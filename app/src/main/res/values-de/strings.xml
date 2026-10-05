@@ -1366,5 +1366,6 @@
     <string name="link_security_punycode">Link blockiert: Verdächtige Look-alike-Domain erkannt.</string>
     <string name="link_security_dangerous_file">Link blockiert: Direkter Datei-Download nicht erlaubt.</string>
     <string name="link_security_malformed">Ungültiger oder fehlerhafter Link.</string>
+    <string name="stats_episodes_count">%1$s Episoden</string>
 </resources>
 

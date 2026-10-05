@@ -1433,4 +1433,5 @@
     <string name="link_security_punycode">Tautan diblokir: terdeteksi domain mencurigakan.</string>
     <string name="link_security_dangerous_file">Tautan diblokir: unduhan file langsung tidak diizinkan.</string>
     <string name="link_security_malformed">Tautan web tidak valid atau salah format.</string>
+    <string name="stats_episodes_count">%1$s episode</string>
 </resources>

@@ -1434,4 +1434,5 @@
     <string name="link_security_punycode">链接已拦截：检测到可疑仿冒域名。</string>
     <string name="link_security_dangerous_file">链接已拦截：不允许直接下载文件。</string>
     <string name="link_security_malformed">无效或格式错误的网页链接。</string>
+    <string name="stats_episodes_count">%1$s 集</string>
 </resources>

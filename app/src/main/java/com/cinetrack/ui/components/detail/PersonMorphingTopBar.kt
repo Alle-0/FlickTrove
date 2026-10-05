@@ -59,7 +59,8 @@ fun SimpleMorphingTopBar(
     onHomeClick: () -> Unit,
     onShareClick: () -> Unit,
     onFilterClick: (() -> Unit)? = null,
-    hasActiveFilters: Boolean = false
+    hasActiveFilters: Boolean = false,
+    scrimAlpha: Float = 0f
 ) {
     val density = LocalDensity.current
 
@@ -168,6 +169,7 @@ fun SimpleMorphingTopBar(
                             shape = symbioteShape,
                             useOffscreenStrategy = true
                         )
+                        .background(Color.Black.copy(alpha = scrimAlpha))
                 )
             }
 
@@ -444,7 +446,8 @@ fun CollectionMorphingTopBar(
     onHomeClick: () -> Unit,
     onShareClick: () -> Unit,
     onFilterClick: (() -> Unit)? = null,
-    hasActiveFilters: Boolean = false
+    hasActiveFilters: Boolean = false,
+    scrimAlpha: Float = 0f
 ) = SimpleMorphingTopBar(
     title = title,
     localHazeState = localHazeState,
@@ -454,5 +457,6 @@ fun CollectionMorphingTopBar(
     onHomeClick = onHomeClick,
     onShareClick = onShareClick,
     onFilterClick = onFilterClick,
-    hasActiveFilters = hasActiveFilters
+    hasActiveFilters = hasActiveFilters,
+    scrimAlpha = scrimAlpha
 )

@@ -1362,6 +1362,7 @@
     <string name="link_security_punycode">लिंक अवरुद्ध: संदिग्ध डोमेन का पता चला।</string>
     <string name="link_security_dangerous_file">लिंक अवरुद्ध: प्रत्यक्ष फ़ाइल डाउनलोड की अनुमति नहीं है।</string>
     <string name="link_security_malformed">अमान्य या विकृत वेब लिंक।</string>
+    <string name="stats_episodes_count">%1$s एपिसोड</string>
 </resources>
 
 

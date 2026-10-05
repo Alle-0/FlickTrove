@@ -1434,4 +1434,5 @@
     <string name="link_security_punycode">リンクがブロックされました：疑わしい類似ドメインが検出されました。</string>
     <string name="link_security_dangerous_file">リンクがブロックされました：直接のファイルダウンロードは許可されていません。</string>
     <string name="link_security_malformed">無効または不正な形式のウェブリンクです。</string>
+    <string name="stats_episodes_count">%1$sエピソード</string>
 </resources>

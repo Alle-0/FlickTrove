@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 @Composable
 fun DetailBackdrop(
     scrollState: ScrollState? = null,
+    scrollOffset: Float? = null,
     backdropPath: String?,
     posterPath: String?,
     accentColor: Color,
@@ -59,9 +60,10 @@ fun DetailBackdrop(
             modifier = Modifier
                 .fillMaxSize()
                 .let { m ->
-                    if (scrollState != null) {
+                    val activeScroll = scrollOffset ?: scrollState?.value?.toFloat()
+                    if (activeScroll != null) {
                         m.graphicsLayer {
-                            val scroll = scrollState.value
+                            val scroll = activeScroll
                             if (scroll > 0) {
                                 // L'immagine sale a metà velocità (0.5f) rispetto allo scroll del contenuto
                                 translationY = scroll * 0.5f

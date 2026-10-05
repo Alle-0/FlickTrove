@@ -1393,4 +1393,5 @@
     <string name="link_security_punycode">Link bloccato: rilevato dominio omografo sospetto.</string>
     <string name="link_security_dangerous_file">Link bloccato: download diretto di file non consentito.</string>
     <string name="link_security_malformed">Link non valido o malformato.</string>
+    <string name="stats_episodes_count">%1$s episodi</string>
 </resources>

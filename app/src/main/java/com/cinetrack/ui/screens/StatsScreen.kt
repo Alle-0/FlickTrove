@@ -60,6 +60,7 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
@@ -103,8 +104,13 @@ import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.viewmodel.PersonStat
 import com.cinetrack.ui.components.shared.shimmerEffect
 import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.draw.shadow
 import kotlin.math.*
 import kotlin.math.roundToInt
 
@@ -206,6 +212,15 @@ fun StatsScreenContent(
     val context = LocalContext.current
     
     var isSharingStats by remember { mutableStateOf(false) }
+    var episodesTooltipBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+    var episodesTooltipText by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(scrollState.isScrollInProgress) {
+        if (scrollState.isScrollInProgress) {
+            episodesTooltipBounds = null
+            episodesTooltipText = null
+        }
+    }
 
     Box(modifier = Modifier.fillMaxSize()) {
         // ── Background & Content Layer (Captured by Haze for Modals) ──────
@@ -433,7 +448,20 @@ fun StatsScreenContent(
                                     secondLabel = stringResource(R.string.stats_watched),
                                     secondValue = stats.tvWatched,
                                     secondIcon = ImageVector.vectorResource(id = R.drawable.ic_tv),
-                                    secondDetail = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null,
+                                    secondInfoTooltip = if (stats.totalEpisodes > 0) {
+                                        val formattedEpisodes = java.text.NumberFormat.getIntegerInstance().format(stats.totalEpisodes)
+                                        stringResource(R.string.stats_episodes_count, formattedEpisodes)
+                                    } else null,
+                                    isSecondInfoActive = episodesTooltipBounds != null,
+                                    onSecondInfoClick = { bounds, text ->
+                                        if (episodesTooltipBounds != null) {
+                                            episodesTooltipBounds = null
+                                            episodesTooltipText = null
+                                        } else {
+                                            episodesTooltipBounds = bounds
+                                            episodesTooltipText = text
+                                        }
+                                    },
                                     thirdLabel = stringResource(R.string.stats_completed),
                                     thirdValue = stats.tvCompleted,
                                     thirdIcon = ImageVector.vectorResource(id = R.drawable.ic_trophy),
@@ -445,7 +473,6 @@ fun StatsScreenContent(
                                 MediaTimeCard(
                                     timeLabel = stringResource(R.string.stats_time_spent),
                                     time = stats.tvTimeFormatted,
-                                    timeDetail = if (stats.totalEpisodes > 0) stringResource(R.string.stats_episodes_short, stats.totalEpisodes) else null,
                                     longestLabel = stringResource(R.string.stats_longest_tv),
                                     longestTitle = stats.longestTV?.title ?: stats.longestTV?.name,
                                     longestDurationMinutes = stats.longestTVMinutes,
@@ -560,6 +587,129 @@ fun StatsScreenContent(
                                 Spacer(Modifier.height(56.dp))
                             }
                             Spacer(Modifier.height(paddingValues.calculateBottomPadding() + 80.dp))
+                        }
+                    }
+                }
+            }
+        }
+
+        // ── Episodes Count Glassmorphic Tooltip Overlay ──────
+        val isTooltipVisible = episodesTooltipBounds != null && episodesTooltipText != null
+        var lastTooltipBounds by remember { mutableStateOf<Rect?>(null) }
+        var lastTooltipText by remember { mutableStateOf<String?>(null) }
+        if (isTooltipVisible) {
+            lastTooltipBounds = episodesTooltipBounds
+            lastTooltipText = episodesTooltipText
+        }
+
+        val displayBounds = lastTooltipBounds
+        val displayText = lastTooltipText
+
+        if (displayBounds != null && displayText != null) {
+            val density = LocalDensity.current
+            val screenWidth = LocalConfiguration.current.screenWidthDp.dp
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(500f)
+            ) {
+                // Background dismiss scrim on tap outside (static, no unwanted scale or motion)
+                if (isTooltipVisible) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .pointerInput(Unit) {
+                                detectTapGestures {
+                                    episodesTooltipBounds = null
+                                    episodesTooltipText = null
+                                }
+                            }
+                    )
+                }
+
+                val sideMarginPx = with(density) { 16.dp.toPx() }
+                val spacingPx = with(density) { 6.dp.toPx() }
+                val screenWidthPx = with(density) { screenWidth.toPx() }
+                val minTopPx = with(density) { 60.dp.toPx() }
+
+                var tooltipWidthPx by remember { mutableFloatStateOf(0f) }
+                var tooltipHeightPx by remember { mutableFloatStateOf(0f) }
+
+                val targetX = (displayBounds.center.x - tooltipWidthPx / 2f)
+                    .coerceIn(sideMarginPx, (screenWidthPx - sideMarginPx - tooltipWidthPx).coerceAtLeast(sideMarginPx))
+                val targetY = (displayBounds.top - tooltipHeightPx - spacingPx)
+                    .coerceAtLeast(minTopPx)
+
+                AnimatedVisibility(
+                    visible = isTooltipVisible,
+                    enter = fadeIn(tween(160)) + scaleIn(
+                        initialScale = 0.75f,
+                        transformOrigin = TransformOrigin(0.5f, 1f),
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)
+                    ),
+                    exit = fadeOut(tween(120)) + scaleOut(
+                        targetScale = 0.80f,
+                        transformOrigin = TransformOrigin(0.5f, 1f),
+                        animationSpec = tween(120)
+                    ),
+                    modifier = Modifier
+                        .offset { IntOffset(targetX.roundToInt(), targetY.roundToInt()) }
+                        .alpha(if (tooltipWidthPx > 0f) 1f else 0f)
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .onSizeChanged { size ->
+                                tooltipWidthPx = size.width.toFloat()
+                                tooltipHeightPx = size.height.toFloat()
+                            }
+                            .shadow(
+                                elevation = 12.dp,
+                                shape = CircleShape,
+                                spotColor = Color.Black.copy(alpha = 0.6f)
+                            )
+                            .bounceClick(scaleDown = 0.95f) {
+                                episodesTooltipBounds = null
+                                episodesTooltipText = null
+                            }
+                            .clip(CircleShape)
+                            .background(
+                                Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color(0xFF222834).copy(alpha = 0.96f),
+                                        Color(0xFF141720).copy(alpha = 0.98f)
+                                    )
+                                )
+                            )
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.verticalGradient(
+                                    colors = listOf(
+                                        Color.White.copy(alpha = 0.22f),
+                                        Color.White.copy(alpha = 0.08f)
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tv),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(13.dp)
+                            )
+                            Text(
+                                text = displayText,
+                                color = Color.White,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                maxLines = 1
+                            )
                         }
                     }
                 }

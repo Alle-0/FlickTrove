@@ -1369,5 +1369,6 @@
     <string name="link_security_punycode">Enlace bloqueado: se detectó un dominio sospechoso homógrafo.</string>
     <string name="link_security_dangerous_file">Enlace bloqueado: descarga directa de archivos no permitida.</string>
     <string name="link_security_malformed">Enlace web no válido o mal formado.</string>
+    <string name="stats_episodes_count">%1$s episodios</string>
 </resources>
 

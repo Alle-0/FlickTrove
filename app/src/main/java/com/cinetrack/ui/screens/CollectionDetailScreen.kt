@@ -8,10 +8,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.GridItemSpan
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.ui.layout.layout
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -144,12 +148,24 @@ fun CollectionDetailScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    val scrollState = rememberScrollState()
+    val lazyGridState = rememberLazyGridState()
     val scrollThreshold = with(density) { 370.dp.toPx() }
-    val scrollProgress by remember {
-        derivedStateOf { (scrollState.value.toFloat() / scrollThreshold).coerceIn(0f, 1f) }
+    val backdropScrollOffset by remember {
+        derivedStateOf {
+            if (lazyGridState.firstVisibleItemIndex == 0) {
+                lazyGridState.firstVisibleItemScrollOffset.toFloat()
+            } else {
+                scrollThreshold + lazyGridState.firstVisibleItemScrollOffset.toFloat()
+            }
+        }
     }
-    val isScrolling = scrollState.isScrollInProgress
+    val scrollProgress by remember {
+        derivedStateOf {
+            if (lazyGridState.firstVisibleItemIndex > 0) 1f
+            else (lazyGridState.firstVisibleItemScrollOffset.toFloat() / scrollThreshold).coerceIn(0f, 1f)
+        }
+    }
+    val isScrolling = lazyGridState.isScrollInProgress
     val isMerged = scrollProgress >= 0.75f
     val targetSymbioteProgress = when {
         isMerged -> 1f
@@ -226,157 +242,181 @@ fun CollectionDetailScreenContent(
         } else {
             val collection = uiState.collection
 
-            Column(
+            LazyVerticalGrid(
+                state = lazyGridState,
+                columns = GridCells.Fixed(columns),
+                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 60.dp),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(rootHazeState, style = HazeStyles.PremiumDark)
-                    .verticalScroll(scrollState)
             ) {
-                Box(modifier = Modifier.fillMaxWidth()) {
-                    DetailBackdrop(
-                        scrollState = scrollState,
-                        backdropPath = collection?.backdropPath ?: collection?.posterPath,
-                        posterPath = collection?.posterPath,
-                        accentColor = globalAccentColor,
-                        backgroundColor = animatedBgColor,
-                        modifier = Modifier.haze(backdropHazeState, style = HazeStyles.PremiumDark)
-                    )
-                }
-
-                Column(
-                    modifier = Modifier
-                        .offset(y = (-140).dp)
-                        .padding(bottom = 60.dp)
-                ) {
-                    // Hero Header Section
-                    Column(modifier = Modifier.padding(horizontal = 16.dp)) {
-                        Text(
-                            text = uiState.collectionName ?: "Collezione",
-                            style = MaterialTheme.typography.headlineMedium.copy(
-                                fontWeight = FontWeight.Black,
-                                fontSize = 24.sp,
-                                lineHeight = 28.sp
-                            ),
-                            color = Color.White
-                        )
-
-                        Spacer(modifier = Modifier.height(10.dp))
-
-                        // Film / Media Count Badge with Progress Border
-                        val displayedCount = uiState.displayedParts.size
-                        val totalCount = displayedCount
-                        val watchedCount = remember(uiState.displayedParts, uiState.favorites) {
-                            if (uiState.displayedParts.isNotEmpty()) {
-                                uiState.displayedParts.count { part ->
-                                    val local = uiState.favorites.find { it.id == part.id }
-                                    local?.watched == true || (local == null && part.watched)
+                // Hero Header Section spanning across all columns (Edge-to-Edge backdrop + Header Content)
+                item(span = { GridItemSpan(maxLineSpan) }) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .layout { measurable, constraints ->
+                                val paddingPx = 16.dp.roundToPx()
+                                val placeable = measurable.measure(
+                                    constraints.copy(
+                                        maxWidth = constraints.maxWidth + 2 * paddingPx,
+                                        minWidth = constraints.minWidth + 2 * paddingPx
+                                    )
+                                )
+                                layout(placeable.width, placeable.height) {
+                                    placeable.placeRelative(-paddingPx, 0)
                                 }
-                            } else 0
-                        }
-                        val collectionProgress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
-                        val animatedProgress by animateFloatAsState(
-                            targetValue = collectionProgress,
-                            animationSpec = tween(durationMillis = 600),
-                            label = "collectionProgress"
-                        )
-
-                        val detailBadgeText = when {
-                            uiState.sortConfig.selectedMedia == "movie" -> {
-                                if (displayedCount == 1) stringResource(R.string.collection_badge_movies_single, 1)
-                                else stringResource(R.string.collection_badge_movies_plural, displayedCount)
                             }
-                            uiState.sortConfig.selectedMedia == "tv" -> {
-                                if (displayedCount == 1) stringResource(R.string.collection_badge_series_single, 1)
-                                else stringResource(R.string.collection_badge_series_plural, displayedCount)
-                            }
-                            uiState.hasTvSeries -> {
-                                if (displayedCount == 1) stringResource(R.string.collection_badge_items_single, 1)
-                                else stringResource(R.string.collection_badge_items_plural, displayedCount)
-                            }
-                            else -> {
-                                if (displayedCount == 1) stringResource(R.string.collection_badge_movies_single, 1)
-                                else stringResource(R.string.collection_badge_movies_plural, displayedCount)
-                            }
-                        }
-
-                        Box(
+                    ) {
+                        DetailBackdrop(
+                            scrollOffset = backdropScrollOffset,
+                            backdropPath = collection?.backdropPath ?: collection?.posterPath,
+                            posterPath = collection?.posterPath,
+                            accentColor = globalAccentColor,
+                            backgroundColor = animatedBgColor,
                             modifier = Modifier
-                                .clip(CircleShape)
-                                .hazeGlass(
-                                    state = backdropHazeState,
-                                    shape = CircleShape,
-                                    containerColor = Color.Black.copy(alpha = 0.45f),
-                                    borderColor = Color.Transparent,
-                                    borderWidth = 0.dp
-                                ),
-                            contentAlignment = Alignment.Center
+                                .fillMaxWidth()
+                                .haze(backdropHazeState, style = HazeStyles.PremiumDark)
+                        )
+
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 340.dp)
+                                .padding(horizontal = 16.dp)
                         ) {
-                            PillProgressBorder(
-                                progress = animatedProgress,
-                                color = globalAccentColor,
-                                strokeWidth = 1.5.dp,
-                                modifier = Modifier.matchParentSize()
-                            )
                             Text(
-                                text = detailBadgeText,
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                letterSpacing = 0.5.sp,
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                text = uiState.collectionName ?: "Collezione",
+                                style = MaterialTheme.typography.headlineMedium.copy(
+                                    fontWeight = FontWeight.Black,
+                                    fontSize = 24.sp,
+                                    lineHeight = 28.sp
+                                ),
+                                color = Color.White
                             )
-                        }
 
-                        // Expandable Overview
-                        val overview = collection?.overview
-                        if (!overview.isNullOrBlank()) {
-                            Spacer(modifier = Modifier.height(14.dp))
-                            var isExpanded by remember { mutableStateOf(false) }
-                            var hasOverflow by remember { mutableStateOf(false) }
+                            Spacer(modifier = Modifier.height(10.dp))
 
-                            Column(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .then(if (hasOverflow || isExpanded) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier)
-                            ) {
-                                AnimatedContent(
-                                    targetState = isExpanded,
-                                    label = "overview_expand_collection"
-                                ) { expanded ->
-                                    Text(
-                                        text = overview,
-                                        style = MaterialTheme.typography.bodyMedium.copy(
-                                            lineHeight = 20.sp
-                                        ),
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        maxLines = if (expanded) Int.MAX_VALUE else 4,
-                                        overflow = TextOverflow.Ellipsis,
-                                        onTextLayout = { result ->
-                                            if (!expanded && hasOverflow != result.hasVisualOverflow) {
-                                                hasOverflow = result.hasVisualOverflow
-                                            }
-                                        }
-                                    )
+                            // Film / Media Count Badge with Progress Border
+                            val displayedCount = uiState.displayedParts.size
+                            val totalCount = displayedCount
+                            val watchedCount = remember(uiState.displayedParts, uiState.favorites) {
+                                if (uiState.displayedParts.isNotEmpty()) {
+                                    uiState.displayedParts.count { part ->
+                                        val local = uiState.favorites.find { it.id == part.id }
+                                        local?.watched == true || (local == null && part.watched)
+                                    }
+                                } else 0
+                            }
+                            val collectionProgress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
+                            val animatedProgress by animateFloatAsState(
+                                targetValue = collectionProgress,
+                                animationSpec = tween(durationMillis = 600),
+                                label = "collectionProgress"
+                            )
+
+                            val detailBadgeText = when {
+                                uiState.sortConfig.selectedMedia == "movie" -> {
+                                    if (displayedCount == 1) stringResource(R.string.collection_badge_movies_single, 1)
+                                    else stringResource(R.string.collection_badge_movies_plural, displayedCount)
                                 }
-
-                                if (hasOverflow || isExpanded) {
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                    Text(
-                                        text = if (isExpanded) stringResource(R.string.overview_show_less) else stringResource(R.string.overview_show_more),
-                                        color = globalAccentColor,
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
+                                uiState.sortConfig.selectedMedia == "tv" -> {
+                                    if (displayedCount == 1) stringResource(R.string.collection_badge_series_single, 1)
+                                    else stringResource(R.string.collection_badge_series_plural, displayedCount)
+                                }
+                                uiState.hasTvSeries -> {
+                                    if (displayedCount == 1) stringResource(R.string.collection_badge_items_single, 1)
+                                    else stringResource(R.string.collection_badge_items_plural, displayedCount)
+                                }
+                                else -> {
+                                    if (displayedCount == 1) stringResource(R.string.collection_badge_movies_single, 1)
+                                    else stringResource(R.string.collection_badge_movies_plural, displayedCount)
                                 }
                             }
+
+                            Box(
+                                modifier = Modifier
+                                    .clip(CircleShape)
+                                    .hazeGlass(
+                                        state = backdropHazeState,
+                                        shape = CircleShape,
+                                        containerColor = Color.Black.copy(alpha = 0.45f),
+                                        borderColor = Color.Transparent,
+                                        borderWidth = 0.dp
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                PillProgressBorder(
+                                    progress = animatedProgress,
+                                    color = globalAccentColor,
+                                    strokeWidth = 1.5.dp,
+                                    modifier = Modifier.matchParentSize()
+                                )
+                                Text(
+                                    text = detailBadgeText,
+                                    color = Color.White,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 0.5.sp,
+                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                )
+                            }
+
+                            // Expandable Overview
+                            val overview = collection?.overview
+                            if (!overview.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(14.dp))
+                                var isExpanded by remember { mutableStateOf(false) }
+                                var hasOverflow by remember { mutableStateOf(false) }
+
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .then(if (hasOverflow || isExpanded) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier)
+                                ) {
+                                    AnimatedContent(
+                                        targetState = isExpanded,
+                                        label = "overview_expand_collection"
+                                    ) { expanded ->
+                                        Text(
+                                            text = overview,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                lineHeight = 20.sp
+                                            ),
+                                            color = Color.White.copy(alpha = 0.85f),
+                                            maxLines = if (expanded) Int.MAX_VALUE else 4,
+                                            overflow = TextOverflow.Ellipsis,
+                                            onTextLayout = { result ->
+                                                if (!expanded && hasOverflow != result.hasVisualOverflow) {
+                                                    hasOverflow = result.hasVisualOverflow
+                                                }
+                                            }
+                                        )
+                                    }
+
+                                    if (hasOverflow || isExpanded) {
+                                        Spacer(modifier = Modifier.height(6.dp))
+                                        Text(
+                                            text = if (isExpanded) stringResource(R.string.overview_show_less) else stringResource(R.string.overview_show_more),
+                                            color = globalAccentColor,
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(24.dp))
                         }
                     }
+                }
 
-                    Spacer(modifier = Modifier.height(24.dp))
-
-                    // Movies inside the collection, exactly 3 columns
-                    val parts = uiState.displayedParts
-                    if (parts.isEmpty()) {
+                // Movies inside the collection
+                val parts = uiState.displayedParts
+                if (parts.isEmpty()) {
+                    item(span = { GridItemSpan(maxLineSpan) }) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -390,72 +430,68 @@ fun CollectionDetailScreenContent(
                                 textAlign = androidx.compose.ui.text.style.TextAlign.Center
                             )
                         }
-                    } else {
-                        FlowRow(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp),
-                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            parts.forEachIndexed { index, movie ->
-                            Box(modifier = Modifier.width(cardWidth)) {
-                                val fav = uiState.favorites.find { it.id == movie.id }
-                                val effectiveMovie = if (fav != null) {
-                                    fav.copy(
-                                        genreIds = if (!movie.genreIds.isNullOrEmpty()) movie.genreIds else fav.genreIds
-                                    ).apply {
-                                        this.logoPath = movie.logoPath ?: fav.logoPath
-                                        this.matchScore = movie.matchScore ?: fav.matchScore
-                                    }
-                                } else {
-                                    if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
+                    }
+                } else {
+                    itemsIndexed(
+                        items = parts,
+                        key = { _, movie -> "${movie.id}_${movie.mediaType}" }
+                    ) { index, movie ->
+                        Box(modifier = Modifier.animateItem()) {
+                            val fav = uiState.favorites.find { it.id == movie.id }
+                            val effectiveMovie = if (fav != null) {
+                                fav.copy(
+                                    genreIds = if (!movie.genreIds.isNullOrEmpty()) movie.genreIds else fav.genreIds
+                                ).apply {
+                                    this.logoPath = movie.logoPath ?: fav.logoPath
+                                    this.matchScore = movie.matchScore ?: fav.matchScore
                                 }
-                                val mediaType = effectiveMovie.mediaType.ifBlank { "movie" }
-                                val folderColors = uiState.movieFolderColors["${mediaType}_${effectiveMovie.id}"]
-                                    ?: uiState.movieFolderColors["movie_${effectiveMovie.id}"]
-                                    ?: uiState.movieFolderColors[effectiveMovie.id.toString()]
-                                    ?: emptyList()
-                                val folderColorObjects = remember(folderColors) {
-                                    folderColors.map { it.toComposeColor() }
-                                }
-                                val isFavorite = effectiveMovie.favorite
-                                val isWatched = effectiveMovie.watched
-                                val isReminder = effectiveMovie.reminder
-                                val progress = (effectiveMovie.progress ?: 0.0).toFloat().let { p ->
-                                    if (p > 0f) p
-                                    else if (effectiveMovie.mediaType == "tv" && !effectiveMovie.watchedEpisodes.isNullOrEmpty() && (effectiveMovie.numberOfEpisodes ?: 0) > 0) {
-                                        val totalWatched = effectiveMovie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
-                                        (totalWatched.toFloat() / effectiveMovie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
-                                    } else 0f
-                                }
-                                val personalRating = effectiveMovie.personalRating
-
-                                MovieCard(
-                                    movie = effectiveMovie,
-                                    cardWidth = cardWidth,
-                                    isFavorite = isFavorite,
-                                    isWatched = isWatched,
-                                    isReminder = isReminder,
-                                    progress = progress,
-                                    personalRating = personalRating,
-                                    folderColors = folderColorObjects,
-                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    showBadges = uiState.preferences.showBadges,
-                                    showAdvancedBadges = false,
-                                    hazeState = rootHazeState,
-                                    staggerIndex = index,
-                                    onPress = { onMovieClick(effectiveMovie) },
-                                    onAction = { viewModel.toggleFavorite(effectiveMovie) },
-                                    onLongPress = { m, pressOffset, cardPos ->
-                                        actionsState.onLongPress(m, pressOffset, cardPos)
-                                    },
-                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                )
+                            } else {
+                                if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
                             }
+                            val mediaType = effectiveMovie.mediaType.ifBlank { "movie" }
+                            val folderColors = uiState.movieFolderColors["${mediaType}_${effectiveMovie.id}"]
+                                ?: uiState.movieFolderColors["movie_${effectiveMovie.id}"]
+                                ?: uiState.movieFolderColors[effectiveMovie.id.toString()]
+                                ?: emptyList()
+                            val folderColorObjects = remember(folderColors) {
+                                folderColors.map { it.toComposeColor() }
+                            }
+                            val isFavorite = effectiveMovie.favorite
+                            val isWatched = effectiveMovie.watched
+                            val isReminder = effectiveMovie.reminder
+                            val progress = (effectiveMovie.progress ?: 0.0).toFloat().let { p ->
+                                if (p > 0f) p
+                                else if (effectiveMovie.mediaType == "tv" && !effectiveMovie.watchedEpisodes.isNullOrEmpty() && (effectiveMovie.numberOfEpisodes ?: 0) > 0) {
+                                    val totalWatched = effectiveMovie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+                                    (totalWatched.toFloat() / effectiveMovie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+                                } else 0f
+                            }
+                            val personalRating = effectiveMovie.personalRating
+
+                            MovieCard(
+                                movie = effectiveMovie,
+                                cardWidth = cardWidth,
+                                isFavorite = isFavorite,
+                                isWatched = isWatched,
+                                isReminder = isReminder,
+                                progress = progress,
+                                personalRating = personalRating,
+                                folderColors = folderColorObjects,
+                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                showBadges = uiState.preferences.showBadges,
+                                showAdvancedBadges = false,
+                                hazeState = rootHazeState,
+                                hasAnimatedSet = viewModel.animatedMovieIds,
+                                staggerIndex = index,
+                                onPress = { onMovieClick(effectiveMovie) },
+                                onAction = { viewModel.toggleFavorite(effectiveMovie) },
+                                onLongPress = { m, pressOffset, cardPos ->
+                                    actionsState.onLongPress(m, pressOffset, cardPos)
+                                },
+                                onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                            )
                         }
                     }
-                }
                 }
             }
         }
@@ -510,6 +546,12 @@ fun CollectionDetailScreenContent(
             }
         }
 
+        val filterModalScrimAlpha by animateFloatAsState(
+            targetValue = if (uiState.isFilterModalOpen) 0.6f else 0f,
+            animationSpec = spring(stiffness = Spring.StiffnessMedium),
+            label = "topBarScrimAlpha"
+        )
+
         CollectionMorphingTopBar(
             title = uiState.collection?.name ?: uiState.collectionName ?: "",
             localHazeState = rootHazeState,
@@ -522,7 +564,8 @@ fun CollectionDetailScreenContent(
                 filterButtonBounds = null
                 viewModel.openFilterModal()
             },
-            hasActiveFilters = uiState.hasActiveFilters
+            hasActiveFilters = uiState.hasActiveFilters,
+            scrimAlpha = filterModalScrimAlpha
         )
 
         HomeFilterModal(

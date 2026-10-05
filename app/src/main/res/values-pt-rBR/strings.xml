@@ -1364,6 +1364,7 @@
     <string name="link_security_punycode">Link bloqueado: domínio suspeito detectado.</string>
     <string name="link_security_dangerous_file">Link bloqueado: download direto de arquivo não permitido.</string>
     <string name="link_security_malformed">Link da web inválido ou malformado.</string>
+    <string name="stats_episodes_count">%1$s episódios</string>
 </resources>
 
 

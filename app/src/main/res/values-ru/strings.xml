@@ -1365,5 +1365,6 @@
     <string name="link_security_punycode">Ссылка заблокирована: обнаружен подозрительный домен.</string>
     <string name="link_security_dangerous_file">Ссылка заблокирована: прямая загрузка файлов запрещена.</string>
     <string name="link_security_malformed">Недействительная ссылка.</string>
+    <string name="stats_episodes_count">%1$s эпизодов</string>
 </resources>
 

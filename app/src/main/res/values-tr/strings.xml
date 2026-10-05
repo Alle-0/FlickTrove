@@ -1434,4 +1434,5 @@
     <string name="link_security_punycode">Bağlantı engellendi: şüpheli benzer alan adı tespit edildi.</string>
     <string name="link_security_dangerous_file">Bağlantı engellendi: doğrudan dosya indirmeye izin verilmez.</string>
     <string name="link_security_malformed">Geçersiz web bağlantısı.</string>
+    <string name="stats_episodes_count">%1$s bölüm</string>
 </resources>

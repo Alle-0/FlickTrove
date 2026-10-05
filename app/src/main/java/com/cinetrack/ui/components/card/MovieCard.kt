@@ -456,7 +456,7 @@ fun MovieCard(
     }
 
     val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
-    val isVisible = hasAnimated.value || isScrollItem
+    val isVisible = hasAnimated.value || staggerIndex < 0
 
     val isExploding = movieActions.explodingMovie?.id == movie.id
     val cardAlpha by animateFloatAsState(

@@ -1435,4 +1435,5 @@
     <string name="link_security_punycode">Link blocked: suspicious look-alike domain detected.</string>
     <string name="link_security_dangerous_file">Link blocked: direct file download not permitted.</string>
     <string name="link_security_malformed">Invalid or malformed web link.</string>
+    <string name="stats_episodes_count">%1$s episodes</string>
 </resources>

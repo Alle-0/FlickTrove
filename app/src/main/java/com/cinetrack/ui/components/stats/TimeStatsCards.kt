@@ -11,25 +11,36 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.foundation.border
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInRoot
+import androidx.compose.ui.layout.onGloballyPositioned
 import coil.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
@@ -255,7 +266,10 @@ fun TriStatPill(
     modifier: Modifier = Modifier,
     firstDetail: String? = null,
     secondDetail: String? = null,
-    thirdDetail: String? = null
+    thirdDetail: String? = null,
+    secondInfoTooltip: String? = null,
+    isSecondInfoActive: Boolean = false,
+    onSecondInfoClick: ((Rect, String) -> Unit)? = null
 ) {
     Box(
         modifier = modifier
@@ -293,7 +307,10 @@ fun TriStatPill(
                 icon = secondIcon,
                 accentColor = accentColor,
                 modifier = Modifier.weight(1f),
-                detail = secondDetail
+                detail = secondDetail,
+                infoTooltip = secondInfoTooltip,
+                isInfoActive = isSecondInfoActive,
+                onInfoClick = onSecondInfoClick
             )
 
             // Divider 2
@@ -324,7 +341,10 @@ private fun TriStatColumn(
     icon: ImageVector,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    detail: String? = null
+    detail: String? = null,
+    infoTooltip: String? = null,
+    isInfoActive: Boolean = false,
+    onInfoClick: ((Rect, String) -> Unit)? = null
 ) {
     Row(
         modifier = modifier.padding(horizontal = 4.dp),
@@ -344,13 +364,42 @@ private fun TriStatColumn(
             modifier = Modifier.weight(1f, fill = false),
             verticalArrangement = Arrangement.Center
         ) {
-            CountingText(
-                target = value,
-                color = Color.White,
-                fontSize = 18.sp,
-                fontWeight = FontWeight.Black,
-                letterSpacing = (-0.5).sp
-            )
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                CountingText(
+                    target = value,
+                    color = Color.White,
+                    fontSize = 18.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-0.5).sp
+                )
+                if (infoTooltip != null) {
+                    Spacer(Modifier.width(3.dp))
+                    var iconCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+                    Box(
+                        modifier = Modifier
+                            .size(18.dp)
+                            .onGloballyPositioned { iconCoordinates = it }
+                            .bounceClick(scaleDown = 0.85f) {
+                                iconCoordinates?.let { coords ->
+                                    if (coords.isAttached) {
+                                        onInfoClick?.invoke(coords.boundsInRoot(), infoTooltip)
+                                    }
+                                }
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = null,
+                            tint = if (isInfoActive) accentColor else Color.White.copy(alpha = 0.40f),
+                            modifier = Modifier.size(11.5.dp)
+                        )
+                    }
+                }
+            }
             if (detail != null) {
                 Text(
                     text = detail,
@@ -390,7 +439,6 @@ fun MediaTimeCard(
     longestDurationMinutes: Int,
     accentColor: Color,
     sectionIcon: ImageVector,
-    timeDetail: String? = null,
     longestSuffix: String? = null,
     longestPosterPath: String? = null,
     onLongestItemClick: (() -> Unit)? = null
@@ -423,15 +471,6 @@ fun MediaTimeCard(
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_clock), null, tint = Color.White.copy(alpha = 0.7f), modifier = Modifier.size(16.dp))
                     Spacer(Modifier.width(6.dp))
                     Text(timeLabel, color = Color.White, fontSize = 14.sp, fontWeight = FontWeight.ExtraBold)
-                    if (timeDetail != null) {
-                        Spacer(Modifier.width(6.dp))
-                        Text(
-                            "• $timeDetail",
-                            color = Color.White.copy(alpha = 0.45f),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                    }
                 }
                 Row(verticalAlignment = Alignment.Bottom) {
                     Text(time, color = accentColor, fontSize = 18.sp, fontWeight = FontWeight.Black, letterSpacing = (-0.4).sp)
