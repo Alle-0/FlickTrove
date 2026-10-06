@@ -99,7 +99,8 @@ fun CommentInputBar(
     hazeState: HazeState,
     focusRequester: FocusRequester,
     postToCommsUni: Boolean = true,
-    onPostToCommsUniChanged: ((Boolean) -> Unit)? = null
+    onPostToCommsUniChanged: ((Boolean) -> Unit)? = null,
+    destinationToggleEnabled: Boolean = true
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
@@ -761,22 +762,29 @@ fun CommentInputBar(
 
                             // Delivery destination pill
                             if (onPostToCommsUniChanged != null) {
+                                val isDestinationActive = destinationToggleEnabled
                                 Box(
                                     modifier = Modifier
                                         .height(32.dp)
-                                        .bounceClick {
-                                            VibrationHelper.vibrateTick(context)
-                                            onPostToCommsUniChanged(!postToCommsUni)
-                                        }
+                                        .then(
+                                            if (isDestinationActive) {
+                                                Modifier.bounceClick {
+                                                    VibrationHelper.vibrateTick(context)
+                                                    onPostToCommsUniChanged(!postToCommsUni)
+                                                }
+                                            } else {
+                                                Modifier
+                                            }
+                                        )
                                         .clip(CircleShape)
                                         .background(
-                                            if (postToCommsUni) accentColor.copy(alpha = 0.14f)
-                                            else Color.White.copy(alpha = 0.06f)
+                                            if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.14f else 0.07f)
+                                            else Color.White.copy(alpha = if (isDestinationActive) 0.06f else 0.03f)
                                         )
                                         .border(
                                             1.dp,
-                                            if (postToCommsUni) accentColor.copy(alpha = 0.35f)
-                                            else Color.White.copy(alpha = 0.15f),
+                                            if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.35f else 0.15f)
+                                            else Color.White.copy(alpha = if (isDestinationActive) 0.15f else 0.07f),
                                             CircleShape
                                         )
                                         .padding(horizontal = 11.dp),
@@ -789,7 +797,8 @@ fun CommentInputBar(
                                         Icon(
                                             painter = painterResource(id = if (postToCommsUni) R.drawable.ic_world else R.drawable.ic_lock),
                                             contentDescription = null,
-                                            tint = if (postToCommsUni) accentColor else Color.White.copy(alpha = 0.65f),
+                                            tint = if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 1f else 0.45f)
+                                                   else Color.White.copy(alpha = if (isDestinationActive) 0.65f else 0.35f),
                                             modifier = Modifier.size(13.dp)
                                         )
                                         Spacer(modifier = Modifier.width(5.dp))
@@ -806,7 +815,8 @@ fun CommentInputBar(
                                                     trim = LineHeightStyle.Trim.Both
                                                 )
                                             ),
-                                            color = if (postToCommsUni) accentColor else Color.White.copy(alpha = 0.65f),
+                                            color = if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 1f else 0.45f)
+                                                   else Color.White.copy(alpha = if (isDestinationActive) 0.65f else 0.35f),
                                             maxLines = 1
                                         )
                                     }

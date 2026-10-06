@@ -62,7 +62,8 @@ data class CommsUniCommentsData(
     val count: Int = 0,
     val total: Int = 0,
     val allTimeTotal: Int? = null,
-    val languageCounts: List<CommsUniLanguageCount> = emptyList()
+    val languageCounts: List<CommsUniLanguageCount> = emptyList(),
+    val sourceCounts: List<CommsUniSourceCount> = emptyList()
 ) {
     val allItems: List<CommsUniComment>
         get() = if (replies.isNotEmpty()) replies else comments

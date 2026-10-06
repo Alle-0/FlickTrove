@@ -171,7 +171,8 @@ fun FilterChip(
     accentColor: Color = MaterialTheme.colorScheme.primary,
     unselectedBorderColor: Color = Color.Transparent,
     unselectedBgColor: Color = Color.Black.copy(alpha = 0.45f),
-    dotColor: Color? = null
+    dotColor: Color? = null,
+    count: Int? = null
 ) {
     val borderColor by animateColorAsState(
         targetValue = if (isSelected) accentColor.copy(alpha = 0.7f) else unselectedBorderColor,
@@ -212,6 +213,25 @@ fun FilterChip(
                 fontWeight = FontWeight.ExtraBold,
                 color = textColor
             )
+            if (count != null) {
+                val countBgColor = if (isSelected) accentColor.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.1f)
+                val countTextColor = if (isSelected) accentColor else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(countBgColor)
+                        .padding(horizontal = 5.dp, vertical = 1.5.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = count.toString(),
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = countTextColor,
+                        lineHeight = 10.sp
+                    )
+                }
+            }
         }
     }
 }

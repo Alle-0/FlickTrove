@@ -466,6 +466,20 @@ class CommsUniViewModel @Inject constructor(
                         commsUniList = extractAllComments(response.data.comments, cachedSourcesMap)
                         nextCursor = response.data.nextCursor
                         _hasMoreComments.value = !response.data.complete
+                        if (response.data.languageCounts.isNotEmpty() || response.data.sourceCounts.isNotEmpty()) {
+                            val currentStats = _conversationStats.value
+                            if (currentStats == null) {
+                                _conversationStats.value = CommsUniConversationStats(
+                                    languageCounts = response.data.languageCounts,
+                                    sourceCounts = response.data.sourceCounts
+                                )
+                            } else {
+                                _conversationStats.value = currentStats.copy(
+                                    languageCounts = if (response.data.languageCounts.isNotEmpty()) response.data.languageCounts else currentStats.languageCounts,
+                                    sourceCounts = if (response.data.sourceCounts.isNotEmpty()) response.data.sourceCounts else currentStats.sourceCounts
+                                )
+                            }
+                        }
                     }.onFailure {
                         if (it.message != "not_archived") {
                             android.util.Log.e("CommsUniViewModel", "Error loading CommsUni comments", it)
@@ -660,8 +674,20 @@ class CommsUniViewModel @Inject constructor(
             }
             _comments.value = currentList
 
+            // Defensive check: le risposte a commenti CommsUni devono essere inviate tassativamente su CommsUni
+            val effectivePostToCommsUni = if (parentId != null) {
+                val parentComment = _comments.value.find { it.id == parentId }
+                if (parentComment != null && !parentComment.originSlug.equals("flicktrove", ignoreCase = true)) {
+                    true
+                } else {
+                    postToCommsUni
+                }
+            } else {
+                postToCommsUni
+            }
+
             // Invio verso la destinazione selezionata (mutuamente esclusiva)
-            val result = if (postToCommsUni && currentEntityId.isNotBlank()) {
+            val result = if (effectivePostToCommsUni && currentEntityId.isNotBlank()) {
                 // Destinazione CommsUni: pubblica solo sulla rete CommsUni
                 if (parentId != null) {
                     commsUniRepository.createReply(parentId, text, isSpoiler)
@@ -674,7 +700,7 @@ class CommsUniViewModel @Inject constructor(
                         title = currentTitle
                     )
                 }
-            } else if (!postToCommsUni && currentRawMediaId.isNotBlank()) {
+            } else if (!effectivePostToCommsUni && currentRawMediaId.isNotBlank()) {
                 // Destinazione FlickTrove: salva solo su Firestore locale
                 val generatedId = try {
                     commentRepository.addCommentAndGetId(

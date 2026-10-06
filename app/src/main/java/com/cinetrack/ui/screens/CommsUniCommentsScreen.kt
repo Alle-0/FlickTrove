@@ -158,9 +158,21 @@ class CommsUniCommentsScreen(
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
+        // True if the parent comment lives only on CommsUni (non-flicktrove origin)
+        val isReplyingToCommsUni = replyingTo?.let { !it.originSlug.equals("flicktrove", ignoreCase = true) } ?: false
+        // True if the parent comment lives only on FlickTrove
+        val isReplyingToFlickTrove = replyingTo?.originSlug?.equals("flicktrove", ignoreCase = true) ?: false
         var inputText by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
         var isSpoiler by remember { mutableStateOf(false) }
         var postToCommsUni by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
+
+        // Lock destination to match the parent comment's platform
+        LaunchedEffect(replyingTo) {
+            when {
+                replyingTo != null && !replyingTo!!.originSlug.equals("flicktrove", ignoreCase = true) -> postToCommsUni = true
+                replyingTo != null && replyingTo!!.originSlug.equals("flicktrove", ignoreCase = true) -> postToCommsUni = false
+            }
+        }
         var isInputExpanded by remember { mutableStateOf(false) }
         var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
         var commentToReport by remember { mutableStateOf<AppComment?>(null) }
@@ -420,6 +432,9 @@ class CommsUniCommentsScreen(
                                 },
                                 onReply = {
                                     replyingTo = comment
+                                    if (!comment.originSlug.equals("flicktrove", ignoreCase = true)) {
+                                        postToCommsUni = true
+                                    }
                                 },
                                 onToggleLike = {
                                     viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage)
@@ -490,6 +505,7 @@ class CommsUniCommentsScreen(
                     onSpoilerChanged = { isSpoiler = it },
                     postToCommsUni = postToCommsUni,
                     onPostToCommsUniChanged = { postToCommsUni = it },
+                    destinationToggleEnabled = !isReplyingToCommsUni && !isReplyingToFlickTrove,
                     attachedMedia = attachedMedia,
                     onAttachedMediaChanged = { attachedMedia = it },
                     isUploadingImage = isUploadingImage,
@@ -518,7 +534,12 @@ class CommsUniCommentsScreen(
                             }
 
                             localFocusManager.clearFocus()
-                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth, mediaTitle, mediaImage, postToCommsUni)
+                            val effectivePostToCommsUni = when {
+                                isReplyingToCommsUni -> true
+                                isReplyingToFlickTrove -> false
+                                else -> postToCommsUni
+                            }
+                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth, mediaTitle, mediaImage, effectivePostToCommsUni)
                             inputText = androidx.compose.ui.text.input.TextFieldValue("")
                             attachedMedia = emptyList()
                             replyingTo = null
@@ -535,16 +556,59 @@ class CommsUniCommentsScreen(
             
             // Sort Dialog Overlay
             // Sort Menu using HomeFilterModal for consistency
+            val sourceCountsMap = remember(conversationStats, comments) {
+                val map = mutableMapOf<String, Int>()
+                conversationStats?.sourceCounts?.forEach { sc ->
+                    val key = sc.source.lowercase().trim()
+                    if (key.isNotBlank()) {
+                        map[key] = (map[key] ?: 0) + sc.count
+                    }
+                }
+                val flickTroveCount = comments.count { it.originSlug.equals("flicktrove", ignoreCase = true) }
+                if (flickTroveCount > (map["flicktrove"] ?: 0)) {
+                    map["flicktrove"] = flickTroveCount
+                }
+                if (map.isEmpty() && comments.isNotEmpty()) {
+                    comments.forEach { c ->
+                        val slug = c.originSlug.ifBlank { "flicktrove" }.lowercase().trim()
+                        map[slug] = (map[slug] ?: 0) + 1
+                    }
+                }
+                map
+            }
+
+            val languageCountsMap = remember(conversationStats, comments) {
+                val map = mutableMapOf<String, Int>()
+                conversationStats?.languageCounts?.forEach { lc ->
+                    val key = lc.language.lowercase().trim()
+                    if (key.isNotBlank()) {
+                        map[key] = (map[key] ?: 0) + lc.count
+                    }
+                }
+                if (map.isEmpty() && comments.isNotEmpty()) {
+                    comments.forEach { c ->
+                        val lang = c.language?.lowercase()?.trim()
+                        if (!lang.isNullOrBlank()) {
+                            map[lang] = (map[lang] ?: 0) + 1
+                        }
+                    }
+                }
+                map
+            }
+
             val commentLanguages = remember(conversationStats, comments) {
                 val fromStats = conversationStats?.languageCounts?.mapNotNull { it.language.lowercase().trim() } ?: emptyList()
                 val fromComments = comments.mapNotNull { it.language?.lowercase()?.trim() }
                 (fromStats + fromComments).filter { it.isNotBlank() }.distinct()
             }
+
             com.cinetrack.ui.components.dialog.HomeFilterModal(
                 isVisible = showSortMenu,
                 isCommentsFilter = true,
                 availableSources = availableSources,
                 availableLanguages = commentLanguages,
+                sourceCounts = sourceCountsMap,
+                languageCounts = languageCountsMap,
                 triggerBounds = sortButtonBounds,
                 sortConfig = com.cinetrack.data.model.SortConfig(
                     sortType = if (sortOption == CommentSortOption.DATE) "date" else "likes",

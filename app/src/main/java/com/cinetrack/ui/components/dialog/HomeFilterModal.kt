@@ -84,6 +84,8 @@ fun HomeFilterModal(
     isCommentsFilter: Boolean = false,
     availableSources: List<com.cinetrack.data.api.SourceCatalogRow> = emptyList(),
     availableLanguages: List<String> = emptyList(),
+    sourceCounts: Map<String, Int> = emptyMap(),
+    languageCounts: Map<String, Int> = emptyMap(),
     showSortBy: Boolean = true,
     suggestedFilters: List<com.cinetrack.ui.viewmodel.FilterPill> = emptyList(),
     initialKeywordName: String? = null,
@@ -343,11 +345,7 @@ fun HomeFilterModal(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.SpaceBetween
                         ) {
-                            val titleText = if (isCollectionFilter) {
-                                stringResource(R.string.collection_filter_modal_title).uppercase()
-                            } else {
-                                stringResource(R.string.filter_title)
-                            }
+                            val titleText = stringResource(R.string.filter_title)
                             Text(
                                 text = titleText,
                                 style = MaterialTheme.typography.headlineSmall,
@@ -562,7 +560,7 @@ fun HomeFilterModal(
                                     badgeCount = activeSources.size,
                                     onToggle = { expandedSection = if (expandedSection == "source") null else "source" }
                                 ) {
-                                    val sources = remember(availableSources) {
+                                    val sources = remember(availableSources, sourceCounts, activeSources) {
                                         val rawList = if (availableSources.isNotEmpty()) {
                                             availableSources
                                         } else {
@@ -581,20 +579,35 @@ fun HomeFilterModal(
                                         val otherItems = filteredList
                                             .filter { !it.slug.equals("flicktrove", ignoreCase = true) }
                                             .sortedBy { (it.displayName?.ifBlank { it.slug } ?: it.slug).lowercase() }
-                                        listOf(flickTroveItem) + otherItems
+                                        val candidateSources = listOf(flickTroveItem) + otherItems
+
+                                        // Mostra solo le fonti con almeno 1 commento (oppure attualmente selezionate), nascondendo quelle con 0
+                                        if (sourceCounts.isNotEmpty()) {
+                                            candidateSources.filter { source ->
+                                                val count = sourceCounts[source.slug.lowercase().trim()] ?: sourceCounts[source.slug] ?: 0
+                                                count > 0 || source.slug in activeSources
+                                            }
+                                        } else {
+                                            candidateSources
+                                        }
                                     }
                                     FlowRow(
                                         modifier = Modifier.padding(horizontal = 12.dp),
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
+                                        val totalSourceComments = remember(sourceCounts) {
+                                            if (sourceCounts.isNotEmpty()) sourceCounts.values.sum() else null
+                                        }
                                         FilterChip(
                                             label = stringResource(R.string.filter_source_all),
                                             isSelected = activeSources.isEmpty(),
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedSources = emptyList(), selectedSource = null) }
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedSources = emptyList(), selectedSource = null) },
+                                            count = totalSourceComments
                                         )
                                         sources.forEach { source ->
                                             val isSelected = source.slug in activeSources
+                                            val count = sourceCounts[source.slug.lowercase().trim()] ?: sourceCounts[source.slug]
                                             FilterChip(
                                                 label = source.displayName?.ifBlank { source.slug } ?: source.slug,
                                                 isSelected = isSelected,
@@ -604,7 +617,8 @@ fun HomeFilterModal(
                                                         selectedSources = newSet.toList(),
                                                         selectedSource = null
                                                     )
-                                                }
+                                                },
+                                                count = count
                                             )
                                         }
                                     }
@@ -625,24 +639,19 @@ fun HomeFilterModal(
                                     onToggle = { expandedSection = if (expandedSection == "language") null else "language" }
                                 ) {
                                     val currentLocale = if (!configuration.locales.isEmpty) configuration.locales[0] else java.util.Locale.getDefault()
-                                    val commsUniSupportedLanguageCodes = remember {
-                                        listOf(
-                                            "en", "it", "es", "fr", "de", "pt", "ru", "tr", "ar", "pl",
-                                            "nl", "id", "ja", "ko", "zh", "hi", "el", "hu", "cs", "ro",
-                                            "sv", "da", "fi", "no", "uk", "vi", "th", "he", "fa", "ms",
-                                            "bg", "hr", "sr", "sk"
-                                        )
-                                    }
-                                    val allLanguageCodes = remember(availableLanguages, commsUniSupportedLanguageCodes) {
-                                        (commsUniSupportedLanguageCodes + availableLanguages)
-                                            .map { it.lowercase().trim() }
-                                            .filter { it.isNotBlank() }
-                                            .distinct()
+                                    // Mostra solo le lingue con almeno 1 commento (oppure attualmente selezionate), nascondendo quelle con 0
+                                    val visibleLanguageCodes = remember(languageCounts, availableLanguages, activeLanguages) {
+                                        if (languageCounts.isNotEmpty()) {
+                                            val positiveCodes = languageCounts.filter { it.value > 0 }.keys
+                                            (positiveCodes + activeLanguages).map { it.lowercase().trim() }.filter { it.isNotBlank() }.distinct()
+                                        } else {
+                                            availableLanguages.map { it.lowercase().trim() }.filter { it.isNotBlank() }.distinct()
+                                        }
                                     }
                                     val allLabel = stringResource(R.string.flow_filter_media_all)
-                                    val languages = remember(currentLocale, allLanguageCodes, allLabel) {
+                                    val languages = remember(currentLocale, visibleLanguageCodes, allLabel) {
                                         val userLangCode = currentLocale.language.lowercase()
-                                        val mapped = allLanguageCodes.map { code ->
+                                        val mapped = visibleLanguageCodes.map { code ->
                                             val loc = java.util.Locale.forLanguageTag(code)
                                             val rawName = loc.getDisplayLanguage(currentLocale)
                                             val displayName = rawName.replaceFirstChar {
@@ -665,13 +674,18 @@ fun HomeFilterModal(
                                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                                         verticalArrangement = Arrangement.spacedBy(8.dp)
                                     ) {
+                                        val totalLanguageComments = remember(languageCounts) {
+                                            if (languageCounts.isNotEmpty()) languageCounts.values.sum() else null
+                                        }
                                         FilterChip(
                                             label = allLabel,
                                             isSelected = activeLanguages.isEmpty(),
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedLanguages = emptyList(), selectedLanguage = null) }
+                                            onClick = { localSortConfig = localSortConfig.copy(selectedLanguages = emptyList(), selectedLanguage = null) },
+                                            count = totalLanguageComments
                                         )
                                         languages.forEach { (code, label) ->
                                             val isSelected = code in activeLanguages
+                                            val count = languageCounts[code]
                                             FilterChip(
                                                 label = label,
                                                 isSelected = isSelected,
@@ -681,7 +695,8 @@ fun HomeFilterModal(
                                                         selectedLanguages = newSet.toList(),
                                                         selectedLanguage = null
                                                     )
-                                                }
+                                                },
+                                                count = count
                                             )
                                         }
                                     }
