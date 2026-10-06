@@ -91,7 +91,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove and **CommsUni (commsuni.tv)** federated community.
 - 👥 **Extensive Cast & Crew**: Dive deep into the people behind the camera. View full cast lists and explore the crew neatly grouped by department (Directing, Writing, Sound, etc.).
 - 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
-- 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, and any custom **CSV/JSON** format.
+- 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, **Cinemaniac**, and any custom **CSV/JSON** format.
 
 ---
 
@@ -213,7 +213,7 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
     <img src="https://img.shields.io/badge/Donate-PayPal-00457C?style=for-the-badge&logo=paypal&logoColor=white" alt="Donate via PayPal" />
   </a>
   
-  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/alleO)
+  [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/alle0)
   
 </div>
 
