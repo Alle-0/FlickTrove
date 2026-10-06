@@ -92,17 +92,17 @@ fun DetailCoverSelectionModal(
                 )
             } else {
                 val gridState = rememberLazyGridState()
-                val cardCornerRadius = 14.dp
+                val cardCornerRadius = 16.dp
                 val cardShape = RoundedCornerShape(cardCornerRadius)
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     state = gridState,
-                    contentPadding = PaddingValues(top = 4.dp, bottom = 14.dp),
+                    contentPadding = PaddingValues(start = 8.dp, end = 8.dp, top = 2.dp, bottom = 4.dp),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
                     verticalArrangement = Arrangement.spacedBy(10.dp),
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 440.dp)
-                        .verticalFadingEdges(gridState, topEdgeHeight = 12.dp, bottomEdgeHeight = 16.dp)
-                        .premiumScrollbar(gridState, paddingEnd = 6f)
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 410.dp)
+                        .verticalFadingEdges(gridState, topEdgeHeight = 12.dp, bottomEdgeHeight = 14.dp)
+                        .premiumScrollbar(gridState, width = 2.5f, paddingEnd = 2f, paddingVertical = 12f)
                 ) {
                     if (defaultImg != null) {
                         item {
@@ -156,8 +156,8 @@ fun DetailCoverSelectionModal(
                                     Box(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
-                                            .padding(7.dp)
-                                            .background(accentColor, RoundedCornerShape(7.dp))
+                                            .padding(8.dp)
+                                            .background(accentColor, RoundedCornerShape(8.dp))
                                             .padding(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
                                         Text(
@@ -212,8 +212,8 @@ fun DetailCoverSelectionModal(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(7.dp)
-                                        .background(accentColor, RoundedCornerShape(7.dp))
+                                        .padding(8.dp)
+                                        .background(accentColor, RoundedCornerShape(8.dp))
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
