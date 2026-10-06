@@ -635,7 +635,8 @@ fun LazyGridScope.searchEditorialCollectionsVetrina(
                             overview = ed.description,
                             partsCount = ed.items.size,
                             partsIds = ed.items.map { it.tmdbId },
-                            editorialId = ed.id
+                            editorialId = ed.id,
+                            hasTvSeries = ed.items.any { it.mediaType == "tv" }
                         )
                         CollectionCollageCard(
                             collection = result,
@@ -782,6 +783,10 @@ fun CollectionCollageCard(
                     modifier = Modifier.matchParentSize()
                 )
                 val badgeText = when {
+                    collection.hasTvSeries -> {
+                        if (totalCount == 1) stringResource(R.string.collection_badge_items_single, 1)
+                        else stringResource(R.string.collection_badge_items_plural, totalCount)
+                    }
                     totalCount == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
                     totalCount > 1 -> stringResource(R.string.collection_badge_movies_plural, totalCount)
                     collection.partsPosterPaths.isNotEmpty() -> stringResource(R.string.collection_badge_movies_plus, collection.partsPosterPaths.size)

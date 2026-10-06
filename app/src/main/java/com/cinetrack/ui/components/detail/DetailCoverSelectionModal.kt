@@ -32,6 +32,7 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.ImageItem
 import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.ImageQuality
@@ -60,35 +61,47 @@ fun DetailCoverSelectionModal(
             (configuration.screenWidthDp.toFloat() / 480f).coerceIn(0.6f, 1.5f)
         }
         Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 16.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            Text(
-                text = stringResource(R.string.detail_select_cover),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = Color.White,
-                modifier = Modifier.padding(start = 16.dp, end = 16.dp, bottom = 16.dp),
-                textAlign = TextAlign.Center
-            )
+            // Header with symmetric ModalCloseButton
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Spacer(modifier = Modifier.size(32.dp))
+                Text(
+                    text = stringResource(R.string.detail_select_cover),
+                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                    color = Color.White,
+                    textAlign = TextAlign.Center
+                )
+                ModalCloseButton(onClick = onDismiss)
+            }
+
+            Spacer(modifier = Modifier.height(16.dp))
             
             val defaultImg = movieEntry?.backdropPath ?: movieEntry?.posterPath
             if (backdrops.isEmpty() && defaultImg == null) {
                 Text(
                     text = stringResource(R.string.detail_no_alternative_covers), 
                     color = Color.White.copy(alpha = 0.6f),
-                    modifier = Modifier.padding(horizontal = 16.dp),
+                    modifier = Modifier.padding(vertical = 24.dp),
                     textAlign = TextAlign.Center
                 )
             } else {
                 val gridState = rememberLazyGridState()
+                val cardCornerRadius = 14.dp
+                val cardShape = RoundedCornerShape(cardCornerRadius)
                 LazyVerticalGrid(
                     columns = GridCells.Fixed(2),
                     state = gridState,
-                    contentPadding = PaddingValues(horizontal = 20.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier.fillMaxWidth().heightIn(max = 400.dp)
-                        .verticalFadingEdges(gridState, topEdgeHeight = 16.dp, bottomEdgeHeight = 16.dp)
+                    contentPadding = PaddingValues(top = 4.dp, bottom = 14.dp),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp),
+                    modifier = Modifier.fillMaxWidth().heightIn(max = 440.dp)
+                        .verticalFadingEdges(gridState, topEdgeHeight = 12.dp, bottomEdgeHeight = 16.dp)
                         .premiumScrollbar(gridState, paddingEnd = 6f)
                 ) {
                     if (defaultImg != null) {
@@ -98,17 +111,17 @@ fun DetailCoverSelectionModal(
                                 modifier = Modifier
                                     .fillMaxWidth()
                                     .aspectRatio(dynamicCoverRatio)
-                                    .clip(RoundedCornerShape(8.dp))
+                                    .bounceClick(scaleDown = 0.94f) {
+                                        onSelectCover(null)
+                                        onDismiss()
+                                    }
+                                    .clip(cardShape)
                                     .background(Color.White.copy(alpha = 0.1f))
                                     .border(
                                         width = if (isDefaultSelected) 2.dp else 0.dp,
                                         color = if (isDefaultSelected) accentColor else Color.Transparent,
-                                        shape = RoundedCornerShape(8.dp)
-                                    )
-                                    .clickable {
-                                        onSelectCover(null)
-                                        onDismiss()
-                                    },
+                                        shape = cardShape
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 val imageUrl = buildTmdbImageUrl(defaultImg, ImageType.BACKDROP, currentImageQuality)
@@ -128,8 +141,8 @@ fun DetailCoverSelectionModal(
                                 )
                                 Box(
                                     modifier = Modifier
-                                        .background(Color.Black.copy(alpha = 0.75f), RoundedCornerShape(6.dp))
-                                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
+                                        .background(Color.Black.copy(alpha = 0.78f), RoundedCornerShape(8.dp))
+                                        .border(0.5.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(8.dp))
                                         .padding(horizontal = 10.dp, vertical = 4.dp)
                                 ) {
                                     Text(
@@ -143,8 +156,8 @@ fun DetailCoverSelectionModal(
                                     Box(
                                         modifier = Modifier
                                             .align(Alignment.TopEnd)
-                                            .padding(6.dp)
-                                            .background(accentColor, RoundedCornerShape(6.dp))
+                                            .padding(7.dp)
+                                            .background(accentColor, RoundedCornerShape(7.dp))
                                             .padding(horizontal = 6.dp, vertical = 2.dp)
                                     ) {
                                         Text(
@@ -175,17 +188,18 @@ fun DetailCoverSelectionModal(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .aspectRatio(dynamicCoverRatio)
-                                .clip(RoundedCornerShape(8.dp))
+                                .bounceClick(scaleDown = 0.94f) {
+                                    onSelectCover(imageItem.filePath)
+                                    onDismiss()
+                                }
+                                .clip(cardShape)
                                 .background(Color.White.copy(alpha = 0.05f))
                                 .border(
                                     width = if (isSelected) 2.dp else 0.dp,
                                     color = if (isSelected) accentColor else Color.Transparent,
-                                    shape = RoundedCornerShape(8.dp)
-                                )
-                                .clickable {
-                                    onSelectCover(imageItem.filePath)
-                                    onDismiss()
-                                }
+                                    shape = cardShape
+                                ),
+                            contentAlignment = Alignment.Center
                         ) {
                             AsyncImage(
                                 model = request,
@@ -198,8 +212,8 @@ fun DetailCoverSelectionModal(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(6.dp)
-                                        .background(accentColor, RoundedCornerShape(6.dp))
+                                        .padding(7.dp)
+                                        .background(accentColor, RoundedCornerShape(7.dp))
                                         .padding(horizontal = 6.dp, vertical = 2.dp)
                                 ) {
                                     Text(
@@ -212,19 +226,6 @@ fun DetailCoverSelectionModal(
                         }
                     }
                 }
-            }
-            
-            Spacer(modifier = Modifier.height(16.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .bounceClick(onClick = onDismiss)
-                    .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-                    .padding(vertical = 12.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
             }
         }
     }

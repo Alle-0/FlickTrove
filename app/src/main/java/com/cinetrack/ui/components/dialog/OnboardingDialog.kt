@@ -41,6 +41,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 
@@ -132,12 +133,7 @@ fun OnboardingDialog(
                 )
                 .border(
                     1.dp,
-                    Brush.verticalGradient(
-                        listOf(
-                            Color.White.copy(alpha = 0.25f),
-                            Color.White.copy(alpha = 0.05f)
-                        )
-                    ),
+                    Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
                     RoundedCornerShape(32.dp)
                 )
                 .padding(24.dp),
@@ -162,18 +158,22 @@ fun OnboardingDialog(
                             Spacer(modifier = Modifier.size(32.dp))
                         }
 
-                        // Skip Button in top right
-                        Text(
-                            text = stringResource(R.string.onboarding_skip),
-                            style = MaterialTheme.typography.labelLarge.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                color = Color.White.copy(alpha = 0.6f)
-                            ),
-                            modifier = Modifier
-                                .bounceClick { onDismiss() }
-                                .clip(CircleShape)
-                                .padding(horizontal = 12.dp, vertical = 6.dp)
-                        )
+                        // Skip Button in top right (hidden on last slide)
+                        if (pagerState.currentPage < slides.size - 1) {
+                            Text(
+                                text = stringResource(R.string.onboarding_skip),
+                                style = MaterialTheme.typography.labelLarge.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White.copy(alpha = 0.6f)
+                                ),
+                                modifier = Modifier
+                                    .bounceClick { onDismiss() }
+                                    .clip(CircleShape)
+                                    .padding(horizontal = 12.dp, vertical = 6.dp)
+                            )
+                        } else {
+                            Spacer(modifier = Modifier.size(32.dp))
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(8.dp))
@@ -198,7 +198,7 @@ fun OnboardingDialog(
                                         .fillMaxWidth()
                                         .height(165.dp)
                                         .clip(RoundedCornerShape(20.dp))
-                                        .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(20.dp)),
+                                        .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlphaStart), RoundedCornerShape(20.dp)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Image(

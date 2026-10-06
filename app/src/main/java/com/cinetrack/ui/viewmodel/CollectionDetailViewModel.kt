@@ -57,8 +57,11 @@ data class CollectionDetailUiState(
     val preferences: UserPreferences = UserPreferences(),
     val error: String? = null
 ) {
+    val isEditorial: Boolean
+        get() = collectionId.isNotBlank() && !collectionId.all { it.isDigit() }
+
     val hasActiveFilters: Boolean
-        get() = sortConfig.sortType != "chronological" || sortConfig.selectedMedia != null || sortConfig.sortDirection != "asc"
+        get() = isEditorial && (sortConfig.sortType != "chronological" || sortConfig.selectedMedia != null || sortConfig.sortDirection != "asc")
 }
 
 private data class Quadruple<A, B, C, D>(

@@ -5,6 +5,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.unit.Dp
@@ -18,6 +19,7 @@ import dev.chrisbanes.haze.haze
 @Composable
 fun CollectionDetailSkeleton(
     cardWidth: Dp,
+    columns: Int = 3,
     hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
@@ -46,7 +48,12 @@ fun CollectionDetailSkeleton(
                     .padding(bottom = 60.dp)
             ) {
                 // Hero Header Section Skeleton
-                Column(modifier = Modifier.padding(horizontal = 16.dp)) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
                     // Title skeleton
                     Box(
                         modifier = Modifier
@@ -80,17 +87,29 @@ fun CollectionDetailSkeleton(
 
                 Spacer(modifier = Modifier.height(32.dp))
 
-                // Movies inside collection grid skeleton
-                FlowRow(
+                // Movies inside collection grid skeleton (exact match with CollectionDetailScreen columns)
+                Column(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(horizontal = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
                     verticalArrangement = Arrangement.spacedBy(16.dp)
                 ) {
-                    repeat(6) {
-                        Box(modifier = Modifier.width(cardWidth)) {
-                            MovieCardSkeleton(width = cardWidth)
+                    repeat(2) {
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            repeat(columns) {
+                                Box(
+                                    modifier = Modifier.weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    MovieCardSkeleton(
+                                        width = Dp.Unspecified,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
+                            }
                         }
                     }
                 }

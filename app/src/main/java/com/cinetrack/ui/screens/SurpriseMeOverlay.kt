@@ -72,32 +72,6 @@ fun SurpriseMeOverlay(
 
     val scope = rememberCoroutineScope()
 
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
-    val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
-
-    val targetWidth = (screenWidth * 0.90f).coerceAtMost(with(density) { 380.dp.toPx() })
-    
-    var contentHeightPx by remember { mutableStateOf(0f) }
-    val maxModalHeightPx = with(density) { 520.dp.toPx() }
-    val maxAllowedHeight = minOf(screenHeight * 0.78f, maxModalHeightPx)
-    val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceAtMost(maxAllowedHeight) 
-                      else with(density) { 240.dp.toPx() },
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "dynamicHeight"
-    )
-
-    val targetRect = Rect(
-        left = (screenWidth - targetWidth) / 2f,
-        top = (screenHeight - targetHeightPx) / 2f,
-        right = (screenWidth + targetWidth) / 2f,
-        bottom = (screenHeight + targetHeightPx) / 2f
-    )
-
-    val transition = updateTransition(targetState = isVisible, label = "SurpriseMeTransition")
-
     BackHandler(enabled = isVisible) {
         if (step in 1..3) {
             step--
@@ -106,8 +80,8 @@ fun SurpriseMeOverlay(
         }
     }
 
-    LaunchedEffect(transition.currentState, isVisible) {
-        if (!isVisible && !transition.currentState) {
+    LaunchedEffect(isVisible) {
+        if (!isVisible) {
             step = 0
             selectedTime = null
             selectedMood = null
@@ -115,214 +89,58 @@ fun SurpriseMeOverlay(
         }
     }
 
-    val progress by transition.animateFloat(
-        transitionSpec = {
-            if (initialState == false && targetState == true) {
-                spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
-            } else {
-                spring(stiffness = Spring.StiffnessMedium)
-            }
-        },
-        label = "expansionProgress"
-    ) { state -> if (state) 1f else 0f }
-
-    val alpha by transition.animateFloat(label = "scrimAlpha") { state -> if (state) 1f else 0f }
-
-    if (transition.currentState || transition.targetState) {
-        val effectiveScrimAlpha = if (triggerBounds != null) {
-            val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
-            0.6f * FastOutSlowInEasing.transform(scrimProgress)
-        } else {
-            0.6f * alpha
-        }
-
+    com.cinetrack.ui.components.shared.MorphGlassModal(
+        isVisible = isVisible,
+        onDismissRequest = onClose,
+        triggerBounds = triggerBounds,
+        hazeState = globalHazeState,
+        targetMaxWidth = 380.dp,
+        targetWidthFraction = 0.90f,
+        maxModalHeightFraction = 0.78f,
+        minModalHeight = 0.dp,
+        defaultModalHeight = 220.dp,
+        zIndex = 90000f
+    ) { contentAlpha ->
         Box(
             modifier = Modifier
-                .fillMaxSize()
-                .zIndex(90000f)
-                .background(Color.Black.copy(alpha = effectiveScrimAlpha))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onClose
-                )
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
         ) {
-            // --- GHOST MEASUREMENT LAYER ---
-            Box(
-                modifier = Modifier
-                    .width(with(density) { targetWidth.toDp() })
-                    .alpha(0f)
-                    .onSizeChanged { size ->
-                        if (size.height > 0) contentHeightPx = size.height.toFloat()
+            SurpriseMeContent(
+                step = step,
+                selectedTime = selectedTime,
+                selectedMood = selectedMood,
+                selectedCompany = selectedCompany,
+                isGhost = contentAlpha == 0f,
+                onBack = { if (step in 1..3) step-- else onClose() },
+                onClose = onClose,
+                onRandomClick = {
+                    scope.launch {
+                        step = 4
+                        delay(800)
+                        val movie = viewModel.getRandomMovie()
+                        onMovieFound(movie)
                     }
-                    .align(Alignment.Center)
-            ) {
-                SurpriseMeContent(
-                    step = step,
-                    selectedTime = selectedTime,
-                    selectedMood = selectedMood,
-                    selectedCompany = selectedCompany,
-                    isGhost = true,
-                    onBack = {},
-                    onClose = {},
-                    onRandomClick = {},
-                    onEmotionalClick = {},
-                    onTimeSelect = {},
-                    onMoodSelect = {},
-                    onCompanySelect = {}
-                )
-            }
-
-            val startRect = triggerBounds ?: targetRect.copy(
-                left = targetRect.center.x - 20f,
-                top = targetRect.center.y - 20f,
-                right = targetRect.center.x + 20f,
-                bottom = targetRect.center.y + 20f
-            )
-
-            // Center moves smoothly towards screen center
-            val currentCenterX = lerp(startRect.center.x, targetRect.center.x, progress)
-            val currentCenterY = lerp(startRect.center.y, targetRect.center.y, progress)
-
-            // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
-            val sizeProgress = if (triggerBounds != null) {
-                val delay = 0.18f
-                if (progress <= delay) {
-                    (progress / delay) * 0.05f
-                } else {
-                    val raw = (progress - delay) / (1f - delay)
-                    0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
-                }
-            } else {
-                progress
-            }
-
-            // Corner radius stays circular during liftoff, then morphs into target rounded corners
-            val cornerRadiusProgress = if (triggerBounds != null) {
-                val delay = 0.18f
-                if (progress <= delay) 0f
-                else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
-            } else {
-                progress
-            }
-
-            val currentWidth = lerp(startRect.width, targetRect.width, sizeProgress)
-            val currentHeight = lerp(startRect.height, targetRect.height, sizeProgress)
-
-            val currentRect = Rect(
-                left = currentCenterX - currentWidth / 2f,
-                top = currentCenterY - currentHeight / 2f,
-                right = currentCenterX + currentWidth / 2f,
-                bottom = currentCenterY + currentHeight / 2f
-            )
-
-            val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() }
-            val endRadius = with(density) { 32.dp.toPx() }
-            val currentCornerRadius = lerp(startRadius, endRadius, cornerRadiusProgress)
-            val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
-
-            val currentTintAlpha = if (triggerBounds != null) {
-                lerp(0.48f, HazeStyles.glassmorphicDialog.tint.alpha, sizeProgress)
-            } else {
-                HazeStyles.glassmorphicDialog.tint.alpha
-            }
-            val currentBlur = if (triggerBounds != null) {
-                androidx.compose.ui.unit.lerp(16.dp, HazeStyles.glassmorphicDialog.blurRadius, sizeProgress)
-            } else {
-                HazeStyles.glassmorphicDialog.blurRadius
-            }
-            val animatedStyle = remember(currentTintAlpha, currentBlur) {
-                HazeStyles.glassmorphicDialog.copy(
-                    tint = HazeStyles.glassmorphicDialog.tint.copy(alpha = currentTintAlpha),
-                    blurRadius = currentBlur
-                )
-            }
-            val borderAlpha = if (triggerBounds != null) {
-                lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
-            } else {
-                HazeStyles.ModalBorderAlpha
-            }
-
-            Box(
-                modifier = Modifier
-                    .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
-                    .size(
-                        width = with(density) { currentRect.width.toDp() },
-                        height = with(density) { currentRect.height.toDp() }
-                    )
-                    .clip(currentShape)
-                    .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
-            ) {
-                // Background Layer (Blurred glass)
-                Spacer(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .hazeGlass(
-                            state = globalHazeState,
-                            shape = currentShape,
-                            style = animatedStyle,
-                            useOffscreenStrategy = false
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = borderAlpha),
-                            shape = currentShape
-                        )
-                )
-
-                // Foreground Content
-                if (progress > 0.38f) {
-                    val contentAlpha = ((progress - 0.38f) / 0.62f).coerceIn(0f, 1f)
-
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .zIndex(1f)
-                            .graphicsLayer(
-                                alpha = contentAlpha,
-                                compositingStrategy = CompositingStrategy.Offscreen
-                            )
-                            .verticalScroll(rememberScrollState()),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        SurpriseMeContent(
-                            step = step,
-                            selectedTime = selectedTime,
-                            selectedMood = selectedMood,
-                            selectedCompany = selectedCompany,
-                            isGhost = false,
-                            onBack = { if (step in 1..3) step-- else onClose() },
-                            onClose = onClose,
-                            onRandomClick = {
-                                scope.launch {
-                                    step = 4
-                                    delay(800)
-                                    val movie = viewModel.getRandomMovie()
-                                    onMovieFound(movie)
-                                }
-                            },
-                            onEmotionalClick = { step = 1 },
-                            onTimeSelect = {
-                                selectedTime = it
-                                step = 2
-                            },
-                            onMoodSelect = {
-                                selectedMood = it
-                                step = 3
-                            },
-                            onCompanySelect = {
-                                selectedCompany = it
-                                scope.launch {
-                                    step = 4
-                                    delay(800)
-                                    val movie = viewModel.getEmotionalMovie(selectedTime!!, selectedMood!!, selectedCompany!!)
-                                    onMovieFound(movie)
-                                }
-                            }
-                        )
+                },
+                onEmotionalClick = { step = 1 },
+                onTimeSelect = {
+                    selectedTime = it
+                    step = 2
+                },
+                onMoodSelect = {
+                    selectedMood = it
+                    step = 3
+                },
+                onCompanySelect = {
+                    selectedCompany = it
+                    scope.launch {
+                        step = 4
+                        delay(800)
+                        val movie = viewModel.getEmotionalMovie(selectedTime!!, selectedMood!!, selectedCompany!!)
+                        onMovieFound(movie)
                     }
                 }
-            }
+            )
         }
     }
 }

@@ -10,6 +10,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.rememberScrollState
@@ -28,9 +29,15 @@ import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.unit.IntOffset
+import kotlin.math.roundToInt
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.PlatformTextStyle
@@ -56,8 +63,11 @@ import com.cinetrack.data.model.AppComment
 import com.cinetrack.ui.utils.MarkdownVisualTransformation
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeChild
 
@@ -92,6 +102,7 @@ fun CommentInputBar(
     onPostToCommsUniChanged: ((Boolean) -> Unit)? = null
 ) {
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val imageLoader = context.imageLoader
     var isInputExpanded by remember { mutableStateOf(false) }
     var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
@@ -123,31 +134,101 @@ fun CommentInputBar(
         label = "outerInnerPaddingBottom"
     )
 
+    val canSend = (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) && !isUserAnonymous
+    val sendInteractionSource = remember { MutableInteractionSource() }
+    val isSendPressed by sendInteractionSource.collectIsPressedAsState()
+
+    // Windup states for the resting icon inside the button
+    val windupOffsetX = remember { Animatable(0f) }
+    val windupOffsetY = remember { Animatable(0f) }
+    val windupScale = remember { Animatable(1f) }
+    val windupRotation = remember { Animatable(0f) }
+
+    // Rocket launch states for the unclipped overlay icon
+    var isFlying by remember { mutableStateOf(false) }
+    var launchOrigin by remember { mutableStateOf(Offset.Zero) }
+    val flightOffsetX = remember { Animatable(0f) }
+    val flightOffsetY = remember { Animatable(0f) }
+    val flightScale = remember { Animatable(1f) }
+    val flightRotation = remember { Animatable(0f) }
+    val flightAlpha = remember { Animatable(1f) }
+
+    // Coordinates tracking to launch precisely from the button's position
+    var barCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var sendButtonOffsetInBar by remember { mutableStateOf<Offset?>(null) }
+
+    LaunchedEffect(isSendPressed, canSend) {
+        if (canSend && isSendPressed && !isFlying) {
+            // Subtle, tactile windup: slight pullback, squish, and tilt
+            launch { windupOffsetX.animateTo(-3f, tween(140, easing = FastOutSlowInEasing)) }
+            launch { windupOffsetY.animateTo(2f, tween(140, easing = FastOutSlowInEasing)) }
+            launch { windupScale.animateTo(0.94f, tween(140, easing = FastOutSlowInEasing)) }
+            launch { windupRotation.animateTo(-8f, tween(140, easing = FastOutSlowInEasing)) }
+        } else if (!isSendPressed && !isFlying) {
+            // Finger released without launch or cancelled: spring back smoothly
+            launch { windupOffsetX.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow)) }
+            launch { windupOffsetY.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow)) }
+            launch { windupScale.animateTo(1f, spring(stiffness = Spring.StiffnessMediumLow)) }
+            launch { windupRotation.animateTo(0f, spring(stiffness = Spring.StiffnessMediumLow)) }
+        }
+    }
+
+    val sendBtnScale by animateFloatAsState(
+        targetValue = if (isSendPressed && (canSend || isUserAnonymous) && !isFlying) 0.94f else 1f,
+        animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy),
+        label = "sendBtnScale"
+    )
+    val sendBgColor by animateColorAsState(
+        targetValue = if (canSend) accentColor else Color.White.copy(alpha = 0.08f),
+        label = "sendBgColor"
+    )
+    val sendIconTint by animateColorAsState(
+        targetValue = if (canSend) Color.Black else Color.White.copy(alpha = 0.38f),
+        label = "sendIconTint"
+    )
+    val flightPlaneTint = if (accentColor == Color.Black || accentColor == Color.Transparent) Color.White else accentColor
+
     Box(
         modifier = modifier
             .fillMaxWidth()
             .navigationBarsPadding()
             .padding(horizontal = 14.dp, vertical = 6.dp)
-            .clip(boxShape)
-            .hazeChild(
-                state = hazeState,
-                shape = boxShape,
-                style = HazeStyle(tint = Color(0xFF161616).copy(alpha = 0.88f), blurRadius = 20.dp)
-            )
-            .border(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.08f),
-                shape = boxShape
-            )
-            .animateContentSize(alignment = Alignment.BottomCenter)
-            .padding(
-                start = outerInnerPaddingH,
-                end = outerInnerPaddingH,
-                top = outerInnerPaddingTop,
-                bottom = outerInnerPaddingBottom
-            )
+            .onGloballyPositioned { barCoordinates = it }
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
+        // Sibling 1: The input bar capsule with smooth size animation (clips only its own content)
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .animateContentSize(alignment = Alignment.BottomCenter)
+        ) {
+            // Sibling 1A: The glass background with hazeChild, shaped and bordered
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color(0xFF161616).copy(alpha = 0.88f), boxShape)
+                    .hazeChild(
+                        state = hazeState,
+                        shape = boxShape,
+                        style = HazeStyle(tint = Color(0xFF161616).copy(alpha = 0.88f), blurRadius = 20.dp)
+                    )
+                    .border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.08f),
+                        shape = boxShape
+                    )
+            )
+
+            // Sibling 1B: The content Column
+            Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(
+                    start = outerInnerPaddingH,
+                    end = outerInnerPaddingH,
+                    top = outerInnerPaddingTop,
+                    bottom = outerInnerPaddingBottom
+                )
+        ) {
             val lastReplyingTo = remember { mutableStateOf(replyingTo) }
             if (replyingTo != null) {
                 lastReplyingTo.value = replyingTo
@@ -240,7 +321,7 @@ fun CommentInputBar(
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(RoundedCornerShape(10.dp))
+                                        .clip(RoundedCornerShape(14.dp))
                                 )
                                 Box(
                                     modifier = Modifier
@@ -262,17 +343,6 @@ fun CommentInputBar(
                         }
                     }
                 }
-
-                // Send button state (hoisted — used in the main Row, always visible)
-                val canSend = (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) && !isUserAnonymous
-                val sendBgColor by animateColorAsState(
-                    targetValue = if (canSend) accentColor else Color.White.copy(alpha = 0.08f),
-                    label = "sendBgColor"
-                )
-                val sendIconTint by animateColorAsState(
-                    targetValue = if (canSend) Color.Black else Color.White.copy(alpha = 0.38f),
-                    label = "sendIconTint"
-                )
 
                 // Main input Row: [TextBox weight(1f)] [Send — always here]
                 val inputScrollState = rememberScrollState()
@@ -299,6 +369,7 @@ fun CommentInputBar(
                             .clip(textBoxShape)
                             .background(Color.White.copy(alpha = 0.06f))
                             .border(1.dp, Color.White.copy(alpha = 0.10f), textBoxShape)
+                            .premiumScrollbar(inputScrollState, width = 3f, paddingEnd = 4f, paddingVertical = 6f)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
                                 indication = null
@@ -319,8 +390,10 @@ fun CommentInputBar(
                             },
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .padding(end = if (inputScrollState.maxValue > 0) 8.dp else 0.dp)
                                 .focusRequester(focusRequester)
                                 .onFocusChanged { focusState -> isInputExpanded = focusState.isFocused }
+                                .verticalFadingEdges(inputScrollState, topEdgeHeight = 12.dp, bottomEdgeHeight = 12.dp)
                                 .verticalScroll(inputScrollState),
                             textStyle = MaterialTheme.typography.bodyLarge.copy(
                                 color = Color.White,
@@ -345,15 +418,109 @@ fun CommentInputBar(
                     Box(
                         modifier = Modifier
                             .size(44.dp)
-                            .bounceClick(enabled = canSend || isUserAnonymous) {
-                                if (isUserAnonymous) {
-                                    onGuestAuthTrigger()
-                                } else if (canSend) {
-                                    onSendComment()
+                            .onGloballyPositioned { btnCoords ->
+                                barCoordinates?.let { bar ->
+                                    if (bar.isAttached && btnCoords.isAttached) {
+                                        sendButtonOffsetInBar = bar.localPositionOf(btnCoords, Offset.Zero)
+                                    }
                                 }
                             }
-                            .clip(CircleShape)
-                            .background(sendBgColor)
+                            .graphicsLayer {
+                                scaleX = sendBtnScale
+                                scaleY = sendBtnScale
+                            }
+                            .clickable(
+                                interactionSource = sendInteractionSource,
+                                indication = null,
+                                enabled = (canSend || isUserAnonymous) && !isFlying
+                            ) {
+                                if (isUserAnonymous) {
+                                    onGuestAuthTrigger()
+                                } else if (canSend && !isFlying) {
+                                    launchOrigin = sendButtonOffsetInBar ?: Offset.Zero
+                                    isFlying = true
+
+                                    // Release impulse & haptic trigger upon finger release
+                                    VibrationHelper.vibrateTick(context)
+                                    onSendComment()
+
+                                    coroutineScope.launch {
+                                        flightOffsetX.snapTo(windupOffsetX.value)
+                                        flightOffsetY.snapTo(windupOffsetY.value)
+                                        flightScale.snapTo(windupScale.value)
+                                        flightRotation.snapTo(windupRotation.value)
+                                        flightAlpha.snapTo(1f)
+
+                                        // High-flying launch sequence:
+                                        // Phase 1 (0..140ms): Smoothly glides out of the circular button clearly in view!
+                                        // Phase 2 (140..620ms): Accelerates skyward, arching across the screen and out of the display!
+                                        launch {
+                                            flightOffsetX.animateTo(
+                                                targetValue = -150f,
+                                                animationSpec = keyframes {
+                                                    durationMillis = 620
+                                                    windupOffsetX.value at 0 using FastOutSlowInEasing
+                                                    -24f at 140 using FastOutLinearInEasing
+                                                    -150f at 620
+                                                }
+                                            )
+                                        }
+                                        launch {
+                                            flightOffsetY.animateTo(
+                                                targetValue = -880f,
+                                                animationSpec = keyframes {
+                                                    durationMillis = 620
+                                                    windupOffsetY.value at 0 using FastOutSlowInEasing
+                                                    -48f at 140 using FastOutLinearInEasing
+                                                    -880f at 620
+                                                }
+                                            )
+                                        }
+                                        launch {
+                                            flightRotation.animateTo(
+                                                targetValue = -50f,
+                                                animationSpec = keyframes {
+                                                    durationMillis = 620
+                                                    windupRotation.value at 0 using FastOutSlowInEasing
+                                                    -32f at 140 using FastOutSlowInEasing
+                                                    -50f at 620
+                                                }
+                                            )
+                                        }
+                                        launch {
+                                            flightScale.animateTo(
+                                                targetValue = 1.35f,
+                                                animationSpec = keyframes {
+                                                    durationMillis = 620
+                                                    windupScale.value at 0 using FastOutSlowInEasing
+                                                    1.12f at 140 using FastOutSlowInEasing
+                                                    1.35f at 380
+                                                    1.2f at 620
+                                                }
+                                            )
+                                        }
+                                        launch {
+                                            flightAlpha.animateTo(
+                                                targetValue = 0f,
+                                                animationSpec = keyframes {
+                                                    durationMillis = 620
+                                                    1f at 0
+                                                    1f at 440
+                                                    0f at 620
+                                                }
+                                            )
+                                        }
+
+                                        delay(630)
+                                        isFlying = false
+                                        windupOffsetX.snapTo(0f)
+                                        windupOffsetY.snapTo(0f)
+                                        windupScale.snapTo(1f)
+                                        windupRotation.snapTo(0f)
+                                    }
+                                }
+                            }
+                            .background(sendBgColor, CircleShape)
                             .border(
                                 width = 1.dp,
                                 color = if (canSend) Color.Transparent else Color.White.copy(alpha = 0.10f),
@@ -365,7 +532,16 @@ fun CommentInputBar(
                             painter = painterResource(id = R.drawable.ic_send),
                             contentDescription = stringResource(R.string.comment_send_btn),
                             tint = sendIconTint,
-                            modifier = Modifier.size(21.dp)
+                            modifier = Modifier
+                                .size(21.dp)
+                                .graphicsLayer {
+                                    translationX = windupOffsetX.value.dp.toPx()
+                                    translationY = windupOffsetY.value.dp.toPx()
+                                    scaleX = windupScale.value
+                                    scaleY = windupScale.value
+                                    rotationZ = windupRotation.value
+                                    alpha = if (isFlying) 0f else 1f
+                                }
                         )
                     }
                 }
@@ -639,6 +815,37 @@ fun CommentInputBar(
                         }
                     }
                 }
+            }
+        }
+    }
+
+    // Sibling 2: Unclipped Flight Overlay
+        if (isFlying) {
+            Box(
+                modifier = Modifier
+                    .offset {
+                        IntOffset(
+                            x = (launchOrigin.x + flightOffsetX.value.dp.toPx()).roundToInt(),
+                            y = (launchOrigin.y + flightOffsetY.value.dp.toPx()).roundToInt()
+                        )
+                    }
+                    .size(44.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_send),
+                    contentDescription = null,
+                    tint = flightPlaneTint,
+                    modifier = Modifier
+                        .size(21.dp)
+                        .graphicsLayer {
+                            scaleX = flightScale.value
+                            scaleY = flightScale.value
+                            rotationZ = flightRotation.value
+                            alpha = flightAlpha.value
+                            clip = false
+                        }
+                )
             }
         }
     }

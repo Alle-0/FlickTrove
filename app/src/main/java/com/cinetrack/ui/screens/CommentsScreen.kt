@@ -168,6 +168,7 @@ class CommentsScreen(
         val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val context = androidx.compose.ui.platform.LocalContext.current
         val hazeState = remember { HazeState() }
+        val globalHazeState = remember { HazeState() }
         val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
         var isUploadingImage by remember { mutableStateOf(false) }
         var attachedMedia by remember { mutableStateOf(emptyList<String>()) }
@@ -204,7 +205,12 @@ class CommentsScreen(
         val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            Scaffold(
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .haze(globalHazeState)
+            ) {
+                Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
@@ -464,6 +470,7 @@ class CommentsScreen(
                 )
             }
         } // End of Scaffold
+    } // End of Box with globalHazeState
             
             // Sort Dialog Overlay
             // Sort Menu using HomeFilterModal for consistency
@@ -475,7 +482,7 @@ class CommentsScreen(
                     sortType = if (sortOption == CommentSortOption.DATE) "date" else "likes",
                     sortDirection = if (sortOrder == CommentSortOrder.DESC) "desc" else "asc"
                 ),
-                hazeState = hazeState,
+                hazeState = globalHazeState,
                 onSortConfigChanged = { newConfig ->
                     sortOption = if (newConfig.sortType == "date") CommentSortOption.DATE else CommentSortOption.LIKES
                     sortOrder = if (newConfig.sortDirection == "desc") CommentSortOrder.DESC else CommentSortOrder.ASC
@@ -490,7 +497,7 @@ class CommentsScreen(
                 onTranslate = { commentId, text, requireWifi ->
                     viewModel.translateComment(commentId, text, requireWifi)
                 },
-                hazeState = hazeState,
+                hazeState = globalHazeState,
                 accentColor = accentColor
             )
 
@@ -504,7 +511,7 @@ class CommentsScreen(
                     }
                     commentToReport = null
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             // Delete Dialog Overlay
@@ -517,7 +524,7 @@ class CommentsScreen(
                     }
                     commentToDelete = null
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             // External Link Warning Dialog Overlay
@@ -537,7 +544,7 @@ class CommentsScreen(
                         viewModel.emitBlockedLink(R.string.external_link_error_no_browser)
                     }
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
         } // End of Outer Box
     }

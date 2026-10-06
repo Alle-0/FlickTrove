@@ -339,6 +339,16 @@ private fun CommentCard(
         accentColor = accentColor
     )
 
+    val currentTranslation = translationState
+    val displayedTextRaw = when (currentTranslation) {
+        is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslation.text
+        else -> comment.text
+    }
+    val mediaRegex = remember { Regex("!\\[.*?\\]\\((.*?)\\)") }
+    val textWithoutMedia = remember(displayedTextRaw) { displayedTextRaw.replace(mediaRegex, "").trim() }
+    val inlineMediaUrls = remember(displayedTextRaw) { mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList() }
+    val mediaUrls = remember(inlineMediaUrls, comment.attachedMedia) { (inlineMediaUrls + comment.attachedMedia).distinct() }
+
     Box(
         modifier = Modifier
             .width(targetWidth)
@@ -348,7 +358,7 @@ private fun CommentCard(
             .background(Color.White.copy(alpha = 0.03f))
             .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(24.dp))
             .bounceClick(scaleDown = 0.98f) { isExpanded = !isExpanded }
-            .padding(16.dp)
+            .padding(14.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -468,7 +478,7 @@ private fun CommentCard(
                 }
             }
             
-            Spacer(modifier = Modifier.height(12.dp))
+            Spacer(modifier = Modifier.height(if (textWithoutMedia.isNotEmpty()) 10.dp else 8.dp))
             
             val scrollState = rememberScrollState()
             val nestedScrollConnection = remember {
@@ -507,21 +517,11 @@ private fun CommentCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val currentTranslation = translationState
-                val displayedTextRaw = when (currentTranslation) {
-                    is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated -> currentTranslation.text
-                    else -> comment.text
-                }
-                val mediaRegex = Regex("!\\[.*?\\]\\((.*?)\\)")
-                val textWithoutMedia = displayedTextRaw.replace(mediaRegex, "").trim()
-                val inlineMediaUrls = mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList()
-                val mediaUrls = (inlineMediaUrls + comment.attachedMedia).distinct()
                 val contentToDraw = @Composable { isBlurred: Boolean ->
                     Column(
                         modifier = Modifier
                             .nestedScroll(nestedScrollConnection)
                             .verticalScroll(scrollState)
-                            .padding(vertical = 4.dp)
                     ) {
                         if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
                             val textToDisplay = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
@@ -555,11 +555,11 @@ private fun CommentCard(
                                         .build(),
                                     contentDescription = "Attachment",
                                     modifier = Modifier
-                                        .padding(top = 8.dp)
+                                        .then(if (textWithoutMedia.isNotEmpty()) Modifier.padding(top = 8.dp) else Modifier)
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
+                                        .clip(RoundedCornerShape(10.dp))
                                         .then(
-                                            if (isBlurred) Modifier.clip(RoundedCornerShape(12.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                            if (isBlurred) Modifier.clip(RoundedCornerShape(10.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                         ),
                                     contentScale = androidx.compose.ui.layout.ContentScale.Crop
                                 )

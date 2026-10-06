@@ -47,6 +47,10 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -58,7 +62,7 @@ fun SimpleMorphingTopBar(
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
     onShareClick: () -> Unit,
-    onFilterClick: (() -> Unit)? = null,
+    onFilterClick: ((Rect?) -> Unit)? = null,
     hasActiveFilters: Boolean = false,
     scrimAlpha: Float = 0f
 ) {
@@ -317,9 +321,11 @@ fun SimpleMorphingTopBar(
                                 animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                                 label = "filterIconScale"
                             )
+                            var filterCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
                             Box(
                                 modifier = Modifier
                                     .size(44.dp)
+                                    .onGloballyPositioned { filterCoordinates = it }
                                     .pointerInput(Unit) {
                                         detectTapGestures(
                                             onPress = {
@@ -327,7 +333,13 @@ fun SimpleMorphingTopBar(
                                                 try { awaitRelease() } finally { isFilterPressed = false }
                                             },
                                             onTap = {
-                                                onFilterClick()
+                                                val bounds = filterCoordinates?.let { coords ->
+                                                    if (coords.isAttached) {
+                                                        val pos = coords.positionInWindow()
+                                                        Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
+                                                    } else null
+                                                }
+                                                onFilterClick(bounds)
                                             }
                                         )
                                     },
@@ -445,7 +457,7 @@ fun CollectionMorphingTopBar(
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
     onShareClick: () -> Unit,
-    onFilterClick: (() -> Unit)? = null,
+    onFilterClick: ((Rect?) -> Unit)? = null,
     hasActiveFilters: Boolean = false,
     scrimAlpha: Float = 0f
 ) = SimpleMorphingTopBar(

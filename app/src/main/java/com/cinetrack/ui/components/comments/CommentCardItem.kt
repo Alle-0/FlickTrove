@@ -429,9 +429,9 @@ fun CommentCardItem(
                                     modifier = Modifier
                                         .padding(top = 8.dp)
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
+                                        .clip(RoundedCornerShape(20.dp))
                                         .then(
-                                            if (isBlurred) Modifier.clip(RoundedCornerShape(12.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                            if (isBlurred) Modifier.clip(RoundedCornerShape(20.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                         ),
                                     contentScale = ContentScale.Crop
                                 )

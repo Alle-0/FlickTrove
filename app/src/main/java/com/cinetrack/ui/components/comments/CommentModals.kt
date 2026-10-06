@@ -856,13 +856,19 @@ fun CommentBlockModal(
     onConfirm: () -> Unit,
     hazeState: HazeState
 ) {
+    var lastComment by remember { mutableStateOf<AppComment?>(null) }
+    if (comment != null) {
+        lastComment = comment
+    }
+    val activeComment = comment ?: lastComment
+
     FlickTroveModal(
         isVisible = comment != null,
         onDismissRequest = onDismiss,
         hazeState = hazeState
     ) {
-        if (comment != null) {
-            val displayName = comment.userDisplayName.ifBlank { "User" }
+        if (activeComment != null) {
+            val displayName = activeComment.userDisplayName.ifBlank { "User" }
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -943,12 +949,18 @@ fun CommentDeleteModal(
     onConfirm: () -> Unit,
     hazeState: HazeState
 ) {
+    var lastComment by remember { mutableStateOf<AppComment?>(null) }
+    if (comment != null) {
+        lastComment = comment
+    }
+    val activeComment = comment ?: lastComment
+
     FlickTroveModal(
         isVisible = comment != null,
         onDismissRequest = onDismiss,
         hazeState = hazeState
     ) {
-        if (comment != null) {
+        if (activeComment != null) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1029,12 +1041,18 @@ fun ExternalLinkWarningModal(
     onConfirm: (url: String) -> Unit,
     hazeState: HazeState
 ) {
+    var lastUrl by remember { mutableStateOf<String?>(null) }
+    if (!url.isNullOrBlank()) {
+        lastUrl = url
+    }
+    val activeUrl = if (!url.isNullOrBlank()) url else lastUrl
+
     FlickTroveModal(
         isVisible = !url.isNullOrBlank(),
         onDismissRequest = onDismiss,
         hazeState = hazeState
     ) {
-        if (!url.isNullOrBlank()) {
+        if (!activeUrl.isNullOrBlank()) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
@@ -1109,7 +1127,7 @@ fun ExternalLinkWarningModal(
                     }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = url,
+                        text = activeUrl,
                         color = Color.White.copy(alpha = 0.50f),
                         style = MaterialTheme.typography.bodySmall,
                         maxLines = 2,
@@ -1148,7 +1166,7 @@ fun ExternalLinkWarningModal(
                     modifier = Modifier
                         .weight(1.2f)
                         .height(50.dp)
-                        .bounceClick { onConfirm(url) }
+                        .bounceClick { onConfirm(activeUrl) }
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color(0xFF2DD4BF))
                         .padding(horizontal = 16.dp),

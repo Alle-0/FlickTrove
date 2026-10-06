@@ -346,7 +346,8 @@ class SearchViewModel @Inject constructor(
                                         overview = ed.description,
                                         partsCount = ed.items.size,
                                         partsIds = ed.items.map { it.tmdbId },
-                                        editorialId = ed.id
+                                        editorialId = ed.id,
+                                        hasTvSeries = ed.items.any { it.mediaType == "tv" }
                                     )
                                 }
                                 matched + response.results

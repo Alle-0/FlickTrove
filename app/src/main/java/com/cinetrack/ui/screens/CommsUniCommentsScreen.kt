@@ -168,7 +168,7 @@ class CommsUniCommentsScreen(
         var userToBlock by remember { mutableStateOf<AppComment?>(null) }
         var pendingExternalUrl by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         var pendingExternalHost by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf("") }
-        var sortOption by remember { mutableStateOf(CommentSortOption.LIKES) }
+        var sortOption by remember { mutableStateOf(CommentSortOption.DATE) }
         var sortOrder by remember { mutableStateOf(CommentSortOrder.DESC) }
         var sourceFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
         var languageFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
@@ -187,6 +187,7 @@ class CommsUniCommentsScreen(
         val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
         val context = androidx.compose.ui.platform.LocalContext.current
         val hazeState = remember { HazeState() }
+        val globalHazeState = remember { HazeState() }
         val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
         var isUploadingImage by remember { mutableStateOf(false) }
         var attachedMedia by remember { mutableStateOf(emptyList<String>()) }
@@ -223,7 +224,12 @@ class CommsUniCommentsScreen(
         val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
-            Scaffold(
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .haze(globalHazeState)
+            ) {
+                Scaffold(
             modifier = Modifier
                 .fillMaxSize()
                 .imePadding()
@@ -525,6 +531,7 @@ class CommsUniCommentsScreen(
                 )
             }
         } // End of Scaffold
+    } // End of Box with globalHazeState
             
             // Sort Dialog Overlay
             // Sort Menu using HomeFilterModal for consistency
@@ -545,7 +552,7 @@ class CommsUniCommentsScreen(
                     selectedSources = sourceFilters.toList(),
                     selectedLanguages = languageFilters.toList()
                 ),
-                hazeState = hazeState,
+                hazeState = globalHazeState,
                 onSortConfigChanged = { newConfig ->
                     sortOption = if (newConfig.sortType == "date") CommentSortOption.DATE else CommentSortOption.LIKES
                     sortOrder = if (newConfig.sortDirection == "desc") CommentSortOrder.DESC else CommentSortOrder.ASC
@@ -560,7 +567,7 @@ class CommsUniCommentsScreen(
                 isVisible = showCommsUniInfo,
                 onDismiss = { showCommsUniInfo = false },
                 triggerBounds = commsUniButtonBounds,
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             // Translation Prompt Dialog
@@ -570,7 +577,7 @@ class CommsUniCommentsScreen(
                 onTranslate = { commentId, text, requireWifi ->
                     viewModel.translateComment(commentId, text, requireWifi)
                 },
-                hazeState = hazeState,
+                hazeState = globalHazeState,
                 accentColor = accentColor
             )
 
@@ -588,7 +595,7 @@ class CommsUniCommentsScreen(
                     commentToReport = null
                     userToBlock = target
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             // Block User Dialog Overlay
@@ -601,7 +608,7 @@ class CommsUniCommentsScreen(
                     }
                     userToBlock = null
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             // Delete Dialog Overlay
@@ -614,7 +621,7 @@ class CommsUniCommentsScreen(
                     }
                     commentToDelete = null
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             // External Link Warning Dialog Overlay
@@ -633,7 +640,7 @@ class CommsUniCommentsScreen(
                         viewModel.emitBlockedLink(R.string.external_link_error_no_browser)
                     }
                 },
-                hazeState = hazeState
+                hazeState = globalHazeState
             )
 
             androidx.activity.compose.BackHandler(

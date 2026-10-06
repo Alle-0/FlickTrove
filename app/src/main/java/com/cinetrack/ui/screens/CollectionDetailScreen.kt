@@ -8,12 +8,9 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.GridItemSpan
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
-import androidx.compose.foundation.lazy.grid.itemsIndexed
-import androidx.compose.ui.layout.layout
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -148,24 +145,24 @@ fun CollectionDetailScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
     val density = LocalDensity.current
-    val lazyGridState = rememberLazyGridState()
+    val scrollState = rememberLazyListState()
     val scrollThreshold = with(density) { 370.dp.toPx() }
     val backdropScrollOffset by remember {
         derivedStateOf {
-            if (lazyGridState.firstVisibleItemIndex == 0) {
-                lazyGridState.firstVisibleItemScrollOffset.toFloat()
+            if (scrollState.firstVisibleItemIndex == 0) {
+                scrollState.firstVisibleItemScrollOffset.toFloat()
             } else {
-                scrollThreshold + lazyGridState.firstVisibleItemScrollOffset.toFloat()
+                scrollThreshold + scrollState.firstVisibleItemScrollOffset.toFloat()
             }
         }
     }
     val scrollProgress by remember {
         derivedStateOf {
-            if (lazyGridState.firstVisibleItemIndex > 0) 1f
-            else (lazyGridState.firstVisibleItemScrollOffset.toFloat() / scrollThreshold).coerceIn(0f, 1f)
+            if (scrollState.firstVisibleItemIndex > 0) 1f
+            else (scrollState.firstVisibleItemScrollOffset.toFloat() / scrollThreshold).coerceIn(0f, 1f)
         }
     }
-    val isScrolling = lazyGridState.isScrollInProgress
+    val isScrolling = scrollState.isScrollInProgress
     val isMerged = scrollProgress >= 0.75f
     val targetSymbioteProgress = when {
         isMerged -> 1f
@@ -196,7 +193,7 @@ fun CollectionDetailScreenContent(
 
     val screenWidth = configuration.screenWidthDp.dp
     val columns = max(3, (screenWidth / 115.dp).toInt())
-    val cardWidth = (screenWidth - 32.dp - (12.dp * (columns - 1))) / columns - 1.5.dp
+    val cardWidth = (screenWidth - 32.dp - (12.dp * (columns - 1))) / columns
 
     val extractedColor by viewModel.extractedColor.collectAsStateWithLifecycle()
     val themePrimaryColor = MaterialTheme.colorScheme.primary
@@ -237,38 +234,28 @@ fun CollectionDetailScreenContent(
         if (uiState.isLoading && uiState.collection == null) {
             CollectionDetailSkeleton(
                 cardWidth = cardWidth,
+                columns = columns,
                 hazeState = backdropHazeState
             )
         } else {
             val collection = uiState.collection
+            val parts = uiState.displayedParts
+            val movieRows = remember(parts, columns) {
+                parts.chunked(columns)
+            }
 
-            LazyVerticalGrid(
-                state = lazyGridState,
-                columns = GridCells.Fixed(columns),
-                contentPadding = PaddingValues(start = 16.dp, end = 16.dp, bottom = 60.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
+            LazyColumn(
+                state = scrollState,
+                contentPadding = PaddingValues(bottom = 60.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(rootHazeState, style = HazeStyles.PremiumDark)
             ) {
-                // Hero Header Section spanning across all columns (Edge-to-Edge backdrop + Header Content)
-                item(span = { GridItemSpan(maxLineSpan) }) {
+                // Hero Header Section (Edge-to-Edge backdrop + Header Content)
+                item {
                     Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .layout { measurable, constraints ->
-                                val paddingPx = 16.dp.roundToPx()
-                                val placeable = measurable.measure(
-                                    constraints.copy(
-                                        maxWidth = constraints.maxWidth + 2 * paddingPx,
-                                        minWidth = constraints.minWidth + 2 * paddingPx
-                                    )
-                                )
-                                layout(placeable.width, placeable.height) {
-                                    placeable.placeRelative(-paddingPx, 0)
-                                }
-                            }
+                        modifier = Modifier.fillMaxWidth()
                     ) {
                         DetailBackdrop(
                             scrollOffset = backdropScrollOffset,
@@ -285,7 +272,8 @@ fun CollectionDetailScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 340.dp)
-                                .padding(horizontal = 16.dp)
+                                .padding(horizontal = 16.dp),
+                            horizontalAlignment = Alignment.Start
                         ) {
                             Text(
                                 text = uiState.collectionName ?: "Collezione",
@@ -294,7 +282,9 @@ fun CollectionDetailScreenContent(
                                     fontSize = 24.sp,
                                     lineHeight = 28.sp
                                 ),
-                                color = Color.White
+                                color = Color.White,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                                modifier = Modifier.fillMaxWidth()
                             )
 
                             Spacer(modifier = Modifier.height(10.dp))
@@ -374,7 +364,8 @@ fun CollectionDetailScreenContent(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .then(if (hasOverflow || isExpanded) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier)
+                                        .then(if (hasOverflow || isExpanded) Modifier.bounceClick { isExpanded = !isExpanded } else Modifier),
+                                    horizontalAlignment = Alignment.Start
                                 ) {
                                     AnimatedContent(
                                         targetState = isExpanded,
@@ -388,6 +379,8 @@ fun CollectionDetailScreenContent(
                                             color = Color.White.copy(alpha = 0.85f),
                                             maxLines = if (expanded) Int.MAX_VALUE else 4,
                                             overflow = TextOverflow.Ellipsis,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Start,
+                                            modifier = Modifier.fillMaxWidth(),
                                             onTextLayout = { result ->
                                                 if (!expanded && hasOverflow != result.hasVisualOverflow) {
                                                     hasOverflow = result.hasVisualOverflow
@@ -402,7 +395,8 @@ fun CollectionDetailScreenContent(
                                             text = if (isExpanded) stringResource(R.string.overview_show_less) else stringResource(R.string.overview_show_more),
                                             color = globalAccentColor,
                                             fontSize = 13.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
+                                            textAlign = androidx.compose.ui.text.style.TextAlign.Start
                                         )
                                     }
                                 }
@@ -414,9 +408,8 @@ fun CollectionDetailScreenContent(
                 }
 
                 // Movies inside the collection
-                val parts = uiState.displayedParts
                 if (parts.isEmpty()) {
-                    item(span = { GridItemSpan(maxLineSpan) }) {
+                    item {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -433,63 +426,81 @@ fun CollectionDetailScreenContent(
                     }
                 } else {
                     itemsIndexed(
-                        items = parts,
-                        key = { _, movie -> "${movie.id}_${movie.mediaType}" }
-                    ) { index, movie ->
-                        Box(modifier = Modifier.animateItem()) {
-                            val fav = uiState.favorites.find { it.id == movie.id }
-                            val effectiveMovie = if (fav != null) {
-                                fav.copy(
-                                    genreIds = if (!movie.genreIds.isNullOrEmpty()) movie.genreIds else fav.genreIds
-                                ).apply {
-                                    this.logoPath = movie.logoPath ?: fav.logoPath
-                                    this.matchScore = movie.matchScore ?: fav.matchScore
-                                }
-                            } else {
-                                if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
-                            }
-                            val mediaType = effectiveMovie.mediaType.ifBlank { "movie" }
-                            val folderColors = uiState.movieFolderColors["${mediaType}_${effectiveMovie.id}"]
-                                ?: uiState.movieFolderColors["movie_${effectiveMovie.id}"]
-                                ?: uiState.movieFolderColors[effectiveMovie.id.toString()]
-                                ?: emptyList()
-                            val folderColorObjects = remember(folderColors) {
-                                folderColors.map { it.toComposeColor() }
-                            }
-                            val isFavorite = effectiveMovie.favorite
-                            val isWatched = effectiveMovie.watched
-                            val isReminder = effectiveMovie.reminder
-                            val progress = (effectiveMovie.progress ?: 0.0).toFloat().let { p ->
-                                if (p > 0f) p
-                                else if (effectiveMovie.mediaType == "tv" && !effectiveMovie.watchedEpisodes.isNullOrEmpty() && (effectiveMovie.numberOfEpisodes ?: 0) > 0) {
-                                    val totalWatched = effectiveMovie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
-                                    (totalWatched.toFloat() / effectiveMovie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
-                                } else 0f
-                            }
-                            val personalRating = effectiveMovie.personalRating
+                        items = movieRows,
+                        key = { _, row -> row.joinToString("_") { "${it.id}_${it.mediaType}" } }
+                    ) { rowIndex, rowMovies ->
+                        Row(
+                            modifier = Modifier
+                                .animateItem()
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp),
+                            horizontalArrangement = Arrangement.spacedBy(12.dp)
+                        ) {
+                            rowMovies.forEachIndexed { colIndex, movie ->
+                                val index = rowIndex * columns + colIndex
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    val fav = uiState.favorites.find { it.id == movie.id }
+                                    val effectiveMovie = if (fav != null) {
+                                        fav.copy(
+                                            genreIds = if (!movie.genreIds.isNullOrEmpty()) movie.genreIds else fav.genreIds
+                                        ).apply {
+                                            this.logoPath = movie.logoPath ?: fav.logoPath
+                                            this.matchScore = movie.matchScore ?: fav.matchScore
+                                        }
+                                    } else {
+                                        if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
+                                    }
+                                    val mediaType = effectiveMovie.mediaType.ifBlank { "movie" }
+                                    val folderColors = uiState.movieFolderColors["${mediaType}_${effectiveMovie.id}"]
+                                        ?: uiState.movieFolderColors["movie_${effectiveMovie.id}"]
+                                        ?: uiState.movieFolderColors[effectiveMovie.id.toString()]
+                                        ?: emptyList()
+                                    val folderColorObjects = remember(folderColors) {
+                                        folderColors.map { it.toComposeColor() }
+                                    }
+                                    val isFavorite = effectiveMovie.favorite
+                                    val isWatched = effectiveMovie.watched
+                                    val isReminder = effectiveMovie.reminder
+                                    val progress = (effectiveMovie.progress ?: 0.0).toFloat().let { p ->
+                                        if (p > 0f) p
+                                        else if (effectiveMovie.mediaType == "tv" && !effectiveMovie.watchedEpisodes.isNullOrEmpty() && (effectiveMovie.numberOfEpisodes ?: 0) > 0) {
+                                            val totalWatched = effectiveMovie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+                                            (totalWatched.toFloat() / effectiveMovie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+                                        } else 0f
+                                    }
+                                    val personalRating = effectiveMovie.personalRating
 
-                            MovieCard(
-                                movie = effectiveMovie,
-                                cardWidth = cardWidth,
-                                isFavorite = isFavorite,
-                                isWatched = isWatched,
-                                isReminder = isReminder,
-                                progress = progress,
-                                personalRating = personalRating,
-                                folderColors = folderColorObjects,
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                showBadges = uiState.preferences.showBadges,
-                                showAdvancedBadges = false,
-                                hazeState = rootHazeState,
-                                hasAnimatedSet = viewModel.animatedMovieIds,
-                                staggerIndex = index,
-                                onPress = { onMovieClick(effectiveMovie) },
-                                onAction = { viewModel.toggleFavorite(effectiveMovie) },
-                                onLongPress = { m, pressOffset, cardPos ->
-                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                },
-                                onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                            )
+                                    MovieCard(
+                                        movie = effectiveMovie,
+                                        cardWidth = cardWidth,
+                                        isFavorite = isFavorite,
+                                        isWatched = isWatched,
+                                        isReminder = isReminder,
+                                        progress = progress,
+                                        personalRating = personalRating,
+                                        folderColors = folderColorObjects,
+                                        showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                        showBadges = uiState.preferences.showBadges,
+                                        showAdvancedBadges = false,
+                                        hazeState = rootHazeState,
+                                        hasAnimatedSet = viewModel.animatedMovieIds,
+                                        staggerIndex = index,
+                                        onPress = { onMovieClick(effectiveMovie) },
+                                        onAction = { viewModel.toggleFavorite(effectiveMovie) },
+                                        onLongPress = { m, pressOffset, cardPos ->
+                                            actionsState.onLongPress(m, pressOffset, cardPos)
+                                        },
+                                        onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                    )
+                                }
+                            }
+                            repeat(columns - rowMovies.size) {
+                                Spacer(modifier = Modifier.weight(1f))
+                            }
                         }
                     }
                 }
@@ -560,25 +571,29 @@ fun CollectionDetailScreenContent(
             onBackClick = onBack,
             onHomeClick = onHomeClick,
             onShareClick = onShareClick,
-            onFilterClick = {
-                filterButtonBounds = null
-                viewModel.openFilterModal()
-            },
+            onFilterClick = if (uiState.isEditorial) {
+                { bounds ->
+                    filterButtonBounds = bounds
+                    viewModel.openFilterModal()
+                }
+            } else null,
             hasActiveFilters = uiState.hasActiveFilters,
             scrimAlpha = filterModalScrimAlpha
         )
 
-        HomeFilterModal(
-            isVisible = uiState.isFilterModalOpen,
-            isCollectionFilter = true,
-            hasTvSeries = uiState.hasTvSeries,
-            triggerBounds = filterButtonBounds,
-            sortConfig = uiState.sortConfig,
-            hazeState = rootHazeState,
-            onSortConfigChanged = { newConfig ->
-                viewModel.updateSortConfig(newConfig)
-            },
-            onDismissRequest = { viewModel.dismissFilterModal() }
-        )
+        if (uiState.isEditorial) {
+            HomeFilterModal(
+                isVisible = uiState.isFilterModalOpen,
+                isCollectionFilter = true,
+                hasTvSeries = uiState.hasTvSeries,
+                triggerBounds = filterButtonBounds,
+                sortConfig = uiState.sortConfig,
+                hazeState = rootHazeState,
+                onSortConfigChanged = { newConfig ->
+                    viewModel.updateSortConfig(newConfig)
+                },
+                onDismissRequest = { viewModel.dismissFilterModal() }
+            )
+        }
     }
 }

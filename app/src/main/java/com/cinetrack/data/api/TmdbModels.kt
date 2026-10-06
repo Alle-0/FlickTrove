@@ -97,7 +97,8 @@ sealed class TMDBSearchResult {
         val partsPosterPaths: List<String> = emptyList(),
         val partsCount: Int = 0,
         val partsIds: List<Long> = emptyList(),
-        val editorialId: String? = null
+        val editorialId: String? = null,
+        val hasTvSeries: Boolean = false
     ) : TMDBSearchResult() {
         override val mediaType: String get() = "collection"
         override val displayTitle: String get() = name ?: ""

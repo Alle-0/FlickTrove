@@ -97,6 +97,13 @@ class CommsUniViewModel @Inject constructor(
         prefs.edit().putStringSet("my_comment_ids_$uid", currentSet).apply()
     }
 
+    private fun untrackMyCommentId(id: String) {
+        val uid = auth.currentUser?.uid ?: return
+        val currentSet = prefs.getStringSet("my_comment_ids_$uid", emptySet())?.toMutableSet() ?: mutableSetOf()
+        currentSet.remove(id)
+        prefs.edit().putStringSet("my_comment_ids_$uid", currentSet).apply()
+    }
+
     private fun recordAuthorId(authorId: String) {
         if (authorId.isNotBlank()) {
             val wasDifferent = _cachedAuthorId.value != authorId
@@ -186,7 +193,7 @@ class CommsUniViewModel @Inject constructor(
     val availableSources: StateFlow<List<com.cinetrack.data.api.SourceCatalogRow>> = _availableSources.asStateFlow()
 
     // Sort & Filters
-    var currentSort = "most_liked"
+    var currentSort = "most_recent"
         private set
     var currentSourceFilter: String? = null
         private set
@@ -413,7 +420,12 @@ class CommsUniViewModel @Inject constructor(
             val sourcesList = sourcesResult.getOrNull() ?: emptyList()
             cachedSourcesMap = sourcesList.associateBy { it.slug }
             if (sourcesList.isNotEmpty()) {
-                _availableSources.value = sourcesList
+                val filteredSources = sourcesList.filter {
+                    !it.slug.equals("commsuni.tv", ignoreCase = true) &&
+                    !it.slug.equals("commsuni", ignoreCase = true) &&
+                    !(it.displayName?.equals("commsuni.tv", ignoreCase = true) == true)
+                }
+                _availableSources.value = filteredSources
             }
             
             coroutineScope {
@@ -930,19 +942,33 @@ class CommsUniViewModel @Inject constructor(
             currentList.removeAll { it.id == commentId }
             _comments.value = currentList
 
-            val isFlickTrove = removed?.originSlug?.equals("flicktrove", ignoreCase = true) == true || removed?.originSlug.isNullOrBlank()
-            if (isFlickTrove && currentRawMediaId.isNotBlank()) {
-                try {
-                    commentRepository.deleteComment(currentRawMediaId, commentId)
-                } catch (_: Exception) {}
+            var anySuccess = false
+
+            // 1. Elimina su CommsUni (se connesso a un'entità di rete)
+            if (currentEntityId.isNotBlank()) {
+                val commsRes = commsUniRepository.deleteComment(commentId)
+                if (commsRes.isSuccess) {
+                    anySuccess = true
+                }
             }
-            val result = if (currentEntityId.isNotBlank() && !isFlickTrove) {
-                commsUniRepository.deleteComment(commentId)
+
+            // 2. Elimina anche su Firestore locale se presente
+            if (currentRawMediaId.isNotBlank()) {
+                val firestoreRes = try {
+                    val res = commentRepository.deleteComment(currentRawMediaId, commentId)
+                    res != com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.FAILED
+                } catch (_: Exception) {
+                    false
+                }
+                if (firestoreRes) {
+                    anySuccess = true
+                }
+            }
+
+            if (anySuccess) {
+                untrackMyCommentId(commentId)
             } else {
-                Result.success(true)
-            }
-            if (result.isFailure) {
-                // Revert
+                // Revert in caso di fallimento su entrambi
                 removed?.let {
                     val revertList = _comments.value.toMutableList()
                     revertList.add(it)

@@ -35,7 +35,7 @@ fun MovieCardSkeleton(
 ) {
     Card(
         modifier = modifier
-            .width(width)
+            .then(if (width != Dp.Unspecified) Modifier.width(width) else Modifier)
             .aspectRatio(2f / 3f), // Standard movie poster ratio
         shape = RoundedCornerShape(28.dp),
         colors = CardDefaults.cardColors(containerColor = Color(0xFF1A1A2E))

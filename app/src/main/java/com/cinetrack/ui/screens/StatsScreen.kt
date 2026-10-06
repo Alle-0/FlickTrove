@@ -39,6 +39,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.draw.scale
+import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.drawscope.*
@@ -664,9 +665,9 @@ fun StatsScreenContent(
                                 tooltipHeightPx = size.height.toFloat()
                             }
                             .shadow(
-                                elevation = 12.dp,
+                                elevation = 8.dp,
                                 shape = CircleShape,
-                                spotColor = Color.Black.copy(alpha = 0.6f)
+                                spotColor = Color.Black.copy(alpha = 0.5f)
                             )
                             .bounceClick(scaleDown = 0.95f) {
                                 episodesTooltipBounds = null
@@ -674,23 +675,15 @@ fun StatsScreenContent(
                             }
                             .clip(CircleShape)
                             .background(
-                                Brush.verticalGradient(
+                                brush = Brush.verticalGradient(
                                     colors = listOf(
-                                        Color(0xFF222834).copy(alpha = 0.96f),
-                                        Color(0xFF141720).copy(alpha = 0.98f)
+                                        HazeStyles.GlassColor.copy(alpha = 0.65f),
+                                        HazeStyles.GlassColor.copy(alpha = 0.82f)
                                     )
                                 )
                             )
-                            .border(
-                                width = 1.dp,
-                                brush = Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color.White.copy(alpha = 0.22f),
-                                        Color.White.copy(alpha = 0.08f)
-                                    )
-                                ),
-                                shape = CircleShape
-                            )
+                            .background(Color.White.copy(alpha = HazeStyles.GlassShimmerAlpha), CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
                     ) {
                         Row(
                             modifier = Modifier.padding(horizontal = 13.dp, vertical = 7.dp),

@@ -294,13 +294,6 @@ fun HomeFilterModal(
             } else {
                 HazeStyles.ModalBorderAlpha
             }
-            val modalAlpha = if (triggerBounds != null) {
-                if (progress <= 0.06f) 0f
-                else ((progress - 0.06f) / 0.24f).coerceIn(0f, 1f)
-            } else {
-                if (progress <= 0.02f) 0f else progress
-            }
-
             Box(
                 modifier = Modifier
                     .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
@@ -308,7 +301,7 @@ fun HomeFilterModal(
                         width = with(density) { currentRect.width.toDp() },
                         height = with(density) { currentRect.height.toDp() }
                     )
-                    .graphicsLayer { this.alpha = modalAlpha }
+                    .clip(currentShape)
                     .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
             ) {
                 // Background Layer (Blurred glass)
@@ -319,7 +312,6 @@ fun HomeFilterModal(
                             state = hazeState,
                             shape = currentShape,
                             style = animatedStyle,
-                            alpha = modalAlpha,
                             useOffscreenStrategy = false
                         )
                         .border(
@@ -369,6 +361,13 @@ fun HomeFilterModal(
                                     localSortConfig.sortType != "chronological" ||
                                         localSortConfig.selectedMedia != null ||
                                         localSortConfig.sortDirection != "asc"
+                                } else if (isCommentsFilter) {
+                                    localSortConfig.sortType != "date" ||
+                                        localSortConfig.sortDirection != "desc" ||
+                                        localSortConfig.selectedSources.isNotEmpty() ||
+                                        localSortConfig.selectedLanguages.isNotEmpty() ||
+                                        localSortConfig.selectedSource != null ||
+                                        localSortConfig.selectedLanguage != null
                                 } else {
                                     localSortConfig.selectedGenres.isNotEmpty() ||
                                         localSortConfig.selectedKeywords.isNotEmpty() ||
@@ -389,6 +388,15 @@ fun HomeFilterModal(
                                                         sortType = "chronological",
                                                         sortDirection = "asc",
                                                         selectedMedia = null
+                                                    )
+                                                } else if (isCommentsFilter) {
+                                                    localSortConfig.copy(
+                                                        sortType = "date",
+                                                        sortDirection = "desc",
+                                                        selectedSources = emptyList(),
+                                                        selectedLanguages = emptyList(),
+                                                        selectedSource = null,
+                                                        selectedLanguage = null
                                                     )
                                                 } else {
                                                     localSortConfig.copy(
@@ -563,9 +571,14 @@ fun HomeFilterModal(
                                                 com.cinetrack.data.api.SourceCatalogRow(slug = "tvtime", displayName = "TV Time Refugees")
                                             )
                                         }
-                                        val flickTroveItem = rawList.firstOrNull { it.slug.equals("flicktrove", ignoreCase = true) }
+                                        val filteredList = rawList.filter {
+                                            !it.slug.equals("commsuni.tv", ignoreCase = true) &&
+                                            !it.slug.equals("commsuni", ignoreCase = true) &&
+                                            !(it.displayName?.equals("commsuni.tv", ignoreCase = true) == true)
+                                        }
+                                        val flickTroveItem = filteredList.firstOrNull { it.slug.equals("flicktrove", ignoreCase = true) }
                                             ?: com.cinetrack.data.api.SourceCatalogRow(slug = "flicktrove", displayName = "FlickTrove")
-                                        val otherItems = rawList
+                                        val otherItems = filteredList
                                             .filter { !it.slug.equals("flicktrove", ignoreCase = true) }
                                             .sortedBy { (it.displayName?.ifBlank { it.slug } ?: it.slug).lowercase() }
                                         listOf(flickTroveItem) + otherItems

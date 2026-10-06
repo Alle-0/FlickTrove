@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.draw.clip
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.remember
@@ -68,6 +69,7 @@ fun MorphGlassModal(
     targetWidthFraction: Float = 0.90f,
     maxModalHeightFraction: Float = 0.78f,
     minModalHeight: Dp = 100.dp,
+    defaultModalHeight: Dp = 260.dp,
     fixedModalHeightFraction: Float? = null,
     targetCornerRadius: Dp = 32.dp,
     style: HazeStyle = HazeStyles.glassmorphicDialog,
@@ -96,7 +98,7 @@ fun MorphGlassModal(
         targetValue = when {
             fixedModalHeightFraction != null -> screenHeight * fixedModalHeightFraction
             contentHeightPx > 0 -> contentHeightPx.coerceIn(minAllowedHeightPx, maxAllowedHeight)
-            else -> with(density) { 340.dp.toPx() }
+            else -> with(density) { defaultModalHeight.toPx() }
         },
         animationSpec = if (advancedEffectsEnabled) spring(stiffness = Spring.StiffnessLow) 
                         else spring(stiffness = Spring.StiffnessMedium),
@@ -272,12 +274,7 @@ fun MorphGlassModal(
                 } else {
                     HazeStyles.ModalBorderAlpha
                 }
-                val modalAlpha = if (triggerBounds != null) {
-                    if (progress <= 0.06f) 0f
-                    else ((progress - 0.06f) / 0.24f).coerceIn(0f, 1f)
-                } else {
-                    if (progress <= 0.02f) 0f else progress
-                }
+                val modalAlpha = if (triggerBounds != null) 1f else if (progress <= 0.02f) 0f else progress
 
                 Box(
                     modifier = Modifier
@@ -286,7 +283,8 @@ fun MorphGlassModal(
                             width = with(density) { currentRect.width.toDp() },
                             height = with(density) { currentRect.height.toDp() }
                         )
-                        .graphicsLayer { this.alpha = modalAlpha }
+                        .clip(currentShape)
+                        .then(if (triggerBounds == null) Modifier.graphicsLayer { this.alpha = modalAlpha } else Modifier)
                         .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
                 ) {
                     // Background Layer (Blurred glass)
