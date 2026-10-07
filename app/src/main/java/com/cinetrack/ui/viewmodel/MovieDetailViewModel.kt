@@ -1009,7 +1009,7 @@ class MovieDetailViewModel @Inject constructor(
                     }
                     WatchState.DROPPED -> {
                         if (mediaType == "tv") {
-                            previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true, watchedEpisodes = emptyMap(), progress = 0.0)
+                            previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
                         } else {
                             previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = true)
                         }
@@ -1017,13 +1017,20 @@ class MovieDetailViewModel @Inject constructor(
                     WatchState.BOOKMARKED -> {
                         if (previousMovie.isReleased) {
                             if (mediaType == "tv") {
-                                previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                                val totalWatched = previousMovie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+                                val totalEpisodes = previousMovie.effectiveTotalEpisodes
+                                val allWatched = totalEpisodes > 0 && totalWatched >= totalEpisodes
+                                if (allWatched) {
+                                    previousMovie.copy(favorite = false, watched = true, reminder = false, dropped = false)
+                                } else {
+                                    previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
+                                }
                             } else {
                                 previousMovie.copy(favorite = true, watched = false, reminder = false, watchedAt = null, dropped = false)
                             }
                         } else {
                             if (mediaType == "tv") {
-                                previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false, watchedEpisodes = emptyMap(), progress = 0.0)
+                                previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
                             } else {
                                 previousMovie.copy(favorite = false, watched = false, reminder = true, watchedAt = null, dropped = false)
                             }

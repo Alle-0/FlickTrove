@@ -107,6 +107,7 @@ class CommsUniCommentsScreen(
     private val accentColorValue: Long = 0L,
     private val mediaTitle: String = "",
     private val mediaImage: String? = null,
+    private val backdropUrl: String? = null,
     private val releaseYear: String? = null,
     private val focusInputOnLaunch: Boolean = false,
     private val targetCommentId: String? = null,
@@ -235,6 +236,7 @@ class CommsUniCommentsScreen(
         }
 
         val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
+        val effectiveBackdrop = backdropUrl ?: mediaImage
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             Box(
@@ -370,13 +372,31 @@ class CommsUniCommentsScreen(
 
                 val shimmerBrush = rememberShimmerBrush()
 
-                LazyColumn(
-                    state = listState,
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .haze(hazeState),
-                    contentPadding = PaddingValues(top = paddingValues.calculateTopPadding() + 16.dp, bottom = 140.dp)
+                        .haze(hazeState)
                 ) {
+                    if (!effectiveBackdrop.isNullOrBlank()) {
+                        AsyncImage(
+                            model = effectiveBackdrop,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .drawWithContent {
+                                    drawContent()
+                                    // Scurito uniformemente su tutto lo schermo (senza gradiente) per garantire massimo contrasto
+                                    drawRect(Color.Black.copy(alpha = 0.88f))
+                                }
+                        )
+                    }
+
+                    LazyColumn(
+                        state = listState,
+                        modifier = Modifier.fillMaxSize(),
+                        contentPadding = PaddingValues(top = paddingValues.calculateTopPadding() + 16.dp, bottom = 140.dp)
+                    ) {
                     if (isLoading) {
                         items(5) { index ->
                             SkeletonCommentItem(index = index, brush = shimmerBrush)
@@ -466,33 +486,34 @@ class CommsUniCommentsScreen(
                                 }
                             )
                         }
-                        
-                        if (hasMoreComments) {
-                            item {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(vertical = 16.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (isLoadingMore) {
-                                        androidx.compose.material3.CircularProgressIndicator(color = accentColor, modifier = Modifier.size(24.dp))
-                                    } else {
-                                        TextButton(onClick = { viewModel.loadMoreComments() }) {
-                                            Text(
-                                                text = stringResource(R.string.comment_load_more),
-                                                color = accentColor,
-                                                fontWeight = FontWeight.Bold
-                                            )
-                                        }
+                    }
+                    
+                    if (hasMoreComments) {
+                        item {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 16.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (isLoadingMore) {
+                                    androidx.compose.material3.CircularProgressIndicator(color = accentColor, modifier = Modifier.size(24.dp))
+                                } else {
+                                    TextButton(onClick = { viewModel.loadMoreComments() }) {
+                                        Text(
+                                            text = stringResource(R.string.comment_load_more),
+                                            color = accentColor,
+                                            fontWeight = FontWeight.Bold
+                                        )
                                     }
                                 }
                             }
                         }
                     }
                 }
+            }
 
-                // Input Area
+            // Input Area
                 CommentInputBar(
                     modifier = Modifier.align(Alignment.BottomCenter),
                     inputText = inputText,

@@ -72,7 +72,6 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
-import com.cinetrack.ui.screens.CommentsScreen
 import com.google.firebase.auth.ktx.auth
 import com.google.firebase.ktx.Firebase
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -333,6 +332,11 @@ fun MovieDetailScreenContent(
             val state = uiState as DetailUiState.Success
             val mediaTitle = state.details.title ?: state.details.name ?: ""
             val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
+            val backdrop = buildTmdbImageUrl(
+                state.movieEntry.customBackdropPath ?: state.movieEntry.backdropPath ?: state.details.backdropPath ?: state.details.posterPath,
+                if (state.movieEntry.customBackdropPath != null || state.movieEntry.backdropPath != null || state.details.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER,
+                ImageQuality.HIGH
+            )
             val globalAccentColor = settingsViewModel.accentColor.value.toComposeColor()
             
             val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
@@ -346,6 +350,7 @@ fun MovieDetailScreenContent(
                     accentColorValue = globalAccentColor.value.toLong(),
                     mediaTitle = mediaTitle,
                     mediaImage = image,
+                    backdropUrl = backdrop,
                     releaseYear = releaseYear,
                     targetCommentId = targetCommentId,
                     focusInputOnLaunch = false,
@@ -523,7 +528,7 @@ fun MovieDetailScreenContent(
                                         matchPercentage = state.matchPercentage,
                                         logoPath = if (useMovieLogo) {
                                             val currentLang = java.util.Locale.getDefault().language
-                                            val logos = state.details?.images?.logos
+                                            val logos = state.details.images?.logos
                                             val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
                                                 ?: logos?.firstOrNull { it.iso6391 == "en" } 
                                                 ?: logos?.firstOrNull()
@@ -531,7 +536,7 @@ fun MovieDetailScreenContent(
                                         } else null,
                                         hazeState = backdropHazeState,
                                         onRatingClick = { showRatingInfoDialog = true },
-                                        hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details?.images?.backdrops?.size ?: 0) > 1,
+                                        hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
                                         onCoverSelectClick = { showCoverSelectionSheet = true },
                                         isOffline = isOffline
                                     )
@@ -617,6 +622,11 @@ fun MovieDetailScreenContent(
                                             } else {
                                                 val mediaTitle = state.details.title ?: state.details.name ?: ""
                                                 val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
+                                                val backdrop = buildTmdbImageUrl(
+                                                    state.movieEntry.customBackdropPath ?: state.movieEntry.backdropPath ?: state.details.backdropPath ?: state.details.posterPath,
+                                                    if (state.movieEntry.customBackdropPath != null || state.movieEntry.backdropPath != null || state.details.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER,
+                                                    ImageQuality.HIGH
+                                                )
                                                 val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
                                                 val imdbId = state.details.externalIds?.imdbId
                                                 val releaseYear = (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
@@ -628,6 +638,7 @@ fun MovieDetailScreenContent(
                                                         accentColorValue = globalAccentColor.value.toLong(),
                                                         mediaTitle = mediaTitle,
                                                         mediaImage = image,
+                                                        backdropUrl = backdrop,
                                                         releaseYear = releaseYear,
                                                         focusInputOnLaunch = focusInput,
                                                         imdbId = imdbId
@@ -729,7 +740,7 @@ fun MovieDetailScreenContent(
                                 ) {
                                     DetailActions(
                                         movie = activeMovie,
-                                        movieStatus = (state as? DetailUiState.Success)?.details?.status,
+                                        movieStatus = state.details.status,
                                         watchState = state.watchState,
                                         progress = state.watchedProgress,
                                         accentColor = accentColor,
