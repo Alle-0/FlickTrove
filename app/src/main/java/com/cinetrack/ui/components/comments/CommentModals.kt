@@ -395,7 +395,7 @@ fun CommentReportModal(
                                         .fillMaxWidth()
                                         .height(52.dp)
                                         .bounceClick {
-                                            onBlockUser?.invoke(c)
+                                            onBlockUser(c)
                                         }
                                         .clip(RoundedCornerShape(16.dp))
                                         .background(Color(0xFFFF3B30).copy(alpha = 0.12f))

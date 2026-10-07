@@ -760,7 +760,7 @@ class SettingsViewModel @Inject constructor(
                     val settings = simklService.get().getUserSettings()
                     val uid = settings.account?.id
                     if (uid != null) {
-                        simklAuthRepository.saveUserAccount(uid, settings.account?.type)
+                        simklAuthRepository.saveUserAccount(uid, settings.account.type)
                     }
                 } catch (e: Exception) {
                     android.util.Log.w("SettingsViewModel", "Failed to fetch user settings after Simkl login", e)

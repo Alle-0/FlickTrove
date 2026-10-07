@@ -354,4 +354,25 @@ object NetworkModule {
     @Provides
     @Singleton
     fun provideCommsUniService(@Named("commsuni_retrofit") retrofit: Retrofit): com.cinetrack.data.api.CommsUniService = retrofit.create(com.cinetrack.data.api.CommsUniService::class.java)
+
+    @Provides
+    @Singleton
+    @Named("giphy_retrofit")
+    fun provideGiphyRetrofit(
+        json: Json,
+        okHttpClient: OkHttpClient
+    ): Retrofit {
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl("https://api.giphy.com/v1/")
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideGiphyService(@Named("giphy_retrofit") retrofit: Retrofit): com.cinetrack.data.api.GiphyService {
+        return retrofit.create(com.cinetrack.data.api.GiphyService::class.java)
+    }
 }

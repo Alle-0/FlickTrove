@@ -537,10 +537,10 @@ fun SettingsAccountSection(
     val hasGoogle = user?.providerData?.any { it.providerId == "google.com" } == true
     val email = when {
         isGuest -> stringResource(R.string.settings_guest)
-        hasGoogle -> user?.providerData
-            ?.firstOrNull { it.providerId == "google.com" }
+        hasGoogle -> user.providerData
+            .firstOrNull { it.providerId == "google.com" }
             ?.email?.takeIf { it.isNotBlank() }
-            ?: user?.email?.takeIf { it.isNotBlank() }
+            ?: user.email?.takeIf { it.isNotBlank() }
             ?: stringResource(R.string.settings_guest)
         else -> user?.email?.takeIf { it.isNotBlank() } ?: stringResource(R.string.settings_guest)
     }

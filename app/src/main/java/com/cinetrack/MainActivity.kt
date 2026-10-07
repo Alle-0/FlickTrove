@@ -5,7 +5,6 @@ import android.content.Intent
 
 import androidx.activity.ComponentActivity
 import androidx.fragment.app.FragmentActivity
-import com.giphy.sdk.ui.Giphy
 import androidx.activity.compose.setContent
 import androidx.core.splashscreen.SplashScreen.Companion.installSplashScreen
 import android.view.animation.AnticipateInterpolator
@@ -107,11 +106,7 @@ class MainActivity : FragmentActivity() {
         val splashScreen = installSplashScreen()
         super.onCreate(savedInstanceState)
         deepLinkIntent.value = intent
-        
-        Giphy.configure(this, "V5zYxUI6BN2WFMauxnBhzEjEjPdytapd", verificationMode = false)
-        com.cinetrack.ui.components.comments.GiphyDialogCustomizer.prepareStaticRadius(this)
 
-        
         // Smooth exit animation for the native splash screen
         splashScreen.setOnExitAnimationListener { splashScreenView ->
             val fadeOut = android.animation.ObjectAnimator.ofFloat(

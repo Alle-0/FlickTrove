@@ -22,6 +22,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.core.*
@@ -40,6 +41,9 @@ fun FlickTroveModal(
     onDismissRequest: () -> Unit,
     hazeState: HazeState? = null,
     modifier: Modifier = Modifier,
+    maxWidth: Dp = 440.dp,
+    maxWidthFraction: Float = 0.92f,
+    contentPadding: PaddingValues = PaddingValues(horizontal = 22.dp, vertical = 24.dp),
     content: @Composable ColumnScope.() -> Unit
 ) {
     val cardShape = RoundedCornerShape(32.dp)
@@ -92,9 +96,12 @@ fun FlickTroveModal(
             ) {
                 Card(
                     modifier = Modifier
-                        .widthIn(max = 420.dp)
-                        .fillMaxWidth(0.90f)
-                        .padding(horizontal = 16.dp)
+                        .widthIn(max = maxWidth)
+                        .fillMaxWidth(maxWidthFraction)
+                        .statusBarsPadding()
+                        .displayCutoutPadding()
+                        .imePadding()
+                        .padding(horizontal = 12.dp, vertical = 12.dp)
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
                             keyboardController?.hide()
                             focusManager.clearFocus()
@@ -122,7 +129,7 @@ fun FlickTroveModal(
                                     keyboardController?.hide()
                                     focusManager.clearFocus()
                                 }
-                                .padding(horizontal = 22.dp, vertical = 24.dp),
+                                .padding(contentPadding),
                             horizontalAlignment = Alignment.CenterHorizontally
                         ) {
                             content()

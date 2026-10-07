@@ -20,6 +20,7 @@ import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,8 +69,8 @@ import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.hazeChild
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 
 internal tailrec fun Context.findFragmentActivity(): FragmentActivity? = when (this) {
     is FragmentActivity -> this
@@ -94,6 +95,7 @@ fun CommentInputBar(
     onAttachedMediaChanged: (List<String>) -> Unit,
     isUploadingImage: Boolean,
     onPickImage: () -> Unit,
+    onPickGif: () -> Unit = {},
     onSendComment: () -> Unit,
     accentColor: Color,
     hazeState: HazeState,
@@ -196,40 +198,34 @@ fun CommentInputBar(
             .padding(horizontal = 14.dp, vertical = 6.dp)
             .onGloballyPositioned { barCoordinates = it }
     ) {
-        // Sibling 1: The input bar capsule with smooth size animation (clips only its own content)
+        // Sibling 1: The input bar capsule (clipped to boxShape, seamlessly tracking content size)
         Box(
             modifier = Modifier
                 .fillMaxWidth()
-                .animateContentSize(alignment = Alignment.BottomCenter)
+                .clip(boxShape)
         ) {
-            // Sibling 1A: The glass background with hazeChild, shaped and bordered
+            // Sibling 1A: The glass background with hazeGlass, shaped and bordered
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(0xFF161616).copy(alpha = 0.88f), boxShape)
-                    .hazeChild(
+                    .hazeGlass(
                         state = hazeState,
                         shape = boxShape,
-                        style = HazeStyle(tint = Color(0xFF161616).copy(alpha = 0.88f), blurRadius = 20.dp)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = Color.White.copy(alpha = 0.08f),
-                        shape = boxShape
+                        style = HazeStyles.PremiumDark
                     )
             )
 
             // Sibling 1B: The content Column
             Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(
-                    start = outerInnerPaddingH,
-                    end = outerInnerPaddingH,
-                    top = outerInnerPaddingTop,
-                    bottom = outerInnerPaddingBottom
-                )
-        ) {
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(
+                        start = outerInnerPaddingH,
+                        end = outerInnerPaddingH,
+                        top = outerInnerPaddingTop,
+                        bottom = outerInnerPaddingBottom
+                    )
+            ) {
             val lastReplyingTo = remember { mutableStateOf(replyingTo) }
             if (replyingTo != null) {
                 lastReplyingTo.value = replyingTo
@@ -327,17 +323,19 @@ fun CommentInputBar(
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
-                                        .padding(3.dp)
-                                        .size(18.dp)
-                                        .background(Color.Black.copy(alpha = 0.65f), CircleShape)
-                                        .bounceClick { onAttachedMediaChanged(attachedMedia.filter { it != url }) },
+                                        .padding(4.dp)
+                                        .size(20.dp)
+                                        .bounceClick { onAttachedMediaChanged(attachedMedia.filter { it != url }) }
+                                        .clip(CircleShape)
+                                        .background(Color.Black.copy(alpha = 0.72f))
+                                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_x),
                                         contentDescription = "Remove",
                                         tint = Color.White,
-                                        modifier = Modifier.size(9.dp)
+                                        modifier = Modifier.size(10.dp)
                                     )
                                 }
                             }
@@ -646,30 +644,7 @@ fun CommentInputBar(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .bounceClick(enabled = attachedMedia.isEmpty()) {
-                                        val fragmentManager = context.findFragmentActivity()?.supportFragmentManager
-                                        if (fragmentManager != null) {
-                                            val settings = com.giphy.sdk.ui.GPHSettings(
-                                                theme = com.giphy.sdk.ui.themes.GPHTheme.Dark,
-                                                mediaTypeConfig = arrayOf(com.giphy.sdk.ui.GPHContentType.gif)
-                                            )
-                                            GiphyDialogCustomizer.prepareStaticRadius(context)
-                                            val dialog = com.giphy.sdk.ui.views.GiphyDialogFragment.newInstance(settings)
-                                            GiphyDialogCustomizer.customizeDialog(dialog, fragmentManager)
-                                            dialog.gifSelectionListener = object : com.giphy.sdk.ui.views.GiphyDialogFragment.GifSelectionListener {
-                                                override fun didSearchTerm(term: String) {}
-                                                override fun onDismissed(selectedContentType: com.giphy.sdk.ui.GPHContentType) {}
-                                                override fun onGifSelected(media: com.giphy.sdk.core.models.Media, searchTerm: String?, selectedContentType: com.giphy.sdk.ui.GPHContentType) {
-                                                    val gifUrl = media.images.fixedHeight?.gifUrl ?: media.images.original?.gifUrl ?: ""
-                                                    if (gifUrl.isNotEmpty()) {
-                                                        onAttachedMediaChanged(listOf(gifUrl))
-                                                    }
-                                                    dialog.dismiss()
-                                                }
-                                            }
-                                            dialog.show(fragmentManager, "giphy_dialog")
-                                        } else {
-                                            android.widget.Toast.makeText(context, "Fragment manager not found", android.widget.Toast.LENGTH_SHORT).show()
-                                        }
+                                        onPickGif()
                                     }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f)),

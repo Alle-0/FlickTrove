@@ -185,6 +185,8 @@ fun SimpleMorphingTopBar(
                         .fillMaxWidth()
                         .height(44.dp)
                 ) {
+                    val homeButtonVisible = detailStackDepth >= 3
+
                     // Left: Back + Home
                     Row(
                         modifier = Modifier.align(Alignment.CenterStart),
@@ -234,7 +236,6 @@ fun SimpleMorphingTopBar(
                         }
 
                         // Home FAB — visible from 3rd detail screen onwards
-                        val homeButtonVisible = detailStackDepth >= 3
                         val homeButtonAlpha by animateFloatAsState(
                             targetValue = if (homeButtonVisible) 1f else 0f,
                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -288,6 +289,8 @@ fun SimpleMorphingTopBar(
                     // Center Title
                     val personTitleAlpha = ((currentEffectiveProgress - 0.68f) / 0.32f).coerceIn(0f, 1f)
                     if (personTitleAlpha > 0.01f) {
+                        val titleStartPadding = if (homeButtonVisible) 92.dp else 52.dp
+                        val titleEndPadding = if (onFilterClick != null) 100.dp else 52.dp
                         Text(
                             text = title,
                             color = Color.White,
@@ -298,7 +301,7 @@ fun SimpleMorphingTopBar(
                             textAlign = androidx.compose.ui.text.style.TextAlign.Center,
                             modifier = Modifier
                                 .align(Alignment.Center)
-                                .padding(horizontal = 64.dp)
+                                .padding(start = titleStartPadding, end = titleEndPadding)
                                 .graphicsLayer { 
                                     alpha = personTitleAlpha
                                     scaleX = 0.9f + (0.1f * personTitleAlpha)

@@ -101,3 +101,33 @@ fun Modifier.premiumScrollbar(
     }
 }
 
+fun Modifier.premiumScrollbar(
+    state: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState,
+    width: Float = 2.5f,
+    paddingEnd: Float = 3f,
+    paddingVertical: Float = 20f,
+    color: Color = Color.White.copy(alpha = 0.35f)
+): Modifier = drawWithContent {
+    drawContent()
+    
+    val layoutInfo = state.layoutInfo
+    val visibleItemsInfo = layoutInfo.visibleItemsInfo
+    if (visibleItemsInfo.isNotEmpty() && layoutInfo.totalItemsCount > visibleItemsInfo.size) {
+        val startY = paddingVertical.dp.toPx()
+        val trackHeight = size.height - (paddingVertical.dp.toPx() * 2)
+        
+        val totalItemsCount = layoutInfo.totalItemsCount.toFloat()
+        val thumbHeight = (visibleItemsInfo.size / totalItemsCount) * trackHeight
+        
+        val scrollOffset = state.firstVisibleItemIndex.toFloat() / (layoutInfo.totalItemsCount - visibleItemsInfo.size).coerceAtLeast(1)
+        val thumbOffset = startY + scrollOffset * (trackHeight - thumbHeight)
+        
+        drawRoundRect(
+            color = color,
+            topLeft = Offset(size.width - width.dp.toPx() - paddingEnd.dp.toPx(), thumbOffset),
+            size = Size(width.dp.toPx(), thumbHeight),
+            cornerRadius = CornerRadius(width.dp.toPx() / 2, width.dp.toPx() / 2)
+        )
+    }
+}
+

@@ -125,6 +125,42 @@ fun Modifier.verticalFadingEdges(
         }
     }
 
+fun Modifier.verticalFadingEdges(
+    lazyStaggeredGridState: androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState,
+    topEdgeHeight: Dp = 24.dp,
+    bottomEdgeHeight: Dp = 24.dp
+): Modifier = this
+    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+    .drawWithContent {
+        drawContent()
+        val topColors = listOf(Color.Transparent, Color.Black)
+        val bottomColors = listOf(Color.Black, Color.Transparent)
+        
+        val showTop = lazyStaggeredGridState.canScrollBackward
+        val showBottom = lazyStaggeredGridState.canScrollForward
+
+        if (showTop && topEdgeHeight > 0.dp) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = topColors,
+                    startY = 0f,
+                    endY = topEdgeHeight.toPx()
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+        if (showBottom && bottomEdgeHeight > 0.dp) {
+            drawRect(
+                brush = Brush.verticalGradient(
+                    colors = bottomColors,
+                    startY = size.height - bottomEdgeHeight.toPx(),
+                    endY = size.height
+                ),
+                blendMode = BlendMode.DstIn
+            )
+        }
+    }
+
 /**
  * Aggiunge bordi sfumati (fading edges) a sinistra e a destra a un contenitore scrollabile orizzontalmente.
  */

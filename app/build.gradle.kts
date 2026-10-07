@@ -42,6 +42,7 @@ android {
         val supabaseAnonKey = localProps.getProperty("SUPABASE_ANON_KEY", "")
         val commsuniApiKey = localProps.getProperty("COMMSUNI_API_KEY", "")
         val commsuniHmacSecret = localProps.getProperty("COMMSUNI_HMAC_SECRET", "")
+        val giphyKey = localProps.getProperty("GIPHY_API_KEY", "")
 
         // TMDB API KEY (To be replaced by user or local.properties)
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
@@ -55,6 +56,7 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
         buildConfigField("String", "COMMSUNI_API_KEY", "\"$commsuniApiKey\"")
         buildConfigField("String", "COMMSUNI_HMAC_SECRET", "\"$commsuniHmacSecret\"")
+        buildConfigField("String", "GIPHY_API_KEY", "\"$giphyKey\"")
     }
 
     signingConfigs {
@@ -154,8 +156,7 @@ dependencies {
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
 
-    // Giphy SDK
-    implementation("com.giphy.sdk:ui:2.5.3")
+    // Timber
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Coroutines

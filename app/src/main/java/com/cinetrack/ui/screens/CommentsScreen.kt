@@ -172,6 +172,7 @@ class CommentsScreen(
         val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
         var isUploadingImage by remember { mutableStateOf(false) }
         var attachedMedia by remember { mutableStateOf(emptyList<String>()) }
+        var showGiphyPicker by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         val imageLoader = context.imageLoader
         
         val photoPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
@@ -183,7 +184,7 @@ class CommentsScreen(
                         imageUri = uri,
                         onSuccess = { url ->
                             isUploadingImage = false
-                            attachedMedia = listOf(url.toString())
+                            attachedMedia = listOf(url)
                         },
                         onError = { error ->
                             isUploadingImage = false
@@ -275,8 +276,9 @@ class CommentsScreen(
                         var current = comments.find { it.id == targetCommentId }
                         val toExpand = mutableSetOf<String>()
                         while (current?.parentId != null) {
-                            toExpand.add(current.parentId!!)
-                            current = comments.find { it.id == current!!.parentId }
+                            val parentId = current.parentId
+                            toExpand.add(parentId)
+                            current = comments.find { it.id == parentId }
                         }
                         if (toExpand.isNotEmpty()) {
                             expandedComments.value = expandedComments.value + toExpand
@@ -437,6 +439,7 @@ class CommentsScreen(
                             androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)
                         )
                     },
+                    onPickGif = { showGiphyPicker = true },
                     onSendComment = {
                         if (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) {
                             val pId = replyingTo?.id
@@ -472,6 +475,18 @@ class CommentsScreen(
         } // End of Scaffold
     } // End of Box with globalHazeState
             
+            // GIF Picker Modal Overlay (Root level for full screen blur & safe insets)
+            com.cinetrack.ui.components.comments.GiphyPickerModal(
+                isVisible = showGiphyPicker,
+                onDismiss = { showGiphyPicker = false },
+                hazeState = globalHazeState,
+                accentColor = accentColor,
+                onGifSelected = { gifUrl ->
+                    attachedMedia = listOf(gifUrl)
+                    showGiphyPicker = false
+                }
+            )
+
             // Sort Dialog Overlay
             // Sort Menu using HomeFilterModal for consistency
             com.cinetrack.ui.components.dialog.HomeFilterModal(
