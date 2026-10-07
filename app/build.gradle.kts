@@ -154,8 +154,8 @@ dependencies {
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
 
-    // Giphy SDK (which transitively pulls an old version of Timber causing lint warnings)
-    implementation("com.giphy.sdk:ui:2.3.13")
+    // Giphy SDK
+    implementation("com.giphy.sdk:ui:2.5.3")
     implementation("com.jakewharton.timber:timber:5.0.1")
 
     // Coroutines
