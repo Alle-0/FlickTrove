@@ -516,18 +516,24 @@ class CommsUniViewModel @Inject constructor(
 
                 val remainingFirestore = firestoreComments
                     .filterNot { it.id in matchedFirestoreIds }
+                    .filter { fc ->
+                        val matchesSource = currentSourceFilter.isNullOrBlank() || fc.originSlug.equals(currentSourceFilter, ignoreCase = true)
+                        val matchesLanguage = currentLanguageFilter.isNullOrBlank() || fc.language.isNullOrBlank() || fc.language.equals(currentLanguageFilter, ignoreCase = true)
+                        matchesSource && matchesLanguage
+                    }
                     .map { fc ->
                         if (auth.currentUser?.uid != null && fc.userId == auth.currentUser?.uid) {
                             trackMyCommentId(fc.id)
                         }
+                        val isCommsUni = fc.isOnCommsUni
                         if (fc.originSlug.isNullOrBlank()) {
                             fc.copy(
                                 originSlug = "flicktrove",
                                 originName = "FlickTrove",
                                 originColor = "#2dd4bf",
-                                isOnCommsUni = false
+                                isOnCommsUni = isCommsUni
                             )
-                        } else fc.copy(isOnCommsUni = false)
+                        } else fc.copy(isOnCommsUni = isCommsUni)
                     }
 
                 val blockedIds = blockedAuthorsManager.blockedAuthorIds.value
@@ -758,6 +764,29 @@ class CommsUniViewModel @Inject constructor(
                 val tempIndex = updated.indexOfFirst { it.id == tempId }
                 if (tempIndex != -1) updated[tempIndex] = finalReal
                 _comments.value = updated
+
+                // Opzione 1: Mirroring su Firestore per tracciamento engagement admin
+                if (effectivePostToCommsUni && currentRawMediaId.isNotBlank()) {
+                    viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                        try {
+                            val mirrorComment = finalReal.copy(
+                                mediaId = currentRawMediaId,
+                                mediaType = currentEntityType,
+                                originSlug = "flicktrove",
+                                originName = "FlickTrove",
+                                originColor = "#2dd4bf",
+                                isOnCommsUni = true
+                            )
+                            commentRepository.mirrorCommsUniComment(
+                                comment = mirrorComment,
+                                mediaTitle = if (mediaTitle.isNotBlank()) mediaTitle else (currentTitle ?: ""),
+                                mediaImage = mediaImage
+                            )
+                        } catch (e: Exception) {
+                            android.util.Log.e("CommsUniViewModel", "Failed to mirror CommsUni comment to Firestore", e)
+                        }
+                    }
+                }
 
                 // Se è una risposta a un commento FlickTrover, invia la notifica Social e Push all'autore
                 if (parentId != null) {

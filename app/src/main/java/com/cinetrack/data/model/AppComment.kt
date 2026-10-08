@@ -36,7 +36,9 @@ data class AppComment(
     val attachedMedia: List<String> = emptyList(),
     val rating: Double? = null,
     val language: String? = null,
-    val isOnCommsUni: Boolean = false
+    @get:PropertyName("isOnCommsUni")
+    @set:PropertyName("isOnCommsUni")
+    var isOnCommsUni: Boolean = false
 ) {
     val isEffectivelyDeleted: Boolean
         get() = isDeleted ||

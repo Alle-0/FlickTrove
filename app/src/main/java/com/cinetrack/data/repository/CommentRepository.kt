@@ -236,6 +236,70 @@ class CommentRepository @Inject constructor(
         }
     }
 
+    suspend fun mirrorCommsUniComment(
+        comment: AppComment,
+        mediaTitle: String = "",
+        mediaImage: String? = null
+    ): Boolean {
+        if (comment.id.isBlank() || comment.mediaId.isBlank()) return false
+        val user = auth.currentUser ?: return false
+
+        return try {
+            val mediaCommentsColl = getMediaCommentsCollection(comment.mediaId)
+            val docRef = mediaCommentsColl.document(comment.id)
+
+            val mirrorComment = comment.copy(
+                userId = user.uid,
+                userDisplayName = if (comment.userDisplayName.isNotBlank()) comment.userDisplayName else (user.displayName ?: ""),
+                userAvatarUrl = if (comment.userAvatarUrl.isNotBlank()) comment.userAvatarUrl else (user.photoUrl?.toString() ?: ""),
+                isOnCommsUni = true,
+                originSlug = if (comment.originSlug.isNotBlank()) comment.originSlug else "flicktrove",
+                originName = if (comment.originName.isNotBlank()) comment.originName else "FlickTrove",
+                originColor = comment.originColor ?: "#2dd4bf"
+            )
+
+            val dataMap = hashMapOf<String, Any?>(
+                "id" to mirrorComment.id,
+                "mediaId" to mirrorComment.mediaId,
+                "mediaType" to mirrorComment.mediaType,
+                "mediaTitle" to mediaTitle,
+                "mediaImage" to mediaImage,
+                "userId" to mirrorComment.userId,
+                "userDisplayName" to mirrorComment.userDisplayName,
+                "userAvatarUrl" to mirrorComment.userAvatarUrl,
+                "text" to mirrorComment.text,
+                "createdAt" to (mirrorComment.createdAt ?: Timestamp.now()),
+                "likesCount" to mirrorComment.likesCount,
+                "likedBy" to mirrorComment.likedBy,
+                "parentId" to mirrorComment.parentId,
+                "parentUserId" to mirrorComment.parentUserId,
+                "rootCommentId" to mirrorComment.rootCommentId,
+                "repliesCount" to mirrorComment.repliesCount,
+                "depth" to mirrorComment.depth,
+                "isDeleted" to mirrorComment.isDeleted,
+                "isSpoiler" to mirrorComment.isSpoiler,
+                "originSlug" to mirrorComment.originSlug,
+                "originName" to mirrorComment.originName,
+                "originColor" to mirrorComment.originColor,
+                "isOnCommsUni" to true
+            )
+
+            docRef.set(dataMap).await()
+
+            if (comment.parentId != null) {
+                try {
+                    val parentRef = mediaCommentsColl.document(comment.parentId)
+                    parentRef.update("repliesCount", FieldValue.increment(1)).await()
+                } catch (_: Exception) {}
+            }
+
+            true
+        } catch (e: Exception) {
+            e.printStackTrace()
+            false
+        }
+    }
+
     suspend fun toggleSpoiler(
         mediaId: String,
         commentId: String,
