@@ -97,3 +97,5 @@ AGENTS.md
 app/src/test/
 *.txt
 partner*.md
+partner_api/
+partner-api/
