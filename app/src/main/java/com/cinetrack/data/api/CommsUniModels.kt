@@ -156,13 +156,21 @@ data class CommsUniEntityPayload(
 )
 
 @Serializable
+data class CommsUniWriteAttachment(
+    val url: String,
+    val contentType: String,
+    val provider: String
+)
+
+@Serializable
 data class CommsUniWriteCommentRequest(
-    val text: String,
+    val text: String? = null,
     val language: String? = null,
     val isSpoiler: Boolean = false,
     val rating: Double? = null,
     val entity: CommsUniEntityPayload? = null,
-    val createdAt: String? = null
+    val createdAt: String? = null,
+    val attachments: List<CommsUniWriteAttachment>? = null
 )
 
 enum class CommsUniReportReason(val value: String) {

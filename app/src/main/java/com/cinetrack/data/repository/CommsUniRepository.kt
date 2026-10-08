@@ -171,7 +171,8 @@ class CommsUniRepository @Inject constructor(
         text: String,
         isSpoiler: Boolean,
         language: String? = null,
-        title: String? = null
+        title: String? = null,
+        attachments: List<com.cinetrack.data.api.CommsUniWriteAttachment>? = null
     ): Result<com.cinetrack.data.api.CommsUniComment> {
         return try {
             val entityPayload = if (!title.isNullOrBlank()) {
@@ -184,10 +185,11 @@ class CommsUniRepository @Inject constructor(
                 entityType,
                 entityId,
                 com.cinetrack.data.api.CommsUniWriteCommentRequest(
-                    text = text,
+                    text = text.trim(),
                     language = language,
                     isSpoiler = isSpoiler,
-                    entity = entityPayload
+                    entity = entityPayload,
+                    attachments = attachments?.takeIf { it.isNotEmpty() }
                 )
             )
             if (response.isSuccessful) {
@@ -204,9 +206,23 @@ class CommsUniRepository @Inject constructor(
         }
     }
 
-    suspend fun createReply(commentId: String, text: String, isSpoiler: Boolean, language: String? = null): Result<com.cinetrack.data.api.CommsUniComment> {
+    suspend fun createReply(
+        commentId: String,
+        text: String,
+        isSpoiler: Boolean,
+        language: String? = null,
+        attachments: List<com.cinetrack.data.api.CommsUniWriteAttachment>? = null
+    ): Result<com.cinetrack.data.api.CommsUniComment> {
         return try {
-            val response = commsUniService.createReply(commentId, com.cinetrack.data.api.CommsUniWriteCommentRequest(text = text, language = language, isSpoiler = isSpoiler))
+            val response = commsUniService.createReply(
+                commentId,
+                com.cinetrack.data.api.CommsUniWriteCommentRequest(
+                    text = text.trim(),
+                    language = language,
+                    isSpoiler = isSpoiler,
+                    attachments = attachments?.takeIf { it.isNotEmpty() }
+                )
+            )
             if (response.isSuccessful) {
                 response.body()?.let { Result.success(it.data.comment) } ?: Result.failure(Exception("Empty body"))
             } else {

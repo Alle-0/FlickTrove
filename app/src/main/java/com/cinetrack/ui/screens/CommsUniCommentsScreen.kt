@@ -551,13 +551,7 @@ class CommsUniCommentsScreen(
                                 expandedComments.value = expandedComments.value + pId
                             }
 
-                            var finalMessage = inputText.text.trim()
-                            if (attachedMedia.isNotEmpty()) {
-                                if (finalMessage.isNotEmpty()) finalMessage += "\n\n"
-                                finalMessage += attachedMedia.joinToString("\n") { url ->
-                                    if (url.contains("giphy.com")) "![gif]($url)" else "![foto]($url)"
-                                }
-                            }
+                            val cleanMessage = inputText.text.trim()
 
                             localFocusManager.clearFocus()
                             val effectivePostToCommsUni = when {
@@ -565,7 +559,17 @@ class CommsUniCommentsScreen(
                                 isReplyingToFlickTrove -> false
                                 else -> postToCommsUni
                             }
-                            viewModel.addComment(finalMessage, isSpoiler, pId, pUserId, newDepth, mediaTitle, mediaImage, effectivePostToCommsUni)
+                            viewModel.addComment(
+                                text = cleanMessage,
+                                isSpoiler = isSpoiler,
+                                parentId = pId,
+                                parentUserId = pUserId,
+                                depth = newDepth,
+                                mediaTitle = mediaTitle,
+                                mediaImage = mediaImage,
+                                postToCommsUni = effectivePostToCommsUni,
+                                attachedMedia = attachedMedia
+                            )
                             inputText = androidx.compose.ui.text.input.TextFieldValue("")
                             attachedMedia = emptyList()
                             replyingTo = null

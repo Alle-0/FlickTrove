@@ -393,7 +393,7 @@ fun CommentCardItem(
 
                 val contentToDraw = @Composable { isBlurred: Boolean ->
                     Column {
-                        if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
+                        if (textWithoutMedia.isNotEmpty() || parentDisplayName != null || mediaUrls.isEmpty()) {
                             Text(
                                 text = annotatedCommentText,
                                 style = MaterialTheme.typography.bodyMedium,

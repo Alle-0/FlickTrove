@@ -43,8 +43,8 @@ data class AppComment(
     val isEffectivelyDeleted: Boolean
         get() = isDeleted ||
                 userId.isBlank() ||
-                (text.isBlank() && userDisplayName.isBlank()) ||
-                (text.trim().startsWith("[") && text.trim().endsWith("]") && (userDisplayName.isBlank() || (userDisplayName.trim().startsWith("[") && userDisplayName.trim().endsWith("]"))))
+                (text.isBlank() && userDisplayName.isBlank() && attachedMedia.isEmpty()) ||
+                (text.trim().startsWith("[") && text.trim().endsWith("]") && attachedMedia.isEmpty() && (userDisplayName.isBlank() || (userDisplayName.trim().startsWith("[") && userDisplayName.trim().endsWith("]"))))
 }
 
 enum class CommentSortOption { DATE, LIKES }
@@ -114,7 +114,10 @@ fun isSameAuthor(c1: AppComment, c2: AppComment): Boolean {
 
 fun isDuplicateComment(c1: AppComment, c2: AppComment): Boolean {
     if (c1.id.isNotBlank() && c2.id.isNotBlank() && c1.id == c2.id) return true
-    return isSameAuthor(c1, c2) && isSameCommentText(c1.text, c2.text) && c1.parentId == c2.parentId
+    val sameMedia = if (c1.attachedMedia.isNotEmpty() || c2.attachedMedia.isNotEmpty()) {
+        c1.attachedMedia == c2.attachedMedia
+    } else true
+    return isSameAuthor(c1, c2) && isSameCommentText(c1.text, c2.text) && sameMedia && c1.parentId == c2.parentId
 }
 
 fun mergeComments(primary: AppComment, secondary: AppComment): AppComment {

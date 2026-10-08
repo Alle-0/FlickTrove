@@ -634,7 +634,8 @@ class CommsUniViewModel @Inject constructor(
         depth: Int,
         mediaTitle: String,
         mediaImage: String?,
-        postToCommsUni: Boolean = true
+        postToCommsUni: Boolean = true,
+        attachedMedia: List<String> = emptyList()
     ) {
         if (isUserAnonymous) return  // Block anonymous writes silently
         val uid = currentUserId ?: return
@@ -660,6 +661,30 @@ class CommsUniViewModel @Inject constructor(
                 postToCommsUni
             }
 
+            val cleanText = text.trim()
+            val commsUniAttachments = if (attachedMedia.isNotEmpty()) {
+                attachedMedia.take(1).map { url ->
+                    val provider = when {
+                        url.contains("giphy.com", ignoreCase = true) -> "giphy"
+                        url.contains("tenor.com", ignoreCase = true) -> "tenor"
+                        url.contains("klipy.com", ignoreCase = true) -> "klipy"
+                        else -> "flicktrove"
+                    }
+                    val contentType = when {
+                        url.endsWith(".gif", ignoreCase = true) || provider == "giphy" || provider == "tenor" -> "image/gif"
+                        url.endsWith(".png", ignoreCase = true) -> "image/png"
+                        url.endsWith(".jpg", ignoreCase = true) || url.endsWith(".jpeg", ignoreCase = true) -> "image/jpeg"
+                        url.endsWith(".avif", ignoreCase = true) -> "image/avif"
+                        else -> "image/webp"
+                    }
+                    com.cinetrack.data.api.CommsUniWriteAttachment(
+                        url = url,
+                        contentType = contentType,
+                        provider = provider
+                    )
+                }
+            } else null
+
             val tempId = "temp_${System.currentTimeMillis()}"
             val optimistic = com.cinetrack.data.model.AppComment(
                 id = tempId,
@@ -668,7 +693,7 @@ class CommsUniViewModel @Inject constructor(
                 userId = currentUserId ?: currentActorId ?: uid,
                 userDisplayName = resolvedName,
                 userAvatarUrl = optimisticAvatar,
-                text = text,
+                text = cleanText,
                 createdAt = com.google.firebase.Timestamp.now(),
                 likesCount = 0,
                 likedBy = emptyList(),
@@ -683,6 +708,7 @@ class CommsUniViewModel @Inject constructor(
                 originColor = "#2dd4bf",
                 archivedLikes = 0,
                 nativeLikes = 0,
+                attachedMedia = attachedMedia,
                 isOnCommsUni = effectivePostToCommsUni
             )
 
@@ -701,14 +727,15 @@ class CommsUniViewModel @Inject constructor(
             val result = if (effectivePostToCommsUni && currentEntityId.isNotBlank()) {
                 // Destinazione CommsUni: pubblica solo sulla rete CommsUni
                 if (parentId != null) {
-                    commsUniRepository.createReply(parentId, text, isSpoiler)
+                    commsUniRepository.createReply(parentId, cleanText, isSpoiler, attachments = commsUniAttachments)
                 } else {
                     commsUniRepository.createComment(
                         entityType = currentEntityType,
                         entityId = currentEntityId,
-                        text = text,
+                        text = cleanText,
                         isSpoiler = isSpoiler,
-                        title = currentTitle
+                        title = currentTitle,
+                        attachments = commsUniAttachments
                     )
                 }
             } else if (!effectivePostToCommsUni && currentRawMediaId.isNotBlank()) {
@@ -717,13 +744,14 @@ class CommsUniViewModel @Inject constructor(
                     commentRepository.addCommentAndGetId(
                         mediaId = currentRawMediaId,
                         mediaType = currentEntityType,
-                        text = text,
+                        text = cleanText,
                         isSpoiler = isSpoiler,
                         parentId = parentId,
                         parentUserId = parentUserId,
                         depth = depth.coerceAtMost(1),
                         mediaTitle = "",
-                        mediaImage = optimisticAvatar
+                        mediaImage = optimisticAvatar,
+                        attachedMedia = attachedMedia
                     )
                 } catch (e: Exception) {
                     null
@@ -737,7 +765,7 @@ class CommsUniViewModel @Inject constructor(
                             entityId = currentEntityId,
                             source = "flicktrove",
                             origin = CommsUniOrigin(kind = "native", slug = "flicktrove", displayName = "FlickTrove"),
-                            text = text,
+                            text = cleanText,
                             createdAt = java.time.Instant.now().toString(),
                             userId = uid,
                             userName = resolvedName,
@@ -758,7 +786,8 @@ class CommsUniViewModel @Inject constructor(
                 val real = newComment.toAppComment(cachedSourcesMap)
                 val finalReal = real.copy(
                     userAvatarUrl = if (real.userAvatarUrl.isBlank() && optimisticAvatar.isNotBlank()) optimisticAvatar else real.userAvatarUrl,
-                    isOnCommsUni = effectivePostToCommsUni
+                    isOnCommsUni = effectivePostToCommsUni,
+                    attachedMedia = if (real.attachedMedia.isNotEmpty()) real.attachedMedia else attachedMedia
                 )
                 val updated = _comments.value.toMutableList()
                 val tempIndex = updated.indexOfFirst { it.id == tempId }
@@ -775,6 +804,7 @@ class CommsUniViewModel @Inject constructor(
                                 originSlug = "flicktrove",
                                 originName = "FlickTrove",
                                 originColor = "#2dd4bf",
+                                attachedMedia = if (finalReal.attachedMedia.isNotEmpty()) finalReal.attachedMedia else attachedMedia,
                                 isOnCommsUni = true
                             )
                             commentRepository.mirrorCommsUniComment(

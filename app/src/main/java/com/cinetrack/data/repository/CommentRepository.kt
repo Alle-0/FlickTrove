@@ -108,9 +108,10 @@ class CommentRepository @Inject constructor(
         parentUserId: String? = null,
         depth: Int = 0,
         mediaTitle: String = "",
-        mediaImage: String? = null
+        mediaImage: String? = null,
+        attachedMedia: List<String> = emptyList()
     ): Boolean = addCommentAndGetId(
-        mediaId, mediaType, text, isSpoiler, parentId, parentUserId, depth, mediaTitle, mediaImage
+        mediaId, mediaType, text, isSpoiler, parentId, parentUserId, depth, mediaTitle, mediaImage, attachedMedia
     ) != null
 
     suspend fun addCommentAndGetId(
@@ -122,7 +123,8 @@ class CommentRepository @Inject constructor(
         parentUserId: String? = null,
         depth: Int = 0,
         mediaTitle: String = "",
-        mediaImage: String? = null
+        mediaImage: String? = null,
+        attachedMedia: List<String> = emptyList()
     ): String? {
         val user = auth.currentUser ?: return null
         
@@ -149,7 +151,8 @@ class CommentRepository @Inject constructor(
             isSpoiler = isSpoiler,
             parentId = parentId,
             parentUserId = parentUserId,
-            depth = depth
+            depth = depth,
+            attachedMedia = attachedMedia
         )
 
         return try {
@@ -281,6 +284,7 @@ class CommentRepository @Inject constructor(
                 "originSlug" to mirrorComment.originSlug,
                 "originName" to mirrorComment.originName,
                 "originColor" to mirrorComment.originColor,
+                "attachedMedia" to mirrorComment.attachedMedia,
                 "isOnCommsUni" to true
             )
 
