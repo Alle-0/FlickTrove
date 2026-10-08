@@ -325,13 +325,10 @@ class RecommendationsViewModel @Inject constructor(
 
                 // Anchor-based genre diversification with refresh variety:
                 // 1. Pick anchor from the top pool
-                // 2. Pick a second seed with minimal genre overlap with the anchor
-                // 3. Third seed is random from the remainder
                 val anchor = topPool.take(4).randomOrNull() ?: topPool.firstOrNull()
+                // 2. Pick a second seed randomly from the top 10 to ensure healthy variety without forcing a complete genre clash
                 val second = if (anchor != null) {
-                    topPool.filter { it.id != anchor.id }.minByOrNull { candidate ->
-                        (candidate.genreIds ?: emptyList()).intersect((anchor.genreIds ?: emptyList()).toSet()).size
-                    }
+                    topPool.take(10).filter { it.id != anchor.id }.randomOrNull()
                 } else null
                 val usedTwo = setOfNotNull(anchor?.id, second?.id)
                 val third = topPool.filter { it.id !in usedTwo }.randomOrNull()
@@ -410,9 +407,10 @@ class RecommendationsViewModel @Inject constructor(
                         .take(10)
                 }
 
-                // 3. Full fallback: show best available if all filters too strict
+                // 3. Full fallback: show best available if all filters too strict, BUT enforce a minimum 40% threshold
                 if (newMovies.isEmpty() && scoredResults.isNotEmpty()) {
                     newMovies = scoredResults
+                        .filter { it.matchScore == null || (it.matchScore ?: 0) >= 40 }
                         .sortedByDescending { it.matchScore ?: 0 }
                         .take(10)
                 }

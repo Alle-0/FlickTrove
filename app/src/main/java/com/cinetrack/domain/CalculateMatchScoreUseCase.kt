@@ -198,8 +198,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             val blendedAffinity = (maxGenreAffinity * 0.65f) + (avgGenreAffinity * 0.35f)
 
             if (blendedAffinity > 0f) {
-                // Scaled up to 36 points
-                coreMatchScore = ((blendedAffinity / profile.maxAffinity) * 36f).coerceIn(0f, 36f)
+                // Scaled up to 50 points (prioritizing personal taste over global rating)
+                coreMatchScore = ((blendedAffinity / profile.maxAffinity) * 50f).coerceIn(0f, 50f)
             }
         }
 
@@ -219,7 +219,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 }
             }
             if (highestPairScore > 0f) {
-                pairSynergyBonus = ((highestPairScore / profile.maxAffinity) * 8f).coerceIn(0f, 8f)
+                // Increased pair synergy bonus to 10 points
+                pairSynergyBonus = ((highestPairScore / profile.maxAffinity) * 10f).coerceIn(0f, 10f)
             }
         }
 
@@ -269,8 +270,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             } else 0
 
             eraBonus = when {
-                decadeRatio >= 0.25f -> 4.5f
-                decadeRatio >= 0.10f -> 2.5f
+                decadeRatio >= 0.25f -> 6.0f
+                decadeRatio >= 0.10f -> 3.0f
                 decadeRatio > 0f -> 1.0f
                 minDecadeDiff >= 30 && profile.totalWatchedCount >= 15 -> -4.0f
                 minDecadeDiff >= 20 && profile.totalWatchedCount >= 15 -> -2.0f
@@ -293,8 +294,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             0.0
         }
 
-        // Base quality score accounts for up to 48 points
-        val baseScore = ((effectiveRating / 8.6) * 48.0).toFloat().coerceIn(0f, 48f)
+        // Base quality score reduced to 30 points (prevents popular but irrelevant movies from taking over)
+        val baseScore = ((effectiveRating / 8.6) * 30.0).toFloat().coerceIn(0f, 30f)
 
         // Composite calculation
         val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus
@@ -310,7 +311,11 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         if (personalRating != null && personalRating > 0) {
             return (personalRating * 10f).toInt().coerceIn(10, 99)
         }
-        val profile = buildUserProfile(localMovies) ?: return null
+        val isTv = currentMovie.mediaType == "tv"
+        val filteredMovies = localMovies.filter { 
+            if (isTv) it.mediaType == "tv" else it.mediaType != "tv" 
+        }
+        val profile = buildUserProfile(filteredMovies) ?: return null
         return calculateScore(currentMovie, profile)
     }
 
