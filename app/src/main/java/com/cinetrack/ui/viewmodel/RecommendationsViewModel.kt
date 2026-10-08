@@ -293,28 +293,28 @@ class RecommendationsViewModel @Inject constructor(
                 return
             }
 
+            val matching = if (type == "movie") {
+                favorites.filter { it.mediaType != "tv" }
+            } else {
+                favorites.filter { it.mediaType == "tv" }
+            }
+
+            // Se non ha tra i preferiti nessun elemento di questo tipo, interrompiamo
+            if (matching.isEmpty()) {
+                _recommendedMovies.value = emptyList()
+                _isEndReached.value = true
+                return
+            }
+
             if (page == 1) {
-                val matchingFavs = if (type == "movie") {
-                    favorites.filter { it.mediaType != "tv" }
-                } else {
-                    favorites.filter { it.mediaType == "tv" }
-                }
-
-                // Se non ha tra i preferiti nessun elemento di questo tipo, interrompiamo
-                if (matchingFavs.isEmpty()) {
-                    _recommendedMovies.value = emptyList()
-                    _isEndReached.value = true
-                    return
-                }
-
                 // Base recommendations on movies the user actually liked.
-                val goodCandidates = matchingFavs.filter { movie ->
+                val goodCandidates = matching.filter { movie ->
                     (movie.personalRating ?: 0.0) >= 7.0 ||
                     (movie.watchedAt != null && (movie.voteAverage ?: 0.0) >= 7.0)
                 }
 
                 // If not enough good candidates, fallback to anything they watched or added
-                val pool = if (goodCandidates.size >= 3) goodCandidates else matchingFavs
+                val pool = if (goodCandidates.size >= 3) goodCandidates else matching
 
                 // Sort the pool to find the absolute best seeds
                 val topPool = pool.sortedWith(
@@ -387,7 +387,7 @@ class RecommendationsViewModel @Inject constructor(
                 }.map { it.copy(mediaType = type) }
             )
 
-            val userProfile = calculateMatchScoreUseCase.buildUserProfile(favorites)
+            val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
             val scoredResults = results.distinctBy { it.id }.map { movie ->
                 val score = calculateMatchScoreUseCase.calculateScore(movie, userProfile)
                 movie.apply { matchScore = score }
@@ -398,7 +398,9 @@ class RecommendationsViewModel @Inject constructor(
                 else _recommendedMovies.value = emptyList()
             } else {
                 // 1. Primary filter: 70% match score threshold
-                var newMovies = scoredResults.filter { it.matchScore == null || (it.matchScore ?: 0) >= 70 }
+                var newMovies = scoredResults
+                    .filter { it.matchScore == null || (it.matchScore ?: 0) >= 70 }
+                    .sortedByDescending { it.matchScore ?: 0 }
 
                 // 2. Graceful degradation: 55% threshold before full fallback
                 if (newMovies.isEmpty() && scoredResults.isNotEmpty()) {
@@ -414,9 +416,6 @@ class RecommendationsViewModel @Inject constructor(
                         .sortedByDescending { it.matchScore ?: 0 }
                         .take(10)
                 }
-
-                // 4. Shuffle survivors for freshness
-                newMovies = newMovies.shuffled()
 
                 if (isAppend) {
                     _recommendedMovies.value = (_recommendedMovies.value + newMovies).distinctBy { it.id }
