@@ -4,6 +4,10 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.api.CommsUniComment
 import com.cinetrack.data.model.filterDeletedWithoutReplies
+import com.cinetrack.data.model.deduplicateComments
+import com.cinetrack.data.model.mergeComments
+import com.cinetrack.data.model.isSameAuthor
+import com.cinetrack.data.model.isSameCommentText
 import com.cinetrack.data.api.CommsUniConversationStats
 import com.cinetrack.data.api.CommsUniOrigin
 import com.cinetrack.data.repository.CommsUniRepository
@@ -494,21 +498,17 @@ class CommsUniViewModel @Inject constructor(
                 val mergedCommsUni = commsUniList.map { cc ->
                     val matchingFc = firestoreComments.firstOrNull { fc ->
                         fc.id == cc.id || (
-                            fc.text.trim() == cc.text.trim() &&
-                            (fc.userDisplayName.trim().equals(cc.userDisplayName.trim(), ignoreCase = true) || fc.userDisplayName.isBlank())
+                            com.cinetrack.data.model.isSameAuthor(fc, cc) &&
+                            com.cinetrack.data.model.isSameCommentText(fc.text, cc.text) &&
+                            fc.parentId == cc.parentId
                         )
                     }
                     if (matchingFc != null) {
                         matchedFirestoreIds.add(matchingFc.id)
-                        cc.copy(
-                            userAvatarUrl = matchingFc.userAvatarUrl.takeIf { it.isNotBlank() } ?: cc.userAvatarUrl,
-                            userDisplayName = matchingFc.userDisplayName.takeIf { it.isNotBlank() } ?: cc.userDisplayName,
-                            likesCount = maxOf(matchingFc.likesCount, cc.likesCount),
-                            likedBy = (matchingFc.likedBy + cc.likedBy).distinct(),
-                            originSlug = if (cc.originSlug.isBlank()) "flicktrove" else cc.originSlug,
-                            originName = if (cc.originName.isBlank()) "FlickTrove" else cc.originName,
-                            originColor = cc.originColor ?: "#2dd4bf"
-                        )
+                        if (auth.currentUser?.uid != null && matchingFc.userId == auth.currentUser?.uid) {
+                            trackMyCommentId(cc.id)
+                        }
+                        com.cinetrack.data.model.mergeComments(cc, matchingFc)
                     } else {
                         cc
                     }
@@ -524,9 +524,10 @@ class CommsUniViewModel @Inject constructor(
                             fc.copy(
                                 originSlug = "flicktrove",
                                 originName = "FlickTrove",
-                                originColor = "#2dd4bf"
+                                originColor = "#2dd4bf",
+                                isOnCommsUni = false
                             )
-                        } else fc
+                        } else fc.copy(isOnCommsUni = false)
                     }
 
                 val blockedIds = blockedAuthorsManager.blockedAuthorIds.value
@@ -536,6 +537,7 @@ class CommsUniViewModel @Inject constructor(
                         val cleanName = it.userDisplayName.trim().lowercase()
                         it.userId in blockedIds || "name_$cleanName" in blockedIds || cleanName in blockedNames
                     }
+                    .deduplicateComments()
                     .filterDeletedWithoutReplies()
 
                 val sorted = if (currentSort == "most_liked" || currentSort == "likes") {
@@ -582,7 +584,7 @@ class CommsUniViewModel @Inject constructor(
                     }
                 
                 currentList.addAll(toAdd)
-                _comments.value = currentList.filterDeletedWithoutReplies()
+                _comments.value = currentList.deduplicateComments().filterDeletedWithoutReplies()
                 autoTranslateCommentsIfModelsDownloaded(toAdd)
                 
                 nextCursor = response.data.nextCursor
@@ -638,6 +640,20 @@ class CommsUniViewModel @Inject constructor(
                 ?: auth.currentUser?.uid?.let { prefs.getString("user_avatar_$it", null) }
                 ?: "").trim()
 
+            // Defensive check: le risposte a commenti CommsUni devono essere inviate tassativamente su CommsUni
+            val effectivePostToCommsUni = if (parentId != null) {
+                val parentComment = _comments.value.find { it.id == parentId }
+                if (parentComment?.isOnCommsUni == true) {
+                    true
+                } else if (parentComment != null && !parentComment.isOnCommsUni) {
+                    false
+                } else {
+                    postToCommsUni
+                }
+            } else {
+                postToCommsUni
+            }
+
             val tempId = "temp_${System.currentTimeMillis()}"
             val optimistic = com.cinetrack.data.model.AppComment(
                 id = tempId,
@@ -660,7 +676,8 @@ class CommsUniViewModel @Inject constructor(
                 originName = "FlickTrove",
                 originColor = "#2dd4bf",
                 archivedLikes = 0,
-                nativeLikes = 0
+                nativeLikes = 0,
+                isOnCommsUni = effectivePostToCommsUni
             )
 
             val currentList = _comments.value.toMutableList()
@@ -673,18 +690,6 @@ class CommsUniViewModel @Inject constructor(
                 currentList.add(0, optimistic)
             }
             _comments.value = currentList
-
-            // Defensive check: le risposte a commenti CommsUni devono essere inviate tassativamente su CommsUni
-            val effectivePostToCommsUni = if (parentId != null) {
-                val parentComment = _comments.value.find { it.id == parentId }
-                if (parentComment != null && !parentComment.originSlug.equals("flicktrove", ignoreCase = true)) {
-                    true
-                } else {
-                    postToCommsUni
-                }
-            } else {
-                postToCommsUni
-            }
 
             // Invio verso la destinazione selezionata (mutuamente esclusiva)
             val result = if (effectivePostToCommsUni && currentEntityId.isNotBlank()) {
@@ -745,11 +750,10 @@ class CommsUniViewModel @Inject constructor(
                 trackMyCommentId(newComment.id)
                 // Replace temp with real comment
                 val real = newComment.toAppComment(cachedSourcesMap)
-                val finalReal = if (real.userAvatarUrl.isBlank() && optimisticAvatar.isNotBlank()) {
-                    real.copy(userAvatarUrl = optimisticAvatar)
-                } else {
-                    real
-                }
+                val finalReal = real.copy(
+                    userAvatarUrl = if (real.userAvatarUrl.isBlank() && optimisticAvatar.isNotBlank()) optimisticAvatar else real.userAvatarUrl,
+                    isOnCommsUni = effectivePostToCommsUni
+                )
                 val updated = _comments.value.toMutableList()
                 val tempIndex = updated.indexOfFirst { it.id == tempId }
                 if (tempIndex != -1) updated[tempIndex] = finalReal
@@ -1262,7 +1266,7 @@ class CommsUniViewModel @Inject constructor(
                 }.toMutableList()
                 
                 fixedExisting.addAll(toAdd)
-                _comments.value = fixedExisting
+                _comments.value = fixedExisting.deduplicateComments()
                 autoTranslateCommentsIfModelsDownloaded(toAdd)
             }
         }

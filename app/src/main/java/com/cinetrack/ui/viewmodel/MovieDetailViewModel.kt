@@ -8,6 +8,10 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.TvdbRepository
+import com.cinetrack.data.model.deduplicateComments
+import com.cinetrack.data.model.mergeComments
+import com.cinetrack.data.model.isSameAuthor
+import com.cinetrack.data.model.isSameCommentText
 
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.components.detail.*
@@ -147,21 +151,14 @@ class MovieDetailViewModel @Inject constructor(
                 val mergedCommsUni = commsUniComments.map { cc ->
                     val matchingFc = firestoreComments.firstOrNull { fc ->
                         fc.id == cc.id || (
-                            fc.text.trim() == cc.text.trim() &&
-                            (fc.userDisplayName.trim().equals(cc.userDisplayName.trim(), ignoreCase = true) || fc.userDisplayName.isBlank())
+                            isSameAuthor(fc, cc) &&
+                            isSameCommentText(fc.text, cc.text) &&
+                            fc.parentId == cc.parentId
                         )
                     }
                     if (matchingFc != null) {
                         matchedFirestoreIds.add(matchingFc.id)
-                        cc.copy(
-                            userAvatarUrl = matchingFc.userAvatarUrl.takeIf { it.isNotBlank() } ?: cc.userAvatarUrl,
-                            userDisplayName = matchingFc.userDisplayName.takeIf { it.isNotBlank() } ?: cc.userDisplayName,
-                            likesCount = maxOf(matchingFc.likesCount, cc.likesCount),
-                            likedBy = (matchingFc.likedBy + cc.likedBy).distinct(),
-                            originSlug = if (cc.originSlug.isBlank()) "flicktrove" else cc.originSlug,
-                            originName = if (cc.originName.isBlank()) "FlickTrove" else cc.originName,
-                            originColor = cc.originColor ?: "#2dd4bf"
-                        )
+                        mergeComments(cc, matchingFc)
                     } else {
                         cc
                     }
@@ -177,6 +174,7 @@ class MovieDetailViewModel @Inject constructor(
 
                 val combined = (mergedCommsUni + remainingFirestore)
                     .filterNot { blockedAuthorsManager.isAuthorBlocked(it.userId, it.userDisplayName) }
+                    .deduplicateComments()
                     .filterNot { it.isEffectivelyDeleted }
                 combined.sortedWith(
                     compareByDescending<com.cinetrack.data.model.AppComment> {

@@ -26,6 +26,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.blur
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import androidx.compose.ui.draw.BlurredEdgeTreatment
@@ -159,10 +160,10 @@ class CommsUniCommentsScreen(
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
-        // True if the parent comment lives only on CommsUni (non-flicktrove origin)
-        val isReplyingToCommsUni = replyingTo?.let { !it.originSlug.equals("flicktrove", ignoreCase = true) } ?: false
-        // True if the parent comment lives only on FlickTrove
-        val isReplyingToFlickTrove = replyingTo?.originSlug?.equals("flicktrove", ignoreCase = true) ?: false
+        // True if the parent comment lives on CommsUni
+        val isReplyingToCommsUni = replyingTo?.isOnCommsUni == true
+        // True if the parent comment lives only on local FlickTrove (Firestore)
+        val isReplyingToFlickTrove = replyingTo != null && !replyingTo!!.isOnCommsUni
         var inputText by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
         var isSpoiler by remember { mutableStateOf(false) }
         var postToCommsUni by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
@@ -170,8 +171,8 @@ class CommsUniCommentsScreen(
         // Lock destination to match the parent comment's platform
         LaunchedEffect(replyingTo) {
             when {
-                replyingTo != null && !replyingTo!!.originSlug.equals("flicktrove", ignoreCase = true) -> postToCommsUni = true
-                replyingTo != null && replyingTo!!.originSlug.equals("flicktrove", ignoreCase = true) -> postToCommsUni = false
+                replyingTo != null && replyingTo!!.isOnCommsUni -> postToCommsUni = true
+                replyingTo != null && !replyingTo!!.isOnCommsUni -> postToCommsUni = false
             }
         }
         var isInputExpanded by remember { mutableStateOf(false) }
@@ -384,6 +385,9 @@ class CommsUniCommentsScreen(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
+                                .clipToBounds()
+                                .scale(1.05f)
+                                .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
                                 .drawWithContent {
                                     drawContent()
                                     // Scurito uniformemente su tutto lo schermo (senza gradiente) per garantire massimo contrasto
@@ -454,9 +458,7 @@ class CommsUniCommentsScreen(
                                 },
                                 onReply = {
                                     replyingTo = comment
-                                    if (!comment.originSlug.equals("flicktrove", ignoreCase = true)) {
-                                        postToCommsUni = true
-                                    }
+                                    postToCommsUni = comment.isOnCommsUni
                                 },
                                 onToggleLike = {
                                     viewModel.toggleLikeComment(comment.id, mediaTitle, mediaImage)
@@ -528,7 +530,7 @@ class CommsUniCommentsScreen(
                     onSpoilerChanged = { isSpoiler = it },
                     postToCommsUni = postToCommsUni,
                     onPostToCommsUniChanged = { postToCommsUni = it },
-                    destinationToggleEnabled = !isReplyingToCommsUni && !isReplyingToFlickTrove,
+                    destinationToggleEnabled = replyingTo == null,
                     attachedMedia = attachedMedia,
                     onAttachedMediaChanged = { attachedMedia = it },
                     isUploadingImage = isUploadingImage,

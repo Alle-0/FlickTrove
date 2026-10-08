@@ -99,7 +99,8 @@ object CommsUniMapper {
             nativeLikes = comment.likes.native,
             attachedMedia = allMediaUrls,
             rating = comment.rating,
-            language = comment.language
+            language = comment.language,
+            isOnCommsUni = true
         )
     }
 }
