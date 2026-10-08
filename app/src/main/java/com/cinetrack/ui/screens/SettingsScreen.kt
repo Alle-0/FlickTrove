@@ -1045,7 +1045,7 @@ fun SettingsScreenContent(
                     settingsViewModel.updateContentLanguage(value) {
                         var actContext = context
                         while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
-                            actContext = (actContext as android.content.ContextWrapper).baseContext
+                            actContext = actContext.baseContext
                         }
                         (actContext as? android.app.Activity)?.recreate()
                     }

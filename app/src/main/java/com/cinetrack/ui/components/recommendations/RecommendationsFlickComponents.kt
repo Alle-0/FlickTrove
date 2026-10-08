@@ -398,7 +398,7 @@ fun FlickMovieCard(
                 } else if (!movie.genreNamesString.isNullOrEmpty()) {
                     movie.genreNamesString!!.split(",").map { it.trim() }.filter { it.isNotEmpty() }
                 } else {
-                    movie.genres?.mapNotNull { it.name?.takeIf { n -> n.isNotBlank() } } ?: emptyList()
+                    movie.genres?.mapNotNull { it.name.takeIf { n -> n.isNotBlank() } } ?: emptyList()
                 }
             }
 

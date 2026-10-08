@@ -168,7 +168,7 @@ fun DetailRecommendations(
                             .then(
                                 if (onCollectionClick != null) {
                                     Modifier.bounceClick {
-                                        onCollectionClick(collection.id.toLong(), collection.name)
+                                        onCollectionClick(collection.id, collection.name)
                                     }
                                 } else Modifier
                             ),

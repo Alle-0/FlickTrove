@@ -841,7 +841,6 @@ fun LazyGridScope.searchResultsGridSection(
             is TMDBSearchResult.TvResult -> "${item.id}_tv"
             is TMDBSearchResult.PersonResult -> "${item.id}_person"
             is TMDBSearchResult.CollectionResult -> "${item.id}_collection"
-            else -> "${item.id}_other"
         }},
         span = { _, _ ->
             when (category) {

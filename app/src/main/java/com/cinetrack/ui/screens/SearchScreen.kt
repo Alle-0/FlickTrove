@@ -151,7 +151,7 @@ data class SearchScreen(
                         navigator.push(PersonDetailScreen(personId, null))
                     },
                     onCollectionClick = { collectionId, collectionName ->
-                        navigator.push(CollectionDetailScreen(collectionId.toString(), collectionName))
+                        navigator.push(CollectionDetailScreen(collectionId, collectionName))
                     },
                     onDiscoverTrendingClick = { requestedType ->
                         DiscoverTab.requestedType = requestedType

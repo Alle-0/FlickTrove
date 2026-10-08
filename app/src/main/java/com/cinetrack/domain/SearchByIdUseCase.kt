@@ -123,7 +123,7 @@ class SearchByIdUseCase @Inject constructor(
                         val person = tmdbService.getPersonDetails(tmdbId)
                         TMDBSearchResult.PersonResult(
                             id = person.id,
-                            name = person.name ?: "",
+                            name = person.name,
                             profilePath = person.profilePath,
                             knownForDepartment = person.knownForDepartment
                         )
@@ -188,7 +188,7 @@ class SearchByIdUseCase @Inject constructor(
         backdropPath = backdropPath,
         voteAverage = voteAverage,
         releaseDate = releaseDate,
-        genreIds = genreIds?.map { it.toLong() } ?: emptyList(),
+        genreIds = genreIds ?: emptyList(),
         overview = overview
     )
 
@@ -199,7 +199,7 @@ class SearchByIdUseCase @Inject constructor(
         backdropPath = backdropPath,
         voteAverage = voteAverage,
         firstAirDate = firstAirDate,
-        genreIds = genreIds?.map { it.toLong() } ?: emptyList(),
+        genreIds = genreIds ?: emptyList(),
         overview = overview
     )
 }

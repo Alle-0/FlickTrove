@@ -1226,12 +1226,12 @@ class CommsUniViewModel @Inject constructor(
         // and the 'parent' query parameter is the nested comment being expanded.
         val isNested = target != null && !target.parentId.isNullOrBlank()
         val rootId = if (isNested) {
-            target?.rootCommentId ?: run {
+            target.rootCommentId ?: run {
                 var curr: com.cinetrack.data.model.AppComment? = target
                 while (curr != null && !curr.parentId.isNullOrBlank()) {
-                    curr = currentComments.find { it.id == curr?.parentId }
+                    curr = currentComments.find { it.id == curr.parentId }
                 }
-                curr?.id ?: target?.parentId ?: commentId
+                curr?.id ?: target.parentId
             }
         } else {
             commentId

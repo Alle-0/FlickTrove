@@ -201,9 +201,9 @@ class FlowViewModel @Inject constructor(
             val sortedMovies = when (filterConfig.sortOption) {
                 FlowSortOption.RECENT_CHECKIN -> {
                     if (filterConfig.sortOrder == FlowSortOrder.DESC) {
-                        vibeFilteredMovies.sortedByDescending { it.clientUpdatedAt ?: 0L }
+                        vibeFilteredMovies.sortedByDescending { it.clientUpdatedAt }
                     } else {
-                        vibeFilteredMovies.sortedBy { it.clientUpdatedAt ?: 0L }
+                        vibeFilteredMovies.sortedBy { it.clientUpdatedAt }
                     }
                 }
                 FlowSortOption.WATCH_DATE -> {

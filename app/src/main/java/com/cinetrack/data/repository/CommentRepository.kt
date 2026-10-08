@@ -366,13 +366,13 @@ class CommentRepository @Inject constructor(
                 }
             }.await()
 
-            if (targetOwnerId != null) {
-                val commentOwnerId = targetOwnerId!!
+            val ownerId = targetOwnerId
+            if (ownerId != null) {
                 val notifId = "${commentId}_${userId}_like"
                 kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
                     try {
                         val notifRef = firestore.collection("user_social_notifications")
-                            .document(commentOwnerId).collection("items").document(notifId)
+                            .document(ownerId).collection("items").document(notifId)
 
                         if (isNewLike) {
                             val notif = hashMapOf(
@@ -393,7 +393,7 @@ class CommentRepository @Inject constructor(
 
                             // Push notification: send directly without redundant Firestore reads
                             com.cinetrack.util.SupabaseNotificationService.notifyUser(
-                                targetUserId = commentOwnerId,
+                                targetUserId = ownerId,
                                 titleLocKey = "notification_like_title",
                                 bodyLocKey = "notification_like_body",
                                 bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),

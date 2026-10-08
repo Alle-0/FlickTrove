@@ -394,7 +394,7 @@ fun ContinueWatchingSeriesCard(
                     }
                     waitForUpOrCancellation()
                     coroutineScope.launch {
-                        pressJob?.join()
+                        pressJob.join()
                         pressScale.animateTo(
                             targetValue = 1f,
                             animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioNoBouncy)

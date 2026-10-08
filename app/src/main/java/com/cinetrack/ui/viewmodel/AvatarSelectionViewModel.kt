@@ -122,7 +122,7 @@ class AvatarSelectionViewModel @Inject constructor(
         backdropPath = backdropPath,
         voteAverage = voteAverage,
         releaseDate = releaseDate,
-        genreIds = genreIds?.map { it.toLong() } ?: emptyList(),
+        genreIds = genreIds ?: emptyList(),
         overview = overview
     )
 
@@ -133,7 +133,7 @@ class AvatarSelectionViewModel @Inject constructor(
         backdropPath = backdropPath,
         voteAverage = voteAverage,
         firstAirDate = firstAirDate,
-        genreIds = genreIds?.map { it.toLong() } ?: emptyList(),
+        genreIds = genreIds ?: emptyList(),
         overview = overview
     )
     suspend fun getMovieDetails(id: Long) = movieRepository.fetchMovieDetails(id, isTv = false)

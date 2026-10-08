@@ -73,7 +73,7 @@ fun EpisodesAccordionView(
             ?: movie.seasons
             ?: (1..(movie.numberOfSeasons ?: 1)).map { Season(seasonNumber = it, episodeCount = 0) }
         seasonsSource
-            .filter { (it.seasonNumber ?: 0) > 0 }
+            .filter { it.seasonNumber > 0 }
             .sortedBy { it.seasonNumber }
     }
 
@@ -234,7 +234,7 @@ fun EpisodesAccordionView(
             contentType = { "season_accordion" }
         ) { index ->
             val season = canonicalSeasons[index]
-            val sNum = season.seasonNumber ?: (index + 1)
+            val sNum = season.seasonNumber
             val isExpanded = expandedSeasons.contains(sNum)
             val seasonData = seasonDetails[sNum]
             val isFullyWatched = seasonData?.let {
@@ -342,7 +342,7 @@ private fun findUpcomingAiring(
     todayIso: String
 ): UpcomingAiringInfo? {
     for (season in seasons) {
-        val sNum = season.seasonNumber ?: continue
+        val sNum = season.seasonNumber
         if (sNum <= 0) continue
 
         val detailedSeason = seasonDetails[sNum]
@@ -387,7 +387,7 @@ private fun findUpNextEpisode(
     todayIso: String
 ): UpNextEpisodeData? {
     for (season in seasons) {
-        val sNum = season.seasonNumber ?: continue
+        val sNum = season.seasonNumber
         if (sNum <= 0) continue // Exclude specials (Pro-Tip #1)
 
         // If the entire season air date is known and in the future, skip it
@@ -669,7 +669,7 @@ private fun SeasonAccordionCard(
     onEpisodeInfoClick: (Episode) -> Unit,
     fallbackBackdropPath: String? = null
 ) {
-    val sNum = season.seasonNumber ?: 1
+    val sNum = season.seasonNumber
     val totalEps = seasonData?.episodeCount?.takeIf { it > 0 }
         ?: season.episodeCount?.takeIf { it > 0 }
         ?: seasonData?.episodes?.size

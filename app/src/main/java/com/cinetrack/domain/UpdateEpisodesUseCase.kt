@@ -118,10 +118,10 @@ class UpdateEpisodesUseCase @Inject constructor() {
             }
         }
 
-        movie.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.forEach { season ->
+        movie.seasons?.filter { it.seasonNumber > 0 }?.forEach { season ->
             val count = movie.getReleasedEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
             if (count > 0) {
-                val seasonNum = season.seasonNumber ?: 0
+                val seasonNum = season.seasonNumber
                 val eps = (1..count).toList()
                 allWatched[seasonNum.toString()] = eps
             }

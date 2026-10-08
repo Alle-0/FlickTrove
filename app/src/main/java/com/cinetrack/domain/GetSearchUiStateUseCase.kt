@@ -135,16 +135,18 @@ fun List<TMDBSearchResult>.applyFilter(config: SortConfig): List<TMDBSearchResul
             val genreIds = when (result) {
                 is TMDBSearchResult.MovieResult -> result.genreIds
                 is TMDBSearchResult.TvResult -> result.genreIds
-                else -> emptyList()
+                is TMDBSearchResult.PersonResult,
+                is TMDBSearchResult.CollectionResult -> emptyList()
             }
-            config.selectedGenres.any { it.toLong() in genreIds }
+            config.selectedGenres.any { it in genreIds }
         }
 
         val decadeMatch = if (config.selectedDecades.isEmpty()) true else {
             val date = when (result) {
                 is TMDBSearchResult.MovieResult -> result.releaseDate
                 is TMDBSearchResult.TvResult -> result.firstAirDate
-                else -> null
+                is TMDBSearchResult.PersonResult,
+                is TMDBSearchResult.CollectionResult -> null
             }
             val year = try {
                 date?.split("-")?.firstOrNull()?.toIntOrNull()

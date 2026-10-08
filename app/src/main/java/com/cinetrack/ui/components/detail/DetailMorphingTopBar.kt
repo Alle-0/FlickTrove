@@ -422,7 +422,7 @@ fun DetailMorphingTopBar(
                                                         withContext(Dispatchers.Main) {
                                                             val sendIntent = android.content.Intent().apply {
                                                                 action = android.content.Intent.ACTION_SEND
-                                                                val titleParam = android.net.Uri.encode(successState.movieEntry.displayName ?: "")
+                                                                val titleParam = android.net.Uri.encode(successState.movieEntry.displayName)
                                                                 val posterParam = successState.movieEntry.posterPath?.let { "&p=${android.net.Uri.encode(it)}" } ?: ""
                                                                 val link = "https://alle-0.github.io/FlickTrove/open.html?type=${successState.movieEntry.mediaType}&id=${successState.movieEntry.id}&t=$titleParam$posterParam"
                                                                 putExtra(android.content.Intent.EXTRA_TEXT, context.getString(R.string.detail_share_text, successState.movieEntry.displayName, link))

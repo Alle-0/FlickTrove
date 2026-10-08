@@ -95,10 +95,10 @@ class DetailUiStateMapper @Inject constructor(
                     }
                 } catch (e: Exception) {}
             }
-            effectiveMovie.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.forEach { season ->
+            effectiveMovie.seasons?.filter { it.seasonNumber > 0 }?.forEach { season ->
                 val count = effectiveMovie.getReleasedEpisodeCountForSeason(season, todayIso, nextEpSeason, nextEpNum)
                 if (count > 0) {
-                    allWatched[(season.seasonNumber ?: 0).toString()] = (1..count).toList()
+                    allWatched[season.seasonNumber.toString()] = (1..count).toList()
                 }
             }
             if (allWatched.isNotEmpty()) {

@@ -93,15 +93,15 @@ class UniversalCsvImporter(
                     
                     val imdbVal = if (imdbIdx != -1 && columns.size > imdbIdx) columns[imdbIdx] 
                                   else columns.firstOrNull { it.trim().startsWith("tt") }
-                    val tmdbVal = if (tmdbIdx != -1 && columns.size > tmdbIdx) columns[tmdbIdx]?.toLongOrNull() else null
+                    val tmdbVal = if (tmdbIdx != -1 && columns.size > tmdbIdx) columns[tmdbIdx].toLongOrNull() else null
                     val titleVal = if (titleIdx != -1 && columns.size > titleIdx) columns[titleIdx] else null
                     val yearVal = if (yearIdx != -1 && columns.size > yearIdx) columns[yearIdx] else null
                     val rawWatchedDateVal = if (watchedDateIdx != -1 && columns.size > watchedDateIdx) columns[watchedDateIdx] else null
                     val parsedWatchedDate = parseAndNormalizeWatchedDate(rawWatchedDateVal)
-                    val ratingVal = if (ratingIdx != -1 && columns.size > ratingIdx) columns[ratingIdx]?.toDoubleOrNull() else null
-                    val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx]?.take(5000) else null
-                    val mvpVal = if (mvpIdx != -1 && columns.size > mvpIdx) columns[mvpIdx]?.take(255) else null
-                    val vibesVal = if (vibesIdx != -1 && columns.size > vibesIdx) columns[vibesIdx]?.take(255) else null
+                    val ratingVal = if (ratingIdx != -1 && columns.size > ratingIdx) columns[ratingIdx].toDoubleOrNull() else null
+                    val noteVal = if (noteIdx != -1 && columns.size > noteIdx) columns[noteIdx].take(5000) else null
+                    val mvpVal = if (mvpIdx != -1 && columns.size > mvpIdx) columns[mvpIdx].take(255) else null
+                    val vibesVal = if (vibesIdx != -1 && columns.size > vibesIdx) columns[vibesIdx].take(255) else null
                     
                     var typeVal = if (typeIdx != -1 && columns.size > typeIdx) columns[typeIdx] else "movie"
                     if (isYamtrack) {
@@ -112,8 +112,8 @@ class UniversalCsvImporter(
                         }
                     }
 
-                    val folderStr = if (folderIdx != -1 && columns.size > folderIdx) columns[folderIdx]?.trim()?.lowercase() else null
-                    val statusStr = if (watchedIdx != -1 && columns.size > watchedIdx) columns[watchedIdx]?.trim()?.lowercase() else null
+                    val folderStr = if (folderIdx != -1 && columns.size > folderIdx) columns[folderIdx].trim().lowercase() else null
+                    val statusStr = if (watchedIdx != -1 && columns.size > watchedIdx) columns[watchedIdx].trim().lowercase() else null
                     
                     val isWatchlistFile = fileName != null && (fileName.contains("watchlist") || fileName.contains("to_watch") || fileName.contains("planned") || fileName.contains("for_later") || fileName.contains("plan_to_watch") || fileName.contains("want_to_watch") || fileName.contains("bookmark"))
                     val isWatchlistFolder = folderStr in listOf("watchlist", "to_watch", "to watch", "planned", "for_later", "da vedere", "plan to watch", "plan_to_watch", "want to watch", "want_to_watch", "ptw", "bookmark", "bookmarked", "saved", "salvati", "da guardare", "guarda più tardi")
@@ -123,7 +123,7 @@ class UniversalCsvImporter(
 
                     var droppedVal = false
                     var watchedVal = if (watchedIdx != -1 && columns.size > watchedIdx) {
-                        val w = columns[watchedIdx]?.trim()?.lowercase()
+                        val w = columns[watchedIdx].trim().lowercase()
                         when (w) {
                             "1", "true", "yes", "watched", "completed", "watching", "seen", "up_to_date" -> true
                             "0", "false", "no", "planned", "for_later", "watchlist", "to_watch", "to watch", "da vedere" -> false
@@ -141,20 +141,20 @@ class UniversalCsvImporter(
                         }
                     }
                     
-                    val seasonVal = if (seasonIdx != -1 && columns.size > seasonIdx) columns[seasonIdx]?.toIntOrNull() else null
-                    val episodeVal = if (episodeIdx != -1 && columns.size > episodeIdx) columns[episodeIdx]?.toIntOrNull() else null
+                    val seasonVal = if (seasonIdx != -1 && columns.size > seasonIdx) columns[seasonIdx].toIntOrNull() else null
+                    val episodeVal = if (episodeIdx != -1 && columns.size > episodeIdx) columns[episodeIdx].toIntOrNull() else null
                     val epsMap = if (seasonVal != null && seasonVal > 0 && episodeVal != null && episodeVal > 0) {
                         mapOf(seasonVal.toString() to listOf(episodeVal))
                     } else null
-                    val rawFolder = if (folderIdx != -1 && columns.size > folderIdx) columns[folderIdx]?.takeIf { it.isNotBlank() } else null
+                    val rawFolder = if (folderIdx != -1 && columns.size > folderIdx) columns[folderIdx].takeIf { it.isNotBlank() } else null
                     val folderVal = rawFolder ?: if (isWatchlistFile) "Watchlist" else null
                     
                     var favVal = if (favIdx != -1 && columns.size > favIdx) {
-                        val f = columns[favIdx]?.trim()?.lowercase()
+                        val f = columns[favIdx].trim().lowercase()
                         f == "1" || f == "true" || f == "yes" || f == "fav" || f == "starred"
                     } else false
 
-                    if (!watchedVal && (isWatchlistFile || folderVal?.equals("watchlist", ignoreCase = true) == true || folderVal?.equals("to watch", ignoreCase = true) == true || folderVal?.equals("planned", ignoreCase = true) == true || folderVal?.equals("for_later", ignoreCase = true) == true || (watchedIdx != -1 && columns.size > watchedIdx && columns[watchedIdx]?.trim()?.lowercase() in listOf("planned", "for_later", "watchlist", "to_watch", "to watch", "da vedere")))) {
+                    if (!watchedVal && (isWatchlistFile || folderVal?.equals("watchlist", ignoreCase = true) == true || folderVal?.equals("to watch", ignoreCase = true) == true || folderVal?.equals("planned", ignoreCase = true) == true || folderVal?.equals("for_later", ignoreCase = true) == true || (watchedIdx != -1 && columns.size > watchedIdx && columns[watchedIdx].trim().lowercase() in listOf("planned", "for_later", "watchlist", "to_watch", "to watch", "da vedere")))) {
                         favVal = true
                     }
                     
@@ -228,7 +228,7 @@ class UniversalCsvImporter(
                                 val isTvMedia = epsMap != null || typeVal.contains("tv", ignoreCase = true) || typeVal.contains("series", ignoreCase = true) || typeVal.contains("show", ignoreCase = true) || typeVal.contains("episode", ignoreCase = true) || lowerHeaders.any { it == "tv_show_name" || it == "series_name" || it == "tv_show_id" || it == "s_id" || it == "id_show" }
                                 val tmdbMovie = movieLookup.searchMediaWithYear(titleVal.trim(), yearVal?.trim(), isTv = isTvMedia)
                                 tmdbMovie?.let {
-                                    val mediaType = if (epsMap != null || it.mediaType == "tv") "tv" else (it.mediaType ?: "movie")
+                                    val mediaType = if (epsMap != null || it.mediaType == "tv") "tv" else it.mediaType
                                     val m = Movie(
                                         id = it.id,
                                         mediaType = mediaType,

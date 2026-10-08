@@ -39,7 +39,7 @@ fun Movie.generateBadges(showAdvancedBadges: Boolean = false): List<MovieBadge> 
     val genresStr = genreNamesString ?: ""
     val hasGenre = { name: String -> 
         genresStr.contains(name, ignoreCase = true) || 
-        genres?.any { it.name?.equals(name, ignoreCase = true) == true } == true
+        genres?.any { it.name.equals(name, ignoreCase = true) } == true
     }
 
     var genreBadgeAdded = false

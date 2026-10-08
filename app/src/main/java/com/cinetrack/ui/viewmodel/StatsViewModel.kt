@@ -280,7 +280,7 @@ class StatsViewModel @Inject constructor(
         var tvEstimate = false
         val tvStats = watchedTV.map { m ->
             val watchedCount = m.watchedEpisodes?.values?.sumOf { it.size }?.takeIf { it > 0 }
-                ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
+                ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { it.seasonNumber > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
             val isComedyOrAnim = m.genreIds?.any { it == 35L || it == 16L } == true
             var avgRunTime = m.episodeRunTime?.firstOrNull() ?: m.runtime?.takeIf { it > 0 } ?: if (isComedyOrAnim) 22 else 45
             if (avgRunTime > 240) {
@@ -295,7 +295,7 @@ class StatsViewModel @Inject constructor(
         val longestTVStat = tvStats.maxByOrNull { it.second }
         val totalEpisodes = watchedTV.sumOf { m ->
             m.watchedEpisodes?.values?.sumOf { it.size }?.takeIf { it > 0 }
-                ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { (it.seasonNumber ?: 0) > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
+                ?: if (m.watched) (m.numberOfEpisodes?.takeIf { it > 0 } ?: m.seasons?.filter { it.seasonNumber > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 } ?: 0) else 0
         }
 
         // We combine the expanded movies and unique TV shows for genres, decades, cast, etc.
@@ -306,8 +306,8 @@ class StatsViewModel @Inject constructor(
         val otherLabel = if (language.lowercase().startsWith("it")) "Altro" else "Other"
         combinedWatched.forEach { m ->
             m.genreIds?.forEach { id ->
-                val defaultName = GenreConstants.ALL_GENRES.find { it.id == id.toLong() }?.name ?: otherLabel
-                val genreName = GenreConstants.getLocalizedName(id.toLong(), language, defaultName)
+                val defaultName = GenreConstants.ALL_GENRES.find { it.id == id }?.name ?: otherLabel
+                val genreName = GenreConstants.getLocalizedName(id, language, defaultName)
                 genreCounts[genreName] = (genreCounts[genreName] ?: 0) + 1
             }
         }

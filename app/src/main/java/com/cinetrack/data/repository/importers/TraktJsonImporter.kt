@@ -49,7 +49,7 @@ class TraktJsonImporter @Inject constructor(
                     isShowWatched = true
                 }
                 
-                val finalWatchedEps = if (isEpisode && item.episode?.season != null && item.episode?.number != null) {
+                val finalWatchedEps = if (isEpisode && item.episode?.season != null && item.episode.number != null) {
                     mapOf(item.episode.season.toString() to listOf(item.episode.number))
                 } else null
 
@@ -277,7 +277,7 @@ class TraktJsonImporter @Inject constructor(
                     val watchedEpsMap = mutableMapOf<String, MutableSet<Int>>()
                     val directEpsObj = obj["watched_episodes"]?.jsonObject ?: obj["watchedEpisodes"]?.jsonObject ?: itemObj["watched_episodes"]?.jsonObject ?: itemObj["watchedEpisodes"]?.jsonObject
                     directEpsObj?.entries?.forEach { (sNum, epsVal) ->
-                        val epNums = epsVal.jsonArray?.mapNotNull { it.jsonPrimitive.contentOrNull?.toIntOrNull() ?: (it as? JsonObject)?.get("number")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: (it as? JsonObject)?.get("episode")?.jsonPrimitive?.contentOrNull?.toIntOrNull() }
+                        val epNums = epsVal.jsonArray.mapNotNull { it.jsonPrimitive.contentOrNull?.toIntOrNull() ?: (it as? JsonObject)?.get("number")?.jsonPrimitive?.contentOrNull?.toIntOrNull() ?: (it as? JsonObject)?.get("episode")?.jsonPrimitive?.contentOrNull?.toIntOrNull() }
                         if (!epNums.isNullOrEmpty()) watchedEpsMap.getOrPut(sNum) { mutableSetOf() }.addAll(epNums)
                     }
                     val seasonsArr = obj["seasons"]?.jsonArray ?: itemObj["seasons"]?.jsonArray
@@ -396,7 +396,7 @@ class TraktJsonImporter @Inject constructor(
                                 val isTvMedia = finalWatchedEps != null || typeStr.contains("tv", ignoreCase = true) || typeStr.contains("show", ignoreCase = true) || typeStr.contains("series", ignoreCase = true)
                                 val tmdbMovie = movieRepository.searchMediaWithYear(title, year, isTv = isTvMedia)
                                 tmdbMovie?.let {
-                                    val mediaType = if (finalWatchedEps != null || it.mediaType == "tv") "tv" else (it.mediaType ?: "movie")
+                                    val mediaType = if (finalWatchedEps != null || it.mediaType == "tv") "tv" else it.mediaType
                                     val m = Movie(
                                         id = it.id,
                                         mediaType = mediaType,

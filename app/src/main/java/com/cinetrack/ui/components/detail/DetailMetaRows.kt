@@ -246,7 +246,7 @@ fun GenrePill(genre: Genre, accentColor: Color, onGenreClick: (Offset) -> Unit) 
             contentAlignment = Alignment.Center
         ) {
             Text(
-                text = genre.name ?: "",
+                text = genre.name,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,

@@ -706,7 +706,7 @@ class TraktSyncWorker @AssistedInject constructor(
                 val hiddenMovies = if (hiddenMoviesRes.isSuccessful) hiddenMoviesRes.body() ?: emptyList() else emptyList()
                 
                 val hiddenTmdbIds = (hiddenShows.mapNotNull { it.show?.ids?.tmdb } + 
-                                   hiddenMovies.mapNotNull { it.movie?.ids?.tmdb }).map { it.toLong() }.toSet()
+                                   hiddenMovies.mapNotNull { it.movie?.ids?.tmdb }).toSet()
 
                 if (hiddenTmdbIds.isNotEmpty()) {
                     val allMovies = movieRepository.getLocalMoviesFlow().firstOrNull() ?: emptyList()
@@ -819,7 +819,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     if (isFirstSync || remoteWatchlistIds.isEmpty()) {
                         // Primo sync o account vuoto: MERGE (push su Trakt di ciò che non è già presente, nessuna rimozione locale)
                         val favoritesToPush = localMovies.filter { 
-                            it.favorite && !remoteWatchlistIds.contains(Pair(it.id, it.mediaType ?: "movie"))
+                            it.favorite && !remoteWatchlistIds.contains(Pair(it.id, it.mediaType))
                         }
                         if (favoritesToPush.isNotEmpty()) {
                             android.util.Log.e("TRAKT_DEBUG", "SYNC MERGE: Primo sync -> Push di ${favoritesToPush.size} elementi in watchlist su Trakt")
@@ -844,7 +844,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         // Two-way diff: favorite = false per ciò che non è più in watchlist
                         for (local in localMovies) {
                             if (local.favorite) {
-                                val key = Pair(local.id, local.mediaType ?: "movie")
+                                val key = Pair(local.id, local.mediaType)
                                 if (!remoteWatchlistIds.contains(key)) {
                                     val isShowInProgress = local.mediaType == "tv" && !local.watchedEpisodes.isNullOrEmpty()
                                     if (!isShowInProgress) {
@@ -882,7 +882,7 @@ class TraktSyncWorker @AssistedInject constructor(
                     if (local != null) {
                         // Merge rule: aggiorna nota solo se locale è vuota
                         if (local.personalNote.isNullOrBlank() && !item.notes.isNullOrBlank()) {
-                            noteUpdates.add(local.copy(personalNote = item.notes?.take(5000)))
+                            noteUpdates.add(local.copy(personalNote = item.notes.take(5000)))
                         }
                     } else {
                         // FIX: Se il film con la nota non esiste localmente, lo scarichiamo da TMDB
@@ -895,7 +895,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                 }
                                 
                                 var newMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(tmdbResponse, mediaType)
-                                newMovie = newMovie.copy(personalNote = item.notes?.take(5000))
+                                newMovie = newMovie.copy(personalNote = item.notes.take(5000))
                                 noteUpdates.add(newMovie)
                                 
                                 delay(50)

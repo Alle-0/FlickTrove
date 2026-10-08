@@ -330,7 +330,7 @@ class SearchViewModel @Inject constructor(
                             newBatch = response.results.map { 
                                 TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                             }
-                            totalPages = response.totalPages ?: 1
+                            totalPages = response.totalPages
                         }
                         "collection" -> {
                             val response = tmdbService.searchCollection(query, page = page)
@@ -737,7 +737,7 @@ class SearchViewModel @Inject constructor(
                                 newBatch = response.results.map { 
                                     TMDBSearchResult.PersonResult(it.id, it.name, it.profilePath, it.knownForDepartment)
                                 }
-                                totalPages = response.totalPages ?: 1
+                                totalPages = response.totalPages
                             }
                             "collection" -> {
                                 val response = tmdbService.searchCollection(query, page = page)
@@ -763,7 +763,6 @@ class SearchViewModel @Inject constructor(
                             is TMDBSearchResult.TvResult -> "tv_${result.id}"
                             is TMDBSearchResult.PersonResult -> "person_${result.id}"
                             is TMDBSearchResult.CollectionResult -> "collection_${result.id}"
-                            else -> "other_${result.id}"
                         }
                     }
                     applyStateFilters()
@@ -925,7 +924,7 @@ class SearchViewModel @Inject constructor(
         backdropPath = backdropPath,
         voteAverage = voteAverage,
         releaseDate = releaseDate,
-        genreIds = genreIds?.map { it.toLong() } ?: emptyList(),
+        genreIds = genreIds ?: emptyList(),
         overview = overview
     )
 
@@ -936,7 +935,7 @@ class SearchViewModel @Inject constructor(
         backdropPath = backdropPath,
         voteAverage = voteAverage,
         firstAirDate = firstAirDate,
-        genreIds = genreIds?.map { it.toLong() } ?: emptyList(),
+        genreIds = genreIds ?: emptyList(),
         overview = overview
     )
 

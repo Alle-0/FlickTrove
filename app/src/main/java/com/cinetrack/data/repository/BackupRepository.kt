@@ -350,7 +350,7 @@ class BackupRepository @Inject constructor(
                 m.watchedEpisodes = emptyMap()
             }
 
-            val key = "${m.mediaType ?: "movie"}_${m.id}"
+            val key = "${m.mediaType}_${m.id}"
             if (folder != null && folder.isNotBlank()) {
                 itemFolderMap.getOrPut(folder.trim()) { mutableSetOf() }.add(key)
             }
@@ -411,7 +411,7 @@ class BackupRepository @Inject constructor(
             if (currentSaved % 5 == 0 || currentSaved == totalToSave) {
                 onProgress(currentSaved, totalToSave)
             }
-            val local = favoriteDao.getById(incoming.id, incoming.mediaType ?: "movie")
+            val local = favoriteDao.getById(incoming.id, incoming.mediaType)
             if (local == null) {
                 favoriteDao.insert(incoming)
                 // Insert into WatchHistoryDao

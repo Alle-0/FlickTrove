@@ -273,7 +273,7 @@ fun DetailHeader(
                             contentAlignment = Alignment.Center
                         ) {
                             Row(
-                                modifier = Modifier.bounceClick { onCoverSelectClick?.invoke() },
+                                modifier = Modifier.bounceClick { onCoverSelectClick() },
                                 horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {

@@ -1551,7 +1551,7 @@ class MovieRepository @Inject constructor(
                     try {
                         val detail = getMovieDetail(id, isTv = false)
                         Movie(
-                            id = detail.id.toLong(),
+                            id = detail.id,
                             title = detail.title ?: "",
                             posterPath = detail.posterPath,
                             backdropPath = detail.backdropPath,
@@ -1575,7 +1575,7 @@ class MovieRepository @Inject constructor(
                     try {
                         val detail = getMovieDetail(id, isTv = true)
                         Movie(
-                            id = detail.id.toLong(),
+                            id = detail.id,
                             title = detail.name ?: detail.title ?: "",
                             posterPath = detail.posterPath,
                             backdropPath = detail.backdropPath,

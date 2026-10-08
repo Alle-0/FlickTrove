@@ -107,7 +107,7 @@ fun SearchContentGrid(
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(
-                text = uiState.errorMessage ?: stringResource(R.string.search_error_message),
+                text = uiState.errorMessage.ifBlank { stringResource(R.string.search_error_message) },
                 style = MaterialTheme.typography.bodyMedium,
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
                 textAlign = TextAlign.Center

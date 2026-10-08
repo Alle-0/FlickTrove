@@ -84,7 +84,7 @@ class FCMService : FirebaseMessagingService() {
         val mediaType = data["mediaType"] ?: ""
         val mediaImage = data["mediaImage"] ?: ""
         
-        if (title!!.isNotEmpty() && NotificationHelper.hasNotificationPermission(this)) {
+        if (title.isNotEmpty() && NotificationHelper.hasNotificationPermission(this)) {
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 if (mediaId != 0L && mediaType.isNotEmpty()) {

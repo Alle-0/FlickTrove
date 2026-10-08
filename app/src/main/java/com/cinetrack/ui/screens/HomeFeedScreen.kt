@@ -585,7 +585,7 @@ fun HomeFeedScreenContent(
                                 item(key = "section_because_you_watched") {
                                     AnimatedHomeSection {
                                         Column {
-                                            HomeSectionTitle(title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName ?: seedMovie.name ?: ""), onClick = null)
+                                            HomeSectionTitle(title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName), onClick = null)
                                             
                                             LazyRow(
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),

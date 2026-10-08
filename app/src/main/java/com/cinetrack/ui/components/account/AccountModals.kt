@@ -547,7 +547,7 @@ fun AccountModals(
                                                     nextCount
                                                 }.await()
                                                 
-                                                currentUser!!.updateProfile(userProfileChangeRequest {
+                                                currentUser.updateProfile(userProfileChangeRequest {
                                                     displayName = nameInput
                                                 }).await()
                                                 
@@ -604,7 +604,7 @@ fun AccountModals(
                                 photoUri = newUrl?.let { Uri.parse(it) } 
                             })?.addOnSuccessListener {
                                 val updates = mutableMapOf<String, Any?>("photoUrl" to newUrl)
-                                Firebase.firestore.collection("users").document(currentUser!!.uid)
+                                Firebase.firestore.collection("users").document(currentUser.uid)
                                     .set(updates, SetOptions.merge())
                             }?.addOnFailureListener {
                                 currentPhotoUrl = oldUrl
@@ -628,12 +628,13 @@ fun AccountModals(
                         onBack = { editProfileSubScreen = EditProfileSubScreen.MENU },
                         onDismissRequest = { showProfileMenu = false },
                         onCharacterSelected = { _, backdropUrl ->
+                            val user = currentUser ?: return@AvatarSelectionContent
                             if (backdropUrl != null) {
-                                prefs.edit().putString("avatar_backdrop_${currentUser!!.uid}", backdropUrl).apply()
+                                prefs.edit().putString("avatar_backdrop_${user.uid}", backdropUrl).apply()
                             } else {
-                                prefs.edit().remove("avatar_backdrop_${currentUser!!.uid}").apply()
+                                prefs.edit().remove("avatar_backdrop_${user.uid}").apply()
                             }
-                            Firebase.firestore.collection("users").document(currentUser!!.uid)
+                            Firebase.firestore.collection("users").document(user.uid)
                                 .set(mapOf("avatarBackdrop" to backdropUrl), SetOptions.merge())
                             showProfileMenu = false
                         }

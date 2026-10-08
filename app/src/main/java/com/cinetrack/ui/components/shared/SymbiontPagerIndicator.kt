@@ -114,7 +114,7 @@ fun SymbiontPagerIndicator(
             }
 
             // 2. Symbiont worm attivo
-            val virtualScrollPosition = (pagerState.currentPage + pagerState.currentPageOffsetFraction).toFloat()
+            val virtualScrollPosition = pagerState.currentPage + pagerState.currentPageOffsetFraction
             val scrollPosition = if (isInfinite) {
                 val wrapped = ((virtualScrollPosition % pageCount) + pageCount) % pageCount
                 if (wrapped >= pageCount) 0f else wrapped

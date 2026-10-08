@@ -378,7 +378,7 @@ fun StatsScreenContent(
                                                                 isFavorite = movie.favorite,
                                                                 isReminder = movie.reminder,
                                                                 progress = (movie.progress ?: 0.0).toFloat(),
-                                                                hazeState = hazeState!!,
+                                                                hazeState = hazeState,
                                                                 onPress = { onMovieClick(movie) }
                                                             )
                                                         }

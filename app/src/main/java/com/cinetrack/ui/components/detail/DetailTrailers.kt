@@ -675,9 +675,8 @@ fun YouTubePlayer(videoId: String) {
 private fun android.content.Context.findActivity(): android.app.Activity? {
     var current: android.content.Context = this
     while (current is android.content.ContextWrapper) {
-        val wrapper = current as android.content.ContextWrapper
-        if (wrapper is android.app.Activity) return wrapper
-        current = wrapper.baseContext
+        if (current is android.app.Activity) return current
+        current = current.baseContext
     }
     return null
 }

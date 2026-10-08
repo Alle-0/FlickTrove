@@ -384,7 +384,7 @@ class FlickTroveNowWatchingWidget : GlanceAppWidget() {
                         showId = show.id,
                         showName = name,
                         imdbId = show.imdbId,
-                        mediaType = show.mediaType ?: "tv",
+                        mediaType = show.mediaType,
                         bitmap = bitmap,
                         seasonNum = s,
                         episodeNum = e,

@@ -202,7 +202,7 @@ class SimklSyncWorker @AssistedInject constructor(
                     val userSettings = simklService.getUserSettings()
                     val uid = userSettings.account?.id
                     if (uid != null) {
-                        authRepository.saveUserAccount(uid, userSettings.account?.type)
+                        authRepository.saveUserAccount(uid, userSettings.account.type)
                         userId = uid
                     }
                 } catch (e: Exception) {

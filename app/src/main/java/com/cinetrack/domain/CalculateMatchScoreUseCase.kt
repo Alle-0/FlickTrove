@@ -36,8 +36,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             }
 
             // Fallback su genreIds: nei film importati/salvati in Room m.genres è spesso null
-            val movieGenreIds = m.genres?.map { it.id.toLong() }
-                ?: m.genreIds?.map { it.toLong() }
+            val movieGenreIds = m.genres?.map { it.id }
+                ?: m.genreIds
                 ?: emptyList()
 
             movieGenreIds.distinct().forEach { id ->
@@ -85,8 +85,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
         // 2. Anti-Diluizione: Blend ponderato tra Max Affinity (70%) e Average Affinity (30%)
         var matchBonus = 0f
-        val currentMovieGenreIds = currentMovie.genres?.map { it.id.toLong() }
-            ?: currentMovie.genreIds?.map { it.toLong() }
+        val currentMovieGenreIds = currentMovie.genres?.map { it.id }
+            ?: currentMovie.genreIds
             ?: emptyList()
 
         if (currentMovieGenreIds.isNotEmpty()) {

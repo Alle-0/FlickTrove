@@ -175,7 +175,7 @@ object FlowStatsTab : Tab {
                             TopMvpsSection(
                                 mvps = flowUiState.topMvps,
                                 onActorClick = { id, profilePath ->
-                                    navigator?.push(com.cinetrack.ui.screens.PersonDetailScreen(id, profilePath))
+                                    navigator.push(com.cinetrack.ui.screens.PersonDetailScreen(id, profilePath))
                                 }
                             )
                             Spacer(modifier = Modifier.height(24.dp))

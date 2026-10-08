@@ -237,7 +237,7 @@ fun SettingsItem(
                 if (isClickable) {
                     Modifier.bounceClick { 
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onClick?.invoke() 
+                        onClick() 
                     }
                 } else {
                     Modifier
