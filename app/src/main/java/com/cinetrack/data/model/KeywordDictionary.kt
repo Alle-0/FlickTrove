@@ -1,7 +1,7 @@
 package com.cinetrack.data.model
 
 object KeywordDictionary {
-    // Mappa massiva generata di parole chiave (oltre 300+ voci)
+    // Mappa massiva generata di parole chiave (443 voci in italiano, 413 in inglese)
     val italianToTmdbKeywordIds = mapOf(
         "distopia" to 4565L, "spazio" to 9882L, "alieni" to 9951L, "post-apocalittico" to 359337L,
         "cyberpunk" to 12190L, "robot" to 14544L, "viaggi nel tempo" to 4379L, "magia" to 2343L,
