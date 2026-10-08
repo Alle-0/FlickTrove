@@ -152,7 +152,26 @@ object KeywordDictionary {
         "famiglia d'elezione" to 248927L, "inseguimento d'auto" to 382327L, "falso documentario" to 11800L, "spaghetti western" to 156212L,
         "film di culto" to 374649L, "femme fatale" to 9016L, "antologia" to 9706L, "space opera" to 161176L,
         "slow burn" to 277551L, "da nemici ad amanti" to 282986L, "amore proibito" to 3691L, "relazione tossica" to 241804L,
-        "dramma giudiziario" to 214780L, "mistero irrisolto" to 172225L, "horror gotico" to 15032L
+        "dramma giudiziario" to 214780L, "mistero irrisolto" to 172225L, "horror gotico" to 15032L,
+        "capitalismo" to 500001L, "miliardario" to 500002L, "industria petrolifera" to 500003L, "ego" to 500004L, "potere aziendale" to 500005L,
+        "madre" to 500006L, "casa" to 500007L, "spirito maligno" to 500008L, "entità" to 500009L, "doppio ruolo" to 500010L,
+        "dentista" to 500011L, "aggressivo" to 500012L, "altra dimensione" to 500013L, "super soldato" to 500014L, "spietatezza" to 500015L,
+        "soldato" to 500016L, "militare" to 500017L, "cospirazione governativa" to 500018L, "protezione dei minori" to 500019L,
+        "arrampicata su roccia" to 500020L, "arrampicata sportiva" to 500021L, "scalata" to 500022L, "racconto d'ammonimento" to 500023L,
+        "drammatico" to 500024L, "alpinista" to 500025L,
+        "romanziere" to 500026L, "verità nascosta" to 500027L, "scrittore fantasma" to 500028L, "cupo" to 500029L, "sconcertato" to 500030L,
+        "tragico" to 500031L, "maschera" to 500032L, "francia" to 500033L, "lealtà" to 500034L, "palazzo" to 500035L,
+        "bastiglia" to 500036L, "nobiltà" to 500037L, "area rurale" to 500038L, "contadino" to 500039L, "agricoltore" to 500040L,
+        "medievale" to 500041L, "rivolta" to 500042L, "peste" to 500043L, "inghilterra medievale" to 500044L, "14º secolo" to 500045L,
+        "anni 1300" to 500046L, "alleanza" to 500047L, "individuo" to 500048L, "filosofia" to 500049L, "letteratura" to 500050L,
+        "professore" to 500051L, "recita scolastica" to 500052L, "new england" to 500053L,
+        "rabbia e odio" to 500054L, "s.w.a.t." to 500055L, "sadismo" to 500056L, "profezia che si autoavvera" to 500057L,
+        "insonnia" to 500058L, "isola" to 500059L, "uragano" to 500060L, "ospedale psichiatrico" to 500061L,
+        "istituto psichiatrico" to 500062L, "paziente fuggito" to 500063L, "psicologo" to 500064L, "moschettiere" to 500065L,
+        "cappa e spada" to 500066L, "veliero" to 500067L, "damigella in pericolo" to 500068L, "re di francia" to 500069L,
+        "17º secolo" to 500070L, "romantico" to 500071L, "infedeltà" to 500072L, "ossessione" to 500073L,
+        "speranza" to 500074L, "long island, new york" to 500075L, "anni 20" to 500076L, "voce narrante" to 500077L,
+        "antieroe" to 500078L, "truffatore" to 500079L, "wall street" to 500080L, "ascesa e caduta" to 500081L
     )
 
     val englishToTmdbKeywordIds = mapOf(
@@ -306,7 +325,26 @@ object KeywordDictionary {
         "spaghetti western" to 156212L, "cult film" to 374649L, "femme fatale" to 9016L, "anthology" to 9706L,
         "space opera" to 161176L, "slow burn" to 277551L, "enemies to lovers" to 282986L, "forbidden love" to 3691L,
         "toxic relationship" to 241804L, "courtroom drama" to 214780L, "unsolved mystery" to 172225L, "gothic horror" to 15032L,
-        "stop motion" to 2661L, "bromance" to 207386L, "detective mystery" to 190479L
+        "stop motion" to 2661L, "bromance" to 207386L, "detective mystery" to 190479L,
+        "capitalism" to 500001L, "billionaire" to 500002L, "oil industry" to 500003L, "ego" to 500004L, "corporate power" to 500005L,
+        "mother" to 500006L, "house" to 500007L, "evil spirit" to 500008L, "entity" to 500009L, "dual role" to 500010L,
+        "dentist" to 500011L, "aggressive" to 500012L, "other dimension" to 500013L, "super soldier" to 500014L, "mercilessness" to 500015L,
+        "soldier" to 500016L, "military" to 500017L, "government conspiracy" to 500018L, "child protection" to 500019L,
+        "rock climbing" to 500020L, "sport climbing" to 500021L, "climb" to 500022L, "cautionary" to 500023L,
+        "dramatic" to 500024L, "mountain climber" to 500025L,
+        "novelist" to 500026L, "hidden truth" to 500027L, "ghost writer" to 500028L, "dreary" to 500029L, "baffled" to 500030L,
+        "tragic" to 500031L, "mask" to 500032L, "france" to 500033L, "loyalty" to 500034L, "palace" to 500035L,
+        "bastille" to 500036L, "royalty" to 500037L, "rural area" to 500038L, "peasant" to 500039L, "farmer" to 500040L,
+        "medieval" to 500041L, "revolt" to 500042L, "plague" to 500043L, "medieval england" to 500044L, "14th century" to 500045L,
+        "1300s" to 500046L, "team up" to 500047L, "individual" to 500048L, "philosophy" to 500049L, "literature" to 500050L,
+        "professor" to 500051L, "school play" to 500052L, "new england" to 500053L,
+        "rage and hate" to 500054L, "s.w.a.t." to 500055L, "sadism" to 500056L, "self-fulfilling prophecy" to 500057L,
+        "insomnia" to 500058L, "island" to 500059L, "hurricane" to 500060L, "psychiatric hospital" to 500061L,
+        "mental institution" to 500062L, "escaped patient" to 500063L, "psychologist" to 500064L, "musketeer" to 500065L,
+        "swashbuckler" to 500066L, "sailing ship" to 500067L, "damsel in distress" to 500068L, "king of france" to 500069L,
+        "17th century" to 500070L, "romance" to 500071L, "infidelity" to 500072L, "obsession" to 500073L,
+        "hope" to 500074L, "long island, new york" to 500075L, "1920s" to 500076L, "voiceover" to 500077L,
+        "anti hero" to 500078L, "con man" to 500079L, "wall street" to 500080L, "rise and fall" to 500081L
     )
 
     fun getDictionaryForLanguage(language: String): Map<String, Long> {

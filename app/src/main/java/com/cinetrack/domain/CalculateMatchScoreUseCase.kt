@@ -106,7 +106,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                     for (j in i + 1 until movieGenreIds.size) {
                         val minId = if (movieGenreIds[i] < movieGenreIds[j]) movieGenreIds[i] else movieGenreIds[j]
                         val maxId = if (movieGenreIds[i] > movieGenreIds[j]) movieGenreIds[i] else movieGenreIds[j]
-                        val pairKey = (minId.toLong() shl 32) or (maxId.toLong() and 0xFFFFFFFFL)
+                        val pairKey = (minId shl 32) or (maxId and 0xFFFFFFFFL)
                         pairScores[pairKey] = (pairScores[pairKey] ?: 0f) + ratingWeight
                         pairCounts[pairKey] = (pairCounts[pairKey] ?: 0) + 1
                     }
