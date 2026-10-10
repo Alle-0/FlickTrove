@@ -78,6 +78,7 @@ class CollectionDetailViewModel @Inject constructor(
     private val editorialRepository: EditorialCollectionRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -244,6 +245,20 @@ class CollectionDetailViewModel @Inject constructor(
                 }
             }
         }.map { it.first }
+
+        val totalParts = baseItems.size
+        val watchedParts = baseItems.count { (part, _) ->
+            val local = favorites.find { it.id == part.id }
+            local?.watched == true || (local == null && part.watched)
+        }
+        val currentCollId = _collectionId.value
+        if (totalParts >= 2 && currentCollId.isNotBlank()) {
+            if (watchedParts == totalParts) {
+                badgeRepository.recordCompletedCollection(currentCollId)
+            } else {
+                badgeRepository.removeCompletedCollection(currentCollId)
+            }
+        }
 
         CollectionDetailUiState(
             collectionId = _collectionId.value,

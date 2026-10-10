@@ -41,8 +41,13 @@ data class SurpriseMeUiState(
 @HiltViewModel
 class SurpriseMeViewModel @Inject constructor(
     private val repository: MovieRepository,
-    private val tmdbService: TMDBService
+    private val tmdbService: TMDBService,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
 ) : ViewModel() {
+
+    fun recordMovieDiscovered(movieId: Long) {
+        badgeRepository.recordSurpriseMeDiscovered(movieId)
+    }
 
     private val _uiState = MutableStateFlow(SurpriseMeUiState())
     val uiState: StateFlow<SurpriseMeUiState> = _uiState.asStateFlow()

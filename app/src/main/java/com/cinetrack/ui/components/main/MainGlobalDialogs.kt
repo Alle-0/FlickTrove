@@ -303,6 +303,7 @@ fun MainGlobalDialogs(
             onMovieFound = { movie ->
                 onSurpriseMeClose()
                 if (movie != null) {
+                    surpriseMeViewModel.recordMovieDiscovered(movie.id)
                     rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
                 } else {
                     Toast.makeText(context, context.getString(R.string.main_surprise_me_not_found), Toast.LENGTH_SHORT).show()

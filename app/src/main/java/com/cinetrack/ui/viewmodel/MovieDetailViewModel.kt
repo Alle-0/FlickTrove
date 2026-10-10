@@ -683,6 +683,10 @@ class MovieDetailViewModel @Inject constructor(
             val current = local ?: (uiState.value as? DetailUiState.Success)?.movieEntry ?: return@launch
             
             val effectiveRating = if (rating == 0.0) null else rating
+            val oldRating = current.personalRating
+            if (oldRating != null && effectiveRating != null && oldRating != effectiveRating) {
+                badgeRepository.recordRatingChanged(current.id)
+            }
             current.personalRating = effectiveRating
             current.emotionalVibes = if (vibes.isEmpty()) null else vibes.joinToString(",")
             current.favoriteActorId = mvpActor?.id
@@ -705,6 +709,10 @@ class MovieDetailViewModel @Inject constructor(
             val targetMediaType = movie.mediaType.ifBlank { "movie" }
             val local = repository.getMovie(movie.id, targetMediaType)
             val current = local ?: movie.copy(mediaType = targetMediaType)
+            val oldRating = current.personalRating
+            if (oldRating != null && effectiveRating != null && oldRating != effectiveRating) {
+                badgeRepository.recordRatingChanged(current.id)
+            }
             current.personalRating = effectiveRating
             current.votedAt = System.currentTimeMillis()
             repository.saveMovie(current)
@@ -1264,6 +1272,7 @@ class MovieDetailViewModel @Inject constructor(
                 mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
             )
             if (success) {
+                badgeRepository.recordCommentWritten()
                 // Refresh comments
                 _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
             }

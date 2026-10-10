@@ -46,6 +46,7 @@ class CommsUniViewModel @Inject constructor(
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     private val tvdbRepository: com.cinetrack.data.repository.TvdbRepository,
     private val storageRepository: com.cinetrack.data.repository.StorageRepository,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
@@ -782,6 +783,7 @@ class CommsUniViewModel @Inject constructor(
             result.onSuccess { newComment ->
                 newComment.userId?.let { recordAuthorId(it) }
                 trackMyCommentId(newComment.id)
+                badgeRepository.recordCommentWritten()
                 // Replace temp with real comment
                 val real = newComment.toAppComment(cachedSourcesMap)
                 val finalReal = real.copy(

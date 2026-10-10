@@ -63,6 +63,8 @@ class BadgeRepository @Inject constructor(
     private val watchHistoryDao: WatchHistoryDao,
     private val folderDao: FolderDao,
     private val firestore: FirebaseFirestore,
+    private val traktAuthRepository: dagger.Lazy<TraktAuthRepository>,
+    private val simklAuthRepository: dagger.Lazy<SimklAuthRepository>,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
@@ -77,6 +79,55 @@ class BadgeRepository @Inject constructor(
 
     private val _unlockedTierEvents = MutableSharedFlow<TrophyUnlockBannerEvent>(extraBufferCapacity = 16)
     val unlockedTierEvents: SharedFlow<TrophyUnlockBannerEvent> = _unlockedTierEvents.asSharedFlow()
+
+    fun recordSurpriseMeDiscovered(movieId: Long) {
+        val currentSet = badgePrefs.getStringSet("surprise_me_discovered_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (currentSet.add(movieId.toString())) {
+            badgePrefs.edit().putStringSet("surprise_me_discovered_ids", currentSet).apply()
+            evaluateBadgesAsync()
+        }
+    }
+
+    fun recordRatingChanged(movieId: Long) {
+        val key = "rating_change_count_$movieId"
+        val newCount = badgePrefs.getInt(key, 0) + 1
+        val currentMax = badgePrefs.getInt("max_rating_changes_on_single_movie", 0)
+        val editor = badgePrefs.edit().putInt(key, newCount)
+        if (newCount > currentMax) {
+            editor.putInt("max_rating_changes_on_single_movie", newCount)
+        }
+        editor.apply()
+        evaluateBadgesAsync()
+    }
+
+    fun recordCompletedCollection(collectionId: String) {
+        if (collectionId.isBlank()) return
+        val currentSet = badgePrefs.getStringSet("completed_collection_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (currentSet.add(collectionId)) {
+            badgePrefs.edit().putStringSet("completed_collection_ids", currentSet).apply()
+            evaluateBadgesAsync()
+        }
+    }
+
+    fun removeCompletedCollection(collectionId: String) {
+        if (collectionId.isBlank()) return
+        val currentSet = badgePrefs.getStringSet("completed_collection_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (currentSet.remove(collectionId)) {
+            badgePrefs.edit().putStringSet("completed_collection_ids", currentSet).apply()
+            evaluateBadgesAsync()
+        }
+    }
+
+    fun recordCommentWritten() {
+        val newCount = badgePrefs.getInt("comments_written_count", 0) + 1
+        badgePrefs.edit().putInt("comments_written_count", newCount).apply()
+        evaluateBadgesAsync()
+    }
+
+    fun recordBackupRestored() {
+        badgePrefs.edit().putBoolean("has_imported_backup", true).apply()
+        evaluateBadgesAsync()
+    }
 
     /**
      * Flusso reattivo principale per la Sala dei Trofei.
@@ -356,12 +407,13 @@ class BadgeRepository @Inject constructor(
 
             // 2. Roulette del Fato: Visto un film scoperto con Surprise Me
             "secret_surprise_fate" -> {
-                val isUnlocked = prevEntity?.isUnlocked ?: false
+                val surpriseDiscoveredIds = badgePrefs.getStringSet("surprise_me_discovered_ids", emptySet()) ?: emptySet()
+                val isWatchedFromSurprise = allWatched.any { surpriseDiscoveredIds.contains(it.id.toString()) } || (prevEntity?.isUnlocked == true)
                 EvaluationResult(
-                    currentProgress = if (isUnlocked) 1 else 0,
+                    currentProgress = if (isWatchedFromSurprise) 1 else 0,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = isUnlocked
+                    isUnlocked = isWatchedFromSurprise
                 )
             }
 
@@ -396,7 +448,7 @@ class BadgeRepository @Inject constructor(
 
             // 5. L'Eterno Dubbioso: Voto modificato almeno 3 volte sullo stesso film
             "secret_indecisive" -> {
-                val count = prevEntity?.progressCurrent ?: 0
+                val count = badgePrefs.getInt("max_rating_changes_on_single_movie", prevEntity?.progressCurrent ?: 0)
                 EvaluationResult(
                     currentProgress = count,
                     targetThreshold = 3,
@@ -520,7 +572,8 @@ class BadgeRepository @Inject constructor(
 
             // 16. Saghe al 100%: Signore delle Saghe
             "badge_sagas" -> {
-                val count = prevEntity?.progressCurrent ?: 0
+                val count = badgePrefs.getStringSet("completed_collection_ids", emptySet())?.size
+                    ?: (prevEntity?.progressCurrent ?: 0)
                 calculateProgressiveTiers(count, badge.progressiveSteps)
             }
 
@@ -546,7 +599,7 @@ class BadgeRepository @Inject constructor(
 
             // 20. Community: Voce della Critica
             "badge_comments" -> {
-                val commentsCount = prevEntity?.progressCurrent ?: 0
+                val commentsCount = badgePrefs.getInt("comments_written_count", prevEntity?.progressCurrent ?: 0)
                 calculateProgressiveTiers(commentsCount, badge.progressiveSteps)
             }
 
@@ -635,7 +688,10 @@ class BadgeRepository @Inject constructor(
 
             // 31. Cloud Sync: Il Trasloco
             "badge_onboarding_sync" -> {
-                val isSynced = prevEntity?.isUnlocked ?: false
+                val isSynced = (traktAuthRepository.get().isLoggedIn.value) ||
+                    (simklAuthRepository.get().getAccessToken() != null) ||
+                    (prevEntity?.isUnlocked == true) ||
+                    badgePrefs.getBoolean("has_imported_backup", false)
                 EvaluationResult(
                     currentProgress = if (isSynced) 1 else 0,
                     targetThreshold = 1,

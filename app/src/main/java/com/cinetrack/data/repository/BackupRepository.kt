@@ -45,7 +45,8 @@ class BackupRepository @Inject constructor(
     private val sofaImporter: SofaImporter,
     private val refractImporter: RefractImporter,
     private val cinemaniacImporter: CinemaniacImporter,
-    private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource
+    private val firebaseRemoteDataSource: com.cinetrack.data.remote.FirebaseRemoteDataSource,
+    private val badgeRepository: dagger.Lazy<com.cinetrack.data.repository.BadgeRepository>
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
 
@@ -122,6 +123,8 @@ class BackupRepository @Inject constructor(
         backup.preferences?.let {
             preferenceRepository.updateAll(it)
         }
+
+        badgeRepository.get().recordBackupRestored()
     }
 
     @OptIn(ExperimentalSerializationApi::class)
@@ -594,6 +597,7 @@ class BackupRepository @Inject constructor(
                     folderDao.insert(newFolder)
                 }
             }
+            badgeRepository.get().recordBackupRestored()
         }
     }
 

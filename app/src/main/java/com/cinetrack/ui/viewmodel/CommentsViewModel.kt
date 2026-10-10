@@ -25,7 +25,8 @@ class CommentsViewModel @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     private val auth: FirebaseAuth,
     private val actionFeedbackManager: ActionFeedbackManager,
-    private val translationManager: com.cinetrack.util.TranslationManager
+    private val translationManager: com.cinetrack.util.TranslationManager,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
 ) : ViewModel() {
 
     val isUserAnonymous: Boolean
@@ -346,6 +347,7 @@ class CommentsViewModel @Inject constructor(
                     mediaImage = mediaImage
                 )
                 if (success) {
+                    badgeRepository.recordCommentWritten()
                     if (parentId != null) {
                         // It's a reply: load the replies of the parent so it appears immediately
                         loadRepliesForComment(parentId)
