@@ -186,10 +186,10 @@ fun FoldersScreenContent(
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(50))
                                 .bounceClick { isCreateDialogOpen = true }
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
                                 .padding(horizontal = 24.dp, vertical = 12.dp)
                         ) {
                             Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
@@ -973,14 +973,14 @@ fun FolderCreateDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(
-                            if (name.isNotBlank()) Color.White else Color.White.copy(alpha = 0.2f)
-                        )
                         .bounceClick(enabled = name.isNotBlank()) {
                             pendingCreate = Triple(name, "folder", selectedColor)
                             isDismissing = true
-                        },
+                        }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(
+                            if (name.isNotBlank()) Color.White else Color.White.copy(alpha = 0.2f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
