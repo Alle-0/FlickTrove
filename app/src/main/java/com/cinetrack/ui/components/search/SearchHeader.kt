@@ -10,6 +10,8 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -37,8 +39,10 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
@@ -112,12 +116,19 @@ fun SearchHeader(
                 onHeaderHeightMeasured(with(density) { layoutCoordinates.size.height.toDp() })
             }
     ) {
+        val headerShape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .clip(headerShape)
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null,
+                    onClick = { /* Intercept accidental taps on header background to prevent leaking to underlying cards */ }
+                )
                 .hazeGlass(
                     state = hazeState,
-                    shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                    shape = headerShape,
                     borderWidth = 0.dp
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
@@ -148,7 +159,20 @@ fun SearchHeader(
                 }
                 Spacer(modifier = Modifier.width(12.dp))
                 Box(
-                    modifier = Modifier.weight(1f).height(44.dp),
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(44.dp)
+                        .clip(CircleShape)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null,
+                            onClick = {
+                                try {
+                                    focusRequester.requestFocus()
+                                } catch (_: Exception) {}
+                                keyboardController?.show()
+                            }
+                        ),
                     contentAlignment = Alignment.CenterStart
                 ) {
                     Box(
@@ -158,7 +182,9 @@ fun SearchHeader(
                     )
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.padding(horizontal = 14.dp)
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(horizontal = 14.dp)
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
