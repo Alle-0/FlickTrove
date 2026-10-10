@@ -46,6 +46,6 @@ object HazeStyles {
      */
     val glassmorphicDialog = PremiumDark.copy(
         blurRadius = 24.dp,
-        tint = Color.Black.copy(alpha = 0.75f)
+        tint = Color.Black.copy(alpha = 0.58f)
     )
 }

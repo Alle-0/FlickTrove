@@ -37,6 +37,8 @@ fun GlassmorphicModal(
     activeHazeState: HazeState,
     dimBackground: Boolean = false,
     dismissOnClickOutside: Boolean = true,
+    style: dev.chrisbanes.haze.HazeStyle = HazeStyles.glassmorphicDialog,
+    scrimAlpha: Float = HazeStyles.ModalScrimAlpha,
     onDismissRequest: (() -> Unit)? = null,
     content: @Composable BoxScope.(alpha: Float) -> Unit
 ) {
@@ -57,7 +59,7 @@ fun GlassmorphicModal(
             modifier = Modifier
                 .fillMaxSize()
                 .then(
-                    if (dimBackground) Modifier.background(Color.Black.copy(alpha = 0.5f * alpha))
+                    if (dimBackground) Modifier.background(Color.Black.copy(alpha = scrimAlpha * alpha))
                     else Modifier
                 ),
             contentAlignment = Alignment.Center
@@ -84,7 +86,7 @@ fun GlassmorphicModal(
                         state = activeHazeState,
                         alpha = alpha,
                         shape = RoundedCornerShape(32.dp),
-                        style = HazeStyles.glassmorphicDialog
+                        style = style
                     )
                     .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
                     .pointerInput(Unit) { 
