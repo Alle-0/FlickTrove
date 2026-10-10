@@ -41,6 +41,10 @@ class UpdatesViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
 
+    val remindersListState = androidx.compose.foundation.lazy.LazyListState()
+    val notificationsListState = androidx.compose.foundation.lazy.LazyListState()
+    val socialListState = androidx.compose.foundation.lazy.LazyListState()
+
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }

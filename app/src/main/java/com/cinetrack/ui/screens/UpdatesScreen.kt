@@ -134,11 +134,9 @@ fun UpdatesScreen(
     var showMonthPicker by remember { mutableStateOf(false) }
     var lastSocialClickTime by remember { mutableLongStateOf(0L) }
 
-    val socialListState = rememberLazyListState()
-    val remindersListState = rememberLazyListState()
-    LaunchedEffect(remindersCategoryTab) {
-        remindersListState.scrollToItem(0)
-    }
+    val remindersListState = viewModel.remindersListState
+    val notificationsListState = viewModel.notificationsListState
+    val socialListState = viewModel.socialListState
 
     LaunchedEffect(isMeasured) {
         if (isMeasured && !hasRevealed) {
@@ -325,6 +323,7 @@ fun UpdatesScreen(
                                     .fillMaxSize()
                             ) {
                                 LazyColumn(
+                                state = notificationsListState,
                                 modifier = Modifier.fillMaxSize(),
                                 contentPadding = PaddingValues(
                                     start = 20.dp, 
