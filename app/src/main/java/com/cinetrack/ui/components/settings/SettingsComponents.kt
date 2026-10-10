@@ -630,7 +630,6 @@ fun DonationBanner(
                         .weight(1f)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            com.cinetrack.ui.components.home.markSupportClicked(context)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
                         .clip(CircleShape)
@@ -667,7 +666,6 @@ fun DonationBanner(
                         .weight(1f)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            com.cinetrack.ui.components.home.markSupportClicked(context)
                             uriHandler.openUri("https://paypal.me/AlessandroBasile0")
                         }
                         .clip(CircleShape)

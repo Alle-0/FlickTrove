@@ -73,13 +73,6 @@ fun markSupportClicked(context: Context) {
         .edit()
         .putBoolean(KEY_HAS_SUPPORTED, true)
         .apply()
-    try {
-        val entryPoint = dagger.hilt.android.EntryPointAccessors.fromApplication(
-            context.applicationContext,
-            com.cinetrack.data.repository.BadgeRepositoryEntryPoint::class.java
-        )
-        entryPoint.badgeRepository().evaluateBadgesAsync()
-    } catch (_: Exception) {}
 }
 
 fun markSupportDismissed(context: Context) {

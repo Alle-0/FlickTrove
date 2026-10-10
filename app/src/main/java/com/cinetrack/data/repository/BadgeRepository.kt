@@ -15,7 +15,9 @@ import com.cinetrack.ui.components.badge.PreviewBadgeTier
 import com.cinetrack.ui.components.badge.ProgressiveTierDetail
 import com.cinetrack.ui.components.badge.OFFICIAL_TROPHY_ROOM_CATALOG
 import com.cinetrack.ui.components.badge.TrophyRoomItemUi
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -69,6 +71,7 @@ class BadgeRepository @Inject constructor(
     private val watchHistoryDao: WatchHistoryDao,
     private val folderDao: FolderDao,
     private val firestore: FirebaseFirestore,
+    private val auth: FirebaseAuth,
     private val traktAuthRepository: dagger.Lazy<TraktAuthRepository>,
     private val simklAuthRepository: dagger.Lazy<SimklAuthRepository>,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
@@ -77,6 +80,52 @@ class BadgeRepository @Inject constructor(
 
     private val badgePrefs by lazy {
         context.getSharedPreferences("flicktrove_badge_prefs", android.content.Context.MODE_PRIVATE)
+    }
+
+    private var supporterListenerRegistration: ListenerRegistration? = null
+
+    init {
+        listenToSupporterStatus()
+    }
+
+    private fun listenToSupporterStatus() {
+        auth.addAuthStateListener { firebaseAuth ->
+            val user = firebaseAuth.currentUser
+            supporterListenerRegistration?.remove()
+            supporterListenerRegistration = null
+
+            if (user != null) {
+                // Real-time listener on user doc
+                supporterListenerRegistration = firestore.collection("users").document(user.uid)
+                    .addSnapshotListener { snapshot, error ->
+                        if (error == null && snapshot != null && snapshot.exists()) {
+                            val isSupporter = snapshot.getBoolean("isSupporter") == true ||
+                                snapshot.getBoolean("isExecutiveProducer") == true
+                            if (isSupporter) {
+                                if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
+                                    badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                                    evaluateBadgesAsync()
+                                }
+                            }
+                        }
+                    }
+
+                // Also check /supporters/{email}
+                val email = user.email
+                if (!email.isNullOrBlank()) {
+                    firestore.collection("supporters").document(email.trim().lowercase())
+                        .get()
+                        .addOnSuccessListener { doc ->
+                            if (doc.exists() && (doc.getBoolean("isSupporter") == true || doc.getBoolean("isExecutiveProducer") == true)) {
+                                if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
+                                    badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                                    evaluateBadgesAsync()
+                                }
+                            }
+                        }
+                }
+            }
+        }
     }
 
     private var isInitialEvaluationDone: Boolean
@@ -135,11 +184,8 @@ class BadgeRepository @Inject constructor(
         evaluateBadgesAsync()
     }
 
-    fun recordSupporterAction() {
-        context.getSharedPreferences("flicktrove_support", android.content.Context.MODE_PRIVATE)
-            .edit()
-            .putBoolean("has_supported", true)
-            .apply()
+    fun recordSupporterVerified() {
+        badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
         evaluateBadgesAsync()
     }
 
@@ -691,9 +737,8 @@ class BadgeRepository @Inject constructor(
 
             // 30. Sostenitore & Mecenate: Il Produttore Esecutivo
             "badge_executive_producer" -> {
-                val hasSupportedLocal = context.getSharedPreferences("flicktrove_support", android.content.Context.MODE_PRIVATE)
-                    .getBoolean("has_supported", false)
-                val isSupporter = hasSupportedLocal || (prevEntity?.isUnlocked ?: false)
+                val isSupporter = badgePrefs.getBoolean("is_supporter_verified", false) ||
+                    (prevEntity?.isUnlocked == true)
                 EvaluationResult(
                     currentProgress = if (isSupporter) 1 else 0,
                     targetThreshold = 1,
