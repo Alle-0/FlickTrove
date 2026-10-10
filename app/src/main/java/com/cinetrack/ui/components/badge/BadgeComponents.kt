@@ -1147,7 +1147,7 @@ fun BadgeTierEvolutionTrack(
         val stepCount = tierSteps.size
         Box(modifier = Modifier.fillMaxWidth()) {
             if (stepCount > 1) {
-                // Linee di connessione disegnate sui centri matematici delle colonne
+                // Linee di connessione disegnate rigorosamente tra i bordi esterni dei nodi (senza attraversare l'interno dei cerchi)
                 Canvas(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -1156,41 +1156,52 @@ fun BadgeTierEvolutionTrack(
                     val colW = size.width / stepCount.toFloat()
                     val strokeH = 2.5.dp.toPx()
                     val y = size.height / 2f
+                    val capRadius = strokeH / 2f
+                    val clearance = 1.dp.toPx()
 
                     for (i in 0 until (stepCount - 1)) {
                         val x1 = colW * (i + 0.5f)
                         val x2 = colW * (i + 1.5f)
 
-                        // 1. Traccia scura satinata di sfondo
-                        drawLine(
-                            color = Color.White.copy(alpha = 0.10f),
-                            start = Offset(x1, y),
-                            end = Offset(x2, y),
-                            strokeWidth = strokeH,
-                            cap = StrokeCap.Round
-                        )
+                        val r1 = if (isUnlocked && i == currentOrdinal) 12.dp.toPx() else 8.dp.toPx()
+                        val r2 = if (isUnlocked && (i + 1) == currentOrdinal) 12.dp.toPx() else 8.dp.toPx()
 
-                        // 2. Tratto colorato in proporzione all'avanzamento
-                        val segmentFraction = when {
-                            !isUnlocked -> 0f
-                            isCompletedAll || i < currentOrdinal -> 1f
-                            i == currentOrdinal -> animatedStepProgress
-                            else -> 0f
-                        }
+                        // Calcolo dei punti di arresto esterni: la linea non penetra mai all'interno del cerchio
+                        val startX = x1 + r1 + clearance + capRadius
+                        val endX = x2 - r2 - clearance - capRadius
 
-                        if (segmentFraction > 0f) {
-                            val activeX2 = x1 + (x2 - x1) * segmentFraction
+                        if (startX < endX) {
+                            // 1. Traccia satinata di sfondo tra i nodi
                             drawLine(
-                                brush = Brush.horizontalGradient(
-                                    listOf(tierSteps[i].primaryColor, tierSteps[i + 1].primaryColor),
-                                    startX = x1,
-                                    endX = x2
-                                ),
-                                start = Offset(x1, y),
-                                end = Offset(activeX2, y),
+                                color = Color.White.copy(alpha = 0.12f),
+                                start = Offset(startX, y),
+                                end = Offset(endX, y),
                                 strokeWidth = strokeH,
                                 cap = StrokeCap.Round
                             )
+
+                            // 2. Tratto colorato in proporzione all'avanzamento
+                            val segmentFraction = when {
+                                !isUnlocked -> 0f
+                                isCompletedAll || i < currentOrdinal -> 1f
+                                i == currentOrdinal -> animatedStepProgress
+                                else -> 0f
+                            }
+
+                            if (segmentFraction > 0f) {
+                                val activeX2 = startX + (endX - startX) * segmentFraction
+                                drawLine(
+                                    brush = Brush.horizontalGradient(
+                                        listOf(tierSteps[i].primaryColor, tierSteps[i + 1].primaryColor),
+                                        startX = startX,
+                                        endX = endX
+                                    ),
+                                    start = Offset(startX, y),
+                                    end = Offset(activeX2, y),
+                                    strokeWidth = strokeH,
+                                    cap = StrokeCap.Round
+                                )
+                            }
                         }
                     }
                 }
@@ -1218,7 +1229,7 @@ fun BadgeTierEvolutionTrack(
                                     .background(
                                         when {
                                             isNodeAchieved -> stepTier.primaryColor
-                                            else -> Color.White.copy(alpha = 0.08f)
+                                            else -> Color(0xFF141722)
                                         }
                                     )
                                     .border(
@@ -1226,7 +1237,7 @@ fun BadgeTierEvolutionTrack(
                                         color = when {
                                             isCurrent -> Color.White
                                             isNodeAchieved -> stepTier.primaryColor
-                                            else -> Color.White.copy(alpha = 0.15f)
+                                            else -> Color.White.copy(alpha = 0.18f)
                                         },
                                         shape = CircleShape
                                     ),
