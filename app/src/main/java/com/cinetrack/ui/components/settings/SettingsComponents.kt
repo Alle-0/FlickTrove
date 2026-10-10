@@ -515,6 +515,7 @@ fun DonationBanner(
     modifier: Modifier = Modifier
 ) {
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+    val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = LocalHapticFeedback.current
     
     // Heart pulse animation
@@ -629,6 +630,7 @@ fun DonationBanner(
                         .weight(1f)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            com.cinetrack.ui.components.home.markSupportClicked(context)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
                         .clip(CircleShape)
@@ -665,6 +667,7 @@ fun DonationBanner(
                         .weight(1f)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            com.cinetrack.ui.components.home.markSupportClicked(context)
                             uriHandler.openUri("https://paypal.me/AlessandroBasile0")
                         }
                         .clip(CircleShape)

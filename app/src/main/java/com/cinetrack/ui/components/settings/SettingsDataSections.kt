@@ -689,6 +689,7 @@ fun SettingsSupportSection(
             tint = Color(0xFFFFA000),
             onClick = { 
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                com.cinetrack.ui.components.home.markSupportClicked(context)
                 uriHandler.openUri("https://paypal.me/AlessandroBasile0") 
             }
         )

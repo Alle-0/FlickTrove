@@ -56,6 +56,12 @@ sealed interface TrophyUnlockBannerEvent {
 
 typealias BadgeTierUnlockedEvent = TrophyUnlockBannerEvent.SingleBadge
 
+@dagger.hilt.EntryPoint
+@dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+interface BadgeRepositoryEntryPoint {
+    fun badgeRepository(): BadgeRepository
+}
+
 @Singleton
 class BadgeRepository @Inject constructor(
     private val badgeDao: BadgeDao,
@@ -126,6 +132,14 @@ class BadgeRepository @Inject constructor(
 
     fun recordBackupRestored() {
         badgePrefs.edit().putBoolean("has_imported_backup", true).apply()
+        evaluateBadgesAsync()
+    }
+
+    fun recordSupporterAction() {
+        context.getSharedPreferences("flicktrove_support", android.content.Context.MODE_PRIVATE)
+            .edit()
+            .putBoolean("has_supported", true)
+            .apply()
         evaluateBadgesAsync()
     }
 
@@ -677,7 +691,9 @@ class BadgeRepository @Inject constructor(
 
             // 30. Sostenitore & Mecenate: Il Produttore Esecutivo
             "badge_executive_producer" -> {
-                val isSupporter = prevEntity?.isUnlocked ?: false
+                val hasSupportedLocal = context.getSharedPreferences("flicktrove_support", android.content.Context.MODE_PRIVATE)
+                    .getBoolean("has_supported", false)
+                val isSupporter = hasSupportedLocal || (prevEntity?.isUnlocked ?: false)
                 EvaluationResult(
                     currentProgress = if (isSupporter) 1 else 0,
                     targetThreshold = 1,
