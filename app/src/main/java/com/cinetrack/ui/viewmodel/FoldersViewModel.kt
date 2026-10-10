@@ -25,7 +25,8 @@ import kotlinx.collections.immutable.toImmutableList
 class FoldersViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
-    private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository
+    private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
 ) : ViewModel() {
 
     private val _sortOption = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.FolderSortOption.DATE)
@@ -123,6 +124,7 @@ class FoldersViewModel @Inject constructor(
             )
             repository.saveFolder(newFolder)
             actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_created, name))
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -133,7 +135,9 @@ class FoldersViewModel @Inject constructor(
                 repository.deleteFolder(folderId)
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_deleted, folder.name)) {
                     repository.saveFolder(folder)
+                    badgeRepository.evaluateBadgesAsync()
                 }
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }
@@ -141,6 +145,7 @@ class FoldersViewModel @Inject constructor(
     fun updateFolder(folder: FolderEntity) {
         viewModelScope.launch {
             repository.saveFolder(folder.copy(updatedAt = Instant.now().toString()))
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 }

@@ -19,7 +19,11 @@ import com.cinetrack.data.local.entities.HomeFeedCacheEntity
 import com.cinetrack.data.local.entities.MovieDetailCacheEntity
 import com.cinetrack.data.local.entities.SearchHistoryEntity
 import com.cinetrack.data.local.entities.WatchHistoryEntity
+import com.cinetrack.data.local.entities.UserBadgeEntity
+import com.cinetrack.data.local.entities.BadgeGlobalStatsEntity
+import com.cinetrack.data.local.entities.UserPersonFrequencyEntity
 import com.cinetrack.data.local.dao.WatchHistoryDao
+import com.cinetrack.data.local.dao.BadgeDao
 
 @Database(
     entities = [
@@ -29,9 +33,12 @@ import com.cinetrack.data.local.dao.WatchHistoryDao
         MovieDetailCacheEntity::class,
         SearchHistoryEntity::class,
         WatchHistoryEntity::class,
-        HomeFeedCacheEntity::class
+        HomeFeedCacheEntity::class,
+        UserBadgeEntity::class,
+        BadgeGlobalStatsEntity::class,
+        UserPersonFrequencyEntity::class
     ],
-    version = 25,
+    version = 26,
     exportSchema = true
 )
 @TypeConverters(FlickTroveConverters::class)
@@ -41,6 +48,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
     abstract fun cacheDao(): CacheDao
     abstract fun searchHistoryDao(): SearchHistoryDao
     abstract fun watchHistoryDao(): WatchHistoryDao
+    abstract fun badgeDao(): BadgeDao
 
     companion object {
         private const val DATABASE_NAME = "flicktrove.db"
@@ -198,6 +206,57 @@ abstract class FlickTroveDatabase : RoomDatabase() {
             }
         }
 
+        private val MIGRATION_25_26 = object : Migration(25, 26) {
+            override fun migrate(db: SupportSQLiteDatabase) {
+                // 1. Tabella user_badges per la progressione dei trofei
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `user_badges` (
+                        `badge_id` TEXT NOT NULL,
+                        `current_tier` TEXT NOT NULL,
+                        `category` TEXT NOT NULL,
+                        `progress_current` INTEGER NOT NULL DEFAULT 0,
+                        `progress_target` INTEGER NOT NULL DEFAULT 1,
+                        `is_unlocked` INTEGER NOT NULL DEFAULT 0,
+                        `unlocked_date` TEXT,
+                        `is_revealed` INTEGER NOT NULL DEFAULT 0,
+                        `sync_status` TEXT NOT NULL DEFAULT 'synced',
+                        `last_updated_at` INTEGER NOT NULL DEFAULT 0,
+                        PRIMARY KEY(`badge_id`)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_user_badges_current_tier` ON `user_badges` (`current_tier`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_user_badges_is_unlocked` ON `user_badges` (`is_unlocked`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_user_badges_category` ON `user_badges` (`category`)")
+
+                // 2. Tabella badge_global_stats per la cache delle percentuali di rarità
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `badge_global_stats` (
+                        `badge_id` TEXT NOT NULL,
+                        `rarity_percent` REAL NOT NULL,
+                        `unlocked_users_count` INTEGER NOT NULL DEFAULT 0,
+                        `total_users_count` INTEGER NOT NULL DEFAULT 0,
+                        `cached_at` INTEGER NOT NULL DEFAULT 0,
+                        PRIMARY KEY(`badge_id`)
+                    )
+                """.trimIndent())
+
+                // 3. Tabella user_person_frequency per i trofei Attore Feticcio e Regista del Cuore
+                db.execSQL("""
+                    CREATE TABLE IF NOT EXISTS `user_person_frequency` (
+                        `person_id` INTEGER NOT NULL,
+                        `role_type` TEXT NOT NULL,
+                        `person_name` TEXT NOT NULL,
+                        `profile_path` TEXT,
+                        `watched_count` INTEGER NOT NULL DEFAULT 0,
+                        `last_watched_at` INTEGER NOT NULL DEFAULT 0,
+                        PRIMARY KEY(`person_id`, `role_type`)
+                    )
+                """.trimIndent())
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_user_person_frequency_role_type_watched_count` ON `user_person_frequency` (`role_type`, `watched_count`)")
+                db.execSQL("CREATE INDEX IF NOT EXISTS `index_user_person_frequency_watched_count` ON `user_person_frequency` (`watched_count`)")
+            }
+        }
+
         fun getInstance(context: Context): FlickTroveDatabase {
             return instance ?: synchronized(this) {
                 try {
@@ -213,7 +272,7 @@ abstract class FlickTroveDatabase : RoomDatabase() {
                     FlickTroveDatabase::class.java,
                     DATABASE_NAME
                 )
-                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25)
+                .addMigrations(MIGRATION_6_7, MIGRATION_7_8, MIGRATION_8_9, MIGRATION_9_10, MIGRATION_10_11, MIGRATION_11_12, MIGRATION_12_13, MIGRATION_13_14, MIGRATION_14_15, MIGRATION_15_16, MIGRATION_16_17, MIGRATION_17_18, MIGRATION_18_19, MIGRATION_19_20, MIGRATION_20_21, MIGRATION_21_22, MIGRATION_22_23, MIGRATION_23_24, MIGRATION_24_25, MIGRATION_25_26)
                 .fallbackToDestructiveMigration(true)
                 .build().also { instance = it }
             }

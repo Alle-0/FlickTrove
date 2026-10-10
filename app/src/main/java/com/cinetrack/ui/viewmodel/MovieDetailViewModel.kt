@@ -72,6 +72,7 @@ class MovieDetailViewModel @Inject constructor(
     private val commentRepository: com.cinetrack.data.repository.CommentRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -672,6 +673,7 @@ class MovieDetailViewModel @Inject constructor(
             val imageType = if (newPath != null || updated.posterPath == null) ImageType.BACKDROP else ImageType.POSTER
             val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
             if (imageUrl != null) fetchAccentColor(imageUrl, updated, forceReload = true)
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -693,6 +695,7 @@ class MovieDetailViewModel @Inject constructor(
             current.votedAt = System.currentTimeMillis()
             
             repository.saveMovie(current)
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -705,6 +708,7 @@ class MovieDetailViewModel @Inject constructor(
             current.personalRating = effectiveRating
             current.votedAt = System.currentTimeMillis()
             repository.saveMovie(current)
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -715,6 +719,7 @@ class MovieDetailViewModel @Inject constructor(
             val current = local ?: movie.copy(mediaType = targetMediaType)
             current.personalNote = note
             repository.saveMovie(current)
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -723,6 +728,7 @@ class MovieDetailViewModel @Inject constructor(
             val targetMediaType = movie.mediaType.ifBlank { "movie" }
             val movieToDelete = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
             repository.deleteMovie(movieToDelete)
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -740,6 +746,7 @@ class MovieDetailViewModel @Inject constructor(
             if (local == null) {
                 repository.saveMovie(movie.copy(mediaType = targetMediaType))
             }
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -793,6 +800,7 @@ class MovieDetailViewModel @Inject constructor(
                 val updated = updateEpisodesUseCase.batchUpdate(currentMovie, castedMap).copy(dropped = false)
                 repository.saveMovie(updated)
                 ensureFirstViewingCreated(updated)
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }
@@ -809,6 +817,7 @@ class MovieDetailViewModel @Inject constructor(
                     votedAt = System.currentTimeMillis()
                 )
                 repository.saveMovie(updated)
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }
@@ -820,6 +829,7 @@ class MovieDetailViewModel @Inject constructor(
                 val currentMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
                 val updated = currentMovie.copy(personalNote = note)
                 repository.saveMovie(updated)
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }
@@ -847,6 +857,7 @@ class MovieDetailViewModel @Inject constructor(
         val movie = state.movieEntry
         viewModelScope.launch {
             repository.deleteMovie(movie)
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -895,6 +906,7 @@ class MovieDetailViewModel @Inject constructor(
                 repository.saveMovie(updatedMovie)
             }
             
+            badgeRepository.evaluateBadgesAsync()
             emitMessage(UiText.DynamicString("Rewatch logged!"))
         }
     }
@@ -909,6 +921,7 @@ class MovieDetailViewModel @Inject constructor(
             if (local != null && latest != null && local.watchedAt != latest.watchedAt) {
                 repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
             }
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -949,6 +962,7 @@ class MovieDetailViewModel @Inject constructor(
                     }
                 }
             }
+            badgeRepository.evaluateBadgesAsync()
         }
     }
 
@@ -1054,6 +1068,7 @@ class MovieDetailViewModel @Inject constructor(
                 if (watchState == WatchState.WATCHED && mediaType == "tv") {
                     ensureFirstViewingCreated(updated, customWatchDate)
                 }
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }
@@ -1104,6 +1119,7 @@ class MovieDetailViewModel @Inject constructor(
                 val updated = updateEpisodesUseCase(currentMovie, seasonNumber, currentWatchedList).copy(dropped = false)
                 repository.saveMovie(updated)
                 ensureFirstViewingCreated(updated)
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }
@@ -1124,6 +1140,7 @@ class MovieDetailViewModel @Inject constructor(
                 val updated = updateEpisodesUseCase(currentMovie, seasonNumber, newEpisodes).copy(dropped = false)
                 repository.saveMovie(updated)
                 ensureFirstViewingCreated(updated)
+                badgeRepository.evaluateBadgesAsync()
             }
         }
     }

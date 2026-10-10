@@ -129,6 +129,9 @@ object AccountTab : Tab {
         val folders by foldersViewModel.folders.collectAsStateWithLifecycle()
         val allMovies by foldersViewModel.allMovies.collectAsStateWithLifecycle()
 
+        val trophyRoomViewModel = hiltViewModel<com.cinetrack.ui.viewmodel.TrophyRoomViewModel>()
+        val trophyItems by trophyRoomViewModel.trophyItems.collectAsStateWithLifecycle()
+
         val context = androidx.compose.ui.platform.LocalContext.current
         var currentContext = context
         while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
@@ -215,16 +218,6 @@ object AccountTab : Tab {
                         }
                     }
             }
-        }
-
-        val isAuthorizedBadgeUser = remember(currentDisplayName, currentUser?.email, currentUser?.displayName) {
-            val name = currentDisplayName.trim()
-            val authName = currentUser?.displayName?.trim()
-            val authEmail = currentUser?.email?.trim()
-            
-            name.equals("Aaa", ignoreCase = true) ||
-            authName?.equals("Aaa", ignoreCase = true) == true ||
-            authEmail?.equals("a@a.com", ignoreCase = true) == true
         }
 
         var extractedColor by remember { mutableStateOf<Color?>(null) }
@@ -484,11 +477,10 @@ object AccountTab : Tab {
                                         TrophyShowcaseCard(
                                             hazeState = backgroundHazeState,
                                             backgroundLuminance = rawLuminance,
-                                            isEnabled = isAuthorizedBadgeUser,
+                                            isEnabled = true,
+                                            unlockedBadges = trophyItems.filter { it.isUnlocked },
                                             onClick = {
-                                                if (isAuthorizedBadgeUser) {
-                                                    tabNavigator.current = TrophyRoomTab
-                                                }
+                                                tabNavigator.current = TrophyRoomTab
                                             }
                                         )
                                     }

@@ -44,7 +44,8 @@ import androidx.compose.foundation.border
 import androidx.compose.ui.zIndex
 import androidx.compose.animation.core.*
 import com.cinetrack.ui.components.badge.FlickTroveBadgeEmblem
-import com.cinetrack.ui.components.badge.SAMPLE_TROPHY_ROOM_ITEMS
+import com.cinetrack.ui.components.badge.OFFICIAL_TROPHY_ROOM_CATALOG
+import com.cinetrack.ui.components.badge.TrophyRoomItemUi
 
 @Composable
 fun GeneralStatsCard(
@@ -575,35 +576,13 @@ fun YourFlowCard(
     }
 }
 
-private fun parseSampleDate(dateStr: String?): Long {
-    if (dateStr == null) return 0L
-    val parts = dateStr.trim().split(" ")
-    if (parts.size != 3) return 0L
-    val day = parts[0].toIntOrNull() ?: 0
-    val month = when (parts[1].lowercase()) {
-        "gen" -> 1
-        "feb" -> 2
-        "mar" -> 3
-        "apr" -> 4
-        "mag" -> 5
-        "giu" -> 6
-        "lug" -> 7
-        "ago" -> 8
-        "set" -> 9
-        "ott" -> 10
-        "nov" -> 11
-        "dic" -> 12
-        else -> 0
-    }
-    val year = parts[2].toIntOrNull() ?: 0
-    return year * 10000L + month * 100L + day
-}
 
 @Composable
 fun TrophyShowcaseCard(
     hazeState: HazeState,
     backgroundLuminance: Float = 0f,
     isEnabled: Boolean = true,
+    unlockedBadges: List<TrophyRoomItemUi> = emptyList(),
     onClick: () -> Unit
 ) {
     val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
@@ -712,12 +691,13 @@ fun TrophyShowcaseCard(
 
                 Spacer(modifier = Modifier.width(12.dp))
 
-                // Overlapping preview emblems from the last 3 unlocked badges
-                val previewEmblems = remember {
-                    SAMPLE_TROPHY_ROOM_ITEMS
-                        .filter { it.isUnlocked }
-                        .sortedByDescending { parseSampleDate(it.unlockedDate) }
-                        .take(3)
+                // Overlapping preview emblems from the last 3 unlocked badges or official catalog
+                val previewEmblems = remember(unlockedBadges) {
+                    if (unlockedBadges.isNotEmpty()) {
+                        unlockedBadges.sortedByDescending { it.unlockedDate ?: "" }.take(3)
+                    } else {
+                        OFFICIAL_TROPHY_ROOM_CATALOG.take(3)
+                    }
                 }
 
                 Row(

@@ -6,7 +6,8 @@ import javax.inject.Inject
 
 class CycleMovieStatusUseCase @Inject constructor(
     private val repository: MovieRepository,
-    private val updateEpisodesUseCase: UpdateEpisodesUseCase
+    private val updateEpisodesUseCase: UpdateEpisodesUseCase,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
 ) {
     suspend operator fun invoke(movie: Movie) {
         val local = repository.getMovie(movie.id, movie.mediaType)
@@ -172,6 +173,7 @@ class CycleMovieStatusUseCase @Inject constructor(
             repository.saveMovie(finalUpdated)
             // Trigger background fetch for missing metadata (runtime, cast) using partial update to avoid race conditions
             repository.fetchMissingDetailsAsync(finalUpdated)
+            badgeRepository.evaluateBadgesAsync()
         } else {
             android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: No changes to save")
         }

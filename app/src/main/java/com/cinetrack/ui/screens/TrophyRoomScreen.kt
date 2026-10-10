@@ -1,9 +1,14 @@
 package com.cinetrack.ui.screens
 
+import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
 import cafe.adriel.voyager.core.screen.uniqueScreenKey
@@ -15,6 +20,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.badge.TrophyRoomScreenContent
+import com.cinetrack.ui.viewmodel.TrophyRoomViewModel
 
 /**
  * TrophyRoomTab – Tab interno di MainScreen, integrato nella navigazione tramite TabNavigator.
@@ -42,8 +48,14 @@ object TrophyRoomTab : Tab {
     override fun Content() {
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
+        val context = LocalContext.current
+        val activity = context as? ComponentActivity
+        val viewModel = activity?.let { hiltViewModel<TrophyRoomViewModel>(it) }
+            ?: hiltViewModel<TrophyRoomViewModel>()
+        val trophyItems by viewModel.trophyItems.collectAsStateWithLifecycle()
 
         TrophyRoomScreenContent(
+            trophyItems = trophyItems,
             paddingValues = paddingValues,
             hazeState = hazeState
         )
@@ -68,8 +80,14 @@ class TrophyRoomScreen : Screen {
 
         val hazeState = LocalHazeState.current
         val paddingValues = LocalAppPadding.current
+        val context = LocalContext.current
+        val activity = context as? ComponentActivity
+        val viewModel = activity?.let { hiltViewModel<TrophyRoomViewModel>(it) }
+            ?: hiltViewModel<TrophyRoomViewModel>()
+        val trophyItems by viewModel.trophyItems.collectAsStateWithLifecycle()
 
         TrophyRoomScreenContent(
+            trophyItems = trophyItems,
             paddingValues = paddingValues,
             hazeState = hazeState
         )

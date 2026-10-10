@@ -4,6 +4,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -48,6 +49,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -78,6 +81,8 @@ import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 
+import androidx.annotation.StringRes
+
 /**
  * Modello di un trofeo nella vetrina della Trophy Room.
  */
@@ -91,12 +96,35 @@ data class TrophyRoomItemUi(
 /**
  * Criteri di ordinamento per la Sala dei Trofei.
  */
-enum class TrophySortOption(val displayName: String) {
-    TIER("Prestigio tier"),
-    PROGRESS("Avanzamento"),
-    RARITY("Rarità"),
-    RECENT("Più recenti"),
-    ALPHABETICAL("Alfabetico (A-Z)")
+enum class TrophySortOption(@StringRes val titleRes: Int) {
+    TIER(R.string.trophy_sort_tier),
+    PROGRESS(R.string.trophy_sort_progress),
+    RARITY(R.string.trophy_sort_rarity),
+    RECENT(R.string.trophy_sort_recent),
+    ALPHABETICAL(R.string.trophy_sort_alphabetical);
+
+    @Composable
+    fun localizedDisplayName(): String = stringResource(titleRes)
+}
+
+/**
+ * Categorie di filtro per la Sala dei Trofei.
+ */
+enum class TrophyFilterCategory(val id: String, @StringRes val titleRes: Int) {
+    ALL("ALL", R.string.trophy_cat_all),
+    PROGRESSIVE("PROGRESSIVE", R.string.trophy_cat_progressive),
+    GENRES_ERAS("GENRES_ERAS", R.string.trophy_cat_genres_eras),
+    HONORS("HONORS", R.string.trophy_cat_honors),
+    LOST_REEL("LOST_REEL", R.string.trophy_cat_lost_reel)
+}
+
+/**
+ * Stato di sblocco per i filtri.
+ */
+enum class TrophyStatusFilter(val id: String, @StringRes val titleRes: Int) {
+    ALL("ALL", R.string.trophy_status_all),
+    UNLOCKED("UNLOCKED", R.string.trophy_status_unlocked),
+    LOCKED("LOCKED", R.string.trophy_status_locked)
 }
 
 /**
@@ -105,15 +133,35 @@ enum class TrophySortOption(val displayName: String) {
 data class TrophyFilterConfig(
     val sortBy: TrophySortOption = TrophySortOption.TIER,
     val sortDirection: String = "desc",
-    val categories: Set<String> = emptySet(),
-    val status: String = "TUTTI",
+    val categories: Set<TrophyFilterCategory> = emptySet(),
+    val status: TrophyStatusFilter = TrophyStatusFilter.ALL,
     val tiers: Set<PreviewBadgeTier> = emptySet()
 ) {
-    val category: String get() = categories.firstOrNull() ?: "TUTTI"
+    val category: TrophyFilterCategory get() = categories.firstOrNull() ?: TrophyFilterCategory.ALL
     val tier: PreviewBadgeTier? get() = tiers.firstOrNull()
 
     val hasActiveFilters: Boolean
-        get() = sortBy != TrophySortOption.TIER || sortDirection != "desc" || categories.isNotEmpty() || status != "TUTTI" || tiers.isNotEmpty()
+        get() = sortBy != TrophySortOption.TIER || sortDirection != "desc" || categories.isNotEmpty() || status != TrophyStatusFilter.ALL || tiers.isNotEmpty()
+}
+
+fun formatLocalizedTrophyDate(dateStr: String?): String {
+    if (dateStr.isNullOrBlank()) return ""
+    return try {
+        val parsed = if (dateStr.contains("-")) {
+            java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).parse(dateStr)
+        } else {
+            try {
+                java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.ITALIAN).parse(dateStr)
+            } catch (e: Exception) {
+                java.text.SimpleDateFormat("dd MMM yyyy", java.util.Locale.US).parse(dateStr)
+            }
+        }
+        if (parsed != null) {
+            java.text.DateFormat.getDateInstance(java.text.DateFormat.MEDIUM, java.util.Locale.getDefault()).format(parsed)
+        } else dateStr
+    } catch (e: Exception) {
+        dateStr
+    }
 }
 
 private fun getTierRank(tier: PreviewBadgeTier): Int = when (tier) {
@@ -150,35 +198,16 @@ private fun TrophyRoomItemUi.completionFraction(): Float {
 }
 
 /**
- * Catalogo dimostrativo fedele al piano ufficiale BADGES_PLAN.md.
+ * Catalogo ufficiale e veritiero dei 37 trofei di FlickTrove.
+ * Ogni elemento parte nello stato originario da conquistare (progressCurrent = 0, isUnlocked = false).
+ * Lo stato effettivo dell'utente viene sincronizzato in tempo reale da Room (BadgeRepository).
  */
-val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
+val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
     // ══════════════════════════════════════════════════════════════════
-    // I 10 TROFEI SEGRETI (LOST REEL 🗝️) — IN CIMA ALLA SALA DEI TROFEI
+    // I TROFEI SEGRETI (LOST REEL 🗝️) — IN CIMA ALLA SALA DEI TROFEI
     // ══════════════════════════════════════════════════════════════════
 
-    // 1. Lost Reel: Il Produttore Esecutivo
-    TrophyRoomItemUi(
-        badge = PreviewBadgeItem(
-            id = "secret_executive_producer",
-            title = "Il Produttore Esecutivo",
-            category = BadgeTypeCategory.LOST_REEL_SECRET,
-            fixedTier = PreviewBadgeTier.LOST_REEL,
-            iconKind = CustomBadgeIconKind.EXECUTIVE_PRODUCER,
-            categoryLabel = "LOST REEL #01",
-            defaultDescription = "Dietro le quinte c'è sempre chi crede nel progetto: hai supportato direttamente lo sviluppo di FlickTrove.",
-            secretHint = "Dietro le quinte c'è sempre chi crede nel progetto...",
-            progressCurrent = 1,
-            progressTarget = 1,
-            progressUnit = "",
-            rarityPercent = "0.1%"
-        ),
-        currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = true,
-        unlockedDate = "10 Ago 2026"
-    ),
-
-    // 2. Lost Reel: Il Giorno della Marmotta
+    // 1. Lost Reel: Il Giorno della Marmotta
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_groundhog_day",
@@ -189,17 +218,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             categoryLabel = "LOST REEL #02",
             defaultDescription = "Metti la sveglia alle 6:00, Sonny e Cher stanno suonando... Hai guardato due volte lo stesso film in 48 ore.",
             secretHint = "Metti la sveglia alle 6:00, Sonny e Cher stanno suonando...",
-            progressCurrent = 2,
+            progressCurrent = 0,
             progressTarget = 2,
             progressUnit = "",
             rarityPercent = "0.3%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = true,
-        unlockedDate = "02 Feb 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 3. Lost Reel: Roulette del Fato
+    // 2. Lost Reel: Roulette del Fato
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_surprise_fate",
@@ -210,17 +239,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             categoryLabel = "LOST REEL #05",
             defaultDescription = "Affidati al caso per la tua prossima avventura: hai visto per intero un film scoperto tramite Surprise Me.",
             secretHint = "Affidati al caso per la tua prossima avventura cinematografica...",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "0.7%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = true,
-        unlockedDate = "19 Gen 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 4. Lost Reel: Creatura della Notte
+    // 3. Lost Reel: Creatura della Notte
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_night_owl",
@@ -231,17 +260,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             categoryLabel = "LOST REEL #04",
             defaultDescription = "Certe storie prendono vita solo quando la città dorme: hai registrato una visione tra le 02:00 e le 05:00 del mattino.",
             secretHint = "Certe storie prendono vita solo quando la città dorme...",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "1.4%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = true,
-        unlockedDate = "15 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 5. Lost Reel: Crisi d'Identità (Bloccato)
+    // 4. Lost Reel: Crisi d'Identità
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_genreless_rebel",
@@ -258,10 +287,11 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             rarityPercent = "1.9%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 6. Lost Reel: L'Eterno Dubbioso (Bloccato)
+    // 5. Lost Reel: L'Eterno Dubbioso
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_indecisive",
@@ -272,16 +302,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             categoryLabel = "LOST REEL #06",
             defaultDescription = "Il parere di un vero critico è in costante evoluzione: hai modificato il tuo voto personale almeno 3 volte sullo stesso film.",
             secretHint = "Il parere di un vero critico è in costante evoluzione...",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 3,
             progressUnit = "modifiche",
             rarityPercent = "2.2%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 7. Lost Reel: Perfezionista Ossessivo (Bloccato)
+    // 6. Lost Reel: Perfezionista Ossessivo
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_completionist",
@@ -290,7 +321,7 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             fixedTier = PreviewBadgeTier.LOST_REEL,
             iconKind = CustomBadgeIconKind.COMPLETIONIST_MIND,
             categoryLabel = "LOST REEL #07",
-            defaultDescription = "Non lasciare nulla al caso: hai compilato contemporaneamente Voto, Nota Personale, Vibe e Attore preferito per un film.",
+            defaultDescription = "Non lasciare nulla al caso: hai compilato contemporaneamente Voto, Nota Personale e Vibe per un film.",
             secretHint = "Non lasciare nulla al caso: cura ogni singolo dettaglio.",
             progressCurrent = 0,
             progressTarget = 1,
@@ -298,10 +329,11 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             rarityPercent = "2.8%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 8. Lost Reel: Origini del Mito (Bloccato)
+    // 7. Lost Reel: Origini del Mito
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_genesis",
@@ -318,10 +350,11 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             rarityPercent = "3.1%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 9. Lost Reel: Cuore d'Acciaio (Bloccato)
+    // 8. Lost Reel: Cuore d'Acciaio
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_iron_heart",
@@ -330,18 +363,19 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             fixedTier = PreviewBadgeTier.LOST_REEL,
             iconKind = CustomBadgeIconKind.IRON_HEART,
             categoryLabel = "LOST REEL #09",
-            defaultDescription = "Nessun brivido ha potuto scalfirti: hai affrontato 3 film horror senza assegnare vibes di paura.",
+            defaultDescription = "Nessun brivido ha potuto scalfirti: hai affrontato 3 film horror completandoli senza stroncature.",
             secretHint = "Nessun brivido ha potuto scalfirti...",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 3,
             progressUnit = "film",
             rarityPercent = "3.5%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 10. Lost Reel: Gourmet Incompreso (Bloccato)
+    // 9. Lost Reel: Gourmet Incompreso
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "secret_unloved_gem",
@@ -350,7 +384,7 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             fixedTier = PreviewBadgeTier.LOST_REEL,
             iconKind = CustomBadgeIconKind.UNLOVED_GEM,
             categoryLabel = "LOST REEL #10",
-            defaultDescription = "La bellezza è negli occhi di chi guarda: hai assegnato il voto massimo di 10 stelle a un'opera con media TMDB inferiore a 5.0.",
+            defaultDescription = "La bellezza è negli occhi di chi guarda: hai assegnato un voto eccellente (>= 9.0) a un'opera con media TMDB inferiore a 5.8.",
             secretHint = "La bellezza è negli occhi di chi guarda...",
             progressCurrent = 0,
             progressTarget = 1,
@@ -358,21 +392,22 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             rarityPercent = "4.1%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
     // ══════════════════════════════════════════════════════════════════
     // I 12 BADGE PROGRESSIVI EVOLUTIVI (1 CARD DINAMICA PER TEMA)
     // ══════════════════════════════════════════════════════════════════
 
-    // 11. Film visti - Frequenza 24fps (The Final Cut, 100%)
+    // 10. Film visti - Frequenza 24fps
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_movies",
             title = "Frequenza 24fps",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.THE_FINAL_CUT,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.CINEMA_REEL,
             categoryLabel = "FILM VISTI",
             defaultDescription = "La passione per il grande schermo attraverso i formati storici della pellicola.",
@@ -383,24 +418,24 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "Il grande formato epico. Ben 250 lungometraggi vissuti.", "250 film completati"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "L'Opera Compiuta. Oltre 500 capolavori impressi nella tua cineteca.", "500+ film • Maestria Assoluta")
             ),
-            progressCurrent = 500,
-            progressTarget = 500,
+            progressCurrent = 0,
+            progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "0.8%"
         ),
-        currentTier = PreviewBadgeTier.THE_FINAL_CUT,
-        isUnlocked = true,
-        unlockedDate = "18 Lug 2026"
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 12. Serie TV complete - Maratoneta Seriale (16mm)
+    // 11. Serie TV complete - Maratoneta Seriale
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_tv",
             title = "Maratoneta Seriale",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_16,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.TV_BINGE,
             categoryLabel = "SERIE TV",
             defaultDescription = "Dall'episodio pilota fino ai titoli di coda dell'ultima stagione.",
@@ -411,24 +446,24 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 serie TV concluse. Una dedizione monumentale.", "25 serie"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 50, "50 serie TV completate al 100%. Maratoneta definitivo.", "50 serie")
             ),
-            progressCurrent = 8,
-            progressTarget = 10,
+            progressCurrent = 0,
+            progressTarget = 3,
             progressUnit = "serie",
             rarityPercent = "14.8%"
         ),
-        currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "04 Set 2026"
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 13. Episodi Serie in 24h - Maratona Notturna (35mm)
+    // 12. Episodi Serie in 24h - Maratona Notturna
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_binge_episodes",
             title = "Maratona Notturna",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_35,
+            initialProgressiveTier = PreviewBadgeTier.MM_16,
             iconKind = CustomBadgeIconKind.BINGE_NIGHT,
             categoryLabel = "BINGE-WATCHING",
             defaultDescription = "Quando una puntata tira l'altra senza sosta.",
@@ -437,54 +472,54 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 5, "5 episodi in un solo giorno. Notte insonne.", "5 episodi"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 10, "10 episodi in 24 ore. Binge-watching leggendario.", "10 episodi")
             ),
-            progressCurrent = 5,
-            progressTarget = 10,
+            progressCurrent = 0,
+            progressTarget = 3,
             progressUnit = "episodi",
             rarityPercent = "5.2%"
         ),
-        currentTier = PreviewBadgeTier.MM_35,
-        isUnlocked = true,
-        unlockedDate = "11 Ago 2026"
+        currentTier = PreviewBadgeTier.MM_16,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 14. Watchlist - L'Archivio Infinito (35mm)
+    // 13. Watchlist - L'Archivio Infinito
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_watchlist_hoarder",
             title = "L'Archivio Infinito",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_35,
+            initialProgressiveTier = PreviewBadgeTier.MM_16,
             iconKind = CustomBadgeIconKind.ARCHIVE_STACK,
             categoryLabel = "WATCHLIST",
-            defaultDescription = "Più di 100 titoli accumulati nella tua watchlist personale.",
+            defaultDescription = "Più di 50 titoli accumulati nella tua watchlist personale.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 50, "50 titoli salvati in archivio.", "50 titoli"),
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 100, "100 titoli pronti alla visione.", "100 titoli"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "250 titoli in attesa di essere vissuti.", "250 titoli"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "500+ titoli. L'archivio cinematografico supremo.", "500+ titoli")
             ),
-            progressCurrent = 112,
-            progressTarget = 250,
+            progressCurrent = 0,
+            progressTarget = 50,
             progressUnit = "titoli",
             rarityPercent = "9.1%"
         ),
-        currentTier = PreviewBadgeTier.MM_35,
-        isUnlocked = true,
-        unlockedDate = "15 Ago 2026"
+        currentTier = PreviewBadgeTier.MM_16,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 15. Fedeltà & Longevità - Tessera del Cineclub (16mm)
+    // 14. Fedeltà & Longevità - Tessera del Cineclub
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_veteran_club",
             title = "Tessera del Cineclub",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_16,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.CINECLUB_PASS,
             categoryLabel = "FEDELTÀ",
-            defaultDescription = "Sei membro attivo del cineclub da oltre 6 mesi.",
+            defaultDescription = "Sei membro attivo del cineclub con continuità.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 1, "1 mese di cineclub.", "1 mese"),
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 6, "6 mesi nel cineclub.", "6 mesi"),
@@ -492,24 +527,24 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 24, "2 anni di passione condivisa.", "2 anni"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 36, "3+ anni di cinema nel cuore.", "3+ anni")
             ),
-            progressCurrent = 8,
-            progressTarget = 12,
+            progressCurrent = 0,
+            progressTarget = 1,
             progressUnit = "mesi",
             rarityPercent = "14.5%"
         ),
-        currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "20 Lug 2026"
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 16. Ore di Visione - Odissea del Tempo (70mm)
+    // 15. Ore di Visione - Odissea del Tempo
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_time",
             title = "Odissea del Tempo",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_70,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.TIME_ODYSSEY,
             categoryLabel = "TEMPO",
             defaultDescription = "Un viaggio monumentale nel tempo cinematografico.",
@@ -520,17 +555,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "250 ore trascorse in sala buia.", "250 ore"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "Oltre 500 ore di puro cinema. L'Odissea è compiuta.", "500+ ore")
             ),
-            progressCurrent = 268,
-            progressTarget = 500,
+            progressCurrent = 0,
+            progressTarget = 10,
             progressUnit = "ore",
             rarityPercent = "3.1%"
         ),
-        currentTier = PreviewBadgeTier.MM_70,
-        isUnlocked = true,
-        unlockedDate = "12 Set 2026"
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 17. Saghe al 100% - Signore delle Saghe (Super 8)
+    // 16. Saghe al 100% - Signore delle Saghe
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_sagas",
@@ -547,17 +582,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 5, "5 saghe completate.", "5 saghe"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 10, "10 saghe al 100%. Maestro delle saghe.", "10 saghe")
             ),
-            progressCurrent = 1,
-            progressTarget = 3,
+            progressCurrent = 0,
+            progressTarget = 1,
             progressUnit = "saghe",
             rarityPercent = "11.2%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "22 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 18. Visioni Ripetute - Déjà-Vu (Super 8)
+    // 17. Visioni Ripetute - Déjà-Vu
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_rewatch",
@@ -574,17 +609,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 10, "10 visioni ripetute dei tuoi film preferiti.", "10 rewatch"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 rewatch. La memoria cinematografica.", "25 rewatch")
             ),
-            progressCurrent = 2,
-            progressTarget = 5,
+            progressCurrent = 0,
+            progressTarget = 1,
             progressUnit = "rewatch",
             rarityPercent = "18.3%"
         ),
         currentTier = PreviewBadgeTier.SUPER_8,
-        isUnlocked = true,
-        unlockedDate = "01 Ago 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 19. Voti Personali - La Giuria (Super 8)
+    // 18. Voti Personali - La Giuria
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_ratings",
@@ -602,24 +637,24 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 100, "100 valutazioni ufficiali nella cineteca.", "100 voti"),
                 PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 250, "Presidente di Giuria • 250 voti assegnati.", "250 voti")
             ),
-            progressCurrent = 18,
-            progressTarget = 25,
+            progressCurrent = 0,
+            progressTarget = 5,
             progressUnit = "voti",
             rarityPercent = "16.0%"
         ),
         currentTier = PreviewBadgeTier.SUPER_8,
-        isUnlocked = true,
-        unlockedDate = "16 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 20. Emotional Vibes - Spettro Emozionale (16mm)
+    // 19. Emotional Vibes - Spettro Emozionale
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_vibes",
             title = "Spettro Emozionale",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_16,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.EMOTIONAL_VIBES,
             categoryLabel = "EMOZIONI",
             defaultDescription = "Dal riso al pianto: hai immortalato le tue emozioni cinematografiche con le Vibes.",
@@ -629,17 +664,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 50, "50 reazioni emotive catalogate.", "50 vibes"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 100, "100 sfumature emotive vissute in sala.", "100 vibes")
             ),
-            progressCurrent = 24,
-            progressTarget = 50,
+            progressCurrent = 0,
+            progressTarget = 5,
             progressUnit = "vibes",
             rarityPercent = "12.4%"
         ),
-        currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "25 Ago 2026"
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 21. Commenti Community - Voce della Critica (Super 8)
+    // 20. Commenti Community - Voce della Critica
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_comments",
@@ -656,24 +691,24 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 25, "25 contributi critici nella community.", "25 commenti"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 commenti. Critico autorevole di FlickTrove.", "50 commenti")
             ),
-            progressCurrent = 4,
-            progressTarget = 10,
+            progressCurrent = 0,
+            progressTarget = 3,
             progressUnit = "commenti",
             rarityPercent = "19.5%"
         ),
         currentTier = PreviewBadgeTier.SUPER_8,
-        isUnlocked = true,
-        unlockedDate = "30 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 22. Cartelle Create - Archivista d'Autore (16mm)
+    // 21. Cartelle Create - Archivista d'Autore
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_folders",
             title = "Archivista d'Autore",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_16,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.AUTHOR_FOLDERS,
             categoryLabel = "ORGANIZZAZIONE",
             defaultDescription = "Hai curato e organizzato la tua cineteca personale raggruppando film in cartelle tematiche.",
@@ -683,28 +718,28 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 5, "5 raccolte d'autore catalogate.", "5 cartelle"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 10, "10 cartelle tematiche. Archivio d'élite.", "10 cartelle")
             ),
-            progressCurrent = 3,
-            progressTarget = 5,
+            progressCurrent = 0,
+            progressTarget = 1,
             progressUnit = "cartelle",
             rarityPercent = "13.7%"
         ),
-        currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "18 Ago 2026"
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
     // ══════════════════════════════════════════════════════════════════
     // I 7 BADGE ESPLORAZIONE GENERI & EPOCHE (2 LIVELLI: 16MM & 70MM)
     // ══════════════════════════════════════════════════════════════════
 
-    // 23. Horror - Notte delle Ombre (70mm)
+    // 22. Horror - Notte delle Ombre
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "genre_horror",
             title = "Notte delle Ombre",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_70,
+            initialProgressiveTier = PreviewBadgeTier.MM_16,
             iconKind = CustomBadgeIconKind.GENRE_HORROR,
             categoryLabel = "GENERE: HORROR",
             defaultDescription = "Brividi, sussurri e tensione: hai esplorato gli angoli più oscuri del cinema.",
@@ -712,17 +747,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 film horror completati.", "10 film"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 capolavori del brivido vissuti al buio.", "25 film")
             ),
-            progressCurrent = 28,
-            progressTarget = 25,
+            progressCurrent = 0,
+            progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "6.8%"
         ),
-        currentTier = PreviewBadgeTier.MM_70,
-        isUnlocked = true,
-        unlockedDate = "23 Set 2026"
+        currentTier = PreviewBadgeTier.MM_16,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 24. Sci-Fi - Oltre l'Atmosfera (16mm)
+    // 23. Sci-Fi - Oltre l'Atmosfera
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "genre_scifi",
@@ -737,17 +772,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 film di fantascienza esplorati.", "10 film"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 viaggi nel cosmo e nel futuro.", "25 film")
             ),
-            progressCurrent = 14,
-            progressTarget = 25,
+            progressCurrent = 0,
+            progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "8.4%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "17 Ago 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 25. Noir/Thriller - Indagine a Mezzanotte (16mm)
+    // 24. Noir/Thriller - Indagine a Mezzanotte
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "genre_thriller",
@@ -762,17 +797,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 thriller e gialli completati.", "10 film"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 indagini cinematografiche risolte.", "25 film")
             ),
-            progressCurrent = 11,
-            progressTarget = 25,
+            progressCurrent = 0,
+            progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "9.6%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "05 Set 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 26. Animazione/Anime - Mondi Disegnati (Super 8, Bloccato)
+    // 25. Animazione/Anime - Mondi Disegnati
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "genre_anime",
@@ -787,16 +822,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 capolavori d'animazione.", "10 film"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 mondi disegnati vissuti con stupore.", "25 film")
             ),
-            progressCurrent = 7,
+            progressCurrent = 0,
             progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "7.2%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = false
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 27. Documentari - Occhio del Reale (16mm)
+    // 26. Documentari - Occhio del Reale
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "genre_doc",
@@ -811,17 +847,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 documentari completati.", "5 doc"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 15, "15 testimonianze del reale assimilate.", "15 doc")
             ),
-            progressCurrent = 6,
-            progressTarget = 15,
+            progressCurrent = 0,
+            progressTarget = 5,
             progressUnit = "doc",
             rarityPercent = "10.1%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "28 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 28. Pre-1980 - Archeologo della Bobina (16mm)
+    // 27. Pre-1980 - Archeologo della Bobina
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "genre_vintage",
@@ -836,24 +872,24 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 opere storiche pre-1980 completate.", "5 film"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 15, "15 classici d'epoca che hanno fatto la storia.", "15 film")
             ),
-            progressCurrent = 8,
-            progressTarget = 15,
+            progressCurrent = 0,
+            progressTarget = 5,
             progressUnit = "film",
             rarityPercent = "11.5%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "19 Ago 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 29. Nazioni Diverse - Passaporto Globale (70mm)
+    // 28. Nazioni Diverse - Passaporto Globale
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "world_tour",
             title = "Passaporto Globale",
             category = BadgeTypeCategory.PROGRESSIVE_TIERS,
             fixedTier = null,
-            initialProgressiveTier = PreviewBadgeTier.MM_70,
+            initialProgressiveTier = PreviewBadgeTier.MM_16,
             iconKind = CustomBadgeIconKind.WORLD_TOUR,
             categoryLabel = "CINEMA MONDIALE",
             defaultDescription = "Un viaggio attorno al mondo attraverso film prodotti in nazioni e culture diverse.",
@@ -861,21 +897,21 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "Opere di 5 nazioni diverse completate.", "5 nazioni"),
                 PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 10, "10 nazioni esplorate. Cinefilo senza frontiere.", "10 nazioni")
             ),
-            progressCurrent = 12,
-            progressTarget = 10,
+            progressCurrent = 0,
+            progressTarget = 5,
             progressUnit = "nazioni",
             rarityPercent = "4.5%"
         ),
-        currentTier = PreviewBadgeTier.MM_70,
-        isUnlocked = true,
-        unlockedDate = "14 Set 2026"
+        currentTier = PreviewBadgeTier.MM_16,
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
     // ══════════════════════════════════════════════════════════════════
     // GLI 8 TRAGUARDI SINGOLI DI PRESTIGIO & ONORIFICENZE
     // ══════════════════════════════════════════════════════════════════
 
-    // 30. Day One Pioneer - Pioniere Prima Bobina (The Final Cut)
+    // 29. Day One Pioneer - Pioniere Prima Bobina
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_day_one_pioneer",
@@ -885,17 +921,38 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.PIONEER_CROWN,
             categoryLabel = "FONDATORI DAY-ONE",
             defaultDescription = "Hai calcato la platea di FlickTrove nei primi mesi di vita. Un posto d'onore riservato ai veri fondatori.",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "1.2%"
         ),
         currentTier = PreviewBadgeTier.THE_FINAL_CUT,
-        isUnlocked = true,
-        unlockedDate = "29 Ago 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 31. Cloud Sync - Il Trasloco (16mm)
+    // 30. Sostenitore & Mecenate - Il Produttore Esecutivo
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_executive_producer",
+            title = "Il Produttore Esecutivo",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.THE_FINAL_CUT,
+            iconKind = CustomBadgeIconKind.EXECUTIVE_PRODUCER,
+            categoryLabel = "MECENATI & SUPPORTO",
+            defaultDescription = "Dietro le quinte c'è sempre chi crede nel progetto: hai supportato direttamente lo sviluppo di FlickTrove.",
+            secretHint = null,
+            progressCurrent = 0,
+            progressTarget = 1,
+            progressUnit = "",
+            rarityPercent = "0.1%"
+        ),
+        currentTier = PreviewBadgeTier.THE_FINAL_CUT,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 31. Cloud Sync - Il Trasloco
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_onboarding_sync",
@@ -905,17 +962,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.SYNC_REEL,
             categoryLabel = "CINETECA CLOUD",
             defaultDescription = "Hai sincronizzato con successo la tua storia cinematografica importando la cineteca da Trakt o SIMKL.",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "6.4%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
-        isUnlocked = true,
-        unlockedDate = "14 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 32. TMDB > 8.5 - Gourmet del Cinema (70mm)
+    // 32. TMDB > 8.5 - Gourmet del Cinema
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "gourmet_critic",
@@ -925,17 +982,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.GOURMET_CRITIC,
             categoryLabel = "ALTA CRITICA",
             defaultDescription = "Hai completato 5 capolavori con votazione media globale TMDB superiore a 8.5 stelle.",
-            progressCurrent = 5,
+            progressCurrent = 0,
             progressTarget = 5,
             progressUnit = "film",
             rarityPercent = "3.8%"
         ),
         currentTier = PreviewBadgeTier.MM_70,
-        isUnlocked = true,
-        unlockedDate = "21 Ago 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 33. Durata > 3h30m - Titanico (70mm)
+    // 33. Durata > 3h30m - Titanico
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "colossal",
@@ -945,17 +1002,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.COLOSSAL_MONUMENT,
             categoryLabel = "SFIDA EPICA",
             defaultDescription = "Hai completato un'opera monumentale di durata superiore alle 3 ore e 30 minuti in una sola sessione.",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "3.6%"
         ),
         currentTier = PreviewBadgeTier.MM_70,
-        isUnlocked = true,
-        unlockedDate = "27 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 34. Attore Preferito - Attore Feticcio (35mm)
+    // 34. Attore Preferito - Attore Feticcio
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "actor_muse",
@@ -965,17 +1022,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.ACTOR_MUSE,
             categoryLabel = "PREFERENZE",
             defaultDescription = "Hai selezionato lo stesso interprete del cuore in 5 check-in dedicati.",
-            progressCurrent = 5,
+            progressCurrent = 0,
             progressTarget = 5,
             progressUnit = "check-in",
             rarityPercent = "5.9%"
         ),
         currentTier = PreviewBadgeTier.MM_35,
-        isUnlocked = true,
-        unlockedDate = "09 Set 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 35. 5 Film Stesso Regista - Regista del Cuore (70mm)
+    // 35. 5 Film Stesso Regista - Regista del Cuore
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "director_heart",
@@ -985,17 +1042,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.DIRECTOR_CHAIR,
             categoryLabel = "AUTORIALITÀ",
             defaultDescription = "Hai esplorato la visione autoriale del tuo regista preferito completando oltre 5 sue opere.",
-            progressCurrent = 5,
+            progressCurrent = 0,
             progressTarget = 5,
             progressUnit = "film",
             rarityPercent = "1.8%"
         ),
         currentTier = PreviewBadgeTier.MM_70,
-        isUnlocked = true,
-        unlockedDate = "19 Ago 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 36. 5 Note Personali - Diario di Bordo (35mm)
+    // 36. 5 Note Personali - Diario di Bordo
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "personal_diary",
@@ -1005,17 +1062,17 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.PERSONAL_DIARY,
             categoryLabel = "NOTE PERSONALI",
             defaultDescription = "Hai annotato impressioni e pensieri intimi scrivendo 5 note personali sui film vissuti.",
-            progressCurrent = 5,
+            progressCurrent = 0,
             progressTarget = 5,
             progressUnit = "note",
             rarityPercent = "7.0%"
         ),
         currentTier = PreviewBadgeTier.MM_35,
-        isUnlocked = true,
-        unlockedDate = "03 Set 2026"
+        isUnlocked = false,
+        unlockedDate = null
     ),
 
-    // 37. Backdrop Personalizzato - Scenografo Personale (Super 8)
+    // 37. Backdrop Personalizzato - Scenografo Personale
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "custom_backdrop",
@@ -1025,14 +1082,14 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
             iconKind = CustomBadgeIconKind.CUSTOM_BACKDROP,
             categoryLabel = "PERSONALIZZAZIONE",
             defaultDescription = "Hai personalizzato la tua identità cinefila impostando un backdrop cinematografico nel profilo.",
-            progressCurrent = 1,
+            progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "22.1%"
         ),
         currentTier = PreviewBadgeTier.SUPER_8,
-        isUnlocked = true,
-        unlockedDate = "15 Lug 2026"
+        isUnlocked = false,
+        unlockedDate = null
     )
 )
 
@@ -1047,6 +1104,7 @@ val SAMPLE_TROPHY_ROOM_ITEMS = listOf(
  */
 @Composable
 fun TrophyRoomScreenContent(
+    trophyItems: List<TrophyRoomItemUi> = OFFICIAL_TROPHY_ROOM_CATALOG,
     paddingValues: PaddingValues = PaddingValues(),
     hazeState: HazeState? = null,
     isFilterModalOpenExternal: Boolean = false,
@@ -1074,38 +1132,35 @@ fun TrophyRoomScreenContent(
         }
     }
 
-    val unlockedCount = SAMPLE_TROPHY_ROOM_ITEMS.count { it.isUnlocked }
-    val totalCount = SAMPLE_TROPHY_ROOM_ITEMS.size
-    val completionFraction = (unlockedCount.toFloat() / totalCount).coerceIn(0f, 1f)
-    val unlockedTierCounts = remember {
-        SAMPLE_TROPHY_ROOM_ITEMS.filter { it.isUnlocked }.groupBy { it.currentTier }.mapValues { it.value.size }
+    val unlockedCount = trophyItems.count { it.isUnlocked }
+    val totalCount = trophyItems.size
+    val completionFraction = (unlockedCount.toFloat() / totalCount.coerceAtLeast(1)).coerceIn(0f, 1f)
+    val unlockedTierCounts = remember(trophyItems) {
+        trophyItems.filter { it.isUnlocked }.groupBy { it.currentTier }.mapValues { it.value.size }
     }
 
     // 1. Filtraggio coerente guidato dal modale dei filtri
-    val filteredItems = remember(filterConfig) {
-        SAMPLE_TROPHY_ROOM_ITEMS.filter { item ->
+    val filteredItems = remember(filterConfig, trophyItems) {
+        trophyItems.filter { item ->
             // Filtro Categoria (Multi-selezione: vuoto significa tutti)
-            val matchesCategory = if (filterConfig.categories.isEmpty()) {
+            val matchesCategory = if (filterConfig.categories.isEmpty() || TrophyFilterCategory.ALL in filterConfig.categories) {
                 true
             } else {
                 filterConfig.categories.any { cat ->
                     when (cat) {
-                        "PROGRESSIVI" -> item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS && !item.badge.id.startsWith("genre_") && item.badge.id != "world_tour"
-                        "GENERI & EPOCHE" -> item.badge.id.startsWith("genre_") || item.badge.id == "world_tour"
-                        "ONORIFICENZE" -> item.badge.category == BadgeTypeCategory.DAY_ONE_HONOR || item.badge.category == BadgeTypeCategory.SPECIAL_ACHIEVEMENT
-                        "LOST REEL" -> item.badge.category == BadgeTypeCategory.LOST_REEL_SECRET
-                        "FILM" -> item.badge.id.contains("movie") || item.badge.categoryLabel.contains("FILM")
-                        "SERIE TV" -> item.badge.id.contains("tv")
-                        "SAGHE" -> item.badge.id.contains("saga") || item.badge.categoryLabel.contains("SAGHE")
-                        else -> true
+                        TrophyFilterCategory.PROGRESSIVE -> item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS && !item.badge.id.startsWith("genre_") && item.badge.id != "world_tour"
+                        TrophyFilterCategory.GENRES_ERAS -> item.badge.id.startsWith("genre_") || item.badge.id == "world_tour"
+                        TrophyFilterCategory.HONORS -> item.badge.category == BadgeTypeCategory.DAY_ONE_HONOR || item.badge.category == BadgeTypeCategory.SPECIAL_ACHIEVEMENT
+                        TrophyFilterCategory.LOST_REEL -> item.badge.category == BadgeTypeCategory.LOST_REEL_SECRET
+                        TrophyFilterCategory.ALL -> true
                     }
                 }
             }
             // Filtro Stato
             val matchesStatus = when (filterConfig.status) {
-                "SBLOCCATI" -> item.isUnlocked
-                "DA CONQUISTARE" -> !item.isUnlocked
-                else -> true
+                TrophyStatusFilter.UNLOCKED -> item.isUnlocked
+                TrophyStatusFilter.LOCKED -> !item.isUnlocked
+                TrophyStatusFilter.ALL -> true
             }
             // Filtro Formato Tier (Multi-selezione: vuoto significa tutti)
             val matchesTier = filterConfig.tiers.isEmpty() || item.currentTier in filterConfig.tiers
@@ -1279,109 +1334,170 @@ private fun TrophyStatsSummaryCard(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 13.dp)
+                .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
+            // Header: solo titolo sezione pulito, zero duplicazioni di 30/37
+            Text(
+                text = stringResource(R.string.trophy_palmares_title),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.5.sp
+                ),
+                color = NeonTeal
+            )
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // Body: Stat Ruota a sinistra + Rarità a destra
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                Column {
-                    Text(
-                        text = "PALMARES CINEFILO",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 9.sp,
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.5.sp
-                        ),
-                        color = NeonTeal
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Row(verticalAlignment = Alignment.Bottom) {
-                        Text(
-                            text = "$unlockedCount",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Black,
-                            color = Color.White
-                        )
-                        Text(
-                            text = " / $totalCount sbloccati",
-                            fontSize = 12.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
-                        )
+                // 1. STAT RUOTA A SINISTRA (Ingrandita e prominente)
+                TrophyMultiTierWheel(
+                    unlockedCount = unlockedCount,
+                    totalCount = totalCount,
+                    completionFraction = completionFraction,
+                    tierCounts = tierCounts,
+                    modifier = Modifier.size(96.dp)
+                )
+
+                // 2. RARITÀ A DESTRA (2 colonne x 3 righe come prima, perfettamente allineate)
+                Column(
+                    modifier = Modifier.weight(1f),
+                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                ) {
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CompactTierBadge(PreviewBadgeTier.SUPER_8, (tierCounts[PreviewBadgeTier.SUPER_8] ?: 0).toString(), Modifier.weight(1f))
+                        CompactTierBadge(PreviewBadgeTier.MM_16, (tierCounts[PreviewBadgeTier.MM_16] ?: 0).toString(), Modifier.weight(1f))
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CompactTierBadge(PreviewBadgeTier.MM_35, (tierCounts[PreviewBadgeTier.MM_35] ?: 0).toString(), Modifier.weight(1f))
+                        CompactTierBadge(PreviewBadgeTier.MM_70, (tierCounts[PreviewBadgeTier.MM_70] ?: 0).toString(), Modifier.weight(1f))
+                    }
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        CompactTierBadge(PreviewBadgeTier.THE_FINAL_CUT, (tierCounts[PreviewBadgeTier.THE_FINAL_CUT] ?: 0).toString(), Modifier.weight(1f))
+                        CompactTierBadge(PreviewBadgeTier.LOST_REEL, (tierCounts[PreviewBadgeTier.LOST_REEL] ?: 0).toString(), Modifier.weight(1f))
                     }
                 }
+            }
+        }
+    }
+}
 
-                // Percentuale a pillola discreta
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(NeonTeal.copy(alpha = 0.12f))
-                        .border(1.dp, NeonTeal.copy(alpha = 0.35f), CircleShape)
-                        .padding(horizontal = 9.dp, vertical = 3.5.dp)
-                ) {
-                    Text(
-                        text = "${(completionFraction * 100).toInt()}%",
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = FontWeight.Black,
-                            fontSize = 12.sp
-                        ),
-                        color = NeonTeal
+@Composable
+private fun TrophyMultiTierWheel(
+    unlockedCount: Int,
+    totalCount: Int,
+    completionFraction: Float,
+    tierCounts: Map<PreviewBadgeTier, Int>,
+    modifier: Modifier = Modifier
+) {
+    val tierOrder = remember {
+        listOf(
+            PreviewBadgeTier.SUPER_8,
+            PreviewBadgeTier.MM_16,
+            PreviewBadgeTier.MM_35,
+            PreviewBadgeTier.MM_70,
+            PreviewBadgeTier.THE_FINAL_CUT,
+            PreviewBadgeTier.LOST_REEL
+        )
+    }
+
+    Box(
+        modifier = modifier,
+        contentAlignment = Alignment.Center
+    ) {
+        Canvas(modifier = Modifier.fillMaxSize()) {
+            val strokeWidthPx = 7.dp.toPx()
+            val diameter = size.minDimension - strokeWidthPx
+            val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
+            val topLeft = androidx.compose.ui.geometry.Offset(strokeWidthPx / 2f, strokeWidthPx / 2f)
+
+            // Anello di sfondo track satinato
+            drawCircle(
+                color = Color.White.copy(alpha = 0.08f),
+                radius = diameter / 2f,
+                style = Stroke(width = strokeWidthPx)
+            )
+
+            val safeTotal = totalCount.coerceAtLeast(1)
+            var currentAngle = -90f
+
+            val activeTiers = tierOrder.filter { (tierCounts[it] ?: 0) > 0 }
+            val hasMultipleTiers = activeTiers.size > 1
+
+            // Angolo coperto dal cap arrotondato su ciascun estremo
+            val radiusPx = diameter / 2f
+            val capAngle = if (radiusPx > 0f) {
+                ((strokeWidthPx / 2f) / (2f * Math.PI.toFloat() * radiusPx)) * 360f
+            } else 4f
+
+            // Micro-gap pulito tra gli estremi arrotondati
+            val gap = if (hasMultipleTiers) (capAngle * 2f + 1.2f) else 0f
+
+            for (tier in activeTiers) {
+                val count = tierCounts[tier] ?: 0
+                val sweep = (count.toFloat() / safeTotal.toFloat()) * 360f
+                if (sweep > 0f) {
+                    val arcSweep = if (hasMultipleTiers) {
+                        (sweep - gap).coerceAtLeast(0.5f)
+                    } else {
+                        sweep
+                    }
+                    val startOffset = if (hasMultipleTiers) (gap / 2f) else 0f
+
+                    drawArc(
+                        color = tier.primaryColor,
+                        startAngle = currentAngle + startOffset,
+                        sweepAngle = arcSweep,
+                        useCenter = false,
+                        topLeft = topLeft,
+                        size = arcSize,
+                        style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
                     )
                 }
+                currentAngle += sweep
             }
+        }
 
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Micro-barra satinata
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(4.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.08f))
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth(fraction = completionFraction)
-                        .height(4.dp)
-                        .clip(CircleShape)
-                        .background(
-                            Brush.horizontalGradient(
-                                listOf(NeonTeal, Color(0xFF10B981))
-                            )
-                        )
-                )
-            }
-
-            Spacer(modifier = Modifier.height(10.dp))
-
-            // Sintesi ultra-compatta su 3 colonne x 2 righe (dimezza l'altezza verticale)
-            Column(
-                modifier = Modifier.fillMaxWidth(),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CompactTierBadge(PreviewBadgeTier.SUPER_8, (tierCounts[PreviewBadgeTier.SUPER_8] ?: 0).toString(), Modifier.weight(1f))
-                    CompactTierBadge(PreviewBadgeTier.MM_16, (tierCounts[PreviewBadgeTier.MM_16] ?: 0).toString(), Modifier.weight(1f))
-                    CompactTierBadge(PreviewBadgeTier.MM_35, (tierCounts[PreviewBadgeTier.MM_35] ?: 0).toString(), Modifier.weight(1f))
-                }
-                Row(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    CompactTierBadge(PreviewBadgeTier.MM_70, (tierCounts[PreviewBadgeTier.MM_70] ?: 0).toString(), Modifier.weight(1f))
-                    CompactTierBadge(PreviewBadgeTier.THE_FINAL_CUT, (tierCounts[PreviewBadgeTier.THE_FINAL_CUT] ?: 0).toString(), Modifier.weight(1f))
-                    CompactTierBadge(PreviewBadgeTier.LOST_REEL, (tierCounts[PreviewBadgeTier.LOST_REEL] ?: 0).toString(), Modifier.weight(1f))
-                }
-            }
+        // Centro della ruota: Percentuale in grande + conteggio
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center
+        ) {
+            Text(
+                text = "${(completionFraction * 100).toInt()}%",
+                style = MaterialTheme.typography.titleLarge.copy(
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = (-0.5).sp
+                ),
+                color = Color.White
+            )
+            Spacer(modifier = Modifier.height(1.dp))
+            Text(
+                text = "$unlockedCount/$totalCount",
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold
+                ),
+                color = Color.White.copy(alpha = 0.5f)
+            )
         }
     }
 }
@@ -1394,7 +1510,7 @@ private fun CompactTierBadge(
 ) {
     Row(
         modifier = modifier
-            .height(28.dp)
+            .height(26.dp)
             .clip(CircleShape)
             .background(Color.White.copy(alpha = 0.05f))
             .border(
@@ -1402,7 +1518,7 @@ private fun CompactTierBadge(
                 color = tier.primaryColor.copy(alpha = 0.85f),
                 shape = CircleShape
             )
-            .padding(start = 7.dp, top = 2.5.dp, bottom = 2.5.dp, end = 2.5.dp),
+            .padding(start = 7.dp, top = 2.dp, bottom = 2.dp, end = 2.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // 1. Pallino colorato del Tier
@@ -1417,9 +1533,9 @@ private fun CompactTierBadge(
 
         // 2. Nome del Formato / Tier in bianco
         Text(
-            text = tier.shortLabel,
+            text = tier.localizedFormatName(),
             style = MaterialTheme.typography.labelSmall.copy(
-                fontSize = 9.5.sp,
+                fontSize = 9.sp,
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.2.sp
             ),
@@ -1433,7 +1549,7 @@ private fun CompactTierBadge(
         // 3. Badge numerico circolare concentrico a destra
         Box(
             modifier = Modifier
-                .size(23.dp)
+                .size(22.dp)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.08f))
                 .border(
@@ -1472,16 +1588,26 @@ fun TrophyFilterModal(
     var localConfig by remember(isVisible) { mutableStateOf(config) }
     var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
 
-    val categoryList = listOf("TUTTI", "PROGRESSIVI", "GENERI & EPOCHE", "ONORIFICENZE", "LOST REEL")
-    val statusList = listOf("TUTTI", "SBLOCCATI", "DA CONQUISTARE")
+    val categoryList = listOf(
+        TrophyFilterCategory.ALL,
+        TrophyFilterCategory.PROGRESSIVE,
+        TrophyFilterCategory.GENRES_ERAS,
+        TrophyFilterCategory.HONORS,
+        TrophyFilterCategory.LOST_REEL
+    )
+    val statusList = listOf(
+        TrophyStatusFilter.ALL,
+        TrophyStatusFilter.UNLOCKED,
+        TrophyStatusFilter.LOCKED
+    )
     val tierList = listOf(
-        null to "TUTTI",
-        PreviewBadgeTier.LOST_REEL to "LOST REEL",
-        PreviewBadgeTier.THE_FINAL_CUT to "FINAL CUT",
-        PreviewBadgeTier.MM_70 to "70MM",
-        PreviewBadgeTier.MM_35 to "35MM",
-        PreviewBadgeTier.MM_16 to "16MM",
-        PreviewBadgeTier.SUPER_8 to "SUPER 8"
+        null to R.string.trophy_cat_all,
+        PreviewBadgeTier.LOST_REEL to R.string.trophy_format_lost_reel,
+        PreviewBadgeTier.THE_FINAL_CUT to R.string.trophy_format_final_cut,
+        PreviewBadgeTier.MM_70 to R.string.trophy_format_70mm,
+        PreviewBadgeTier.MM_35 to R.string.trophy_format_35mm,
+        PreviewBadgeTier.MM_16 to R.string.trophy_format_16mm,
+        PreviewBadgeTier.SUPER_8 to R.string.trophy_format_super_8
     )
 
     MorphGlassModal(
@@ -1503,7 +1629,7 @@ fun TrophyFilterModal(
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
                 Text(
-                    text = "FILTRA TROFEI",
+                    text = stringResource(R.string.trophy_filter_title),
                     style = MaterialTheme.typography.headlineSmall,
                     fontWeight = FontWeight.Black,
                     letterSpacing = 3.sp,
@@ -1560,7 +1686,7 @@ fun TrophyFilterModal(
             ) {
                 // 1. ORDINA PER (Ufficiale FlickTrove con SortOptionItem e DirectionChip)
                 ExpandableSection(
-                    title = "ORDINA PER",
+                    title = stringResource(R.string.trophy_filter_sort_by),
                     isExpanded = expandedSection == "sort",
                     showChevron = true,
                     isClickable = true,
@@ -1573,7 +1699,7 @@ fun TrophyFilterModal(
                     ) {
                         TrophySortOption.values().forEach { option ->
                             SortOptionItem(
-                                label = option.displayName,
+                                label = stringResource(option.titleRes),
                                 isSelected = localConfig.sortBy == option,
                                 onClick = { localConfig = localConfig.copy(sortBy = option) }
                             )
@@ -1608,11 +1734,11 @@ fun TrophyFilterModal(
 
                 // 2. CATEGORIA (Multi-selezione con FilterChip)
                 ExpandableSection(
-                    title = "CATEGORIA",
+                    title = stringResource(R.string.trophy_filter_category),
                     isExpanded = expandedSection == "category",
                     showChevron = true,
                     isClickable = true,
-                    badgeCount = localConfig.categories.size,
+                    badgeCount = if (localConfig.categories.contains(TrophyFilterCategory.ALL)) 0 else localConfig.categories.size,
                     onToggle = { expandedSection = if (expandedSection == "category") null else "category" }
                 ) {
                     FlowRow(
@@ -1621,19 +1747,20 @@ fun TrophyFilterModal(
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         categoryList.forEach { cat ->
-                            val isAll = cat == "TUTTI"
-                            val isSelected = if (isAll) localConfig.categories.isEmpty() else cat in localConfig.categories
-                            val isLostReel = cat == "LOST REEL"
+                            val isAll = cat == TrophyFilterCategory.ALL
+                            val isSelected = if (isAll) localConfig.categories.isEmpty() || TrophyFilterCategory.ALL in localConfig.categories else cat in localConfig.categories
+                            val isLostReel = cat == TrophyFilterCategory.LOST_REEL
                             val lostReelColor = if (isLostReel) PreviewBadgeTier.LOST_REEL.primaryColor else null
 
                             FilterChip(
-                                label = cat,
+                                label = stringResource(cat.titleRes),
                                 isSelected = isSelected,
                                 onClick = {
                                     localConfig = if (isAll) {
                                         localConfig.copy(categories = emptySet())
                                     } else {
-                                        val newSet = if (isSelected) localConfig.categories - cat else localConfig.categories + cat
+                                        val withoutAll = localConfig.categories - TrophyFilterCategory.ALL
+                                        val newSet = if (isSelected) withoutAll - cat else withoutAll + cat
                                         localConfig.copy(categories = newSet)
                                     }
                                 },
@@ -1648,11 +1775,11 @@ fun TrophyFilterModal(
 
                 // 3. STATO (FilterChip ufficiali dell'app)
                 ExpandableSection(
-                    title = "STATO",
+                    title = stringResource(R.string.trophy_filter_status),
                     isExpanded = expandedSection == "status",
                     showChevron = true,
                     isClickable = true,
-                    badgeCount = if (localConfig.status != "TUTTI") 1 else 0,
+                    badgeCount = if (localConfig.status != TrophyStatusFilter.ALL) 1 else 0,
                     onToggle = { expandedSection = if (expandedSection == "status") null else "status" }
                 ) {
                     FlowRow(
@@ -1662,7 +1789,7 @@ fun TrophyFilterModal(
                     ) {
                         statusList.forEach { statusOption ->
                             FilterChip(
-                                label = statusOption,
+                                label = stringResource(statusOption.titleRes),
                                 isSelected = localConfig.status == statusOption,
                                 onClick = { localConfig = localConfig.copy(status = statusOption) }
                             )
@@ -1672,7 +1799,7 @@ fun TrophyFilterModal(
 
                 // 4. FORMATO PELLICOLA (Multi-selezione con FilterChip)
                 ExpandableSection(
-                    title = "FORMATO PELLICOLA",
+                    title = stringResource(R.string.trophy_filter_format),
                     isExpanded = expandedSection == "tier",
                     showChevron = true,
                     isClickable = true,
@@ -1684,13 +1811,13 @@ fun TrophyFilterModal(
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        tierList.forEach { (tierOption, label) ->
+                        tierList.forEach { (tierOption, labelRes) ->
                             val isAll = tierOption == null
                             val isSelected = if (isAll) localConfig.tiers.isEmpty() else tierOption in localConfig.tiers
                             val tierColor = tierOption?.primaryColor
 
                             FilterChip(
-                                label = label,
+                                label = stringResource(labelRes),
                                 isSelected = isSelected,
                                 onClick = {
                                     localConfig = if (isAll) {
@@ -1786,7 +1913,7 @@ fun TrophyDetailContent(
                         .padding(horizontal = 11.dp, vertical = 3.5.dp)
                 ) {
                     Text(
-                        text = item.currentTier.formatName.uppercase(),
+                        text = item.currentTier.localizedFormatName().uppercase(),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
@@ -1803,9 +1930,10 @@ fun TrophyDetailContent(
                         .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
                         .padding(horizontal = 11.dp, vertical = 3.5.dp)
                 ) {
+                    val tierLabel = targetTier?.localizedFormatName()?.uppercase() ?: stringResource(R.string.trophy_tier_1)
                     Text(
-                        text = if (item.badge.category == BadgeTypeCategory.LOST_REEL_SECRET) "LOST REEL"
-                        else "DA SBLOCCARE • ${targetTier?.formatName?.uppercase() ?: "1° LIVELLO"}",
+                        text = if (item.badge.category == BadgeTypeCategory.LOST_REEL_SECRET) stringResource(R.string.trophy_cat_lost_reel)
+                        else stringResource(R.string.trophy_to_unlock_tier, tierLabel),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Black,
@@ -1823,14 +1951,16 @@ fun TrophyDetailContent(
                 tier = if (item.isUnlocked) item.currentTier else (targetTier ?: item.currentTier),
                 iconKind = item.badge.iconKind,
                 isUnlocked = item.isUnlocked,
-                size = 110.dp
+                size = 110.dp,
+                enableInteractiveParallax = true,
+                enablePeriodicGleam = true
             )
 
             Spacer(modifier = Modifier.height(14.dp))
 
             // 2. Titolo del Trofeo (centrato direttamente sotto l'emblema)
             Text(
-                text = item.badge.title,
+                text = item.badge.localizedTitle(),
                 style = MaterialTheme.typography.headlineSmall.copy(
                     fontWeight = FontWeight.Black,
                     fontSize = 20.sp
@@ -1846,7 +1976,7 @@ fun TrophyDetailContent(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
-                if (item.isUnlocked && item.unlockedDate != null) {
+                if (item.isUnlocked && !item.unlockedDate.isNullOrBlank()) {
                     Box(
                         modifier = Modifier
                             .clip(CircleShape)
@@ -1854,7 +1984,7 @@ fun TrophyDetailContent(
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
-                            text = item.unlockedDate,
+                            text = formatLocalizedTrophyDate(item.unlockedDate),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.SemiBold
@@ -1871,7 +2001,7 @@ fun TrophyDetailContent(
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
-                        text = "Sbloccato dal ${item.badge.rarityPercent} dei cinefili",
+                        text = stringResource(R.string.trophy_rarity_pct, item.badge.rarityPercent),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 11.sp,
                             fontWeight = FontWeight.SemiBold
@@ -1895,9 +2025,9 @@ fun TrophyDetailContent(
 
             // 4. Paragrafo Descrittivo
             val desc = if (!item.isUnlocked && item.badge.secretHint != null) {
-                item.badge.secretHint
+                item.badge.localizedSecretHint() ?: item.badge.localizedDescription()
             } else {
-                item.badge.progressiveSteps[item.currentTier]?.description ?: item.badge.defaultDescription
+                item.badge.localizedDescription()
             }
 
             Text(
@@ -1916,7 +2046,7 @@ fun TrophyDetailContent(
             // 5. PROGRESSIONE CHIARA: quanto ho visto e quanto serve per il prossimo traguardo
             if (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS) {
                 val currentVal = item.badge.progressCurrent
-                val unit = item.badge.progressUnit
+                val unit = item.badge.localizedUnit()
                 val isMaxTier = item.isUnlocked && (targetTier == null || item.currentTier == availableTiers.lastOrNull())
 
                 val nextTarget = if (!item.isUnlocked) {
@@ -1944,7 +2074,7 @@ fun TrophyDetailContent(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = if (isMaxTier) "TRAGUARDO MASSIMO" else "PROSSIMO OBIETTIVO",
+                                text = if (isMaxTier) stringResource(R.string.trophy_max_target_reached) else stringResource(R.string.trophy_next_goal),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 9.sp,
                                     fontWeight = FontWeight.ExtraBold,
@@ -1984,9 +2114,13 @@ fun TrophyDetailContent(
                                     modifier = Modifier.padding(bottom = 2.dp, start = 4.dp)
                                 )
                             } else {
-                                val completedSuffix = if (unit.equals("ore", ignoreCase = true) || unit.endsWith("e", ignoreCase = true)) "completate" else "completati"
+                                val completedSuffix = if (unit.equals("ore", ignoreCase = true) || unit.endsWith("e", ignoreCase = true)) {
+                                    stringResource(R.string.trophy_completed_suffix_fem)
+                                } else {
+                                    stringResource(R.string.trophy_completed_suffix)
+                                }
                                 Text(
-                                    text = if (unit.isNotBlank()) " $unit $completedSuffix" else " completati",
+                                    text = if (unit.isNotBlank()) " $unit $completedSuffix" else " $completedSuffix",
                                     fontSize = 13.sp,
                                     fontWeight = FontWeight.SemiBold,
                                     color = Color.White.copy(alpha = 0.65f),
@@ -2031,9 +2165,13 @@ fun TrophyDetailContent(
                         // Testo di supporto — senza ripetere il target già indicato sopra
                         if (!isMaxTier && targetTier != null) {
                             Spacer(modifier = Modifier.height(8.dp))
-                            val targetLabel = if (!item.isUnlocked) "il trofeo (${targetTier.formatName})" else targetTier.formatName
+                            val targetLabel = if (!item.isUnlocked) {
+                                stringResource(R.string.trophy_to_unlock_trophy_tier, targetTier.localizedFormatName())
+                            } else {
+                                targetTier.localizedFormatName()
+                            }
                             Text(
-                                text = "Ti mancano $needed $unit per sbloccare $targetLabel.",
+                                text = stringResource(R.string.trophy_needed_count, needed, unit, targetLabel),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontSize = 11.sp,
                                     lineHeight = 15.sp
@@ -2043,7 +2181,7 @@ fun TrophyDetailContent(
                         } else if (isMaxTier) {
                             Spacer(modifier = Modifier.height(8.dp))
                             Text(
-                                text = "Hai raggiunto il traguardo massimo di questo trofeo.",
+                                text = stringResource(R.string.trophy_max_milestone_desc),
                                 style = MaterialTheme.typography.bodySmall.copy(
                                     fontSize = 11.sp,
                                     lineHeight = 15.sp
@@ -2140,7 +2278,11 @@ private fun TrophyDetailModalPreview() {
                 onDismissRequest = {}
             ) { _ ->
                 TrophyDetailContent(
-                    item = SAMPLE_TROPHY_ROOM_ITEMS[0],
+                    item = OFFICIAL_TROPHY_ROOM_CATALOG[0].copy(
+                        isUnlocked = true,
+                        unlockedDate = "02 Feb 2026",
+                        badge = OFFICIAL_TROPHY_ROOM_CATALOG[0].badge.copy(progressCurrent = 2)
+                    ),
                     onClose = {}
                 )
             }

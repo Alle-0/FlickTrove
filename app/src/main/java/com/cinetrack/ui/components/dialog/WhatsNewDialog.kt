@@ -157,9 +157,9 @@ fun WhatsNewDialog(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(50.dp)
+                        .bounceClick { onDismiss() }
                         .clip(RoundedCornerShape(14.dp))
-                        .background(accentColor)
-                        .bounceClick { onDismiss() },
+                        .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Row(verticalAlignment = Alignment.CenterVertically) {
