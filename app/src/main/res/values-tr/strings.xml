@@ -1602,4 +1602,8 @@
 
     <string name="trophy_track_title">FORMAT İLERLEMESİ</string>
     <string name="trophy_completed_badge">TAMAMLANDI</string>
+    <string name="trophy_unlock_banner_header">KUPA AÇILDI</string>
+    <string name="trophy_unlock_banner_format_upgraded">YENİ FORMAT</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d kupa açıldı!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Kupa Odası\'na göz at</string>
 </resources>

@@ -1603,4 +1603,8 @@
 
     <string name="trophy_track_title">FORMAT PROGRESSION</string>
     <string name="trophy_completed_badge">COMPLETED</string>
+    <string name="trophy_unlock_banner_header">TROPHY UNLOCKED</string>
+    <string name="trophy_unlock_banner_format_upgraded">NEW FORMAT</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d trophies unlocked!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Check out the Trophy Room</string>
 </resources>

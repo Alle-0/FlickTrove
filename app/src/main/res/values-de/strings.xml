@@ -1534,5 +1534,9 @@
 
     <string name="trophy_track_title">FORMAT-AUFSTIEG</string>
     <string name="trophy_completed_badge">ABGESCHLOSSEN</string>
+    <string name="trophy_unlock_banner_header">TROPHÄE FREIGESCHALTET</string>
+    <string name="trophy_unlock_banner_format_upgraded">NEUES FORMAT</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d Trophäen freigeschaltet!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Sieh dir das Trophäenzimmer an</string>
 </resources>
 

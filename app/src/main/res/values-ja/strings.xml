@@ -1602,4 +1602,8 @@
 
     <string name="trophy_track_title">フォーマットの進化</string>
     <string name="trophy_completed_badge">完了</string>
+    <string name="trophy_unlock_banner_header">トロフィー獲得</string>
+    <string name="trophy_unlock_banner_format_upgraded">新フォーマット</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d個のトロフィーを獲得！</string>
+    <string name="trophy_unlock_bootstrap_subtitle">トロフィールームを見る</string>
 </resources>

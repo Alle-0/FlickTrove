@@ -1533,5 +1533,9 @@
 
     <string name="trophy_track_title">ВОСХОЖДЕНИЕ ФОРМАТОВ</string>
     <string name="trophy_completed_badge">ЗАВЕРШЕНО</string>
+    <string name="trophy_unlock_banner_header">ТРОФЕЙ РАЗБЛОКИРОВАН</string>
+    <string name="trophy_unlock_banner_format_upgraded">НОВЫЙ ФОРМАТ</string>
+    <string name="trophy_unlock_bootstrap_title">Разблокировано трофеев: %1$d!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Загляните в Зал Трофеев</string>
 </resources>
 

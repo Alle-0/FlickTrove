@@ -1601,4 +1601,8 @@
 
     <string name="trophy_track_title">PROGRESI FORMAT</string>
     <string name="trophy_completed_badge">SELESAI</string>
+    <string name="trophy_unlock_banner_header">TROFI TERBUKA</string>
+    <string name="trophy_unlock_banner_format_upgraded">FORMAT BARU</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d trofi terbuka!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Lihat Ruang Trofi</string>
 </resources>

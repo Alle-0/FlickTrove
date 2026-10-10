@@ -1602,4 +1602,8 @@
 
     <string name="trophy_track_title">規格進階歷程</string>
     <string name="trophy_completed_badge">已完成</string>
+    <string name="trophy_unlock_banner_header">成就解鎖</string>
+    <string name="trophy_unlock_banner_format_upgraded">新規格</string>
+    <string name="trophy_unlock_bootstrap_title">已解鎖 %1$d 個成就！</string>
+    <string name="trophy_unlock_bootstrap_subtitle">查看榮譽陳列館</string>
 </resources>

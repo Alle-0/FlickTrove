@@ -1602,4 +1602,8 @@
 
     <string name="trophy_track_title">规格进阶历程</string>
     <string name="trophy_completed_badge">已完成</string>
+    <string name="trophy_unlock_banner_header">成就解锁</string>
+    <string name="trophy_unlock_banner_format_upgraded">新格式</string>
+    <string name="trophy_unlock_bootstrap_title">已解锁 %1$d 个成就！</string>
+    <string name="trophy_unlock_bootstrap_subtitle">查看荣誉陈列馆</string>
 </resources>

@@ -3,7 +3,7 @@ package com.cinetrack.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.repository.BadgeRepository
-import com.cinetrack.data.repository.BadgeTierUnlockedEvent
+import com.cinetrack.data.repository.TrophyUnlockBannerEvent
 import com.cinetrack.ui.components.badge.OFFICIAL_TROPHY_ROOM_CATALOG
 import com.cinetrack.ui.components.badge.TrophyRoomItemUi
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -33,7 +33,7 @@ class TrophyRoomViewModel @Inject constructor(
     /**
      * Eventi di sblocco in tempo reale per banner celebrativi PlayStation/Steam.
      */
-    val unlockedTierEvents: SharedFlow<BadgeTierUnlockedEvent> = badgeRepository.unlockedTierEvents
+    val unlockedTierEvents: SharedFlow<TrophyUnlockBannerEvent> = badgeRepository.unlockedTierEvents
 
     init {
         refreshBadges()

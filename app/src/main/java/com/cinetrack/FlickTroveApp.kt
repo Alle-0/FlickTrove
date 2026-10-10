@@ -31,6 +31,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.components.common.UndoToast
@@ -49,6 +50,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
 
     val undoViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.UndoViewModel>()
     val errorViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.GlobalErrorViewModel>()
+    val trophyRoomViewModel = androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.TrophyRoomViewModel>()
 
     val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
 
@@ -337,6 +339,18 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                         onDismiss = { showGuestAuthDialog = false },
                                         navigator = navigator,
                                         globalHazeState = globalHazeState
+                                    )
+
+                                    com.cinetrack.ui.components.badge.TrophyUnlockBanner(
+                                        trophyRoomViewModel = trophyRoomViewModel,
+                                        hazeState = globalHazeState,
+                                        onNavigateToTrophyRoom = {
+                                            navigator.push(com.cinetrack.ui.screens.TrophyRoomScreen())
+                                        },
+                                        modifier = Modifier
+                                            .align(Alignment.TopCenter)
+                                            .statusBarsPadding()
+                                            .zIndex(300000f)
                                     )
                                 }
                             }

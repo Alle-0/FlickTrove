@@ -1602,4 +1602,8 @@
 
     <string name="trophy_track_title">포맷의 성장</string>
     <string name="trophy_completed_badge">완료</string>
+    <string name="trophy_unlock_banner_header">트로피 획득</string>
+    <string name="trophy_unlock_banner_format_upgraded">새로운 포맷</string>
+    <string name="trophy_unlock_bootstrap_title">트로피 %1$d개 잠금 해제!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">트로피 룸을 확인해보세요</string>
 </resources>

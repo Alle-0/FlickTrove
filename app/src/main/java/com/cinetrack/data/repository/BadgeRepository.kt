@@ -35,18 +35,26 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 /**
- * Evento emesso quando l'utente raggiunge una nuova milestone o sblocca un tier trofeo.
- * Catturato dalla UI per mostrare il banner celebrativo stile PlayStation / Xbox.
+ * Evento emesso quando l'utente sblocca un trofeo singolarmente oppure completa
+ * il primo bootstrap retroattivo con un sommario celebrativo.
  */
-data class BadgeTierUnlockedEvent(
-    val badgeId: String,
-    val title: String,
-    val tier: PreviewBadgeTier,
-    val category: BadgeTypeCategory,
-    val iconKind: CustomBadgeIconKind,
-    val milestonePhrase: String,
-    val isFirstUnlock: Boolean
-)
+sealed interface TrophyUnlockBannerEvent {
+    data class SingleBadge(
+        val badgeId: String,
+        val title: String,
+        val tier: PreviewBadgeTier,
+        val category: BadgeTypeCategory,
+        val iconKind: CustomBadgeIconKind,
+        val milestonePhrase: String,
+        val isFirstUnlock: Boolean
+    ) : TrophyUnlockBannerEvent
+
+    data class InitialBootstrapSummary(
+        val unlockedCount: Int
+    ) : TrophyUnlockBannerEvent
+}
+
+typealias BadgeTierUnlockedEvent = TrophyUnlockBannerEvent.SingleBadge
 
 @Singleton
 class BadgeRepository @Inject constructor(
@@ -54,12 +62,21 @@ class BadgeRepository @Inject constructor(
     private val favoriteDao: FavoriteDao,
     private val watchHistoryDao: WatchHistoryDao,
     private val folderDao: FolderDao,
-    private val firestore: FirebaseFirestore
+    private val firestore: FirebaseFirestore,
+    @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.Default)
 
-    private val _unlockedTierEvents = MutableSharedFlow<BadgeTierUnlockedEvent>(extraBufferCapacity = 8)
-    val unlockedTierEvents: SharedFlow<BadgeTierUnlockedEvent> = _unlockedTierEvents.asSharedFlow()
+    private val badgePrefs by lazy {
+        context.getSharedPreferences("flicktrove_badge_prefs", android.content.Context.MODE_PRIVATE)
+    }
+
+    private var isInitialEvaluationDone: Boolean
+        get() = badgePrefs.getBoolean("is_initial_badge_evaluation_done", false)
+        set(value) = badgePrefs.edit().putBoolean("is_initial_badge_evaluation_done", value).apply()
+
+    private val _unlockedTierEvents = MutableSharedFlow<TrophyUnlockBannerEvent>(extraBufferCapacity = 16)
+    val unlockedTierEvents: SharedFlow<TrophyUnlockBannerEvent> = _unlockedTierEvents.asSharedFlow()
 
     /**
      * Flusso reattivo principale per la Sala dei Trofei.
@@ -140,6 +157,9 @@ class BadgeRepository @Inject constructor(
         val allFolders = folderDao.getAll()
         val existingBadges = badgeDao.getAllUserBadges().associateBy { it.badgeId }
 
+        val isBootstrap = !isInitialEvaluationDone || existingBadges.isEmpty()
+        var bootstrapNewlyUnlockedCount = 0
+
         val watchedMovies = allMovies.filter { it.watched && it.mediaType != "tv" && !it.dropped }
         val watchedShows = allMovies.filter { it.watched && it.mediaType == "tv" && !it.dropped }
         val allWatched = allMovies.filter { it.watched && !it.dropped }
@@ -208,12 +228,16 @@ class BadgeRepository @Inject constructor(
             )
             evaluatedEntities.add(entity)
 
-            // Emetti evento di celebrazione per nuovi sblocchi o upgrade
-            if (newlyUnlocked || tierUpgraded) {
+            if (newlyUnlocked) {
+                bootstrapNewlyUnlockedCount++
+            }
+
+            // Emetti evento di celebrazione per nuovi sblocchi o upgrade (esclusivamente nelle sessioni live post-bootstrap)
+            if (!isBootstrap && (newlyUnlocked || tierUpgraded)) {
                 val stepPhrase = badge.progressiveSteps[calculatedTier]?.milestonePhrase
                     ?: badge.title
                 _unlockedTierEvents.tryEmit(
-                    BadgeTierUnlockedEvent(
+                    TrophyUnlockBannerEvent.SingleBadge(
                         badgeId = badge.id,
                         title = badge.title,
                         tier = calculatedTier,
@@ -227,6 +251,19 @@ class BadgeRepository @Inject constructor(
         }
 
         badgeDao.upsertBadges(evaluatedEntities)
+
+        // Se è il primissimo bootstrap per un utente esistente con storico, emetti 1 singolo evento celebrativo riepilogativo
+        if (isBootstrap) {
+            isInitialEvaluationDone = true
+            if (bootstrapNewlyUnlockedCount > 0) {
+                _unlockedTierEvents.tryEmit(
+                    TrophyUnlockBannerEvent.InitialBootstrapSummary(
+                        unlockedCount = bootstrapNewlyUnlockedCount
+                    )
+                )
+            }
+        }
+
         return evaluatedEntities
     }
 

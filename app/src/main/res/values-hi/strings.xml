@@ -1530,6 +1530,10 @@
 
     <string name="trophy_track_title">प्रारूप प्रगति</string>
     <string name="trophy_completed_badge">पूर्ण</string>
+    <string name="trophy_unlock_banner_header">ट्रॉफ़ी अनलॉक हुई</string>
+    <string name="trophy_unlock_banner_format_upgraded">नया प्रारूप</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d ट्रॉफ़ी अनलॉक हुईं!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">ट्रॉफ़ी रूम देखें</string>
 </resources>
 
 

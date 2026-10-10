@@ -1561,4 +1561,8 @@
 
     <string name="trophy_track_title">SCALATA DEI FORMATI</string>
     <string name="trophy_completed_badge">COMPLETATO</string>
+    <string name="trophy_unlock_banner_header">TROFEO SBLOCCATO</string>
+    <string name="trophy_unlock_banner_format_upgraded">NUOVO FORMATO</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d trofei sbloccati!</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Controlla la Sala dei Trofei</string>
 </resources>

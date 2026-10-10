@@ -1533,5 +1533,9 @@
 
     <string name="trophy_track_title">ASCENSION DES FORMATS</string>
     <string name="trophy_completed_badge">COMPLÉTÉ</string>
+    <string name="trophy_unlock_banner_header">TROPHÉE DÉBLOQUÉ</string>
+    <string name="trophy_unlock_banner_format_upgraded">NOUVEAU FORMAT</string>
+    <string name="trophy_unlock_bootstrap_title">%1$d trophées débloqués !</string>
+    <string name="trophy_unlock_bootstrap_subtitle">Consulte la Salle des Trophées</string>
 </resources>
 
