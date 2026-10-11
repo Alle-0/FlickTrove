@@ -1700,4 +1700,44 @@
     <string name="badge_watchlist_hoarder_cat">WATCHLIST</string>
     <string name="badge_watchlist_hoarder_desc">Over 50 curated titles waiting in your personal watchlist.</string>
     <string name="badge_watchlist_hoarder_title">The Infinite Archive</string>
+
+    <!-- New Trophies & Units -->
+    <string name="trophy_unit_decades">decades</string>
+    <string name="badge_secret_harsh_critic_title">The Harsh Critic</string>
+    <string name="badge_secret_harsh_critic_cat">LOST REEL #11</string>
+    <string name="badge_secret_harsh_critic_desc">Not even sacred monsters escape your ruthless eye: you gave a harsh rating (&lt;= 4.0) to a universally acclaimed masterpiece (TMDB &gt;= 8.3).</string>
+    <string name="badge_secret_harsh_critic_hint">Not even sacred monsters are safe from your critical eye...</string>
+
+    <string name="badge_genre_western_title">High Noon</string>
+    <string name="badge_genre_western_cat">WESTERN</string>
+    <string name="badge_genre_western_desc">Sunset shootouts, dusty trails, and saloons: conquering the great cinematographic frontier.</string>
+
+    <string name="badge_miniseries_title">Television Novel</string>
+    <string name="badge_miniseries_cat">LIMITED SERIES</string>
+    <string name="badge_miniseries_desc">Concise, self-contained storytelling: you completed 5 single-season limited series.</string>
+
+    <string name="badge_folder_deep_title">The Ultimate Collection</string>
+    <string name="badge_folder_deep_cat">CURATED FOLDERS</string>
+    <string name="badge_folder_deep_desc">A rich, meticulous archive: you assembled a themed folder with more than 25 titles.</string>
+
+    <string name="badge_time_machine_title">The Time Machine</string>
+    <string name="badge_time_machine_cat">TIME TRAVEL</string>
+    <string name="badge_time_machine_desc">Boundless cinematic literacy: you watched at least one movie from 7 distinct decades.</string>
+    <string name="badge_secret_instant_watch_title">Love at First Sight</string>
+    <string name="badge_secret_instant_watch_cat">LOST REEL #12</string>
+    <string name="badge_secret_instant_watch_desc">Zero hesitation, no dust on the list: you watched a movie within 24 hours of adding it to your watchlist.</string>
+    <string name="badge_secret_instant_watch_hint">Seize the fleeting moment: don\'t let your watchlist gather dust...</string>
+
+    <string name="badge_day_one_premiere_title">World Premiere</string>
+    <string name="badge_day_one_premiere_cat">DAY-ONE PREMIERES</string>
+    <string name="badge_day_one_premiere_desc">Experience the thrill of the big screen on the exact official release date.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">The Critic\'s Palette</string>
+    <string name="badge_secret_full_rating_spectrum_cat">LOST REEL #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">You mastered the full spectrum of film criticism, awarding every integer rating from 1 to 10 at least once.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">An authoritative critic masters every shade of judgment, from the abyss to the sublime...</string>
+
+    <string name="badge_current_year_title">Hot off the Press</string>
+    <string name="badge_current_year_cat">Contemporary Cinema</string>
+    <string name="badge_current_year_desc">Live the cinema of your time: you watched 5 films released during the current calendar year.</string>
 </resources>

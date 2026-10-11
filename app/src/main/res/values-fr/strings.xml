@@ -1696,5 +1696,37 @@
     <string name="detail_rating_tr_13">13 ans et plus (13A: avec famille).</string>
     <string name="detail_rating_tr_16">16 ans et plus.</string>
     <string name="detail_rating_tr_18">Réservé aux adultes (18+).</string>
+    <string name="trophy_unit_decades">décennies</string>
+    <string name="badge_secret_harsh_critic_title">Le Critique à Contre-Courant</string>
+    <string name="badge_secret_harsh_critic_cat">Bobine Perdue #11</string>
+    <string name="badge_secret_harsh_critic_desc">Vous avez attribué une note sévère (≤ 4.0) à un chef-d\'œuvre plébiscité (≥ 8.3 sur TMDB). Votre regard ne cède jamais au consensus.</string>
+    <string name="badge_secret_harsh_critic_hint">Ayez l\'audace de défier le consensus unanime des critiques.</string>
+    <string name="badge_genre_western_title">Duel au Soleil</string>
+    <string name="badge_genre_western_cat">Western</string>
+    <string name="badge_genre_western_desc">Arpentez la frontière sauvage et ses légendes du grand écran.</string>
+    <string name="badge_miniseries_title">Le Roman Télévisuel</string>
+    <string name="badge_miniseries_cat">Mini-séries</string>
+    <string name="badge_miniseries_desc">Terminez 5 mini-séries complètes d\'une seule saison.</string>
+    <string name="badge_folder_deep_title">La Collection Ultime</string>
+    <string name="badge_folder_deep_cat">Curation Approfondie</string>
+    <string name="badge_folder_deep_desc">Créez et enrichissez un dossier thématique avec plus de 25 œuvres.</string>
+    <string name="badge_time_machine_title">La Machine à Remonter le Temps</string>
+    <string name="badge_time_machine_cat">Cinéphilie Temporelle</string>
+    <string name="badge_time_machine_desc">Regardez au moins un film dans 7 décennies différentes du 7e art.</string>
+    <string name="badge_secret_instant_watch_title">Coup de Foudre</string>
+    <string name="badge_secret_instant_watch_cat">BOBINE PERDUE #12</string>
+    <string name="badge_secret_instant_watch_desc">Aucune hésitation, zéro poussière sur la liste : vous avez regardé un film dans les 24 heures suivant son ajout à votre watchlist.</string>
+    <string name="badge_secret_instant_watch_hint">Saisissez l\'instant éphémère : ne laissez pas votre watchlist prendre la poussière...</string>
+    <string name="badge_day_one_premiere_title">Avant-Première Mondiale</string>
+    <string name="badge_day_one_premiere_cat">PREMIÈRES EN SALLE</string>
+    <string name="badge_day_one_premiere_desc">Vivez l\'émotion du grand écran le jour même de la sortie officielle.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">La Palette du Critique</string>
+    <string name="badge_secret_full_rating_spectrum_cat">BOBINE PERDUE #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Vous maîtrisez tout le spectre du regard critique, en ayant attribué au moins une fois chaque note entière de 1 à 10.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Un critique avisé maîtrise chaque nuance de jugement, des profondeurs au sublime...</string>
+    <string name="badge_current_year_title">Frais d\'Impression</string>
+    <string name="badge_current_year_cat">Cinéma Contemporain</string>
+    <string name="badge_current_year_desc">Vivez le cinéma de votre époque : vous avez regardé 5 films sortis au cours de l\'année civile actuelle.</string>
 </resources>
 

@@ -1702,4 +1702,36 @@
 
     <string name="settings_commsuni_notice">CommsUni(commsuni.tv)를 통해 제공되는 커뮤니티 토론 및 연합 댓글.</string>
     <string name="detail_rating_it_10">10세 미만 어린이에게 권장하지 않음.</string>
+    <string name="trophy_unit_decades">년대</string>
+    <string name="badge_secret_harsh_critic_title">타협 없는 비평가</string>
+    <string name="badge_secret_harsh_critic_cat">잃어버린 릴 #11</string>
+    <string name="badge_secret_harsh_critic_desc">TMDB에서 찬사를 받는 걸작(≥ 8.3)에 엄격한 평점(≤ 4.0)을 매겼습니다. 대중의 합의에 흔들리지 않는 확고한 안목입니다.</string>
+    <string name="badge_secret_harsh_critic_hint">만장일치의 찬사에 당당히 맞설 용기를 가지세요.</string>
+    <string name="badge_genre_western_title">대낮의 결투</string>
+    <string name="badge_genre_western_cat">서부극</string>
+    <string name="badge_genre_western_desc">황량한 개척지와 스크린을 수놓은 카우보이 전설을 탐험하세요.</string>
+    <string name="badge_miniseries_title">TV 소설</string>
+    <string name="badge_miniseries_cat">미니시리즈</string>
+    <string name="badge_miniseries_desc">단일 시즌으로 완결된 미니시리즈 5편을 완주하세요.</string>
+    <string name="badge_folder_deep_title">궁극의 컬렉션</string>
+    <string name="badge_folder_deep_cat">심층 큐레이션</string>
+    <string name="badge_folder_deep_desc">테마 폴더를 생성하고 25편 이상의 엄선된 작품으로 채우세요.</string>
+    <string name="badge_time_machine_title">타임머신</string>
+    <string name="badge_time_machine_cat">영화사 여행</string>
+    <string name="badge_time_machine_desc">영화사의 서로 다른 7개 연대에서 각각 최소 1편 이상의 영화를 감상하세요.</string>
+    <string name="badge_secret_instant_watch_title">첫눈에 반한 영화</string>
+    <string name="badge_secret_instant_watch_cat">잃어버린 릴 #12</string>
+    <string name="badge_secret_instant_watch_desc">망설임 없이 리스트에 먼지 쌓일 틈 없이: 보고싶은 영화에 추가한 지 24시간 이내에 감상했습니다.</string>
+    <string name="badge_secret_instant_watch_hint">찰나의 영감을 놓치지 마세요: 위시리스트가 잠들지 않도록...</string>
+    <string name="badge_day_one_premiere_title">월드 프리미어</string>
+    <string name="badge_day_one_premiere_cat">개봉일 관람</string>
+    <string name="badge_day_one_premiere_desc">공식 개봉 당일에 극장 스크린의 감동을 그대로 느껴보세요.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">비평가의 팔레트</string>
+    <string name="badge_secret_full_rating_spectrum_cat">잃어버린 릴 #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">영화 비평의 전 스펙트럼을 섭렵했습니다: 1점부터 10점까지의 모든 정수 평점을 최소 한 번씩 부여했습니다.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">진정한 비평가는 나락부터 최고조까지 모든 평가의 결을 다룰 줄 압니다...</string>
+    <string name="badge_current_year_title">갓 나온 신작</string>
+    <string name="badge_current_year_cat">동시대 시네마</string>
+    <string name="badge_current_year_desc">우리 시대의 영화를 경험하세요: 당해 연도에 개봉한 최신작 5편을 관람했습니다.</string>
 </resources>

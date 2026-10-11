@@ -1701,4 +1701,44 @@
     <string name="detail_rating_in_ua">Guida dei genitori per minori di 12 anni (UA).</string>
     <string name="detail_rating_in_a">Riservato agli adulti (A - 18+).</string>
     <string name="detail_rating_in_s">Riservato a un pubblico speciale (S).</string>
+
+    <!-- Nuovi Trofei & Unità -->
+    <string name="trophy_unit_decades">decenni</string>
+    <string name="badge_secret_harsh_critic_title">Il Critico Controcorrente</string>
+    <string name="badge_secret_harsh_critic_cat">LOST REEL #11</string>
+    <string name="badge_secret_harsh_critic_desc">Nemmeno i mostri sacri sono al sicuro dal tuo occhio clinico: hai assegnato un voto impietoso (&lt;= 4.0) a un\'opera considerata un capolavoro (TMDB &gt;= 8.3).</string>
+    <string name="badge_secret_harsh_critic_hint">Nemmeno i mostri sacri sono al sicuro dal tuo occhio critico...</string>
+
+    <string name="badge_genre_western_title">Mezzogiorno di Fuoco</string>
+    <string name="badge_genre_western_cat">GENERE: WESTERN</string>
+    <string name="badge_genre_western_desc">Duelli al tramonto, cavalcate polverose e saloon: hai esplorato la grande frontiera del cinema.</string>
+
+    <string name="badge_miniseries_title">Il Romanzo Televisivo</string>
+    <string name="badge_miniseries_cat">MINISERIE TV</string>
+    <string name="badge_miniseries_desc">Storie intense e autoconclusive: hai completato 5 miniserie da una sola stagione.</string>
+
+    <string name="badge_folder_deep_title">La Collezione Definitiva</string>
+    <string name="badge_folder_deep_cat">RACCOLTE D\'AUTORE</string>
+    <string name="badge_folder_deep_desc">Un archivio ricco e meticoloso: hai creato una cartella tematica con oltre 25 titoli.</string>
+
+    <string name="badge_time_machine_title">La Macchina del Tempo</string>
+    <string name="badge_time_machine_cat">VIAGGIO NEL TEMPO</string>
+    <string name="badge_time_machine_desc">Cultura cinefila senza confini: hai visto almeno un film per ciascuno di 7 decenni diversi.</string>
+    <string name="badge_secret_instant_watch_title">Amore a Prima Vista</string>
+    <string name="badge_secret_instant_watch_cat">LOST REEL #12</string>
+    <string name="badge_secret_instant_watch_desc">Nessuna esitazione, zero polvere sulla lista: hai visto un\'opera entro 24 ore dall\'averla aggiunta ai tuoi segnalibri.</string>
+    <string name="badge_secret_instant_watch_hint">Cogli l\'attimo fuggente: non lasciare che la tua watchlist accumuli polvere...</string>
+
+    <string name="badge_day_one_premiere_title">Prima Visione Assoluta</string>
+    <string name="badge_day_one_premiere_cat">PRIME VISIONI</string>
+    <string name="badge_day_one_premiere_desc">Vivi l\'emozione del grande schermo il giorno stesso dell\'uscita ufficiale in sala.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">La Scala del Critico</string>
+    <string name="badge_secret_full_rating_spectrum_cat">LOST REEL #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Hai padroneggiato l\'intera tavolozza del giudizio cinefilo, assegnando almeno una volta ogni voto intero da 1 a 10.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Un critico autorevole padroneggia ogni sfumatura di giudizio, dall\'abisso al sublime...</string>
+
+    <string name="badge_current_year_title">Fresco di Stampa</string>
+    <string name="badge_current_year_cat">Cinema Contemporaneo</string>
+    <string name="badge_current_year_desc">Vivi il cinema del tuo tempo: hai guardato 5 film distribuiti nelle sale o in streaming nell\'anno in corso.</string>
 </resources>

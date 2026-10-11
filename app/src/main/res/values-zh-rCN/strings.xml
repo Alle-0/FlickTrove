@@ -1702,4 +1702,36 @@
 
     <string name="settings_commsuni_notice">通过 CommsUni (commsuni.tv) 提供的社区讨论与联合评论。</string>
     <string name="detail_rating_it_10">不建议10岁以下儿童观看。</string>
+    <string name="trophy_unit_decades">个年代</string>
+    <string name="badge_secret_harsh_critic_title">特立独行的影评人</string>
+    <string name="badge_secret_harsh_critic_cat">失落胶片 #11</string>
+    <string name="badge_secret_harsh_critic_desc">给一部在TMDB备受赞誉的杰作（≥ 8.3）打出了极严苛的低分（≤ 4.0）。你的审美绝不盲从大众共识。</string>
+    <string name="badge_secret_harsh_critic_hint">敢于向一致好评的大众共识发起挑战。</string>
+    <string name="badge_genre_western_title">烈日决斗</string>
+    <string name="badge_genre_western_cat">西部片</string>
+    <string name="badge_genre_western_desc">踏入荒芜边疆，探索银幕上的拓荒牛仔传奇。</string>
+    <string name="badge_miniseries_title">电视小说</string>
+    <string name="badge_miniseries_cat">迷你剧</string>
+    <string name="badge_miniseries_desc">完整追完5部单季独立成篇的迷你剧集。</string>
+    <string name="badge_folder_deep_title">终极典藏</string>
+    <string name="badge_folder_deep_cat">深度策展</string>
+    <string name="badge_folder_deep_desc">创建主题文件夹并精心收录超过25部佳作。</string>
+    <string name="badge_time_machine_title">时光穿梭机</string>
+    <string name="badge_time_machine_cat">纵览影史</string>
+    <string name="badge_time_machine_desc">跨越时光长河，在电影史7个不同的年代各观赏至少1部电影。</string>
+    <string name="badge_secret_instant_watch_title">一见钟情</string>
+    <string name="badge_secret_instant_watch_cat">失落胶片 #12</string>
+    <string name="badge_secret_instant_watch_desc">毫不迟疑，心愿单绝不积灰：在将电影加入待看列表后24小时内即刻完成了观影。</string>
+    <string name="badge_secret_instant_watch_hint">把握稍纵即逝的灵感：别让你的待看列表蒙上灰尘...</string>
+    <string name="badge_day_one_premiere_title">首映零点场</string>
+    <string name="badge_day_one_premiere_cat">首映鉴赏</string>
+    <string name="badge_day_one_premiere_desc">在官方公映的当天第一时间体验大银幕的魅力。</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">影评人的调色盘</string>
+    <string name="badge_secret_full_rating_spectrum_cat">失落胶片 #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">掌握了电影评价的完整光谱：从1分到10分的每个整数评分都至少打出过一次。</string>
+    <string name="badge_secret_full_rating_spectrum_hint">权威的影评人精通从深渊到底蕴的每一种评价尺度...</string>
+    <string name="badge_current_year_title">新鲜出炉</string>
+    <string name="badge_current_year_cat">当代院线</string>
+    <string name="badge_current_year_desc">感受属于我们这个时代的电影：观看了5部在当年公映的最新佳作。</string>
 </resources>

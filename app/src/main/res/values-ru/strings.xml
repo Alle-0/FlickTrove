@@ -1696,5 +1696,37 @@
     <string name="detail_rating_tr_13">С 13 лет (13A: с родителями).</string>
     <string name="detail_rating_tr_16">С 16 лет.</string>
     <string name="detail_rating_tr_18">Только для взрослых (18+).</string>
+    <string name="trophy_unit_decades">дес.</string>
+    <string name="badge_secret_harsh_critic_title">Бескомпромиссный критик</string>
+    <string name="badge_secret_harsh_critic_cat">Утерянная пленка #11</string>
+    <string name="badge_secret_harsh_critic_desc">Вы поставили низкую оценку (≤ 4.0) признанному шедевру (≥ 8.3 на TMDB). Ваш вкус не подчиняется общему мнению.</string>
+    <string name="badge_secret_harsh_critic_hint">Осмельтесь пойти против всеобщего признания.</string>
+    <string name="badge_genre_western_title">Дуэль под солнцем</string>
+    <string name="badge_genre_western_cat">Вестерн</string>
+    <string name="badge_genre_western_desc">Погрузитесь в дикий фронтир и легенды кинематографа.</string>
+    <string name="badge_miniseries_title">Телевизионный роман</string>
+    <string name="badge_miniseries_cat">Мини-сериалы</string>
+    <string name="badge_miniseries_desc">Завершите просмотр 5 законченных мини-сериалов из одного сезона.</string>
+    <string name="badge_folder_deep_title">Главная коллекция</string>
+    <string name="badge_folder_deep_cat">Глубокая подборка</string>
+    <string name="badge_folder_deep_desc">Создайте и наполните тематическую папку более чем 25 фильмами.</string>
+    <string name="badge_time_machine_title">Машина времени</string>
+    <string name="badge_time_machine_cat">Сквозь эпохи</string>
+    <string name="badge_time_machine_desc">Посмотрите хотя бы по одному фильму из 7 разных десятилетий истории кино.</string>
+    <string name="badge_secret_instant_watch_title">Любовь с первого взгляда</string>
+    <string name="badge_secret_instant_watch_cat">УТЕРЯННАЯ ПЛЕНКА #12</string>
+    <string name="badge_secret_instant_watch_desc">Никаких сомнений, никакой пыли на списке: вы посмотрели фильм в течение 24 часов после добавления в список ожидания.</string>
+    <string name="badge_secret_instant_watch_hint">Ловите ускользающий момент: не позволяйте списку ожидания пылиться...</string>
+    <string name="badge_day_one_premiere_title">Мировая премьера</string>
+    <string name="badge_day_one_premiere_cat">ДНИ ПРЕМЬЕР</string>
+    <string name="badge_day_one_premiere_desc">Ощутите магию большого экрана прямо в день официальной премьеры.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">Палитра критика</string>
+    <string name="badge_secret_full_rating_spectrum_cat">УТЕРЯННАЯ ПЛЕНКА #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Вы освоили всю палитру кинокритики, выставив хотя бы раз каждую целую оценку от 1 до 10.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Авторитетный критик владеет каждым оттенком суждения, от бездны до возвышенного...</string>
+    <string name="badge_current_year_title">Свежий выпуск</string>
+    <string name="badge_current_year_cat">Современное кино</string>
+    <string name="badge_current_year_desc">Живите кинематографом своего времени: вы посмотрели 5 фильмов, вышедших в текущем календарном году.</string>
 </resources>
 

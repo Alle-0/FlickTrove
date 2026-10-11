@@ -1702,4 +1702,36 @@
 
     <string name="settings_commsuni_notice">CommsUni (commsuni.tv) üzerinden sağlanan topluluk tartışmaları ve federe yorumlar.</string>
     <string name="detail_rating_it_10">10 yaş altı için uygun değildir.</string>
+    <string name="trophy_unit_decades">on yıl</string>
+    <string name="badge_secret_harsh_critic_title">Tavizsiz Eleştirmen</string>
+    <string name="badge_secret_harsh_critic_cat">Kayıp Makara #11</string>
+    <string name="badge_secret_harsh_critic_desc">TMDB\'de herkesçe alkışlanan bir başyapıta (≥ 8.3) oldukça sert bir puan (≤ 4.0) verdiniz. Zevkiniz çoğunluğa boyun eğmez.</string>
+    <string name="badge_secret_harsh_critic_hint">Eleştirmenlerin oybirliğiyle uzlaştığı fikre meydan okuma cesaretini gösterin.</string>
+    <string name="badge_genre_western_title">Güneşte Düello</string>
+    <string name="badge_genre_western_cat">Vahşi Batı</string>
+    <string name="badge_genre_western_desc">Issız sınır boylarını ve sinemanın kovboy efsanelerini keşfedin.</string>
+    <string name="badge_miniseries_title">Televizyon Romanı</string>
+    <string name="badge_miniseries_cat">Mini Diziler</string>
+    <string name="badge_miniseries_desc">Tek sezonluk, tamamlanmış 5 mini diziyi bitirin.</string>
+    <string name="badge_folder_deep_title">Kapsamlı Koleksiyon</string>
+    <string name="badge_folder_deep_cat">Derin Kürasyon</string>
+    <string name="badge_folder_deep_desc">Tematik bir klasör oluşturup içine 25\'ten fazla seçkin yapım ekleyin.</string>
+    <string name="badge_time_machine_title">Zaman Makinesi</string>
+    <string name="badge_time_machine_cat">Kuşaklararası Sinema</string>
+    <string name="badge_time_machine_desc">Sinema tarihinin 7 farklı on yılından en az birer film izleyin.</string>
+    <string name="badge_secret_instant_watch_title">İlk Görüşte Aşk</string>
+    <string name="badge_secret_instant_watch_cat">KAYIP MAKARA #12</string>
+    <string name="badge_secret_instant_watch_desc">Sıfır tereddüt, listede toz yok: Bir filmi izleme listenize ekledikten sonraki 24 saat içinde izlediniz.</string>
+    <string name="badge_secret_instant_watch_hint">Anı yakalayın: İzleme listenizin tozlanmasına izin vermeyin...</string>
+    <string name="badge_day_one_premiere_title">Vizyon Günü</string>
+    <string name="badge_day_one_premiere_cat">VİZYON GÜNLERİ</string>
+    <string name="badge_day_one_premiere_desc">Resmi vizyon tarihinde sinema salonunun heyecanını ilk günden yaşayın.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">Eleştirmenin Paleti</string>
+    <string name="badge_secret_full_rating_spectrum_cat">KAYIP MAKARA #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Sinema eleştirisinin tüm yelpazesine hakimsiniz: 1\'den 10\'a kadar her tam puanı en az bir kez verdiniz.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Yetkin bir eleştirmen, en dipten zirveye kadar her yargı tonuna hakimdir...</string>
+    <string name="badge_current_year_title">Ayağının Tozuyla</string>
+    <string name="badge_current_year_cat">Güncel Sinema</string>
+    <string name="badge_current_year_desc">Zamanınızın sinemasını yaşayın: İçinde bulunduğumuz takvim yılında çıkan 5 film izlediniz.</string>
 </resources>

@@ -1702,4 +1702,36 @@
 
     <string name="settings_commsuni_notice">CommsUni（commsuni.tv）を介して提供されるコミュニティの議論と連合コメント。</string>
     <string name="detail_rating_it_10">10歳未満の鑑賞には不適。</string>
+    <string name="trophy_unit_decades">年代</string>
+    <string name="badge_secret_harsh_critic_title">妥協なき批評家</string>
+    <string name="badge_secret_harsh_critic_cat">失われたフィルム #11</string>
+    <string name="badge_secret_harsh_critic_desc">TMDBで絶賛された傑作（≥ 8.3）に厳しい評価（≤ 4.0）を付けました。世間の評判に流されない独自の審美眼です。</string>
+    <string name="badge_secret_harsh_critic_hint">満場一致の世論に抗う勇気を持つこと。</string>
+    <string name="badge_genre_western_title">白昼の決闘</string>
+    <string name="badge_genre_western_cat">西部劇</string>
+    <string name="badge_genre_western_desc">荒野のフロンティアと映画史に残るガンマンの伝説を巡る。</string>
+    <string name="badge_miniseries_title">映像小説</string>
+    <string name="badge_miniseries_cat">リミテッドシリーズ</string>
+    <string name="badge_miniseries_desc">全1シーズン完結のリミテッドシリーズを5本完走する。</string>
+    <string name="badge_folder_deep_title">珠玉のコレクション</string>
+    <string name="badge_folder_deep_cat">キュレーションの極み</string>
+    <string name="badge_folder_deep_desc">テーマ別フォルダーを作成し、25作品以上を厳選して収蔵する。</string>
+    <string name="badge_time_machine_title">タイムマシン</string>
+    <string name="badge_time_machine_cat">映画史の旅</string>
+    <string name="badge_time_machine_desc">映画史の異なる7つの年代から、それぞれ1本以上の作品を鑑賞する。</string>
+    <string name="badge_secret_instant_watch_title">一目惚れ</string>
+    <string name="badge_secret_instant_watch_cat">失われたフィルム #12</string>
+    <string name="badge_secret_instant_watch_desc">迷いなし、リストに埃をかぶせない：ウォッチリストに追加してから24時間以内に映画を鑑賞しました。</string>
+    <string name="badge_secret_instant_watch_hint">一瞬の好機を逃さないこと：ウォッチリストを眠らせないで...</string>
+    <string name="badge_day_one_premiere_title">世界初公開</string>
+    <string name="badge_day_one_premiere_cat">初日プレミア</string>
+    <string name="badge_day_one_premiere_desc">公式公開日当日に劇場スクリーンの感動を体験する。</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">批評家のパレット</string>
+    <string name="badge_secret_full_rating_spectrum_cat">失われたフィルム #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">映画批評のあらゆる階調を極め、1から10までの整数評価をすべて1回以上付けました。</string>
+    <string name="badge_secret_full_rating_spectrum_hint">真の批評眼は、奈落から至高まですべての評価のグラデーションを使いこなす...</string>
+    <string name="badge_current_year_title">最新封切り</string>
+    <string name="badge_current_year_cat">現代シネマ</string>
+    <string name="badge_current_year_desc">同時代の映画を生きる：現在進行形の暦年に公開された映画を5本鑑賞しました。</string>
 </resources>

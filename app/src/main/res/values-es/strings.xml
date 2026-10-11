@@ -1699,5 +1699,37 @@
     <string name="detail_rating_tr_13">Mayores de 13 años (13A: con familia).</string>
     <string name="detail_rating_tr_16">Mayores de 16 años.</string>
     <string name="detail_rating_tr_18">Solo para adultos (18+).</string>
+    <string name="trophy_unit_decades">décadas</string>
+    <string name="badge_secret_harsh_critic_title">El Crítico Implacable</string>
+    <string name="badge_secret_harsh_critic_cat">Rollo Perdido #11</string>
+    <string name="badge_secret_harsh_critic_desc">Asignaste una puntuación muy severa (≤ 4.0) a una obra maestra aclamada universalmente (≥ 8.3 en TMDB). Tu gusto no se doblega ante el consenso.</string>
+    <string name="badge_secret_harsh_critic_hint">Ten la audacia de desafiar el consenso de la crítica unánime.</string>
+    <string name="badge_genre_western_title">Duelo al Sol</string>
+    <string name="badge_genre_western_cat">Western</string>
+    <string name="badge_genre_western_desc">Explora la frontera y sus leyendas cinematográficas.</string>
+    <string name="badge_miniseries_title">La Novela Televisiva</string>
+    <string name="badge_miniseries_cat">Miniseries</string>
+    <string name="badge_miniseries_desc">Completa 5 miniseries autoconclusivas de una sola temporada.</string>
+    <string name="badge_folder_deep_title">La Colección Definitiva</string>
+    <string name="badge_folder_deep_cat">Curaduría Profunda</string>
+    <string name="badge_folder_deep_desc">Crea y nutre una carpeta temática con más de 25 títulos seleccionados.</string>
+    <string name="badge_time_machine_title">La Máquina del Tiempo</string>
+    <string name="badge_time_machine_cat">Cinefilia Temporal</string>
+    <string name="badge_time_machine_desc">Disfruta de al menos una película en cada una de 7 décadas distintas de la historia del cine.</string>
+    <string name="badge_secret_instant_watch_title">Amor a Primera Vista</string>
+    <string name="badge_secret_instant_watch_cat">LOST REEL #12</string>
+    <string name="badge_secret_instant_watch_desc">Cero vacilaciones, sin polvo en la lista: viste una película dentro de las 24 horas posteriores a agregarla a tu lista de seguimiento.</string>
+    <string name="badge_secret_instant_watch_hint">Aprovecha el momento fugaz: no dejes que tu lista acumule polvo...</string>
+    <string name="badge_day_one_premiere_title">Estreno Absoluto</string>
+    <string name="badge_day_one_premiere_cat">ESTRENOS</string>
+    <string name="badge_day_one_premiere_desc">Vive la emoción de la gran pantalla el mismo día del estreno oficial.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">La Escala del Crítico</string>
+    <string name="badge_secret_full_rating_spectrum_cat">LOST REEL #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Dominaste toda la paleta del juicio cinematográfico, otorgando al menos una vez cada calificación entera del 1 al 10.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Un crítico con autoridad domina cada matiz de juicio, desde el abismo hasta lo sublime...</string>
+    <string name="badge_current_year_title">Recién Salido del Horno</string>
+    <string name="badge_current_year_cat">Cine Contemporáneo</string>
+    <string name="badge_current_year_desc">Vive el cine de tu tiempo: viste 5 películas estrenadas durante el año calendario en curso.</string>
 </resources>
 

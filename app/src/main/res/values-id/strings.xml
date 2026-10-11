@@ -1701,4 +1701,36 @@
 
     <string name="settings_commsuni_notice">Diskusi komunitas dan komentar terfederasi disediakan melalui CommsUni (commsuni.tv).</string>
     <string name="detail_rating_it_10">Tidak cocok untuk anak di bawah usia 10 tahun.</string>
+    <string name="trophy_unit_decades">dekade</string>
+    <string name="badge_secret_harsh_critic_title">Kritikus Tanpa Kompromi</string>
+    <string name="badge_secret_harsh_critic_cat">Gulungan Hilang #11</string>
+    <string name="badge_secret_harsh_critic_desc">Anda memberikan rating sangat rendah (≤ 4.0) untuk mahakarya yang dipuji di TMDB (≥ 8.3). Selera Anda tidak tunduk pada suara terbanyak.</string>
+    <string name="badge_secret_harsh_critic_hint">Miliki keberanian untuk menentang konsensus pujian bulat.</string>
+    <string name="badge_genre_western_title">Duel di Bawah Matahari</string>
+    <string name="badge_genre_western_cat">Western</string>
+    <string name="badge_genre_western_desc">Jelajahi garis perbatasan liar dan legenda koboi layar lebar.</string>
+    <string name="badge_miniseries_title">Novel Televisi</string>
+    <string name="badge_miniseries_cat">Serial Mini</string>
+    <string name="badge_miniseries_desc">Selesaikan 5 serial mini lengkap yang tuntas dalam satu musim.</string>
+    <string name="badge_folder_deep_title">Koleksi Terhebat</string>
+    <string name="badge_folder_deep_cat">Kurasi Mendalam</string>
+    <string name="badge_folder_deep_desc">Buat dan perkaya folder bertema dengan lebih dari 25 judul pilihan.</string>
+    <string name="badge_time_machine_title">Mesin Waktu</string>
+    <string name="badge_time_machine_cat">Lintas Era Sinema</string>
+    <string name="badge_time_machine_desc">Tonton setidaknya satu film dari masing-masing 7 dekade berbeda dalam sejarah perfilman.</string>
+    <string name="badge_secret_instant_watch_title">Cinta pada Pandangan Pertama</string>
+    <string name="badge_secret_instant_watch_cat">GULUNGAN HILANG #12</string>
+    <string name="badge_secret_instant_watch_desc">Tanpa ragu, tanpa debu di daftar: Anda menonton film dalam waktu 24 jam setelah menambahkannya ke watchlist.</string>
+    <string name="badge_secret_instant_watch_hint">Manfaatkan momen sekilas: jangan biarkan watchlist Anda berdebu...</string>
+    <string name="badge_day_one_premiere_title">Tayang Perdana</string>
+    <string name="badge_day_one_premiere_cat">HARI PERDANA</string>
+    <string name="badge_day_one_premiere_desc">Rasakan keseruan layar lebar tepat pada hari rilis resminya.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">Palet Sang Kritikus</string>
+    <string name="badge_secret_full_rating_spectrum_cat">GULUNGAN HILANG #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Anda menguasai seluruh spektrum kritik film, memberikan setiap peringkat bulat dari 1 hingga 10 setidaknya satu kali.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Seorang kritikus berwibawa menguasai setiap nuansa penilaian, dari yang terburuk hingga yang agung...</string>
+    <string name="badge_current_year_title">Hangat dari Bioskop</string>
+    <string name="badge_current_year_cat">Sinema Kontemporer</string>
+    <string name="badge_current_year_desc">Nikmati sinema zaman Anda: Anda telah menonton 5 film yang dirilis pada tahun kalender ini.</string>
 </resources>

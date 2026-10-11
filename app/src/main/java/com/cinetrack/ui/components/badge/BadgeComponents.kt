@@ -212,6 +212,18 @@ enum class CustomBadgeIconKind(@DrawableRes val iconRes: Int) {
     IRON_HEART(R.drawable.ic_badge_heart_shield),
     UNLOVED_GEM(R.drawable.ic_badge_diamond_hard),
 
+    // Nuovi Badges (6 trofei con icone vettoriali dedicate)
+    GENRE_COMEDY(R.drawable.ic_badge_jester_hat),
+    GENRE_WESTERN(R.drawable.ic_badge_western_hat),
+    TV_NOVEL(R.drawable.ic_badge_vhs),
+    DEEP_COLLECTION(R.drawable.ic_badge_book_pile),
+    TIME_MACHINE(R.drawable.ic_badge_pocket_watch),
+    HARSH_CRITIC(R.drawable.ic_badge_lightning_shout),
+    INSTANT_WATCH(R.drawable.ic_badge_middle_arrow),
+    DAY_ONE_PREMIERE(R.drawable.ic_badge_theater_curtains),
+    FULL_RATING_SPECTRUM(R.drawable.ic_badge_stairs_goal),
+    CURRENT_YEAR(R.drawable.ic_badge_newspaper),
+
     // Alias per retrocompatibilità
     DOUBLE_TICKET(R.drawable.ic_badge_ticket),
     SECRET_KEY(R.drawable.ic_badge_strongbox)
@@ -327,6 +339,15 @@ fun getBadgeTitleRes(badgeId: String): Int = when (badgeId) {
     "colossal" -> R.string.badge_colossal_title
     "actor_muse" -> R.string.badge_actor_muse_title
     "director_heart" -> R.string.badge_director_heart_title
+    "secret_harsh_critic" -> R.string.badge_secret_harsh_critic_title
+    "genre_western" -> R.string.badge_genre_western_title
+    "badge_miniseries" -> R.string.badge_miniseries_title
+    "badge_folder_deep" -> R.string.badge_folder_deep_title
+    "badge_time_machine" -> R.string.badge_time_machine_title
+    "secret_instant_watch" -> R.string.badge_secret_instant_watch_title
+    "badge_day_one_premiere", "secret_day_one_premiere" -> R.string.badge_day_one_premiere_title
+    "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_title
+    "badge_current_year" -> R.string.badge_current_year_title
     else -> 0
 }
 
@@ -395,6 +416,15 @@ fun getBadgeCategoryRes(badgeId: String): Int = when (badgeId) {
     "colossal" -> R.string.badge_colossal_cat
     "actor_muse" -> R.string.badge_actor_muse_cat
     "director_heart" -> R.string.badge_director_heart_cat
+    "secret_harsh_critic" -> R.string.badge_secret_harsh_critic_cat
+    "genre_western" -> R.string.badge_genre_western_cat
+    "badge_miniseries" -> R.string.badge_miniseries_cat
+    "badge_folder_deep" -> R.string.badge_folder_deep_cat
+    "badge_time_machine" -> R.string.badge_time_machine_cat
+    "secret_instant_watch" -> R.string.badge_secret_instant_watch_cat
+    "badge_day_one_premiere", "secret_day_one_premiere" -> R.string.badge_day_one_premiere_cat
+    "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_cat
+    "badge_current_year" -> R.string.badge_current_year_cat
     else -> 0
 }
 
@@ -463,6 +493,15 @@ fun getBadgeDescriptionRes(badgeId: String): Int = when (badgeId) {
     "colossal" -> R.string.badge_colossal_desc
     "actor_muse" -> R.string.badge_actor_muse_desc
     "director_heart" -> R.string.badge_director_heart_desc
+    "secret_harsh_critic" -> R.string.badge_secret_harsh_critic_desc
+    "genre_western" -> R.string.badge_genre_western_desc
+    "badge_miniseries" -> R.string.badge_miniseries_desc
+    "badge_folder_deep" -> R.string.badge_folder_deep_desc
+    "badge_time_machine" -> R.string.badge_time_machine_desc
+    "secret_instant_watch" -> R.string.badge_secret_instant_watch_desc
+    "badge_day_one_premiere", "secret_day_one_premiere" -> R.string.badge_day_one_premiere_desc
+    "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_desc
+    "badge_current_year" -> R.string.badge_current_year_desc
     else -> 0
 }
 
@@ -478,6 +517,9 @@ fun getBadgeSecretHintRes(badgeId: String): Int? = when (badgeId) {
     "secret_unloved_gem" -> R.string.badge_secret_unloved_gem_hint
     "secret_midnight_madness" -> R.string.badge_secret_midnight_madness_hint
     "secret_cinephile_streak" -> R.string.badge_secret_cinephile_streak_hint
+    "secret_harsh_critic" -> R.string.badge_secret_harsh_critic_hint
+    "secret_instant_watch" -> R.string.badge_secret_instant_watch_hint
+    "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_hint
     else -> null
 }
 
@@ -491,6 +533,8 @@ fun getProgressUnitRes(unit: String): Int? = when (unit.lowercase().trim()) {
     "cartelle", "folders" -> R.string.trophy_unit_folders
     "voti", "ratings" -> R.string.trophy_unit_ratings
     "note", "notes" -> R.string.trophy_unit_notes
+    "decenni", "decades" -> R.string.trophy_unit_decades
+    "titoli", "titles" -> R.string.trophy_unit_movies
     else -> null
 }
 

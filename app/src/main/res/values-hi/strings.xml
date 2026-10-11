@@ -1694,6 +1694,38 @@
     <string name="detail_rating_tr_13">13 वर्ष और उससे अधिक उम्र (13A: परिवार के साथ)।</string>
     <string name="detail_rating_tr_16">16 वर्ष और उससे अधिक उम्र।</string>
     <string name="detail_rating_tr_18">केवल वयस्क (18+)।</string>
+    <string name="trophy_unit_decades">दशक</string>
+    <string name="badge_secret_harsh_critic_title">कठोर समीक्षक</string>
+    <string name="badge_secret_harsh_critic_cat">खोई हुई रील #11</string>
+    <string name="badge_secret_harsh_critic_desc">आपने TMDB पर प्रशंसित उत्कृष्ट कृति (≥ 8.3) को बहुत कम रेटिंग (≤ 4.0) दी। आपकी पसंद आम राय से नहीं झुकती।</string>
+    <string name="badge_secret_harsh_critic_hint">सर्वसम्मत जनमत को चुनौती देने का साहस रखें।</string>
+    <string name="badge_genre_western_title">धूप में द्वंद्वयुद्ध</string>
+    <string name="badge_genre_western_cat">वेस्टर्न</string>
+    <string name="badge_genre_western_desc">सीमावर्ती वीराने और सिनेमाई काउबॉय किंवदंतियों का अन्वेषण करें।</string>
+    <string name="badge_miniseries_title">टेलीविजन उपन्यास</string>
+    <string name="badge_miniseries_cat">मिनी-सीरीज़</string>
+    <string name="badge_miniseries_desc">एकल-सीज़न वाली 5 संपूर्ण मिनी-सीरीज़ पूरी करें।</string>
+    <string name="badge_folder_deep_title">अंतिम संग्रह</string>
+    <string name="badge_folder_deep_cat">गहन क्यूरेशन</string>
+    <string name="badge_folder_deep_desc">एक थीम आधारित फ़ोल्डर बनाएं और उसमें 25 से अधिक चुनिंदा शीर्षक जोड़ें।</string>
+    <string name="badge_time_machine_title">टाइम मशीन</string>
+    <string name="badge_time_machine_cat">युगों की यात्रा</string>
+    <string name="badge_time_machine_desc">सिनेमा इतिहास के 7 अलग-अलग दशकों में से प्रत्येक से कम से कम एक फिल्म देखें।</string>
+    <string name="badge_secret_instant_watch_title">पहली नज़र में प्यार</string>
+    <string name="badge_secret_instant_watch_cat">खोई हुई रील #12</string>
+    <string name="badge_secret_instant_watch_desc">बिना किसी झिझक के, सूची पर कोई धूल नहीं: आपने वॉचलिस्ट में जोड़ने के 24 घंटों के भीतर एक फिल्म देखी।</string>
+    <string name="badge_secret_instant_watch_hint">क्षणभंगुर पल को पकड़ें: अपनी वॉचलिस्ट पर धूल न जमने दें...</string>
+    <string name="badge_day_one_premiere_title">वर्ल्ड प्रीमियर</string>
+    <string name="badge_day_one_premiere_cat">पहले दिन का शो</string>
+    <string name="badge_day_one_premiere_desc">आधिकारिक रिलीज़ की तारीख पर ही बड़े पर्दे के रोमांच का अनुभव करें।</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">समीक्षक का पैलेट</string>
+    <string name="badge_secret_full_rating_spectrum_cat">खोई हुई रील #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">आपने फिल्म समीक्षा के पूरे स्पेक्ट्रम में महारत हासिल की, 1 से 10 तक की प्रत्येक रेटिंग कम से कम एक बार दी।</string>
+    <string name="badge_secret_full_rating_spectrum_hint">एक आधिकारिक समीक्षक हर फैसले के शेड में माहिर होता है...</string>
+    <string name="badge_current_year_title">ताज़ा रिलीज़</string>
+    <string name="badge_current_year_cat">समकालीन सिनेमा</string>
+    <string name="badge_current_year_desc">अपने समय के सिनेमा को जिएं: आपने वर्तमान कैलेंडर वर्ष में रिलीज़ हुई 5 फ़िल्में देखीं।</string>
 </resources>
 
 

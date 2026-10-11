@@ -198,7 +198,7 @@ private fun TrophyRoomItemUi.completionFraction(): Float {
 }
 
 /**
- * Catalogo ufficiale e veritiero dei 37 trofei di FlickTrove.
+ * Catalogo ufficiale e veritiero dei 43 trofei di FlickTrove.
  * Ogni elemento parte nello stato originario da conquistare (progressCurrent = 0, isUnlocked = false).
  * Lo stato effettivo dell'utente viene sincronizzato in tempo reale da Room (BadgeRepository).
  */
@@ -390,6 +390,69 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             progressTarget = 1,
             progressUnit = "",
             rarityPercent = "4.1%"
+        ),
+        currentTier = PreviewBadgeTier.LOST_REEL,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 10. Lost Reel: Il Critico Controcorrente
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "secret_harsh_critic",
+            title = "Il Critico Controcorrente",
+            category = BadgeTypeCategory.LOST_REEL_SECRET,
+            fixedTier = PreviewBadgeTier.LOST_REEL,
+            iconKind = CustomBadgeIconKind.HARSH_CRITIC,
+            categoryLabel = "LOST REEL #11",
+            defaultDescription = "Nemmeno i mostri sacri sono al sicuro dal tuo occhio critico: hai assegnato un voto impietoso (<= 4.0) a un'opera considerata un capolavoro su TMDB (>= 8.3).",
+            secretHint = "Nemmeno i mostri sacri sono al sicuro dal tuo occhio critico...",
+            progressCurrent = 0,
+            progressTarget = 1,
+            progressUnit = "",
+            rarityPercent = "1.5%"
+        ),
+        currentTier = PreviewBadgeTier.LOST_REEL,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 11. Lost Reel: Amore a Prima Vista
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "secret_instant_watch",
+            title = "Amore a Prima Vista",
+            category = BadgeTypeCategory.LOST_REEL_SECRET,
+            fixedTier = PreviewBadgeTier.LOST_REEL,
+            iconKind = CustomBadgeIconKind.INSTANT_WATCH,
+            categoryLabel = "LOST REEL #12",
+            defaultDescription = "Nessuna esitazione, zero polvere sulla lista: hai visto un'opera entro 24 ore dall'averla aggiunta ai tuoi segnalibri.",
+            secretHint = "Cogli l'attimo fuggente: non lasciare che la tua watchlist accumuli polvere...",
+            progressCurrent = 0,
+            progressTarget = 1,
+            progressUnit = "",
+            rarityPercent = "3.2%"
+        ),
+        currentTier = PreviewBadgeTier.LOST_REEL,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 12. Lost Reel: La Scala del Critico
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "secret_full_rating_spectrum",
+            title = "La Scala del Critico",
+            category = BadgeTypeCategory.LOST_REEL_SECRET,
+            fixedTier = PreviewBadgeTier.LOST_REEL,
+            iconKind = CustomBadgeIconKind.FULL_RATING_SPECTRUM,
+            categoryLabel = "LOST REEL #13",
+            defaultDescription = "Hai padroneggiato l'intera tavolozza del giudizio cinefilo, assegnando almeno una volta ogni voto intero da 1 a 10.",
+            secretHint = "Un critico autorevole padroneggia ogni sfumatura di giudizio, dall'abisso al sublime...",
+            progressCurrent = 0,
+            progressTarget = 10,
+            progressUnit = "voti",
+            rarityPercent = "2.8%"
         ),
         currentTier = PreviewBadgeTier.LOST_REEL,
         isUnlocked = false,
@@ -730,6 +793,34 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         unlockedDate = null
     ),
 
+    // 22. Prime Visioni - Prima Visione Assoluta
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_day_one_premiere",
+            title = "Prima Visione Assoluta",
+            category = BadgeTypeCategory.PROGRESSIVE_TIERS,
+            fixedTier = null,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
+            iconKind = CustomBadgeIconKind.DAY_ONE_PREMIERE,
+            categoryLabel = "PRIME VISIONI",
+            defaultDescription = "Vivi l'emozione del grande schermo il giorno stesso dell'uscita ufficiale in sala.",
+            progressiveSteps = mapOf(
+                PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 1, "Il debutto in sala: hai vissuto il tuo primo film alla sua data esatta di debutto.", "1 film al debutto"),
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "Fedele alla prima: 5 film visti il giorno esatto dell'uscita ufficiale.", "5 film al debutto"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 15, "In prima fila: 15 prime visioni vissute alla data di uscita.", "15 film al debutto"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 30, "Spettatore d'assalto: 30 film visti esattamente alla data di debutto.", "30 film al debutto"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 50, "L'Abbonato della Prima: 50 film visti alla data esatta di debutto • Fedeltà Leggendaria.", "50 film al debutto")
+            ),
+            progressCurrent = 0,
+            progressTarget = 1,
+            progressUnit = "film",
+            rarityPercent = "2.1%"
+        ),
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
     // ══════════════════════════════════════════════════════════════════
     // I 7 BADGE ESPLORAZIONE GENERI & EPOCHE (2 LIVELLI: 16MM & 70MM)
     // ══════════════════════════════════════════════════════════════════
@@ -903,6 +994,56 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             progressTarget = 5,
             progressUnit = "nazioni",
             rarityPercent = "4.5%"
+        ),
+        currentTier = PreviewBadgeTier.MM_16,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 29. Commedia - L'Arte della Risata
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "genre_comedy",
+            title = "L'Arte della Risata",
+            category = BadgeTypeCategory.PROGRESSIVE_TIERS,
+            fixedTier = null,
+            initialProgressiveTier = PreviewBadgeTier.MM_16,
+            iconKind = CustomBadgeIconKind.GENRE_COMEDY,
+            categoryLabel = "GENERE: COMMEDIA",
+            defaultDescription = "Dalla slapstick classica all'umorismo brillante e alla satira più dissacrante.",
+            progressiveSteps = mapOf(
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 20, "20 commedie viste con il sorriso.", "20 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 60, "60 commedie e capolavori dell'ironia cinematografica.", "60 film")
+            ),
+            progressCurrent = 0,
+            progressTarget = 20,
+            progressUnit = "film",
+            rarityPercent = "15.4%"
+        ),
+        currentTier = PreviewBadgeTier.MM_16,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 30. Western - Mezzogiorno di Fuoco
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "genre_western",
+            title = "Mezzogiorno di Fuoco",
+            category = BadgeTypeCategory.PROGRESSIVE_TIERS,
+            fixedTier = null,
+            initialProgressiveTier = PreviewBadgeTier.MM_16,
+            iconKind = CustomBadgeIconKind.GENRE_WESTERN,
+            categoryLabel = "GENERE: WESTERN",
+            defaultDescription = "Duelli al tramonto, cavalcate polverose e saloon: hai esplorato la grande frontiera del cinema.",
+            progressiveSteps = mapOf(
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 8, "8 western completati nella frontiera.", "8 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 leggende del selvaggio West vissute al tramonto.", "25 film")
+            ),
+            progressCurrent = 0,
+            progressTarget = 8,
+            progressUnit = "film",
+            rarityPercent = "5.1%"
         ),
         currentTier = PreviewBadgeTier.MM_16,
         isUnlocked = false,
@@ -1090,6 +1231,86 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             rarityPercent = "22.1%"
         ),
         currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 41. Miniserie TV - Il Romanzo Televisivo
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_miniseries",
+            title = "Il Romanzo Televisivo",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_35,
+            iconKind = CustomBadgeIconKind.TV_NOVEL,
+            categoryLabel = "MINISERIE TV",
+            defaultDescription = "Storie intense e autoconclusive: hai completato 5 miniserie da una sola stagione.",
+            progressCurrent = 0,
+            progressTarget = 5,
+            progressUnit = "serie",
+            rarityPercent = "11.7%"
+        ),
+        currentTier = PreviewBadgeTier.MM_35,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 43. Profondità Cartelle - La Collezione Definitiva
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_folder_deep",
+            title = "La Collezione Definitiva",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_35,
+            iconKind = CustomBadgeIconKind.DEEP_COLLECTION,
+            categoryLabel = "RACCOLTE D'AUTORE",
+            defaultDescription = "Un archivio ricco e meticoloso: hai creato una cartella tematica con oltre 25 titoli.",
+            progressCurrent = 0,
+            progressTarget = 25,
+            progressUnit = "titoli",
+            rarityPercent = "4.3%"
+        ),
+        currentTier = PreviewBadgeTier.MM_35,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 44. Attraverso i Decenni - La Macchina del Tempo
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_time_machine",
+            title = "La Macchina del Tempo",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_70,
+            iconKind = CustomBadgeIconKind.TIME_MACHINE,
+            categoryLabel = "VIAGGIO NEL TEMPO",
+            defaultDescription = "Cultura cinefila senza confini: hai visto almeno un film per ciascuno di 7 decenni diversi.",
+            progressCurrent = 0,
+            progressTarget = 7,
+            progressUnit = "decenni",
+            rarityPercent = "7.8%"
+        ),
+        currentTier = PreviewBadgeTier.MM_70,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 48. Cinema Contemporaneo - Fresco di Stampa
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_current_year",
+            title = "Fresco di Stampa",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_35,
+            iconKind = CustomBadgeIconKind.CURRENT_YEAR,
+            categoryLabel = "CINEMA CONTEMPORANEO",
+            defaultDescription = "Vivi il cinema del tuo tempo: hai guardato 5 film distribuiti nelle sale o in streaming nell'anno in corso.",
+            progressCurrent = 0,
+            progressTarget = 5,
+            progressUnit = "film",
+            rarityPercent = "14.2%"
+        ),
+        currentTier = PreviewBadgeTier.MM_35,
         isUnlocked = false,
         unlockedDate = null
     )

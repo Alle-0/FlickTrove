@@ -81,6 +81,7 @@ class CycleMovieStatusUseCase @Inject constructor(
             current.favorite || current.reminder -> {
                 if (current.isReleased) {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [To See -> Watched] (isReleased=true)")
+                    badgeRepository.recordMovieWatched(current.id)
                     // Released: Move to Watched (Check)
                     if (current.mediaType == "tv") {
                         updateEpisodesUseCase.markAllWatched(current).copy(
@@ -125,6 +126,7 @@ class CycleMovieStatusUseCase @Inject constructor(
             
             // Case 3: State: Untracked (+) -> Move to To See (Eye/Bell)
             else -> {
+                badgeRepository.recordMovieBookmarked(current.id)
                 if (current.isReleased) {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Untracked -> To See (Eye)] (isReleased=true)")
                     current.copy(

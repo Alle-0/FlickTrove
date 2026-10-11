@@ -1697,5 +1697,39 @@
     <string name="detail_rating_tr_13">Ab 13 Jahren (13A: mit Begleitung).</string>
     <string name="detail_rating_tr_16">Ab 16 Jahren.</string>
     <string name="detail_rating_tr_18">Nur für Erwachsene (18+).</string>
+
+    <!-- Neue Trophäen & Einheiten -->
+    <string name="trophy_unit_decades">Jahrzehnte</string>
+    <string name="badge_secret_harsh_critic_title">Der unbarmherzige Kritiker</string>
+    <string name="badge_secret_harsh_critic_cat">LOST REEL #11</string>
+    <string name="badge_secret_harsh_critic_desc">Selbst die Ikonen sind vor deinem scharfen Blick nicht sicher: Du hast ein hochgelobtes Meisterwerk (TMDB &gt;= 8.3) mit &lt;= 4.0 bewertet.</string>
+    <string name="badge_secret_harsh_critic_hint">Selbst die Ikonen sind vor deinem scharfen Blick nicht sicher...</string>
+    <string name="badge_genre_western_title">Zwölf Uhr mittags</string>
+    <string name="badge_genre_western_cat">WESTERN</string>
+    <string name="badge_genre_western_desc">Duelle im Abendrot, staubige Pfade und Saloons: Du hast die große Grenze des Kinos erkundet.</string>
+    <string name="badge_miniseries_title">Fernsehroman</string>
+    <string name="badge_miniseries_cat">MINISERIEN</string>
+    <string name="badge_miniseries_desc">Kompakte, abgeschlossene Geschichten: Du hast 5 Miniserien mit nur einer Staffel abgeschlossen.</string>
+    <string name="badge_folder_deep_title">Die ultimative Sammlung</string>
+    <string name="badge_folder_deep_cat">KURATIERTE ORDNER</string>
+    <string name="badge_folder_deep_desc">Ein reichhaltiges Archiv: Du hast einen thematischen Ordner mit mehr als 25 Titeln erstellt.</string>
+    <string name="badge_time_machine_title">Die Zeitmaschine</string>
+    <string name="badge_time_machine_cat">ZEITREISE</string>
+    <string name="badge_time_machine_desc">Grenzenlose Filmkultur: Du hast mindestens einen Film aus 7 verschiedenen Jahrzehnten gesehen.</string>
+    <string name="badge_secret_instant_watch_title">Liebe auf den ersten Blick</string>
+    <string name="badge_secret_instant_watch_cat">LOST REEL #12</string>
+    <string name="badge_secret_instant_watch_desc">Kein Zögern, kein Staub auf der Liste: Du hast einen Film innerhalb von 24 Stunden nach dem Hinzufügen zur Watchlist gesehen.</string>
+    <string name="badge_secret_instant_watch_hint">Nutze den flüchtigen Moment: Lass deine Watchlist keinen Staub ansetzen...</string>
+    <string name="badge_day_one_premiere_title">Weltpremiere</string>
+    <string name="badge_day_one_premiere_cat">ERSTAUFFÜHRUNGEN</string>
+    <string name="badge_day_one_premiere_desc">Erlebe die Magie der Leinwand am offiziellen Erscheinungstag.</string>
+
+    <string name="badge_secret_full_rating_spectrum_title">Die Palette des Kritikers</string>
+    <string name="badge_secret_full_rating_spectrum_cat">LOST REEL #13</string>
+    <string name="badge_secret_full_rating_spectrum_desc">Du beherrschst das gesamte Spektrum der Filmkritik und hast jede ganzzahlige Bewertung von 1 bis 10 mindestens einmal vergeben.</string>
+    <string name="badge_secret_full_rating_spectrum_hint">Ein maßgeblicher Kritiker beherrscht jede Nuance des Urteils, vom Abgrund bis zum Erhabenen...</string>
+    <string name="badge_current_year_title">Druckfrisch</string>
+    <string name="badge_current_year_cat">Gegenwartskino</string>
+    <string name="badge_current_year_desc">Erlebe das Kino deiner Zeit: Du hast 5 Filme gesehen, die im aktuellen Kalenderjahr veröffentlicht wurden.</string>
 </resources>
 

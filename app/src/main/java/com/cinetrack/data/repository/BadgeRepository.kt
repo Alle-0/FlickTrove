@@ -189,6 +189,21 @@ class BadgeRepository @Inject constructor(
         evaluateBadgesAsync()
     }
 
+    fun recordMovieBookmarked(movieId: Long) {
+        badgePrefs.edit().putLong("bookmarked_at_$movieId", System.currentTimeMillis()).apply()
+    }
+
+    fun recordMovieWatched(movieId: Long) {
+        val bookmarkedAt = badgePrefs.getLong("bookmarked_at_$movieId", 0L)
+        if (bookmarkedAt > 0L) {
+            val diffHours = (System.currentTimeMillis() - bookmarkedAt) / (1000 * 60 * 60)
+            if (diffHours in 0..24) {
+                badgePrefs.edit().putBoolean("unlocked_instant_watch", true).apply()
+            }
+        }
+        evaluateBadgesAsync()
+    }
+
     /**
      * Flusso reattivo principale per la Sala dei Trofei.
      * Fonde il catalogo ufficiale con:
@@ -312,7 +327,7 @@ class BadgeRepository @Inject constructor(
                 watchedShows = watchedShows,
                 allWatched = allWatched,
                 allHistory = allHistory,
-                folderCount = allFolders.size,
+                allFolders = allFolders,
                 prevEntity = prevEntity
             )
 
@@ -439,7 +454,7 @@ class BadgeRepository @Inject constructor(
         watchedShows: List<Movie>,
         allWatched: List<Movie>,
         allHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>,
-        folderCount: Int,
+        allFolders: List<com.cinetrack.data.local.entities.FolderEntity>,
         prevEntity: UserBadgeEntity?
     ): EvaluationResult {
         return when (badge.id) {
@@ -583,6 +598,46 @@ class BadgeRepository @Inject constructor(
                 )
             }
 
+            // 10. Il Critico Controcorrente: Voto personale <= 4.0 con media TMDB >= 8.3
+            "secret_harsh_critic" -> {
+                val harshCount = allWatched.count { movie ->
+                    val lowPersonal = movie.personalRating != null && movie.personalRating!! <= 4.0
+                    val highGlobal = (movie.voteAverage ?: 0.0) >= 8.3
+                    lowPersonal && highGlobal
+                }
+                EvaluationResult(
+                    currentProgress = harshCount,
+                    targetThreshold = 1,
+                    activeTier = PreviewBadgeTier.LOST_REEL,
+                    isUnlocked = harshCount >= 1
+                )
+            }
+
+            // 11. Lost Reel: Amore a Prima Vista (visto entro 24 ore dall'aggiunta in segnalibri)
+            "secret_instant_watch" -> {
+                val isUnlocked = badgePrefs.getBoolean("unlocked_instant_watch", false) || (prevEntity?.isUnlocked == true)
+                EvaluationResult(
+                    currentProgress = if (isUnlocked) 1 else 0,
+                    targetThreshold = 1,
+                    activeTier = PreviewBadgeTier.LOST_REEL,
+                    isUnlocked = isUnlocked
+                )
+            }
+
+            // 12. Lost Reel: La Scala del Critico (assegnato almeno una volta ogni voto intero da 1 a 10)
+            "secret_full_rating_spectrum" -> {
+                val usedScores = allWatched.mapNotNull {
+                    it.personalRating?.let { r -> kotlin.math.round(r).toInt().takeIf { s -> s in 1..10 } }
+                }.toSet()
+                val count = usedScores.size
+                EvaluationResult(
+                    currentProgress = count,
+                    targetThreshold = 10,
+                    activeTier = PreviewBadgeTier.LOST_REEL,
+                    isUnlocked = count >= 10
+                )
+            }
+
             // ══════════════════════════════════════════════════════════════════
             // I 12 BADGE PROGRESSIVI EVOLUTIVI
             // ══════════════════════════════════════════════════════════════════
@@ -672,7 +727,18 @@ class BadgeRepository @Inject constructor(
 
             // 21. Curatore d'Autore: Cartelle create
             "badge_folders" -> {
-                calculateProgressiveTiers(folderCount, badge.progressiveSteps)
+                calculateProgressiveTiers(allFolders.size, badge.progressiveSteps)
+            }
+
+            // 22. Prime Visioni: Prima Visione Assoluta (film visti il giorno esatto di uscita)
+            "badge_day_one_premiere", "secret_day_one_premiere" -> {
+                val dayOneCount = allWatched.count { movie ->
+                    val relDate = movie.releaseDate?.take(10) ?: return@count false
+                    val watchedDate = movie.watchedAt?.take(10)
+                    if (watchedDate != null && watchedDate == relDate) return@count true
+                    allHistory.any { h -> h.movieId == movie.id && h.watchedAt.take(10) == relDate }
+                }
+                calculateProgressiveTiers(dayOneCount, badge.progressiveSteps)
             }
 
             // ══════════════════════════════════════════════════════════════════
@@ -726,6 +792,18 @@ class BadgeRepository @Inject constructor(
                     .filter { it.isNotBlank() }
                     .distinct().size
                 calculateProgressiveTiers(distinctCountries, badge.progressiveSteps)
+            }
+
+            // 29. Commedia: L'Arte della Risata (Genere 35)
+            "genre_comedy" -> {
+                val comedyCount = allWatched.count { it.genreIds?.contains(35L) == true }
+                calculateProgressiveTiers(comedyCount, badge.progressiveSteps)
+            }
+
+            // 30. Western: Mezzogiorno di Fuoco (Genere 37)
+            "genre_western" -> {
+                val westernCount = allWatched.count { it.genreIds?.contains(37L) == true }
+                calculateProgressiveTiers(westernCount, badge.progressiveSteps)
             }
 
             // ══════════════════════════════════════════════════════════════════
@@ -854,6 +932,56 @@ class BadgeRepository @Inject constructor(
                     targetThreshold = 2,
                     activeTier = PreviewBadgeTier.SUPER_8,
                     isUnlocked = totalCustomScore >= 2
+                )
+            }
+
+            // 41. Miniserie TV: Il Romanzo Televisivo (5 miniserie completate con 1 sola stagione)
+            "badge_miniseries" -> {
+                val miniseriesCount = watchedShows.count { show ->
+                    show.numberOfSeasons == 1 || (show.seasons?.count { s -> s.seasonNumber > 0 } == 1)
+                }
+                EvaluationResult(
+                    currentProgress = miniseriesCount,
+                    targetThreshold = 5,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = miniseriesCount >= 5
+                )
+            }
+
+            // 43. Profondità Cartelle: La Collezione Definitiva (almeno 1 cartella con >= 25 titoli)
+            "badge_folder_deep" -> {
+                val maxFolderItems = allFolders.maxOfOrNull { it.itemIds.size } ?: 0
+                EvaluationResult(
+                    currentProgress = maxFolderItems,
+                    targetThreshold = 25,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = maxFolderItems >= 25
+                )
+            }
+
+            // 44. Attraverso i Decenni: La Macchina del Tempo (almeno 1 film visto per 7 decenni diversi)
+            "badge_time_machine" -> {
+                val distinctDecades = watchedMovies.mapNotNull { movie ->
+                    val year = movie.releaseDate?.take(4)?.toIntOrNull()
+                    if (year != null && year in 1880..2099) (year / 10) * 10 else null
+                }.distinct().size
+                EvaluationResult(
+                    currentProgress = distinctDecades,
+                    targetThreshold = 7,
+                    activeTier = PreviewBadgeTier.MM_70,
+                    isUnlocked = distinctDecades >= 7
+                )
+            }
+
+            // 45. Cinema Contemporaneo: Fresco di Stampa (5 film visti dell'anno in corso)
+            "badge_current_year" -> {
+                val currentYear = Calendar.getInstance().get(Calendar.YEAR).toString()
+                val currentYearCount = watchedMovies.count { it.releaseDate?.take(4) == currentYear }
+                EvaluationResult(
+                    currentProgress = currentYearCount.coerceAtMost(5),
+                    targetThreshold = 5,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = currentYearCount >= 5
                 )
             }
 
