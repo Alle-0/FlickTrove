@@ -1571,7 +1571,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Il Produttore Esecutivo</string>
     <string name="badge_executive_producer_cat">MECENATI &amp; SUPPORTO</string>
-    <string name="badge_executive_producer_desc">Dietro le quinte c\'è sempre chi crede nel progetto: hai supportato direttamente lo sviluppo di FlickTrove.</string>
+    <string name="badge_executive_producer_desc">Dietro le quinte c\'è sempre chi crede nel progetto: hai supportato direttamente lo sviluppo di FlickTrove con una donazione.</string>
     <string name="badge_onboarding_sync_title">Il Trasloco</string>
     <string name="badge_onboarding_sync_cat">IMPORT &amp; TRASLOCO</string>
     <string name="badge_onboarding_sync_desc">Nessuna storia va perduta: hai importato o sincronizzato con successo la tua cineteca personale da Trakt, SIMKL o tramite ripristino di un archivio.</string>
@@ -1741,4 +1741,33 @@
     <string name="badge_current_year_title">Fresco di Stampa</string>
     <string name="badge_current_year_cat">Cinema Contemporaneo</string>
     <string name="badge_current_year_desc">Vivi il cinema del tuo tempo: hai guardato 5 film distribuiti nelle sale o in streaming nell\'anno in corso.</string>
+
+    <string name="badge_double_feature_title">Doppio Spettacolo</string>
+    <string name="badge_double_feature_cat">SESSIONI DI VISIONE</string>
+    <string name="badge_double_feature_desc">La magia della sala non finisce mai: hai guardato 2 film diversi nello stesso giorno solare.</string>
+
+    <string name="badge_hidden_gem_title">Gemma Nascosta</string>
+    <string name="badge_hidden_gem_cat">CINEMA INDIPENDENTE</string>
+    <string name="badge_hidden_gem_desc">Scopritore di tesori cinematografici: hai guardato e premiato (voto &gt;= 7.5 o Preferito) un film di nicchia con meno di 500 voti su TMDB.</string>
+    <string name="trophy_unit_gems">gemme</string>
+
+    <string name="badge_short_films_title">Pillole di Cinema</string>
+    <string name="badge_short_films_cat">CORTOMETRAGGI</string>
+    <string name="badge_short_films_desc">L\'arte della sintesi: hai completato la visione di 5 film o cortometraggi con durata pari o inferiore a 45 minuti.</string>
+    <string name="trophy_unit_shorts">corti</string>
+
+    <string name="trophy_unit_comments">commenti</string>
+    <string name="trophy_unit_sagas">saghe</string>
+    <string name="trophy_unit_months">mesi</string>
+    <string name="trophy_unit_edits">modifiche</string>
+    <string name="trophy_unit_vibes">vibe</string>
+    <string name="trophy_unit_items">elementi</string>
+    <string name="trophy_unit_checkins">check-in</string>
+
+
+    <string name="badge_trophy_hunter_title">Il Cacciatore di Trofei</string>
+    <string name="badge_trophy_hunter_cat">TRAGUARDI CINEFILI</string>
+    <string name="badge_trophy_hunter_desc">La consacrazione definitiva del collezionista: scala le vette della cineteca sbloccando i trofei dell\'app.</string>
+    <string name="trophy_unit_trophies">trofei</string>
 </resources>
+

@@ -11,6 +11,7 @@ import com.cinetrack.ui.screens.CollectionDetailScreen
 import com.cinetrack.ui.screens.DiscoverTab
 import com.cinetrack.ui.screens.MovieDetailScreen
 import com.cinetrack.ui.screens.PersonDetailScreen
+import com.cinetrack.ui.screens.TrophyRoomTab
 import com.cinetrack.ui.screens.VistiTab
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import kotlinx.coroutines.delay
@@ -100,6 +101,8 @@ fun MainDeepLinkHandler(
                 val reqType = intent.getStringExtra("requestedType") ?: "popular_movies"
                 DiscoverTab.requestedType = reqType
                 tabNavigator.current = DiscoverTab
+            } else if (action == "com.cinetrack.OPEN_TROPHY_ROOM") {
+                tabNavigator.current = TrophyRoomTab
             } else if (action == "com.cinetrack.FLICKTROVE_SOCIAL_NOTIFICATION") {
                 val mediaId = intent.getStringExtra("mediaId")?.toLongOrNull()
                 val mediaType = intent.getStringExtra("mediaType")

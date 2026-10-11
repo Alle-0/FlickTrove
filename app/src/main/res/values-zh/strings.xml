@@ -1612,7 +1612,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">執行製片人</string>
     <string name="badge_executive_producer_cat">贊助人與支持</string>
-    <string name="badge_executive_producer_desc">在幕後，總有相信這個項目的人：您直接支持了FlickTrove的開發。</string>
+    <string name="badge_executive_producer_desc">在幕後，總有相信這個項目的人：您通過贊助直接支持了FlickTrove的開發。</string>
     <string name="badge_onboarding_sync_title">大搬遷</string>
     <string name="badge_onboarding_sync_cat">匯入與遷移</string>
     <string name="badge_onboarding_sync_desc">沒有故事會遺失：您透過Trakt、SIMKL或備份還原成功匯入或同步了您的個人片庫。</string>
@@ -1734,4 +1734,33 @@
     <string name="badge_current_year_title">新鮮出爐</string>
     <string name="badge_current_year_cat">當代院線</string>
     <string name="badge_current_year_desc">感受屬於我們這個時代的電影：觀看了5部在當年公映的最新佳作。</string>
+
+    <string name="badge_double_feature_title">雙片連映</string>
+    <string name="badge_double_feature_cat">放映場次</string>
+    <string name="badge_double_feature_desc">影廳的魅力永不落幕：你在同一天內觀看了2部不同的電影。</string>
+
+    <string name="badge_hidden_gem_title">滄海遺珠</string>
+    <string name="badge_hidden_gem_cat">獨立電影</string>
+    <string name="badge_hidden_gem_desc">電影寶藏的探索者：觀看並喜愛（評分 &gt;= 7.5 或加入收藏）一部 TMDB 評分人數少於 500 的冷門佳作。</string>
+    <string name="trophy_unit_gems">珍寶</string>
+
+    <string name="badge_short_films_title">光影膠囊</string>
+    <string name="badge_short_films_cat">短片</string>
+    <string name="badge_short_films_desc">凝練的藝術：完整觀看了5部片長不超過45分鐘的短片或電影。</string>
+    <string name="trophy_unit_shorts">部短片</string>
+
+
+    <string name="trophy_unit_comments">則評論</string>
+    <string name="trophy_unit_sagas">部傳奇</string>
+    <string name="trophy_unit_months">個月</string>
+    <string name="trophy_unit_edits">次修改</string>
+    <string name="trophy_unit_vibes">個氛圍</string>
+    <string name="trophy_unit_items">個元素</string>
+    <string name="trophy_unit_checkins">次打卡</string>
+
+
+    <string name="badge_trophy_hunter_title">奖杯猎人</string>
+    <string name="badge_trophy_hunter_cat">影迷里程碑</string>
+    <string name="badge_trophy_hunter_desc">收藏家的终极荣耀：解锁应用中的奖杯，登上电影殿堂的巅峰。</string>
+    <string name="trophy_unit_trophies">个奖杯</string>
 </resources>

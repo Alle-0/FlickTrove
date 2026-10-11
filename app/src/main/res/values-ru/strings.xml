@@ -1543,7 +1543,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Исполнительный продюсер</string>
     <string name="badge_executive_producer_cat">ПОКРОВИТЕЛИ И ПОДДЕРЖКА</string>
-    <string name="badge_executive_producer_desc">За кулисами всегда есть те, кто верит в проект: вы напрямую поддержали развитие FlickTrove.</string>
+    <string name="badge_executive_producer_desc">За кулисами всегда есть те, кто верит в проект: вы напрямую поддержали развитие FlickTrove пожертвованием.</string>
     <string name="badge_onboarding_sync_title">Большой переезд</string>
     <string name="badge_onboarding_sync_cat">ИМПОРТ И ПЕРЕЕЗД</string>
     <string name="badge_onboarding_sync_desc">Ни одна история не потеряна: вы успешно импортировали или синхронизировали свою фильмотеку из Trakt, SIMKL или резервной копии.</string>
@@ -1728,5 +1728,34 @@
     <string name="badge_current_year_title">Свежий выпуск</string>
     <string name="badge_current_year_cat">Современное кино</string>
     <string name="badge_current_year_desc">Живите кинематографом своего времени: вы посмотрели 5 фильмов, вышедших в текущем календарном году.</string>
+
+    <string name="badge_double_feature_title">Двойной сеанс</string>
+    <string name="badge_double_feature_cat">КИНОСЕАНСЫ</string>
+    <string name="badge_double_feature_desc">Магия кинозала не угасает: вы посмотрели 2 разных фильма в один и тот же календарный день.</string>
+
+    <string name="badge_hidden_gem_title">Скрытая жемчужина</string>
+    <string name="badge_hidden_gem_cat">НЕЗАВИСИМОЕ КИНО</string>
+    <string name="badge_hidden_gem_desc">Первооткрыватель киносокровищ: вы посмотрели и высоко оценили (оценка &gt;= 7.5 или в Избранном) нишевый фильм с менее чем 500 голосами на TMDB.</string>
+    <string name="trophy_unit_gems">жемчужин</string>
+
+    <string name="badge_short_films_title">Кино в пилюлях</string>
+    <string name="badge_short_films_cat">КОРОТКОМЕТРАЖКИ</string>
+    <string name="badge_short_films_desc">Искусство лаконичности: вы посмотрели 5 короткометражек или фильмов продолжительностью 45 минут или меньше.</string>
+    <string name="trophy_unit_shorts">короткометражек</string>
+
+
+    <string name="trophy_unit_comments">комментариев</string>
+    <string name="trophy_unit_sagas">саг</string>
+    <string name="trophy_unit_months">месяцев</string>
+    <string name="trophy_unit_edits">изменений</string>
+    <string name="trophy_unit_vibes">вайбов</string>
+    <string name="trophy_unit_items">элементов</string>
+    <string name="trophy_unit_checkins">чекинов</string>
+
+
+    <string name="badge_trophy_hunter_title">Охотник за трофеями</string>
+    <string name="badge_trophy_hunter_cat">СИНЕФИЛЬСКИЕ ДОСТИЖЕНИЯ</string>
+    <string name="badge_trophy_hunter_desc">Главное признание коллекционера: покоряйте вершины синематеки, открывая трофеи приложения.</string>
+    <string name="trophy_unit_trophies">трофеев</string>
 </resources>
 

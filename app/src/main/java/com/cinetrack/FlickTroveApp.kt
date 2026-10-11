@@ -345,7 +345,10 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                         trophyRoomViewModel = trophyRoomViewModel,
                                         hazeState = globalHazeState,
                                         onNavigateToTrophyRoom = {
-                                            navigator.push(com.cinetrack.ui.screens.TrophyRoomScreen())
+                                            if (navigator.size > 1) {
+                                                navigator.popUntil { it is com.cinetrack.ui.screens.MainScreen }
+                                            }
+                                            deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_TROPHY_ROOM")
                                         },
                                         modifier = Modifier
                                             .align(Alignment.TopCenter)

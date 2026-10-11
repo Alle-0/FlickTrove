@@ -1612,7 +1612,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Sorumlu Yapımcı</string>
     <string name="badge_executive_producer_cat">DESTEKÇİLER VE YARDIM</string>
-    <string name="badge_executive_producer_desc">Perde arkasında her zaman projeye inananlar vardır: FlickTrove\'un gelişimini doğrudan desteklediniz.</string>
+    <string name="badge_executive_producer_desc">Perde arkasında her zaman projeye inananlar vardır: bir bağış ile FlickTrove\'un gelişimini doğrudan desteklediniz.</string>
     <string name="badge_onboarding_sync_title">Büyük Taşınma</string>
     <string name="badge_onboarding_sync_cat">İÇE AKTARMA VE TAŞINMA</string>
     <string name="badge_onboarding_sync_desc">Hiçbir hikaye kaybolmaz: Trakt, SIMKL veya yedekleme yoluyla film kütüphanenizi başarıyla içe aktardınız veya senkronize ettiniz.</string>
@@ -1734,4 +1734,33 @@
     <string name="badge_current_year_title">Ayağının Tozuyla</string>
     <string name="badge_current_year_cat">Güncel Sinema</string>
     <string name="badge_current_year_desc">Zamanınızın sinemasını yaşayın: İçinde bulunduğumuz takvim yılında çıkan 5 film izlediniz.</string>
+
+    <string name="badge_double_feature_title">Çifte Seans</string>
+    <string name="badge_double_feature_cat">GÖSTERİM SEANSLARI</string>
+    <string name="badge_double_feature_desc">Sinemanın büyüsü hiç bitmez: Aynı takvim gününde 2 farklı film izlediniz.</string>
+
+    <string name="badge_hidden_gem_title">Gizli Cevher</string>
+    <string name="badge_hidden_gem_cat">BAĞIMSIZ SİNEMA</string>
+    <string name="badge_hidden_gem_desc">Sinematik hazinelerin kaşifi: TMDB\'de 500\'den az oya sahip niş bir filmi izleyip beğendiniz (puan &gt;= 7.5 veya Favori).</string>
+    <string name="trophy_unit_gems">cevher</string>
+
+    <string name="badge_short_films_title">Sinema Kapsülü</string>
+    <string name="badge_short_films_cat">KISA FİLMLER</string>
+    <string name="badge_short_films_desc">Özetin sanatı: Süresi 45 dakika veya daha az olan 5 kısa film izlediniz.</string>
+    <string name="trophy_unit_shorts">kısa film</string>
+
+
+    <string name="trophy_unit_comments">yorum</string>
+    <string name="trophy_unit_sagas">saga</string>
+    <string name="trophy_unit_months">ay</string>
+    <string name="trophy_unit_edits">düzenleme</string>
+    <string name="trophy_unit_vibes">vibe</string>
+    <string name="trophy_unit_items">öğe</string>
+    <string name="trophy_unit_checkins">check-in</string>
+
+
+    <string name="badge_trophy_hunter_title">Kupa Avcısı</string>
+    <string name="badge_trophy_hunter_cat">SİNEFİL KİLOMETRE TAŞLARI</string>
+    <string name="badge_trophy_hunter_desc">Koleksiyoncunun nihai zaferi: Uygulamadaki kupaları açarak sinematek zirvelerini fethedin.</string>
+    <string name="trophy_unit_trophies">kupa</string>
 </resources>

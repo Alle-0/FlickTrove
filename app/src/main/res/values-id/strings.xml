@@ -1611,7 +1611,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Produser Eksekutif</string>
     <string name="badge_executive_producer_cat">PELINDUNG &amp; DUKUNGAN</string>
-    <string name="badge_executive_producer_desc">Di balik layar, selalu ada yang percaya pada proyek ini: Anda secara langsung mendukung pengembangan FlickTrove.</string>
+    <string name="badge_executive_producer_desc">Di balik layar, selalu ada yang percaya pada proyek ini: Anda secara langsung mendukung pengembangan FlickTrove dengan donasi.</string>
     <string name="badge_onboarding_sync_title">Pindahan Besar</string>
     <string name="badge_onboarding_sync_cat">IMPOR &amp; MIGRASI</string>
     <string name="badge_onboarding_sync_desc">Tidak ada kisah yang hilang: Anda berhasil mengimpor atau menyinkronkan perpustakaan film Anda dari Trakt, SIMKL, atau melalui pemulihan cadangan.</string>
@@ -1733,4 +1733,33 @@
     <string name="badge_current_year_title">Hangat dari Bioskop</string>
     <string name="badge_current_year_cat">Sinema Kontemporer</string>
     <string name="badge_current_year_desc">Nikmati sinema zaman Anda: Anda telah menonton 5 film yang dirilis pada tahun kalender ini.</string>
+
+    <string name="badge_double_feature_title">Tayangan Ganda</string>
+    <string name="badge_double_feature_cat">SESI PENAYANGAN</string>
+    <string name="badge_double_feature_desc">Keajaiban bioskop tidak pernah padam: Anda menonton 2 film berbeda pada hari kalender yang sama.</string>
+
+    <string name="badge_hidden_gem_title">Permata Tersembunyi</string>
+    <string name="badge_hidden_gem_cat">SINEMA INDEPENDEN</string>
+    <string name="badge_hidden_gem_desc">Penemu harta karun sinema: Anda menonton dan menyukai (nilai &gt;= 7.5 atau Favorit) film khusus dengan kurang dari 500 suara di TMDB.</string>
+    <string name="trophy_unit_gems">permata</string>
+
+    <string name="badge_short_films_title">Kapsul Sinema</string>
+    <string name="badge_short_films_cat">FILM PENDEK</string>
+    <string name="badge_short_films_desc">Seni keringkasan: Anda menonton 5 film pendek atau berdurasi 45 menit atau kurang.</string>
+    <string name="trophy_unit_shorts">film pendek</string>
+
+
+    <string name="trophy_unit_comments">komentar</string>
+    <string name="trophy_unit_sagas">saga</string>
+    <string name="trophy_unit_months">bulan</string>
+    <string name="trophy_unit_edits">perubahan</string>
+    <string name="trophy_unit_vibes">vibe</string>
+    <string name="trophy_unit_items">elemen</string>
+    <string name="trophy_unit_checkins">check-in</string>
+
+
+    <string name="badge_trophy_hunter_title">Pemburu Trofi</string>
+    <string name="badge_trophy_hunter_cat">PENCAPAIAN SINEFIL</string>
+    <string name="badge_trophy_hunter_desc">Penghargaan tertinggi bagi sang kolektor: taklukkan puncak sinemateka dengan membuka trofi aplikasi.</string>
+    <string name="trophy_unit_trophies">trofi</string>
 </resources>

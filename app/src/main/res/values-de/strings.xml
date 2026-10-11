@@ -1544,7 +1544,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Ausführender Produzent</string>
     <string name="badge_executive_producer_cat">FÖRDERER &amp; UNTERSTÜTZUNG</string>
-    <string name="badge_executive_producer_desc">Hinter den Kulissen gibt es immer jemanden, der an das Projekt glaubt: Du hast die Entwicklung von FlickTrove direkt unterstützt.</string>
+    <string name="badge_executive_producer_desc">Hinter den Kulissen gibt es immer jemanden, der an das Projekt glaubt: Du hast die Entwicklung von FlickTrove direkt mit einer Spende unterstützt.</string>
     <string name="badge_onboarding_sync_title">Der große Umzug</string>
     <string name="badge_onboarding_sync_cat">IMPORT &amp; MIGRATION</string>
     <string name="badge_onboarding_sync_desc">Keine Geschichte geht verloren: Du hast deine Filmbibliothek erfolgreich von Trakt, SIMKL oder über ein Backup importiert oder synchronisiert.</string>
@@ -1731,5 +1731,34 @@
     <string name="badge_current_year_title">Druckfrisch</string>
     <string name="badge_current_year_cat">Gegenwartskino</string>
     <string name="badge_current_year_desc">Erlebe das Kino deiner Zeit: Du hast 5 Filme gesehen, die im aktuellen Kalenderjahr veröffentlicht wurden.</string>
+
+    <string name="badge_double_feature_title">Doppelvorstellung</string>
+    <string name="badge_double_feature_cat">VORFÜHRUNGEN</string>
+    <string name="badge_double_feature_desc">Die Magie des Kinos endet nie: Du hast 2 verschiedene Filme am selben Kalendertag gesehen.</string>
+
+    <string name="badge_hidden_gem_title">Verstecktes Juwel</string>
+    <string name="badge_hidden_gem_cat">INDEPENDENT-KINO</string>
+    <string name="badge_hidden_gem_desc">Entdecker cineastischer Schätze: Du hast einen Nischenfilm mit weniger als 500 TMDB-Bewertungen gesehen und geschätzt (Bewertung &gt;= 7.5 oder Favorit).</string>
+    <string name="trophy_unit_gems">Juwelen</string>
+
+    <string name="badge_short_films_title">Kino in Pillen</string>
+    <string name="badge_short_films_cat">KURZFILME</string>
+    <string name="badge_short_films_desc">Die Kunst der Kürze: Du hast 5 Kurzfilme mit einer Laufzeit von maximal 45 Minuten gesehen.</string>
+    <string name="trophy_unit_shorts">Kurzfilme</string>
+
+
+    <string name="trophy_unit_comments">Kommentare</string>
+    <string name="trophy_unit_sagas">Sagas</string>
+    <string name="trophy_unit_months">Monate</string>
+    <string name="trophy_unit_edits">Änderungen</string>
+    <string name="trophy_unit_vibes">Vibes</string>
+    <string name="trophy_unit_items">Elemente</string>
+    <string name="trophy_unit_checkins">Check-ins</string>
+
+
+    <string name="badge_trophy_hunter_title">Der Trophäenjäger</string>
+    <string name="badge_trophy_hunter_cat">CINEASTISCHE MEILENSTEINE</string>
+    <string name="badge_trophy_hunter_desc">Die ultimative Weihe des Sammlers: Erklimme die Höhen der Kinemathek, indem du die Trophäen der App freischaltest.</string>
+    <string name="trophy_unit_trophies">Trophäen</string>
 </resources>
 

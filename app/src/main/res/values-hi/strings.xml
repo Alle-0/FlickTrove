@@ -1540,7 +1540,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">कार्यकारी निर्माता</string>
     <string name="badge_executive_producer_cat">संरक्षक और समर्थन</string>
-    <string name="badge_executive_producer_desc">पर्दे के पीछे हमेशा ऐसे लोग होते हैं जो प्रोजेक्ट में विश्वास करते हैं: आपने सीधे FlickTrove के विकास का समर्थन किया है।</string>
+    <string name="badge_executive_producer_desc">पर्दे के पीछे हमेशा ऐसे लोग होते हैं जो प्रोजेक्ट में विश्वास करते हैं: आपने दान देकर सीधे FlickTrove के विकास का समर्थन किया है।</string>
     <string name="badge_onboarding_sync_title">बड़ा कदम</string>
     <string name="badge_onboarding_sync_cat">आयात और स्थानांतरण</string>
     <string name="badge_onboarding_sync_desc">कोई कहानी नहीं खोती: आपने Trakt, SIMKL या बैकअप पुनर्स्थापना के माध्यम से अपनी फिल्म लाइब्रेरी को सफलतापूर्वक आयात या सिंक किया है।</string>
@@ -1726,6 +1726,35 @@
     <string name="badge_current_year_title">ताज़ा रिलीज़</string>
     <string name="badge_current_year_cat">समकालीन सिनेमा</string>
     <string name="badge_current_year_desc">अपने समय के सिनेमा को जिएं: आपने वर्तमान कैलेंडर वर्ष में रिलीज़ हुई 5 फ़िल्में देखीं।</string>
+
+    <string name="badge_double_feature_title">डबल फीचर</string>
+    <string name="badge_double_feature_cat">स्क्रीनिंग सत्र</string>
+    <string name="badge_double_feature_desc">सिनेमाघर का जादू कभी खत्म नहीं होता: आपने एक ही कैलेंडर दिन में 2 अलग-अलग फ़िल्में देखीं।</string>
+
+    <string name="badge_hidden_gem_title">छिपा हुआ रत्न</string>
+    <string name="badge_hidden_gem_cat">स्वतंत्र सिनेमा</string>
+    <string name="badge_hidden_gem_desc">सिनेमाई खजाने के खोजकर्ता: आपने TMDB पर 500 से कम वोटों वाली एक आला फ़िल्म देखी और पसंद की (रेटिंग &gt;= 7.5 या पसंदीदा)।</string>
+    <string name="trophy_unit_gems">रत्न</string>
+
+    <string name="badge_short_films_title">सिनेमा कैप्सूल</string>
+    <string name="badge_short_films_cat">लघु फ़िल्में</string>
+    <string name="badge_short_films_desc">संक्षिप्तता की कला: आपने 45 मिनट या उससे कम समय की 5 लघु फ़िल्में पूरी कीं।</string>
+    <string name="trophy_unit_shorts">लघु फ़िल्में</string>
+
+
+    <string name="trophy_unit_comments">टिप्पणियाँ</string>
+    <string name="trophy_unit_sagas">गाथाएँ</string>
+    <string name="trophy_unit_months">महीने</string>
+    <string name="trophy_unit_edits">संपादन</string>
+    <string name="trophy_unit_vibes">वाइब्स</string>
+    <string name="trophy_unit_items">तत्व</string>
+    <string name="trophy_unit_checkins">चेक-इन</string>
+
+
+    <string name="badge_trophy_hunter_title">ट्रॉफी शिकारी</string>
+    <string name="badge_trophy_hunter_cat">सिनेप्रेमी मील के पत्थर</string>
+    <string name="badge_trophy_hunter_desc">संग्रहकर्ता का अंतिम सम्मान: ऐप की ट्रॉफियों को अनलॉक करके सिनेमा के शिखर पर पहुंचें।</string>
+    <string name="trophy_unit_trophies">ट्रॉफियां</string>
 </resources>
 
 

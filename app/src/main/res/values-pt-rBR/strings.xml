@@ -1542,7 +1542,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Produtor Executivo</string>
     <string name="badge_executive_producer_cat">PATRONOS E APOIO</string>
-    <string name="badge_executive_producer_desc">Nos bastidores sempre há quem acredite no projeto: você apoiou diretamente o desenvolvimento do FlickTrove.</string>
+    <string name="badge_executive_producer_desc">Nos bastidores sempre há quem acredite no projeto: você apoiou diretamente o desenvolvimento do FlickTrove com uma doação.</string>
     <string name="badge_onboarding_sync_title">A Grande Mudança</string>
     <string name="badge_onboarding_sync_cat">IMPORTAÇÃO E MIGRAÇÃO</string>
     <string name="badge_onboarding_sync_desc">Nenhuma história se perde: você importou ou sincronizou com sucesso sua cinemateca do Trakt, SIMKL ou por meio de um backup.</string>
@@ -1726,6 +1726,35 @@
     <string name="badge_current_year_title">Recém-Saído do Forno</string>
     <string name="badge_current_year_cat">Cinema Contemporâneo</string>
     <string name="badge_current_year_desc">Viva o cinema do seu tempo: você assistiu a 5 filmes lançados no ano corrente.</string>
+
+    <string name="badge_double_feature_title">Sessão Dupla</string>
+    <string name="badge_double_feature_cat">SESSÕES DE CINEMA</string>
+    <string name="badge_double_feature_desc">A magia da sala nunca termina: você assistiu a 2 filmes distintos no mesmo dia civil.</string>
+
+    <string name="badge_hidden_gem_title">Joia Escondida</string>
+    <string name="badge_hidden_gem_cat">CINEMA INDEPENDENTE</string>
+    <string name="badge_hidden_gem_desc">Explorador de tesouros cinéfilos: assistiu e adorou (nota &gt;= 7.5 ou Favorito) um filme de nicho com menos de 500 votos no TMDB.</string>
+    <string name="trophy_unit_gems">joias</string>
+
+    <string name="badge_short_films_title">Pílulas de Cinema</string>
+    <string name="badge_short_films_cat">CURTAS-METRAGENS</string>
+    <string name="badge_short_films_desc">A arte da síntese: completou a exibição de 5 curtas-metragens ou filmes com duração de 45 minutos ou menos.</string>
+    <string name="trophy_unit_shorts">curtas</string>
+
+
+    <string name="trophy_unit_comments">comentários</string>
+    <string name="trophy_unit_sagas">sagas</string>
+    <string name="trophy_unit_months">meses</string>
+    <string name="trophy_unit_edits">alterações</string>
+    <string name="trophy_unit_vibes">vibes</string>
+    <string name="trophy_unit_items">elementos</string>
+    <string name="trophy_unit_checkins">check-ins</string>
+
+
+    <string name="badge_trophy_hunter_title">O Caçador de Troféus</string>
+    <string name="badge_trophy_hunter_cat">CONQUISTAS CINÉFILAS</string>
+    <string name="badge_trophy_hunter_desc">A consagração definitiva do colecionador: escale o topo da cinemateca desbloqueando os troféus do aplicativo.</string>
+    <string name="trophy_unit_trophies">troféus</string>
 </resources>
 
 

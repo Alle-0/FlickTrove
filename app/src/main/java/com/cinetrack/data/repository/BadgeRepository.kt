@@ -135,6 +135,26 @@ class BadgeRepository @Inject constructor(
     private val _unlockedTierEvents = MutableSharedFlow<TrophyUnlockBannerEvent>(extraBufferCapacity = 16)
     val unlockedTierEvents: SharedFlow<TrophyUnlockBannerEvent> = _unlockedTierEvents.asSharedFlow()
 
+    fun triggerTestUnlockBanner(
+        badgeId: String = "badge_movies",
+        tier: PreviewBadgeTier = PreviewBadgeTier.MM_70
+    ) {
+        val catalogItem = OFFICIAL_TROPHY_ROOM_CATALOG.firstOrNull { it.badge.id == badgeId }
+        val badge = catalogItem?.badge
+        val stepPhrase = badge?.progressiveSteps?.get(tier)?.milestonePhrase
+            ?: "Hai sbloccato il formato ${tier.formatName}!"
+        val event = TrophyUnlockBannerEvent.SingleBadge(
+            badgeId = badgeId,
+            title = badge?.title ?: "Frequenza 24fps",
+            tier = tier,
+            category = badge?.category ?: BadgeTypeCategory.PROGRESSIVE_TIERS,
+            iconKind = badge?.iconKind ?: CustomBadgeIconKind.CINEMA_REEL,
+            milestonePhrase = stepPhrase,
+            isFirstUnlock = false
+        )
+        _unlockedTierEvents.tryEmit(event)
+    }
+
     fun recordSurpriseMeDiscovered(movieId: Long) {
         val currentSet = badgePrefs.getStringSet("surprise_me_discovered_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
         if (currentSet.add(movieId.toString())) {
@@ -262,6 +282,8 @@ class BadgeRepository @Inject constructor(
         repositoryScope.launch {
             try {
                 evaluateAllBadges()
+                syncPendingBadgesToFirestore()
+                fetchGlobalRarityStats()
             } catch (e: Exception) {
                 android.util.Log.e("BadgeRepository", "Error evaluating badges asynchronously", e)
             }
@@ -316,7 +338,7 @@ class BadgeRepository @Inject constructor(
         val evaluatedEntities = mutableListOf<UserBadgeEntity>()
         val todayStr = SimpleDateFormat("yyyy-MM-dd", Locale.US).format(Date())
 
-        for (catalogItem in OFFICIAL_TROPHY_ROOM_CATALOG) {
+        for (catalogItem in OFFICIAL_TROPHY_ROOM_CATALOG.filter { it.badge.id != "badge_trophy_hunter" }) {
             val badge = catalogItem.badge
             val prevEntity = existingBadges[badge.id]
 
@@ -376,6 +398,62 @@ class BadgeRepository @Inject constructor(
             }
         }
 
+        // Valutazione dinamica del meta-trofeo "Il Cacciatore di Trofei": avanza con lo sblocco di tutti gli altri trofei
+        val trophyHunterCatalogItem = OFFICIAL_TROPHY_ROOM_CATALOG.firstOrNull { it.badge.id == "badge_trophy_hunter" }
+        if (trophyHunterCatalogItem != null) {
+            val badge = trophyHunterCatalogItem.badge
+            val prevEntity = existingBadges[badge.id]
+            val otherUnlockedCount = evaluatedEntities.count { it.isUnlocked }
+
+            val (calculatedProgress, targetThreshold, calculatedTier, isUnlocked) = calculateProgressiveTiers(
+                otherUnlockedCount,
+                badge.progressiveSteps
+            )
+
+            val newlyUnlocked = isUnlocked && (prevEntity == null || !prevEntity.isUnlocked)
+            val tierUpgraded = prevEntity != null && prevEntity.isUnlocked && isHigherTier(calculatedTier, parseTierSafe(prevEntity.currentTier, PreviewBadgeTier.SUPER_8))
+
+            val unlockedDate = when {
+                prevEntity?.unlockedDate != null -> prevEntity.unlockedDate
+                isUnlocked -> todayStr
+                else -> null
+            }
+
+            val entity = UserBadgeEntity(
+                badgeId = badge.id,
+                currentTier = calculatedTier.name,
+                category = badge.category.name,
+                progressCurrent = calculatedProgress,
+                progressTarget = targetThreshold,
+                isUnlocked = isUnlocked,
+                unlockedDate = unlockedDate,
+                isRevealed = isUnlocked || (prevEntity?.isRevealed ?: false),
+                syncStatus = if (prevEntity?.progressCurrent != calculatedProgress || newlyUnlocked || tierUpgraded) "pending" else "synced",
+                lastUpdatedAt = System.currentTimeMillis()
+            )
+            evaluatedEntities.add(entity)
+
+            if (newlyUnlocked) {
+                bootstrapNewlyUnlockedCount++
+            }
+
+            if (!isBootstrap && (newlyUnlocked || tierUpgraded)) {
+                val stepPhrase = badge.progressiveSteps[calculatedTier]?.milestonePhrase
+                    ?: badge.title
+                _unlockedTierEvents.tryEmit(
+                    TrophyUnlockBannerEvent.SingleBadge(
+                        badgeId = badge.id,
+                        title = badge.title,
+                        tier = calculatedTier,
+                        category = badge.category,
+                        iconKind = badge.iconKind,
+                        milestonePhrase = stepPhrase,
+                        isFirstUnlock = newlyUnlocked
+                    )
+                )
+            }
+        }
+
         badgeDao.upsertBadges(evaluatedEntities)
 
         // Se è il primissimo bootstrap per un utente esistente con storico, emetti 1 singolo evento celebrativo riepilogativo
@@ -394,6 +472,77 @@ class BadgeRepository @Inject constructor(
     }
 
     /**
+     * Sincronizza i nuovi badge sbloccati in cloud:
+     * 1. Salva la copia sul profilo personale dell'utente in `/users/{uid}/unlocked_badges/{badgeId}`
+     * 2. Incrementa in modo atomico il contatore della community in `/system_metrics/badges_global`
+     * 3. Aggiorna lo stato Room locale a 'synced'
+     */
+    suspend fun syncPendingBadgesToFirestore(): Boolean {
+        val user = auth.currentUser ?: return false
+        if (user.isAnonymous) return false // Solo gli utenti registrati contribuiscono alle statistiche globali!
+        val pendingBadges = badgeDao.getPendingSyncBadges().filter { it.isUnlocked }
+        if (pendingBadges.isEmpty()) return true
+
+        return try {
+            val docRef = firestore.collection("system_metrics").document("badges_global")
+            val userBadgesCollection = firestore.collection("users").document(user.uid).collection("unlocked_badges")
+
+            val existingDocs = try {
+                userBadgesCollection.get().await().documents.map { it.id }.toSet()
+            } catch (_: Exception) {
+                emptySet()
+            }
+
+            val actuallyNewBadges = pendingBadges.filter { it.badgeId !in existingDocs }
+
+            if (actuallyNewBadges.isNotEmpty()) {
+                firestore.runTransaction { transaction ->
+                    val snapshot = transaction.get(docRef)
+                    if (!snapshot.exists()) return@runTransaction
+
+                    val totalUsers = snapshot.getLong("total_active_users") ?: 154L
+                    @Suppress("UNCHECKED_CAST")
+                    val countsMap = (snapshot.get("unlock_counts") as? Map<String, Any>)?.toMutableMap() ?: mutableMapOf()
+                    @Suppress("UNCHECKED_CAST")
+                    val raritiesMap = (snapshot.get("rarities") as? Map<String, Any>)?.toMutableMap() ?: mutableMapOf()
+
+                    for (b in actuallyNewBadges) {
+                        val currentCount = (countsMap[b.badgeId] as? Number)?.toLong() ?: 0L
+                        val newCount = currentCount + 1L
+                        countsMap[b.badgeId] = newCount
+                        val newPct = ((newCount.toDouble() / totalUsers) * 100.0).coerceIn(0.1, 100.0)
+                        raritiesMap[b.badgeId] = String.format(Locale.US, "%.1f", newPct).toDoubleOrNull() ?: newPct
+                    }
+
+                    transaction.update(docRef, mapOf(
+                        "unlock_counts" to countsMap,
+                        "rarities" to raritiesMap
+                    ))
+                }.await()
+            }
+
+            val batch = firestore.batch()
+            for (b in pendingBadges) {
+                val badgeDoc = userBadgesCollection.document(b.badgeId)
+                batch.set(badgeDoc, mapOf(
+                    "badgeId" to b.badgeId,
+                    "tier" to b.currentTier,
+                    "unlockedDate" to (b.unlockedDate ?: ""),
+                    "syncedAt" to System.currentTimeMillis()
+                ))
+            }
+            batch.commit().await()
+
+            badgeDao.markBadgesAsSynced(pendingBadges.map { it.badgeId })
+            android.util.Log.d("BadgeRepository", "syncPendingBadgesToFirestore: synced ${pendingBadges.size} badges (new increments: ${actuallyNewBadges.size})")
+            true
+        } catch (e: Exception) {
+            android.util.Log.e("BadgeRepository", "syncPendingBadgesToFirestore failed", e)
+            false
+        }
+    }
+
+    /**
      * Sincronizza le statistiche globali di rarità leggendo 1 singola volta
      * il documento aggregato `/system_metrics/badges_global` da Firestore.
      */
@@ -407,17 +556,31 @@ class BadgeRepository @Inject constructor(
         }
         return try {
             val doc = firestore.collection("system_metrics").document("badges_global").get().await()
-            if (!doc.exists()) return false
+            if (!doc.exists()) {
+                android.util.Log.w("BadgeRepository", "badges_global document does not exist in Firestore")
+                return false
+            }
 
-            val totalUsers = doc.getLong("total_active_users") ?: 1000L
+            val totalUsers = (doc.getLong("total_active_users") ?: 154L).coerceAtLeast(1L)
             @Suppress("UNCHECKED_CAST")
-            val rarities = doc.get("rarities") as? Map<String, Any> ?: return false
+            val rarities = doc.get("rarities") as? Map<String, Any>
+            @Suppress("UNCHECKED_CAST")
+            val counts = doc.get("unlock_counts") as? Map<String, Any>
 
-            val statsEntities = rarities.mapNotNull { (badgeId, rawPercent) ->
-                val percentFloat = when (rawPercent) {
-                    is Number -> rawPercent.toFloat()
-                    is String -> rawPercent.replace("%", "").toFloatOrNull()
-                    else -> null
+            if (rarities == null && counts == null) return false
+
+            val allBadgeIds = (counts?.keys ?: emptySet()) + (rarities?.keys ?: emptySet())
+            val statsEntities = allBadgeIds.mapNotNull { badgeId ->
+                val countNumber = counts?.get(badgeId) as? Number
+                val percentFloat = if (countNumber != null) {
+                    ((countNumber.toFloat() / totalUsers) * 100f).coerceIn(0.1f, 100.0f)
+                } else {
+                    val rawPercent = rarities?.get(badgeId)
+                    when (rawPercent) {
+                        is Number -> rawPercent.toFloat()
+                        is String -> rawPercent.replace("%", "").toFloatOrNull()
+                        else -> null
+                    }
                 } ?: return@mapNotNull null
 
                 BadgeGlobalStatsEntity(
@@ -430,10 +593,11 @@ class BadgeRepository @Inject constructor(
 
             if (statsEntities.isNotEmpty()) {
                 badgeDao.upsertGlobalStats(statsEntities)
+                android.util.Log.d("BadgeRepository", "fetchGlobalRarityStats: successfully saved ${statsEntities.size} global rarity stats (totalUsers=$totalUsers)")
             }
             true
         } catch (e: Exception) {
-            e.printStackTrace()
+            android.util.Log.e("BadgeRepository", "fetchGlobalRarityStats failed", e)
             false
         }
     }
@@ -985,7 +1149,71 @@ class BadgeRepository @Inject constructor(
                 )
             }
 
+            // 48. Doppio Spettacolo: 2 film diversi nello stesso giorno solare
+            "badge_double_feature" -> {
+                val movieIds = watchedMovies.map { it.id }.toSet()
+                val dayToMovieIds = mutableMapOf<String, MutableSet<Long>>()
+                for (history in allHistory) {
+                    if (history.movieId in movieIds) {
+                        val dayKey = history.watchedAt.take(10)
+                        if (dayKey.isNotBlank()) {
+                            dayToMovieIds.getOrPut(dayKey) { mutableSetOf() }.add(history.movieId)
+                        }
+                    }
+                }
+                for (movie in watchedMovies) {
+                    val dayKey = movie.watchedAt?.take(10)
+                    if (!dayKey.isNullOrBlank()) {
+                        dayToMovieIds.getOrPut(dayKey) { mutableSetOf() }.add(movie.id)
+                    }
+                }
+                val maxMoviesInSingleDay = dayToMovieIds.values.maxOfOrNull { it.size } ?: 0
+                EvaluationResult(
+                    currentProgress = maxMoviesInSingleDay.coerceAtMost(2),
+                    targetThreshold = 2,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = maxMoviesInSingleDay >= 2
+                )
+            }
+
+            // 49. Gemma Nascosta: Film con TMDB voteCount <= 500 apprezzato dall'utente (voto >= 7.5 o Preferito)
+            "badge_hidden_gem" -> {
+                val hiddenGemsCount = watchedMovies.count { movie ->
+                    val tmdbVotes = movie.voteCount ?: 0
+                    val isNiche = tmdbVotes in 1..500
+                    val isLoved = (movie.personalRating ?: 0.0) >= 7.5 || movie.favorite
+                    isNiche && isLoved
+                }
+                EvaluationResult(
+                    currentProgress = hiddenGemsCount.coerceAtMost(1),
+                    targetThreshold = 1,
+                    activeTier = PreviewBadgeTier.MM_70,
+                    isUnlocked = hiddenGemsCount >= 1
+                )
+            }
+
+            // 50. Pillole di Cinema: 5 cortometraggi o film con durata <= 45 minuti
+            "badge_short_films" -> {
+                val shortCount = watchedMovies.count { movie ->
+                    val rt = movie.runtime ?: 0
+                    rt in 1..45
+                }
+                EvaluationResult(
+                    currentProgress = shortCount.coerceAtMost(5),
+                    targetThreshold = 5,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = shortCount >= 5
+                )
+            }
+
+            // 51. Meta Trofeo: Il Cacciatore di Trofei (avanza con lo sblocco degli altri trofei)
+            "badge_trophy_hunter" -> {
+                val curr = prevEntity?.progressCurrent ?: 0
+                calculateProgressiveTiers(curr, badge.progressiveSteps)
+            }
+
             // Default
+
             else -> {
                 val target = badge.progressTarget.coerceAtLeast(1)
                 val curr = prevEntity?.progressCurrent ?: 0
@@ -1033,9 +1261,10 @@ class BadgeRepository @Inject constructor(
             }
         }
 
-        // Se ha raggiunto l'ultimo tier, il target è la soglia finale
-        if (highestAchievedTier == PreviewBadgeTier.THE_FINAL_CUT) {
-            nextTarget = steps[PreviewBadgeTier.THE_FINAL_CUT]?.targetThreshold ?: nextTarget
+        // Se ha raggiunto l'ultimo tier disponibile, il target è la soglia finale massima
+        val maxAvailableTier = steps.keys.maxByOrNull { it.ordinal } ?: PreviewBadgeTier.THE_FINAL_CUT
+        if (highestAchievedTier == maxAvailableTier) {
+            nextTarget = steps[maxAvailableTier]?.targetThreshold ?: nextTarget
         }
 
         return EvaluationResult(

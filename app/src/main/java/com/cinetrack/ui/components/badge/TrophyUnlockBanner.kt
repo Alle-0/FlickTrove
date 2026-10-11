@@ -41,6 +41,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -126,7 +128,7 @@ fun TrophyUnlockBanner(
 
         Box(
             modifier = Modifier
-                .padding(horizontal = 16.dp, vertical = 8.dp)
+                .padding(start = 16.dp, end = 16.dp, top = 52.dp, bottom = 10.dp)
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)
                 .widthIn(max = 440.dp)
@@ -141,42 +143,39 @@ fun TrophyUnlockBanner(
                         }
                     }
                 }
-                .clip(RoundedCornerShape(32.dp))
+                .clip(RoundedCornerShape(26.dp))
                 .hazeGlass(
                     state = hazeState,
-                    shape = RoundedCornerShape(32.dp),
-                    style = HazeStyles.PremiumDark
-                )
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.08f),
-                            Color(0xFF0F172A).copy(alpha = 0.75f)
-                        )
-                    )
+                    shape = RoundedCornerShape(26.dp),
+                    style = HazeStyles.glassmorphicDialog
                 )
                 .border(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            Color.White.copy(alpha = 0.28f),
-                            Color.White.copy(alpha = 0.08f)
+                            Color.White.copy(alpha = 0.22f),
+                            Color.White.copy(alpha = 0.05f)
                         )
                     ),
-                    shape = RoundedCornerShape(32.dp)
+                    shape = RoundedCornerShape(26.dp)
                 )
-                .padding(horizontal = 14.dp, vertical = 10.dp)
         ) {
-            when (current) {
-                is TrophyUnlockBannerEvent.InitialBootstrapSummary -> {
-                    InitialBootstrapBannerContent(
-                        unlockedCount = current.unlockedCount
-                    )
-                }
-                is TrophyUnlockBannerEvent.SingleBadge -> {
-                    SingleBadgeBannerContent(
-                        event = current
-                    )
+            Box(
+                modifier = Modifier
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .padding(horizontal = 16.dp, vertical = 11.dp)
+            ) {
+                when (current) {
+                    is TrophyUnlockBannerEvent.InitialBootstrapSummary -> {
+                        InitialBootstrapBannerContent(
+                            unlockedCount = current.unlockedCount
+                        )
+                    }
+                    is TrophyUnlockBannerEvent.SingleBadge -> {
+                        SingleBadgeBannerContent(
+                            event = current
+                        )
+                    }
                 }
             }
         }

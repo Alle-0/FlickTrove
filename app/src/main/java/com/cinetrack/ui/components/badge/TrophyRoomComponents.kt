@@ -1083,7 +1083,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.THE_FINAL_CUT,
             iconKind = CustomBadgeIconKind.EXECUTIVE_PRODUCER,
             categoryLabel = "MECENATI & SUPPORTO",
-            defaultDescription = "Dietro le quinte c'è sempre chi crede nel progetto: hai supportato direttamente lo sviluppo di FlickTrove.",
+            defaultDescription = "Dietro le quinte c'è sempre chi crede nel progetto: hai supportato direttamente lo sviluppo di FlickTrove con una donazione.",
             secretHint = null,
             progressCurrent = 0,
             progressTarget = 1,
@@ -1295,7 +1295,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         unlockedDate = null
     ),
 
-    // 48. Cinema Contemporaneo - Fresco di Stampa
+    // 47. Cinema Contemporaneo - Fresco di Stampa
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_current_year",
@@ -1313,8 +1313,96 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         currentTier = PreviewBadgeTier.MM_35,
         isUnlocked = false,
         unlockedDate = null
+    ),
+
+    // 48. Doppio Spettacolo
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_double_feature",
+            title = "Doppio Spettacolo",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_35,
+            iconKind = CustomBadgeIconKind.DOUBLE_FEATURE,
+            categoryLabel = "SESSIONI DI VISIONE",
+            defaultDescription = "La magia della sala non finisce mai: hai guardato 2 film diversi nello stesso giorno solare.",
+            progressCurrent = 0,
+            progressTarget = 2,
+            progressUnit = "film",
+            rarityPercent = "18.5%"
+        ),
+        currentTier = PreviewBadgeTier.MM_35,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 49. Gemma Nascosta
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_hidden_gem",
+            title = "Gemma Nascosta",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_70,
+            iconKind = CustomBadgeIconKind.HIDDEN_GEM,
+            categoryLabel = "CINEMA INDIPENDENTE",
+            defaultDescription = "Scopritore di tesori cinematografici: hai guardato e premiato (voto >= 7.5 o Preferito) un film di nicchia con meno di 500 voti su TMDB.",
+            progressCurrent = 0,
+            progressTarget = 1,
+            progressUnit = "gemme",
+            rarityPercent = "6.1%"
+        ),
+        currentTier = PreviewBadgeTier.MM_70,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 50. Pillole di Cinema
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_short_films",
+            title = "Pillole di Cinema",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_35,
+            iconKind = CustomBadgeIconKind.SHORT_FILMS,
+            categoryLabel = "CORTOMETRAGGI",
+            defaultDescription = "L'arte della sintesi: hai completato la visione di 5 film o cortometraggi con durata pari o inferiore a 45 minuti.",
+            progressCurrent = 0,
+            progressTarget = 5,
+            progressUnit = "corti",
+            rarityPercent = "8.4%"
+        ),
+        currentTier = PreviewBadgeTier.MM_35,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 51. Meta Trofeo - Il Cacciatore di Trofei
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_trophy_hunter",
+            title = "Il Cacciatore di Trofei",
+            category = BadgeTypeCategory.PROGRESSIVE_TIERS,
+            fixedTier = null,
+            initialProgressiveTier = PreviewBadgeTier.SUPER_8,
+            iconKind = CustomBadgeIconKind.TROPHY_HUNTER,
+            categoryLabel = "TRAGUARDI CINEFILI",
+            defaultDescription = "La consacrazione definitiva del collezionista: scala le vette della cineteca sbloccando i trofei dell'app.",
+            progressiveSteps = mapOf(
+                PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 10, "Hai sbloccato i tuoi primi 10 trofei.", "10 trofei"),
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 20, "20 trofei conquistati. La tua bacheca risplende.", "20 trofei"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 35, "35 trofei nella sala d'onore. Un vero maestro del cinema.", "35 trofei"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 trofei completati. La Sala dei Trofei è al suo apice leggendario.", "50 trofei")
+            ),
+            progressCurrent = 0,
+            progressTarget = 10,
+            progressUnit = "trofei",
+            rarityPercent = "0.6%"
+        ),
+        currentTier = PreviewBadgeTier.SUPER_8,
+        isUnlocked = false,
+        unlockedDate = null
     )
 )
+
 
 /**
  * Schermata Vetrina dei Trofei (Trophy Showcase) in Puro Stile FlickTrove:
@@ -1331,7 +1419,8 @@ fun TrophyRoomScreenContent(
     paddingValues: PaddingValues = PaddingValues(),
     hazeState: HazeState? = null,
     isFilterModalOpenExternal: Boolean = false,
-    onFilterModalOpenExternalChange: (Boolean) -> Unit = {}
+    onFilterModalOpenExternalChange: (Boolean) -> Unit = {},
+    onTestBannerClick: (() -> Unit)? = null
 ) {
     val localHaze = hazeState ?: remember { HazeState() }
     val gridState = rememberLazyGridState()
@@ -1466,7 +1555,8 @@ fun TrophyRoomScreenContent(
                     unlockedCount = unlockedCount,
                     totalCount = totalCount,
                     completionFraction = completionFraction,
-                    tierCounts = unlockedTierCounts
+                    tierCounts = unlockedTierCounts,
+                    onTestBannerClick = onTestBannerClick
                 )
             }
 
@@ -1547,6 +1637,7 @@ private fun TrophyStatsSummaryCard(
     totalCount: Int,
     completionFraction: Float,
     tierCounts: Map<PreviewBadgeTier, Int> = emptyMap(),
+    onTestBannerClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -1559,18 +1650,52 @@ private fun TrophyStatsSummaryCard(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            // Header: solo titolo sezione pulito, zero duplicazioni di 30/37
-            Text(
-                text = stringResource(R.string.trophy_palmares_title),
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Black,
-                    letterSpacing = 1.5.sp
-                ),
-                color = NeonTeal
-            )
+            // Header: solo titolo sezione pulito con eventuale trigger test notifica
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.trophy_palmares_title),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.sp,
+                        fontWeight = FontWeight.Black,
+                        letterSpacing = 1.5.sp
+                    ),
+                    color = NeonTeal
+                )
 
-            Spacer(modifier = Modifier.height(10.dp))
+                if (onTestBannerClick != null) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .bounceClick { onTestBannerClick() }
+                            .clip(CircleShape)
+                            .background(Color(0xFFFBBF24).copy(alpha = 0.12f))
+                            .border(1.dp, Color(0xFFFBBF24).copy(alpha = 0.50f), CircleShape)
+                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_trophy),
+                            contentDescription = null,
+                            tint = Color(0xFFFBBF24),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = "Test Notifica",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 10.sp,
+                                fontWeight = FontWeight.Bold
+                            ),
+                            color = Color(0xFFFBBF24)
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(12.dp))
 
             // Body: Stat Ruota a sinistra + Rarità a destra
             Row(
@@ -1578,13 +1703,13 @@ private fun TrophyStatsSummaryCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(14.dp)
             ) {
-                // 1. STAT RUOTA A SINISTRA (Ingrandita e prominente)
+                // 1. STAT RUOTA A SINISTRA (Ingrandita a 116.dp per bilanciare le 3 righe dei tier)
                 TrophyMultiTierWheel(
                     unlockedCount = unlockedCount,
                     totalCount = totalCount,
                     completionFraction = completionFraction,
                     tierCounts = tierCounts,
-                    modifier = Modifier.size(96.dp)
+                    modifier = Modifier.size(116.dp)
                 )
 
                 // 2. RARITÀ A DESTRA (2 colonne x 3 righe come prima, perfettamente allineate)
@@ -1646,7 +1771,7 @@ private fun TrophyMultiTierWheel(
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidthPx = 7.dp.toPx()
+            val strokeWidthPx = 8.5.dp.toPx()
             val diameter = size.minDimension - strokeWidthPx
             val arcSize = androidx.compose.ui.geometry.Size(diameter, diameter)
             val topLeft = androidx.compose.ui.geometry.Offset(strokeWidthPx / 2f, strokeWidthPx / 2f)
@@ -1706,17 +1831,17 @@ private fun TrophyMultiTierWheel(
             Text(
                 text = "${(completionFraction * 100).toInt()}%",
                 style = MaterialTheme.typography.titleLarge.copy(
-                    fontSize = 20.sp,
+                    fontSize = 24.sp,
                     fontWeight = FontWeight.Black,
                     letterSpacing = (-0.5).sp
                 ),
                 color = Color.White
             )
-            Spacer(modifier = Modifier.height(1.dp))
+            Spacer(modifier = Modifier.height(2.dp))
             Text(
                 text = "$unlockedCount/$totalCount",
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 10.sp,
+                    fontSize = 11.sp,
                     fontWeight = FontWeight.Bold
                 ),
                 color = Color.White.copy(alpha = 0.5f)

@@ -45,7 +45,18 @@ class TrophyRoomViewModel @Inject constructor(
     fun refreshBadges() {
         viewModelScope.launch {
             badgeRepository.evaluateAllBadges()
+            badgeRepository.syncPendingBadgesToFirestore()
             badgeRepository.fetchGlobalRarityStats()
         }
+    }
+
+    /**
+     * Emette un evento di test per verificare visivamente l'animazione e lo stile del banner celebrativo.
+     */
+    fun triggerTestUnlockBanner(
+        badgeId: String = "badge_movies",
+        tier: com.cinetrack.ui.components.badge.PreviewBadgeTier = com.cinetrack.ui.components.badge.PreviewBadgeTier.MM_70
+    ) {
+        badgeRepository.triggerTestUnlockBanner(badgeId, tier)
     }
 }

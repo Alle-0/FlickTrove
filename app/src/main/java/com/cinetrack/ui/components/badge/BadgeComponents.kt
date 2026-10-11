@@ -223,6 +223,10 @@ enum class CustomBadgeIconKind(@DrawableRes val iconRes: Int) {
     DAY_ONE_PREMIERE(R.drawable.ic_badge_theater_curtains),
     FULL_RATING_SPECTRUM(R.drawable.ic_badge_stairs_goal),
     CURRENT_YEAR(R.drawable.ic_badge_newspaper),
+    DOUBLE_FEATURE(R.drawable.ic_badge_double_feature),
+    HIDDEN_GEM(R.drawable.ic_badge_hidden_gem),
+    SHORT_FILMS(R.drawable.ic_badge_short_films),
+    TROPHY_HUNTER(R.drawable.ic_badge_trophy_hunter),
 
     // Alias per retrocompatibilità
     DOUBLE_TICKET(R.drawable.ic_badge_ticket),
@@ -348,6 +352,10 @@ fun getBadgeTitleRes(badgeId: String): Int = when (badgeId) {
     "badge_day_one_premiere", "secret_day_one_premiere" -> R.string.badge_day_one_premiere_title
     "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_title
     "badge_current_year" -> R.string.badge_current_year_title
+    "badge_double_feature" -> R.string.badge_double_feature_title
+    "badge_hidden_gem" -> R.string.badge_hidden_gem_title
+    "badge_short_films" -> R.string.badge_short_films_title
+    "badge_trophy_hunter" -> R.string.badge_trophy_hunter_title
     else -> 0
 }
 
@@ -425,6 +433,10 @@ fun getBadgeCategoryRes(badgeId: String): Int = when (badgeId) {
     "badge_day_one_premiere", "secret_day_one_premiere" -> R.string.badge_day_one_premiere_cat
     "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_cat
     "badge_current_year" -> R.string.badge_current_year_cat
+    "badge_double_feature" -> R.string.badge_double_feature_cat
+    "badge_hidden_gem" -> R.string.badge_hidden_gem_cat
+    "badge_short_films" -> R.string.badge_short_films_cat
+    "badge_trophy_hunter" -> R.string.badge_trophy_hunter_cat
     else -> 0
 }
 
@@ -502,6 +514,10 @@ fun getBadgeDescriptionRes(badgeId: String): Int = when (badgeId) {
     "badge_day_one_premiere", "secret_day_one_premiere" -> R.string.badge_day_one_premiere_desc
     "secret_full_rating_spectrum" -> R.string.badge_secret_full_rating_spectrum_desc
     "badge_current_year" -> R.string.badge_current_year_desc
+    "badge_double_feature" -> R.string.badge_double_feature_desc
+    "badge_hidden_gem" -> R.string.badge_hidden_gem_desc
+    "badge_short_films" -> R.string.badge_short_films_desc
+    "badge_trophy_hunter" -> R.string.badge_trophy_hunter_desc
     else -> 0
 }
 
@@ -529,12 +545,23 @@ fun getProgressUnitRes(unit: String): Int? = when (unit.lowercase().trim()) {
     "episodi", "puntate", "episodes" -> R.string.trophy_unit_episodes
     "serie", "shows", "series" -> R.string.trophy_unit_shows
     "rewatch", "rewatches" -> R.string.trophy_unit_rewatches
-    "paesi", "countries" -> R.string.trophy_unit_countries
+    "paesi", "countries", "nazioni", "nations" -> R.string.trophy_unit_countries
     "cartelle", "folders" -> R.string.trophy_unit_folders
     "voti", "ratings" -> R.string.trophy_unit_ratings
     "note", "notes" -> R.string.trophy_unit_notes
     "decenni", "decades" -> R.string.trophy_unit_decades
     "titoli", "titles" -> R.string.trophy_unit_movies
+    "gemme", "gems" -> R.string.trophy_unit_gems
+    "corti", "shorts" -> R.string.trophy_unit_shorts
+    "commenti", "comments" -> R.string.trophy_unit_comments
+    "saghe", "sagas" -> R.string.trophy_unit_sagas
+    "mesi", "months" -> R.string.trophy_unit_months
+    "modifiche", "edits" -> R.string.trophy_unit_edits
+    "vibes", "vibe" -> R.string.trophy_unit_vibes
+    "elementi", "elements", "items" -> R.string.trophy_unit_items
+    "check-in", "checkins", "check-ins" -> R.string.trophy_unit_checkins
+    "doc", "documentari", "documentaries" -> R.string.trophy_unit_movies
+    "trofei", "trofeo", "trophies", "trophy" -> R.string.trophy_unit_trophies
     else -> null
 }
 
@@ -715,7 +742,7 @@ fun FlickTroveBadgeEmblem(
     showProgressRing: Boolean = false,
     size: Dp = 92.dp,
     enableInteractiveParallax: Boolean = size >= 90.dp,
-    enablePeriodicGleam: Boolean = true,
+    enablePeriodicGleam: Boolean = isUnlocked && size >= 90.dp,
     modifier: Modifier = Modifier
 ) {
     val tierColor by animateColorAsState(
@@ -736,26 +763,31 @@ fun FlickTroveBadgeEmblem(
         label = "EmblemProgress"
     )
 
-    // ── 1. EFFETTO LUCCICHIO PERIODICO (Gleam calmo e raro ogni ~9 secondi) ──
+    // ── 1. EFFETTO LUCCICHIO PERIODICO (Gleam calmo, attivo SOLO su emblema ingrandito >= 90.dp) ──
     val shimmerDelayMs = remember(iconKind, tier) {
         ((iconKind.hashCode() and 0x7FFFFFFF) % 4000)
     }
-    val infiniteTransition = rememberInfiniteTransition(label = "EmblemInfiniteTransition")
-    val gleamProgress by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = keyframes {
-                durationMillis = 9000
-                0.0f at 0 using LinearOutSlowInEasing
-                1.0f at 1300 using FastOutSlowInEasing
-                1.0f at 9000
-            },
-            repeatMode = RepeatMode.Restart,
-            initialStartOffset = StartOffset(shimmerDelayMs)
-        ),
-        label = "GleamProgress"
-    )
+    val gleamProgress: Float = if (enablePeriodicGleam && isUnlocked) {
+        val infiniteTransition = rememberInfiniteTransition(label = "EmblemInfiniteTransition")
+        val progress by infiniteTransition.animateFloat(
+            initialValue = 0f,
+            targetValue = 1f,
+            animationSpec = infiniteRepeatable(
+                animation = keyframes {
+                    durationMillis = 9000
+                    0.0f at 0 using LinearOutSlowInEasing
+                    1.0f at 1300 using FastOutSlowInEasing
+                    1.0f at 9000
+                },
+                repeatMode = RepeatMode.Restart,
+                initialStartOffset = StartOffset(shimmerDelayMs)
+            ),
+            label = "GleamProgress"
+        )
+        progress
+    } else {
+        0f
+    }
 
     // ── 2. EFFETTO PARALLASSE TATTILE 3D COL DITO ──
     val coroutineScope = rememberCoroutineScope()
@@ -1016,23 +1048,19 @@ fun FlickTroveBadgeEmblem(
         val innerCircleSize = if (showProgressRing) size * 0.60f else size * 0.68f
         val standardIconSize = if (showProgressRing) size * 0.46f else size * 0.52f
 
-        // Solo queste 3 icone specifiche (Scenografo Personale, Notte delle Ombre, Produttore Esecutivo)
-        // vengono ingrandite ulteriormente a 1.85x del diametro della lente per riempire il cerchio ed essere croppate
-        val isSpecialLargeIcon = isUnlocked && (
+        // Icone ingrandite su misura per riempire armoniosamente la lente circolare
+        val currentIconSize = when {
             iconKind.iconRes == R.drawable.ic_badge_light_projector ||
             iconKind.iconRes == R.drawable.ic_badge_screaming ||
-            iconKind.iconRes == R.drawable.ic_badge_shaking_hands
-        )
-
-        val currentIconSize = if (isSpecialLargeIcon) {
-            innerCircleSize * 1.15f
-        } else {
-            standardIconSize
+            iconKind.iconRes == R.drawable.ic_badge_shaking_hands -> innerCircleSize * 1.15f
+            iconKind.iconRes == R.drawable.ic_badge_theater_curtains -> innerCircleSize * 1.15f
+            iconKind.iconRes == R.drawable.ic_badge_pocket_watch -> innerCircleSize * 1.15f
+            else -> standardIconSize
         }
 
+
         // Sposta solo queste icone un pochetto più in alto per bilanciare la base
-        val isShiftedUpIcon = isUnlocked && (
-            iconKind.iconRes == R.drawable.ic_badge_hot_meal ||
+        val isShiftedUpIcon = iconKind.iconRes == R.drawable.ic_badge_hot_meal ||
             iconKind.iconRes == R.drawable.ic_badge_star_altar ||
             iconKind.iconRes == R.drawable.ic_badge_tv ||
             iconKind.iconRes == R.drawable.ic_badge_magnifying_glass ||
@@ -1040,12 +1068,9 @@ fun FlickTroveBadgeEmblem(
             iconKind.iconRes == R.drawable.ic_badge_scales ||
             iconKind.iconRes == R.drawable.ic_badge_acoustic_megaphone ||
             iconKind.iconRes == R.drawable.ic_badge_lantern_flame
-        )
 
         // Abbassa la medaglia con stella (La Giuria) che ha la barra orizzontale larga in cima
-        val isShiftedDownIcon = isUnlocked && (
-            iconKind.iconRes == R.drawable.ic_badge_star_medal
-        )
+        val isShiftedDownIcon = iconKind.iconRes == R.drawable.ic_badge_star_medal
 
         val iconOffsetY = when {
             isShiftedUpIcon -> -size * 0.032f
@@ -1075,14 +1100,26 @@ fun FlickTroveBadgeEmblem(
                         .wrapContentSize(align = Alignment.Center, unbounded = true)
                         .requiredSize(currentIconSize)
                 )
-            } else {
+            } else if (tier == PreviewBadgeTier.LOST_REEL) {
+                // I trofei segreti Lost Reel mantengono il lucchetto per preservare il mistero della Bobina Perduta
                 Icon(
                     painter = painterResource(id = R.drawable.ic_lock),
-                    contentDescription = "Bloccato",
-                    tint = if (tier == PreviewBadgeTier.LOST_REEL) Color(0xFF818CF8).copy(alpha = 0.75f) else Color(0xFF64748B),
+                    contentDescription = "Trofeo Segreto",
+                    tint = Color(0xFF818CF8).copy(alpha = 0.70f),
                     modifier = Modifier
                         .offset(x = parallaxX * 0.7f, y = parallaxY * 0.7f)
                         .size(standardIconSize * 0.82f)
+                )
+            } else {
+                // I trofei standard mostrano la propria icona identificativa in silhouette satinata scura
+                Icon(
+                    painter = painterResource(id = iconKind.iconRes),
+                    contentDescription = "Non sbloccato",
+                    tint = Color(0xFF94A3B8).copy(alpha = 0.40f),
+                    modifier = Modifier
+                        .offset(x = parallaxX, y = iconOffsetY + parallaxY)
+                        .wrapContentSize(align = Alignment.Center, unbounded = true)
+                        .requiredSize(currentIconSize)
                 )
             }
         }
@@ -1125,7 +1162,7 @@ fun FlickTroveBadgeEmblem(
 
             clipPath(glassPath) {
                 // Luccichio Periodico a Spazzamento Diagonale sul Vetro (ogni ~9s)
-                if (enablePeriodicGleam && gleamProgress in 0.001f..0.999f) {
+                if (enablePeriodicGleam && isUnlocked && gleamProgress in 0.001f..0.999f) {
                     val sweepMin = -lensRadius * 1.6f
                     val sweepMax = lensRadius * 1.6f
                     val currentSweep = sweepMin + (sweepMax - sweepMin) * gleamProgress
@@ -1430,18 +1467,33 @@ fun TrophyBadgeCard(
     }
 
     val isProgressive = badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS
-    val isMastered = isProgressive && tier == PreviewBadgeTier.THE_FINAL_CUT && isUnlocked
 
-    // Il target visualizzato e la barra di avanzamento puntano SEMPRE al prossimo formato da conquistare
-    val nextTier = when (tier) {
-        PreviewBadgeTier.SUPER_8 -> PreviewBadgeTier.MM_16
-        PreviewBadgeTier.MM_16 -> PreviewBadgeTier.MM_35
-        PreviewBadgeTier.MM_35 -> PreviewBadgeTier.MM_70
-        PreviewBadgeTier.MM_70 -> PreviewBadgeTier.THE_FINAL_CUT
-        else -> null
+    // Formati ordinati della pellicola cinematografica
+    val tierSequence = listOf(
+        PreviewBadgeTier.SUPER_8,
+        PreviewBadgeTier.MM_16,
+        PreviewBadgeTier.MM_35,
+        PreviewBadgeTier.MM_70,
+        PreviewBadgeTier.THE_FINAL_CUT
+    )
+
+    // Formati supportati da questo specifico badge (es. per i generi solo MM_16 e MM_70)
+    val configuredTiers = tierSequence.filter { it in badge.progressiveSteps }
+    val currentIdx = configuredTiers.indexOf(tier)
+
+    val nextTier = if (!isUnlocked) {
+        configuredTiers.firstOrNull()
+    } else if (currentIdx >= 0 && currentIdx < configuredTiers.size - 1) {
+        configuredTiers[currentIdx + 1]
+    } else {
+        null
     }
 
-    val targetThreshold = if (isUnlocked && nextTier != null) {
+    val isMastered = isUnlocked && (isProgressive && (nextTier == null || configuredTiers.isEmpty()))
+
+    val targetThreshold = if (!isUnlocked) {
+        nextTier?.let { badge.progressiveSteps[it]?.targetThreshold } ?: badge.progressTarget
+    } else if (nextTier != null) {
         badge.progressiveSteps[nextTier]?.targetThreshold ?: badge.progressTarget
     } else {
         badge.progressiveSteps[tier]?.targetThreshold ?: badge.progressTarget
@@ -1494,6 +1546,12 @@ fun TrophyBadgeCard(
                     "${badge.progressCurrent} / $targetThreshold $unitStr".trim()
                 } else {
                     "${badge.progressCurrent} / $targetThreshold"
+                }
+            } else if (isProgressive && isMastered) {
+                if (unitStr.isNotBlank()) {
+                    "${badge.progressCurrent} $unitStr".trim()
+                } else {
+                    "${badge.progressCurrent}"
                 }
             } else {
                 null

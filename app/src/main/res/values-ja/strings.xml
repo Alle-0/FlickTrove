@@ -1612,7 +1612,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">エグゼクティブ・プロデューサー</string>
     <string name="badge_executive_producer_cat">パトロン＆サポート</string>
-    <string name="badge_executive_producer_desc">舞台裏には常にプロジェクトを信じる人がいます。あなたはFlickTroveの開発を直接支援しました。</string>
+    <string name="badge_executive_producer_desc">舞台裏には常にプロジェクトを信じる人がいます。寄付を通じてFlickTroveの開発を直接支援しました。</string>
     <string name="badge_onboarding_sync_title">大移動</string>
     <string name="badge_onboarding_sync_cat">インポート＆移行</string>
     <string name="badge_onboarding_sync_desc">どんな物語も失われません：Trakt、SIMKL、またはバックアップ復元を通じて映画ライブラリを正常にインポートまたは同期しました。</string>
@@ -1734,4 +1734,33 @@
     <string name="badge_current_year_title">最新封切り</string>
     <string name="badge_current_year_cat">現代シネマ</string>
     <string name="badge_current_year_desc">同時代の映画を生きる：現在進行形の暦年に公開された映画を5本鑑賞しました。</string>
+
+    <string name="badge_double_feature_title">二本立て</string>
+    <string name="badge_double_feature_cat">上映セッション</string>
+    <string name="badge_double_feature_desc">劇場の魔法は終わらない：同じ日に2本の異なる映画を鑑賞しました。</string>
+
+    <string name="badge_hidden_gem_title">隠れた名作</string>
+    <string name="badge_hidden_gem_cat">インディペンデント映画</string>
+    <string name="badge_hidden_gem_desc">映画の宝物の探求者：TMDBの投票数が500未満のニッチな作品を鑑賞し、高評価（7.5以上またはお気に入り）を付けました。</string>
+    <string name="trophy_unit_gems">名作</string>
+
+    <string name="badge_short_films_title">シネマ・カプセル</string>
+    <string name="badge_short_films_cat">ショートフィルム</string>
+    <string name="badge_short_films_desc">凝縮された芸術：上映時間45分以下の短編映画または作品を5本鑑賞しました。</string>
+    <string name="trophy_unit_shorts">短編</string>
+
+
+    <string name="trophy_unit_comments">件のコメント</string>
+    <string name="trophy_unit_sagas">つのサーガ</string>
+    <string name="trophy_unit_months">ヶ月</string>
+    <string name="trophy_unit_edits">回の変更</string>
+    <string name="trophy_unit_vibes">バイブス</string>
+    <string name="trophy_unit_items">個の要素</string>
+    <string name="trophy_unit_checkins">回のチェックイン</string>
+
+
+    <string name="badge_trophy_hunter_title">トロフィーハンター</string>
+    <string name="badge_trophy_hunter_cat">映画ファンのマイルストーン</string>
+    <string name="badge_trophy_hunter_desc">コレクターの究極の栄誉：アプリのトロフィーを解除して、シネマテークの頂点を極めよう。</string>
+    <string name="trophy_unit_trophies">トロフィー</string>
 </resources>

@@ -1613,7 +1613,7 @@
     <!-- Nuovi Trofei -->
     <string name="badge_executive_producer_title">Executive Producer</string>
     <string name="badge_executive_producer_cat">PATRONS &amp; SUPPORT</string>
-    <string name="badge_executive_producer_desc">Behind the scenes, there are always those who believe in the project: you directly supported FlickTrove\'s development.</string>
+    <string name="badge_executive_producer_desc">Behind the scenes, there are always those who believe in the project: you directly supported FlickTrove\'s development with a donation.</string>
     <string name="badge_onboarding_sync_title">The Big Move</string>
     <string name="badge_onboarding_sync_cat">IMPORT &amp; MIGRATION</string>
     <string name="badge_onboarding_sync_desc">No story is lost: you successfully imported or synced your film library from Trakt, SIMKL, or via a backup restore.</string>
@@ -1740,4 +1740,33 @@
     <string name="badge_current_year_title">Hot off the Press</string>
     <string name="badge_current_year_cat">Contemporary Cinema</string>
     <string name="badge_current_year_desc">Live the cinema of your time: you watched 5 films released during the current calendar year.</string>
+
+    <string name="badge_double_feature_title">Double Feature</string>
+    <string name="badge_double_feature_cat">SCREENING SESSIONS</string>
+    <string name="badge_double_feature_desc">The theater magic never stops: you watched 2 distinct movies on the same calendar day.</string>
+
+    <string name="badge_hidden_gem_title">Hidden Gem</string>
+    <string name="badge_hidden_gem_cat">INDEPENDENT CINEMA</string>
+    <string name="badge_hidden_gem_desc">Discoverer of cinematic treasures: you watched and loved (rated &gt;= 7.5 or Favorite) a niche movie with fewer than 500 TMDB votes.</string>
+    <string name="trophy_unit_gems">gems</string>
+
+    <string name="badge_short_films_title">Cinema in Pills</string>
+    <string name="badge_short_films_cat">SHORT FILMS</string>
+    <string name="badge_short_films_desc">The art of brevity: you watched 5 short films with a runtime of 45 minutes or less.</string>
+    <string name="trophy_unit_shorts">shorts</string>
+
+    <string name="trophy_unit_comments">comments</string>
+    <string name="trophy_unit_sagas">sagas</string>
+    <string name="trophy_unit_months">months</string>
+    <string name="trophy_unit_edits">edits</string>
+    <string name="trophy_unit_vibes">vibes</string>
+    <string name="trophy_unit_items">elements</string>
+    <string name="trophy_unit_checkins">check-ins</string>
+
+
+    <string name="badge_trophy_hunter_title">The Trophy Hunter</string>
+    <string name="badge_trophy_hunter_cat">CINEPHILE MILESTONES</string>
+    <string name="badge_trophy_hunter_desc">The collector\'s ultimate consecration: conquer the heights of the cinetheque by unlocking the app\'s trophies.</string>
+    <string name="trophy_unit_trophies">trophies</string>
 </resources>
+

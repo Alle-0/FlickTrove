@@ -244,6 +244,9 @@ class AuthViewModel @Inject constructor(
                 
                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                 batch.set(usernameRef, mapOf("uid" to uid))
+
+                val metricsRef = Firebase.firestore.collection("system_metrics").document("badges_global")
+                batch.update(metricsRef, "total_active_users", com.google.firebase.firestore.FieldValue.increment(1))
             } else {
                 finalName = snapshot.getString("displayName") ?: currentUser?.displayName ?: "User"
             }
@@ -659,6 +662,20 @@ class AuthViewModel @Inject constructor(
         try {
             val firestore = Firebase.firestore
             val batch = firestore.batch()
+
+            // Se l'utente era registrato (non anonimo), decrementa il conteggio globale degli utenti e dei badge
+            if (!user.isAnonymous) {
+                val metricsRef = firestore.collection("system_metrics").document("badges_global")
+                batch.update(metricsRef, "total_active_users", com.google.firebase.firestore.FieldValue.increment(-1))
+
+                try {
+                    val userBadgesSnap = firestore.collection("users").document(uid).collection("unlocked_badges").get().await()
+                    for (doc in userBadgesSnap.documents) {
+                        batch.delete(doc.reference)
+                        batch.update(metricsRef, "unlock_counts.${doc.id}", com.google.firebase.firestore.FieldValue.increment(-1))
+                    }
+                } catch (_: Exception) {}
+            }
 
             // Elimina documento utente primario
             batch.delete(firestore.collection("users").document(uid))
