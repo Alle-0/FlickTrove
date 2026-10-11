@@ -1436,7 +1436,7 @@
     <string name="link_security_malformed">잘못되거나 유효하지 않은 웹 링크입니다.</string>
     <string name="stats_episodes_count">%1$s개 에피소드</string>
 
-    <!-- FlickTrove Trophy Room & Badge Catalog -->
+    <!-- FlickTrove Trophy Room &amp; Badge Catalog -->
     <string name="trophy_sort_tier">티어 위상</string>
     <string name="trophy_sort_progress">진행도</string>
     <string name="trophy_sort_rarity">희귀도</string>
@@ -1595,10 +1595,10 @@
     <string name="badge_actor_director_fetish_desc">특정 스타일이나 배우에 매료되어 동일한 감독 또는 배우의 작품을 5편 이상 감상했습니다.</string>
     <string name="badge_personal_diary_title">항해 일지</string>
     <string name="badge_personal_diary_cat">개인 노트</string>
-    <string name="badge_personal_diary_desc">영화를 본 후 감상과 생각을 기록으로 남기며 5편의 영화에 개인 노트를 작성했습니다.</string>
+    <string name="badge_personal_diary_desc">시청한 영화에 10개의 개인 메모를 작성하여 감상과 깊은 생각을 기록했습니다.</string>
     <string name="badge_custom_backdrop_title">전속 무대 디자이너</string>
     <string name="badge_custom_backdrop_cat">커스터마이징</string>
-    <string name="badge_custom_backdrop_desc">프로필에 영화 스틸컷 배경 이미지를 설정하여 나만의 시네필 정체성을 표현했습니다.</string>
+    <string name="badge_custom_backdrop_desc">아바타와 영화 배경을 설정하여 프로필을 완성함으로써 시네필로서의 정체성을 구축했습니다.</string>
 
     <string name="trophy_track_title">포맷의 성장</string>
     <string name="trophy_completed_badge">완료</string>
@@ -1606,4 +1606,100 @@
     <string name="trophy_unlock_banner_format_upgraded">새로운 포맷</string>
     <string name="trophy_unlock_bootstrap_title">트로피 %1$d개 잠금 해제!</string>
     <string name="trophy_unlock_bootstrap_subtitle">트로피 룸을 확인해보세요</string>
+
+
+
+    <!-- Nuovi Trofei -->
+    <string name="badge_executive_producer_title">총괄 프로듀서</string>
+    <string name="badge_executive_producer_cat">후원자 및 지원</string>
+    <string name="badge_executive_producer_desc">무대 뒤에는 항상 프로젝트를 믿는 사람들이 있습니다. 귀하는 FlickTrove의 개발을 직접 지원했습니다.</string>
+    <string name="badge_onboarding_sync_title">대이동</string>
+    <string name="badge_onboarding_sync_cat">가져오기 및 마이그레이션</string>
+    <string name="badge_onboarding_sync_desc">어떤 이야기도 사라지지 않습니다: Trakt, SIMKL 또는 백업 복원을 통해 영화 라이브러리를 성공적으로 가져오거나 동기화했습니다.</string>
+    <string name="badge_gourmet_critic_title">시네마 고메</string>
+    <string name="badge_gourmet_critic_cat">하이 크리틱</string>
+    <string name="badge_gourmet_critic_desc">TMDB 글로벌 평균 평점이 8.5점 이상인 명작 10편을 시청했습니다.</string>
+    <string name="badge_colossal_title">타이타닉</string>
+    <string name="badge_colossal_cat">에픽 챌린지</string>
+    <string name="badge_colossal_desc">단일 세션에서 3시간 30분이 넘는 기념비적인 작품을 완료했습니다.</string>
+    <string name="badge_actor_muse_title">최애 배우</string>
+    <string name="badge_actor_muse_cat">선호도</string>
+    <string name="badge_actor_muse_desc">8번의 체크인에서 동일한 좋아하는 배우를 선택했습니다.</string>
+    <string name="badge_director_heart_title">최애 감독</string>
+    <string name="badge_director_heart_cat">작품 세계</string>
+    <string name="badge_director_heart_desc">좋아하는 감독의 작품을 8편 이상 시청하여 그들의 작품 세계를 탐구했습니다.</string>
+
+    <string name="badge_binge_episodes_cat">정주행</string>
+    <string name="badge_binge_episodes_desc">멈출 수 없는 몰입감으로 에피소드를 연속 시청했습니다.</string>
+    <string name="badge_binge_episodes_title">심야의 정주행</string>
+    <string name="badge_comments_cat">커뮤니티</string>
+    <string name="badge_comments_desc">영화 팬들과 깊이 있는 감상과 리뷰를 나눴습니다.</string>
+    <string name="badge_comments_title">비평가의 목소리</string>
+    <string name="badge_folders_cat">폴더 정리</string>
+    <string name="badge_folders_desc">테마별 폴더를 만들어 개인 시네마테크를 체계적으로 정리했습니다.</string>
+    <string name="badge_folders_title">작가주의 아키비스트</string>
+    <string name="badge_genre_anime_cat">장르: 애니메이션</string>
+    <string name="badge_genre_anime_desc">애니메이션의 미학: 어린 시절 명작부터 거장의 애니메이션까지.</string>
+    <string name="badge_genre_anime_title">그려진 세계</string>
+    <string name="badge_genre_doc_cat">다큐멘터리</string>
+    <string name="badge_genre_doc_desc">역사와 자연, 인간의 내면을 증언하는 다큐멘터리.</string>
+    <string name="badge_genre_doc_title">진실의 렌즈</string>
+    <string name="badge_genre_scifi_cat">장르: SF</string>
+    <string name="badge_genre_scifi_desc">성간 여행, 디스토피아적 미래, 그리고 미지의 지성.</string>
+    <string name="badge_genre_scifi_title">대기권 너머</string>
+    <string name="badge_genre_vintage_cat">클래식 시네마</string>
+    <string name="badge_genre_vintage_desc">1980년 이전에 탄생한 영화사의 기념비적 명작을 찾아서.</string>
+    <string name="badge_genre_vintage_title">필름 고고학자</string>
+    <string name="badge_ratings_cat">평점</string>
+    <string name="badge_ratings_desc">감상한 작품에 나만의 비평적 점수를 부여했습니다.</string>
+    <string name="badge_ratings_title">심사위원석</string>
+    <string name="badge_sagas_cat">프랜차이즈</string>
+    <string name="badge_sagas_desc">영화 사가의 모든 시리즈를 완전히 정주행했습니다.</string>
+    <string name="badge_sagas_title">사가의 제왕</string>
+    <string name="badge_secret_completionist_cat">LOST REEL #07</string>
+    <string name="badge_secret_completionist_desc">디테일의 미학: 한 작품에 평점, 감상 메모, 바이브를 모두 동시에 남겼습니다.</string>
+    <string name="badge_secret_completionist_hint">디테일의 미학: 모든 순간을 완벽히 기록하세요.</string>
+    <string name="badge_secret_completionist_title">완벽주의 기록가</string>
+    <string name="badge_secret_genesis_cat">LOST REEL #08</string>
+    <string name="badge_secret_genesis_desc">무성영화 시대로의 탐험: 1940년 이전에 제작된 클래식 영화를 감상했습니다.</string>
+    <string name="badge_secret_genesis_hint">무성영화 시대로의 탐험...</string>
+    <string name="badge_secret_genesis_title">신화의 기원</string>
+    <string name="badge_secret_genreless_rebel_cat">LOST REEL #03</string>
+    <string name="badge_secret_genreless_rebel_desc">어떤 틀에도 얽매이지 않는 영화: TMDB에 장르 표기가 없는 작품을 감상했습니다.</string>
+    <string name="badge_secret_genreless_rebel_hint">어떤 틀에도 얽매이지 않는 영화...</string>
+    <string name="badge_secret_genreless_rebel_title">정체성의 위기</string>
+    <string name="badge_secret_indecisive_cat">LOST REEL #06</string>
+    <string name="badge_secret_indecisive_desc">비평가의 시선은 끊임없이 진화합니다: 한 작품의 평점을 3회 이상 수정했습니다.</string>
+    <string name="badge_secret_indecisive_hint">비평가의 시선은 끊임없이 진화합니다...</string>
+    <string name="badge_secret_indecisive_title">영원한 고뇌가</string>
+    <string name="badge_secret_iron_heart_cat">LOST REEL #09</string>
+    <string name="badge_secret_iron_heart_desc">흔들리지 않는 담력: 혹평 없이 공포 영화 3편을 완주했습니다.</string>
+    <string name="badge_secret_iron_heart_hint">흔들리지 않는 담력...</string>
+    <string name="badge_secret_iron_heart_title">강철의 심장</string>
+    <string name="badge_secret_night_owl_cat">LOST REEL #04</string>
+    <string name="badge_secret_night_owl_desc">도시가 잠든 후에만 깨어나는 이야기: 새벽 2시에서 5시 사이에 영화를 감상했습니다.</string>
+    <string name="badge_secret_night_owl_hint">도시가 잠든 후에만 깨어나는 이야기...</string>
+    <string name="badge_secret_night_owl_title">밤의 생명체</string>
+    <string name="badge_secret_unloved_gem_cat">LOST REEL #10</string>
+    <string name="badge_secret_unloved_gem_desc">아름다움은 보는 이의 눈에 있습니다: TMDB 평균 5.8 미만인 작품에 9.0 이상의 극찬을 주었습니다.</string>
+    <string name="badge_secret_unloved_gem_hint">아름다움은 보는 이의 눈에 있습니다...</string>
+    <string name="badge_secret_unloved_gem_title">외로운 미식가</string>
+    <string name="badge_time_cat">관람 시간</string>
+    <string name="badge_time_desc">영화의 역사를 가로지르는 기념비적인 시간 여행.</string>
+    <string name="badge_time_title">시간의 오디세이</string>
+    <string name="badge_tv_cat">TV 시리즈</string>
+    <string name="badge_tv_desc">파일럿 에피소드부터 마지막 시즌 엔딩 크레디트까지.</string>
+    <string name="badge_tv_title">시리즈 마라토너</string>
+    <string name="badge_veteran_club_cat">충성도</string>
+    <string name="badge_veteran_club_desc">시네클럽의 활발하고 지속적인 정회원입니다.</string>
+    <string name="badge_veteran_club_title">시네클럽 멤버십</string>
+    <string name="badge_vibes_cat">감정 바이브</string>
+    <string name="badge_vibes_desc">웃음에서 눈물까지: 영화가 준 생생한 느낌을 바이브로 기록했습니다.</string>
+    <string name="badge_vibes_title">감정의 스펙트럼</string>
+    <string name="badge_watchlist_hoarder_cat">보고싶은 영화</string>
+    <string name="badge_watchlist_hoarder_desc">위시리스트에 50편 이상의 영화를 보관하고 있습니다.</string>
+    <string name="badge_watchlist_hoarder_title">무한의 아카이브</string>
+
+    <string name="settings_commsuni_notice">CommsUni(commsuni.tv)를 통해 제공되는 커뮤니티 토론 및 연합 댓글.</string>
+    <string name="detail_rating_it_10">10세 미만 어린이에게 권장하지 않음.</string>
 </resources>

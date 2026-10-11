@@ -133,7 +133,7 @@ fun FolderDetailScreenContent(
     val filterButtonBounds = remember { BoundsHolder() }
     val activeFilterConfig = com.cinetrack.ui.LocalActiveFilterConfig.current
     
-    val lazyGridState = rememberLazyGridState()
+    val lazyGridState = viewModel.lazyGridState
     val scope = rememberCoroutineScope()
 
     val folderReorderRequest = com.cinetrack.ui.LocalFolderReorderRequest.current
@@ -187,9 +187,15 @@ fun FolderDetailScreenContent(
         onDispose { folderReorderConfig.value = null }
     }
 
-    LaunchedEffect(successStateForScroll?.sortConfig, successStateForScroll?.activeTab) {
-        if (successStateForScroll != null && successStateForScroll.movies.isNotEmpty()) {
-            lazyGridState.scrollToItem(0)
+    var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.model.SortConfig?>(null) }
+    LaunchedEffect(successStateForScroll?.sortConfig) {
+        if (successStateForScroll != null) {
+            if (previousSortConfig != null && previousSortConfig != successStateForScroll.sortConfig) {
+                if (successStateForScroll.movies.isNotEmpty()) {
+                    lazyGridState.scrollToItem(0)
+                }
+            }
+            previousSortConfig = successStateForScroll.sortConfig
         }
     }
 

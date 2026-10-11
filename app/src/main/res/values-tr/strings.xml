@@ -1436,7 +1436,7 @@
     <string name="link_security_malformed">Geçersiz web bağlantısı.</string>
     <string name="stats_episodes_count">%1$s bölüm</string>
 
-    <!-- FlickTrove Trophy Room & Badge Catalog -->
+    <!-- FlickTrove Trophy Room &amp; Badge Catalog -->
     <string name="trophy_sort_tier">Aşama prestiji</string>
     <string name="trophy_sort_progress">İlerleme</string>
     <string name="trophy_sort_rarity">Nadirlik</string>
@@ -1595,10 +1595,10 @@
     <string name="badge_actor_director_fetish_desc">Belirli bir tarza veya yüze sarsılmaz bağlılık: Aynı yönetmen veya oyuncudan en az 5 film izlediniz.</string>
     <string name="badge_personal_diary_title">Seyir Defteri</string>
     <string name="badge_personal_diary_cat">KİŞİSEL NOTLAR</string>
-    <string name="badge_personal_diary_desc">İzlenen filmler hakkında 5 kişisel not yazarak samimi düşüncelerinizi ve izlenimlerinizi kaydettiniz.</string>
+    <string name="badge_personal_diary_desc">İzlediğiniz filmlere 10 kişisel not yazarak izlenimlerinizi ve samimi düşüncelerinizi kaydettiniz.</string>
     <string name="badge_custom_backdrop_title">Kişisel Sahne Tasarımcısı</string>
     <string name="badge_custom_backdrop_cat">ÖZELLEŞTİRME</string>
-    <string name="badge_custom_backdrop_desc">Profilinize sinematik bir arka plan görseli ayarlayarak sinefil kimliğinizi özelleştirdiniz.</string>
+    <string name="badge_custom_backdrop_desc">Profilinizi bir avatar ve sinematik bir arka planla tamamlayarak sinefil kimliğinizi şekillendirdiniz.</string>
 
     <string name="trophy_track_title">FORMAT İLERLEMESİ</string>
     <string name="trophy_completed_badge">TAMAMLANDI</string>
@@ -1606,4 +1606,100 @@
     <string name="trophy_unlock_banner_format_upgraded">YENİ FORMAT</string>
     <string name="trophy_unlock_bootstrap_title">%1$d kupa açıldı!</string>
     <string name="trophy_unlock_bootstrap_subtitle">Kupa Odası\'na göz at</string>
+
+
+
+    <!-- Nuovi Trofei -->
+    <string name="badge_executive_producer_title">Sorumlu Yapımcı</string>
+    <string name="badge_executive_producer_cat">DESTEKÇİLER VE YARDIM</string>
+    <string name="badge_executive_producer_desc">Perde arkasında her zaman projeye inananlar vardır: FlickTrove\'un gelişimini doğrudan desteklediniz.</string>
+    <string name="badge_onboarding_sync_title">Büyük Taşınma</string>
+    <string name="badge_onboarding_sync_cat">İÇE AKTARMA VE TAŞINMA</string>
+    <string name="badge_onboarding_sync_desc">Hiçbir hikaye kaybolmaz: Trakt, SIMKL veya yedekleme yoluyla film kütüphanenizi başarıyla içe aktardınız veya senkronize ettiniz.</string>
+    <string name="badge_gourmet_critic_title">Sinema Gurmesi</string>
+    <string name="badge_gourmet_critic_cat">YÜKSEK ELEŞTİRİ</string>
+    <string name="badge_gourmet_critic_desc">Küresel TMDB ortalama puanı 8,5 yıldızın üzerinde olan 10 başyapıtı tamamladınız.</string>
+    <string name="badge_colossal_title">Titanik</string>
+    <string name="badge_colossal_cat">DESTANSI MEYDAN OKUMA</string>
+    <string name="badge_colossal_desc">Tek oturuşta 3 saat 30 dakikayı aşan anıtsal bir eseri tamamladınız.</string>
+    <string name="badge_actor_muse_title">Favori Oyuncu</string>
+    <string name="badge_actor_muse_cat">TERCİHLER</string>
+    <string name="badge_actor_muse_desc">8 özel check-in\'de aynı favori oyuncuyu seçtiniz.</string>
+    <string name="badge_director_heart_title">Gönüllerin Yönetmeni</string>
+    <string name="badge_director_heart_cat">YÖNETMENLİK</string>
+    <string name="badge_director_heart_desc">Favori yönetmeninizin 8\'den fazla eserini tamamlayarak onun vizyonunu keşfettiniz.</string>
+
+    <string name="badge_binge_episodes_cat">BINGE-WATCHING</string>
+    <string name="badge_binge_episodes_desc">Bir bölüm diğerini durmaksızın kovaladığında.</string>
+    <string name="badge_binge_episodes_title">Gece Maratonu</string>
+    <string name="badge_comments_cat">TOPLULUK</string>
+    <string name="badge_comments_desc">Düşüncelerinizi ve incelemelerinizi sinefil topluluğuyla paylaştınız.</string>
+    <string name="badge_comments_title">Eleştirinin Sesi</string>
+    <string name="badge_folders_cat">DÜZEN</string>
+    <string name="badge_folders_desc">Kişisel sinematek arşivinizi tematik klasörlerle düzenlediniz.</string>
+    <string name="badge_folders_title">Yönetmen Arşivcisi</string>
+    <string name="badge_genre_anime_cat">TÜR: ANİMASYON</string>
+    <string name="badge_genre_anime_desc">Animasyon sanatı: çocukluk klasiklerinden Japon başyapıtlarına.</string>
+    <string name="badge_genre_anime_title">Çizgili Dünyalar</string>
+    <string name="badge_genre_doc_cat">BELGESELLER</string>
+    <string name="badge_genre_doc_desc">Tarihe, doğaya ve insan ruhuna tanıklık eden kamera.</string>
+    <string name="badge_genre_doc_title">Gerçeğin Gözü</string>
+    <string name="badge_genre_scifi_cat">TÜR: BİLİM KURGU</string>
+    <string name="badge_genre_scifi_desc">Yıldızlararası yolculuklar, distopik gelecekler ve uzaylı zekalar.</string>
+    <string name="badge_genre_scifi_title">Atmosferin Ötesinde</string>
+    <string name="badge_genre_vintage_cat">KLASİK SİNEMA</string>
+    <string name="badge_genre_vintage_desc">1980 öncesinde yaratılmış sinema dönüm noktalarını keşfedin.</string>
+    <string name="badge_genre_vintage_title">Makara Arkeoloğu</string>
+    <string name="badge_ratings_cat">PUANLAR</string>
+    <string name="badge_ratings_desc">İzlediğiniz yapımlara puan vererek eleştirel gözünüzü konuşturdunuz.</string>
+    <string name="badge_ratings_title">Jüri Heyeti</string>
+    <string name="badge_sagas_cat">SERİLER</string>
+    <string name="badge_sagas_desc">Büyük bir sinema serisinin tüm filmlerini tamamladınız.</string>
+    <string name="badge_sagas_title">Serilerin Efendisi</string>
+    <string name="badge_secret_completionist_cat">LOST REEL #07</string>
+    <string name="badge_secret_completionist_desc">Hiçbir detayı şansa bırakmayın: tek bir filme Puan, Özel Not ve Vibe eklediniz.</string>
+    <string name="badge_secret_completionist_hint">Hiçbir detayı şansa bırakmayın: her ayrıntıyı kusursuzlaştırın.</string>
+    <string name="badge_secret_completionist_title">Takıntılı Mükemmeliyetçi</string>
+    <string name="badge_secret_genesis_cat">LOST REEL #08</string>
+    <string name="badge_secret_genesis_desc">Sessiz sinemanın şafağına yolculuk: 1940 yılından önce çekilmiş bir eseri tamamladınız.</string>
+    <string name="badge_secret_genesis_hint">Sessiz sinemanın şafağına yolculuk...</string>
+    <string name="badge_secret_genesis_title">Efsanenin Kökenleri</string>
+    <string name="badge_secret_genreless_rebel_cat">LOST REEL #03</string>
+    <string name="badge_secret_genreless_rebel_desc">Sinema tüm etiketlere meydan okuduğunda: TMDB üzerinde türü belirtilmemiş bir yapım izlediniz.</string>
+    <string name="badge_secret_genreless_rebel_hint">Sinema tüm etiketlere meydan okuduğunda...</string>
+    <string name="badge_secret_genreless_rebel_title">Kimlik Bunalımı</string>
+    <string name="badge_secret_indecisive_cat">LOST REEL #06</string>
+    <string name="badge_secret_indecisive_desc">Gerçek bir eleştirmenin zihni sürekli evrilir: aynı filme verdiğiniz puanı en az 3 kez değiştirdiniz.</string>
+    <string name="badge_secret_indecisive_hint">Gerçek bir eleştirmenin zihni sürekli evrilir...</string>
+    <string name="badge_secret_indecisive_title">Ebedi Tereddüt</string>
+    <string name="badge_secret_iron_heart_cat">LOST REEL #09</string>
+    <string name="badge_secret_iron_heart_desc">Hiçbir ürperti sizi yıldıramadı: 3 korku filmini sert puanlar vermeden bitirdiniz.</string>
+    <string name="badge_secret_iron_heart_hint">Hiçbir ürperti sizi yıldıramadı...</string>
+    <string name="badge_secret_iron_heart_title">Çelik Yürek</string>
+    <string name="badge_secret_night_owl_cat">LOST REEL #04</string>
+    <string name="badge_secret_night_owl_desc">Bazı hikayeler sadece şehir uyurken canlanır: gece 02:00 ile 05:00 arasında film izlediniz.</string>
+    <string name="badge_secret_night_owl_hint">Bazı hikayeler sadece şehir uyurken canlanır...</string>
+    <string name="badge_secret_night_owl_title">Gece Yaratığı</string>
+    <string name="badge_secret_unloved_gem_cat">LOST REEL #10</string>
+    <string name="badge_secret_unloved_gem_desc">Güzellik bakanın gözündedir: TMDB ortalaması 5.8 altında olan bir filme harika bir puan (>= 9.0) verdiniz.</string>
+    <string name="badge_secret_unloved_gem_hint">Güzellik bakanın gözündedir...</string>
+    <string name="badge_secret_unloved_gem_title">Anlaşılmamış Gurme</string>
+    <string name="badge_time_cat">SÜRE</string>
+    <string name="badge_time_desc">Sinema tarihinde saatler ve günler süren anıtsal bir yolculuk.</string>
+    <string name="badge_time_title">Zamanın Yolculuğu</string>
+    <string name="badge_tv_cat">DİZİLER</string>
+    <string name="badge_tv_desc">Pilot bölümden final sezonunun kapanış jeneriğine kadar.</string>
+    <string name="badge_tv_title">Dizi Maratoncusu</string>
+    <string name="badge_veteran_club_cat">SADAKAT</string>
+    <string name="badge_veteran_club_desc">Sinekulübün aktif ve sadık bir üyesisiniz.</string>
+    <string name="badge_veteran_club_title">Sinekulüp Kartı</string>
+    <string name="badge_vibes_cat">DUYGULAR</string>
+    <string name="badge_vibes_desc">Kahkahadan gözyaşına: sinema hislerinizi Vibe\'lar ile ölümsüzleştirdiniz.</string>
+    <string name="badge_vibes_title">Duygusal Spektrum</string>
+    <string name="badge_watchlist_hoarder_cat">İZLEME LİSTESİ</string>
+    <string name="badge_watchlist_hoarder_desc">Kişisel izleme listenizde 50\'den fazla kayıtlı film.</string>
+    <string name="badge_watchlist_hoarder_title">Sonsuz Arşiv</string>
+
+    <string name="settings_commsuni_notice">CommsUni (commsuni.tv) üzerinden sağlanan topluluk tartışmaları ve federe yorumlar.</string>
+    <string name="detail_rating_it_10">10 yaş altı için uygun değildir.</string>
 </resources>

@@ -336,8 +336,14 @@ private fun SingleBadgeBannerContent(
 
             Spacer(modifier = Modifier.height(2.dp))
 
+            val titleRes = getBadgeTitleRes(event.badgeId)
+            val bannerTitle = if (titleRes != 0) stringResource(titleRes) else event.title
+
+            val descRes = getBadgeDescriptionRes(event.badgeId)
+            val bannerSubtitle = if (descRes != 0) stringResource(descRes) else event.milestonePhrase
+
             Text(
-                text = event.title,
+                text = bannerTitle,
                 style = MaterialTheme.typography.titleSmall.copy(
                     fontWeight = FontWeight.Bold,
                     fontSize = 14.sp
@@ -348,7 +354,7 @@ private fun SingleBadgeBannerContent(
             )
 
             Text(
-                text = event.milestonePhrase,
+                text = bannerSubtitle,
                 style = MaterialTheme.typography.bodySmall.copy(
                     fontSize = 11.sp
                 ),

@@ -265,24 +265,45 @@ data class PreviewBadgeItem(
 fun getBadgeTitleRes(badgeId: String): Int = when (badgeId) {
     "secret_groundhog_day" -> R.string.badge_secret_groundhog_day_title
     "secret_surprise_fate" -> R.string.badge_secret_surprise_fate_title
+    "secret_night_owl" -> R.string.badge_secret_night_owl_title
+    "secret_genreless_rebel" -> R.string.badge_secret_genreless_rebel_title
+    "secret_indecisive" -> R.string.badge_secret_indecisive_title
+    "secret_completionist" -> R.string.badge_secret_completionist_title
+    "secret_genesis" -> R.string.badge_secret_genesis_title
+    "secret_iron_heart" -> R.string.badge_secret_iron_heart_title
+    "secret_unloved_gem" -> R.string.badge_secret_unloved_gem_title
     "secret_midnight_madness" -> R.string.badge_secret_midnight_madness_title
     "secret_cinephile_streak" -> R.string.badge_secret_cinephile_streak_title
-    "day_one_pioneer" -> R.string.badge_day_one_pioneer_title
+    "day_one_pioneer", "badge_day_one_pioneer" -> R.string.badge_day_one_pioneer_title
     "badge_movies" -> R.string.badge_movies_title
+    "badge_tv" -> R.string.badge_tv_title
+    "badge_binge_episodes" -> R.string.badge_binge_episodes_title
+    "badge_watchlist_hoarder" -> R.string.badge_watchlist_hoarder_title
+    "badge_veteran_club" -> R.string.badge_veteran_club_title
+    "badge_time" -> R.string.badge_time_title
     "badge_movie_runtime" -> R.string.badge_movie_runtime_title
     "badge_tv_episodes" -> R.string.badge_tv_episodes_title
     "badge_tv_shows" -> R.string.badge_tv_shows_title
+    "badge_sagas" -> R.string.badge_sagas_title
     "badge_rewatch" -> R.string.badge_rewatch_title
+    "badge_ratings" -> R.string.badge_ratings_title
+    "badge_vibes" -> R.string.badge_vibes_title
+    "badge_comments" -> R.string.badge_comments_title
+    "badge_folders" -> R.string.badge_folders_title
     "genre_horror" -> R.string.badge_genre_horror_title
+    "genre_scifi" -> R.string.badge_genre_scifi_title
     "genre_sci_fi" -> R.string.badge_genre_sci_fi_title
     "genre_thriller" -> R.string.badge_genre_thriller_title
+    "genre_anime" -> R.string.badge_genre_anime_title
     "genre_comedy" -> R.string.badge_genre_comedy_title
     "genre_animation" -> R.string.badge_genre_animation_title
     "genre_drama" -> R.string.badge_genre_drama_title
+    "genre_doc" -> R.string.badge_genre_doc_title
     "genre_documentary" -> R.string.badge_genre_documentary_title
     "genre_action" -> R.string.badge_genre_action_title
     "genre_fantasy" -> R.string.badge_genre_fantasy_title
     "genre_romance" -> R.string.badge_genre_romance_title
+    "genre_vintage" -> R.string.badge_genre_vintage_title
     "genre_classic_cinema" -> R.string.badge_genre_classic_cinema_title
     "world_tour" -> R.string.badge_world_tour_title
     "saga_lord_of_rings" -> R.string.badge_saga_lord_of_rings_title
@@ -300,30 +321,57 @@ fun getBadgeTitleRes(badgeId: String): Int = when (badgeId) {
     "actor_director_fetish" -> R.string.badge_actor_director_fetish_title
     "personal_diary" -> R.string.badge_personal_diary_title
     "custom_backdrop" -> R.string.badge_custom_backdrop_title
+    "badge_executive_producer" -> R.string.badge_executive_producer_title
+    "badge_onboarding_sync" -> R.string.badge_onboarding_sync_title
+    "gourmet_critic" -> R.string.badge_gourmet_critic_title
+    "colossal" -> R.string.badge_colossal_title
+    "actor_muse" -> R.string.badge_actor_muse_title
+    "director_heart" -> R.string.badge_director_heart_title
     else -> 0
 }
 
 fun getBadgeCategoryRes(badgeId: String): Int = when (badgeId) {
     "secret_groundhog_day" -> R.string.badge_secret_groundhog_day_cat
     "secret_surprise_fate" -> R.string.badge_secret_surprise_fate_cat
+    "secret_night_owl" -> R.string.badge_secret_night_owl_cat
+    "secret_genreless_rebel" -> R.string.badge_secret_genreless_rebel_cat
+    "secret_indecisive" -> R.string.badge_secret_indecisive_cat
+    "secret_completionist" -> R.string.badge_secret_completionist_cat
+    "secret_genesis" -> R.string.badge_secret_genesis_cat
+    "secret_iron_heart" -> R.string.badge_secret_iron_heart_cat
+    "secret_unloved_gem" -> R.string.badge_secret_unloved_gem_cat
     "secret_midnight_madness" -> R.string.badge_secret_midnight_madness_cat
     "secret_cinephile_streak" -> R.string.badge_secret_cinephile_streak_cat
-    "day_one_pioneer" -> R.string.badge_day_one_pioneer_cat
+    "day_one_pioneer", "badge_day_one_pioneer" -> R.string.badge_day_one_pioneer_cat
     "badge_movies" -> R.string.badge_movies_cat
+    "badge_tv" -> R.string.badge_tv_cat
+    "badge_binge_episodes" -> R.string.badge_binge_episodes_cat
+    "badge_watchlist_hoarder" -> R.string.badge_watchlist_hoarder_cat
+    "badge_veteran_club" -> R.string.badge_veteran_club_cat
+    "badge_time" -> R.string.badge_time_cat
     "badge_movie_runtime" -> R.string.badge_movie_runtime_cat
     "badge_tv_episodes" -> R.string.badge_tv_episodes_cat
     "badge_tv_shows" -> R.string.badge_tv_shows_cat
+    "badge_sagas" -> R.string.badge_sagas_cat
     "badge_rewatch" -> R.string.badge_rewatch_cat
+    "badge_ratings" -> R.string.badge_ratings_cat
+    "badge_vibes" -> R.string.badge_vibes_cat
+    "badge_comments" -> R.string.badge_comments_cat
+    "badge_folders" -> R.string.badge_folders_cat
     "genre_horror" -> R.string.badge_genre_horror_cat
+    "genre_scifi" -> R.string.badge_genre_scifi_cat
     "genre_sci_fi" -> R.string.badge_genre_sci_fi_cat
     "genre_thriller" -> R.string.badge_genre_thriller_cat
+    "genre_anime" -> R.string.badge_genre_anime_cat
     "genre_comedy" -> R.string.badge_genre_comedy_cat
     "genre_animation" -> R.string.badge_genre_animation_cat
     "genre_drama" -> R.string.badge_genre_drama_cat
+    "genre_doc" -> R.string.badge_genre_doc_cat
     "genre_documentary" -> R.string.badge_genre_documentary_cat
     "genre_action" -> R.string.badge_genre_action_cat
     "genre_fantasy" -> R.string.badge_genre_fantasy_cat
     "genre_romance" -> R.string.badge_genre_romance_cat
+    "genre_vintage" -> R.string.badge_genre_vintage_cat
     "genre_classic_cinema" -> R.string.badge_genre_classic_cinema_cat
     "world_tour" -> R.string.badge_world_tour_cat
     "saga_lord_of_rings" -> R.string.badge_saga_lord_of_rings_cat
@@ -341,30 +389,57 @@ fun getBadgeCategoryRes(badgeId: String): Int = when (badgeId) {
     "actor_director_fetish" -> R.string.badge_actor_director_fetish_cat
     "personal_diary" -> R.string.badge_personal_diary_cat
     "custom_backdrop" -> R.string.badge_custom_backdrop_cat
+    "badge_executive_producer" -> R.string.badge_executive_producer_cat
+    "badge_onboarding_sync" -> R.string.badge_onboarding_sync_cat
+    "gourmet_critic" -> R.string.badge_gourmet_critic_cat
+    "colossal" -> R.string.badge_colossal_cat
+    "actor_muse" -> R.string.badge_actor_muse_cat
+    "director_heart" -> R.string.badge_director_heart_cat
     else -> 0
 }
 
 fun getBadgeDescriptionRes(badgeId: String): Int = when (badgeId) {
     "secret_groundhog_day" -> R.string.badge_secret_groundhog_day_desc
     "secret_surprise_fate" -> R.string.badge_secret_surprise_fate_desc
+    "secret_night_owl" -> R.string.badge_secret_night_owl_desc
+    "secret_genreless_rebel" -> R.string.badge_secret_genreless_rebel_desc
+    "secret_indecisive" -> R.string.badge_secret_indecisive_desc
+    "secret_completionist" -> R.string.badge_secret_completionist_desc
+    "secret_genesis" -> R.string.badge_secret_genesis_desc
+    "secret_iron_heart" -> R.string.badge_secret_iron_heart_desc
+    "secret_unloved_gem" -> R.string.badge_secret_unloved_gem_desc
     "secret_midnight_madness" -> R.string.badge_secret_midnight_madness_desc
     "secret_cinephile_streak" -> R.string.badge_secret_cinephile_streak_desc
-    "day_one_pioneer" -> R.string.badge_day_one_pioneer_desc
+    "day_one_pioneer", "badge_day_one_pioneer" -> R.string.badge_day_one_pioneer_desc
     "badge_movies" -> R.string.badge_movies_desc
+    "badge_tv" -> R.string.badge_tv_desc
+    "badge_binge_episodes" -> R.string.badge_binge_episodes_desc
+    "badge_watchlist_hoarder" -> R.string.badge_watchlist_hoarder_desc
+    "badge_veteran_club" -> R.string.badge_veteran_club_desc
+    "badge_time" -> R.string.badge_time_desc
     "badge_movie_runtime" -> R.string.badge_movie_runtime_desc
     "badge_tv_episodes" -> R.string.badge_tv_episodes_desc
     "badge_tv_shows" -> R.string.badge_tv_shows_desc
+    "badge_sagas" -> R.string.badge_sagas_desc
     "badge_rewatch" -> R.string.badge_rewatch_desc
+    "badge_ratings" -> R.string.badge_ratings_desc
+    "badge_vibes" -> R.string.badge_vibes_desc
+    "badge_comments" -> R.string.badge_comments_desc
+    "badge_folders" -> R.string.badge_folders_desc
     "genre_horror" -> R.string.badge_genre_horror_desc
+    "genre_scifi" -> R.string.badge_genre_scifi_desc
     "genre_sci_fi" -> R.string.badge_genre_sci_fi_desc
     "genre_thriller" -> R.string.badge_genre_thriller_desc
+    "genre_anime" -> R.string.badge_genre_anime_desc
     "genre_comedy" -> R.string.badge_genre_comedy_desc
     "genre_animation" -> R.string.badge_genre_animation_desc
     "genre_drama" -> R.string.badge_genre_drama_desc
+    "genre_doc" -> R.string.badge_genre_doc_desc
     "genre_documentary" -> R.string.badge_genre_documentary_desc
     "genre_action" -> R.string.badge_genre_action_desc
     "genre_fantasy" -> R.string.badge_genre_fantasy_desc
     "genre_romance" -> R.string.badge_genre_romance_desc
+    "genre_vintage" -> R.string.badge_genre_vintage_desc
     "genre_classic_cinema" -> R.string.badge_genre_classic_cinema_desc
     "world_tour" -> R.string.badge_world_tour_desc
     "saga_lord_of_rings" -> R.string.badge_saga_lord_of_rings_desc
@@ -382,12 +457,25 @@ fun getBadgeDescriptionRes(badgeId: String): Int = when (badgeId) {
     "actor_director_fetish" -> R.string.badge_actor_director_fetish_desc
     "personal_diary" -> R.string.badge_personal_diary_desc
     "custom_backdrop" -> R.string.badge_custom_backdrop_desc
+    "badge_executive_producer" -> R.string.badge_executive_producer_desc
+    "badge_onboarding_sync" -> R.string.badge_onboarding_sync_desc
+    "gourmet_critic" -> R.string.badge_gourmet_critic_desc
+    "colossal" -> R.string.badge_colossal_desc
+    "actor_muse" -> R.string.badge_actor_muse_desc
+    "director_heart" -> R.string.badge_director_heart_desc
     else -> 0
 }
 
 fun getBadgeSecretHintRes(badgeId: String): Int? = when (badgeId) {
     "secret_groundhog_day" -> R.string.badge_secret_groundhog_day_hint
     "secret_surprise_fate" -> R.string.badge_secret_surprise_fate_hint
+    "secret_night_owl" -> R.string.badge_secret_night_owl_hint
+    "secret_genreless_rebel" -> R.string.badge_secret_genreless_rebel_hint
+    "secret_indecisive" -> R.string.badge_secret_indecisive_hint
+    "secret_completionist" -> R.string.badge_secret_completionist_hint
+    "secret_genesis" -> R.string.badge_secret_genesis_hint
+    "secret_iron_heart" -> R.string.badge_secret_iron_heart_hint
+    "secret_unloved_gem" -> R.string.badge_secret_unloved_gem_hint
     "secret_midnight_madness" -> R.string.badge_secret_midnight_madness_hint
     "secret_cinephile_streak" -> R.string.badge_secret_cinephile_streak_hint
     else -> null
@@ -459,31 +547,31 @@ val OFFICIAL_BADGES_CATALOG = listOf(
             ),
             PreviewBadgeTier.MM_16 to ProgressiveTierDetail(
                 tier = PreviewBadgeTier.MM_16,
-                targetThreshold = 25,
-                description = "Il circuito del cinema d'autore. Hai raggiunto quota 25 lungometraggi completati.",
-                milestonePhrase = "25 film completati"
+                targetThreshold = 50,
+                description = "Il circuito del cinema d'autore. Hai raggiunto quota 50 lungometraggi completati.",
+                milestonePhrase = "50 film completati"
             ),
             PreviewBadgeTier.MM_35 to ProgressiveTierDetail(
                 tier = PreviewBadgeTier.MM_35,
-                targetThreshold = 100,
-                description = "Il ritmo costante della sala buia è diventato la tua seconda casa. Hai completato 100 lungometraggi.",
-                milestonePhrase = "100 film completati"
+                targetThreshold = 200,
+                description = "Il ritmo costante della sala buia è diventato la tua seconda casa. Hai completato 200 lungometraggi.",
+                milestonePhrase = "200 film completati"
             ),
             PreviewBadgeTier.MM_70 to ProgressiveTierDetail(
                 tier = PreviewBadgeTier.MM_70,
-                targetThreshold = 250,
-                description = "Il grande formato epico e le proiezioni prestigiose. Ben 250 lungometraggi vissuti.",
-                milestonePhrase = "250 film completati"
+                targetThreshold = 500,
+                description = "Il grande formato epico e le proiezioni prestigiose. Ben 500 lungometraggi vissuti.",
+                milestonePhrase = "500 film completati"
             ),
             PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(
                 tier = PreviewBadgeTier.THE_FINAL_CUT,
-                targetThreshold = 500,
-                description = "L'Opera Compiuta. Oltre 500 capolavori impressi nella tua cineteca personale. Hai raggiunto l'apice leggendario della settima arte.",
-                milestonePhrase = "500+ film • Maestria Assoluta"
+                targetThreshold = 1000,
+                description = "L'Opera Compiuta. Oltre 1.000 capolavori impressi nella tua cineteca personale. Hai raggiunto l'apice leggendario della settima arte.",
+                milestonePhrase = "1.000+ film • Maestria Assoluta"
             )
         ),
-        progressCurrent = 500,
-        progressTarget = 500,
+        progressCurrent = 1000,
+        progressTarget = 1000,
         progressUnit = "film",
         rarityPercent = "0.8%"
     ),
@@ -510,13 +598,13 @@ val OFFICIAL_BADGES_CATALOG = listOf(
         defaultDescription = "Dall'episodio pilota fino ai titoli di coda dell'ultima stagione.",
         progressiveSteps = mapOf(
             PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 3, "Hai completato 3 serie TV.", "3 serie"),
-            PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 serie TV interamente completate. Circuito d'autore conquistato.", "5 serie"),
-            PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 10, "10 serie TV viste dalla prima all'ultima puntata.", "10 serie"),
-            PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 serie TV concluse. Una dedizione monumentale.", "25 serie"),
-            PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 50, "50 serie TV completate al 100%. Maratoneta definitivo.", "50 serie")
+            PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 serie TV interamente completate. Circuito d'autore conquistato.", "10 serie"),
+            PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 25, "25 serie TV viste dalla prima all'ultima puntata.", "25 serie"),
+            PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 serie TV concluse. Una dedizione monumentale.", "50 serie"),
+            PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 100, "100 serie TV completate al 100%. Maratoneta definitivo.", "100 serie")
         ),
-        progressCurrent = 5,
-        progressTarget = 5,
+        progressCurrent = 10,
+        progressTarget = 10,
         progressUnit = "serie",
         rarityPercent = "14.8%"
     ),
@@ -531,14 +619,14 @@ val OFFICIAL_BADGES_CATALOG = listOf(
         categoryLabel = "ORE DI VISIONE",
         defaultDescription = "Un viaggio monumentale nel tempo cinematografico.",
         progressiveSteps = mapOf(
-            PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 10, "10 ore di visione cinematografica.", "10 ore"),
-            PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 50, "50 ore davanti al grande schermo.", "50 ore"),
-            PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 100, "100 ore di proiezioni accumulate.", "100 ore"),
-            PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "250 ore trascorse in sala buia.", "250 ore"),
-            PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "Oltre 500 ore di puro cinema. L'Odissea è compiuta.", "500+ ore")
+            PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 25, "25 ore di visione cinematografica.", "25 ore"),
+            PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 100, "100 ore davanti al grande schermo.", "100 ore"),
+            PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 350, "350 ore di proiezioni accumulate.", "350 ore"),
+            PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 800, "800 ore trascorse in sala buia.", "800 ore"),
+            PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 2000, "Oltre 2.000 ore di puro cinema. L'Odissea è compiuta.", "2.000+ ore")
         ),
-        progressCurrent = 250,
-        progressTarget = 250,
+        progressCurrent = 350,
+        progressTarget = 350,
         progressUnit = "ore",
         rarityPercent = "3.1%"
     ),

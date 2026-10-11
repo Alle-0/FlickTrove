@@ -1436,7 +1436,7 @@
     <string name="link_security_malformed">無効または不正な形式のウェブリンクです。</string>
     <string name="stats_episodes_count">%1$sエピソード</string>
 
-    <!-- FlickTrove Trophy Room & Badge Catalog -->
+    <!-- FlickTrove Trophy Room &amp; Badge Catalog -->
     <string name="trophy_sort_tier">ティアの格</string>
     <string name="trophy_sort_progress">進捗度</string>
     <string name="trophy_sort_rarity">レア度</string>
@@ -1595,10 +1595,10 @@
     <string name="badge_actor_director_fetish_desc">ある作家性や特定の役者に強く魅せられ、同じ監督または俳優の映画を5本以上鑑賞しました。</string>
     <string name="badge_personal_diary_title">シネマ航海日誌</string>
     <string name="badge_personal_diary_cat">個人鑑賞メモ</string>
-    <string name="badge_personal_diary_desc">映画の余韻や個人的な考察を文字に残し、鑑賞作品に5件の個人メモを記録しました。</string>
+    <string name="badge_personal_diary_desc">鑑賞した映画に10件の個人メモを書き、感想や親密な思いを記録しました。</string>
     <string name="badge_custom_backdrop_title">専属セットデザイナー</string>
     <string name="badge_custom_backdrop_cat">カスタマイズ</string>
-    <string name="badge_custom_backdrop_desc">プロフィールに映画のバックドロップを設定し、シネフィルの個性を彩りました。</string>
+    <string name="badge_custom_backdrop_desc">アバターと映画の背景を設定してプロフィールを完成させ、映画ファンとしてのアイデンティティを確立しました。</string>
 
     <string name="trophy_track_title">フォーマットの進化</string>
     <string name="trophy_completed_badge">完了</string>
@@ -1606,4 +1606,100 @@
     <string name="trophy_unlock_banner_format_upgraded">新フォーマット</string>
     <string name="trophy_unlock_bootstrap_title">%1$d個のトロフィーを獲得！</string>
     <string name="trophy_unlock_bootstrap_subtitle">トロフィールームを見る</string>
+
+
+
+    <!-- Nuovi Trofei -->
+    <string name="badge_executive_producer_title">エグゼクティブ・プロデューサー</string>
+    <string name="badge_executive_producer_cat">パトロン＆サポート</string>
+    <string name="badge_executive_producer_desc">舞台裏には常にプロジェクトを信じる人がいます。あなたはFlickTroveの開発を直接支援しました。</string>
+    <string name="badge_onboarding_sync_title">大移動</string>
+    <string name="badge_onboarding_sync_cat">インポート＆移行</string>
+    <string name="badge_onboarding_sync_desc">どんな物語も失われません：Trakt、SIMKL、またはバックアップ復元を通じて映画ライブラリを正常にインポートまたは同期しました。</string>
+    <string name="badge_gourmet_critic_title">シネマグルメ</string>
+    <string name="badge_gourmet_critic_cat">ハイクリティク</string>
+    <string name="badge_gourmet_critic_desc">TMDBのグローバル平均評価が8.5星を超える名作を10本見終えました。</string>
+    <string name="badge_colossal_title">タイタニック</string>
+    <string name="badge_colossal_cat">壮大な挑戦</string>
+    <string name="badge_colossal_desc">1回のセッションで3時間30分を超える記念碑的な作品を見終えました。</string>
+    <string name="badge_actor_muse_title">お気に入りの俳優</string>
+    <string name="badge_actor_muse_cat">好み</string>
+    <string name="badge_actor_muse_desc">8回のチェックインで同じお気に入りの俳優を選択しました。</string>
+    <string name="badge_director_heart_title">お気に入りの監督</string>
+    <string name="badge_director_heart_cat">作家性</string>
+    <string name="badge_director_heart_desc">お気に入りの監督の作品を8本以上見終え、その作家性を探求しました。</string>
+
+    <string name="badge_binge_episodes_cat">一気見</string>
+    <string name="badge_binge_episodes_desc">再生が止まらない：エピソードを立て続けに鑑賞しました。</string>
+    <string name="badge_binge_episodes_title">深夜の一気見</string>
+    <string name="badge_comments_cat">コミュニティ</string>
+    <string name="badge_comments_desc">熱い感想や考察を映画ファン仲間と分かち合いました。</string>
+    <string name="badge_comments_title">批評家の声</string>
+    <string name="badge_folders_cat">フォルダ整理</string>
+    <string name="badge_folders_desc">テーマ別フォルダを作成し、マイシネマテークを美しく整理しました。</string>
+    <string name="badge_folders_title">作家主義アーキビスト</string>
+    <string name="badge_genre_anime_cat">アニメーション</string>
+    <string name="badge_genre_anime_desc">アニメーションの美学：不朽の名作から日本の傑作まで。</string>
+    <string name="badge_genre_anime_title">描かれた世界</string>
+    <string name="badge_genre_doc_cat">ドキュメンタリー</string>
+    <string name="badge_genre_doc_desc">歴史と自然、そして人間の真実を記録するレンズ。</string>
+    <string name="badge_genre_doc_title">現実を捉える眼</string>
+    <string name="badge_genre_scifi_cat">SF映画</string>
+    <string name="badge_genre_scifi_desc">恒星間航行、ディストピアの未来、そして未知の知性。</string>
+    <string name="badge_genre_scifi_title">大気圏の彼方へ</string>
+    <string name="badge_genre_vintage_cat">名画・クラシック</string>
+    <string name="badge_genre_vintage_desc">1980年以前に制作された映画史の金字塔を訪ねて。</string>
+    <string name="badge_genre_vintage_title">フィルムの考古学者</string>
+    <string name="badge_ratings_cat">評価</string>
+    <string name="badge_ratings_desc">鑑賞した映画に鋭い批評眼でスコアをつけました。</string>
+    <string name="badge_ratings_title">審査員席</string>
+    <string name="badge_sagas_cat">シリーズ・サーガ</string>
+    <string name="badge_sagas_desc">映画シリーズの全チャプターを完全に制覇しました。</string>
+    <string name="badge_sagas_title">サーガの覇者</string>
+    <string name="badge_secret_completionist_cat">LOST REEL #07</string>
+    <string name="badge_secret_completionist_desc">妥協なき記録：1つの作品に評価、メモ、バイブをすべて同時に記録しました。</string>
+    <string name="badge_secret_completionist_hint">妥協なき記録：すべての細部にこだわりを。</string>
+    <string name="badge_secret_completionist_title">執念の完璧主義者</string>
+    <string name="badge_secret_genesis_cat">LOST REEL #08</string>
+    <string name="badge_secret_genesis_desc">無声映画の夜明けへ：1940年以前に制作された歴史的映画を鑑賞しました。</string>
+    <string name="badge_secret_genesis_hint">無声映画の夜明けへ...</string>
+    <string name="badge_secret_genesis_title">神話の起源</string>
+    <string name="badge_secret_genreless_rebel_cat">LOST REEL #03</string>
+    <string name="badge_secret_genreless_rebel_desc">あらゆる枠組みを拒む映画：TMDBにジャンル記載のない作品を鑑賞しました。</string>
+    <string name="badge_secret_genreless_rebel_hint">あらゆる枠組みを拒む映画...</string>
+    <string name="badge_secret_genreless_rebel_title">アイデンティティの危機</string>
+    <string name="badge_secret_indecisive_cat">LOST REEL #06</string>
+    <string name="badge_secret_indecisive_desc">批評家の視点は常に進化する：同じ作品の評価を3回以上変更しました。</string>
+    <string name="badge_secret_indecisive_hint">批評家の視点は常に進化する...</string>
+    <string name="badge_secret_indecisive_title">永遠の優柔不断</string>
+    <string name="badge_secret_iron_heart_cat">LOST REEL #09</string>
+    <string name="badge_secret_iron_heart_desc">恐怖に屈しない精神：低評価をつけることなくホラー映画を3本完走しました。</string>
+    <string name="badge_secret_iron_heart_hint">恐怖に屈しない精神...</string>
+    <string name="badge_secret_iron_heart_title">鋼鉄の心臓</string>
+    <string name="badge_secret_night_owl_cat">LOST REEL #04</string>
+    <string name="badge_secret_night_owl_desc">街が眠りについた時にだけ宿る映画の魔法：深夜2時から5時の間に映画を鑑賞しました。</string>
+    <string name="badge_secret_night_owl_hint">街が眠りについた時にだけ物語は動き出す...</string>
+    <string name="badge_secret_night_owl_title">夜の生き物</string>
+    <string name="badge_secret_unloved_gem_cat">LOST REEL #10</string>
+    <string name="badge_secret_unloved_gem_desc">美は観る者の瞳に宿る：TMDB平均5.8未満の作品に極めて高い評価（9.0以上）をつけました。</string>
+    <string name="badge_secret_unloved_gem_hint">美は観る者の瞳に宿る...</string>
+    <string name="badge_secret_unloved_gem_title">孤高のグルメ批評家</string>
+    <string name="badge_time_cat">鑑賞時間</string>
+    <string name="badge_time_desc">映画の歴史を巡る壮大な時間の旅。</string>
+    <string name="badge_time_title">時間のオデッセイ</string>
+    <string name="badge_tv_cat">テレビシリーズ</string>
+    <string name="badge_tv_desc">パイロット版から最終シーズンのエンドロールまで駆け抜けました。</string>
+    <string name="badge_tv_title">シリアルマラソナー</string>
+    <string name="badge_veteran_club_cat">ロイヤルティ</string>
+    <string name="badge_veteran_club_desc">シネクラブのアクティブで熱心な継続メンバーです。</string>
+    <string name="badge_veteran_club_title">シネクラブ会員証</string>
+    <string name="badge_vibes_cat">エモーション</string>
+    <string name="badge_vibes_desc">笑いから涙まで：映画が呼び起こした感動をバイブで記録しました。</string>
+    <string name="badge_vibes_title">感情のスペクトル</string>
+    <string name="badge_watchlist_hoarder_cat">ウォッチリスト</string>
+    <string name="badge_watchlist_hoarder_desc">ウォッチリストに50本以上の映画が登録されています。</string>
+    <string name="badge_watchlist_hoarder_title">無限のアーカイブ</string>
+
+    <string name="settings_commsuni_notice">CommsUni（commsuni.tv）を介して提供されるコミュニティの議論と連合コメント。</string>
+    <string name="detail_rating_it_10">10歳未満の鑑賞には不適。</string>
 </resources>

@@ -1435,7 +1435,7 @@
     <string name="link_security_malformed">Tautan web tidak valid atau salah format.</string>
     <string name="stats_episodes_count">%1$s episode</string>
 
-    <!-- FlickTrove Trophy Room & Badge Catalog -->
+    <!-- FlickTrove Trophy Room &amp; Badge Catalog -->
     <string name="trophy_sort_tier">Gengsi tingkatan</string>
     <string name="trophy_sort_progress">Kemajuan</string>
     <string name="trophy_sort_rarity">Kelangkaan</string>
@@ -1594,10 +1594,10 @@
     <string name="badge_actor_director_fetish_desc">Kecintaan mendalam pada satu gaya atau sosok: menonton setidaknya 5 film dari sutradara atau aktor yang sama.</string>
     <string name="badge_personal_diary_title">Buku Log</string>
     <string name="badge_personal_diary_cat">CATATAN PRIBADI</string>
-    <string name="badge_personal_diary_desc">Mencatat kesan dan pemikiran mendalam dengan menulis 5 catatan pribadi tentang film yang ditonton.</string>
+    <string name="badge_personal_diary_desc">Anda mencatat kesan dan pemikiran intim dengan menulis 10 catatan pribadi tentang film yang ditonton.</string>
     <string name="badge_custom_backdrop_title">Penata Panggung Pribadi</string>
     <string name="badge_custom_backdrop_cat">KUSTOMISASI</string>
-    <string name="badge_custom_backdrop_desc">Mempersonalisasi identitas sinefil Anda dengan menyetel latar belakang sinematik di profil.</string>
+    <string name="badge_custom_backdrop_desc">Anda merawat identitas pencinta film Anda dengan melengkapi latar profil Anda dengan avatar dan latar belakang sinematik.</string>
 
     <string name="trophy_track_title">PROGRESI FORMAT</string>
     <string name="trophy_completed_badge">SELESAI</string>
@@ -1605,4 +1605,100 @@
     <string name="trophy_unlock_banner_format_upgraded">FORMAT BARU</string>
     <string name="trophy_unlock_bootstrap_title">%1$d trofi terbuka!</string>
     <string name="trophy_unlock_bootstrap_subtitle">Lihat Ruang Trofi</string>
+
+
+
+    <!-- Nuovi Trofei -->
+    <string name="badge_executive_producer_title">Produser Eksekutif</string>
+    <string name="badge_executive_producer_cat">PELINDUNG &amp; DUKUNGAN</string>
+    <string name="badge_executive_producer_desc">Di balik layar, selalu ada yang percaya pada proyek ini: Anda secara langsung mendukung pengembangan FlickTrove.</string>
+    <string name="badge_onboarding_sync_title">Pindahan Besar</string>
+    <string name="badge_onboarding_sync_cat">IMPOR &amp; MIGRASI</string>
+    <string name="badge_onboarding_sync_desc">Tidak ada kisah yang hilang: Anda berhasil mengimpor atau menyinkronkan perpustakaan film Anda dari Trakt, SIMKL, atau melalui pemulihan cadangan.</string>
+    <string name="badge_gourmet_critic_title">Gourmet Sinema</string>
+    <string name="badge_gourmet_critic_cat">KRITIK TINGGI</string>
+    <string name="badge_gourmet_critic_desc">Anda telah menyelesaikan 10 mahakarya dengan rata-rata peringkat global TMDB di atas 8,5 bintang.</string>
+    <string name="badge_colossal_title">Raksasa</string>
+    <string name="badge_colossal_cat">TANTANGAN EPIK</string>
+    <string name="badge_colossal_desc">Anda menyelesaikan karya monumental berdurasi lebih dari 3 jam 30 menit dalam satu sesi.</string>
+    <string name="badge_actor_muse_title">Aktor Favorit</string>
+    <string name="badge_actor_muse_cat">PREFERENSI</string>
+    <string name="badge_actor_muse_desc">Anda memilih pemeran favorit yang sama dalam 8 check-in khusus.</string>
+    <string name="badge_director_heart_title">Sutradara Favorit</string>
+    <string name="badge_director_heart_cat">KEPENGARANGAN</string>
+    <string name="badge_director_heart_desc">Anda mengeksplorasi visi sutradara favorit Anda dengan menyelesaikan lebih dari 8 karyanya.</string>
+
+    <string name="badge_binge_episodes_cat">BINGE-WATCHING</string>
+    <string name="badge_binge_episodes_desc">Saat satu episode terus bergulir ke episode berikutnya tanpa jeda.</string>
+    <string name="badge_binge_episodes_title">Maraton Tengah Malam</string>
+    <string name="badge_comments_cat">KOMUNITAS</string>
+    <string name="badge_comments_desc">Berbagi refleksi dan ulasan berbobot bersama sesama sinefil.</string>
+    <string name="badge_comments_title">Suara Kritikus</string>
+    <string name="badge_folders_cat">ORGANISASI</string>
+    <string name="badge_folders_desc">Menata koleksi film pribadi dalam folder tematik pilihan.</string>
+    <string name="badge_folders_title">Arsiparis Auteur</string>
+    <string name="badge_genre_anime_cat">GENRE: ANIMASI</string>
+    <string name="badge_genre_anime_desc">Seni animasi: dari klasik masa kecil hingga mahakarya Jepang.</string>
+    <string name="badge_genre_anime_title">Dunia Gambar</string>
+    <string name="badge_genre_doc_cat">DOKUMENTER</string>
+    <string name="badge_genre_doc_desc">Kamera sebagai saksi sejarah, alam, dan jiwa manusia.</string>
+    <string name="badge_genre_doc_title">Mata Realitas</string>
+    <string name="badge_genre_scifi_cat">GENRE: SCI-FI</string>
+    <string name="badge_genre_scifi_desc">Perjalanan antarbintang, masa depan distopia, dan kecerdasan kosmik.</string>
+    <string name="badge_genre_scifi_title">Melampaui Atmosfer</string>
+    <string name="badge_genre_vintage_cat">SINEMA KLASIK</string>
+    <string name="badge_genre_vintage_desc">Menjelajahi tonggak sejarah sinema yang diproduksi sebelum tahun 1980.</string>
+    <string name="badge_genre_vintage_title">Arkeolog Gulungan Film</string>
+    <string name="badge_ratings_cat">PENILAIAN</string>
+    <string name="badge_ratings_desc">Mengasah pandangan kritis dengan memberi nilai pada film yang ditonton.</string>
+    <string name="badge_ratings_title">Dewan Juri</string>
+    <string name="badge_sagas_cat">WARALABA</string>
+    <string name="badge_sagas_desc">Menyelesaikan seluruh babak dalam sebuah saga film besar.</string>
+    <string name="badge_sagas_title">Penguasa Saga</string>
+    <string name="badge_secret_completionist_cat">LOST REEL #07</string>
+    <string name="badge_secret_completionist_desc">Tanpa cela: mencatat Rating, Catatan Pribadi, dan Vibe secara bersamaan pada sebuah film.</string>
+    <string name="badge_secret_completionist_hint">Tanpa cela: perhatikan setiap detail.</string>
+    <string name="badge_secret_completionist_title">Perfeksionis Obsesif</string>
+    <string name="badge_secret_genesis_cat">LOST REEL #08</string>
+    <string name="badge_secret_genesis_desc">Menyelami fajar sinema bisu: menyelesaikan karya yang diproduksi sebelum tahun 1940.</string>
+    <string name="badge_secret_genesis_hint">Menyelami fajar sinema bisu...</string>
+    <string name="badge_secret_genesis_title">Asal Usul Mitos</string>
+    <string name="badge_secret_genreless_rebel_cat">LOST REEL #03</string>
+    <string name="badge_secret_genreless_rebel_desc">Ketika film menolak batasan: menonton karya tanpa genre yang tercantum di TMDB.</string>
+    <string name="badge_secret_genreless_rebel_hint">Ketika film menolak batasan...</string>
+    <string name="badge_secret_genreless_rebel_title">Krisis Identitas</string>
+    <string name="badge_secret_indecisive_cat">LOST REEL #06</string>
+    <string name="badge_secret_indecisive_desc">Sudut pandang kritikus selalu berkembang: mengubah rating minimal 3 kali pada film yang sama.</string>
+    <string name="badge_secret_indecisive_hint">Sudut pandang kritikus selalu berkembang...</string>
+    <string name="badge_secret_indecisive_title">Sang Peragu Abadi</string>
+    <string name="badge_secret_iron_heart_cat">LOST REEL #09</string>
+    <string name="badge_secret_iron_heart_desc">Ketakutan tak mampu menggoyahkan: menyelesaikan 3 film horor tanpa rating rendah.</string>
+    <string name="badge_secret_iron_heart_hint">Ketakutan tak mampu menggoyahkan...</string>
+    <string name="badge_secret_iron_heart_title">Hati Baja</string>
+    <string name="badge_secret_night_owl_cat">LOST REEL #04</string>
+    <string name="badge_secret_night_owl_desc">Beberapa cerita hanya hidup saat kota terlelap: mencatat tontonan antara pukul 02:00 dan 05:00 pagi.</string>
+    <string name="badge_secret_night_owl_hint">Beberapa cerita hanya hidup saat kota terlelap...</string>
+    <string name="badge_secret_night_owl_title">Makhluk Malam</string>
+    <string name="badge_secret_unloved_gem_cat">LOST REEL #10</string>
+    <string name="badge_secret_unloved_gem_desc">Keindahan ada di mata penonton: memberi rating tinggi (>= 9.0) pada film dengan skor TMDB di bawah 5.8.</string>
+    <string name="badge_secret_unloved_gem_hint">Keindahan ada di mata penonton...</string>
+    <string name="badge_secret_unloved_gem_title">Gourmet yang Disalahpahami</string>
+    <string name="badge_time_cat">WAKTU</string>
+    <string name="badge_time_desc">Perjalanan monumental melintasi berjam-jam sejarah perfilman.</string>
+    <string name="badge_time_title">Odisseus Waktu</string>
+    <string name="badge_tv_cat">SERIAL TV</string>
+    <string name="badge_tv_desc">Dari episode pilot hingga kredit akhir musim pemungkas.</string>
+    <string name="badge_tv_title">Maraton Serial</string>
+    <string name="badge_veteran_club_cat">LOYALITAS</string>
+    <string name="badge_veteran_club_desc">Anggota aktif dan setia dari komunitas sinefil kami.</string>
+    <string name="badge_veteran_club_title">Kartu Klub Film</string>
+    <string name="badge_vibes_cat">EMOSI</string>
+    <string name="badge_vibes_desc">Dari tawa hingga air mata: abadikan perasaan Anda lewat Vibes.</string>
+    <string name="badge_vibes_title">Spektrum Emosional</string>
+    <string name="badge_watchlist_hoarder_cat">WATCHLIST</string>
+    <string name="badge_watchlist_hoarder_desc">Lebih dari 50 judul tersimpan dalam daftar tontonan pribadi Anda.</string>
+    <string name="badge_watchlist_hoarder_title">Arsip Tak Terbatas</string>
+
+    <string name="settings_commsuni_notice">Diskusi komunitas dan komentar terfederasi disediakan melalui CommsUni (commsuni.tv).</string>
+    <string name="detail_rating_it_10">Tidak cocok untuk anak di bawah usia 10 tahun.</string>
 </resources>

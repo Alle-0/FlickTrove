@@ -382,7 +382,14 @@ class BadgeRepository @Inject constructor(
      * Sincronizza le statistiche globali di rarità leggendo 1 singola volta
      * il documento aggregato `/system_metrics/badges_global` da Firestore.
      */
-    suspend fun fetchGlobalRarityStats(): Boolean {
+    suspend fun fetchGlobalRarityStats(forceRefresh: Boolean = false): Boolean {
+        if (!forceRefresh) {
+            val lastCached = badgeDao.getLatestGlobalStatsTimestamp() ?: 0L
+            val ttlMillis = 24 * 60 * 60 * 1000L // 24 ore di cache locale
+            if (System.currentTimeMillis() - lastCached < ttlMillis) {
+                return true // Dati già freschi in Room: zero chiamate di rete!
+            }
+        }
         return try {
             val doc = firestore.collection("system_metrics").document("badges_global").get().await()
             if (!doc.exists()) return false
@@ -761,14 +768,14 @@ class BadgeRepository @Inject constructor(
                 )
             }
 
-            // 32. TMDB > 8.5: Gourmet del Cinema
+            // 32. TMDB > 8.5: Gourmet del Cinema (10 capolavori)
             "gourmet_critic" -> {
                 val count = watchedMovies.count { (it.voteAverage ?: 0.0) >= 8.5 }
                 EvaluationResult(
                     currentProgress = count,
-                    targetThreshold = 5,
+                    targetThreshold = 10,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = count >= 5
+                    isUnlocked = count >= 10
                 )
             }
 
@@ -783,51 +790,70 @@ class BadgeRepository @Inject constructor(
                 )
             }
 
-            // 34. Attore Preferito: Attore Feticcio (5 check-in)
+            // 34. Attore Preferito: Attore Feticcio (8 check-in)
             "actor_muse" -> {
                 val topActorCount = allWatched.filter { it.favoriteActorId != null }
                     .groupBy { it.favoriteActorId }
                     .values.maxOfOrNull { it.size } ?: 0
                 EvaluationResult(
                     currentProgress = topActorCount,
-                    targetThreshold = 5,
+                    targetThreshold = 8,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = topActorCount >= 5
+                    isUnlocked = topActorCount >= 8
                 )
             }
 
-            // 35. 5 Film Stesso Regista: Regista del Cuore
+            // 35. 8 Film Stesso Regista: Regista del Cuore (8 film)
             "director_heart" -> {
                 val topDirectorCount = allWatched.filter { it.directorId != null }
                     .groupBy { it.directorId }
                     .values.maxOfOrNull { it.size } ?: 0
                 EvaluationResult(
                     currentProgress = topDirectorCount,
-                    targetThreshold = 5,
+                    targetThreshold = 8,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = topDirectorCount >= 5
+                    isUnlocked = topDirectorCount >= 8
                 )
             }
 
-            // 36. Note Personali: Diario di Bordo (5 note)
+            // 36. Note Personali: Diario di Bordo (10 note)
             "personal_diary" -> {
                 val notesCount = allWatched.count { !it.personalNote.isNullOrBlank() }
                 EvaluationResult(
                     currentProgress = notesCount,
-                    targetThreshold = 5,
+                    targetThreshold = 10,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = notesCount >= 5
+                    isUnlocked = notesCount >= 10
                 )
             }
 
-            // 37. Backdrop Personalizzato: Scenografo Personale
+            // 37. Backdrop & Avatar: Scenografo Personale (Target = 2: Avatar + Backdrop)
             "custom_backdrop" -> {
-                val hasCustom = allMovies.any { it.customBackdropPath != null }
+                val currentUid = auth.currentUser?.uid
+                val userNamePrefs = context.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE)
+                val commsPrefs = context.getSharedPreferences("commsuni_prefs", android.content.Context.MODE_PRIVATE)
+
+                val hasAvatar = !currentUid.isNullOrBlank() && (
+                    auth.currentUser?.photoUrl != null ||
+                    !userNamePrefs.getString("user_avatar_$currentUid", null).isNullOrBlank() ||
+                    !commsPrefs.getString("user_avatar_$currentUid", null).isNullOrBlank()
+                )
+
+                val hasProfileBackdrop = !currentUid.isNullOrBlank() && (
+                    !userNamePrefs.getString("avatar_backdrop_$currentUid", null).isNullOrBlank()
+                )
+
+                val hasMovieCustom = allMovies.any { it.customBackdropPath != null }
+
+                val avatarScore = if (hasAvatar) 1 else 0
+                val backdropScore = if (hasProfileBackdrop || hasMovieCustom) 1 else 0
+                val totalCustomScore = avatarScore + backdropScore
+
                 EvaluationResult(
-                    currentProgress = if (hasCustom) 1 else 0,
-                    targetThreshold = 1,
+                    currentProgress = totalCustomScore,
+                    targetThreshold = 2,
                     activeTier = PreviewBadgeTier.SUPER_8,
-                    isUnlocked = hasCustom
+                    isUnlocked = totalCustomScore >= 2
                 )
             }
 

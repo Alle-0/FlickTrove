@@ -11,6 +11,7 @@ import com.cinetrack.data.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
+import androidx.compose.foundation.lazy.grid.LazyGridState
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.data.model.UserPreferences
@@ -55,6 +56,8 @@ class FolderDetailViewModel @Inject constructor(
     private val _folderId = MutableStateFlow<String?>(null)
     
     val animatedMovieIds = mutableSetOf<String>()
+
+    val lazyGridState = LazyGridState()
 
     fun initFolder(id: String) {
         if (_folderId.value != id) {

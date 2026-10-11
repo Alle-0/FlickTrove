@@ -413,10 +413,10 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             defaultDescription = "La passione per il grande schermo attraverso i formati storici della pellicola.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 10, "I primi passi nella sala buia. Hai completato i tuoi primi 10 lungometraggi.", "10 film completati"),
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 25, "Il circuito del cinema d'autore. Hai raggiunto quota 25 lungometraggi.", "25 film completati"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 100, "La sala buia è la tua seconda casa. Hai completato 100 lungometraggi.", "100 film completati"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "Il grande formato epico. Ben 250 lungometraggi vissuti.", "250 film completati"),
-                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "L'Opera Compiuta. Oltre 500 capolavori impressi nella tua cineteca.", "500+ film • Maestria Assoluta")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 50, "Il circuito del cinema d'autore. Hai raggiunto quota 50 lungometraggi.", "50 film completati"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 200, "La sala buia è la tua seconda casa. Hai completato 200 lungometraggi.", "200 film completati"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 500, "Il grande formato epico. Ben 500 lungometraggi vissuti.", "500 film completati"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 1000, "L'Opera Compiuta. Oltre 1.000 capolavori impressi nella tua cineteca.", "1.000+ film • Maestria Assoluta")
             ),
             progressCurrent = 0,
             progressTarget = 10,
@@ -441,10 +441,10 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             defaultDescription = "Dall'episodio pilota fino ai titoli di coda dell'ultima stagione.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 3, "Hai completato 3 serie TV.", "3 serie"),
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 serie TV interamente completate. Circuito d'autore.", "5 serie"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 10, "10 serie TV viste dalla prima all'ultima puntata.", "10 serie"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 serie TV concluse. Una dedizione monumentale.", "25 serie"),
-                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 50, "50 serie TV completate al 100%. Maratoneta definitivo.", "50 serie")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 serie TV interamente completate. Circuito d'autore.", "10 serie"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 25, "25 serie TV viste dalla prima all'ultima puntata.", "25 serie"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 serie TV concluse. Una dedizione monumentale.", "50 serie"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 100, "100 serie TV completate al 100%. Maratoneta definitivo.", "100 serie")
             ),
             progressCurrent = 0,
             progressTarget = 3,
@@ -468,12 +468,12 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "BINGE-WATCHING",
             defaultDescription = "Quando una puntata tira l'altra senza sosta.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 3, "3 episodi di una serie divorati in 24 ore.", "3 episodi"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 5, "5 episodi in un solo giorno. Notte insonne.", "5 episodi"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 10, "10 episodi in 24 ore. Binge-watching leggendario.", "10 episodi")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 4, "4 episodi di una serie divorati in 24 ore.", "4 episodi"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 8, "8 episodi in un solo giorno. Notte insonne.", "8 episodi"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 15, "15 episodi in 24 ore. Binge-watching leggendario.", "15 episodi")
             ),
             progressCurrent = 0,
-            progressTarget = 3,
+            progressTarget = 4,
             progressUnit = "episodi",
             rarityPercent = "5.2%"
         ),
@@ -495,9 +495,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             defaultDescription = "Più di 50 titoli accumulati nella tua watchlist personale.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 50, "50 titoli salvati in archivio.", "50 titoli"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 100, "100 titoli pronti alla visione.", "100 titoli"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "250 titoli in attesa di essere vissuti.", "250 titoli"),
-                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "500+ titoli. L'archivio cinematografico supremo.", "500+ titoli")
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 150, "150 titoli pronti alla visione.", "150 titoli"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 350, "350 titoli in attesa di essere vissuti.", "350 titoli"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 1000, "1.000+ titoli. L'archivio cinematografico supremo.", "1.000+ titoli")
             ),
             progressCurrent = 0,
             progressTarget = 50,
@@ -549,14 +549,14 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "TEMPO",
             defaultDescription = "Un viaggio monumentale nel tempo cinematografico.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 10, "10 ore di visione cinematografica.", "10 ore"),
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 50, "50 ore davanti al grande schermo.", "50 ore"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 100, "100 ore di proiezioni accumulate.", "100 ore"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 250, "250 ore trascorse in sala buia.", "250 ore"),
-                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 500, "Oltre 500 ore di puro cinema. L'Odissea è compiuta.", "500+ ore")
+                PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 25, "25 ore di visione cinematografica.", "25 ore"),
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 100, "100 ore davanti al grande schermo.", "100 ore"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 350, "350 ore di proiezioni accumulate.", "350 ore"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 800, "800 ore trascorse in sala buia.", "800 ore"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 2000, "Oltre 2.000 ore di puro cinema. L'Odissea è compiuta.", "2.000+ ore")
             ),
             progressCurrent = 0,
-            progressTarget = 10,
+            progressTarget = 25,
             progressUnit = "ore",
             rarityPercent = "3.1%"
         ),
@@ -579,8 +579,8 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             progressiveSteps = mapOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 1, "1 saga completa.", "1 saga"),
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 3, "3 saghe complete al 100%.", "3 saghe"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 5, "5 saghe completate.", "5 saghe"),
-                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 10, "10 saghe al 100%. Maestro delle saghe.", "10 saghe")
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 7, "7 saghe completate.", "7 saghe"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 15, "15 saghe al 100%. Maestro delle saghe.", "15 saghe")
             ),
             progressCurrent = 0,
             progressTarget = 1,
@@ -606,8 +606,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 1, "Il tuo 1° rewatch registrato.", "1 rewatch"),
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 rewatch completati.", "5 rewatch"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 10, "10 visioni ripetute dei tuoi film preferiti.", "10 rewatch"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 rewatch. La memoria cinematografica.", "25 rewatch")
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 15, "15 visioni ripetute dei tuoi film preferiti.", "15 rewatch"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 35, "35 rewatch. La memoria cinematografica.", "35 rewatch"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 50, "50 rewatch. Amore eterno per i capolavori.", "50 rewatch")
             ),
             progressCurrent = 0,
             progressTarget = 1,
@@ -631,14 +632,14 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "VALUTAZIONI",
             defaultDescription = "Hai espresso il tuo giudizio critico assegnando voti alle opere viste.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 5, "5 film valutati con voto.", "5 voti"),
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 25, "25 schede critiche registrate.", "25 voti"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 50, "50 film recensiti con giudizio personale.", "50 voti"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 100, "100 valutazioni ufficiali nella cineteca.", "100 voti"),
-                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 250, "Presidente di Giuria • 250 voti assegnati.", "250 voti")
+                PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 10, "10 film valutati con voto.", "10 voti"),
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 50, "50 schede critiche registrate.", "50 voti"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 150, "150 film recensiti con giudizio personale.", "150 voti"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 400, "400 valutazioni ufficiali nella cineteca.", "400 voti"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 1000, "Presidente di Giuria • 1.000 voti assegnati.", "1.000 voti")
             ),
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 10,
             progressUnit = "voti",
             rarityPercent = "16.0%"
         ),
@@ -660,9 +661,10 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             defaultDescription = "Dal riso al pianto: hai immortalato le tue emozioni cinematografiche con le Vibes.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 5, "5 vibes emotive assegnate.", "5 vibes"),
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 20, "20 vibes registrate.", "20 vibes"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 50, "50 reazioni emotive catalogate.", "50 vibes"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 100, "100 sfumature emotive vissute in sala.", "100 vibes")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 25, "25 vibes registrate.", "25 vibes"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 75, "75 reazioni emotive catalogate.", "75 vibes"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 150, "150 sfumature emotive vissute in sala.", "150 vibes"),
+                PreviewBadgeTier.THE_FINAL_CUT to ProgressiveTierDetail(PreviewBadgeTier.THE_FINAL_CUT, 300, "300 vibes. Maestro delle emozioni cinematografiche.", "300 vibes")
             ),
             progressCurrent = 0,
             progressTarget = 5,
@@ -687,9 +689,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             defaultDescription = "Hai condiviso le tue impressioni e riflessioni con la community di cinefili.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 3, "3 commenti condivisi.", "3 commenti"),
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 riflessioni pubblicate.", "10 commenti"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 25, "25 contributi critici nella community.", "25 commenti"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 commenti. Critico autorevole di FlickTrove.", "50 commenti")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 15, "15 riflessioni pubblicate.", "15 commenti"),
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 40, "40 contributi critici nella community.", "40 commenti"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 80, "80 commenti. Critico autorevole di FlickTrove.", "80 commenti")
             ),
             progressCurrent = 0,
             progressTarget = 3,
@@ -715,8 +717,8 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 1, "1 cartella tematica creata.", "1 cartella"),
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 3, "3 cartelle personalizzate nella cineteca.", "3 cartelle"),
-                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 5, "5 raccolte d'autore catalogate.", "5 cartelle"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 10, "10 cartelle tematiche. Archivio d'élite.", "10 cartelle")
+                PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 7, "7 raccolte d'autore catalogate.", "7 cartelle"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 15, "15 cartelle tematiche. Archivio d'élite.", "15 cartelle")
             ),
             progressCurrent = 0,
             progressTarget = 1,
@@ -744,11 +746,11 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "GENERE: HORROR",
             defaultDescription = "Brividi, sussurri e tensione: hai esplorato gli angoli più oscuri del cinema.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 film horror completati.", "10 film"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 capolavori del brivido vissuti al buio.", "25 film")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 15, "15 film horror completati.", "15 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 capolavori del brivido vissuti al buio.", "50 film")
             ),
             progressCurrent = 0,
-            progressTarget = 10,
+            progressTarget = 15,
             progressUnit = "film",
             rarityPercent = "6.8%"
         ),
@@ -769,11 +771,11 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "GENERE: SCI-FI",
             defaultDescription = "Viaggi interstellari, futuri distopici e intelligenze aliene.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 film di fantascienza esplorati.", "10 film"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 viaggi nel cosmo e nel futuro.", "25 film")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 15, "15 film di fantascienza esplorati.", "15 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 viaggi nel cosmo e nel futuro.", "50 film")
             ),
             progressCurrent = 0,
-            progressTarget = 10,
+            progressTarget = 15,
             progressUnit = "film",
             rarityPercent = "8.4%"
         ),
@@ -794,11 +796,11 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "GENERE: THRILLER",
             defaultDescription = "Trame intricate, misteri insoluti e colpi di scena mozzafiato.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 thriller e gialli completati.", "10 film"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 indagini cinematografiche risolte.", "25 film")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 15, "15 thriller e gialli completati.", "15 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 indagini cinematografiche risolte.", "50 film")
             ),
             progressCurrent = 0,
-            progressTarget = 10,
+            progressTarget = 15,
             progressUnit = "film",
             rarityPercent = "9.6%"
         ),
@@ -819,11 +821,11 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "GENERE: ANIMAZIONE",
             defaultDescription = "L'arte dell'animazione: dai classici dell'infanzia ai capolavori d'autore giapponesi.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 capolavori d'animazione.", "10 film"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 25, "25 mondi disegnati vissuti con stupore.", "25 film")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 15, "15 capolavori d'animazione.", "15 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 50, "50 mondi disegnati vissuti con stupore.", "50 film")
             ),
             progressCurrent = 0,
-            progressTarget = 10,
+            progressTarget = 15,
             progressUnit = "film",
             rarityPercent = "7.2%"
         ),
@@ -844,11 +846,11 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "DOCUMENTARI",
             defaultDescription = "La cinepresa come testimone della storia, della natura e dell'animo umano.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 documentari completati.", "5 doc"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 15, "15 testimonianze del reale assimilate.", "15 doc")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 documentari completati.", "10 doc"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 30, "30 testimonianze del reale assimilate.", "30 doc")
             ),
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 10,
             progressUnit = "doc",
             rarityPercent = "10.1%"
         ),
@@ -869,11 +871,11 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             categoryLabel = "CINEMA D'EPOCA",
             defaultDescription = "Alla scoperta delle pietre miliari realizzate prima del 1980.",
             progressiveSteps = mapOf(
-                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "5 opere storiche pre-1980 completate.", "5 film"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 15, "15 classici d'epoca che hanno fatto la storia.", "15 film")
+                PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 10, "10 opere storiche pre-1980 completate.", "10 film"),
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 30, "30 classici d'epoca che hanno fatto la storia.", "30 film")
             ),
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "11.5%"
         ),
@@ -895,7 +897,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             defaultDescription = "Un viaggio attorno al mondo attraverso film prodotti in nazioni e culture diverse.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 5, "Opere di 5 nazioni diverse completate.", "5 nazioni"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 10, "10 nazioni esplorate. Cinefilo senza frontiere.", "10 nazioni")
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 20, "20 nazioni esplorate. Cinefilo senza frontiere.", "20 nazioni")
             ),
             progressCurrent = 0,
             progressTarget = 5,
@@ -952,7 +954,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         unlockedDate = null
     ),
 
-    // 31. Cloud Sync - Il Trasloco
+    // 31. Import & Cloud Sync - Il Trasloco
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_onboarding_sync",
@@ -960,8 +962,8 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
             fixedTier = PreviewBadgeTier.MM_16,
             iconKind = CustomBadgeIconKind.SYNC_REEL,
-            categoryLabel = "CINETECA CLOUD",
-            defaultDescription = "Hai sincronizzato con successo la tua storia cinematografica importando la cineteca da Trakt o SIMKL.",
+            categoryLabel = "IMPORT & TRASLOCO",
+            defaultDescription = "Nessuna storia va perduta: hai importato o sincronizzato con successo la tua cineteca personale da Trakt, SIMKL o tramite ripristino di un archivio.",
             progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
@@ -981,9 +983,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.MM_70,
             iconKind = CustomBadgeIconKind.GOURMET_CRITIC,
             categoryLabel = "ALTA CRITICA",
-            defaultDescription = "Hai completato 5 capolavori con votazione media globale TMDB superiore a 8.5 stelle.",
+            defaultDescription = "Hai completato 10 capolavori con votazione media globale TMDB superiore a 8.5 stelle.",
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 10,
             progressUnit = "film",
             rarityPercent = "3.8%"
         ),
@@ -1021,9 +1023,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.MM_35,
             iconKind = CustomBadgeIconKind.ACTOR_MUSE,
             categoryLabel = "PREFERENZE",
-            defaultDescription = "Hai selezionato lo stesso interprete del cuore in 5 check-in dedicati.",
+            defaultDescription = "Hai selezionato lo stesso interprete del cuore in 8 check-in dedicati.",
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 8,
             progressUnit = "check-in",
             rarityPercent = "5.9%"
         ),
@@ -1032,7 +1034,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         unlockedDate = null
     ),
 
-    // 35. 5 Film Stesso Regista - Regista del Cuore
+    // 35. 8 Film Stesso Regista - Regista del Cuore
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "director_heart",
@@ -1041,9 +1043,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.MM_70,
             iconKind = CustomBadgeIconKind.DIRECTOR_CHAIR,
             categoryLabel = "AUTORIALITÀ",
-            defaultDescription = "Hai esplorato la visione autoriale del tuo regista preferito completando oltre 5 sue opere.",
+            defaultDescription = "Hai esplorato la visione autoriale del tuo regista preferito completando oltre 8 sue opere.",
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 8,
             progressUnit = "film",
             rarityPercent = "1.8%"
         ),
@@ -1052,7 +1054,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         unlockedDate = null
     ),
 
-    // 36. 5 Note Personali - Diario di Bordo
+    // 36. 10 Note Personali - Diario di Bordo
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "personal_diary",
@@ -1061,9 +1063,9 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.MM_35,
             iconKind = CustomBadgeIconKind.PERSONAL_DIARY,
             categoryLabel = "NOTE PERSONALI",
-            defaultDescription = "Hai annotato impressioni e pensieri intimi scrivendo 5 note personali sui film vissuti.",
+            defaultDescription = "Hai annotato impressioni e pensieri intimi scrivendo 10 note personali sui film vissuti.",
             progressCurrent = 0,
-            progressTarget = 5,
+            progressTarget = 10,
             progressUnit = "note",
             rarityPercent = "7.0%"
         ),
@@ -1081,10 +1083,10 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.CUSTOM_BACKDROP,
             categoryLabel = "PERSONALIZZAZIONE",
-            defaultDescription = "Hai personalizzato la tua identità cinefila impostando un backdrop cinematografico nel profilo.",
+            defaultDescription = "Hai curato la tua identità cinefila completando la scenografia del tuo profilo con un avatar e un backdrop cinematografico.",
             progressCurrent = 0,
-            progressTarget = 1,
-            progressUnit = "",
+            progressTarget = 2,
+            progressUnit = "elementi",
             rarityPercent = "22.1%"
         ),
         currentTier = PreviewBadgeTier.SUPER_8,

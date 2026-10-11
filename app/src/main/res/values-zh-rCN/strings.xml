@@ -1436,7 +1436,7 @@
     <string name="link_security_malformed">无效或格式错误的网页链接。</string>
     <string name="stats_episodes_count">%1$s 集</string>
 
-    <!-- FlickTrove Trophy Room & Badge Catalog -->
+    <!-- FlickTrove Trophy Room &amp; Badge Catalog -->
     <string name="trophy_sort_tier">阶级声望</string>
     <string name="trophy_sort_progress">进度</string>
     <string name="trophy_sort_rarity">稀有度</string>
@@ -1595,10 +1595,10 @@
     <string name="badge_actor_director_fetish_desc">对特定电影风格或演员情有独钟：观赏了同一位导演或主演的至少5部电影。</string>
     <string name="badge_personal_diary_title">光影日志</string>
     <string name="badge_personal_diary_cat">随手随笔</string>
-    <string name="badge_personal_diary_desc">在观影后及时记录下感悟与思绪，为已看过的电影写下了至少5则私人笔记。</string>
+    <string name="badge_personal_diary_desc">您通过对观看过的电影撰写10篇个人笔记，记录了感触与深层思考。</string>
     <string name="badge_custom_backdrop_title">私人美术指导</string>
     <string name="badge_custom_backdrop_cat">个性化装扮</string>
-    <string name="badge_custom_backdrop_desc">在个人主页中设定了一张专属电影背景剧照，彰显你的独特影迷个性。</string>
+    <string name="badge_custom_backdrop_desc">您通过头像和电影背景装点个人档案，打造了专属的影迷身份标识。</string>
 
     <string name="trophy_track_title">规格进阶历程</string>
     <string name="trophy_completed_badge">已完成</string>
@@ -1606,4 +1606,100 @@
     <string name="trophy_unlock_banner_format_upgraded">新格式</string>
     <string name="trophy_unlock_bootstrap_title">已解锁 %1$d 个成就！</string>
     <string name="trophy_unlock_bootstrap_subtitle">查看荣誉陈列馆</string>
+
+
+
+    <!-- Nuovi Trofei -->
+    <string name="badge_executive_producer_title">执行制片人</string>
+    <string name="badge_executive_producer_cat">赞助人与支持</string>
+    <string name="badge_executive_producer_desc">在幕后，总有相信这个项目的人：您直接支持了FlickTrove的开发。</string>
+    <string name="badge_onboarding_sync_title">大搬迁</string>
+    <string name="badge_onboarding_sync_cat">导入与迁移</string>
+    <string name="badge_onboarding_sync_desc">没有故事会遗失：您通过Trakt、SIMKL或备份恢复成功导入或同步了您的个人片库。</string>
+    <string name="badge_gourmet_critic_title">电影美食家</string>
+    <string name="badge_gourmet_critic_cat">高级影评</string>
+    <string name="badge_gourmet_critic_desc">您已完成10部TMDB全球平均评分超过8.5星的杰作。</string>
+    <string name="badge_colossal_title">泰坦尼克</string>
+    <string name="badge_colossal_cat">史诗挑战</string>
+    <string name="badge_colossal_desc">您在一次观影中完成了一部长达3小时30分钟以上的史诗巨作。</string>
+    <string name="badge_actor_muse_title">最爱演员</string>
+    <string name="badge_actor_muse_cat">偏好</string>
+    <string name="badge_actor_muse_desc">您在8次签到中选择了同一位最爱的演员。</string>
+    <string name="badge_director_heart_title">最爱导演</string>
+    <string name="badge_director_heart_cat">作者论</string>
+    <string name="badge_director_heart_desc">您观看了最爱导演的8部以上作品，探索了其作者视野。</string>
+
+    <string name="badge_binge_episodes_cat">一口气追完</string>
+    <string name="badge_binge_episodes_desc">一集接一集停不下来。</string>
+    <string name="badge_binge_episodes_title">深夜连播</string>
+    <string name="badge_comments_cat">社区交流</string>
+    <string name="badge_comments_desc">与广大影迷朋友分享独到见解与深刻共鸣。</string>
+    <string name="badge_comments_title">影评之声</string>
+    <string name="badge_folders_cat">分类管理</string>
+    <string name="badge_folders_desc">建立主题文件夹，精心打理属于自己的私人电影资料馆。</string>
+    <string name="badge_folders_title">作者性策展人</string>
+    <string name="badge_genre_anime_cat">动画长片</string>
+    <string name="badge_genre_anime_desc">动画的魔法：从童年经典到日本殿堂级杰作。</string>
+    <string name="badge_genre_anime_title">手绘星河</string>
+    <string name="badge_genre_doc_cat">纪录长片</string>
+    <string name="badge_genre_doc_desc">镜头作为历史、自然与人类灵魂的见证者。</string>
+    <string name="badge_genre_doc_title">现实之眼</string>
+    <string name="badge_genre_scifi_cat">科幻电影</string>
+    <string name="badge_genre_scifi_desc">星际穿越、反乌托邦未来与地外智慧生命。</string>
+    <string name="badge_genre_scifi_title">冲出大气层</string>
+    <string name="badge_genre_vintage_cat">复古经典</string>
+    <string name="badge_genre_vintage_desc">探寻1980年以前铸就的影史丰碑。</string>
+    <string name="badge_genre_vintage_title">胶片考古家</string>
+    <string name="badge_ratings_cat">评分</string>
+    <string name="badge_ratings_desc">以审慎的鉴赏眼光为看过的电影打分。</string>
+    <string name="badge_ratings_title">评审团席位</string>
+    <string name="badge_sagas_cat">系列电影</string>
+    <string name="badge_sagas_desc">完整看完了整个电影宇宙或宏大系列的全部篇章。</string>
+    <string name="badge_sagas_title">传奇终结者</string>
+    <string name="badge_secret_completionist_cat">LOST REEL #07</string>
+    <string name="badge_secret_completionist_desc">绝不遗漏分毫：为同一部电影同时记录了评分、个人笔记和氛围感（Vibe）。</string>
+    <string name="badge_secret_completionist_hint">绝不遗漏分毫：雕琢每一个细节。</string>
+    <string name="badge_secret_completionist_title">强迫症完美主义</string>
+    <string name="badge_secret_genesis_cat">LOST REEL #08</string>
+    <string name="badge_secret_genesis_desc">重返默片发轫之初：完整观看了一部1940年以前出品的经典之作。</string>
+    <string name="badge_secret_genesis_hint">重返默片发轫之初...</string>
+    <string name="badge_secret_genesis_title">神话起源</string>
+    <string name="badge_secret_genreless_rebel_cat">LOST REEL #03</string>
+    <string name="badge_secret_genreless_rebel_desc">打破所有归类与标签：观看了一部在TMDB上未标明任何类型的电影。</string>
+    <string name="badge_secret_genreless_rebel_hint">打破所有归类与标签...</string>
+    <string name="badge_secret_genreless_rebel_title">身份危机</string>
+    <string name="badge_secret_indecisive_cat">LOST REEL #06</string>
+    <string name="badge_secret_indecisive_desc">影评人的眼光总在不断进化：对同一部电影修改评分至少3次。</string>
+    <string name="badge_secret_indecisive_hint">影评人的眼光总在不断进化...</string>
+    <string name="badge_secret_indecisive_title">永恒的犹豫者</string>
+    <string name="badge_secret_iron_heart_cat">LOST REEL #09</string>
+    <string name="badge_secret_iron_heart_desc">再多惊悚也无法动摇：完整观看3部恐怖片且未给出低分。</string>
+    <string name="badge_secret_iron_heart_hint">再多惊悚也无法动摇...</string>
+    <string name="badge_secret_iron_heart_title">钢铁之心</string>
+    <string name="badge_secret_night_owl_cat">LOST REEL #04</string>
+    <string name="badge_secret_night_owl_desc">某些故事只在整座城市沉睡时醒来：在凌晨2点至5点之间记录了一次观影。</string>
+    <string name="badge_secret_night_owl_hint">某些故事只在整座城市沉睡时醒来...</string>
+    <string name="badge_secret_night_owl_title">夜行动物</string>
+    <string name="badge_secret_unloved_gem_cat">LOST REEL #10</string>
+    <string name="badge_secret_unloved_gem_desc">美存在于观者眼中：为TMDB均分低于5.8的作品给出了9.0分以上的极高评价。</string>
+    <string name="badge_secret_unloved_gem_hint">美存在于观者眼中...</string>
+    <string name="badge_secret_unloved_gem_title">独行美食家</string>
+    <string name="badge_time_cat">观影时长</string>
+    <string name="badge_time_desc">穿梭于光影岁月的史诗级电影之旅。</string>
+    <string name="badge_time_title">时间奥德赛</string>
+    <string name="badge_tv_cat">电视剧集</string>
+    <string name="badge_tv_desc">从试播集一路追到最终季的片尾字幕。</string>
+    <string name="badge_tv_title">追剧马拉松</string>
+    <string name="badge_veteran_club_cat">忠实会员</string>
+    <string name="badge_veteran_club_desc">迷影俱乐部持续活跃的资深成员。</string>
+    <string name="badge_veteran_club_title">迷影俱乐部徽章</string>
+    <string name="badge_vibes_cat">情绪标签</string>
+    <string name="badge_vibes_desc">从欢笑到泪水：用Vibe捕捉光影带来的内心震撼。</string>
+    <string name="badge_vibes_title">情感光谱</string>
+    <string name="badge_watchlist_hoarder_cat">心愿单</string>
+    <string name="badge_watchlist_hoarder_desc">个人待看列表中珍藏了超过50部作品。</string>
+    <string name="badge_watchlist_hoarder_title">无限档案室</string>
+
+    <string name="settings_commsuni_notice">通过 CommsUni (commsuni.tv) 提供的社区讨论与联合评论。</string>
+    <string name="detail_rating_it_10">不建议10岁以下儿童观看。</string>
 </resources>

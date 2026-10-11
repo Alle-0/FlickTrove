@@ -1437,7 +1437,7 @@
     <string name="link_security_malformed">Invalid or malformed web link.</string>
     <string name="stats_episodes_count">%1$s episodes</string>
 
-    <!-- FlickTrove Trophy Room & Badge Catalog -->
+    <!-- FlickTrove Trophy Room &amp; Badge Catalog -->
     <string name="trophy_sort_tier">Tier prestige</string>
     <string name="trophy_sort_progress">Progress</string>
     <string name="trophy_sort_rarity">Rarity</string>
@@ -1596,10 +1596,10 @@
     <string name="badge_actor_director_fetish_desc">An absolute affinity for a style or a screen presence: watched at least 5 films with the same actor or director.</string>
     <string name="badge_personal_diary_title">Captain\'s Log</string>
     <string name="badge_personal_diary_cat">PERSONAL NOTES</string>
-    <string name="badge_personal_diary_desc">Poured thoughts and private impressions into words by writing 5 personal notes on watched films.</string>
+    <string name="badge_personal_diary_desc">You recorded impressions and intimate thoughts by writing 10 personal notes on watched films.</string>
     <string name="badge_custom_backdrop_title">Personal Set Designer</string>
     <string name="badge_custom_backdrop_cat">CUSTOMIZATION</string>
-    <string name="badge_custom_backdrop_desc">Customized your cinephile identity by setting a cinematic profile backdrop.</string>
+    <string name="badge_custom_backdrop_desc">You curated your cinephile identity by completing your profile setting with a custom avatar and cinematic backdrop.</string>
 
     <string name="trophy_track_title">FORMAT PROGRESSION</string>
     <string name="trophy_completed_badge">COMPLETED</string>
@@ -1607,4 +1607,97 @@
     <string name="trophy_unlock_banner_format_upgraded">NEW FORMAT</string>
     <string name="trophy_unlock_bootstrap_title">%1$d trophies unlocked!</string>
     <string name="trophy_unlock_bootstrap_subtitle">Check out the Trophy Room</string>
+
+
+
+    <!-- Nuovi Trofei -->
+    <string name="badge_executive_producer_title">Executive Producer</string>
+    <string name="badge_executive_producer_cat">PATRONS &amp; SUPPORT</string>
+    <string name="badge_executive_producer_desc">Behind the scenes, there are always those who believe in the project: you directly supported FlickTrove\'s development.</string>
+    <string name="badge_onboarding_sync_title">The Big Move</string>
+    <string name="badge_onboarding_sync_cat">IMPORT &amp; MIGRATION</string>
+    <string name="badge_onboarding_sync_desc">No story is lost: you successfully imported or synced your film library from Trakt, SIMKL, or via a backup restore.</string>
+    <string name="badge_gourmet_critic_title">Cinema Gourmet</string>
+    <string name="badge_gourmet_critic_cat">HIGH CRITIQUE</string>
+    <string name="badge_gourmet_critic_desc">You completed 10 masterpieces with a global TMDB average rating of over 8.5 stars.</string>
+    <string name="badge_colossal_title">Titanic</string>
+    <string name="badge_colossal_cat">EPIC CHALLENGE</string>
+    <string name="badge_colossal_desc">You completed a monumental work lasting over 3 hours and 30 minutes in a single session.</string>
+    <string name="badge_actor_muse_title">Actor Muse</string>
+    <string name="badge_actor_muse_cat">PREFERENCES</string>
+    <string name="badge_actor_muse_desc">You selected the same favorite performer in 8 dedicated check-ins.</string>
+    <string name="badge_director_heart_title">Director of the Heart</string>
+    <string name="badge_director_heart_cat">AUTEURSHIP</string>
+    <string name="badge_director_heart_desc">You explored the auteur vision of your favorite director by completing over 8 of their works.</string>
+
+    <string name="badge_binge_episodes_cat">BINGE-WATCHING</string>
+    <string name="badge_binge_episodes_desc">When one episode inevitably leads to the next without pause.</string>
+    <string name="badge_binge_episodes_title">Night Binge</string>
+    <string name="badge_comments_cat">COMMUNITY</string>
+    <string name="badge_comments_desc">Sharing thoughtful reactions and critiques with fellow cinephiles.</string>
+    <string name="badge_comments_title">Voice of the Critic</string>
+    <string name="badge_folders_cat">CURATION</string>
+    <string name="badge_folders_desc">Organizing your personal library into curated thematic folders.</string>
+    <string name="badge_folders_title">Auteur Archivist</string>
+    <string name="badge_genre_anime_cat">GENRE: ANIMATION</string>
+    <string name="badge_genre_anime_desc">The art of animation: from childhood classics to visionary Japanese masterworks.</string>
+    <string name="badge_genre_anime_title">Drawn Worlds</string>
+    <string name="badge_genre_doc_cat">DOCUMENTARIES</string>
+    <string name="badge_genre_doc_desc">The camera as witness to history, nature, and the human spirit.</string>
+    <string name="badge_genre_doc_title">Eye on Reality</string>
+    <string name="badge_genre_scifi_cat">GENRE: SCI-FI</string>
+    <string name="badge_genre_scifi_desc">Interstellar voyages, dystopian futures, and alien minds.</string>
+    <string name="badge_genre_scifi_title">Beyond the Atmosphere</string>
+    <string name="badge_genre_vintage_cat">VINTAGE CINEMA</string>
+    <string name="badge_genre_vintage_desc">Exploring historic cinema milestones produced before 1980.</string>
+    <string name="badge_genre_vintage_title">Reel Archaeologist</string>
+    <string name="badge_ratings_cat">RATINGS</string>
+    <string name="badge_ratings_desc">Exercising your critical eye by rating the films you watch.</string>
+    <string name="badge_ratings_title">The Jury</string>
+    <string name="badge_sagas_cat">FRANCHISES</string>
+    <string name="badge_sagas_desc">You completed every single chapter of a major cinematic saga.</string>
+    <string name="badge_sagas_title">Lord of the Sagas</string>
+    <string name="badge_secret_completionist_cat">LOST REEL #07</string>
+    <string name="badge_secret_completionist_desc">Leaving nothing to chance: you logged a Rating, Personal Note, and Vibe all at once for a single film.</string>
+    <string name="badge_secret_completionist_hint">Leaving nothing to chance: master every single detail.</string>
+    <string name="badge_secret_completionist_title">Obsessive Perfectionist</string>
+    <string name="badge_secret_genesis_cat">LOST REEL #08</string>
+    <string name="badge_secret_genesis_desc">A dive into silent cinema\'s origins: you watched a film produced before 1940.</string>
+    <string name="badge_secret_genesis_hint">A dive into the origins of silent cinema...</string>
+    <string name="badge_secret_genesis_title">Origins of the Myth</string>
+    <string name="badge_secret_genreless_rebel_cat">LOST REEL #03</string>
+    <string name="badge_secret_genreless_rebel_desc">When cinema defies all labels: you watched a work with no listed genres on TMDB.</string>
+    <string name="badge_secret_genreless_rebel_hint">When cinema defies all labels...</string>
+    <string name="badge_secret_genreless_rebel_title">Identity Crisis</string>
+    <string name="badge_secret_indecisive_cat">LOST REEL #06</string>
+    <string name="badge_secret_indecisive_desc">A true critic\'s mind is always evolving: you changed your rating at least 3 times on the same film.</string>
+    <string name="badge_secret_indecisive_hint">A true critic\'s mind is always evolving...</string>
+    <string name="badge_secret_indecisive_title">The Eternal Doubter</string>
+    <string name="badge_secret_iron_heart_cat">LOST REEL #09</string>
+    <string name="badge_secret_iron_heart_desc">No chills could break your resolve: you survived 3 horror films without harsh ratings.</string>
+    <string name="badge_secret_iron_heart_hint">No chills could break your resolve...</string>
+    <string name="badge_secret_iron_heart_title">Iron Heart</string>
+    <string name="badge_secret_night_owl_cat">LOST REEL #04</string>
+    <string name="badge_secret_night_owl_desc">Some stories only come alive when the city sleeps: you logged a screening between 2:00 AM and 5:00 AM.</string>
+    <string name="badge_secret_night_owl_hint">Some stories only come alive when the city sleeps...</string>
+    <string name="badge_secret_night_owl_title">Night Owl Creature</string>
+    <string name="badge_secret_unloved_gem_cat">LOST REEL #10</string>
+    <string name="badge_secret_unloved_gem_desc">Beauty lies in the eye of the beholder: you gave a stellar rating (>= 9.0) to a film with a TMDB average below 5.8.</string>
+    <string name="badge_secret_unloved_gem_hint">Beauty lies in the eye of the beholder...</string>
+    <string name="badge_secret_unloved_gem_title">Misunderstood Gourmet</string>
+    <string name="badge_time_cat">SCREEN TIME</string>
+    <string name="badge_time_desc">A monumental voyage through hours and days of cinematic history.</string>
+    <string name="badge_time_title">Odyssey of Time</string>
+    <string name="badge_tv_cat">TV SERIES</string>
+    <string name="badge_tv_desc">From the pilot episode all the way to the closing credits of the final season.</string>
+    <string name="badge_tv_title">Serial Marathoner</string>
+    <string name="badge_veteran_club_cat">LOYALTY</string>
+    <string name="badge_veteran_club_desc">An active and continuous member of our cinephile community.</string>
+    <string name="badge_veteran_club_title">Cineclub Card</string>
+    <string name="badge_vibes_cat">EMOTIONS</string>
+    <string name="badge_vibes_desc">From laughter to tears: capturing your visceral feelings with Vibes.</string>
+    <string name="badge_vibes_title">Emotional Spectrum</string>
+    <string name="badge_watchlist_hoarder_cat">WATCHLIST</string>
+    <string name="badge_watchlist_hoarder_desc">Over 50 curated titles waiting in your personal watchlist.</string>
+    <string name="badge_watchlist_hoarder_title">The Infinite Archive</string>
 </resources>
