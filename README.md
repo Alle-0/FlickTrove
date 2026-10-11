@@ -76,6 +76,7 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 - 🎠 **Cinematic Home Feed** *(New in 4.0)*: An immersive, auto-scrolling **Hero Spotlight Carousel** sits at the top, showcasing trending titles with dynamic ambilight glow effects extracted from each backdrop in real-time.
 - 🏆 **The Trove's Pick** *(New in 4.0)*: A premium full-width card that highlights the single best title our proprietary algorithm has curated for you, complete with a personalized Match Score and a real-time dynamic glow.
 - 🥇 **Top 10 FlickTrove** *(New in 4.0)*: Our own custom weekly ranking algorithm surfaces the 10 hottest titles among all users, updated every 30 days.
+- 🏛️ **Trophy Room & Cinephile Gamification**: 51 unique achievements and progressive milestones across historical film stock formats (*Super 8*, *16mm*, *35mm*, *70mm*, *The Final Cut*) and secret *Lost Reels*, celebrating your viewing history, binge marathons, director muse loyalty, and deep curated collections with real-time unlock banners and global community rarity stats.
 - 🔍 **Comprehensive Search**: Access the entire TMDB catalog. Find movies, TV shows, and explore biographical details and filmographies of actors.
 - 📁 **Custom Organization**: Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists the way you prefer.
 - 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
