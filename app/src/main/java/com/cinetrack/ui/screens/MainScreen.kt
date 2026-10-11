@@ -367,6 +367,11 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                             settingsViewModel.triggerEditProfileMenu(bounds)
                                         } 
                                     } else null,
+                                    onEditBackdropBoundsChanged = if (currentTab is AccountTab) {
+                                        { bounds ->
+                                            settingsViewModel.editProfilePencilBounds = bounds
+                                        }
+                                    } else null,
                                     onSettingsClick = if (currentTab is AccountTab) {
                                         { offset ->
                                             settingsOverlayOffsetX = offset.x

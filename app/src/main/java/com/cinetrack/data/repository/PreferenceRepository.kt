@@ -119,8 +119,22 @@ class PreferenceRepository @Inject constructor(
                 showGeneralStats = preferences[PreferencesKeys.SHOW_GENERAL_STATS] ?: true,
                 showTrophies = preferences[PreferencesKeys.SHOW_TROPHIES] ?: true,
                 dashboardCardOrder = run {
-                    val raw = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,flow,trophies").split(",").filter { it.isNotBlank() }
-                    if (!raw.contains("trophies")) raw + "trophies" else raw
+                    val raw = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,trophies,flow").split(",").filter { it.isNotBlank() }
+                    val withTrophies = if (!raw.contains("trophies")) {
+                        val flowIdx = raw.indexOf("flow")
+                        if (flowIdx != -1) {
+                            val list = raw.toMutableList()
+                            list.add(flowIdx, "trophies")
+                            list
+                        } else {
+                            raw + "trophies"
+                        }
+                    } else raw
+                    if (withTrophies == listOf("stats", "folders", "flow", "trophies")) {
+                        listOf("stats", "folders", "trophies", "flow")
+                    } else {
+                        withTrophies
+                    }
                 },
                 showHomeContinueWatching = preferences[PreferencesKeys.SHOW_HOME_CONTINUE_WATCHING] ?: true,
                 showHomeBoxOffice = preferences[PreferencesKeys.SHOW_HOME_BOX_OFFICE] ?: true,

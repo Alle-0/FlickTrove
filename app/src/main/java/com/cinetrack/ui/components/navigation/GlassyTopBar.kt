@@ -80,6 +80,7 @@ fun GlassyTopBar(
     layoutColumns: Int? = null,
     hasAppUpdateBadge: Boolean = false,
     onEditBackdropClick: ((Rect) -> Unit)? = null,
+    onEditBackdropBoundsChanged: ((Rect) -> Unit)? = null,
     onSettingsClick: ((Offset) -> Unit)? = null,
     isStatsRewatchesEnabled: Boolean? = null,
     onStatsRewatchToggle: ((Boolean) -> Unit)? = null
@@ -489,12 +490,14 @@ fun GlassyTopBar(
                             .size(36.dp)
                             .onGloballyPositioned { coords ->
                                 val position = coords.positionInRoot()
-                                editButtonBounds[0] = Rect(
+                                val bounds = Rect(
                                     position.x,
                                     position.y,
                                     position.x + coords.size.width,
                                     position.y + coords.size.height
                                 )
+                                editButtonBounds[0] = bounds
+                                onEditBackdropBoundsChanged?.invoke(bounds)
                             }
                             .bounceClick(
                                 enabled = !isDimmed,

@@ -78,6 +78,8 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    var editProfilePencilBounds: Rect? = null
+
     private val _showEditProfileMenu = MutableSharedFlow<Rect?>()
     val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()
     
@@ -89,7 +91,7 @@ class SettingsViewModel @Inject constructor(
 
     fun triggerEditProfileMenu(triggerBounds: Rect? = null) {
         viewModelScope.launch {
-            _showEditProfileMenu.emit(triggerBounds)
+            _showEditProfileMenu.emit(triggerBounds ?: editProfilePencilBounds)
         }
     }
     

@@ -141,7 +141,7 @@ fun DashboardSettingsDialog(
                             if (vibrationEnabled) {
                                 VibrationHelper.vibrateClick(context)
                             }
-                            val defaultOrder = listOf("stats", "folders", "flow", "trophies")
+                            val defaultOrder = listOf("stats", "folders", "trophies", "flow")
                             localOrder = defaultOrder
                             dropTrigger++
                             settingsViewModel.updateDashboardCardOrder(defaultOrder)

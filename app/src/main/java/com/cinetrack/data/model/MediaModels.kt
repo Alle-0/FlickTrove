@@ -138,7 +138,7 @@ data class UserPreferences(
     val imageQuality: String = "MEDIUM",
     val showGeneralStats: Boolean = true,
     val showTrophies: Boolean = true,
-    val dashboardCardOrder: List<String> = listOf("stats", "folders", "flow", "trophies"),
+    val dashboardCardOrder: List<String> = listOf("stats", "folders", "trophies", "flow"),
     val showHomeContinueWatching: Boolean = true,
     val showHomeBoxOffice: Boolean = true,
     val showHomeWatchlist: Boolean = true,

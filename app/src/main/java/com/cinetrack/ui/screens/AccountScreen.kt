@@ -21,7 +21,11 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.boundsInWindow
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import kotlinx.coroutines.tasks.await
 import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.layout.ContentScale
@@ -282,32 +286,42 @@ object AccountTab : Tab {
                     .background(animatedBgColor)
                     .haze(state = backgroundHazeState)
             ) {
-                if (avatarBackdrop != null) {
-                val imageUrl = buildTmdbImageUrl(avatarBackdrop!!, ImageType.BACKDROP, currentImageQuality)
-                Box(modifier = Modifier.fillMaxWidth().height(480.dp)) {
-                    AsyncImage(
-                        model = imageUrl,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    0.0f to Color.Transparent,
-                                    0.30f to Color.Transparent,
-                                    0.55f to animatedBgColor.copy(alpha = 0.40f),
-                                    0.75f to animatedBgColor.copy(alpha = 0.85f),
-                                    0.92f to animatedBgColor.copy(alpha = 0.98f),
-                                    1.0f to animatedBgColor
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(480.dp)
+                        .clickable(
+                            indication = null,
+                            interactionSource = remember { MutableInteractionSource() }
+                        ) {
+                            settingsViewModel.triggerEditProfileMenu()
+                        }
+                ) {
+                    if (avatarBackdrop != null) {
+                        val imageUrl = buildTmdbImageUrl(avatarBackdrop!!, ImageType.BACKDROP, currentImageQuality)
+                        AsyncImage(
+                            model = imageUrl,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier.fillMaxSize()
+                        )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(
+                                    Brush.verticalGradient(
+                                        0.0f to Color.Transparent,
+                                        0.30f to Color.Transparent,
+                                        0.55f to animatedBgColor.copy(alpha = 0.40f),
+                                        0.75f to animatedBgColor.copy(alpha = 0.85f),
+                                        0.92f to animatedBgColor.copy(alpha = 0.98f),
+                                        1.0f to animatedBgColor
+                                    )
                                 )
-                            )
-                    )
-                }
-            } else {
-                CinematicBackground(modifier = Modifier.fillMaxSize())
+                        )
+                    } else {
+                        CinematicBackground(modifier = Modifier.fillMaxSize())
+                    }
                 }
             }
 
@@ -323,8 +337,18 @@ object AccountTab : Tab {
                             .verticalScroll(rememberScrollState())
                             .padding(bottom = paddingValues.calculateBottomPadding() + 80.dp)
                     ) {
-                    // Top Spacer for Status Bar & padding + GlassyTopBar clearance
-                    Spacer(Modifier.height(paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp))
+                    // Top Spacer for Status Bar & padding + GlassyTopBar clearance (tappable to trigger profile customization)
+                    Spacer(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp)
+                            .clickable(
+                                indication = null,
+                                interactionSource = remember { MutableInteractionSource() }
+                            ) {
+                                settingsViewModel.triggerEditProfileMenu()
+                            }
+                    )
                     
                     // Capture delegated props into local vals (needed by name pill + dashboard cards)
                     val snapshotRawColor = rawExtractedColor
@@ -341,7 +365,13 @@ object AccountTab : Tab {
                         // Avatar Container
                         Box(
                             modifier = Modifier
-                                .size(120.dp),
+                                .size(120.dp)
+                                .clickable(
+                                    indication = null,
+                                    interactionSource = remember { MutableInteractionSource() }
+                                ) {
+                                    settingsViewModel.triggerEditProfileMenu()
+                                },
                             contentAlignment = Alignment.Center
                         ) {
                             Box(
@@ -380,11 +410,11 @@ object AccountTab : Tab {
                                             modifier = Modifier.size(48.dp)
                                         )
                                     }
+                                }
                             }
                         }
-                    }
                         
-                    Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(16.dp))
                         
                         // Name Container
                         Box(
@@ -394,6 +424,12 @@ object AccountTab : Tab {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 modifier = Modifier
+                                    .clickable(
+                                        indication = null,
+                                        interactionSource = remember { MutableInteractionSource() }
+                                    ) {
+                                        settingsViewModel.triggerEditProfileMenu()
+                                    }
                                     .hazeGlass(
                                         state = backgroundHazeState,
                                         shape = RoundedCornerShape(50),
@@ -407,25 +443,25 @@ object AccountTab : Tab {
                                     )
                                     .padding(horizontal = 24.dp, vertical = 8.dp)
                             ) {
-                            val namePencilColor = Color(0xFFF0F0F0)
-                            val textShadow = androidx.compose.ui.graphics.Shadow(
-                                color = if (namePencilColor == Color(0xFF1A1A1A)) Color.White.copy(alpha = 0.3f)
-                                        else Color.Black.copy(alpha = 0.4f),
-                                offset = androidx.compose.ui.geometry.Offset(0f, 1f),
-                                blurRadius = 4f
-                            )
-                            Text(
-                                text = currentDisplayName,
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.Bold,
-                                    color = namePencilColor,
-                                    shadow = textShadow
-                                ),
-                                modifier = Modifier.weight(1f, fill = false),
-                                maxLines = 1,
-                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                            )
-                        }
+                                val namePencilColor = Color(0xFFF0F0F0)
+                                val textShadow = androidx.compose.ui.graphics.Shadow(
+                                    color = if (namePencilColor == Color(0xFF1A1A1A)) Color.White.copy(alpha = 0.3f)
+                                            else Color.Black.copy(alpha = 0.4f),
+                                    offset = androidx.compose.ui.geometry.Offset(0f, 1f),
+                                    blurRadius = 4f
+                                )
+                                Text(
+                                    text = currentDisplayName,
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = namePencilColor,
+                                        shadow = textShadow
+                                    ),
+                                    modifier = Modifier.weight(1f, fill = false),
+                                    maxLines = 1,
+                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
 
