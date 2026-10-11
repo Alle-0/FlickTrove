@@ -343,6 +343,9 @@ class SettingsViewModel @Inject constructor(
     val dynamicAppIconEnabled: StateFlow<Boolean> = settingsRepository.dynamicAppIconEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val seasonalAppIconEnabled: StateFlow<Boolean> = settingsRepository.seasonalAppIconEnabled
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val showLayoutToggle: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showLayoutToggle }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
@@ -434,7 +437,7 @@ class SettingsViewModel @Inject constructor(
                 _pendingReveal.value = Pair(color, revealOrigin)
             } else {
                 settingsRepository.updateAccentColor(color)
-                IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value)
+                IconManager.updateAppIcon(context, color, dynamicAppIconEnabled.value, seasonalAppIconEnabled.value)
                 actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_accent_updated))
                 // Remote sync in background
                 launch {
@@ -463,7 +466,7 @@ class SettingsViewModel @Inject constructor(
 
     fun applyPendingIcon(colorName: String) {
         viewModelScope.launch {
-            IconManager.updateAppIcon(context, colorName, dynamicAppIconEnabled.value)
+            IconManager.updateAppIcon(context, colorName, dynamicAppIconEnabled.value, seasonalAppIconEnabled.value)
         }
     }
 
@@ -662,10 +665,20 @@ class SettingsViewModel @Inject constructor(
     fun toggleDynamicAppIcon(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleDynamicAppIcon(enabled)
-            IconManager.updateAppIcon(context, accentColor.value, enabled)
+            IconManager.updateAppIcon(context, accentColor.value, enabled, seasonalAppIconEnabled.value)
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_dynamic_icon, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleSeasonalAppIcon(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleSeasonalAppIcon(enabled)
+            IconManager.updateAppIcon(context, accentColor.value, dynamicAppIconEnabled.value, enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_seasonal_icon, context.getString(statusRes)))
         }
     }
 

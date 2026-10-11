@@ -212,6 +212,16 @@
     <string name="settings_accent_color_desc">Personalizza l\'aspetto dell\'app</string>
     <string name="settings_dynamic_icon">Icona App Dinamica</string>
     <string name="settings_dynamic_icon_desc">Cambia l\'icona dell\'app nella schermata home per adattarla al colore accento</string>
+    <string name="settings_seasonal_icon">Icona App Stagionale</string>
+    <string name="settings_seasonal_icon_desc">Icone a tema per festività speciali</string>
+    <string name="settings_seasonal_preview_title">Icone Applicazione</string>
+    <string name="settings_seasonal_preview_subtitle">Icona classica e varianti festive stagionali</string>
+    <string name="settings_seasonal_preview_classic">Predefinita</string>
+    <string name="settings_seasonal_preview_classic_desc">Tutto l\'anno</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 Ott – 5 Nov</string>
+    <string name="settings_seasonal_preview_active_now">ATTIVA ORA</string>
+    <string name="settings_seasonal_preview_upcoming">IN ARRIVO</string>
     <string name="settings_entry_animation">Animazione Iniziale</string>
     <string name="settings_entry_animation_desc">Mostra l\'animazione del logo all\'apertura dell\'app</string>
     <string name="settings_amoled_bg">Sfondo AMOLED</string>
@@ -811,6 +821,7 @@
     <string name="settings_msg_notifications">Notifiche %1$s</string>
     <string name="settings_msg_vibration">Vibrazione %1$s</string>
     <string name="settings_msg_dynamic_icon">Icona App Dinamica %1$s</string>
+    <string name="settings_msg_seasonal_icon">Icona App Stagionale %1$s</string>
     <string name="settings_msg_visual_fx">Effetti visivi avanzati %1$s</string>
     <string name="settings_msg_img_quality">Qualità immagini: %1$s</string>
     <string name="settings_msg_text_size">Dimensione testo: %1$s</string>

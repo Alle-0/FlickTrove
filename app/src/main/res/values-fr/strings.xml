@@ -1757,5 +1757,17 @@
     <string name="badge_trophy_hunter_cat">DÉFIS CINÉPHILES</string>
     <string name="badge_trophy_hunter_desc">La consécration ultime du collectionneur : gravissez les sommets de la cinémathèque en débloquant les trophées de l\'application.</string>
     <string name="trophy_unit_trophies">trophées</string>
+
+    <string name="settings_seasonal_icon">Icône d\'Application Saisonnière</string>
+    <string name="settings_seasonal_icon_desc">Icônes à thème pour les fêtes</string>
+    <string name="settings_msg_seasonal_icon">Icône saisonnière %1$s</string>
+    <string name="settings_seasonal_preview_title">Icônes de l\'Application</string>
+    <string name="settings_seasonal_preview_subtitle">Icône classique et éditions festives saisonnières</string>
+    <string name="settings_seasonal_preview_classic">Par défaut</string>
+    <string name="settings_seasonal_preview_classic_desc">Toute l\'année</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 oct. – 5 nov.</string>
+    <string name="settings_seasonal_preview_active_now">ACTIF ACTUELLEMENT</string>
+    <string name="settings_seasonal_preview_upcoming">À VENIR</string>
 </resources>
 

@@ -889,20 +889,19 @@ fun FlickTroveBadgeEmblem(
             val tickOuterR = if (showProgressRing) radius * 0.78f else radius * 0.88f
             val innerRingR = if (showProgressRing) radius * 0.60f else radius * 0.68f
 
-            // 0. Ombra di contatto e sopraelevazione sotto la ghiera esterna (Drop Shadow verso il fondo)
+            // 0. Ombra morbida di profondità attorno al perimetro della lente
             drawCircle(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color.Black.copy(alpha = 0.80f),
-                        Color.Black.copy(alpha = 0.40f),
-                        Color.Black.copy(alpha = 0.12f),
+                        Color.Black.copy(alpha = 0.60f),
+                        Color.Black.copy(alpha = 0.25f),
                         Color.Transparent
                     ),
-                    center = Offset(center.x, center.y + radius * 0.045f),
-                    radius = lensRadius * 1.10f
+                    center = center,
+                    radius = lensRadius * 1.04f
                 ),
-                radius = lensRadius * 1.10f,
-                center = Offset(center.x, center.y + radius * 0.045f)
+                radius = lensRadius * 1.04f,
+                center = center
             )
 
             // 2. Base satinata della lente (dark cinema profondo e uniforme su tutta la superficie)
@@ -1042,6 +1041,7 @@ fun FlickTroveBadgeEmblem(
                     )
                 )
             }
+
         }
 
         // B. AREA CENTRALE DELLA LENTE CON ICONA IN SECONDO PIANO (EFFETTO PARALLASSE IN PROFONDITÀ)

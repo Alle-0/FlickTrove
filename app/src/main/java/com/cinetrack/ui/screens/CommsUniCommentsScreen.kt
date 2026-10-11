@@ -244,7 +244,26 @@ class CommsUniCommentsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(globalHazeState)
+                    .haze(hazeState)
             ) {
+                if (!effectiveBackdrop.isNullOrBlank()) {
+                    AsyncImage(
+                        model = effectiveBackdrop,
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .clipToBounds()
+                            .scale(1.05f)
+                            .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                            .drawWithContent {
+                                drawContent()
+                                // Scurito uniformemente su tutto lo schermo (senza gradiente) per garantire massimo contrasto
+                                drawRect(Color.Black.copy(alpha = 0.88f))
+                            }
+                    )
+                }
+
                 Scaffold(
             modifier = Modifier
                 .fillMaxSize()
@@ -376,26 +395,7 @@ class CommsUniCommentsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .haze(hazeState)
                 ) {
-                    if (!effectiveBackdrop.isNullOrBlank()) {
-                        AsyncImage(
-                            model = effectiveBackdrop,
-                            contentDescription = null,
-                            contentScale = ContentScale.Crop,
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .clipToBounds()
-                                .scale(1.05f)
-                                .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                                .drawWithContent {
-                                    drawContent()
-                                    // Scurito uniformemente su tutto lo schermo (senza gradiente) per garantire massimo contrasto
-                                    drawRect(Color.Black.copy(alpha = 0.88f))
-                                }
-                        )
-                    }
-
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),

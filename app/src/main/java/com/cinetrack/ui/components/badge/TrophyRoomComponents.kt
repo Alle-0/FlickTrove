@@ -1747,42 +1747,47 @@ private fun TrophyMultiTierWheel(
             )
 
             val safeTotal = totalCount.coerceAtLeast(1)
-            var currentAngle = -90f
+            val radiusPx = diameter / 2f
+            val circumference = (2f * Math.PI.toFloat() * radiusPx).coerceAtLeast(1f)
+            val capAngle = ((strokeWidthPx / 2f) / circumference) * 360f
 
             val activeTiers = tierOrder.filter { (tierCounts[it] ?: 0) > 0 }
             val hasMultipleTiers = activeTiers.size > 1
+            val gapAngle = if (hasMultipleTiers) 3.5f else 0f
 
-            // Angolo coperto dal cap arrotondato su ciascun estremo
-            val radiusPx = diameter / 2f
-            val capAngle = if (radiusPx > 0f) {
-                ((strokeWidthPx / 2f) / (2f * Math.PI.toFloat() * radiusPx)) * 360f
-            } else 4f
-
-            // Micro-gap pulito tra gli estremi arrotondati
-            val gap = if (hasMultipleTiers) (capAngle * 2f + 1.2f) else 0f
+            var nextVisualStart = -90f
 
             for (tier in activeTiers) {
                 val count = tierCounts[tier] ?: 0
-                val sweep = (count.toFloat() / safeTotal.toFloat()) * 360f
-                if (sweep > 0f) {
-                    val arcSweep = if (hasMultipleTiers) {
-                        (sweep - gap).coerceAtLeast(0.5f)
-                    } else {
-                        sweep
-                    }
-                    val startOffset = if (hasMultipleTiers) (gap / 2f) else 0f
+                val rawSweep = (count.toFloat() / safeTotal.toFloat()) * 360f
+                if (rawSweep > 0f) {
+                    // Ampiezza visiva minima per consentire le due estremità arrotondate (pillola o punto circolare)
+                    val minPillSpan = 2f * capAngle + 0.5f
+                    val visualSpan = rawSweep.coerceAtLeast(minPillSpan)
+
+                    val visualStart = nextVisualStart
+                    val visualEnd = visualStart + visualSpan
+
+                    // Il centro dell'arco tiene conto del cap arrotondato che sporge di capAngle a ciascun estremo
+                    val arcStart = visualStart + capAngle
+                    val arcSweep = (visualSpan - 2f * capAngle).coerceAtLeast(0.1f)
 
                     drawArc(
                         color = tier.primaryColor,
-                        startAngle = currentAngle + startOffset,
+                        startAngle = arcStart,
                         sweepAngle = arcSweep,
                         useCenter = false,
                         topLeft = topLeft,
                         size = arcSize,
-                        style = Stroke(width = strokeWidthPx, cap = StrokeCap.Round)
+                        style = Stroke(
+                            width = strokeWidthPx,
+                            cap = StrokeCap.Round
+                        )
                     )
+
+                    // Il segmento successivo inizia rigidamente DOPO il termine visivo del precedente + gap di respiro
+                    nextVisualStart = visualEnd + gapAngle
                 }
-                currentAngle += sweep
             }
         }
 

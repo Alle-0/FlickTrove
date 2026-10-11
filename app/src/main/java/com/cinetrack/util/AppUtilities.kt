@@ -18,7 +18,11 @@ class AppUtilities @Inject constructor(
         context.imageLoader.memoryCache?.clear()
     }
 
-    fun updateAppIcon(colorName: String, isDynamicIconEnabled: Boolean) {
-        IconManager.updateAppIcon(context, colorName, isDynamicIconEnabled)
+    fun updateAppIcon(
+        colorName: String,
+        isDynamicIconEnabled: Boolean,
+        isSeasonalIconEnabled: Boolean = true
+    ) {
+        IconManager.updateAppIcon(context, colorName, isDynamicIconEnabled, isSeasonalIconEnabled)
     }
 }

@@ -11,6 +11,7 @@ interface SettingsRepository {
     val notificationsSocial: Flow<Boolean>
     val vibrationEnabled: Flow<Boolean>
     val dynamicAppIconEnabled: Flow<Boolean>
+    val seasonalAppIconEnabled: Flow<Boolean>
     val advancedVisualEffectsEnabled: Flow<Boolean>
     val lastFeedbackTimestamp: Flow<Long>
     val titleTextSizeMultiplier: Flow<Float>
@@ -30,6 +31,7 @@ interface SettingsRepository {
     suspend fun toggleNotificationsSocial(enabled: Boolean)
     suspend fun toggleVibration(enabled: Boolean)
     suspend fun toggleDynamicAppIcon(enabled: Boolean)
+    suspend fun toggleSeasonalAppIcon(enabled: Boolean)
     suspend fun updateDisabledBadges(badges: Set<String>)
     suspend fun toggleAdvancedVisualEffects(enabled: Boolean)
     suspend fun updateLastFeedbackTimestamp(timestamp: Long)

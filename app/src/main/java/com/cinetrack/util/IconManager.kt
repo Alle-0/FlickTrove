@@ -11,17 +11,36 @@ object IconManager {
     private const val ALIAS_PURPLE = "com.cinetrack.MainActivityPurple"
     private const val ALIAS_AMBER = "com.cinetrack.MainActivityAmber"
     private const val ALIAS_BLUE = "com.cinetrack.MainActivityBlue"
+    private const val ALIAS_HALLOWEEN = "com.cinetrack.MainActivityHalloween"
 
-    fun updateAppIcon(context: Context, colorName: String, isDynamicIconEnabled: Boolean) {
-        if (!isDynamicIconEnabled) {
-            return
-        }
+    fun isHalloweenSeason(): Boolean {
+        val cal = java.util.Calendar.getInstance()
+        val month = cal.get(java.util.Calendar.MONTH) // Calendar.OCTOBER = 9, Calendar.NOVEMBER = 10
+        val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        return (month == java.util.Calendar.OCTOBER && day >= 15) ||
+               (month == java.util.Calendar.NOVEMBER && day <= 5)
+    }
 
+    fun updateAppIcon(
+        context: Context,
+        colorName: String,
+        isDynamicIconEnabled: Boolean,
+        isSeasonalIconEnabled: Boolean = true
+    ) {
         val packageManager = context.packageManager
         
-        val aliases = listOf(ALIAS_TEAL, ALIAS_PINK, ALIAS_PURPLE, ALIAS_AMBER, ALIAS_BLUE)
+        val aliases = listOf(
+            ALIAS_TEAL,
+            ALIAS_PINK,
+            ALIAS_PURPLE,
+            ALIAS_AMBER,
+            ALIAS_BLUE,
+            ALIAS_HALLOWEEN
+        )
         
         val activeAlias = when {
+            isSeasonalIconEnabled && isHalloweenSeason() -> ALIAS_HALLOWEEN
+            !isDynamicIconEnabled -> ALIAS_TEAL
             colorName == "Pink" -> ALIAS_PINK
             colorName == "Purple" -> ALIAS_PURPLE
             colorName == "Amber" -> ALIAS_AMBER

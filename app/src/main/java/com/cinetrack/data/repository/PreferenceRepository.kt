@@ -47,6 +47,7 @@ class PreferenceRepository @Inject constructor(
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
+        val SEASONAL_APP_ICON_ENABLED = booleanPreferencesKey("seasonal_app_icon_enabled")
         val APP_THEME = stringPreferencesKey("app_theme")
         val CONTENT_LANGUAGE = stringPreferencesKey("content_language")
         val SHOW_SPLIT_RELEASES_HOME = booleanPreferencesKey("show_split_releases_home")
@@ -104,6 +105,7 @@ class PreferenceRepository @Inject constructor(
                 contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "system",
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
+                seasonalAppIconEnabled = preferences[PreferencesKeys.SEASONAL_APP_ICON_ENABLED] ?: true,
                 showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
                 showSplitDroppedHome = preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] ?: false,
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
@@ -310,6 +312,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.CONTENT_LANGUAGE] = prefs.contentLanguage
             preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = prefs.advancedVisualEffectsEnabled
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
+            preferences[PreferencesKeys.SEASONAL_APP_ICON_ENABLED] = prefs.seasonalAppIconEnabled
             preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = prefs.showSplitReleasesHome
             preferences[PreferencesKeys.SHOW_SPLIT_DROPPED_HOME] = prefs.showSplitDroppedHome
             preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] = prefs.showAppEntryAnimation

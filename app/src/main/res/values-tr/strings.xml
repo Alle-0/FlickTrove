@@ -1763,4 +1763,16 @@
     <string name="badge_trophy_hunter_cat">SİNEFİL KİLOMETRE TAŞLARI</string>
     <string name="badge_trophy_hunter_desc">Koleksiyoncunun nihai zaferi: Uygulamadaki kupaları açarak sinematek zirvelerini fethedin.</string>
     <string name="trophy_unit_trophies">kupa</string>
+
+    <string name="settings_seasonal_icon">Mevsimsel Uygulama Simgesi</string>
+    <string name="settings_seasonal_icon_desc">Özel günler için temalı simgeler</string>
+    <string name="settings_msg_seasonal_icon">Mevsimsel uygulama simgesi: %1$s</string>
+    <string name="settings_seasonal_preview_title">Uygulama Simgeleri</string>
+    <string name="settings_seasonal_preview_subtitle">Klasik simge ve mevsimsel festival sürümleri</string>
+    <string name="settings_seasonal_preview_classic">Varsayılan</string>
+    <string name="settings_seasonal_preview_classic_desc">Tüm yıl boyunca</string>
+    <string name="settings_seasonal_preview_halloween">Cadılar Bayramı</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 Eki – 5 Kas</string>
+    <string name="settings_seasonal_preview_active_now">ŞU AN ETKİN</string>
+    <string name="settings_seasonal_preview_upcoming">YAKINDA</string>
 </resources>

@@ -1763,4 +1763,16 @@
     <string name="badge_trophy_hunter_cat">영화광 마일스톤</string>
     <string name="badge_trophy_hunter_desc">수집가의 궁극적인 영예: 앱의 트로피를 잠금 해제하여 시네마테크의 정점에 도달하세요.</string>
     <string name="trophy_unit_trophies">개의 트로피</string>
+
+    <string name="settings_seasonal_icon">시즌 앱 아이콘</string>
+    <string name="settings_seasonal_icon_desc">기념일 및 특별 이벤트를 위한 테마 아이콘</string>
+    <string name="settings_msg_seasonal_icon">시즌 앱 아이콘: %1$s</string>
+    <string name="settings_seasonal_preview_title">앱 아이콘</string>
+    <string name="settings_seasonal_preview_subtitle">클래식 아이콘 및 시즌 기념 에디션</string>
+    <string name="settings_seasonal_preview_classic">기본</string>
+    <string name="settings_seasonal_preview_classic_desc">연중 사용</string>
+    <string name="settings_seasonal_preview_halloween">할로윈</string>
+    <string name="settings_seasonal_preview_halloween_desc">10월 15일 – 11월 5일</string>
+    <string name="settings_seasonal_preview_active_now">현재 활성화됨</string>
+    <string name="settings_seasonal_preview_upcoming">출시 예정</string>
 </resources>

@@ -23,9 +23,12 @@ import kotlinx.coroutines.tasks.await
 import com.cinetrack.ui.components.updates.generateReminderItems
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.UiText
+import com.cinetrack.data.repository.BadgeRepository
+import com.cinetrack.data.repository.TrophyUpdateNotification
 
 data class UpdatesUiState(
     val movies: ImmutableList<Movie> = persistentListOf(),
+    val trophyNotifications: ImmutableList<TrophyUpdateNotification> = persistentListOf(),
     val notificationCount: Int = 0,
     val socialNotifications: ImmutableList<GroupedSocialNotification> = persistentListOf(),
     val socialUnreadCount: Int = 0,
@@ -36,6 +39,7 @@ data class UpdatesUiState(
 @HiltViewModel
 class UpdatesViewModel @Inject constructor(
     private val repository: MovieRepository,
+    private val badgeRepository: BadgeRepository,
     private val auth: FirebaseAuth,
     private val firestore: FirebaseFirestore,
     private val actionFeedbackManager: ActionFeedbackManager
@@ -208,25 +212,27 @@ class UpdatesViewModel @Inject constructor(
 
     val uiState: StateFlow<UpdatesUiState> = combine(
         repository.getLocalMoviesFlow(),
+        badgeRepository.getTrophyNotificationsFlow(),
         _socialNotifications,
         _socialUnreadCount
-    ) { movies, socialNotifs, socialUnread ->
+    ) { movies, trophyNotifs, socialNotifs, socialUnread ->
             val today = java.time.LocalDate.now().toString()
             val updateList = movies.filter { 
                 (!it.dropped && (it.newEpisodesFound ?: 0) > 0) || it.reminder == true || it.migratedAt == today || (it.mediaType == "tv" && !it.dropped)
             }
                 .sortedByDescending { it.clientUpdatedAt }
-            val unreadNotifCount = movies.count {
+            val unreadMovieNotifCount = movies.count {
                 !it.dropped && ((it.newEpisodesFound ?: 0) > 0 || (it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0))
             }
-            val futureRemindersCount = movies.flatMap { it.generateReminderItems(today) }.size
+            val totalLocalNotifCount = unreadMovieNotifCount + trophyNotifs.size
 
             UpdatesUiState(
                 movies = updateList.toImmutableList(),
-                notificationCount = unreadNotifCount,
+                trophyNotifications = trophyNotifs.toImmutableList(),
+                notificationCount = totalLocalNotifCount,
                 socialNotifications = socialNotifs,
                 socialUnreadCount = socialUnread,
-                totalUnreadCount = unreadNotifCount + socialUnread,
+                totalUnreadCount = totalLocalNotifCount + socialUnread,
                 isLoading = false
             )
         }
@@ -276,6 +282,21 @@ class UpdatesViewModel @Inject constructor(
                 repository.saveMovie(movie.copy(migratedAt = null))
             }
         }
+    }
+
+    fun clearTrophyNotification(notification: TrophyUpdateNotification) {
+        when (notification) {
+            is TrophyUpdateNotification.BootstrapSummary -> {
+                badgeRepository.dismissTrophyBootstrapNotification()
+            }
+            is TrophyUpdateNotification.SingleTrophy -> {
+                badgeRepository.dismissTrophyNotification(notification.badgeId)
+            }
+        }
+    }
+
+    fun clearAllTrophyNotifications() {
+        badgeRepository.dismissAllTrophyNotifications()
     }
 
     fun markSocialNotificationAsRead(notification: GroupedSocialNotification) {

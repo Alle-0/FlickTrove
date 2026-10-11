@@ -1760,5 +1760,17 @@
     <string name="badge_trophy_hunter_cat">LOGROS CINÉFILOS</string>
     <string name="badge_trophy_hunter_desc">La consagración definitiva del coleccionista: escala las cimas de la cineteca desbloqueando los trofeos de la aplicación.</string>
     <string name="trophy_unit_trophies">trofeos</string>
+
+    <string name="settings_seasonal_icon">Icono de App de Temporada</string>
+    <string name="settings_seasonal_icon_desc">Iconos temáticos para festividades</string>
+    <string name="settings_msg_seasonal_icon">Icono de temporada %1$s</string>
+    <string name="settings_seasonal_preview_title">Iconos de la App</string>
+    <string name="settings_seasonal_preview_subtitle">Icono clásico y ediciones festivas de temporada</string>
+    <string name="settings_seasonal_preview_classic">Predeterminado</string>
+    <string name="settings_seasonal_preview_classic_desc">Todo el año</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 Oct – 5 Nov</string>
+    <string name="settings_seasonal_preview_active_now">ACTIVO AHORA</string>
+    <string name="settings_seasonal_preview_upcoming">PRÓXIMAMENTE</string>
 </resources>
 

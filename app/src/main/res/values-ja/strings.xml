@@ -1763,4 +1763,16 @@
     <string name="badge_trophy_hunter_cat">映画ファンのマイルストーン</string>
     <string name="badge_trophy_hunter_desc">コレクターの究極の栄誉：アプリのトロフィーを解除して、シネマテークの頂点を極めよう。</string>
     <string name="trophy_unit_trophies">トロフィー</string>
+
+    <string name="settings_seasonal_icon">季節限定アプリアイコン</string>
+    <string name="settings_seasonal_icon_desc">季節のイベントや祝日限定の特別アイコン</string>
+    <string name="settings_msg_seasonal_icon">季節限定アプリアイコン: %1$s</string>
+    <string name="settings_seasonal_preview_title">アプリアイコン</string>
+    <string name="settings_seasonal_preview_subtitle">クラシックアイコンと季節限定エディション</string>
+    <string name="settings_seasonal_preview_classic">デフォルト</string>
+    <string name="settings_seasonal_preview_classic_desc">通年利用</string>
+    <string name="settings_seasonal_preview_halloween">ハロウィン</string>
+    <string name="settings_seasonal_preview_halloween_desc">10月15日 – 11月5日</string>
+    <string name="settings_seasonal_preview_active_now">現在適用中</string>
+    <string name="settings_seasonal_preview_upcoming">近日公開</string>
 </resources>

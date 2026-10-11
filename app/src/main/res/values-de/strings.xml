@@ -1760,5 +1760,17 @@
     <string name="badge_trophy_hunter_cat">CINEASTISCHE MEILENSTEINE</string>
     <string name="badge_trophy_hunter_desc">Die ultimative Weihe des Sammlers: Erklimme die Höhen der Kinemathek, indem du die Trophäen der App freischaltest.</string>
     <string name="trophy_unit_trophies">Trophäen</string>
+
+    <string name="settings_seasonal_icon">Saisonales App-Icon</string>
+    <string name="settings_seasonal_icon_desc">Festliche Symbole für Feiertage</string>
+    <string name="settings_msg_seasonal_icon">Saisonales App-Icon %1$s</string>
+    <string name="settings_seasonal_preview_title">App-Icons</string>
+    <string name="settings_seasonal_preview_subtitle">Klassisches Icon und saisonale Festtags-Editionen</string>
+    <string name="settings_seasonal_preview_classic">Standard</string>
+    <string name="settings_seasonal_preview_classic_desc">Ganzjährig</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">15. Okt. – 5. Nov.</string>
+    <string name="settings_seasonal_preview_active_now">JETZT AKTIV</string>
+    <string name="settings_seasonal_preview_upcoming">DEMNÄCHST</string>
 </resources>
 

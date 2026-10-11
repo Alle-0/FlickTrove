@@ -98,7 +98,8 @@ fun UpdatesScreen(
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
-    onSocialNotificationClick: ((Movie, String?) -> Unit)? = null
+    onSocialNotificationClick: ((Movie, String?) -> Unit)? = null,
+    onNavigateToTrophyRoom: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -106,6 +107,7 @@ fun UpdatesScreen(
     val today = LocalDate.now().toString()
     
     val movies = uiState.movies
+    val trophyNotifications = uiState.trophyNotifications
     val newEpisodes = movies.filter { (it.newEpisodesFound ?: 0) > 0 }
     val releasedRecently = movies.filter { it.migratedAt == today && (it.newEpisodesFound ?: 0) == 0 }
     var remindersCategoryTab by rememberSaveable { mutableIntStateOf(0) }
@@ -354,7 +356,55 @@ fun UpdatesScreen(
                                         }
                                     }
                                 } else {
-                                    val hasUpdates = newEpisodes.isNotEmpty() || releasedRecently.isNotEmpty()
+                                    val hasUpdates = newEpisodes.isNotEmpty() || releasedRecently.isNotEmpty() || trophyNotifications.isNotEmpty()
+
+                                    if (trophyNotifications.isNotEmpty()) {
+                                        item {
+                                            SectionHeader(
+                                                text = stringResource(R.string.dashboard_trophies),
+                                                action = if (trophyNotifications.size > 1) {
+                                                    {
+                                                        val markInteractionSource = remember { MutableInteractionSource() }
+                                                        val markIsPressed by markInteractionSource.collectIsPressedAsState()
+                                                        val markScale by animateFloatAsState(if (markIsPressed) 0.9f else 1f, label = "markTrophiesScale")
+
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .graphicsLayer { scaleX = markScale; scaleY = markScale }
+                                                                .clip(RoundedCornerShape(50))
+                                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
+                                                                .clickable(
+                                                                    interactionSource = markInteractionSource,
+                                                                    indication = null
+                                                                ) {
+                                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                                    viewModel.clearAllTrophyNotifications()
+                                                                }
+                                                                .padding(horizontal = 14.dp, vertical = 6.dp)
+                                                        ) {
+                                                            Text(
+                                                                stringResource(R.string.updates_mark_all),
+                                                                color = MaterialTheme.colorScheme.primary,
+                                                                fontSize = 10.sp,
+                                                                fontWeight = FontWeight.Black,
+                                                                letterSpacing = 1.sp
+                                                            )
+                                                        }
+                                                    }
+                                                } else null
+                                            )
+                                        }
+                                        items(trophyNotifications, key = { it.key }, contentType = { "trophy" }) { notif ->
+                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
+                                                TrophyNotificationCard(
+                                                    notification = notif,
+                                                    onDismiss = { viewModel.clearTrophyNotification(notif) },
+                                                    onClick = { onNavigateToTrophyRoom?.invoke() }
+                                                )
+                                            }
+                                        }
+                                    }
                                     
                                     if (newEpisodes.isNotEmpty()) {
                                         item { 

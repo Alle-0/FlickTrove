@@ -28,6 +28,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val NOTIFICATIONS_SOCIAL = booleanPreferencesKey("notifications_social")
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
+        val SEASONAL_APP_ICON_ENABLED = booleanPreferencesKey("seasonal_app_icon_enabled")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
         val LAST_FEEDBACK_TIMESTAMP = longPreferencesKey("last_feedback_timestamp")
         val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
@@ -101,6 +102,10 @@ class SettingsRepositoryImpl @Inject constructor(
         preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false // Default value is false to prevent unexpected restarts
     }
 
+    override val seasonalAppIconEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.SEASONAL_APP_ICON_ENABLED] ?: true // Default value is true
+    }
+
     override val advancedVisualEffectsEnabled: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true // Default value
     }
@@ -162,6 +167,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleDynamicAppIcon(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = enabled
+        }
+    }
+
+    override suspend fun toggleSeasonalAppIcon(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SEASONAL_APP_ICON_ENABLED] = enabled
         }
     }
 

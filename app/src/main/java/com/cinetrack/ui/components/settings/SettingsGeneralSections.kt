@@ -413,10 +413,12 @@ fun SettingsAestheticsSection(
     settingsViewModel: SettingsViewModel,
     currentAccentColor: Color,
     vibrationEnabled: Boolean,
-    onShowColorDialog: () -> Unit
+    onShowColorDialog: () -> Unit,
+    onShowSeasonalIconsDialog: () -> Unit
 ) {
     val context = LocalContext.current
     val dynamicAppIconEnabled by settingsViewModel.dynamicAppIconEnabled.collectAsStateWithLifecycle()
+    val seasonalAppIconEnabled by settingsViewModel.seasonalAppIconEnabled.collectAsStateWithLifecycle()
     val showAppEntryAnimation by settingsViewModel.showAppEntryAnimation.collectAsStateWithLifecycle()
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
 
@@ -479,6 +481,45 @@ fun SettingsAestheticsSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleDynamicAppIcon(!dynamicAppIconEnabled)
+            }
+        )
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+            title = stringResource(R.string.settings_seasonal_icon),
+            description = stringResource(R.string.settings_seasonal_icon_desc),
+            trailing = {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .clip(CircleShape)
+                            .bounceClick {
+                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                onShowSeasonalIconsDialog()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Info,
+                            contentDescription = "Info Seasonal Icons",
+                            tint = Color.White.copy(alpha = 0.5f),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+                    Spacer(modifier = Modifier.width(4.dp))
+                    FlickTroveSwitch(
+                        checked = seasonalAppIconEnabled,
+                        onCheckedChange = { 
+                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                            settingsViewModel.toggleSeasonalAppIcon(it) 
+                        },
+                        accentColor = currentAccentColor
+                    )
+                }
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleSeasonalAppIcon(!seasonalAppIconEnabled)
             }
         )
         SettingsItem(

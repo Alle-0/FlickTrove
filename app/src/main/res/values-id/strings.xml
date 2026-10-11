@@ -1762,4 +1762,16 @@
     <string name="badge_trophy_hunter_cat">PENCAPAIAN SINEFIL</string>
     <string name="badge_trophy_hunter_desc">Penghargaan tertinggi bagi sang kolektor: taklukkan puncak sinemateka dengan membuka trofi aplikasi.</string>
     <string name="trophy_unit_trophies">trofi</string>
+
+    <string name="settings_seasonal_icon">Ikon Aplikasi Musiman</string>
+    <string name="settings_seasonal_icon_desc">Ikon bertema khusus untuk hari raya</string>
+    <string name="settings_msg_seasonal_icon">Ikon aplikasi musiman %1$s</string>
+    <string name="settings_seasonal_preview_title">Ikon Aplikasi</string>
+    <string name="settings_seasonal_preview_subtitle">Ikon klasik dan edisi festival musiman</string>
+    <string name="settings_seasonal_preview_classic">Bawaan</string>
+    <string name="settings_seasonal_preview_classic_desc">Sepanjang tahun</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 Okt – 5 Nov</string>
+    <string name="settings_seasonal_preview_active_now">AKTIF SEKARANG</string>
+    <string name="settings_seasonal_preview_upcoming">SEGERA HADIR</string>
 </resources>

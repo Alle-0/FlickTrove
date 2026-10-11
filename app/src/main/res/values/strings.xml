@@ -233,6 +233,16 @@
     <string name="settings_accent_color_desc">Customize the look of the app</string>
     <string name="settings_dynamic_icon">Dynamic App Icon</string>
     <string name="settings_dynamic_icon_desc">Changes the app icon on the home screen to match the accent color</string>
+    <string name="settings_seasonal_icon">Seasonal App Icon</string>
+    <string name="settings_seasonal_icon_desc">Special themed icons for holidays</string>
+    <string name="settings_seasonal_preview_title">App Icons</string>
+    <string name="settings_seasonal_preview_subtitle">Classic icon and seasonal festive editions</string>
+    <string name="settings_seasonal_preview_classic">Default</string>
+    <string name="settings_seasonal_preview_classic_desc">All year round</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">Oct 15 – Nov 5</string>
+    <string name="settings_seasonal_preview_active_now">ACTIVE NOW</string>
+    <string name="settings_seasonal_preview_upcoming">UPCOMING</string>
     <string name="settings_entry_animation">Entry Animation</string>
     <string name="settings_entry_animation_desc">Shows the logo animation when opening the app</string>
     <string name="settings_amoled_bg">AMOLED Background</string>
@@ -858,6 +868,7 @@
     <string name="settings_msg_notifications">Notifications %1$s</string>
     <string name="settings_msg_vibration">Vibration %1$s</string>
     <string name="settings_msg_dynamic_icon">Dynamic app icon %1$s</string>
+    <string name="settings_msg_seasonal_icon">Seasonal app icon %1$s</string>
     <string name="settings_msg_visual_fx">Advanced visual effects %1$s</string>
     <string name="settings_msg_img_quality">Image quality: %1$s</string>
     <string name="settings_msg_text_size">Text size: %1$s</string>

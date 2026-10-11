@@ -898,6 +898,7 @@ class MovieRepository @Inject constructor(
                 contentLanguage = remotePrefs["contentLanguage"] as? String ?: currentPrefs.contentLanguage,
                 advancedVisualEffectsEnabled = remotePrefs["advancedVisualEffectsEnabled"] as? Boolean ?: currentPrefs.advancedVisualEffectsEnabled,
                 dynamicAppIconEnabled = remotePrefs["dynamicAppIconEnabled"] as? Boolean ?: currentPrefs.dynamicAppIconEnabled,
+                seasonalAppIconEnabled = remotePrefs["seasonalAppIconEnabled"] as? Boolean ?: currentPrefs.seasonalAppIconEnabled,
                 showSplitReleasesHome = remotePrefs["showSplitReleasesHome"] as? Boolean ?: currentPrefs.showSplitReleasesHome,
                 showSplitDroppedHome = remotePrefs["showSplitDroppedHome"] as? Boolean ?: currentPrefs.showSplitDroppedHome,
                 showAppEntryAnimation = remotePrefs["showAppEntryAnimation"] as? Boolean ?: currentPrefs.showAppEntryAnimation,
@@ -948,6 +949,7 @@ class MovieRepository @Inject constructor(
                     "contentLanguage" to prefs.contentLanguage,
                     "advancedVisualEffectsEnabled" to prefs.advancedVisualEffectsEnabled,
                     "dynamicAppIconEnabled" to prefs.dynamicAppIconEnabled,
+                    "seasonalAppIconEnabled" to prefs.seasonalAppIconEnabled,
                     "showSplitReleasesHome" to prefs.showSplitReleasesHome,
                     "showSplitDroppedHome" to prefs.showSplitDroppedHome,
                     "showAppEntryAnimation" to prefs.showAppEntryAnimation,
@@ -1724,6 +1726,38 @@ class MovieRepository @Inject constructor(
                     }
                 }
             awaitClose { listener.remove() }
+        }
+    }
+
+    suspend fun autoReconcileGlobalRatingIfMissing(
+        movieId: Long,
+        mediaType: String,
+        globalStats: com.cinetrack.data.model.GlobalMovieStats?
+    ) {
+        val compositeId = "${mediaType}_${movieId}"
+        val localMovie = favoriteDao.getById(movieId, mediaType) ?: return
+        val rating = localMovie.personalRating
+        if (rating == null || rating <= 0.0) return
+
+        // Auto-reconcile ONLY if global stats currently has 0 votes (guaranteed zero double-count risk)
+        if (globalStats == null || globalStats.ratingCount == 0L) {
+            try {
+                firebaseRemoteDataSource.updateGlobalMovieStats(
+                    compositeId = compositeId,
+                    addedVibes = emptyList(),
+                    removedVibes = emptyList(),
+                    newMvp = null,
+                    oldMvp = null,
+                    newRating = rating,
+                    oldRating = null,
+                    newStatus = if (localMovie.watched) "watched" else null,
+                    oldStatus = null
+                )
+                android.util.Log.d("MovieRepository", "Auto-reconciled global rating ($rating) for $compositeId")
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
+                android.util.Log.e("MovieRepository", "Auto-reconcile global rating failed for $compositeId", e)
+            }
         }
     }
     // --- Watch History (Delegated to WatchHistoryRepository) ---

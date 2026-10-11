@@ -210,6 +210,7 @@ class MovieDetailViewModel @Inject constructor(
         private set
     var mediaType: String = "movie"
         private set
+    private var hasAttemptedGlobalReconcile = false
 
     fun initMovie(id: Long, type: String) {
         if (movieId == 0L && id != 0L) {
@@ -227,10 +228,14 @@ class MovieDetailViewModel @Inject constructor(
                 fetchFromTMDB(movieId, mediaType == "tv")
             }
             
-            // Listen to global stats
+            // Listen to global stats & auto-reconcile personal vote if movie has 0 global votes
             viewModelScope.launch {
                 repository.getGlobalMovieStatsFlow(movieId, mediaType).collect { stats ->
                     _globalStats.value = stats
+                    if (!hasAttemptedGlobalReconcile && (stats == null || stats.ratingCount == 0L)) {
+                        hasAttemptedGlobalReconcile = true
+                        repository.autoReconcileGlobalRatingIfMissing(movieId, mediaType, stats)
+                    }
                 }
             }
 

@@ -1757,5 +1757,17 @@
     <string name="badge_trophy_hunter_cat">СИНЕФИЛЬСКИЕ ДОСТИЖЕНИЯ</string>
     <string name="badge_trophy_hunter_desc">Главное признание коллекционера: покоряйте вершины синематеки, открывая трофеи приложения.</string>
     <string name="trophy_unit_trophies">трофеев</string>
+
+    <string name="settings_seasonal_icon">Сезонная иконка приложения</string>
+    <string name="settings_seasonal_icon_desc">Тематические иконки к праздникам</string>
+    <string name="settings_msg_seasonal_icon">Сезонная иконка %1$s</string>
+    <string name="settings_seasonal_preview_title">Иконки приложения</string>
+    <string name="settings_seasonal_preview_subtitle">Классическая иконка и праздничные сезонные версии</string>
+    <string name="settings_seasonal_preview_classic">По умолчанию</string>
+    <string name="settings_seasonal_preview_classic_desc">Круглый год</string>
+    <string name="settings_seasonal_preview_halloween">Хэллоуин</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 окт. – 5 нояб.</string>
+    <string name="settings_seasonal_preview_active_now">АКТИВНО СЕЙЧАС</string>
+    <string name="settings_seasonal_preview_upcoming">СКОРО</string>
 </resources>
 

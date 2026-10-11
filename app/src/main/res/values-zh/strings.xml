@@ -1763,4 +1763,16 @@
     <string name="badge_trophy_hunter_cat">影迷里程碑</string>
     <string name="badge_trophy_hunter_desc">收藏家的终极荣耀：解锁应用中的奖杯，登上电影殿堂的巅峰。</string>
     <string name="trophy_unit_trophies">个奖杯</string>
+
+    <string name="settings_seasonal_icon">季节性应用图标</string>
+    <string name="settings_seasonal_icon_desc">节日专属的主题图标</string>
+    <string name="settings_msg_seasonal_icon">季节性应用图标 %1$s</string>
+    <string name="settings_seasonal_preview_title">应用图标</string>
+    <string name="settings_seasonal_preview_subtitle">经典图标与季节性节日限定版</string>
+    <string name="settings_seasonal_preview_classic">默认</string>
+    <string name="settings_seasonal_preview_classic_desc">全年使用</string>
+    <string name="settings_seasonal_preview_halloween">万圣节</string>
+    <string name="settings_seasonal_preview_halloween_desc">10月15日 – 11月5日</string>
+    <string name="settings_seasonal_preview_active_now">当前生效</string>
+    <string name="settings_seasonal_preview_upcoming">即将到来</string>
 </resources>

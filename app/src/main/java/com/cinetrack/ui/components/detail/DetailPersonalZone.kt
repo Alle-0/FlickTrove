@@ -135,6 +135,8 @@ fun DetailPersonalZone(
         ) {
             val flickTroveRating = if (globalStats != null && globalStats.ratingCount > 0) {
                 globalStats.totalRating / globalStats.ratingCount
+            } else if (previewRating > 0) {
+                previewRating
             } else {
                 null
             }

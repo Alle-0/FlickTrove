@@ -23,6 +23,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharedFlow
 import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
@@ -54,6 +55,31 @@ sealed interface TrophyUnlockBannerEvent {
     data class InitialBootstrapSummary(
         val unlockedCount: Int
     ) : TrophyUnlockBannerEvent
+}
+
+/**
+ * Modello notifiche trofei per la schermata Updates (Notifiche / Aggiornamenti).
+ */
+sealed interface TrophyUpdateNotification {
+    val key: String
+
+    data class BootstrapSummary(
+        val unlockedCount: Int
+    ) : TrophyUpdateNotification {
+        override val key: String get() = "trophy_bootstrap_summary"
+    }
+
+    data class SingleTrophy(
+        val badgeId: String,
+        val title: String,
+        val tier: PreviewBadgeTier,
+        val category: BadgeTypeCategory,
+        val iconKind: CustomBadgeIconKind,
+        val subtitle: String,
+        val isFirstUnlock: Boolean
+    ) : TrophyUpdateNotification {
+        override val key: String get() = "trophy_single_$badgeId"
+    }
 }
 
 typealias BadgeTierUnlockedEvent = TrophyUnlockBannerEvent.SingleBadge
@@ -135,6 +161,85 @@ class BadgeRepository @Inject constructor(
     private val _unlockedTierEvents = MutableSharedFlow<TrophyUnlockBannerEvent>(extraBufferCapacity = 16)
     val unlockedTierEvents: SharedFlow<TrophyUnlockBannerEvent> = _unlockedTierEvents.asSharedFlow()
 
+    private val _trophyNotificationsTrigger = MutableStateFlow(0)
+
+    private fun recordPendingTrophyNotification(badgeId: String) {
+        val currentSet = badgePrefs.getStringSet("pending_trophy_badge_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (currentSet.add(badgeId)) {
+            badgePrefs.edit().putStringSet("pending_trophy_badge_ids", currentSet).apply()
+            _trophyNotificationsTrigger.value++
+        }
+    }
+
+    fun dismissTrophyBootstrapNotification() {
+        badgePrefs.edit().putBoolean("is_trophy_bootstrap_acknowledged", true).apply()
+        _trophyNotificationsTrigger.value++
+    }
+
+    fun dismissTrophyNotification(badgeId: String) {
+        val currentSet = badgePrefs.getStringSet("pending_trophy_badge_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
+        currentSet.remove(badgeId)
+        badgePrefs.edit().putStringSet("pending_trophy_badge_ids", currentSet).apply()
+        _trophyNotificationsTrigger.value++
+    }
+
+    fun dismissAllTrophyNotifications() {
+        badgePrefs.edit()
+            .putBoolean("is_trophy_bootstrap_acknowledged", true)
+            .putStringSet("pending_trophy_badge_ids", emptySet())
+            .apply()
+        _trophyNotificationsTrigger.value++
+    }
+
+    /**
+     * Flusso reattivo delle notifiche trofeo per la schermata Updates (Opzione B):
+     * 1. Bootstrap storico: 1 singola card riassuntiva ("X trofei sbloccati") se non ancora convalidata.
+     * 2. Sblocchi in tempo reale successivi: card singola per ogni nuovo trofeo conquistato.
+     */
+    fun getTrophyNotificationsFlow(): Flow<List<TrophyUpdateNotification>> {
+        return combine(
+            badgeDao.getAllUserBadgesFlow(),
+            _trophyNotificationsTrigger
+        ) { userBadges, _ ->
+            val result = mutableListOf<TrophyUpdateNotification>()
+            val isBootstrapAcknowledged = badgePrefs.getBoolean("is_trophy_bootstrap_acknowledged", false)
+            val unlockedBadges = userBadges.filter { it.isUnlocked }
+
+            // 1. Bootstrap Summary: se non ancora confermato ed esistono badge conquistati
+            if (!isBootstrapAcknowledged && unlockedBadges.isNotEmpty()) {
+                result.add(TrophyUpdateNotification.BootstrapSummary(unlockedCount = unlockedBadges.size))
+            }
+
+            // 2. Notifiche singole per sblocchi successivi in tempo reale
+            val pendingIds = badgePrefs.getStringSet("pending_trophy_badge_ids", emptySet()) ?: emptySet()
+            if (pendingIds.isNotEmpty()) {
+                val userBadgeMap = userBadges.associateBy { it.badgeId }
+                for (id in pendingIds) {
+                    val catalogItem = OFFICIAL_TROPHY_ROOM_CATALOG.firstOrNull { it.badge.id == id } ?: continue
+                    val badge = catalogItem.badge
+                    val userEntity = userBadgeMap[id]
+                    val tier = userEntity?.let { parseTierSafe(it.currentTier, badge.fixedTier ?: badge.initialProgressiveTier) }
+                        ?: badge.fixedTier ?: badge.initialProgressiveTier
+                    val stepPhrase = badge.progressiveSteps[tier]?.milestonePhrase ?: badge.defaultDescription
+
+                    result.add(
+                        TrophyUpdateNotification.SingleTrophy(
+                            badgeId = badge.id,
+                            title = badge.title,
+                            tier = tier,
+                            category = badge.category,
+                            iconKind = badge.iconKind,
+                            subtitle = stepPhrase,
+                            isFirstUnlock = userEntity?.currentTier == badge.initialProgressiveTier.name
+                        )
+                    )
+                }
+            }
+
+            result
+        }.flowOn(Dispatchers.Default)
+    }
+
     fun triggerTestUnlockBanner(
         badgeId: String = "badge_movies",
         tier: PreviewBadgeTier = PreviewBadgeTier.MM_70
@@ -153,6 +258,7 @@ class BadgeRepository @Inject constructor(
             isFirstUnlock = false
         )
         _unlockedTierEvents.tryEmit(event)
+        recordPendingTrophyNotification(badgeId)
     }
 
     fun recordSurpriseMeDiscovered(movieId: Long) {
@@ -395,6 +501,7 @@ class BadgeRepository @Inject constructor(
                         isFirstUnlock = newlyUnlocked
                     )
                 )
+                recordPendingTrophyNotification(badge.id)
             }
         }
 
@@ -451,6 +558,7 @@ class BadgeRepository @Inject constructor(
                         isFirstUnlock = newlyUnlocked
                     )
                 )
+                recordPendingTrophyNotification(badge.id)
             }
         }
 

@@ -437,6 +437,8 @@ fun SettingsScreenContent(
         }
     }
     val dynamicAppIconEnabled by settingsViewModel.dynamicAppIconEnabled.collectAsStateWithLifecycle()
+    val seasonalAppIconEnabled by settingsViewModel.seasonalAppIconEnabled.collectAsStateWithLifecycle()
+    var showSeasonalIconsDialog by remember { mutableStateOf(false) }
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
@@ -534,7 +536,7 @@ fun SettingsScreenContent(
     var duplicateRewatchesCount by remember { mutableIntStateOf(0) }
     var isCleaningUpRewatches by remember { mutableStateOf(false) }
 
-    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
+    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showSeasonalIconsDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
                            showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || isBackupLoading || showCleanupRewatchesDialog ||
                            showDeepSyncConfirm || showUnmatchedItemsModal || showBlockedUsersModal || showDashboardSettings || showHomeSectionsDialog
@@ -544,6 +546,7 @@ fun SettingsScreenContent(
         showDeleteDialog = false
         showReauthDialog = false
         showColorDialog = false
+        showSeasonalIconsDialog = false
         showLanguageDialog = false
         showStartScreenDialog = false
         showFeedbackDialog = false
@@ -594,6 +597,7 @@ fun SettingsScreenContent(
             showDeleteDialog = false
             showReauthDialog = false
             showColorDialog = false
+            showSeasonalIconsDialog = false
             showLanguageDialog = false
             showStartScreenDialog = false
             showFeedbackDialog = false
@@ -759,7 +763,8 @@ fun SettingsScreenContent(
                             settingsViewModel = settingsViewModel,
                             currentAccentColor = currentAccentColor,
                             vibrationEnabled = vibrationEnabled,
-                            onShowColorDialog = { showColorDialog = true }
+                            onShowColorDialog = { showColorDialog = true },
+                            onShowSeasonalIconsDialog = { showSeasonalIconsDialog = true }
                         )
                     }
 
@@ -1030,6 +1035,13 @@ fun SettingsScreenContent(
                     settingsViewModel.updateAccentColor(colorName, origin)
                 }
             }
+        )
+
+        SeasonalIconsPreviewDialog(
+            visible = showSeasonalIconsDialog,
+            activeHazeState = activeHazeState,
+            seasonalAppIconEnabled = seasonalAppIconEnabled,
+            onDismiss = { showSeasonalIconsDialog = false }
         )
 
         val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()

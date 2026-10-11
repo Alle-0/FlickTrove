@@ -1755,6 +1755,18 @@
     <string name="badge_trophy_hunter_cat">CONQUISTAS CINÉFILAS</string>
     <string name="badge_trophy_hunter_desc">A consagração definitiva do colecionador: escale o topo da cinemateca desbloqueando os troféus do aplicativo.</string>
     <string name="trophy_unit_trophies">troféus</string>
+
+    <string name="settings_seasonal_icon">Ícone Sazonal do Aplicativo</string>
+    <string name="settings_seasonal_icon_desc">Ícones temáticos para feriados e datas especiais</string>
+    <string name="settings_msg_seasonal_icon">Ícone sazonal do app %1$s</string>
+    <string name="settings_seasonal_preview_title">Ícones do Aplicativo</string>
+    <string name="settings_seasonal_preview_subtitle">Ícone clássico e edições festivas sazonais</string>
+    <string name="settings_seasonal_preview_classic">Padrão</string>
+    <string name="settings_seasonal_preview_classic_desc">O ano todo</string>
+    <string name="settings_seasonal_preview_halloween">Halloween</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 Out – 5 Nov</string>
+    <string name="settings_seasonal_preview_active_now">ATIVO AGORA</string>
+    <string name="settings_seasonal_preview_upcoming">EM BREVE</string>
 </resources>
 
 

@@ -1755,6 +1755,18 @@
     <string name="badge_trophy_hunter_cat">सिनेप्रेमी मील के पत्थर</string>
     <string name="badge_trophy_hunter_desc">संग्रहकर्ता का अंतिम सम्मान: ऐप की ट्रॉफियों को अनलॉक करके सिनेमा के शिखर पर पहुंचें।</string>
     <string name="trophy_unit_trophies">ट्रॉफियां</string>
+
+    <string name="settings_seasonal_icon">मौसमी ऐप आइकन</string>
+    <string name="settings_seasonal_icon_desc">त्योहारों के लिए विशेष थीम वाले आइकन</string>
+    <string name="settings_msg_seasonal_icon">मौसमी ऐप आइकन %1$s</string>
+    <string name="settings_seasonal_preview_title">ऐप आइकन</string>
+    <string name="settings_seasonal_preview_subtitle">क्लासिक आइकन और मौसमी उत्सव संस्करण</string>
+    <string name="settings_seasonal_preview_classic">डिफ़ॉल्ट</string>
+    <string name="settings_seasonal_preview_classic_desc">पूरे साल</string>
+    <string name="settings_seasonal_preview_halloween">हेलोवीन</string>
+    <string name="settings_seasonal_preview_halloween_desc">15 अक्टूबर – 5 नवंबर</string>
+    <string name="settings_seasonal_preview_active_now">अभी सक्रिय</string>
+    <string name="settings_seasonal_preview_upcoming">जल्द आ रहा है</string>
 </resources>
 
 

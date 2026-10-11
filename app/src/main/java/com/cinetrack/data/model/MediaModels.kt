@@ -124,6 +124,7 @@ data class UserPreferences(
     val contentLanguage: String = "system",
     val advancedVisualEffectsEnabled: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
+    val seasonalAppIconEnabled: Boolean = true,
     val showSplitReleasesHome: Boolean = true,
     val showSplitDroppedHome: Boolean = false,
     val showAppEntryAnimation: Boolean = true,
