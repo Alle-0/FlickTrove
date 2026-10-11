@@ -1419,8 +1419,7 @@ fun TrophyRoomScreenContent(
     paddingValues: PaddingValues = PaddingValues(),
     hazeState: HazeState? = null,
     isFilterModalOpenExternal: Boolean = false,
-    onFilterModalOpenExternalChange: (Boolean) -> Unit = {},
-    onTestBannerClick: (() -> Unit)? = null
+    onFilterModalOpenExternalChange: (Boolean) -> Unit = {}
 ) {
     val localHaze = hazeState ?: remember { HazeState() }
     val gridState = rememberLazyGridState()
@@ -1526,7 +1525,7 @@ fun TrophyRoomScreenContent(
     val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     val effectiveTopInset = maxOf(statusBarTop, cutoutTop)
     val topPadding = if (paddingValues.calculateTopPadding() > 0.dp) paddingValues.calculateTopPadding() else effectiveTopInset + 10.dp + 46.dp + 22.dp
-    val bottomPadding = if (paddingValues.calculateBottomPadding() > 0.dp) paddingValues.calculateBottomPadding() + 24.dp else 110.dp
+    val bottomPadding = if (paddingValues.calculateBottomPadding() > 0.dp) paddingValues.calculateBottomPadding() + 160.dp else 240.dp
 
     Box(modifier = Modifier.fillMaxSize()) {
         val hazeState = localHaze
@@ -1555,8 +1554,7 @@ fun TrophyRoomScreenContent(
                     unlockedCount = unlockedCount,
                     totalCount = totalCount,
                     completionFraction = completionFraction,
-                    tierCounts = unlockedTierCounts,
-                    onTestBannerClick = onTestBannerClick
+                    tierCounts = unlockedTierCounts
                 )
             }
 
@@ -1637,7 +1635,6 @@ private fun TrophyStatsSummaryCard(
     totalCount: Int,
     completionFraction: Float,
     tierCounts: Map<PreviewBadgeTier, Int> = emptyMap(),
-    onTestBannerClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -1650,50 +1647,16 @@ private fun TrophyStatsSummaryCard(
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp, vertical = 14.dp)
         ) {
-            // Header: solo titolo sezione pulito con eventuale trigger test notifica
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = stringResource(R.string.trophy_palmares_title),
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontSize = 9.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = 1.5.sp
-                    ),
-                    color = NeonTeal
-                )
-
-                if (onTestBannerClick != null) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(5.dp),
-                        modifier = Modifier
-                            .bounceClick { onTestBannerClick() }
-                            .clip(CircleShape)
-                            .background(Color(0xFFFBBF24).copy(alpha = 0.12f))
-                            .border(1.dp, Color(0xFFFBBF24).copy(alpha = 0.50f), CircleShape)
-                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_trophy),
-                            contentDescription = null,
-                            tint = Color(0xFFFBBF24),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = "Test Notifica",
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Bold
-                            ),
-                            color = Color(0xFFFBBF24)
-                        )
-                    }
-                }
-            }
+            // Header: solo titolo sezione pulito
+            Text(
+                text = stringResource(R.string.trophy_palmares_title),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 1.5.sp
+                ),
+                color = NeonTeal
+            )
 
             Spacer(modifier = Modifier.height(12.dp))
 

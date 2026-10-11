@@ -57,8 +57,7 @@ object TrophyRoomTab : Tab {
         TrophyRoomScreenContent(
             trophyItems = trophyItems,
             paddingValues = paddingValues,
-            hazeState = hazeState,
-            onTestBannerClick = { viewModel.triggerTestUnlockBanner() }
+            hazeState = hazeState
         )
     }
 }
@@ -90,8 +89,7 @@ class TrophyRoomScreen : Screen {
         TrophyRoomScreenContent(
             trophyItems = trophyItems,
             paddingValues = paddingValues,
-            hazeState = hazeState,
-            onTestBannerClick = { viewModel.triggerTestUnlockBanner() }
+            hazeState = hazeState
         )
     }
 }
