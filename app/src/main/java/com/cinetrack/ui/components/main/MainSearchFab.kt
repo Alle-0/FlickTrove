@@ -124,12 +124,27 @@ fun BoxScope.MainScrollToTopFab(
         ) + fadeOut(animationSpec = tween(200)),
         modifier = Modifier
             .align(Alignment.BottomEnd)
-            .padding(end = 28.dp, bottom = 152.dp)
+            .padding(end = 29.dp, bottom = 152.dp)
             .zIndex(60f)
     ) {
         Box(
             modifier = Modifier
-                .size(40.dp)
+                .size(34.dp)
+                .bounceClick(scaleDown = 0.85f) {
+                    coroutineScope.launch {
+                        try {
+                            arrowOffsetY.animateTo(-12f, tween(110, easing = FastOutLinearInEasing))
+                            arrowAlpha.snapTo(0f)
+                            arrowOffsetY.snapTo(12f)
+                            arrowAlpha.animateTo(1f, tween(80))
+                            arrowOffsetY.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                        } finally {
+                            arrowOffsetY.snapTo(0f)
+                            arrowAlpha.snapTo(1f)
+                        }
+                    }
+                    onScrollToTop()
+                }
                 .clip(CircleShape)
                 .hazeGlass(
                     state = contentHazeState,
@@ -139,22 +154,7 @@ fun BoxScope.MainScrollToTopFab(
                     1.dp,
                     HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                     CircleShape
-                )
-                .bounceClick(scaleDown = 0.85f) {
-                    coroutineScope.launch {
-                        try {
-                            arrowOffsetY.animateTo(-14f, tween(110, easing = FastOutLinearInEasing))
-                            arrowAlpha.snapTo(0f)
-                            arrowOffsetY.snapTo(14f)
-                            arrowAlpha.animateTo(1f, tween(80))
-                            arrowOffsetY.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-                        } finally {
-                            arrowOffsetY.snapTo(0f)
-                            arrowAlpha.snapTo(1f)
-                        }
-                    }
-                    onScrollToTop()
-                },
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -162,7 +162,7 @@ fun BoxScope.MainScrollToTopFab(
                 contentDescription = stringResource(R.string.main_cd_scroll_to_top),
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
-                    .size(22.dp)
+                    .size(20.dp)
                     .offset(y = arrowOffsetY.value.dp)
                     .alpha(arrowAlpha.value)
                     .rotate(-90f)
