@@ -541,7 +541,7 @@ fun SeriesStatusInfoDialog(
                         desc = stringResource(R.string.filter_sort_status_desc_caught_up)
                     ),
                     SeriesStatusLegendEntry(
-                        iconRes = R.drawable.ic_drop_arrow_down,
+                        iconRes = R.drawable.ic_packing,
                         tintColor = Color(0xFFEF4444), // Coral Red
                         title = stringResource(R.string.filter_status_dropped),
                         desc = stringResource(R.string.filter_sort_status_desc_dropped)
