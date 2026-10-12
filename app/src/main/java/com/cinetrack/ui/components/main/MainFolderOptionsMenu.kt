@@ -52,8 +52,7 @@ fun MainFolderOptionsMenu(
     offset: Offset,
     hazeState: HazeState,
     onDismiss: () -> Unit,
-    onRename: () -> Unit,
-    onChangeColor: () -> Unit,
+    onEdit: () -> Unit,
     onReorder: () -> Unit,
     onDelete: () -> Unit
 ) {
@@ -90,7 +89,7 @@ fun MainFolderOptionsMenu(
                         .fillMaxWidth()
                         .bounceClick {
                             onDismiss()
-                            onRename()
+                            onEdit()
                         }
                         .padding(horizontal = 16.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically
@@ -103,31 +102,7 @@ fun MainFolderOptionsMenu(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        stringResource(R.string.main_folder_rename),
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                    )
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .bounceClick {
-                            onDismiss()
-                            onChangeColor()
-                        }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        ImageVector.vectorResource(id = R.drawable.ic_palette),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        stringResource(R.string.main_folder_change_color),
+                        stringResource(R.string.folder_edit_info),
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )

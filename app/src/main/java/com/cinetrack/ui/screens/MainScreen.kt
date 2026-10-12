@@ -437,14 +437,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 offset = folderOptionsOffset,
                                 hazeState = contentHazeState,
                                 onDismiss = { showFolderOptions = false },
-                                onRename = {
+                                onEdit = {
                                     showFolderOptions = false
-                                    folderEditMode = FolderEditMode.NAME
-                                    showFolderEditDialog = true
-                                },
-                                onChangeColor = {
-                                    showFolderOptions = false
-                                    folderEditMode = FolderEditMode.COLOR
+                                    folderEditMode = FolderEditMode.ALL
                                     showFolderEditDialog = true
                                 },
                                 onReorder = {
