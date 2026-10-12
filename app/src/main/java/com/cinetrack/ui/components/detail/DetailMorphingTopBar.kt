@@ -540,7 +540,7 @@ fun DetailMorphingTopBar(
                                     successState.folders.find { it.id == folderId }?.itemIds?.contains(itemId) ?: false
                                 },
                                 onToggleItem = { folder -> viewModel.onEvent(DetailEvent.ToggleFolderMembership(folder)) },
-                                onCreateFolder = { name: String, color: String -> viewModel.onEvent(DetailEvent.CreateFolder(name, color)) },
+                                onCreateFolder = { name: String, color: String, desc: String? -> viewModel.onEvent(DetailEvent.CreateFolder(name, color, desc)) },
                                 onClose = { onFolderPickerChange(false) },
                                 modifier = Modifier.fillMaxSize()
                             )

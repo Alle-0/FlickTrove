@@ -751,8 +751,11 @@
     <string name="folder_item_count">%1$d items</string>
     <string name="folder_new_name">New Folder</string>
     <string name="folder_edit_rename">Rename Folder</string>
+    <string name="folder_edit_info">Edit Folder</string>
     <string name="folder_edit_color">Change Color</string>
     <string name="folder_edit_name_hint">Folder name</string>
+    <string name="folder_edit_description_hint">Description (optional)</string>
+    <string name="folders_description_placeholder">Description (optional)</string>
     <string name="folder_delete_title">Delete Folder?</string>
     <string name="folder_delete_confirm_prefix">Are you sure you want to delete </string>
     <string name="folder_delete_confirm_prefix_2">Are you sure you want to delete the folder </string>

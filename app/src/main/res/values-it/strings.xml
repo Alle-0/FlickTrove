@@ -704,8 +704,11 @@
     <string name="folder_item_count">%1$d elementi</string>
     <string name="folder_new_name">Nuova Cartella</string>
     <string name="folder_edit_rename">Rinomina Cartella</string>
+    <string name="folder_edit_info">Modifica Cartella</string>
     <string name="folder_edit_color">Cambia Colore</string>
     <string name="folder_edit_name_hint">Nome cartella</string>
+    <string name="folder_edit_description_hint">Descrizione (opzionale)</string>
+    <string name="folders_description_placeholder">Descrizione (opzionale)</string>
     <string name="folder_delete_title">Elimina Cartella?</string>
     <string name="folder_delete_confirm_prefix">Sei sicuro di voler eliminare </string>
     <string name="folder_delete_confirm_prefix_2">Sei sicuro di voler eliminare la cartella </string>

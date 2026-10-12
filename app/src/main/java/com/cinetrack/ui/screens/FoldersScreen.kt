@@ -145,7 +145,7 @@ fun FoldersScreenContent(
     var isCreateDialogOpen by remember { mutableStateOf(false) }
     var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
     var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
-    var folderEditMode by remember { mutableStateOf(FolderEditMode.NAME) }
+    var folderEditMode by remember { mutableStateOf(FolderEditMode.ALL) }
     
     var activeMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
     var activeMenuBounds by remember { mutableStateOf(Rect.Zero) }
@@ -499,8 +499,8 @@ fun FoldersScreenContent(
     if (isCreateDialogOpen) {
         FolderCreateDialog(
             onDismiss = { isCreateDialogOpen = false },
-            onCreate = { name, icon, color ->
-                viewModel.createFolder(name, icon, color)
+            onCreate = { name, icon, color, description ->
+                viewModel.createFolder(name, icon, color, description ?: "")
                 isCreateDialogOpen = false
             },
             hazeState = hazeState
@@ -523,10 +523,11 @@ fun FoldersScreenContent(
         FolderEditDialog(
             initialName = folder.name,
             initialColor = folder.color ?: "#FFFFFF",
+            initialDescription = folder.description,
             editMode = folderEditMode,
             onDismiss = { folderToEdit = null },
-            onSave = { newName, newColor ->
-                viewModel.updateFolder(folder.copy(name = newName, color = newColor))
+            onSave = { newName, newColor, newDesc ->
+                viewModel.updateFolder(folder.copy(name = newName, color = newColor, description = newDesc))
                 folderToEdit = null
             },
             hazeState = hazeState
@@ -586,7 +587,7 @@ fun FoldersScreenContent(
                             .fillMaxWidth()
                             .bounceClick { 
                                 activeMenuFolder = null
-                                folderEditMode = FolderEditMode.NAME
+                                folderEditMode = FolderEditMode.ALL
                                 folderToEdit = folder
                             }
                             .padding(horizontal = 16.dp, vertical = 14.dp),
@@ -594,22 +595,7 @@ fun FoldersScreenContent(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text(stringResource(R.string.folders_rename), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
-                    }
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .bounceClick { 
-                                activeMenuFolder = null
-                                folderEditMode = FolderEditMode.COLOR
-                                folderToEdit = folder
-                            }
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_palette), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(12.dp))
-                        Text(stringResource(R.string.folders_change_color), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                        Text(stringResource(R.string.folder_edit_info), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                     }
                     Row(
                         modifier = Modifier
@@ -757,7 +743,16 @@ fun FolderCard(
                     ""
                 }
             }
-            if (formattedDate.isNotEmpty()) {
+            if (!folder.description.isNullOrBlank()) {
+                Spacer(Modifier.height(3.dp))
+                Text(
+                    text = folder.description,
+                    style = MaterialTheme.typography.bodySmall,
+                    color = Color.White.copy(alpha = 0.65f),
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                )
+            } else if (formattedDate.isNotEmpty()) {
                 Spacer(Modifier.height(3.dp))
                 Text(
                     text = formattedDate,
@@ -850,16 +845,17 @@ fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgr
 @Composable
 fun FolderCreateDialog(
     onDismiss: () -> Unit,
-    onCreate: (String, String, String) -> Unit,
+    onCreate: (String, String, String, String?) -> Unit,
     hazeState: HazeState? = null
 ) {
     var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("#6366F1") }
     val focusManager = LocalFocusManager.current
     val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     var isDismissing by remember { mutableStateOf(false) }
     var isVisible by remember { mutableStateOf(false) }
-    var pendingCreate by remember { mutableStateOf<Triple<String, String, String>?>(null) }
+    var pendingCreate by remember { mutableStateOf<Triple<String, String, Pair<String, String?>>?>(null) }
     
     LaunchedEffect(Unit) { isVisible = true }
     LaunchedEffect(isDismissing) {
@@ -867,7 +863,7 @@ fun FolderCreateDialog(
             isVisible = false
             kotlinx.coroutines.delay(250)
             if (pendingCreate != null) {
-                onCreate(pendingCreate!!.first, pendingCreate!!.second, pendingCreate!!.third)
+                onCreate(pendingCreate!!.first, pendingCreate!!.second, pendingCreate!!.third.first, pendingCreate!!.third.second)
             } else {
                 onDismiss()
             }
@@ -959,6 +955,33 @@ fun FolderCreateDialog(
                     modifier = Modifier.fillMaxWidth(),
                     textAlign = androidx.compose.ui.text.style.TextAlign.End
                 )
+
+                Spacer(Modifier.height(16.dp))
+
+                OutlinedTextField(
+                    value = description,
+                    onValueChange = { if (it.length <= 250) description = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    label = { Text(stringResource(R.string.folders_description_placeholder), color = Color.White.copy(alpha = 0.5f)) },
+                    shape = RoundedCornerShape(16.dp),
+                    colors = OutlinedTextFieldDefaults.colors(
+                        focusedTextColor = Color.White,
+                        unfocusedTextColor = Color.White,
+                        focusedBorderColor = Color.White,
+                        unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                        cursorColor = Color.White
+                    ),
+                    minLines = 2,
+                    maxLines = 4
+                )
+                Spacer(Modifier.height(4.dp))
+                Text(
+                    text = "${description.length}/250",
+                    style = MaterialTheme.typography.labelSmall,
+                    color = if (description.length >= 230) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                    modifier = Modifier.fillMaxWidth(),
+                    textAlign = androidx.compose.ui.text.style.TextAlign.End
+                )
                 
                 Spacer(Modifier.height(24.dp))
                 
@@ -974,7 +997,7 @@ fun FolderCreateDialog(
                         .fillMaxWidth()
                         .height(56.dp)
                         .bounceClick(enabled = name.isNotBlank()) {
-                            pendingCreate = Triple(name, "folder", selectedColor)
+                            pendingCreate = Triple(name, "folder", Pair(selectedColor, description.trim().ifEmpty { null }))
                             isDismissing = true
                         }
                         .clip(RoundedCornerShape(16.dp))

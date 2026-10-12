@@ -666,8 +666,11 @@
     <string name="folder_item_count">%1$d आइटम</string>
     <string name="folder_new_name">नया फ़ोल्डर</string>
     <string name="folder_edit_rename">फ़ोल्डर का नाम बदलें</string>
+    <string name="folder_edit_info">फ़ोल्डर संपादित करें</string>
     <string name="folder_edit_color">रंग बदलें</string>
     <string name="folder_edit_name_hint">फ़ोल्डर का नाम</string>
+    <string name="folder_edit_description_hint">विवरण (वैकल्पिक)</string>
+    <string name="folders_description_placeholder">विवरण (वैकल्पिक)</string>
     <string name="folder_delete_title">फ़ोल्डर हटाएँ?</string>
     <string name="folder_delete_confirm_prefix">क्या आप वाकई हटाना चाहते हैं </string>
     <string name="folder_delete_confirm_prefix_2">क्या आप वाकई फ़ोल्डर हटाना चाहते हैं </string>

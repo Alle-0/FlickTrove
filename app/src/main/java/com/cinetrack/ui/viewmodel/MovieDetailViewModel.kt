@@ -623,7 +623,7 @@ class MovieDetailViewModel @Inject constructor(
             is DetailEvent.SyncWatchedEpisodes -> syncWatchedEpisodes(event.episodes)
             DetailEvent.DeleteMovie -> deleteMovie()
             is DetailEvent.ToggleFolderMembership -> toggleFolderMembership(event.folder)
-            is DetailEvent.CreateFolder -> createFolder(event.name, event.color)
+            is DetailEvent.CreateFolder -> createFolder(event.name, event.color, event.description)
             is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
             is DetailEvent.SaveCheckIn -> saveCheckIn(event.rating, event.vibes, event.mvpActor, event.characterImageUrl)
             is DetailEvent.ToggleCommentLike -> toggleCommentLike(event.commentId)
@@ -782,13 +782,14 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun createFolder(name: String, color: String) {
+    private fun createFolder(name: String, color: String, description: String? = null) {
         val itemId = "${mediaType}_${movieId}"
         val newFolder = FolderEntity(
             id = UUID.randomUUID().toString(),
             name = name,
             icon = "folder",
             color = color,
+            description = description?.trim()?.ifEmpty { null },
             itemIds = listOf(itemId),
             createdAt = Instant.now().toString(),
             updatedAt = Instant.now().toString()

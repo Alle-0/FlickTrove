@@ -392,7 +392,7 @@ class FolderDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateFolderDetails(newName: String, newColor: String) {
+    fun updateFolderDetails(newName: String, newColor: String, newDescription: String? = null) {
         viewModelScope.launch {
             val currentState = uiState.value
             if (currentState is FolderDetailUiState.Success) {
@@ -400,6 +400,7 @@ class FolderDetailViewModel @Inject constructor(
                 repository.saveFolder(folder.copy(
                     name = newName,
                     color = newColor,
+                    description = newDescription ?: folder.description,
                     updatedAt = Instant.now().toString()
                 ))
             }

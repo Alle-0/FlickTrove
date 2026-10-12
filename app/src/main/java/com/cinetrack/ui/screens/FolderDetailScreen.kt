@@ -18,6 +18,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
@@ -308,8 +310,29 @@ fun FolderDetailScreenContent(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
+                                if (!state.folder.description.isNullOrBlank()) {
+                                    item(span = { GridItemSpan(maxLineSpan) }) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .padding(bottom = 6.dp)
+                                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                                                .background(Color.White.copy(alpha = 0.05f))
+                                                .border(0.5.dp, Color.White.copy(alpha = 0.1f), androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                                        ) {
+                                            Text(
+                                                text = state.folder.description,
+                                                style = MaterialTheme.typography.bodyMedium,
+                                                color = Color.White.copy(alpha = 0.75f),
+                                                lineHeight = 20.sp
+                                            )
+                                        }
+                                    }
+                                }
+
                                 if (state.movies.isEmpty()) {
-                                    item(span = { GridItemSpan(3) }) {
+                                    item(span = { GridItemSpan(maxLineSpan) }) {
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
@@ -404,11 +427,12 @@ fun FolderDetailScreenContent(
                                 com.cinetrack.ui.components.shared.FolderEditDialog(
                                     initialName = state.folder.name,
                                     initialColor = state.folder.color ?: "#FFFFFF",
+                                    initialDescription = state.folder.description,
                                     editMode = folderEditMode,
                                     onDismiss = { onShowEditDialogChange(false) },
-                                    onSave = { newName, newColor ->
+                                    onSave = { newName, newColor, newDesc ->
                                         onShowEditDialogChange(false)
-                                        viewModel.updateFolderDetails(newName, newColor)
+                                        viewModel.updateFolderDetails(newName, newColor, newDesc)
                                         onFolderUpdated(newName, newColor)
                                     },
                                     hazeState = externalHazeState

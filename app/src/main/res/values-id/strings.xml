@@ -739,8 +739,11 @@
     <string name="folder_item_count">%1$d item</string>
     <string name="folder_new_name">Folder Baru</string>
     <string name="folder_edit_rename">Ganti Nama Folder</string>
+    <string name="folder_edit_info">Edit Folder</string>
     <string name="folder_edit_color">Ubah Warna</string>
     <string name="folder_edit_name_hint">Nama folder</string>
+    <string name="folder_edit_description_hint">Deskripsi (opsional)</string>
+    <string name="folders_description_placeholder">Deskripsi (opsional)</string>
     <string name="folder_delete_title">Hapus Folder?</string>
     <string name="folder_delete_confirm_prefix">Apakah Anda yakin ingin menghapus </string>
     <string name="folder_delete_confirm_prefix_2">Apakah Anda yakin ingin menghapus folder </string>

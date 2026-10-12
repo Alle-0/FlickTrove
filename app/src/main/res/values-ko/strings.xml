@@ -739,8 +739,11 @@
     <string name="folder_item_count">%1$d개 항목</string>
     <string name="folder_new_name">새 폴더</string>
     <string name="folder_edit_rename">폴더 이름 변경</string>
+    <string name="folder_edit_info">폴더 편집</string>
     <string name="folder_edit_color">색상 변경</string>
     <string name="folder_edit_name_hint">폴더 이름</string>
+    <string name="folder_edit_description_hint">설명 (선택사항)</string>
+    <string name="folders_description_placeholder">설명 (선택사항)</string>
     <string name="folder_delete_title">폴더를 삭제하시겠습니까?</string>
     <string name="folder_delete_confirm_prefix">정말로 삭제하시겠습니까: </string>
     <string name="folder_delete_confirm_prefix_2">정말로 이 폴더를 삭제하시겠습니까: </string>

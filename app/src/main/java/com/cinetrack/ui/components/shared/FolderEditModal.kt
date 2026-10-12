@@ -32,25 +32,27 @@ import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.*
 import com.cinetrack.ui.utils.bounceClick
 
-enum class FolderEditMode { NAME, COLOR }
+enum class FolderEditMode { ALL, NAME, COLOR }
 
 @Composable
 fun FolderEditDialog(
     initialName: String,
     initialColor: String,
-    editMode: FolderEditMode = FolderEditMode.NAME,
+    initialDescription: String? = null,
+    editMode: FolderEditMode = FolderEditMode.ALL,
     onDismiss: () -> Unit,
-    onSave: (String, String) -> Unit,
+    onSave: (String, String, String?) -> Unit,
     hazeState: HazeState? = null
 ) {
     var name by remember { mutableStateOf(initialName) }
+    var description by remember { mutableStateOf(initialDescription ?: "") }
     var selectedColor by remember { mutableStateOf(initialColor) }
     val focusManager = LocalFocusManager.current
     val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     
     var isVisible by remember { mutableStateOf(false) }
     var isDismissing by remember { mutableStateOf(false) }
-    var pendingSave by remember { mutableStateOf<Pair<String, String>?>(null) }
+    var pendingSave by remember { mutableStateOf<Triple<String, String, String?>?>(null) }
     
     LaunchedEffect(Unit) { isVisible = true }
     
@@ -59,7 +61,7 @@ fun FolderEditDialog(
             isVisible = false
             kotlinx.coroutines.delay(250)
             if (pendingSave != null) {
-                onSave(pendingSave!!.first, pendingSave!!.second)
+                onSave(pendingSave!!.first, pendingSave!!.second, pendingSave!!.third)
             } else {
                 onDismiss()
             }
@@ -118,7 +120,7 @@ fun FolderEditDialog(
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = if (editMode == FolderEditMode.NAME) stringResource(R.string.folder_edit_rename) else stringResource(R.string.folder_edit_color),
+                            text = if (editMode == FolderEditMode.COLOR) stringResource(R.string.folder_edit_color) else stringResource(R.string.folder_edit_info),
                             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                             color = Color.White
                         )
@@ -128,7 +130,7 @@ fun FolderEditDialog(
                     }
                     Spacer(Modifier.height(24.dp))
                     
-                    if (editMode == FolderEditMode.NAME) {
+                    if (editMode == FolderEditMode.ALL || editMode == FolderEditMode.NAME) {
                         OutlinedTextField(
                             value = name,
                             onValueChange = { if (it.length <= 40) name = it },
@@ -152,9 +154,39 @@ fun FolderEditDialog(
                             modifier = Modifier.fillMaxWidth(),
                             textAlign = androidx.compose.ui.text.style.TextAlign.End
                         )
+
+                        Spacer(Modifier.height(16.dp))
+
+                        OutlinedTextField(
+                            value = description,
+                            onValueChange = { if (it.length <= 250) description = it },
+                            modifier = Modifier.fillMaxWidth(),
+                            label = { Text(stringResource(R.string.folder_edit_description_hint), color = Color.White.copy(alpha = 0.5f)) },
+                            shape = RoundedCornerShape(16.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                focusedBorderColor = Color.White,
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                cursorColor = Color.White
+                            ),
+                            minLines = 2,
+                            maxLines = 4
+                        )
+                        Spacer(Modifier.height(4.dp))
+                        Text(
+                            text = "${description.length}/250",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (description.length >= 230) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                            modifier = Modifier.fillMaxWidth(),
+                            textAlign = androidx.compose.ui.text.style.TextAlign.End
+                        )
                     }
                     
-                    if (editMode == FolderEditMode.COLOR) {
+                    if (editMode == FolderEditMode.ALL || editMode == FolderEditMode.COLOR) {
+                        if (editMode == FolderEditMode.ALL) {
+                            Spacer(Modifier.height(20.dp))
+                        }
                         FolderColorPicker(
                             selectedColor = selectedColor,
                             onColorSelected = { selectedColor = it }
@@ -163,13 +195,17 @@ fun FolderEditDialog(
                     
                     Spacer(Modifier.height(32.dp))
                     
-                    val isSaveEnabled = if (editMode == FolderEditMode.NAME) name.isNotBlank() && name != initialName else selectedColor != initialColor
+                    val isSaveEnabled = when (editMode) {
+                        FolderEditMode.ALL -> name.isNotBlank() && (name.trim() != initialName.trim() || description.trim() != (initialDescription ?: "").trim() || selectedColor != initialColor)
+                        FolderEditMode.NAME -> name.isNotBlank() && (name.trim() != initialName.trim() || description.trim() != (initialDescription ?: "").trim())
+                        FolderEditMode.COLOR -> selectedColor != initialColor
+                    }
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                             .bounceClick(enabled = isSaveEnabled) {
-                                pendingSave = Pair(name, selectedColor)
+                                pendingSave = Triple(name, selectedColor, description.trim().ifEmpty { null })
                                 isDismissing = true
                             }
                             .clip(RoundedCornerShape(16.dp))

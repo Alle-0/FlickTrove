@@ -168,11 +168,12 @@ fun MainGlobalDialogs(
             FolderEditDialog(
                 initialName = folder.name,
                 initialColor = folder.color ?: "#FFFFFF",
+                initialDescription = folder.description,
                 editMode = folderEditMode,
                 hazeState = globalHazeState,
                 onDismiss = { onFolderEditDialogChange(false) },
-                onSave = { newName, newColor ->
-                    foldersViewModel.updateFolder(folder.copy(name = newName, color = newColor))
+                onSave = { newName, newColor, newDesc ->
+                    foldersViewModel.updateFolder(folder.copy(name = newName, color = newColor, description = newDesc))
                     onFolderEditDialogChange(false)
                 }
             )

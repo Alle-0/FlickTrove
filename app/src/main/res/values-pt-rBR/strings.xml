@@ -668,8 +668,11 @@
     <string name="folder_item_count">%1$d itens</string>
     <string name="folder_new_name">Nova Pasta</string>
     <string name="folder_edit_rename">Renomear Pasta</string>
+    <string name="folder_edit_info">Editar Pasta</string>
     <string name="folder_edit_color">Alterar Cor</string>
     <string name="folder_edit_name_hint">Nome da pasta</string>
+    <string name="folder_edit_description_hint">Descrição (opcional)</string>
+    <string name="folders_description_placeholder">Descrição (opcional)</string>
     <string name="folder_delete_title">Excluir Pasta?</string>
     <string name="folder_delete_confirm_prefix">Tem certeza de que deseja excluir </string>
     <string name="folder_delete_confirm_prefix_2">Tem certeza de que deseja excluir a pasta </string>

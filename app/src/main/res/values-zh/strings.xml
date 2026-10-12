@@ -739,8 +739,11 @@
     <string name="folder_item_count">%1$d 项</string>
     <string name="folder_new_name">新建文件夹</string>
     <string name="folder_edit_rename">重命名文件夹</string>
+    <string name="folder_edit_info">编辑文件夹</string>
     <string name="folder_edit_color">更改颜色</string>
     <string name="folder_edit_name_hint">文件夹名称</string>
+    <string name="folder_edit_description_hint">描述（可选）</string>
+    <string name="folders_description_placeholder">描述（可选）</string>
     <string name="folder_delete_title">删除文件夹？</string>
     <string name="folder_delete_confirm_prefix">确定要删除 </string>
     <string name="folder_delete_confirm_prefix_2">确定要删除文件夹 </string>

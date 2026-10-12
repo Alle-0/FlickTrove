@@ -47,7 +47,7 @@ fun FolderPickerModal(
     folders: List<FolderEntity>,
     isItemInFolder: (String) -> Boolean,
     onToggleItem: (FolderEntity) -> Unit,
-    onCreateFolder: (String, String) -> Unit,
+    onCreateFolder: (String, String, String?) -> Unit,
     onClose: () -> Unit,
     hazeState: HazeState
 ) {
@@ -87,7 +87,7 @@ fun FolderPickerModalContent(
     folders: List<FolderEntity>,
     isItemInFolder: (String) -> Boolean,
     onToggleItem: (FolderEntity) -> Unit,
-    onCreateFolder: (String, String) -> Unit,
+    onCreateFolder: (String, String, String?) -> Unit,
     onClose: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -119,8 +119,8 @@ fun FolderPickerModalContent(
             if (creating) {
                 FolderCreateForm(
                     onCancel = { isCreating = false },
-                    onCreate = { name, color ->
-                        onCreateFolder(name, color)
+                    onCreate = { name, color, desc ->
+                        onCreateFolder(name, color, desc)
                         isCreating = false
                     }
                 )
@@ -367,9 +367,10 @@ private fun FolderItem(
 @Composable
 private fun FolderCreateForm(
     onCancel: () -> Unit,
-    onCreate: (String, String) -> Unit
+    onCreate: (String, String, String?) -> Unit
 ) {
     var name by remember { mutableStateOf("") }
+    var description by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("#6366F1") }
 
     val focusManager = LocalFocusManager.current
@@ -427,6 +428,33 @@ private fun FolderCreateForm(
                 modifier = Modifier.fillMaxWidth(),
                 textAlign = androidx.compose.ui.text.style.TextAlign.End
             )
+
+            Spacer(Modifier.height(16.dp))
+
+            OutlinedTextField(
+                value = description,
+                onValueChange = { if (it.length <= 250) description = it },
+                modifier = Modifier.fillMaxWidth(),
+                label = { Text(stringResource(R.string.folders_description_placeholder), color = Color.White.copy(alpha = 0.4f)) },
+                shape = RoundedCornerShape(16.dp),
+                colors = OutlinedTextFieldDefaults.colors(
+                    focusedTextColor = Color.White,
+                    unfocusedTextColor = Color.White,
+                    focusedBorderColor = Color.White,
+                    unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                    cursorColor = Color.White
+                ),
+                minLines = 2,
+                maxLines = 4
+            )
+            Spacer(Modifier.height(4.dp))
+            Text(
+                text = "${description.length}/250",
+                style = MaterialTheme.typography.labelSmall,
+                color = if (description.length >= 230) Color.White.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.3f),
+                modifier = Modifier.fillMaxWidth(),
+                textAlign = androidx.compose.ui.text.style.TextAlign.End
+            )
             
             Spacer(Modifier.height(20.dp))
             
@@ -462,7 +490,7 @@ private fun FolderCreateForm(
                     .weight(1.2f)
                     .height(52.dp)
                     .then(
-                        if (isEnabled) Modifier.bounceClick { onCreate(name, selectedColor) }
+                        if (isEnabled) Modifier.bounceClick { onCreate(name, selectedColor, description.trim().ifEmpty { null }) }
                         else Modifier
                     )
                     .background(

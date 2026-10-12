@@ -668,8 +668,11 @@
     <string name="folder_item_count">%1$d элементов</string>
     <string name="folder_new_name">Новая папка</string>
     <string name="folder_edit_rename">Переименовать папку</string>
+    <string name="folder_edit_info">Редактировать папку</string>
     <string name="folder_edit_color">Изменить цвет</string>
     <string name="folder_edit_name_hint">Имя папки</string>
+    <string name="folder_edit_description_hint">Описание (необязательно)</string>
+    <string name="folders_description_placeholder">Описание (необязательно)</string>
     <string name="folder_delete_title">Удалить папку?</string>
     <string name="folder_delete_confirm_prefix">Вы уверены, что хотите удалить </string>
     <string name="folder_delete_confirm_prefix_2">Вы уверены, что хотите удалить папку </string>

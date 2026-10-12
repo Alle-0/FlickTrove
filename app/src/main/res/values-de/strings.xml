@@ -661,8 +661,11 @@
     <string name="folder_item_count">%1$d Elemente</string>
     <string name="folder_new_name">Neuer Ordner</string>
     <string name="folder_edit_rename">Ordner umbenennen</string>
+    <string name="folder_edit_info">Ordner bearbeiten</string>
     <string name="folder_edit_color">Farbe ändern</string>
     <string name="folder_edit_name_hint">Ordnername</string>
+    <string name="folder_edit_description_hint">Beschreibung (optional)</string>
+    <string name="folders_description_placeholder">Beschreibung (optional)</string>
     <string name="folder_delete_title">Ordner löschen?</string>
     <string name="folder_delete_confirm_prefix">Möchtest du wirklich löschen: </string>
     <string name="folder_delete_confirm_prefix_2">Möchtest du den Ordner wirklich löschen: </string>

@@ -661,8 +661,11 @@
     <string name="folder_item_count">%1$d éléments</string>
     <string name="folder_new_name">Nouveau dossier</string>
     <string name="folder_edit_rename">Renommer le dossier</string>
+    <string name="folder_edit_info">Modifier le dossier</string>
     <string name="folder_edit_color">Changer la couleur</string>
     <string name="folder_edit_name_hint">Nom du dossier</string>
+    <string name="folder_edit_description_hint">Description (facultatif)</string>
+    <string name="folders_description_placeholder">Description (facultatif)</string>
     <string name="folder_delete_title">Supprimer le dossier ?</string>
     <string name="folder_delete_confirm_prefix">Voulez-vous vraiment supprimer </string>
     <string name="folder_delete_confirm_prefix_2">Voulez-vous vraiment supprimer le dossier </string>

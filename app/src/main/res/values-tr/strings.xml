@@ -739,8 +739,11 @@
     <string name="folder_item_count">%1$d öge</string>
     <string name="folder_new_name">Yeni Klasör</string>
     <string name="folder_edit_rename">Klasörü Yeniden Adlandır</string>
+    <string name="folder_edit_info">Klasörü Düzenle</string>
     <string name="folder_edit_color">Rengi Değiştir</string>
     <string name="folder_edit_name_hint">Klasör adı</string>
+    <string name="folder_edit_description_hint">Açıklama (isteğe bağlı)</string>
+    <string name="folders_description_placeholder">Açıklama (isteğe bağlı)</string>
     <string name="folder_delete_title">Klasör Silinsin mi?</string>
     <string name="folder_delete_confirm_prefix">Silmek istediğinizden emin misiniz: </string>
     <string name="folder_delete_confirm_prefix_2">Klasörü silmek istediğinizden emin misiniz: </string>

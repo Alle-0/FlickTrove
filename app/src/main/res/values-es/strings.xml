@@ -662,8 +662,11 @@
     <string name="folder_item_count">%1$d elementos</string>
     <string name="folder_new_name">Nueva carpeta</string>
     <string name="folder_edit_rename">Renombrar carpeta</string>
+    <string name="folder_edit_info">Editar Carpeta</string>
     <string name="folder_edit_color">Cambiar color</string>
     <string name="folder_edit_name_hint">Nombre de la carpeta</string>
+    <string name="folder_edit_description_hint">Descripción (opcional)</string>
+    <string name="folders_description_placeholder">Descripción (opcional)</string>
     <string name="folder_delete_title">¿Eliminar carpeta?</string>
     <string name="folder_delete_confirm_prefix">¿Estás seguro de que deseas eliminar </string>
     <string name="folder_delete_confirm_prefix_2">¿Estás seguro de que deseas eliminar la carpeta </string>

@@ -81,7 +81,7 @@ sealed class DetailEvent {
     object DeleteMovie : DetailEvent()
     data class SyncWatchedEpisodes(val episodes: Map<String, List<Int>>) : DetailEvent()
     data class ToggleFolderMembership(val folder: FolderEntity) : DetailEvent()
-    data class CreateFolder(val name: String, val color: String) : DetailEvent()
+    data class CreateFolder(val name: String, val color: String, val description: String? = null) : DetailEvent()
     data class UpdateCustomCover(val newPath: String?) : DetailEvent()
     data class SaveCheckIn(val rating: Double?, val vibes: List<String>, val mvpActor: CastMember?, val characterImageUrl: String?) : DetailEvent()
     data class ToggleCommentLike(val commentId: String) : DetailEvent()
