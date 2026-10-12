@@ -93,6 +93,7 @@ mcp.json
 tools/
 GEMINI.md
 AGENTS.md
+.agent/
 .agents/
 app/src/test/
 *.txt
