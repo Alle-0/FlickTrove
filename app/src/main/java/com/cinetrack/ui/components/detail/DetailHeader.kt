@@ -132,6 +132,23 @@ fun DetailHeader(
                 }
             }
     ) {
+        val isTvSeries = movie.mediaType == "tv"
+        val effectiveStatus = movieStatus?.takeIf { it.isNotBlank() } ?: movie.status
+        val seriesStatusLabel = if (isTvSeries && !effectiveStatus.isNullOrBlank()) {
+            when (effectiveStatus) {
+                "Returning Series" -> stringResource(R.string.status_returning_series)
+                "Planned" -> stringResource(R.string.status_planned)
+                "In Production" -> stringResource(R.string.status_in_production)
+                "Ended" -> stringResource(R.string.status_ended)
+                "Canceled", "Cancelled" -> stringResource(R.string.status_canceled)
+                "Pilot" -> stringResource(R.string.status_pilot)
+                "Rumored" -> stringResource(R.string.status_rumored)
+                "Post Production" -> stringResource(R.string.status_post_production)
+                "Released" -> stringResource(R.string.status_released)
+                else -> effectiveStatus
+            }
+        } else null
+
         // Title & Tagline
         Column(modifier = Modifier.fillMaxWidth()) {
             @Composable
@@ -198,27 +215,10 @@ fun DetailHeader(
                 }
             }
 
-            val isTvSeries = movie.mediaType == "tv"
-            val effectiveStatus = movieStatus?.takeIf { it.isNotBlank() } ?: movie.status
-            val seriesStatusLabel = if (isTvSeries && !effectiveStatus.isNullOrBlank()) {
-                when (effectiveStatus) {
-                    "Returning Series" -> stringResource(R.string.status_returning_series)
-                    "Planned" -> stringResource(R.string.status_planned)
-                    "In Production" -> stringResource(R.string.status_in_production)
-                    "Ended" -> stringResource(R.string.status_ended)
-                    "Canceled", "Cancelled" -> stringResource(R.string.status_canceled)
-                    "Pilot" -> stringResource(R.string.status_pilot)
-                    "Rumored" -> stringResource(R.string.status_rumored)
-                    "Post Production" -> stringResource(R.string.status_post_production)
-                    "Released" -> stringResource(R.string.status_released)
-                    else -> effectiveStatus
-                }
-            } else null
 
-            val showCoverBtn = movie.customBackdropPath != null && onCoverSelectClick != null
             val showTrailerBtn = onTrailerClick != null
 
-            if (matchPercentage != null || seriesStatusLabel != null || showTrailerBtn || showCoverBtn) {
+            if (matchPercentage != null || showTrailerBtn) {
                 val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
                 Row(
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -272,41 +272,6 @@ fun DetailHeader(
                         }
                     }
 
-                    if (seriesStatusLabel != null) {
-                        Box(
-                            modifier = Modifier
-                                .then(
-                                    if (advancedEffectsEnabled) {
-                                        Modifier
-                                            .hazeGlass(
-                                                state = hazeState,
-                                                shape = CircleShape,
-                                                containerColor = Color.White.copy(alpha = 0.08f),
-                                                blurRadius = 16.dp
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    } else {
-                                        Modifier
-                                            .clip(CircleShape)
-                                            .background(Color(0xFF1E1A22))
-                                            .border(0.5.dp, Color.White.copy(alpha = 0.2f), CircleShape)
-                                            .padding(horizontal = 8.dp, vertical = 3.dp)
-                                    }
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = seriesStatusLabel,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.3.sp
-                                ),
-                                color = Color.White.copy(alpha = 0.9f)
-                            )
-                        }
-                    }
-
                     if (onTrailerClick != null) {
                         Box(
                             modifier = Modifier
@@ -349,50 +314,6 @@ fun DetailHeader(
                                     ),
                                     color = ColorUtils.lightenForText(accentColor, 1.35f),
                                     modifier = Modifier.bounceClick { onTrailerClick() }
-                                )
-                            }
-                        }
-                    }
-
-                    if (showCoverBtn) {
-                        Box(
-                            modifier = Modifier
-                                .clip(CircleShape)
-                                .then(
-                                    if (advancedEffectsEnabled) {
-                                        Modifier
-                                            .hazeGlass(
-                                                state = hazeState,
-                                                shape = CircleShape,
-                                                containerColor = accentColor.copy(alpha = 0.15f),
-                                                blurRadius = 16.dp
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    } else {
-                                        Modifier
-                                            .background(Color(0xFF1E1A22))
-                                            .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
-                                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                                    }
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                modifier = Modifier.bounceClick { onCoverSelectClick() },
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
-                                    contentDescription = stringResource(R.string.detail_select_cover),
-                                    modifier = Modifier.size(13.dp),
-                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
-                                )
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(13.dp),
-                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
                             }
                         }
@@ -491,6 +412,25 @@ fun DetailHeader(
                             ),
                             color = Color.White.copy(alpha = 0.6f)
                         )
+
+                        if (seriesStatusLabel != null) {
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .size(4.dp)
+                                    .background(Color.White.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape)
+                            )
+
+                            Text(
+                                text = seriesStatusLabel.uppercase(),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.2.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.6f)
+                            )
+                        }
                     }
                 }
 
