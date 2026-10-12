@@ -216,9 +216,9 @@ fun DetailHeader(
             }
 
 
-            val showTrailerBtn = onTrailerClick != null
+            val showCoverBtn = (movie.customBackdropPath != null || hasAlternativeCovers) && onCoverSelectClick != null
 
-            if (matchPercentage != null || showTrailerBtn) {
+            if (matchPercentage != null || showCoverBtn) {
                 val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
                 Row(
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -272,9 +272,11 @@ fun DetailHeader(
                         }
                     }
 
-                    if (onTrailerClick != null) {
+                    if (showCoverBtn) {
                         Box(
                             modifier = Modifier
+                                .bounceClick { onCoverSelectClick() }
+                                .clip(CircleShape)
                                 .then(
                                     if (advancedEffectsEnabled) {
                                         Modifier
@@ -284,10 +286,9 @@ fun DetailHeader(
                                                 containerColor = accentColor.copy(alpha = 0.15f),
                                                 blurRadius = 16.dp
                                             )
-                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                            .padding(horizontal = 8.dp, vertical = 2.dp)
                                     } else {
                                         Modifier
-                                            .clip(CircleShape)
                                             .background(Color(0xFF1E1A22))
                                             .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
                                             .padding(horizontal = 10.dp, vertical = 4.dp)
@@ -296,24 +297,20 @@ fun DetailHeader(
                             contentAlignment = Alignment.Center
                         ) {
                             Row(
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(4.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(11.dp),
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
+                                    contentDescription = stringResource(R.string.detail_select_cover),
+                                    modifier = Modifier.size(13.dp),
                                     tint = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
-                                Text(
-                                    text = "Trailer",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        letterSpacing = 0.5.sp
-                                    ),
-                                    color = ColorUtils.lightenForText(accentColor, 1.35f),
-                                    modifier = Modifier.bounceClick { onTrailerClick() }
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(13.dp),
+                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
                                 )
                             }
                         }
@@ -356,79 +353,76 @@ fun DetailHeader(
 
                     Spacer(modifier = Modifier.weight(1f))
 
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    Column(
+                        horizontalAlignment = Alignment.End,
+                        verticalArrangement = Arrangement.Center,
                         modifier = Modifier.padding(end = 12.dp)
                     ) {
-                        val dateStr = movie.releaseDate ?: movie.firstAirDate
-                        val isReleased = movie.isReleased
-                        
-                        val displayedDate = if (!isReleased && !dateStr.isNullOrBlank()) {
-                            if (dateStr.length >= 10) {
-                                val parts = dateStr.split("-")
-                                if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else dateStr
-                            } else dateStr
-                        } else {
-                            dateStr?.take(4) ?: "-"
-                        }
-                        
-                        val dateColor = if (!isReleased) accentColor else Color.White.copy(alpha = 0.6f)
-
-                        Text(
-                            text = displayedDate,
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.5.sp
-                            ),
-                            color = dateColor
-                        )
-
-
-                        
-                        Box(
-                            modifier = Modifier
-                                .padding(horizontal = 10.dp)
-                                .size(4.dp)
-                                .background(Color.White.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape)
-                        )
-
-                        val runtime = movie.numberOfSeasons?.let { 
-                            if (it > 0) "$it ${if (it > 1) stringResource(R.string.detail_seasons) else stringResource(R.string.detail_season)}" else null 
-                        } ?: movie.runtime?.let {
-                            if (it > 0) {
-                                val h = it / 60
-                                val m = it % 60
-                                if (h > 0) "${h}h ${m}m" else "${m}m"
-                            } else null
-                        } ?: "-"
-
-                        Text(
-                            text = runtime.uppercase(),
-                            style = MaterialTheme.typography.labelMedium.copy(
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.5.sp
-                            ),
-                            color = Color.White.copy(alpha = 0.6f)
-                        )
-
-                        if (seriesStatusLabel != null) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .size(4.dp)
-                                    .background(Color.White.copy(alpha = 0.3f), androidx.compose.foundation.shape.CircleShape)
-                            )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            val dateStr = movie.releaseDate ?: movie.firstAirDate
+                            val isReleased = movie.isReleased
+                            
+                            val displayedDate = if (!isReleased && !dateStr.isNullOrBlank()) {
+                                if (dateStr.length >= 10) {
+                                    val parts = dateStr.split("-")
+                                    if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else dateStr
+                                } else dateStr
+                            } else {
+                                dateStr?.take(4) ?: "-"
+                            }
+                            
+                            val dateColor = if (!isReleased) accentColor else Color.White.copy(alpha = 0.6f)
 
                             Text(
-                                text = seriesStatusLabel.uppercase(),
+                                text = displayedDate,
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.2.sp
+                                    letterSpacing = 1.5.sp
+                                ),
+                                color = dateColor
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .padding(horizontal = 8.dp)
+                                    .size(3.5.dp)
+                                    .background(Color.White.copy(alpha = 0.3f), CircleShape)
+                            )
+
+                            val runtime = movie.numberOfSeasons?.let { 
+                                if (it > 0) "$it ${if (it > 1) stringResource(R.string.detail_seasons) else stringResource(R.string.detail_season)}" else null 
+                            } ?: movie.runtime?.let {
+                                if (it > 0) {
+                                    val h = it / 60
+                                    val m = it % 60
+                                    if (h > 0) "${h}h ${m}m" else "${m}m"
+                                } else null
+                            } ?: "-"
+
+                            Text(
+                                text = runtime.uppercase(),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.5.sp
                                 ),
                                 color = Color.White.copy(alpha = 0.6f)
+                            )
+                        }
+
+                        if (seriesStatusLabel != null) {
+                            Spacer(modifier = Modifier.height(2.dp))
+                            Text(
+                                text = seriesStatusLabel.uppercase(),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontSize = 9.5.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.2.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.55f)
                             )
                         }
                     }

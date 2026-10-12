@@ -15,6 +15,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -56,6 +57,7 @@ fun DetailMetaRows(
     onKeywordClick: (Long, String, Offset) -> Unit,
     onProviderClick: (Provider) -> Unit,
     isInTheaters: Boolean = false,
+    onTrailerClick: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
@@ -215,6 +217,46 @@ fun DetailMetaRows(
                     accentColor = accentColor,
                     onProviderClick = onProviderClick
                 )
+            }
+        }
+
+        if (onTrailerClick != null) {
+            val hasProvidersAbove = streaming.isNotEmpty() || buyAndRent.isNotEmpty() || isInTheaters
+            Spacer(modifier = Modifier.height(if (hasProvidersAbove) 14.dp else 0.dp))
+
+            Box(
+                modifier = Modifier
+                    .bounceClick { onTrailerClick() }
+                    .clip(CircleShape)
+                    .background(accentColor.copy(alpha = 0.12f))
+                    .border(
+                        0.5.dp,
+                        ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.4f),
+                        CircleShape
+                    )
+                    .padding(horizontal = 14.dp, vertical = 7.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
+                        contentDescription = null,
+                        modifier = Modifier.size(11.dp),
+                        tint = ColorUtils.lightenForText(accentColor, 1.35f)
+                    )
+                    Text(
+                        text = "Trailer",
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontSize = 11.5.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 0.5.sp
+                        ),
+                        color = ColorUtils.lightenForText(accentColor, 1.35f)
+                    )
+                }
             }
         }
     }

@@ -553,6 +553,9 @@ fun MovieDetailScreenContent(
                                         buyAndRent = state.buyRentProviders,
                                         accentColor = accentColor,
                                         isInTheaters = state.isInTheaters,
+                                        onTrailerClick = if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
+                                            { scope.launch { scrollState.animateScrollTo(trailersYOffset.toInt()) } }
+                                        } else null,
                                         onGenreClick = { genre, offset -> onGenreClick(genre.id, genre.name, offset) },
                                         onKeywordClick = { id, name, offset -> onKeywordClick(id, name, offset) },
                                         onProviderClick = { provider ->
