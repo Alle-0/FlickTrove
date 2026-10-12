@@ -1764,9 +1764,11 @@
     <string name="settings_seasonal_preview_classic">डिफ़ॉल्ट</string>
     <string name="settings_seasonal_preview_classic_desc">पूरे साल</string>
     <string name="settings_seasonal_preview_halloween">हेलोवीन</string>
-    <string name="settings_seasonal_preview_halloween_desc">15 अक्टूबर – 5 नवंबर</string>
+    <string name="settings_seasonal_preview_halloween_desc">10 अक्टूबर – 5 नवंबर</string>
     <string name="settings_seasonal_preview_active_now">अभी सक्रिय</string>
     <string name="settings_seasonal_preview_upcoming">जल्द आ रहा है</string>
+    <string name="settings_seasonal_preview_christmas">क्रिसमस</string>
+    <string name="settings_seasonal_preview_christmas_desc">1 दिस – 6 जन</string>
 </resources>
 
 

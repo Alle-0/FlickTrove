@@ -3,6 +3,7 @@ package com.cinetrack.ui.components.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -31,6 +32,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.utils.verticalFadingEdges
+import com.cinetrack.ui.utils.horizontalFadingEdges
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.GlassmorphicModal
 import com.cinetrack.ui.components.common.FlickTroveSwitch
@@ -952,6 +954,7 @@ fun SeasonalIconsPreviewDialog(
     onDismiss: () -> Unit
 ) {
     val isHalloweenActive = remember { com.cinetrack.util.IconManager.isHalloweenSeason() }
+    val isChristmasActive = remember { com.cinetrack.util.IconManager.isChristmasSeason() }
 
     GlassmorphicModal(
         visible = visible,
@@ -983,19 +986,23 @@ fun SeasonalIconsPreviewDialog(
 
             Spacer(modifier = Modifier.height(24.dp))
 
+            val scrollState = rememberScrollState()
             Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .horizontalFadingEdges(scrollState, leftEdgeWidth = 24.dp, rightEdgeWidth = 24.dp)
+                    .horizontalScroll(scrollState),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Classic Default Icon Card
-                val isClassicActive = !seasonalAppIconEnabled || !isHalloweenActive
+                val isClassicActive = !seasonalAppIconEnabled || (!isHalloweenActive && !isChristmasActive)
                 SeasonalIconCard(
                     title = stringResource(R.string.settings_seasonal_preview_classic),
                     subtitle = stringResource(R.string.settings_seasonal_preview_classic_desc),
                     drawableRes = R.drawable.ic_launcher_foreground_vector,
                     badgeText = if (isClassicActive) stringResource(R.string.settings_seasonal_preview_active_now) else null,
                     accentColor = NeonTeal,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.width(130.dp)
                 )
 
                 // Halloween Seasonal Icon Card
@@ -1010,7 +1017,22 @@ fun SeasonalIconsPreviewDialog(
                         stringResource(R.string.settings_seasonal_preview_upcoming)
                     },
                     accentColor = Color(0xFFFF7518),
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.width(130.dp)
+                )
+
+                // Christmas Seasonal Icon Card
+                val isChristmasCurrentlyActive = seasonalAppIconEnabled && isChristmasActive
+                SeasonalIconCard(
+                    title = stringResource(R.string.settings_seasonal_preview_christmas),
+                    subtitle = stringResource(R.string.settings_seasonal_preview_christmas_desc),
+                    drawableRes = R.drawable.ic_launcher_foreground_christmas,
+                    badgeText = if (isChristmasCurrentlyActive) {
+                        stringResource(R.string.settings_seasonal_preview_active_now)
+                    } else {
+                        stringResource(R.string.settings_seasonal_preview_upcoming)
+                    },
+                    accentColor = Color(0xFFEF4444),
+                    modifier = Modifier.width(130.dp)
                 )
             }
 
@@ -1084,8 +1106,8 @@ private fun SeasonalIconCard(
             textAlign = TextAlign.Center
         )
 
+        Spacer(modifier = Modifier.height(8.dp))
         if (badgeText != null) {
-            Spacer(modifier = Modifier.height(8.dp))
             Box(
                 modifier = Modifier
                     .clip(androidx.compose.foundation.shape.CircleShape)
@@ -1104,9 +1126,12 @@ private fun SeasonalIconCard(
                         fontWeight = FontWeight.Bold,
                         letterSpacing = 0.5.sp
                     ),
-                    color = accentColor
+                    color = accentColor,
+                    maxLines = 1
                 )
             }
+        } else {
+            Spacer(modifier = Modifier.height(18.dp))
         }
     }
 }

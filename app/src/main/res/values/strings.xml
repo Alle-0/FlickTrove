@@ -240,7 +240,7 @@
     <string name="settings_seasonal_preview_classic">Default</string>
     <string name="settings_seasonal_preview_classic_desc">All year round</string>
     <string name="settings_seasonal_preview_halloween">Halloween</string>
-    <string name="settings_seasonal_preview_halloween_desc">Oct 15 – Nov 5</string>
+    <string name="settings_seasonal_preview_halloween_desc">Oct 10 – Nov 5</string>
     <string name="settings_seasonal_preview_active_now">ACTIVE NOW</string>
     <string name="settings_seasonal_preview_upcoming">UPCOMING</string>
     <string name="settings_entry_animation">Entry Animation</string>
@@ -1779,5 +1779,7 @@
     <string name="badge_trophy_hunter_cat">CINEPHILE MILESTONES</string>
     <string name="badge_trophy_hunter_desc">The collector\'s ultimate consecration: conquer the heights of the cinetheque by unlocking the app\'s trophies.</string>
     <string name="trophy_unit_trophies">trophies</string>
+    <string name="settings_seasonal_preview_christmas">Christmas</string>
+    <string name="settings_seasonal_preview_christmas_desc">Dec 1 – Jan 6</string>
 </resources>
 

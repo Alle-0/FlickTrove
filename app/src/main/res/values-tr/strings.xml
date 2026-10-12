@@ -1772,7 +1772,9 @@
     <string name="settings_seasonal_preview_classic">Varsayılan</string>
     <string name="settings_seasonal_preview_classic_desc">Tüm yıl boyunca</string>
     <string name="settings_seasonal_preview_halloween">Cadılar Bayramı</string>
-    <string name="settings_seasonal_preview_halloween_desc">15 Eki – 5 Kas</string>
+    <string name="settings_seasonal_preview_halloween_desc">10 Eki – 5 Kas</string>
     <string name="settings_seasonal_preview_active_now">ŞU AN ETKİN</string>
     <string name="settings_seasonal_preview_upcoming">YAKINDA</string>
+    <string name="settings_seasonal_preview_christmas">Yılbaşı</string>
+    <string name="settings_seasonal_preview_christmas_desc">1 Ara – 6 Oca</string>
 </resources>

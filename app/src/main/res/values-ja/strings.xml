@@ -1772,7 +1772,9 @@
     <string name="settings_seasonal_preview_classic">デフォルト</string>
     <string name="settings_seasonal_preview_classic_desc">通年利用</string>
     <string name="settings_seasonal_preview_halloween">ハロウィン</string>
-    <string name="settings_seasonal_preview_halloween_desc">10月15日 – 11月5日</string>
+    <string name="settings_seasonal_preview_halloween_desc">10月10日 – 11月5日</string>
     <string name="settings_seasonal_preview_active_now">現在適用中</string>
     <string name="settings_seasonal_preview_upcoming">近日公開</string>
+    <string name="settings_seasonal_preview_christmas">クリスマス</string>
+    <string name="settings_seasonal_preview_christmas_desc">12月1日～1月6日</string>
 </resources>

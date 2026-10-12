@@ -1766,8 +1766,10 @@
     <string name="settings_seasonal_preview_classic">По умолчанию</string>
     <string name="settings_seasonal_preview_classic_desc">Круглый год</string>
     <string name="settings_seasonal_preview_halloween">Хэллоуин</string>
-    <string name="settings_seasonal_preview_halloween_desc">15 окт. – 5 нояб.</string>
+    <string name="settings_seasonal_preview_halloween_desc">10 окт. – 5 нояб.</string>
     <string name="settings_seasonal_preview_active_now">АКТИВНО СЕЙЧАС</string>
     <string name="settings_seasonal_preview_upcoming">СКОРО</string>
+    <string name="settings_seasonal_preview_christmas">Рождество</string>
+    <string name="settings_seasonal_preview_christmas_desc">1 дек – 6 янв</string>
 </resources>
 

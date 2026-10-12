@@ -1771,7 +1771,9 @@
     <string name="settings_seasonal_preview_classic">Bawaan</string>
     <string name="settings_seasonal_preview_classic_desc">Sepanjang tahun</string>
     <string name="settings_seasonal_preview_halloween">Halloween</string>
-    <string name="settings_seasonal_preview_halloween_desc">15 Okt – 5 Nov</string>
+    <string name="settings_seasonal_preview_halloween_desc">10 Okt – 5 Nov</string>
     <string name="settings_seasonal_preview_active_now">AKTIF SEKARANG</string>
     <string name="settings_seasonal_preview_upcoming">SEGERA HADIR</string>
+    <string name="settings_seasonal_preview_christmas">Natal</string>
+    <string name="settings_seasonal_preview_christmas_desc">1 Des – 6 Jan</string>
 </resources>

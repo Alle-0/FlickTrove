@@ -12,13 +12,22 @@ object IconManager {
     private const val ALIAS_AMBER = "com.cinetrack.MainActivityAmber"
     private const val ALIAS_BLUE = "com.cinetrack.MainActivityBlue"
     private const val ALIAS_HALLOWEEN = "com.cinetrack.MainActivityHalloween"
+    private const val ALIAS_CHRISTMAS = "com.cinetrack.MainActivityChristmas"
 
     fun isHalloweenSeason(): Boolean {
         val cal = java.util.Calendar.getInstance()
         val month = cal.get(java.util.Calendar.MONTH) // Calendar.OCTOBER = 9, Calendar.NOVEMBER = 10
         val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
-        return (month == java.util.Calendar.OCTOBER && day >= 15) ||
+        return (month == java.util.Calendar.OCTOBER && day >= 10) ||
                (month == java.util.Calendar.NOVEMBER && day <= 5)
+    }
+
+    fun isChristmasSeason(): Boolean {
+        val cal = java.util.Calendar.getInstance()
+        val month = cal.get(java.util.Calendar.MONTH) // Calendar.DECEMBER = 11, Calendar.JANUARY = 0
+        val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        return (month == java.util.Calendar.DECEMBER && day >= 1) ||
+               (month == java.util.Calendar.JANUARY && day <= 6)
     }
 
     fun updateAppIcon(
@@ -35,11 +44,13 @@ object IconManager {
             ALIAS_PURPLE,
             ALIAS_AMBER,
             ALIAS_BLUE,
-            ALIAS_HALLOWEEN
+            ALIAS_HALLOWEEN,
+            ALIAS_CHRISTMAS
         )
         
         val activeAlias = when {
             isSeasonalIconEnabled && isHalloweenSeason() -> ALIAS_HALLOWEEN
+            isSeasonalIconEnabled && isChristmasSeason() -> ALIAS_CHRISTMAS
             !isDynamicIconEnabled -> ALIAS_TEAL
             colorName == "Pink" -> ALIAS_PINK
             colorName == "Purple" -> ALIAS_PURPLE

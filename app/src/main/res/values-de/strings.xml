@@ -1769,8 +1769,10 @@
     <string name="settings_seasonal_preview_classic">Standard</string>
     <string name="settings_seasonal_preview_classic_desc">Ganzjährig</string>
     <string name="settings_seasonal_preview_halloween">Halloween</string>
-    <string name="settings_seasonal_preview_halloween_desc">15. Okt. – 5. Nov.</string>
+    <string name="settings_seasonal_preview_halloween_desc">10. Okt. – 5. Nov.</string>
     <string name="settings_seasonal_preview_active_now">JETZT AKTIV</string>
     <string name="settings_seasonal_preview_upcoming">DEMNÄCHST</string>
+    <string name="settings_seasonal_preview_christmas">Weihnachten</string>
+    <string name="settings_seasonal_preview_christmas_desc">1. Dez. – 6. Jan.</string>
 </resources>
 

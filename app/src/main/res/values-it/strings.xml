@@ -219,7 +219,7 @@
     <string name="settings_seasonal_preview_classic">Predefinita</string>
     <string name="settings_seasonal_preview_classic_desc">Tutto l\'anno</string>
     <string name="settings_seasonal_preview_halloween">Halloween</string>
-    <string name="settings_seasonal_preview_halloween_desc">15 Ott – 5 Nov</string>
+    <string name="settings_seasonal_preview_halloween_desc">10 Ott – 5 Nov</string>
     <string name="settings_seasonal_preview_active_now">ATTIVA ORA</string>
     <string name="settings_seasonal_preview_upcoming">IN ARRIVO</string>
     <string name="settings_entry_animation">Animazione Iniziale</string>
@@ -1780,5 +1780,7 @@
     <string name="badge_trophy_hunter_cat">TRAGUARDI CINEFILI</string>
     <string name="badge_trophy_hunter_desc">La consacrazione definitiva del collezionista: scala le vette della cineteca sbloccando i trofei dell\'app.</string>
     <string name="trophy_unit_trophies">trofei</string>
+    <string name="settings_seasonal_preview_christmas">Natale</string>
+    <string name="settings_seasonal_preview_christmas_desc">1 dic – 6 gen</string>
 </resources>
 
