@@ -20,12 +20,24 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.foundation.shape.RoundedCornerShape
+import com.cinetrack.util.VibrationHelper
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onSizeChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
@@ -137,6 +149,28 @@ fun FolderDetailScreenContent(
     
     val lazyGridState = viewModel.lazyGridState
     val scope = rememberCoroutineScope()
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        androidx.compose.runtime.derivedStateOf {
+            lazyGridState.firstVisibleItemIndex > 3 || (lazyGridState.firstVisibleItemIndex > 0 && lazyGridState.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    DisposableEffect(showScrollToTop, lazyGridState) {
+        if (showScrollToTop) {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+                isVisible = true,
+                onScrollToTop = {
+                    scope.launch { lazyGridState.animateScrollToItem(0) }
+                }
+            )
+        } else {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
+        }
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
+        }
+    }
 
     val folderReorderRequest = com.cinetrack.ui.LocalFolderReorderRequest.current
     
@@ -297,10 +331,105 @@ fun FolderDetailScreenContent(
                                 }
                             }
 
+                            val density = LocalDensity.current
+                            val context = LocalContext.current
+                            val coroutineScope = rememberCoroutineScope()
+
+                            val hasDescription = !state.folder.description.isNullOrBlank()
+
+                            var descMaxHeightPx by remember(state.folder.id, state.folder.description) { mutableFloatStateOf(0f) }
+                            var descHeightPx by remember(state.folder.id, state.folder.description) { mutableFloatStateOf(0f) }
+                            var snapJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
+
+                            fun performSnap(velocity: Float = 0f) {
+                                if (!hasDescription || descMaxHeightPx <= 0f) return
+                                val isPartial = descHeightPx > 0.5f && descHeightPx < descMaxHeightPx - 0.5f
+                                if (!isPartial) return
+
+                                val targetDesc = when {
+                                    velocity < -300f -> 0f
+                                    velocity > 300f -> descMaxHeightPx
+                                    descHeightPx < descMaxHeightPx * 0.5f -> 0f
+                                    else -> descMaxHeightPx
+                                }
+
+                                val startDesc = descHeightPx
+                                snapJob?.cancel()
+                                snapJob = coroutineScope.launch {
+                                    val anim = Animatable(0f)
+                                    anim.animateTo(
+                                        targetValue = 1f,
+                                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
+                                    ) {
+                                        descHeightPx = startDesc + (targetDesc - startDesc) * value
+                                    }
+                                    VibrationHelper.vibrateTick(context)
+                                }
+                            }
+
+                            val nestedScrollConnection = remember(hasDescription, descMaxHeightPx) {
+                                object : androidx.compose.ui.input.nestedscroll.NestedScrollConnection {
+                                    override fun onPreScroll(available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                                        if (!hasDescription || descMaxHeightPx <= 0f) return androidx.compose.ui.geometry.Offset.Zero
+                                        snapJob?.cancel()
+                                        var consumedY = 0f
+                                        val delta = available.y
+
+                                        // Scrolling down (swiping up): collapse description first
+                                        if (delta < 0 && descHeightPx > 0f) {
+                                            val newHeight = (descHeightPx + delta).coerceIn(0f, descMaxHeightPx)
+                                            val consumed = newHeight - descHeightPx
+                                            descHeightPx = newHeight
+                                            consumedY += consumed
+                                        }
+
+                                        return androidx.compose.ui.geometry.Offset(0f, consumedY)
+                                    }
+
+                                    override fun onPostScroll(consumed: androidx.compose.ui.geometry.Offset, available: androidx.compose.ui.geometry.Offset, source: androidx.compose.ui.input.nestedscroll.NestedScrollSource): androidx.compose.ui.geometry.Offset {
+                                        if (!hasDescription || descMaxHeightPx <= 0f) return androidx.compose.ui.geometry.Offset.Zero
+                                        snapJob?.cancel()
+                                        var consumedY = 0f
+                                        val delta = available.y
+
+                                        // Scrolling up (swiping down, delta > 0): expand description
+                                        if (delta > 0 && descHeightPx < descMaxHeightPx) {
+                                            val newHeight = (descHeightPx + delta).coerceIn(0f, descMaxHeightPx)
+                                            val consumedAmount = newHeight - descHeightPx
+                                            descHeightPx = newHeight
+                                            consumedY += consumedAmount
+                                        }
+
+                                        return androidx.compose.ui.geometry.Offset(0f, consumedY)
+                                    }
+
+                                    override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
+                                        if (!hasDescription || descMaxHeightPx <= 0f) return androidx.compose.ui.unit.Velocity.Zero
+                                        val isPartial = descHeightPx > 0.5f && descHeightPx < descMaxHeightPx - 0.5f
+                                        if (isPartial) {
+                                            performSnap(available.y)
+                                            return available
+                                        }
+                                        return androidx.compose.ui.unit.Velocity.Zero
+                                    }
+                                }
+                            }
+
+                            LaunchedEffect(lazyGridState.isScrollInProgress, hasDescription) {
+                                if (!hasDescription) return@LaunchedEffect
+                                if (lazyGridState.isScrollInProgress) {
+                                    snapJob?.cancel()
+                                } else {
+                                    performSnap(0f)
+                                }
+                            }
+
                             LazyVerticalGrid(
                                 state = lazyGridState,
                                 columns = GridCells.Fixed(columns),
-                                modifier = Modifier.fillMaxSize(),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .nestedScroll(nestedScrollConnection),
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
                                     end = 16.dp,
@@ -310,23 +439,52 @@ fun FolderDetailScreenContent(
                                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                                 verticalArrangement = Arrangement.spacedBy(12.dp)
                             ) {
-                                if (!state.folder.description.isNullOrBlank()) {
+                                if (hasDescription) {
                                     item(span = { GridItemSpan(maxLineSpan) }) {
+                                        val currentHeight = if (descMaxHeightPx > 0f) with(density) { descHeightPx.toDp() } else Dp.Unspecified
+                                        val progress = if (descMaxHeightPx > 0f) (descHeightPx / descMaxHeightPx).coerceIn(0f, 1f) else 1f
+                                        val alphaProgress = ((progress - 0.4f) * 1.67f).coerceIn(0f, 1f)
+
                                         Box(
                                             modifier = Modifier
                                                 .fillMaxWidth()
-                                                .padding(bottom = 6.dp)
-                                                .clip(androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
-                                                .background(Color.White.copy(alpha = 0.05f))
-                                                .border(0.5.dp, Color.White.copy(alpha = 0.1f), androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
-                                                .padding(horizontal = 16.dp, vertical = 12.dp)
+                                                .then(if (currentHeight != Dp.Unspecified) Modifier.height(currentHeight) else Modifier)
+                                                .clipToBounds(),
+                                            contentAlignment = Alignment.TopCenter
                                         ) {
-                                            Text(
-                                                text = state.folder.description,
-                                                style = MaterialTheme.typography.bodyMedium,
-                                                color = Color.White.copy(alpha = 0.75f),
-                                                lineHeight = 20.sp
-                                            )
+                                            Box(
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .padding(bottom = 6.dp)
+                                                    .onSizeChanged { size ->
+                                                        if (size.height > 0 && size.height.toFloat() > descMaxHeightPx) {
+                                                            descMaxHeightPx = size.height.toFloat()
+                                                            if (descHeightPx == 0f) {
+                                                                descHeightPx = size.height.toFloat()
+                                                            }
+                                                        }
+                                                    }
+                                                    .clip(RoundedCornerShape(16.dp))
+                                                    .background(Color.White.copy(alpha = 0.05f))
+                                                    .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                            ) {
+                                                if (alphaProgress > 0f) {
+                                                    Box(
+                                                        modifier = Modifier
+                                                            .fillMaxWidth()
+                                                            .wrapContentHeight(unbounded = true)
+                                                            .graphicsLayer { alpha = alphaProgress }
+                                                    ) {
+                                                        Text(
+                                                            text = state.folder.description.orEmpty(),
+                                                            style = MaterialTheme.typography.bodyMedium,
+                                                            color = Color.White.copy(alpha = 0.75f),
+                                                            lineHeight = 20.sp
+                                                        )
+                                                    }
+                                                }
+                                            }
                                         }
                                     }
                                 }

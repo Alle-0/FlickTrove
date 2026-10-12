@@ -37,6 +37,7 @@
     <string name="main_tab_folders">Klasörlerim</string>
     <string name="main_tab_settings">Ayarlar</string>
     <string name="main_cd_search">Ara</string>
+    <string name="main_cd_scroll_to_top">Yukarı kaydır</string>
     <string name="main_folder_rename">Klasörü Yeniden Adlandır</string>
     <string name="main_folder_change_color">Rengi Değiştir</string>
     <string name="main_folder_delete">Klasörü Sil</string>
@@ -1022,6 +1023,16 @@
     <string name="filter_sort_personal_rating">Kişisel Puan</string>
     <string name="filter_sort_runtime">Toplam Süre</string>
     <string name="filter_sort_remaining_episodes">Kalan Bölümler</string>
+    <string name="filter_sort_series_status">Durum</string>
+    <string name="filter_sort_series_status_dialog_title">Duruma Göre Sırala</string>
+    <string name="filter_sort_series_status_dialog_subtitle">Doğal izleme sırası:</string>
+    <string name="filter_sort_status_title_unreleased">Henüz Yayınlanmadı</string>
+    <string name="filter_sort_status_title_caught_up">Güncel / Tamamlandı</string>
+    <string name="filter_sort_status_desc_watching">Başlanmış ve izlenecek bölümleri olan diziler.</string>
+    <string name="filter_sort_status_desc_not_started">Yayınlanmış ve başlanmaya hazır diziler.</string>
+    <string name="filter_sort_status_desc_unreleased">Gelecekte yayınlanması planlanan kayıtlı diziler.</string>
+    <string name="filter_sort_status_desc_caught_up">Şu ana kadar yayınlanan tüm bölümler izlendi.</string>
+    <string name="filter_sort_status_desc_dropped">Durdurulan veya yarıda bırakılan diziler.</string>
     <string name="filter_dir_desc">Azalan</string>
     <string name="filter_dir_asc">Artan</string>
     <string name="msg_action_removed">\"%1$s\" kaldırıldı</string>

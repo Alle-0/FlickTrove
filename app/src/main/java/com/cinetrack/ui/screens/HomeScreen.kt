@@ -167,6 +167,29 @@ fun HomeScreenContent(
     
     val currentGridState = if (uiState.activeTab == "movie") movieGridState else tvGridState
     
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        androidx.compose.runtime.derivedStateOf {
+            val gs = if (uiState.activeTab == "movie") movieGridState else tvGridState
+            gs.firstVisibleItemIndex > 3 || (gs.firstVisibleItemIndex > 0 && gs.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    DisposableEffect(showScrollToTop, currentGridState, uiState.activeTab) {
+        if (showScrollToTop) {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+                isVisible = true,
+                onScrollToTop = {
+                    scope.launch { currentGridState.animateScrollToItem(0) }
+                }
+            )
+        } else {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
+        }
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
+        }
+    }
+
     var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.model.SortConfig?>(null) }
     LaunchedEffect(uiState.sortConfig) {
         if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {

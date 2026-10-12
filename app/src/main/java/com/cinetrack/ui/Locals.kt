@@ -46,3 +46,11 @@ data class TrophyFilterModalConfig(
 )
 
 val LocalActiveTrophyFilterConfig = compositionLocalOf<MutableState<TrophyFilterModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }
+
+data class ScrollToTopState(
+    val isVisible: Boolean = false,
+    val onScrollToTop: () -> Unit = {}
+)
+
+val LocalScrollToTopState = compositionLocalOf<MutableState<ScrollToTopState>> { androidx.compose.runtime.mutableStateOf(ScrollToTopState()) }
+

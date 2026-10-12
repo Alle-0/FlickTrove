@@ -11,6 +11,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -49,16 +50,13 @@ fun QuickRatingModal(
         hazeState = hazeState
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 12.dp),
+            modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 12.dp)
                     .padding(bottom = 16.dp)
             ) {
                 Box(
@@ -149,7 +147,7 @@ fun QuickRatingModal(
                     .height(80.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -158,9 +156,9 @@ fun QuickRatingModal(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(56.dp)
+                        .height(50.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.08f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -178,12 +176,12 @@ fun QuickRatingModal(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(56.dp)
+                        .height(50.dp)
                         .bounceClick(scaleDown = 0.92f) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(currentRating)
                         }
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(CircleShape)
                         .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {

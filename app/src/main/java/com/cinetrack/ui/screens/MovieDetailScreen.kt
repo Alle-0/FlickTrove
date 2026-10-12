@@ -424,6 +424,7 @@ fun MovieDetailScreenContent(
         cachedSuccess = uiState as DetailUiState.Success
     }
     var trailersMenuData by remember { mutableStateOf<com.cinetrack.ui.components.detail.TrailersMenuModalData?>(null) }
+    var trailersYOffset by remember { mutableFloatStateOf(0f) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         MovieActionsWrapper(
@@ -538,7 +539,11 @@ fun MovieDetailScreenContent(
                                         onRatingClick = { showRatingInfoDialog = true },
                                         hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
                                         onCoverSelectClick = { showCoverSelectionSheet = true },
-                                        isOffline = isOffline
+                                        onTrailerClick = if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
+                                            { scope.launch { scrollState.animateScrollTo(trailersYOffset.toInt()) } }
+                                        } else null,
+                                        isOffline = isOffline,
+                                        movieStatus = state.details.status ?: activeMovie.status
                                     )
 
                                     DetailMetaRows(
@@ -698,6 +703,9 @@ fun MovieDetailScreenContent(
 
                                     if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
                                         DetailTrailers(
+                                            modifier = Modifier.onGloballyPositioned { coordinates ->
+                                                trailersYOffset = coordinates.positionInParent().y
+                                            },
                                             videos = state.videos,
                                             trailers = state.trailers,
                                             accentColor = accentColor,

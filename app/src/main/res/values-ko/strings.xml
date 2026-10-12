@@ -37,6 +37,7 @@
     <string name="main_tab_folders">내 폴더</string>
     <string name="main_tab_settings">설정</string>
     <string name="main_cd_search">검색</string>
+    <string name="main_cd_scroll_to_top">맨 위로 이동</string>
     <string name="main_folder_rename">폴더 이름 변경</string>
     <string name="main_folder_change_color">색상 변경</string>
     <string name="main_folder_delete">폴더 삭제</string>
@@ -1022,6 +1023,16 @@
     <string name="filter_sort_personal_rating">내 평점순</string>
     <string name="filter_sort_runtime">총 러닝타임순</string>
     <string name="filter_sort_remaining_episodes">남은 에피소드순</string>
+    <string name="filter_sort_series_status">상태</string>
+    <string name="filter_sort_series_status_dialog_title">상태별 정렬</string>
+    <string name="filter_sort_series_status_dialog_subtitle">시청 우선순위:</string>
+    <string name="filter_sort_status_title_unreleased">미공개·공개 예정</string>
+    <string name="filter_sort_status_title_caught_up">최신화까지 시청 / 완료</string>
+    <string name="filter_sort_status_desc_watching">시청을 시작했으며 볼 에피소드가 있는 시리즈입니다.</string>
+    <string name="filter_sort_status_desc_not_started">공개되어 바로 시청을 시작할 수 있습니다.</string>
+    <string name="filter_sort_status_desc_unreleased">향후 공개 예정으로 저장된 시리즈입니다.</string>
+    <string name="filter_sort_status_desc_caught_up">현재 방영된 모든 에피소드를 시청했습니다.</string>
+    <string name="filter_sort_status_desc_dropped">일시 정지하거나 중단한 시리즈입니다.</string>
     <string name="filter_dir_desc">내림차순</string>
     <string name="filter_dir_asc">오름차순</string>
     <string name="msg_action_removed">\"%1$s\" 삭제됨</string>

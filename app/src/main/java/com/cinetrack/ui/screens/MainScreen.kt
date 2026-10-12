@@ -63,6 +63,7 @@ import com.cinetrack.ui.components.common.SymbiontGlobalIndicator
 import com.cinetrack.ui.components.common.SymbiontPullState
 import com.cinetrack.ui.components.main.MainModalsContainer
 import com.cinetrack.ui.components.main.MainSearchFab
+import com.cinetrack.ui.components.main.MainScrollToTopFab
 import com.cinetrack.ui.components.navigation.GlassyTopBar
 import com.cinetrack.ui.components.shared.FolderEditMode
 import com.cinetrack.ui.components.shared.LocalMovieActions
@@ -170,8 +171,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             val currentTab = tabNavigator.current
             var previousTab by remember { mutableStateOf<Tab>(initialTab) }
             var _lastTab by remember { mutableStateOf<Tab>(initialTab) }
+            val scrollToTopState = remember { mutableStateOf(com.cinetrack.ui.ScrollToTopState()) }
 
             LaunchedEffect(currentTab) {
+                scrollToTopState.value = com.cinetrack.ui.ScrollToTopState()
                 // previousTab = il tab in cui eravamo PRIMA di questo cambio
                 if (currentTab != _lastTab) {
                     previousTab = _lastTab
@@ -215,6 +218,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     com.cinetrack.ui.LocalActiveTrophyFilterConfig provides activeTrophyFilterConfig,
                     com.cinetrack.ui.LocalFolderReorderRequest provides folderReorderRequest,
                     com.cinetrack.ui.LocalFolderReorderConfig provides folderReorderConfig,
+                    com.cinetrack.ui.LocalScrollToTopState provides scrollToTopState,
                     LocalFilterRequest provides { bounds ->
                         filterButtonBounds = bounds
                         isFilterModalVisible = true
@@ -397,6 +401,12 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         "account" -> tabNavigator.current = AccountTab
                                     }
                                 }
+                            )
+
+                            MainScrollToTopFab(
+                                visible = scrollToTopState.value.isVisible && currentTab !is SettingsTab,
+                                contentHazeState = contentHazeState,
+                                onScrollToTop = scrollToTopState.value.onScrollToTop
                             )
 
                             MainSearchFab(

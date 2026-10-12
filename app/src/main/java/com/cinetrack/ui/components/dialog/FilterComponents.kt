@@ -141,7 +141,7 @@ fun ExpandableSection(
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = null,
-                        tint = if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                        tint = if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                         modifier = Modifier
                             .size(20.dp)
                             .graphicsLayer(rotationZ = rotation)
@@ -151,8 +151,14 @@ fun ExpandableSection(
 
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = scaleIn(initialScale = 0.95f) + fadeIn(),
-                exit = scaleOut(targetScale = 0.95f) + fadeOut()
+                enter = scaleIn(
+                    initialScale = 0.85f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
+                ) + fadeIn(animationSpec = tween(200)),
+                exit = scaleOut(
+                    targetScale = 0.85f,
+                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
+                ) + fadeOut(animationSpec = tween(150))
             ) {
                 Box(modifier = Modifier.padding(bottom = 14.dp)) {
                     content()
@@ -319,6 +325,7 @@ fun ProviderItem(
 fun SortOptionItem(
     label: String,
     isSelected: Boolean,
+    onInfoClick: (() -> Unit)? = null,
     onClick: () -> Unit
 ) {
     Row(
@@ -337,12 +344,41 @@ fun SortOptionItem(
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
-        Text(
-            text = label,
-            color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            fontSize = 14.sp
-        )
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Text(
+                text = label,
+                color = if (isSelected) MaterialTheme.colorScheme.onSurface else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.9f),
+                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+                fontSize = 14.sp
+            )
+            if (onInfoClick != null) {
+                Spacer(modifier = Modifier.width(8.dp))
+                Box(
+                    modifier = Modifier
+                        .size(22.dp)
+                        .bounceClick { onInfoClick() }
+                        .clip(CircleShape)
+                        .background(
+                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.22f)
+                            else Color.White.copy(alpha = 0.08f)
+                        )
+                        .border(
+                            1.dp,
+                            if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+                            else Color.White.copy(alpha = 0.16f),
+                            CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Info,
+                        contentDescription = stringResource(R.string.filter_sort_series_status_dialog_title),
+                        tint = if (isSelected) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.75f),
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+            }
+        }
 
         if (isSelected) {
             Icon(
@@ -400,3 +436,192 @@ fun DirectionChip(
 }
 
 data class FilterOption(val id: String, val label: String)
+
+@Composable
+fun SeriesStatusInfoDialog(
+    onDismiss: () -> Unit,
+    hazeState: HazeState? = null
+) {
+    Box(
+        modifier = Modifier
+            .fillMaxSize()
+            .zIndex(200f)
+            .background(Color.Black.copy(alpha = 0.72f))
+            .clickable(
+                interactionSource = remember { MutableInteractionSource() },
+                indication = null
+            ) { onDismiss() },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .widthIn(max = 380.dp)
+                .fillMaxWidth(0.88f)
+                .clip(RoundedCornerShape(28.dp))
+                .background(Color(0xFF111114).copy(alpha = 0.98f))
+                .border(
+                    1.dp,
+                    Color.White.copy(alpha = 0.12f),
+                    RoundedCornerShape(28.dp)
+                )
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) {}
+                .padding(22.dp)
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Header
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier.weight(1f)
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(34.dp)
+                                .clip(CircleShape)
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_crono),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.primary,
+                                modifier = Modifier.size(17.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(10.dp))
+                        Column {
+                            Text(
+                                text = stringResource(R.string.filter_sort_series_status_dialog_title),
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                color = Color.White
+                            )
+                            Text(
+                                text = stringResource(R.string.filter_sort_series_status_dialog_subtitle),
+                                fontSize = 11.5.sp,
+                                color = Color.White.copy(alpha = 0.6f)
+                            )
+                        }
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                val items = listOf(
+                    SeriesStatusLegendEntry(
+                        iconRes = R.drawable.ic_play,
+                        tintColor = Color(0xFF10B981), // Emerald
+                        title = stringResource(R.string.filter_status_watching),
+                        desc = stringResource(R.string.filter_sort_status_desc_watching)
+                    ),
+                    SeriesStatusLegendEntry(
+                        iconRes = R.drawable.ic_segnalibro,
+                        tintColor = Color(0xFFF59E0B), // Amber / Gold
+                        title = stringResource(R.string.filter_status_not_started),
+                        desc = stringResource(R.string.filter_sort_status_desc_not_started)
+                    ),
+                    SeriesStatusLegendEntry(
+                        iconRes = R.drawable.ic_bell,
+                        tintColor = Color(0xFF06B6D4), // Cyan
+                        title = stringResource(R.string.filter_sort_status_title_unreleased),
+                        desc = stringResource(R.string.filter_sort_status_desc_unreleased)
+                    ),
+                    SeriesStatusLegendEntry(
+                        iconRes = R.drawable.ic_tick,
+                        tintColor = Color(0xFFA855F7), // Violet
+                        title = stringResource(R.string.filter_sort_status_title_caught_up),
+                        desc = stringResource(R.string.filter_sort_status_desc_caught_up)
+                    ),
+                    SeriesStatusLegendEntry(
+                        iconRes = R.drawable.ic_drop_arrow_down,
+                        tintColor = Color(0xFFEF4444), // Coral Red
+                        title = stringResource(R.string.filter_status_dropped),
+                        desc = stringResource(R.string.filter_sort_status_desc_dropped)
+                    )
+                )
+
+                items.forEachIndexed { index, item ->
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(Color.White.copy(alpha = 0.035f))
+                            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                            .padding(horizontal = 12.dp, vertical = 9.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .size(32.dp)
+                                .clip(CircleShape)
+                                .background(item.tintColor.copy(alpha = 0.16f))
+                                .border(1.dp, item.tintColor.copy(alpha = 0.4f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = item.iconRes),
+                                contentDescription = null,
+                                tint = item.tintColor,
+                                modifier = Modifier.size(15.dp)
+                            )
+                        }
+                        Spacer(modifier = Modifier.width(12.dp))
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = item.title,
+                                fontSize = 13.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White
+                            )
+                            Text(
+                                text = item.desc,
+                                fontSize = 11.sp,
+                                color = Color.White.copy(alpha = 0.62f),
+                                lineHeight = 14.sp
+                            )
+                        }
+                    }
+                    if (index < items.lastIndex) {
+                        Spacer(modifier = Modifier.height(7.dp))
+                    }
+                }
+
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .bounceClick { onDismiss() }
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(16.dp))
+                        .padding(vertical = 12.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = stringResource(R.string.settings_close),
+                        color = MaterialTheme.colorScheme.primary,
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 13.5.sp
+                    )
+                }
+            }
+        }
+    }
+}
+
+private data class SeriesStatusLegendEntry(
+    val iconRes: Int,
+    val tintColor: Color,
+    val title: String,
+    val desc: String
+)
+

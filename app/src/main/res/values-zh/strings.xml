@@ -37,6 +37,7 @@
     <string name="main_tab_folders">我的文件夹</string>
     <string name="main_tab_settings">设置</string>
     <string name="main_cd_search">搜索</string>
+    <string name="main_cd_scroll_to_top">回到顶部</string>
     <string name="main_folder_rename">重命名文件夹</string>
     <string name="main_folder_change_color">更改颜色</string>
     <string name="main_folder_delete">删除文件夹</string>
@@ -1022,6 +1023,16 @@
     <string name="filter_sort_personal_rating">我的评分</string>
     <string name="filter_sort_runtime">播放总时长</string>
     <string name="filter_sort_remaining_episodes">剩余集数</string>
+    <string name="filter_sort_series_status">状态</string>
+    <string name="filter_sort_series_status_dialog_title">按状态排序</string>
+    <string name="filter_sort_series_status_dialog_subtitle">自然观看层级：</string>
+    <string name="filter_sort_status_title_unreleased">尚未播出</string>
+    <string name="filter_sort_status_title_caught_up">跟上进度 / 已完结</string>
+    <string name="filter_sort_status_desc_watching">已开始观看且有可用更新集数的剧集。</string>
+    <string name="filter_sort_status_desc_not_started">已上映播出，随时可以开始观看。</string>
+    <string name="filter_sort_status_desc_unreleased">未来计划播出的已收藏剧集。</string>
+    <string name="filter_sort_status_desc_caught_up">当前已播出的所有剧集均已看完。</string>
+    <string name="filter_sort_status_desc_dropped">已暂停或弃剧的系列。</string>
     <string name="filter_dir_desc">降序</string>
     <string name="filter_dir_asc">升序</string>
     <string name="msg_action_removed">“%1$s” 已移除</string>

@@ -183,6 +183,21 @@ class GetHomeUiStateUseCase @Inject constructor() {
                     movies.sortedWith(compareBy<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
+            "series_status" -> {
+                if (isDesc) {
+                    movies.sortedWith(
+                        compareByDescending<Movie> { it.seriesStatusPriority }
+                            .thenBy { it.title ?: it.name ?: "" }
+                            .thenBy { it.id }
+                    )
+                } else {
+                    movies.sortedWith(
+                        compareBy<Movie> { it.seriesStatusPriority }
+                            .thenBy { it.title ?: it.name ?: "" }
+                            .thenBy { it.id }
+                    )
+                }
+            }
             "remaining_episodes" -> {
                 if (isDesc) {
                     movies.sortedWith(

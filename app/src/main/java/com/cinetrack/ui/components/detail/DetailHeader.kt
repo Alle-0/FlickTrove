@@ -14,6 +14,8 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -75,7 +77,9 @@ fun DetailHeader(
     onRatingClick: () -> Unit = {},
     hasAlternativeCovers: Boolean = false,
     onCoverSelectClick: (() -> Unit)? = null,
+    onTrailerClick: (() -> Unit)? = null,
     isOffline: Boolean = false,
+    movieStatus: String? = null,
     modifier: Modifier = Modifier
 ) {
     var isExpanded by remember { mutableStateOf(false) }
@@ -194,8 +198,27 @@ fun DetailHeader(
                 }
             }
 
+            val isTvSeries = movie.mediaType == "tv"
+            val effectiveStatus = movieStatus?.takeIf { it.isNotBlank() } ?: movie.status
+            val seriesStatusLabel = if (isTvSeries && !effectiveStatus.isNullOrBlank()) {
+                when (effectiveStatus) {
+                    "Returning Series" -> stringResource(R.string.status_returning_series)
+                    "Planned" -> stringResource(R.string.status_planned)
+                    "In Production" -> stringResource(R.string.status_in_production)
+                    "Ended" -> stringResource(R.string.status_ended)
+                    "Canceled", "Cancelled" -> stringResource(R.string.status_canceled)
+                    "Pilot" -> stringResource(R.string.status_pilot)
+                    "Rumored" -> stringResource(R.string.status_rumored)
+                    "Post Production" -> stringResource(R.string.status_post_production)
+                    "Released" -> stringResource(R.string.status_released)
+                    else -> effectiveStatus
+                }
+            } else null
+
             val showCoverBtn = movie.customBackdropPath != null && onCoverSelectClick != null
-            if (matchPercentage != null || showCoverBtn) {
+            val showTrailerBtn = onTrailerClick != null
+
+            if (matchPercentage != null || seriesStatusLabel != null || showTrailerBtn || showCoverBtn) {
                 val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
                 Row(
                     modifier = Modifier.padding(bottom = 16.dp),
@@ -244,6 +267,88 @@ fun DetailHeader(
                                         letterSpacing = 0.5.sp
                                     ),
                                     color = ColorUtils.lightenForText(accentColor, 1.35f)
+                                )
+                            }
+                        }
+                    }
+
+                    if (seriesStatusLabel != null) {
+                        Box(
+                            modifier = Modifier
+                                .then(
+                                    if (advancedEffectsEnabled) {
+                                        Modifier
+                                            .hazeGlass(
+                                                state = hazeState,
+                                                shape = CircleShape,
+                                                containerColor = Color.White.copy(alpha = 0.08f),
+                                                blurRadius = 16.dp
+                                            )
+                                            .padding(horizontal = 8.dp, vertical = 2.dp)
+                                    } else {
+                                        Modifier
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF1E1A22))
+                                            .border(0.5.dp, Color.White.copy(alpha = 0.2f), CircleShape)
+                                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = seriesStatusLabel,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.3.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.9f)
+                            )
+                        }
+                    }
+
+                    if (onTrailerClick != null) {
+                        Box(
+                            modifier = Modifier
+                                .then(
+                                    if (advancedEffectsEnabled) {
+                                        Modifier
+                                            .hazeGlass(
+                                                state = hazeState,
+                                                shape = CircleShape,
+                                                containerColor = accentColor.copy(alpha = 0.15f),
+                                                blurRadius = 16.dp
+                                            )
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    } else {
+                                        Modifier
+                                            .clip(CircleShape)
+                                            .background(Color(0xFF1E1A22))
+                                            .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
+                                            .padding(horizontal = 10.dp, vertical = 4.dp)
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Row(
+                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(11.dp),
+                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
+                                )
+                                Text(
+                                    text = "Trailer",
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.ExtraBold,
+                                        letterSpacing = 0.5.sp
+                                    ),
+                                    color = ColorUtils.lightenForText(accentColor, 1.35f),
+                                    modifier = Modifier.bounceClick { onTrailerClick() }
                                 )
                             }
                         }

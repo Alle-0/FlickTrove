@@ -37,6 +37,7 @@
     <string name="main_tab_folders">My folders</string>
     <string name="main_tab_settings">Settings</string>
     <string name="main_cd_search">Search</string>
+    <string name="main_cd_scroll_to_top">Scroll to top</string>
     <string name="main_folder_rename">Rename Folder</string>
     <string name="main_folder_change_color">Change Color</string>
     <string name="main_folder_delete">Delete Folder</string>
@@ -1037,6 +1038,16 @@
     <string name="filter_sort_personal_rating">Personal Rating</string>
     <string name="filter_sort_runtime">Total Runtime</string>
     <string name="filter_sort_remaining_episodes">Remaining Episodes</string>
+    <string name="filter_sort_series_status">Status</string>
+    <string name="filter_sort_series_status_dialog_title">Series Status Sorting</string>
+    <string name="filter_sort_series_status_dialog_subtitle">Natural viewing hierarchy:</string>
+    <string name="filter_sort_status_title_unreleased">Not Yet Released</string>
+    <string name="filter_sort_status_title_caught_up">Caught Up / Completed</string>
+    <string name="filter_sort_status_desc_watching">Shows you have started with episodes available.</string>
+    <string name="filter_sort_status_desc_not_started">Released and available to begin.</string>
+    <string name="filter_sort_status_desc_unreleased">Upcoming releases scheduled for the future.</string>
+    <string name="filter_sort_status_desc_caught_up">All currently aired episodes have been watched.</string>
+    <string name="filter_sort_status_desc_dropped">Paused or abandoned series.</string>
     <string name="filter_dir_desc">Descending</string>
     <string name="filter_dir_asc">Ascending</string>
     <string name="msg_action_removed">\"%1$s\" removed</string>

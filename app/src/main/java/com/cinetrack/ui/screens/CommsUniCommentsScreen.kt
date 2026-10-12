@@ -375,7 +375,8 @@ class CommsUniCommentsScreen(
                     }
                 }
 
-                val flatTree = remember(comments, expandedComments.value, sortOption, sortOrder, sourceFilters, languageFilters) { 
+                val flatTree =
+                    remember(comments, expandedComments.value, sortOption, sortOrder, sourceFilters, languageFilters) {
                     buildFlatTree(comments, expandedComments.value, sortOption, sortOrder, sourceFilters, languageFilters) 
                 }
 
@@ -994,4 +995,4 @@ class CommsUniCommentsScreen(
         return tree
     }
 }
-
+

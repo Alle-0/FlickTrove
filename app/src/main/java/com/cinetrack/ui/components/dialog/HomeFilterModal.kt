@@ -149,12 +149,14 @@ fun HomeFilterModal(
     val alpha by transition.animateFloat(label = "scrimAlpha") { state -> if (state) 1f else 0f }
 
     var localSortConfig by remember(isVisible) { mutableStateOf(sortConfig) }
+    var showSeriesStatusInfoDialog by remember { mutableStateOf(false) }
     
     // Sync local state when modal becomes visible
     LaunchedEffect(isVisible) {
         if (isVisible) {
             localSortConfig = sortConfig
             expandedSection = null
+            showSeriesStatusInfoDialog = false
         }
     }
 
@@ -506,16 +508,22 @@ fun HomeFilterModal(
                                                 add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
                                                 add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
                                                 if (category != "movie") {
+                                                    add(FilterOption("series_status", stringResource(R.string.filter_sort_series_status)))
                                                     add(FilterOption("remaining_episodes", stringResource(R.string.filter_sort_remaining_episodes)))
                                                 }
                                             }
                                         }
 
+
                                         sortOptions.forEach { option ->
                                             SortOptionItem(
                                                 label = option.label,
                                                 isSelected = localSortConfig.sortType == option.id,
-                                                onClick = { localSortConfig = localSortConfig.copy(sortType = option.id) }
+                                                onInfoClick = if (option.id == "series_status") { { showSeriesStatusInfoDialog = true } } else null,
+                                                onClick = {
+                                                    val newDirection = if (localSortConfig.sortType != option.id && (option.id == "series_status" || option.id == "title")) "asc" else localSortConfig.sortDirection
+                                                    localSortConfig = localSortConfig.copy(sortType = option.id, sortDirection = newDirection)
+                                                }
                                             )
                                         }
                                         
@@ -1030,6 +1038,14 @@ fun HomeFilterModal(
                         }
                     }
                 }
+            }
+
+            // --- SERIES STATUS INFO DIALOG (root level for proper hazeGlass) ---
+            if (showSeriesStatusInfoDialog) {
+                SeriesStatusInfoDialog(
+                    hazeState = hazeState,
+                    onDismiss = { showSeriesStatusInfoDialog = false }
+                )
             }
         }
     }

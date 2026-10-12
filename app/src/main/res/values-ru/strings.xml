@@ -34,6 +34,7 @@
     <string name="main_tab_folders">Мои папки</string>
     <string name="main_tab_settings">Настройки</string>
     <string name="main_cd_search">Поиск</string>
+    <string name="main_cd_scroll_to_top">Наверх</string>
     <string name="main_folder_rename">Переименовать папку</string>
     <string name="main_folder_change_color">Изменить цвет</string>
     <string name="main_folder_delete">Удалить папку</string>
@@ -951,6 +952,16 @@
     <string name="filter_sort_personal_rating">Личная оценка</string>
     <string name="filter_sort_runtime">Общая продолжительность</string>
     <string name="filter_sort_remaining_episodes">Оставшиеся серии</string>
+    <string name="filter_sort_series_status">Статус</string>
+    <string name="filter_sort_series_status_dialog_title">Сортировка по статусу</string>
+    <string name="filter_sort_series_status_dialog_subtitle">Естественный порядок просмотра:</string>
+    <string name="filter_sort_status_title_unreleased">Ещё не вышли</string>
+    <string name="filter_sort_status_title_caught_up">В графике / Завершены</string>
+    <string name="filter_sort_status_desc_watching">Начатые сериалы с доступными для просмотра сериями.</string>
+    <string name="filter_sort_status_desc_not_started">Вышедшие и доступные для начала просмотра.</string>
+    <string name="filter_sort_status_desc_unreleased">Запланированные будущие премьеры.</string>
+    <string name="filter_sort_status_desc_caught_up">Все вышедшие на данный момент серии просмотрены.</string>
+    <string name="filter_sort_status_desc_dropped">Приостановленные или брошенные сериалы.</string>
     <string name="filter_dir_desc">По убыванию</string>
     <string name="filter_dir_asc">По возрастанию</string>
     <string name="msg_action_removed">\"%1$s\" удалено</string>

@@ -5,6 +5,7 @@ import com.cinetrack.ui.utils.ColorUtils
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Check
@@ -143,7 +144,6 @@ fun QuickNoteModal(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 8.dp)
                 .imePadding()
                 .pointerInput(Unit) {
                     detectTapGestures(onTap = { focusManager.clearFocus() })
@@ -152,7 +152,9 @@ fun QuickNoteModal(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -404,7 +406,7 @@ fun QuickNoteModal(
                 }
             }
 
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -413,9 +415,9 @@ fun QuickNoteModal(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(56.dp)
+                        .height(50.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.08f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -433,12 +435,12 @@ fun QuickNoteModal(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(56.dp)
+                        .height(50.dp)
                         .bounceClick(scaleDown = 0.92f) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(note)
                         }
-                        .clip(RoundedCornerShape(24.dp))
+                        .clip(CircleShape)
                         .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {

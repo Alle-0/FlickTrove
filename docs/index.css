@@ -162,8 +162,8 @@ body {
   z-index: -1;
   border-radius: 100px;
   background: rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
+  backdrop-filter: blur(24px);
 }
 
 .nav-brand {
@@ -475,8 +475,8 @@ body {
   gap: 10px;
   padding: 12px 22px;
   background: rgba(15, 23, 42, 0.218);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 100px;
   color: #fff;
@@ -512,8 +512,8 @@ body {
   padding: 14px 28px;
   background: rgba(255, 255, 255, 0.03);
   /* Vetro scuro */
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 100px;
   /* Forma a pillola */
@@ -636,8 +636,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.1);
   box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5), inset 0 0 0 1px rgba(255, 255, 255, 0.05);
   overflow: hidden;
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 .phone-frame img {
@@ -846,8 +846,8 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 24px;
   box-shadow: 0 30px 60px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   overflow: hidden;
 }
 
@@ -1033,8 +1033,8 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(255, 255, 255, 0.1);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
 }
 
 /* 3. Detail UI */
@@ -1359,8 +1359,8 @@ body {
   gap: 8px;
   padding: 12px 24px;
   background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   border: 1px solid rgba(255, 255, 255, 0.08);
   border-radius: 100px;
   color: #fff;
@@ -1444,8 +1444,8 @@ body {
   border-radius: 16px;
   margin-bottom: 16px;
   overflow: hidden;
-  backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
   transition: all 0.3s ease;
 }
 
@@ -1582,8 +1582,8 @@ body {
   border-radius: 24px;
   padding: 24px 30px;
   overflow: hidden;
-  backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
   box-shadow: 0 24px 60px rgba(0, 0, 0, 0.45), 0 0 40px rgba(45, 212, 191, 0.04);
   display: flex;
   flex-direction: row;
@@ -1872,8 +1872,8 @@ body {
   border-radius: 100px;
   background: rgba(255, 255, 255, 0.03);
   border: 1px solid rgba(255, 255, 255, 0.05);
-  backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px);
+  backdrop-filter: blur(10px);
   transition: all 0.3s ease;
   margin-bottom: 40px;
 }
@@ -2243,8 +2243,8 @@ body {
   width: 100%;
   height: 100%;
   background: rgba(9, 12, 16, 0.88);
-  backdrop-filter: blur(0px);
   -webkit-backdrop-filter: blur(0px);
+  backdrop-filter: blur(0px);
   z-index: 100000;
   flex-direction: column;
   justify-content: center;
@@ -2262,8 +2262,8 @@ body {
   opacity: 1;
   visibility: visible;
   pointer-events: auto;
-  backdrop-filter: blur(28px);
   -webkit-backdrop-filter: blur(28px);
+  backdrop-filter: blur(28px);
 }
 
 .mobile-menu-close {
@@ -2510,8 +2510,8 @@ body {
     gap: 7px !important;
     border-radius: 100px !important;
     background: rgba(12, 16, 24, 0.78) !important;
-    backdrop-filter: blur(20px) !important;
     -webkit-backdrop-filter: blur(20px) !important;
+    backdrop-filter: blur(20px) !important;
     border: 1px solid rgba(255, 255, 255, 0.15) !important;
     box-shadow: 0 12px 28px rgba(0, 0, 0, 0.6), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
     z-index: 35 !important;

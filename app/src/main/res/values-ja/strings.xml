@@ -37,6 +37,7 @@
     <string name="main_tab_folders">マイフォルダ</string>
     <string name="main_tab_settings">設定</string>
     <string name="main_cd_search">検索</string>
+    <string name="main_cd_scroll_to_top">トップに戻る</string>
     <string name="main_folder_rename">フォルダ名を変更</string>
     <string name="main_folder_change_color">カラーを変更</string>
     <string name="main_folder_delete">フォルダを削除</string>
@@ -1022,6 +1023,16 @@
     <string name="filter_sort_personal_rating">個人評価順</string>
     <string name="filter_sort_runtime">総上映時間順</string>
     <string name="filter_sort_remaining_episodes">残りエピソード順</string>
+    <string name="filter_sort_series_status">ステータス</string>
+    <string name="filter_sort_series_status_dialog_title">ステータス順</string>
+    <string name="filter_sort_series_status_dialog_subtitle">視聴の優先順位：</string>
+    <string name="filter_sort_status_title_unreleased">未配信・未公開</string>
+    <string name="filter_sort_status_title_caught_up">最新話まで視聴済み / 完了</string>
+    <string name="filter_sort_status_desc_watching">視聴開始済みで、見られるエピソードがある作品。</string>
+    <string name="filter_sort_status_desc_not_started">配信中で、いつでも見始められる作品。</string>
+    <string name="filter_sort_status_desc_unreleased">今後配信予定の保存済み作品。</string>
+    <string name="filter_sort_status_desc_caught_up">現在放送・配信中の全エピソードを視聴済み。</string>
+    <string name="filter_sort_status_desc_dropped">中断または途中で視聴をやめた作品。</string>
     <string name="filter_dir_desc">降順</string>
     <string name="filter_dir_asc">昇順</string>
     <string name="msg_action_removed">「%1$s」を削除しました</string>

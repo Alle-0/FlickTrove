@@ -82,7 +82,6 @@ internal fun EpisodeCard(
                 val airDateInfo = remember(episode.airDate) {
                     com.cinetrack.ui.components.updates.formatEpisodeAirDate(episode.airDate, context)
                 }
-
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier.fillMaxWidth()
@@ -273,6 +272,35 @@ internal fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
                                     fontSize = 12.sp,
                                     fontWeight = FontWeight.Bold,
                                     color = Color(0xFF00E676)
+                                )
+                            }
+                        }
+                    }
+
+                    val runtimeText = episode.runtime?.takeIf { it > 0 }?.let { m ->
+                        if (m < 60) "${m}m" else "${m / 60}h ${if (m % 60 > 0) "${m % 60}m" else ""}".trim()
+                    }
+                    if (runtimeText != null) {
+                        Surface(
+                            color = Color.White.copy(alpha = 0.08f),
+                            shape = CircleShape
+                        ) {
+                            Row(
+                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_clock),
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.7f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                                Spacer(modifier = Modifier.width(6.dp))
+                                Text(
+                                    text = runtimeText,
+                                    fontSize = 12.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = Color.White.copy(alpha = 0.9f)
                                 )
                             }
                         }

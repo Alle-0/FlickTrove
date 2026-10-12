@@ -275,6 +275,11 @@ class FolderDetailViewModel @Inject constructor(
             "vote_average" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "personal_rating" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.personalRating ?: 0.0 }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "runtime" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { getMovieDuration(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "series_status" -> if (isDesc) {
+                filtered.sortedWith(compareByDescending<Movie> { it.seriesStatusPriority }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            } else {
+                filtered.sortedWith(compareBy<Movie> { it.seriesStatusPriority }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            }
             "remaining_episodes" -> if (isDesc) {
                 filtered.sortedWith(compareByDescending<Movie> { getRemainingEpisodes(it) }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             } else {

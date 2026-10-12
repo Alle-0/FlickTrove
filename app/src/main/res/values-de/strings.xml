@@ -32,6 +32,7 @@
     <string name="main_tab_folders">Meine Ordner</string>
     <string name="main_tab_settings">Einstellungen</string>
     <string name="main_cd_search">Suche</string>
+    <string name="main_cd_scroll_to_top">Nach oben scrollen</string>
     <string name="main_folder_rename">Ordner umbenennen</string>
     <string name="main_folder_change_color">Farbe ändern</string>
     <string name="main_folder_delete">Ordner löschen</string>
@@ -944,6 +945,16 @@
     <string name="filter_sort_personal_rating">Persönliche Bewertung</string>
     <string name="filter_sort_runtime">Gesamtlaufzeit</string>
     <string name="filter_sort_remaining_episodes">Verbleibende Episoden</string>
+    <string name="filter_sort_series_status">Status</string>
+    <string name="filter_sort_series_status_dialog_title">Sortierung nach Status</string>
+    <string name="filter_sort_series_status_dialog_subtitle">Natürliche Wiedergabe-Hierarchie:</string>
+    <string name="filter_sort_status_title_unreleased">Noch nicht erschienen</string>
+    <string name="filter_sort_status_title_caught_up">Auf dem neuesten Stand / Abgeschlossen</string>
+    <string name="filter_sort_status_desc_watching">Begonnene Serien mit verfügbaren Episoden zum Anschauen.</string>
+    <string name="filter_sort_status_desc_not_started">Veröffentlicht und bereit zum Starten.</string>
+    <string name="filter_sort_status_desc_unreleased">Geplante zukünftige Veröffentlichungen.</string>
+    <string name="filter_sort_status_desc_caught_up">Alle bisher ausgestrahlten Episoden wurden gesehen.</string>
+    <string name="filter_sort_status_desc_dropped">Pausierte oder abgebrochene Serien.</string>
     <string name="filter_dir_desc">Absteigend</string>
     <string name="filter_dir_asc">Aufsteigend</string>
     <string name="msg_action_removed">„%1$s“ entfernt</string>

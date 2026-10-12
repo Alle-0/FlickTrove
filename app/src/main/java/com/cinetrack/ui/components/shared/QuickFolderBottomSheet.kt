@@ -46,13 +46,13 @@ fun QuickFolderModal(
         hazeState = hazeState
     ) {
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 16.dp, bottom = 8.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 12.dp).padding(bottom = 16.dp)
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 16.dp)
             ) {
                 Box(
                     modifier = Modifier
@@ -192,14 +192,14 @@ fun QuickFolderModal(
                 }
             }
 
-            Spacer(modifier = Modifier.height(16.dp))
+            Spacer(modifier = Modifier.height(20.dp))
 
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(56.dp)
+                    .height(50.dp)
                     .bounceClick(scaleDown = 0.92f, onClick = onClose)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(CircleShape)
                     .background(accentColor),
                 contentAlignment = Alignment.Center
             ) {

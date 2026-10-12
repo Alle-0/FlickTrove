@@ -34,6 +34,7 @@
     <string name="main_tab_folders">Minhas pastas</string>
     <string name="main_tab_settings">Configurações</string>
     <string name="main_cd_search">Buscar</string>
+    <string name="main_cd_scroll_to_top">Volver ao topo</string>
     <string name="main_folder_rename">Renomear Pasta</string>
     <string name="main_folder_change_color">Alterar Cor</string>
     <string name="main_folder_delete">Excluir Pasta</string>
@@ -948,6 +949,16 @@
     <string name="filter_sort_personal_rating">Avaliação Pessoal</string>
     <string name="filter_sort_runtime">Duração Total</string>
     <string name="filter_sort_remaining_episodes">Episódios Restantes</string>
+    <string name="filter_sort_series_status">Status</string>
+    <string name="filter_sort_series_status_dialog_title">Ordenar por Status</string>
+    <string name="filter_sort_series_status_dialog_subtitle">Hierarquia natural de visualização:</string>
+    <string name="filter_sort_status_title_unreleased">Ainda não lançadas</string>
+    <string name="filter_sort_status_title_caught_up">Em dia / Concluídas</string>
+    <string name="filter_sort_status_desc_watching">Séries iniciadas com episódios disponíveis para assistir.</string>
+    <string name="filter_sort_status_desc_not_started">Lançadas e disponíveis, prontas para começar.</string>
+    <string name="filter_sort_status_desc_unreleased">Lançamentos futuros agendados já salvos.</string>
+    <string name="filter_sort_status_desc_caught_up">Todos os episódios lançados até o momento foram assistidos.</string>
+    <string name="filter_sort_status_desc_dropped">Séries pausadas ou abandonadas.</string>
     <string name="filter_dir_desc">Decrescente</string>
     <string name="filter_dir_asc">Crescente</string>
     <string name="msg_action_removed">\"%1$s\" removido</string>

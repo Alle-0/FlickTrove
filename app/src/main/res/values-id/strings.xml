@@ -37,6 +37,7 @@
     <string name="main_tab_folders">Folder Saya</string>
     <string name="main_tab_settings">Pengaturan</string>
     <string name="main_cd_search">Cari</string>
+    <string name="main_cd_scroll_to_top">Kembali ke atas</string>
     <string name="main_folder_rename">Ganti Nama Folder</string>
     <string name="main_folder_change_color">Ubah Warna</string>
     <string name="main_folder_delete">Hapus Folder</string>
@@ -1022,6 +1023,16 @@
     <string name="filter_sort_personal_rating">Rating Pribadi</string>
     <string name="filter_sort_runtime">Total Durasi</string>
     <string name="filter_sort_remaining_episodes">Episode Tersisa</string>
+    <string name="filter_sort_series_status">Status</string>
+    <string name="filter_sort_series_status_dialog_title">Urutkan Berdasarkan Status</string>
+    <string name="filter_sort_series_status_dialog_subtitle">Hierarki menonton alami:</string>
+    <string name="filter_sort_status_title_unreleased">Belum Rilis</string>
+    <string name="filter_sort_status_title_caught_up">Sesuai Jadwal / Selesai</string>
+    <string name="filter_sort_status_desc_watching">Serial yang sudah dimulai dengan episode yang siap ditonton.</string>
+    <string name="filter_sort_status_desc_not_started">Sudah rilis dan siap untuk dimulai.</string>
+    <string name="filter_sort_status_desc_unreleased">Rilisan mendatang yang sudah disimpan.</string>
+    <string name="filter_sort_status_desc_caught_up">Semua episode yang sudah tayang telah ditonton.</string>
+    <string name="filter_sort_status_desc_dropped">Serial yang dijeda atau dihentikan.</string>
     <string name="filter_dir_desc">Menurun</string>
     <string name="filter_dir_asc">Menaik</string>
     <string name="msg_action_removed">\"%1$s\" dihapus</string>

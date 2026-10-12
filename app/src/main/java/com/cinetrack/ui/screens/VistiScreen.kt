@@ -147,6 +147,28 @@ fun VistiScreenContent(
     
     val listState = if (uiState.activeTab == "movie") viewModel.movieGridState else viewModel.tvGridState
     val scope = rememberCoroutineScope()
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        androidx.compose.runtime.derivedStateOf {
+            listState.firstVisibleItemIndex > 3 || (listState.firstVisibleItemIndex > 0 && listState.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    DisposableEffect(showScrollToTop, listState) {
+        if (showScrollToTop) {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+                isVisible = true,
+                onScrollToTop = {
+                    scope.launch { listState.animateScrollToItem(0) }
+                }
+            )
+        } else {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
+        }
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
+        }
+    }
     
     androidx.activity.compose.BackHandler(enabled = isFilterVisible) {
         onToggleFilter(false, null)

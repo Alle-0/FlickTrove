@@ -34,6 +34,7 @@
     <string name="main_tab_folders">मेरे फ़ोल्डर</string>
     <string name="main_tab_settings">सेटिंग्स</string>
     <string name="main_cd_search">खोजें</string>
+    <string name="main_cd_scroll_to_top">शीर्ष पर स्क्रॉल करें</string>
     <string name="main_folder_rename">फ़ोल्डर का नाम बदलें</string>
     <string name="main_folder_change_color">रंग बदलें</string>
     <string name="main_folder_delete">फ़ोल्डर हटाएँ</string>
@@ -946,6 +947,16 @@
     <string name="filter_sort_personal_rating">व्यक्तिगत रेटिंग</string>
     <string name="filter_sort_runtime">कुल रनटाइम</string>
     <string name="filter_sort_remaining_episodes">शेष एपिसोड</string>
+    <string name="filter_sort_series_status">स्थिति</string>
+    <string name="filter_sort_series_status_dialog_title">स्थिति अनुसार क्रमबद्ध करें</string>
+    <string name="filter_sort_series_status_dialog_subtitle">प्राकृतिक देखने का पदानुक्रम:</string>
+    <string name="filter_sort_status_title_unreleased">अभी रिलीज़ नहीं हुआ</string>
+    <string name="filter_sort_status_title_caught_up">नवीनतम तक देखे गए / पूर्ण</string>
+    <string name="filter_sort_status_desc_watching">शुरू की गई श्रृंखलाएं जिनमें देखने के लिए एपिसोड उपलब्ध हैं।</string>
+    <string name="filter_sort_status_desc_not_started">रिलीज़ हो चुकी हैं और शुरू करने के लिए तैयार हैं।</string>
+    <string name="filter_sort_status_desc_unreleased">भविष्य में रिलीज़ होने वाली सहेजी गई श्रृंखलाएं।</string>
+    <string name="filter_sort_status_desc_caught_up">वर्तमान में प्रसारित सभी एपिसोड देखे जा चुके हैं।</string>
+    <string name="filter_sort_status_desc_dropped">रोकी गई या बीच में छोड़ी गई श्रृंखलाएं।</string>
     <string name="filter_dir_desc">अवरोही</string>
     <string name="filter_dir_asc">आरोही</string>
     <string name="msg_action_removed">\"%1$s\" हटा दिया गया</string>

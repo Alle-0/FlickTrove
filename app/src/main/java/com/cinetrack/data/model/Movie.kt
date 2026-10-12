@@ -461,6 +461,32 @@ data class Movie(
         }
 
     @get:Exclude
+    val seriesStatusPriority: Int
+        get() {
+            if (mediaType != "tv") return 99
+            if (dropped) return 5
+            if (watched) return 4
+            if (!isReleased) return 3
+
+            val watchedCount = watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+            if (watchedCount == 0) {
+                return if (!isReleased) 3 else 2
+            }
+
+            val info = calculateNextEpisode()
+            if (info != null) {
+                if (info.isUpToDateWithAirDate || (info.remainingTotal == 0 && info.remainingInSeason == 0)) {
+                    return 4 // In pari con la messa in onda: va in 'Completate / In pari'
+                }
+                return 1 // Ha episodi disponibili ancora da guardare: 'In corso'
+            }
+
+            val total = numberOfEpisodes ?: 0
+            if (total > 0 && watchedCount >= total) return 4
+            return 1
+        }
+
+    @get:Exclude
     val effectiveTotalEpisodes: Int
         get() {
             if (mediaType != "tv") return 1
@@ -679,6 +705,19 @@ data class Movie(
                     )
                 }
             }
+        }
+
+        if (totalAiredEpisodes == 0 && totalWatchedEpisodes == 0) {
+            val firstSeason = validSeasons.firstOrNull()?.seasonNumber ?: 1
+            return NextEpisodeInfo(
+                seasonNumber = nextAiringSeason ?: firstSeason,
+                episodeNumber = nextAiringEpNum ?: 1,
+                remainingInSeason = 0,
+                remainingTotal = numberOfEpisodes ?: 0,
+                progress = 0f,
+                isLastEpisodeOfSeries = false,
+                isUpToDateWithAirDate = false
+            )
         }
 
         // If we reached here, all currently aired episodes have been watched!
