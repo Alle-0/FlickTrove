@@ -139,33 +139,63 @@ fun DetailSkeleton(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Match Percentage Pill (Neutral monochrome)
-                    Box(
-                        modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.04f))
-                            .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
-                            .padding(horizontal = 12.dp, vertical = 5.dp),
-                        contentAlignment = Alignment.Center
+                    // Row with Match Percentage Pill & Trailer action
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
+                        // Match Percentage Pill (Neutral monochrome)
                         Box(
                             modifier = Modifier
-                                .width(68.dp)
-                                .height(11.dp)
-                                .clip(RoundedCornerShape(3.dp))
-                                .background(Color.White.copy(alpha = 0.06f))
-                                .shimmerEffect()
-                        )
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.04f))
+                                .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
+                                .padding(horizontal = 12.dp, vertical = 5.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .width(68.dp)
+                                    .height(11.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(Color.White.copy(alpha = 0.06f))
+                                    .shimmerEffect()
+                            )
+                        }
+
+                        // Trailer Action skeleton
+                        Row(
+                            modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(12.dp)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.06f))
+                                    .shimmerEffect()
+                            )
+                            Box(
+                                modifier = Modifier
+                                    .width(42.dp)
+                                    .height(11.dp)
+                                    .clip(RoundedCornerShape(3.dp))
+                                    .background(Color.White.copy(alpha = 0.06f))
+                                    .shimmerEffect()
+                            )
+                        }
                     }
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Fused Container (TMDB rating pill + dot + year + runtime)
+                    // Fused Container (TMDB rating pill + 2-row metadata: year/runtime + status)
                     val containerShape = RoundedCornerShape(28.dp)
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(48.dp)
+                            .defaultMinSize(minHeight = 48.dp)
                             .clip(containerShape)
                             .background(Color.White.copy(alpha = 0.03f))
                             .border(1.dp, Color.White.copy(alpha = 0.06f), containerShape)
@@ -188,31 +218,49 @@ fun DetailSkeleton(
 
                             Spacer(modifier = Modifier.weight(1f))
 
-                            // Year • Runtime
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(end = 14.dp)
+                            // Metadata Column (2 rows: Year • Runtime, and Series Status)
+                            Column(
+                                horizontalAlignment = Alignment.End,
+                                verticalArrangement = Arrangement.Center,
+                                modifier = Modifier.padding(end = 12.dp)
                             ) {
+                                // Line 1: Year • Runtime
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(34.dp)
+                                            .height(11.dp)
+                                            .clip(RoundedCornerShape(3.dp))
+                                            .background(Color.White.copy(alpha = 0.06f))
+                                            .shimmerEffect()
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(horizontal = 8.dp)
+                                            .size(3.5.dp)
+                                            .background(Color.White.copy(alpha = 0.12f), CircleShape)
+                                    )
+                                    Box(
+                                        modifier = Modifier
+                                            .width(52.dp)
+                                            .height(11.dp)
+                                            .clip(RoundedCornerShape(3.dp))
+                                            .background(Color.White.copy(alpha = 0.06f))
+                                            .shimmerEffect()
+                                    )
+                                }
+
+                                Spacer(modifier = Modifier.height(3.dp))
+
+                                // Line 2: Status / Format placeholder
                                 Box(
                                     modifier = Modifier
-                                        .width(36.dp)
-                                        .height(12.dp)
+                                        .width(68.dp)
+                                        .height(9.dp)
                                         .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.06f))
-                                        .shimmerEffect()
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .padding(horizontal = 10.dp)
-                                        .size(4.dp)
-                                        .background(Color.White.copy(alpha = 0.12f), CircleShape)
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .width(52.dp)
-                                        .height(12.dp)
-                                        .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.06f))
+                                        .background(Color.White.copy(alpha = 0.04f))
                                         .shimmerEffect()
                                 )
                             }
