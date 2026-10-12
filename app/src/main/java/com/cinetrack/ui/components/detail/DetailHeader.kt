@@ -274,49 +274,28 @@ fun DetailHeader(
                     }
 
                     if (onTrailerClick != null) {
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .bounceClick { onTrailerClick() }
-                                .then(
-                                    if (advancedEffectsEnabled) {
-                                        Modifier
-                                            .hazeGlass(
-                                                state = hazeState,
-                                                shape = CircleShape,
-                                                containerColor = accentColor.copy(alpha = 0.15f),
-                                                blurRadius = 16.dp
-                                            )
-                                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                                    } else {
-                                        Modifier
-                                            .clip(CircleShape)
-                                            .background(Color(0xFF1E1A22))
-                                            .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
-                                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                                    }
-                                ),
-                            contentAlignment = Alignment.Center
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(5.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(5.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(11.dp),
-                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
-                                )
-                                Text(
-                                    text = "Trailer",
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 11.sp,
-                                        fontWeight = FontWeight.ExtraBold,
-                                        letterSpacing = 0.5.sp
-                                    ),
-                                    color = ColorUtils.lightenForText(accentColor, 1.35f)
-                                )
-                            }
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
+                                contentDescription = null,
+                                modifier = Modifier.size(12.dp),
+                                tint = ColorUtils.lightenForText(accentColor, 1.35f)
+                            )
+                            Text(
+                                text = "Trailer",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.ExtraBold,
+                                    letterSpacing = 0.5.sp
+                                ),
+                                color = ColorUtils.lightenForText(accentColor, 1.35f)
+                            )
                         }
                     }
 
