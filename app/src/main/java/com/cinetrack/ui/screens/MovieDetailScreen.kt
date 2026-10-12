@@ -459,7 +459,8 @@ fun MovieDetailScreenContent(
                         preloadedTitle = preloadedTitle,
                         preloadedPosterPath = preloadedPosterPath,
                         preloadedBackdropPath = preloadedBackdropPath,
-                        preloadedAccentColor = preloadedAccentColor
+                        preloadedAccentColor = preloadedAccentColor,
+                        isTv = mediaType == "tv"
                     )
                 }
                 2 -> {

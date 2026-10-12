@@ -44,7 +44,8 @@ fun DetailSkeleton(
     preloadedTitle: String? = null,
     preloadedPosterPath: String? = null,
     preloadedBackdropPath: String? = null,
-    preloadedAccentColor: String? = null
+    preloadedAccentColor: String? = null,
+    isTv: Boolean = false
 ) {
     Box(
         modifier = Modifier
@@ -139,10 +140,9 @@ fun DetailSkeleton(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Row with Match Percentage Pill & Trailer action
+                    // Row with Match Percentage Pill & Trailer action (aligned to the left)
                     Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Match Percentage Pill (Neutral monochrome)
@@ -164,7 +164,7 @@ fun DetailSkeleton(
                             )
                         }
 
-                        // Trailer Action skeleton
+                        // Trailer Action skeleton (placed at the left, right next to match pill)
                         Row(
                             modifier = Modifier.padding(horizontal = 4.dp, vertical = 2.dp),
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -190,7 +190,7 @@ fun DetailSkeleton(
 
                     Spacer(modifier = Modifier.height(14.dp))
 
-                    // Fused Container (TMDB rating pill + 2-row metadata: year/runtime + status)
+                    // Fused Container (TMDB rating pill + metadata)
                     val containerShape = RoundedCornerShape(28.dp)
                     Box(
                         modifier = Modifier
@@ -218,20 +218,63 @@ fun DetailSkeleton(
 
                             Spacer(modifier = Modifier.weight(1f))
 
-                            // Metadata Column (2 rows: Year • Runtime, and Series Status)
-                            Column(
-                                horizontalAlignment = Alignment.End,
-                                verticalArrangement = Arrangement.Center,
-                                modifier = Modifier.padding(end = 12.dp)
-                            ) {
-                                // Line 1: Year • Runtime
+                            if (isTv) {
+                                // TV Series: 2 rows (Year • Seasons, and Series Status)
+                                Column(
+                                    horizontalAlignment = Alignment.End,
+                                    verticalArrangement = Arrangement.Center,
+                                    modifier = Modifier.padding(end = 12.dp)
+                                ) {
+                                    // Line 1: Year • Seasons
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .width(34.dp)
+                                                .height(11.dp)
+                                                .clip(RoundedCornerShape(3.dp))
+                                                .background(Color.White.copy(alpha = 0.06f))
+                                                .shimmerEffect()
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .padding(horizontal = 8.dp)
+                                                .size(3.5.dp)
+                                                .background(Color.White.copy(alpha = 0.12f), CircleShape)
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .width(52.dp)
+                                                .height(11.dp)
+                                                .clip(RoundedCornerShape(3.dp))
+                                                .background(Color.White.copy(alpha = 0.06f))
+                                                .shimmerEffect()
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.height(3.dp))
+
+                                    // Line 2: Status placeholder (e.g. RETURNING SERIES / ENDED)
+                                    Box(
+                                        modifier = Modifier
+                                            .width(68.dp)
+                                            .height(9.dp)
+                                            .clip(RoundedCornerShape(3.dp))
+                                            .background(Color.White.copy(alpha = 0.04f))
+                                            .shimmerEffect()
+                                    )
+                                }
+                            } else {
+                                // Movies: Single line (Year • Runtime)
                                 Row(
-                                    verticalAlignment = Alignment.CenterVertically
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier.padding(end = 14.dp)
                                 ) {
                                     Box(
                                         modifier = Modifier
-                                            .width(34.dp)
-                                            .height(11.dp)
+                                            .width(36.dp)
+                                            .height(12.dp)
                                             .clip(RoundedCornerShape(3.dp))
                                             .background(Color.White.copy(alpha = 0.06f))
                                             .shimmerEffect()
@@ -245,24 +288,12 @@ fun DetailSkeleton(
                                     Box(
                                         modifier = Modifier
                                             .width(52.dp)
-                                            .height(11.dp)
+                                            .height(12.dp)
                                             .clip(RoundedCornerShape(3.dp))
                                             .background(Color.White.copy(alpha = 0.06f))
                                             .shimmerEffect()
                                     )
                                 }
-
-                                Spacer(modifier = Modifier.height(3.dp))
-
-                                // Line 2: Status / Format placeholder
-                                Box(
-                                    modifier = Modifier
-                                        .width(68.dp)
-                                        .height(9.dp)
-                                        .clip(RoundedCornerShape(3.dp))
-                                        .background(Color.White.copy(alpha = 0.04f))
-                                        .shimmerEffect()
-                                )
                             }
                         }
                     }
