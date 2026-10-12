@@ -300,46 +300,25 @@ fun DetailHeader(
                     }
 
                     if (showCoverBtn) {
-                        Box(
+                        Row(
                             modifier = Modifier
                                 .bounceClick { onCoverSelectClick() }
-                                .clip(CircleShape)
-                                .then(
-                                    if (advancedEffectsEnabled) {
-                                        Modifier
-                                            .hazeGlass(
-                                                state = hazeState,
-                                                shape = CircleShape,
-                                                containerColor = accentColor.copy(alpha = 0.15f),
-                                                blurRadius = 16.dp
-                                            )
-                                            .padding(horizontal = 8.dp, vertical = 2.dp)
-                                    } else {
-                                        Modifier
-                                            .background(Color(0xFF1E1A22))
-                                            .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
-                                            .padding(horizontal = 10.dp, vertical = 4.dp)
-                                    }
-                                ),
-                            contentAlignment = Alignment.Center
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                            horizontalArrangement = Arrangement.spacedBy(4.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
-                                horizontalArrangement = Arrangement.spacedBy(4.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
-                                    contentDescription = stringResource(R.string.detail_select_cover),
-                                    modifier = Modifier.size(13.dp),
-                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
-                                )
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                                    contentDescription = null,
-                                    modifier = Modifier.size(13.dp),
-                                    tint = ColorUtils.lightenForText(accentColor, 1.35f)
-                                )
-                            }
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
+                                contentDescription = stringResource(R.string.detail_select_cover),
+                                modifier = Modifier.size(14.dp),
+                                tint = ColorUtils.lightenForText(accentColor, 1.35f)
+                            )
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                                contentDescription = null,
+                                modifier = Modifier.size(14.dp),
+                                tint = ColorUtils.lightenForText(accentColor, 1.35f)
+                            )
                         }
                     }
                 }
