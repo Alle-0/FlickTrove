@@ -255,8 +255,7 @@ class CommsUniCommentsScreen(
                                 localFocusManager.clearFocus()
                             })
                         },
-                    containerColor = Color.Transparent,
-            topBar = {
+                    topBar = {
                 TopAppBar(
                     modifier = Modifier
                         .clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
