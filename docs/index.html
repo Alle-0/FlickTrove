@@ -44,7 +44,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link
-    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=Outfit:wght@500;700;900&display=swap"
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Outfit:wght@500;600;700;800;900&display=swap"
     rel="stylesheet">
 
   <!-- CSS -->
@@ -130,11 +130,13 @@
 
 <body>
 
+
+
   <!-- Floating Pill Navbar -->
   <nav class="floating-navbar">
     <div class="nav-brand">
       <svg width="24" height="24" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path
+        <path class="nav-logo-path"
           d="M116.934 351.021C147.681 367.151 182.789 366.979 232.617 298.312L351.796 135.803C352.53 134.803 354.593 136.08 354.134 137.234C327.209 204.99 389.104 240.954 442 200.01C442.969 199.26 444.678 200.781 443.953 201.768L318.112 373.265C276.104 423.885 200.154 428.716 152.071 383.826L116.934 351.021ZM116.934 351.021L58.7977 296.746C45.0417 283.903 44.3346 262.329 57.2201 248.613L86.0595 217.915C98.9382 204.207 120.5 203.559 134.178 216.471L215.627 293.354M183.002 326.191C189.058 319.756 188.751 309.63 182.316 303.574L170.563 292.515C164.128 286.459 154.002 286.766 147.946 293.201L136.887 304.953C130.831 311.388 131.138 321.514 137.573 327.57L149.271 338.579M386.805 115.855L381.82 161.544C380.151 176.849 395.675 188.222 409.765 182.015L451.824 163.488C465.914 157.281 468.001 138.15 455.581 129.051L418.506 101.89C406.086 92.7918 388.474 100.55 386.805 115.855ZM240.912 358.122L261.262 373.095C270.159 379.641 282.678 377.736 289.225 368.839L304.198 348.488C310.744 339.592 308.839 327.072 299.942 320.526L279.591 305.553C270.694 299.007 258.175 300.912 251.629 309.809L236.656 330.16C230.109 339.056 232.015 351.575 240.912 358.122ZM297.907 284.914L318.299 299.83C327.214 306.352 339.728 304.411 346.249 295.496L361.166 275.104C367.687 266.189 365.747 253.675 356.832 247.154L336.44 232.237C327.524 225.716 315.011 227.656 308.489 236.571L293.573 256.963C287.051 265.878 288.992 278.392 297.907 284.914ZM134.178 280.813L128.21 287.154L123.033 292.515C116.326 299.458 105.32 299.83 98.1608 293.354L86.3765 282.263C78.7381 275.075 78.3733 263.056 85.5617 255.417L95.7214 244.621C102.91 236.983 114.929 236.618 122.568 243.807L133.363 253.966C141.002 261.155 141.367 273.174 134.178 280.813Z"
           stroke="url(#paint0_linear_1_3)" stroke-width="10" stroke-linecap="round" />
         <defs>
@@ -203,12 +205,13 @@
 
         <!-- Left Column: Text & CTA -->
         <div class="hero-text-col">
+
           <h1 class="hero-title hero-anim-item">The ultimate personal <span class="text-gradient">cinema<br />and TV
               show</span> companion.</h1>
-          <p class="hero-subtitle hero-anim-item">Experience a dynamic, beautifully crafted interface with a 100%
-            offline-first architecture.</p>
+          <p class="hero-subtitle hero-anim-item">Experience a dynamic, OLED-crafted interface with 100%
+            offline-first privacy, deep statistics and universal cloud sync.</p>
 
-          <div class="hero-anim-item">
+          <div class="hero-cta-group hero-anim-item">
             <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank"
               rel="noopener noreferrer">
               <!-- Icona SVG personalizzata (Arrow + Tray) -->
@@ -222,6 +225,15 @@
                   stroke="currentColor" stroke-width="2" stroke-linecap="round" />
               </svg>
               <span>Download APK</span>
+            </a>
+
+            <a href="https://github.com/Alle-0/FlickTrove" class="btn-secondary-glass" target="_blank"
+              rel="noopener noreferrer">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                <path
+                  d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0024 12c0-6.63-5.37-12-12-12z" />
+              </svg>
+              <span>GitHub Source</span>
             </a>
           </div>
         </div>
@@ -290,110 +302,161 @@
       </div>
     </section>
 
-    <!-- Phase 3: Visual Features Showcase (Pinned Feature Swap) -->
-    <section class="visual-features" id="features">
-      <div class="features-sticky-container">
+    <!-- Phase 3: Core Capabilities Tab Carousel (Raycast & Igloo Style) -->
+    <section class="features-carousel-section" id="features">
+      <div class="features-carousel-container">
         <!-- Section Header -->
         <div class="features-section-header">
           <span class="features-kicker">Core Capabilities</span>
           <h2 class="features-main-title">Crafted for cinema lovers.</h2>
+          <p class="features-header-desc">Engineered for cinephiles who demand uncompromising speed, deep customization, and complete data ownership.</p>
         </div>
 
-        <div class="features-stage">
+        <!-- Interactive Tab Navigation (FlickTrove Sliding Pill) -->
+        <div class="features-tabs-bar" role="tablist" aria-label="Feature Tabs">
+          <div class="tab-sliding-pill" id="tabSlidingPill"></div>
 
-          <!-- Row 1 (Universal Sync) -->
-          <div class="feature-row feature-swap-item">
-            <div class="feature-visual">
-              <div class="glow-effect"></div>
-              <div class="abstract-canvas">
-                <div class="ui-mockup sync-grid-ui">
-                  <div class="sync-grid">
-                    <div class="integration-card">
-                      <div class="int-icon trakt">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="24" height="24" rx="6" fill="#ED1C24" />
-                          <path d="M9.5 15.5L6 12L4.5 13.5L9.5 18.5L20 8L18.5 6.5L9.5 15.5Z" fill="white" />
-                        </svg>
-                      </div>
-                      <div class="int-info">
-                        <h4>Trakt</h4>
-                        <p>Live sync & history</p>
-                      </div>
+          <button class="feature-tab-btn active" data-tab="0" role="tab" aria-selected="true" aria-controls="feature-panel-0">
+            <span class="tab-icon">
+              <img src="./assets/readme_icons/ricarica_cloud.svg" alt="Universal Sync" class="tab-icon-img" width="18" height="18">
+            </span>
+            <span class="tab-title">Universal Sync</span>
+          </button>
+
+          <button class="feature-tab-btn" data-tab="1" role="tab" aria-selected="false" aria-controls="feature-panel-1">
+            <span class="tab-icon">
+              <img src="./assets/readme_icons/palette.svg" alt="Alive with Color" class="tab-icon-img" width="18" height="18">
+            </span>
+            <span class="tab-title">Alive with Color</span>
+          </button>
+
+          <button class="feature-tab-btn" data-tab="2" role="tab" aria-selected="false" aria-controls="feature-panel-2">
+            <span class="tab-icon">
+              <img src="./assets/readme_icons/smartphone.svg" alt="100% Offline-First" class="tab-icon-img" width="18" height="18">
+            </span>
+            <span class="tab-title">100% Offline-First</span>
+          </button>
+        </div>
+
+        <!-- Carousel Viewport & Panels -->
+        <div class="features-stage-wrapper">
+          <!-- Ambient Dynamic Glow -->
+          <div class="features-ambient-glow" id="featuresAmbientGlow"></div>
+
+          <!-- PANEL 0: Universal Sync & Import -->
+          <div class="feature-panel active" id="feature-panel-0" data-panel="0" role="tabpanel">
+            <div class="panel-content-grid">
+              <div class="panel-info">
+                <span class="panel-kicker cyan-kicker">Cloud Ecosystem</span>
+                <h3 class="panel-heading">Bring your cinema history from everywhere.</h3>
+                <p class="panel-description">
+                  Live two-way sync with Trakt and SIMKL. Import your complete watch history, custom ratings, and watchlists from TV Time, CSV, or JSON in a single tap.
+                </p>
+              </div>
+
+              <div class="panel-visual">
+                <div class="sync-services-panel">
+                  <div class="sync-service-card active-service">
+                    <div class="service-icon trakt-icon">
+                      <svg width="28" height="28" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path d="M 48,11.26 l 0,25.47 C 48,42.95 42.95,48 36.73,48 L 11.26,48 C 5.04,48 0,42.95 0,36.73 L 0,11.26 C 0,5.04 5.04,0 11.26,0 l 25.47,0 a 11.24,11.24 0 0,1 9.62,5.4 c 0.18,0.29 0.34,0.59 0.5,0.89 c 0.33,0.68 0.6,1.39 0.79,2.14 c 0.1,0.37 0.18,0.76 0.23,1.15 c 0.09,0.54 0.13,1.11 0.13,1.68 Z" fill="#ED1C24"/>
+                        <path d="m 13.62,17.97 l 7.92,7.92 l 1.47,-1.47 l -7.92,-7.92 l -1.47,1.47 Z m -0.7,0.7 l -1.46,1.46 l 14.4,14.4 l 1.46,-1.47 L 23,28.75 L 46.35,5.4 c -0.36,-0.6 -0.78,-1.16 -1.25,-1.68 L 21.54,27.28 l -8.62,-8.61 Z m 15.09,13.7 l 1.47,-1.46 l -2.16,-2.16 L 47.64,8.43 c -0.19,-0.75 -0.46,-1.46 -0.79,-2.14 L 24.39,28.75 l 3.62,3.62 Z M 47.87,9.58 L 28.7,28.75 l 1.47,1.46 L 48,12.38 l 0,-1.12 c 0,-0.57 -0.04,-1.14 -0.13,-1.68 Z M 25.16,22.27 l -7.92,-7.92 l -1.47,1.47 l 7.92,7.92 l 1.47,-1.47 Z m 16.16,12.85 c 0,3.42 -2.78,6.2 -6.2,6.2 L 12.88,41.32 c -3.42,0 -6.2,-2.78 -6.2,-6.2 L 6.68,12.88 c 0,-3.42 2.78,-6.21 6.2,-6.21 l 20.78,0 L 33.66,4.6 L 12.88,4.6 c -4.56,0 -8.28,3.71 -8.28,8.28 l 0,22.24 c 0,4.56 3.71,8.28 8.28,8.28 l 22.24,0 c 4.56,0 8.28,-3.71 8.28,-8.28 l 0,-3.51 l -2.07,0 l 0,3.51 Z" fill="#FFFFFF"/>
+                      </svg>
                     </div>
-                    <div class="integration-card">
-                      <div class="int-icon simkl">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="24" height="24" rx="6" fill="#000000" />
-                          <path d="M7 16.5C7 16.5 8.5 18 11.5 18C14.5 18 16.5 16 16.5 13.8C16.5 10.5 11 11 11 8.5C11 7.2 12.2 6.5 13.8 6.5C15.5 6.5 16.8 7.5 16.8 7.5" stroke="#00C8FF" stroke-width="2.2" stroke-linecap="round"/>
-                        </svg>
-                      </div>
-                      <div class="int-info">
-                        <h4>SIMKL</h4>
-                        <p>Lists, history & ratings</p>
-                      </div>
-                    </div>
-                    <div class="integration-card">
-                      <div class="int-icon tvtime">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <rect width="24" height="24" rx="6" fill="#3A3A3A" />
-                          <path d="M6 7H18V10H13.5V18H10.5V10H6V7Z" fill="#FFCC00" />
-                        </svg>
-                      </div>
-                      <div class="int-info">
-                        <h4>TV Time</h4>
-                        <p>Episodes, movies & dates</p>
-                      </div>
-                    </div>
-                    <div class="integration-card">
-                      <div class="int-icon csv">
-                        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor"
-                          stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                          <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
-                          <polyline points="14 2 14 8 20 8"></polyline>
-                          <line x1="8" y1="13" x2="16" y2="13"></line>
-                          <line x1="8" y1="17" x2="16" y2="17"></line>
-                          <polyline points="10 9 9 9 8 9"></polyline>
-                        </svg>
-                      </div>
-                      <div class="int-info">
-                        <h4>CSV & JSON</h4>
-                        <p>Universal backup & import</p>
-                      </div>
+                    <div class="service-text">
+                      <h4>Trakt.tv</h4>
+                      <p>Live 2-Way Sync</p>
                     </div>
                   </div>
-                  <div class="sync-footer">
-                    <span>Live two-way sync with Trakt & SIMKL</span>
+
+                  <div class="sync-service-card active-service">
+                    <div class="service-icon simkl-icon">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="24" height="24" rx="5.5" fill="#000000"/>
+                        <path d="M12.407 4.11c2.074 0 3.538.061 4.393.186 1.127.168 1.94.46 2.438.877 0.672.578 1.009 1.613 1.009 3.104 0 .161-.004.417-.01.768h-4.234c-.014-.358-.039-.607-.074-.746-.098-.41-.42-.64-.966-.692-.484-.043-1.66-.066-3.53-.066-1.85 0-2.946.056-3.289.165-.385.133-.578.474-.578 1.024 0 .528.203.851.61.969.343.095 1.887.187 4.633.275 2.487.073 4.073.165 4.76.275.693.11 1.244.275 1.654.495.41.22.737.532.983.936.37.595.557 1.552.557 2.873 0 1.475-.182 2.557-.546 3.247-.364.683-.96 1.149-1.785 1.398-.812.25-3.05.374-6.71.374-2.226 0-3.832-.062-4.82-.187-1.204-.147-2.068-.434-2.593-.86-.567-.456-.903-1.1-1.008-1.93a10.522 10.522 0 0 1-.085-1.434v-.789H7.44c-.007.74.136 1.216.43 1.428.154.102.33.167.525.203.196.037.54.063 1.03.077a166.2 166.2 0 0 0 2.405.022c1.862-.007 2.94-.018 3.234-.033.553-.044.917-.12 1.092-.23.245-.161.368-.52.368-1.077 0-.38-.078-.648-.231-.802-.211-.212-.712-.325-1.503-.34-.547 0-1.688-.044-3.425-.132-1.794-.088-2.956-.14-3.488-.154-1.387-.044-2.364-.212-2.932-.505-.728-.373-1.205-1.01-1.429-1.91-.126-.498-.189-1.15-.189-1.956 0-1.698.309-2.895.925-3.59.462-.527 1.163-.875 2.102-1.044.848-.146 2.865-.22 6.053-.22z" fill="#00C8FF"/>
+                      </svg>
+                    </div>
+                    <div class="service-text">
+                      <h4>SIMKL</h4>
+                      <p>Lists, History & Ratings</p>
+                    </div>
+                  </div>
+
+                  <div class="sync-service-card">
+                    <div class="service-icon tvtime-icon">
+                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <rect width="24" height="24" rx="5.5" fill="#FFC800"/>
+                        <path d="M4.8 4.8h14.4v4.8h-4.8v9.6H9.6V9.6H4.8z" fill="#000000"/>
+                      </svg>
+                    </div>
+                    <div class="service-text">
+                      <h4>TV Time</h4>
+                      <p>Complete Data Import</p>
+                    </div>
+                  </div>
+
+                  <div class="sync-service-card">
+                    <div class="service-icon file-icon">
+                      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#2DD4BF" stroke-width="2" stroke-linecap="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="16" y2="17"/></svg>
+                    </div>
+                    <div class="service-text">
+                      <h4>CSV & JSON</h4>
+                      <p>Universal Export & Backup</p>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-            <div class="feature-text">
-              <h2>Universal Sync & Import</h2>
-              <p>Bring your lists from everywhere with seamless two-way Trakt & SIMKL synchronization.</p>
+          </div>
+
+          <!-- PANEL 1: Alive with Color -->
+          <div class="feature-panel" id="feature-panel-1" data-panel="1" role="tabpanel">
+            <div class="panel-content-grid">
+              <div class="panel-info">
+                <span class="panel-kicker red-kicker">Material You</span>
+                <h3 class="panel-heading">Alive with color. Extracted in real time.</h3>
+                <p class="panel-description">
+                  Every title becomes a vibrant living canvas. Dynamic palette extraction tints interface cards and backdrops in real time while preserving pure OLED blacks.
+                </p>
+              </div>
+
+              <div class="panel-visual">
+                <div class="phone-showcase-frame">
+                  <div class="phone-mockup-wrapper">
+                    <img src="./assets/Detail_MoneyHeist.webp" alt="Dynamic Theming on Money Heist" class="mockup-img" loading="lazy">
+                  </div>
+                  <div class="swatches-floating-card">
+                    <span class="swatches-label">EXTRACTED PALETTE</span>
+                    <div class="swatches-row">
+                      <span class="swatch-bubble" style="background: #FF2A4B; --glow: rgba(255, 42, 75, 0.65);" title="Dalí Red"></span>
+                      <span class="swatch-bubble" style="background: #FFB703; --glow: rgba(255, 183, 3, 0.65);" title="Vault Amber"></span>
+                      <span class="swatch-bubble" style="background: #4ADE80; --glow: rgba(74, 222, 128, 0.65);" title="Rating Mint"></span>
+                      <span class="swatch-bubble" style="background: #2DD4BF; --glow: rgba(45, 212, 191, 0.65);" title="Match Teal"></span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
-          <!-- Row 2 (Dynamic Theming) -->
-          <div class="feature-row feature-swap-item">
-            <div class="feature-visual">
-              <div class="glow-effect"></div>
-              <img src="./assets/Detail_MoneyHeist.webp" alt="Dynamic Theming UI">
-            </div>
-            <div class="feature-text">
-              <h2>Alive with Color</h2>
-              <p>Real-time UI color extraction from movie posters at 120fps.</p>
-            </div>
-          </div>
+          <!-- PANEL 2: 100% Offline-First -->
+          <div class="feature-panel" id="feature-panel-2" data-panel="2" role="tabpanel">
+            <div class="panel-content-grid">
+              <div class="panel-info">
+                <span class="panel-kicker emerald-kicker">Offline Architecture</span>
+                <h3 class="panel-heading">100% Offline-First. Always in your pocket.</h3>
+                <p class="panel-description">
+                  Zero loading spinners, zero telemetry. Your entire database, ratings, personal notes, and episodes are stored natively on your device in local Room SQLite.
+                </p>
+              </div>
 
-          <!-- Row 3 (Offline-First) -->
-          <div class="feature-row feature-swap-item">
-            <div class="feature-visual">
-              <div class="glow-effect"></div>
-              <img src="./assets/Detail_Dune.webp" alt="Offline Library UI">
-            </div>
-            <div class="feature-text">
-              <h2>Always Offline</h2>
-              <p>Your entire cinematic universe, cached locally. No internet required.</p>
+              <div class="panel-visual">
+                <div class="phone-showcase-frame">
+                  <div class="phone-mockup-wrapper">
+                    <img src="./assets/Detail_Dune.webp" alt="Offline Library on Dune" class="mockup-img" loading="lazy">
+                  </div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -401,7 +464,76 @@
       </div>
     </section>
 
-    <!-- Phase 6: Unified Portal Zoom & Text Scrubbing (Apple Keynote Style) -->
+    <!-- Phase 3.5: Features Marquee -->
+    <section class="features-marquee-section">
+      <p class="marquee-label">Powered by 20+ cinephile features</p>
+
+      <div class="marquee-wrapper marquee-left">
+        <div class="marquee-track">
+          <!-- Track 1 items -->
+          <div class="marquee-pill"><img src="./assets/readme_icons/trophy.svg" alt="icon"> 51 Cinephile Trophies</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/home.svg" alt="icon"> Cinematic Home Feed</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/star.svg" alt="icon"> Top 10 FlickTrove</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/lente.svg" alt="icon"> Comprehensive Search</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/cartella.svg" alt="icon"> Custom Curated Folders
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/bell.svg" alt="icon"> Smart Notifications</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/stat.svg" alt="icon"> Advanced Statistics</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/tv.svg" alt="icon"> Episodic TV Tracking</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/cloud.svg" alt="icon"> Two-Way Cloud Sync</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/smartphone.svg" alt="icon"> 100% Offline-First</div>
+          <!-- DUPLICATE Track 1 items for infinite scroll -->
+          <div class="marquee-pill"><img src="./assets/readme_icons/trophy.svg" alt="icon"> 51 Cinephile Trophies</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/home.svg" alt="icon"> Cinematic Home Feed</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/star.svg" alt="icon"> Top 10 FlickTrove</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/lente.svg" alt="icon"> Comprehensive Search</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/cartella.svg" alt="icon"> Custom Curated Folders
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/bell.svg" alt="icon"> Smart Notifications</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/stat.svg" alt="icon"> Advanced Statistics</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/tv.svg" alt="icon"> Episodic TV Tracking</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/cloud.svg" alt="icon"> Two-Way Cloud Sync</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/smartphone.svg" alt="icon"> 100% Offline-First</div>
+        </div>
+      </div>
+
+      <div class="marquee-wrapper marquee-right">
+        <div class="marquee-track">
+          <!-- Track 2 items -->
+          <div class="marquee-pill"><img src="./assets/readme_icons/world.svg" alt="icon"> 13 Languages Localized</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/play.svg" alt="icon"> Streaming Providers</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/documento.svg" alt="icon"> Magazine & News Feed
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/star_piena.svg" alt="icon"> Global Rating System
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/persona.svg" alt="icon"> Custom Avatars</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/comment.svg" alt="icon"> Community &amp; Social
+            (CommsUni)</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/people.svg" alt="icon"> Extensive Cast & Crew</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/scudo_privacy.svg" alt="icon"> Safe Environment
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/caricare.svg" alt="icon"> Universal Data Import
+          </div>
+          <!-- DUPLICATE Track 2 items for infinite scroll -->
+          <div class="marquee-pill"><img src="./assets/readme_icons/world.svg" alt="icon"> 13 Languages Localized</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/play.svg" alt="icon"> Streaming Providers</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/documento.svg" alt="icon"> Magazine & News Feed
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/star_piena.svg" alt="icon"> Global Rating System
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/persona.svg" alt="icon"> Custom Avatars</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/comment.svg" alt="icon"> Community &amp; Social
+            (CommsUni)</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/people.svg" alt="icon"> Extensive Cast & Crew</div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/scudo_privacy.svg" alt="icon"> Safe Environment
+          </div>
+          <div class="marquee-pill"><img src="./assets/readme_icons/caricare.svg" alt="icon"> Universal Data Import
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Cinematic Climax: Unified Portal Zoom & Text Scrubbing (Apple Keynote Style) -->
     <section class="portal-zoom-section scroll-reveal-section">
       <div class="portal-sticky reveal-sticky">
         <div class="portal-stage">
@@ -420,71 +552,6 @@
             <span class="reveal-word">Track</span>
             <span class="reveal-word">stories.</span>
           </h2>
-        </div>
-      </div>
-    </section>
-
-    <!-- Phase 3.5: Features Marquee -->
-    <section class="features-marquee-section">
-      <p class="marquee-label">Powered by 19+ premium features</p>
-
-      <div class="marquee-wrapper marquee-left">
-        <div class="marquee-track">
-          <!-- Track 1 items -->
-          <div class="marquee-pill"><img src="./assets/readme_icons/home.svg" alt="icon"> Cinematic Home Feed</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/trophy.svg" alt="icon"> The Trove's Pick</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/star.svg" alt="icon"> Top 10 FlickTrove</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/lente.svg" alt="icon"> Comprehensive Search</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/cartella.svg" alt="icon"> Custom Organization</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/bell.svg" alt="icon"> Smart Notifications</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/stat.svg" alt="icon"> Advanced Statistics</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/tv.svg" alt="icon"> Episodic Tracking</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/cloud.svg" alt="icon"> Cloud & Live Sync</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/smartphone.svg" alt="icon"> Offline-First</div>
-          <!-- DUPLICATE Track 1 items for infinite scroll -->
-          <div class="marquee-pill"><img src="./assets/readme_icons/home.svg" alt="icon"> Cinematic Home Feed</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/trophy.svg" alt="icon"> The Trove's Pick</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/star.svg" alt="icon"> Top 10 FlickTrove</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/lente.svg" alt="icon"> Comprehensive Search</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/cartella.svg" alt="icon"> Custom Organization</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/bell.svg" alt="icon"> Smart Notifications</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/stat.svg" alt="icon"> Advanced Statistics</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/tv.svg" alt="icon"> Episodic Tracking</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/cloud.svg" alt="icon"> Cloud & Live Sync</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/smartphone.svg" alt="icon"> Offline-First</div>
-        </div>
-      </div>
-
-      <div class="marquee-wrapper marquee-right">
-        <div class="marquee-track">
-          <!-- Track 2 items -->
-          <div class="marquee-pill"><img src="./assets/readme_icons/world.svg" alt="icon"> 13 Languages Localized</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/play.svg" alt="icon"> Streaming Providers</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/documento.svg" alt="icon"> Magazine & News Feed
-          </div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/star_piena.svg" alt="icon"> Global Rating System
-          </div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/persona.svg" alt="icon"> Custom Avatars</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/comment.svg" alt="icon"> Community &amp; Social (CommsUni)</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/people.svg" alt="icon"> Extensive Cast & Crew</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/scudo_privacy.svg" alt="icon"> Safe Environment
-          </div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/caricare.svg" alt="icon"> Universal Data Import
-          </div>
-          <!-- DUPLICATE Track 2 items for infinite scroll -->
-          <div class="marquee-pill"><img src="./assets/readme_icons/world.svg" alt="icon"> 13 Languages Localized</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/play.svg" alt="icon"> Streaming Providers</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/documento.svg" alt="icon"> Magazine & News Feed
-          </div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/star_piena.svg" alt="icon"> Global Rating System
-          </div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/persona.svg" alt="icon"> Custom Avatars</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/comment.svg" alt="icon"> Community &amp; Social (CommsUni)</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/people.svg" alt="icon"> Extensive Cast & Crew</div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/scudo_privacy.svg" alt="icon"> Safe Environment
-          </div>
-          <div class="marquee-pill"><img src="./assets/readme_icons/caricare.svg" alt="icon"> Universal Data Import
-          </div>
         </div>
       </div>
     </section>
@@ -566,7 +633,10 @@
           <div class="faq-answer-wrapper">
             <div class="faq-answer">
               <div class="faq-answer-inner">
-                <p>FlickTrove supports 13 languages natively: English, Italian, German, Spanish, French, Portuguese (Brazil), Russian, Hindi, Japanese, Korean, Simplified Chinese, Indonesian, and Turkish. It also includes localized regional film classifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, and BBFC).</p>
+                <p>FlickTrove supports 13 languages natively: English, Italian, German, Spanish, French, Portuguese
+                  (Brazil), Russian, Hindi, Japanese, Korean, Simplified Chinese, Indonesian, and Turkish. It also
+                  includes localized regional film classifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA,
+                  ClassInd, CBFC, and BBFC).</p>
               </div>
             </div>
           </div>
@@ -580,7 +650,10 @@
           <div class="faq-answer-wrapper">
             <div class="faq-answer">
               <div class="faq-answer-inner">
-                <p>FlickTrove lets you read and write reviews, share reactions, and discuss movies and TV shows. Social comments and federated community discussions are integrated with <a href="https://commsuni.tv/" target="_blank">commsuni.tv</a> (CommsUni), keeping discussions vibrant, open, and moderated across platforms.</p>
+                <p>FlickTrove lets you read and write reviews, share reactions, and discuss movies and TV shows. Social
+                  comments and federated community discussions are integrated with <a href="https://commsuni.tv/"
+                    target="_blank">commsuni.tv</a> (CommsUni), keeping discussions vibrant, open, and moderated across
+                  platforms.</p>
               </div>
             </div>
           </div>
@@ -606,6 +679,29 @@
           }
         }
       </script>
+    </section>
+
+    <!-- Phase 4: Final CTA -->
+    <section class="final-cta-section">
+      <div class="cinematic-orb"></div>
+      <h2>Ready to build your <span class="text-gradient">ultimate watchlist</span>?</h2>
+      <p>Download FlickTrove for Android today. 100% Free.</p>
+      <div class="cta-btn-wrapper" style="position: relative; z-index: 10;">
+        <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank"
+          rel="noopener noreferrer">
+          <!-- Icona SVG personalizzata (Arrow + Tray) -->
+          <svg class="icon-download" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            xmlns="http://www.w3.org/2000/svg">
+            <path class="arrow"
+              d="M10.5 12.5L10.9722 12.9722C11.545 13.545 12.4691 13.5596 13.0596 13.0051L17.0792 9.23118C17.4095 8.92105 17.1901 8.36667 16.737 8.36667H14.6818C14.4057 8.36667 14.1818 8.14281 14.1818 7.86667V5.18182C14.1818 3.97683 13.205 3 12 3C10.795 3 9.81818 3.97683 9.81818 5.18182V7.86667C9.81818 8.14281 9.59432 8.36667 9.31818 8.36667H7.35353C6.8891 8.36667 6.67559 8.94467 7.02848 9.24659L7.75982 9.87229"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+            <path class="tray"
+              d="M17.8667 17H18C19.1046 17 20 17.8954 20 19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17H13.0667"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" />
+          </svg>
+          <span>Download APK</span>
+        </a>
+      </div>
     </section>
 
     <!-- Phase 5.5: Support the Indie Developer (Horizontal 2-Column Tip Jar) -->
@@ -683,29 +779,6 @@
         </div>
       </div>
     </section>
-
-    <!-- Phase 4: Final CTA -->
-    <section class="final-cta-section">
-      <div class="cinematic-orb"></div>
-      <h2>Ready to build your <span class="text-gradient">ultimate watchlist</span>?</h2>
-      <p>Download FlickTrove for Android today. 100% Free.</p>
-      <div class="cta-btn-wrapper" style="position: relative; z-index: 10;">
-        <a href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-download" target="_blank"
-          rel="noopener noreferrer">
-          <!-- Icona SVG personalizzata (Arrow + Tray) -->
-          <svg class="icon-download" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            xmlns="http://www.w3.org/2000/svg">
-            <path class="arrow"
-              d="M10.5 12.5L10.9722 12.9722C11.545 13.545 12.4691 13.5596 13.0596 13.0051L17.0792 9.23118C17.4095 8.92105 17.1901 8.36667 16.737 8.36667H14.6818C14.4057 8.36667 14.1818 8.14281 14.1818 7.86667V5.18182C14.1818 3.97683 13.205 3 12 3C10.795 3 9.81818 3.97683 9.81818 5.18182V7.86667C9.81818 8.14281 9.59432 8.36667 9.31818 8.36667H7.35353C6.8891 8.36667 6.67559 8.94467 7.02848 9.24659L7.75982 9.87229"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-            <path class="tray"
-              d="M17.8667 17H18C19.1046 17 20 17.8954 20 19C20 20.1046 19.1046 21 18 21H6C4.89543 21 4 20.1046 4 19C4 17.8954 4.89543 17 6 17H13.0667"
-              stroke="currentColor" stroke-width="2" stroke-linecap="round" />
-          </svg>
-          <span>Download APK</span>
-        </a>
-      </div>
-    </section>
   </main>
 
   <!-- Phase 4: Footer -->
@@ -751,7 +824,7 @@
           <a href="https://www.omdbapi.com/" target="_blank">OMDb</a>
           <a href="https://trakt.tv/" target="_blank">Trakt</a>
           <a href="https://simkl.com/" target="_blank">SIMKL</a>
-          <a href="https://commsuni.tv/" target="_blank">CommsUni (commsuni.tv)</a>
+          <a href="https://commsuni.tv/" target="_blank">CommsUni</a>
           <a href="https://giphy.com/" target="_blank">Giphy</a>
           <a href="https://www.rottentomatoes.com/" target="_blank">Rotten Tomatoes</a>
           <a href="https://www.metacritic.com/" target="_blank">Metacritic</a>
