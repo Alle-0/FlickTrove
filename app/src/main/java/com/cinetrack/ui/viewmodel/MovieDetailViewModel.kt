@@ -243,13 +243,13 @@ class MovieDetailViewModel @Inject constructor(
             viewModelScope.launch {
                 // Backfill for older movies marked as watched before the history feature
                 val local = repository.getMovie(movieId, mediaType)
-                if (local != null && local.watched) {
+                if (local != null && local.watched && !local.watchedAt.isNullOrBlank()) {
                     val currentHistory = repository.getWatchHistoryForMovie(movieId)
                     if (currentHistory.none { !it.isRewatch }) {
                         repository.insertWatchHistory(
                             com.cinetrack.data.local.entities.WatchHistoryEntity(
                                 movieId = movieId,
-                                watchedAt = local.watchedAt ?: java.time.Instant.now().toString(),
+                                watchedAt = local.watchedAt!!,
                                 isRewatch = false
                             )
                         )
@@ -878,105 +878,131 @@ class MovieDetailViewModel @Inject constructor(
     fun logRewatch() {
         if (movieId == 0L) return
         viewModelScope.launch {
-            val allHistory = repository.getWatchHistoryForMovie(movieId)
-            val rewatchCount = allHistory.count { it.isRewatch }
-            
-            if (rewatchCount >= 99) {
-                emitMessage(UiText.StringResource(R.string.max_rewatch_limit))
-                return@launch
-            }
-            
-            val watchedDate = java.time.Instant.now().toString()
-            
-            val local = repository.getMovie(movieId, mediaType)
-            val historicalEpisodesJson = if (local?.mediaType == "tv") {
-                try {
-                    Json.encodeToString(local.watchedEpisodes ?: emptyMap<String, List<Int>>())
-                } catch (e: Exception) {
-                    null
+            try {
+                val allHistory = repository.getWatchHistoryForMovie(movieId)
+                val rewatchCount = allHistory.count { it.isRewatch }
+                
+                if (rewatchCount >= 99) {
+                    emitMessage(UiText.StringResource(R.string.max_rewatch_limit))
+                    return@launch
                 }
-            } else null
-            
-            repository.insertWatchHistory(
-                com.cinetrack.data.local.entities.WatchHistoryEntity(
-                    movieId = movieId,
-                    watchedAt = watchedDate,
-                    isRewatch = true,
-                    historicalEpisodes = historicalEpisodesJson
-                )
-            )
-            
-            if (local != null) {
-                var updatedMovie = local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis())
-                if (mediaType == "tv") {
-                    updatedMovie = updatedMovie.copy(
-                        watched = false, 
-                        watchedEpisodes = emptyMap(), 
-                        progress = 0.0,
-                        favorite = true,
-                        dropped = false
+                
+                var watchedDate = java.time.Instant.now().toString()
+                var counter = 1
+                while (allHistory.any { it.watchedAt == watchedDate }) {
+                    watchedDate = java.time.Instant.now().plusMillis(counter.toLong()).toString()
+                    counter++
+                }
+                
+                val local = repository.getMovie(movieId, mediaType)
+                val historicalEpisodesJson = if (local?.mediaType == "tv") {
+                    try {
+                        Json.encodeToString(local.watchedEpisodes ?: emptyMap<String, List<Int>>())
+                    } catch (e: Exception) {
+                        null
+                    }
+                } else null
+                
+                repository.insertWatchHistory(
+                    com.cinetrack.data.local.entities.WatchHistoryEntity(
+                        movieId = movieId,
+                        watchedAt = watchedDate,
+                        isRewatch = true,
+                        historicalEpisodes = historicalEpisodesJson
                     )
+                )
+                
+                if (local != null) {
+                    var updatedMovie = local.copy(watchedAt = watchedDate, clientUpdatedAt = System.currentTimeMillis())
+                    if (mediaType == "tv") {
+                        updatedMovie = updatedMovie.copy(
+                            watched = false, 
+                            watchedEpisodes = emptyMap(), 
+                            progress = 0.0,
+                            favorite = true,
+                            dropped = false
+                        )
+                    }
+                    repository.saveMovie(updatedMovie)
                 }
-                repository.saveMovie(updatedMovie)
+                
+                badgeRepository.evaluateBadgesAsync()
+                emitMessage(UiText.DynamicString("Rewatch logged!"))
+            } catch (e: Exception) {
+                android.util.Log.e("MovieDetailViewModel", "Failed to log rewatch", e)
             }
-            
-            badgeRepository.evaluateBadgesAsync()
-            emitMessage(UiText.DynamicString("Rewatch logged!"))
         }
     }
 
     fun updateWatchHistoryDate(history: com.cinetrack.data.local.entities.WatchHistoryEntity, newDateIso: String) {
         viewModelScope.launch {
-            repository.updateWatchHistory(history.copy(watchedAt = newDateIso))
-            // Update movie's latest watchedAt if necessary
-            val allHistory = repository.getWatchHistoryForMovie(movieId)
-            val latest = allHistory.maxByOrNull { it.watchedAt }
-            val local = repository.getMovie(movieId, mediaType)
-            if (local != null && latest != null && local.watchedAt != latest.watchedAt) {
-                repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+            try {
+                // Ensure unique timestamp to satisfy SQLite UNIQUE(movieId, watchedAt) constraint
+                val allHistory = repository.getWatchHistoryForMovie(movieId)
+                var targetIso = newDateIso
+                var counter = 1
+                while (allHistory.any { it.id != history.id && it.watchedAt == targetIso }) {
+                    val instant = java.time.Instant.parse(newDateIso).plusSeconds(counter.toLong())
+                    targetIso = instant.toString()
+                    counter++
+                }
+                repository.updateWatchHistory(history.copy(watchedAt = targetIso))
+                // Update movie's latest watchedAt if necessary
+                val updatedHistory = repository.getWatchHistoryForMovie(movieId)
+                val latest = updatedHistory.maxByOrNull { it.watchedAt }
+                val local = repository.getMovie(movieId, mediaType)
+                if (local != null && latest != null && local.watchedAt != latest.watchedAt) {
+                    repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+                }
+                badgeRepository.evaluateBadgesAsync()
+            } catch (e: Exception) {
+                android.util.Log.e("MovieDetailViewModel", "Failed to update watch history date", e)
             }
-            badgeRepository.evaluateBadgesAsync()
         }
     }
 
     fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) {
         viewModelScope.launch {
-            repository.deleteWatchHistory(history)
-            
-            // Revert state if history is empty
-            val allHistory = repository.getWatchHistoryForMovie(movieId)
-            val local = repository.getMovie(movieId, mediaType)
-            if (local != null) {
-                if (allHistory.isEmpty()) {
-                    if (!history.isRewatch) {
-                        repository.saveMovie(local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis()))
-                    }
-                } else {
-                    val latest = allHistory.maxByOrNull { it.watchedAt }
-                    if (latest != null && local.watchedAt != latest.watchedAt) {
-                        var updatedLocal = local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis())
-                        
-                        if (mediaType == "tv") {
-                            if (history.historicalEpisodes != null) {
-                                try {
-                                    val parsedMap: Map<String, List<Int>> = Json.decodeFromString(history.historicalEpisodes)
-                                    val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
-                                    updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
-                                } catch (e: Exception) {
+            try {
+                repository.deleteWatchHistory(history)
+                
+                // Revert state if history is empty
+                val allHistory = repository.getWatchHistoryForMovie(movieId)
+                val local = repository.getMovie(movieId, mediaType)
+                if (local != null) {
+                    if (allHistory.isEmpty()) {
+                        if (!history.isRewatch) {
+                            repository.saveMovie(local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis()))
+                        }
+                    } else {
+                        val latest = allHistory.maxByOrNull { it.watchedAt }
+                        if (latest != null && local.watchedAt != latest.watchedAt) {
+                            var updatedLocal = local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis())
+                            
+                            if (mediaType == "tv") {
+                                if (history.historicalEpisodes != null) {
+                                    try {
+                                        val parsedMap: Map<String, List<Int>> = Json.decodeFromString(history.historicalEpisodes)
+                                        val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
+                                        updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
+                                    } catch (e: Exception) {
+                                        updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                                    }
+                                } else {
                                     updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
                                 }
                             } else {
-                                updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                                updatedLocal = updatedLocal.copy(watched = true)
                             }
-                        } else {
-                            updatedLocal = updatedLocal.copy(watched = true)
+                            
+                            repository.saveMovie(updatedLocal)
                         }
-                        
-                        repository.saveMovie(updatedLocal)
                     }
                 }
+                badgeRepository.evaluateBadgesAsync()
+            } catch (e: Exception) {
+                android.util.Log.e("MovieDetailViewModel", "Failed to delete watch history", e)
             }
-            badgeRepository.evaluateBadgesAsync()
         }
     }
 

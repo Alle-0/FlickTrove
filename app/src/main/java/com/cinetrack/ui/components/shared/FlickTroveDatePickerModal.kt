@@ -45,11 +45,20 @@ fun FlickTroveDatePickerModal(
     disableFutureDates: Boolean = true,
     isVisible: Boolean = true
 ) {
-    var selectedDate by remember { mutableStateOf(initialDate ?: LocalDate.now()) }
-    var currentMonth by remember { mutableStateOf(YearMonth.from(selectedDate)) }
+    var selectedDate by remember(initialDate, isVisible) { mutableStateOf(initialDate ?: LocalDate.now()) }
+    var currentMonth by remember(selectedDate, isVisible) { mutableStateOf(YearMonth.from(selectedDate)) }
     var showMonthPicker by remember { mutableStateOf(false) }
     val haptic = LocalHapticFeedback.current
     val internalHazeState = remember { HazeState() }
+
+    LaunchedEffect(isVisible, initialDate) {
+        if (isVisible) {
+            val baseDate = initialDate ?: LocalDate.now()
+            selectedDate = baseDate
+            currentMonth = YearMonth.from(baseDate)
+            showMonthPicker = false
+        }
+    }
 
     FlickTroveModal(
         isVisible = isVisible,

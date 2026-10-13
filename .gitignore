@@ -102,4 +102,5 @@ partner_api/
 partner-api/
 .hintrc
 screenshot*.png
-screensho*.png
+*.bak
+scratch/

@@ -204,7 +204,7 @@ fun WatchHistoryBottomSheet(
     } // End of FlickTroveModal
     } // End of Box
 
-    val initialLocalDate = remember(editingHistory?.watchedAt) {
+    val initialLocalDate = remember(editingHistory?.id, editingHistory?.watchedAt) {
         try {
             if (editingHistory != null) {
                 val zdt = Instant.parse(editingHistory!!.watchedAt).atZone(ZoneId.systemDefault())
@@ -221,20 +221,16 @@ fun WatchHistoryBottomSheet(
         initialDate = initialLocalDate,
         isVisible = showDatePicker,
         onDateSelected = { selectedDate ->
-            if (editingHistory != null) {
+            editingHistory?.let { target ->
                 val newIso = selectedDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
-                onUpdateDate(editingHistory!!, newIso)
+                onUpdateDate(target, newIso)
             }
             showDatePicker = false
+            editingHistory = null
         },
         onDismissRequest = {
-            if (!showDatePicker) {
-                // Animation finished, safe to clear state
-                editingHistory = null
-            } else {
-                // User dismissed it
-                showDatePicker = false
-            }
+            showDatePicker = false
+            editingHistory = null
         },
         hazeState = hazeState,
         accentColor = accentColor

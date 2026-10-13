@@ -850,368 +850,440 @@ fun FlickTroveBadgeEmblem(
         Modifier
     }
 
+    // CONTENITORE RADICE (Stazionario, riceve il tocco ed ospita l'ombra dinamica sul piano di fondo)
     Box(
         modifier = modifier
             .size(size)
-            .then(touchModifier)
-            .graphicsLayer {
-                rotationY = tiltX.value * 14f
-                rotationX = -tiltY.value * 14f
-                cameraDistance = 16f * density
-            },
+            .then(touchModifier),
         contentAlignment = Alignment.Center
     ) {
-        // A. BACKGROUND CANVAS (Bagliore Neon, Lente Dark, Tacche ottiche, Anelli e Traccia Progresso)
+        // 0. OMBRA PROIETTATA SUL PIANO SOTTOSTANTE (Cast Drop Shadow & Ambilight Ambient Glow)
+        // Questo layer rimane sul piano piatto del layout e trasla in direzione opposta al tilt,
+        // dando l'illusione fisica che la moneta sia sospesa a mezz'aria sopra lo schermo!
         Canvas(modifier = Modifier.fillMaxSize()) {
             val center = Offset(this.size.width / 2f, this.size.height / 2f)
-            val radius = (this.size.minDimension / 2f)
+            val radius = this.size.minDimension / 2f
 
-            // 1. Bagliore Neon Ambilight volumetrico coerente
+            // L'ombra si allontana dal punto di sollevamento della moneta in base al tilt
+            val shadowOffsetX = -tiltX.value * radius * 0.16f
+            val shadowOffsetY = -tiltY.value * radius * 0.16f + radius * 0.08f // sorgente di luce dall'alto
+            val shadowCenter = Offset(center.x + shadowOffsetX, center.y + shadowOffsetY)
+
+            // 0a. Bagliore Ambilight volumetrico sul fondo (se sbloccato)
             if (isUnlocked) {
                 drawCircle(
                     brush = Brush.radialGradient(
                         colors = listOf(
-                            glowColor,
-                            glowColor.copy(alpha = 0.22f),
+                            glowColor.copy(alpha = 0.38f),
+                            glowColor.copy(alpha = 0.12f),
                             Color.Transparent
                         ),
-                        center = center,
-                        radius = radius * 1.18f
+                        center = Offset(center.x + shadowOffsetX * 0.5f, center.y + shadowOffsetY * 0.5f),
+                        radius = radius * 1.25f
                     ),
-                    radius = radius * 1.15f,
-                    center = center
+                    radius = radius * 1.25f,
+                    center = Offset(center.x + shadowOffsetX * 0.5f, center.y + shadowOffsetY * 0.5f)
                 )
             }
 
-            // Dimensioni proporzionate in base alla presenza del progress ring esterno
-            val lensRadius = if (showProgressRing) radius * 0.92f else radius * 0.88f
-            val tickInnerR = if (showProgressRing) radius * 0.72f else radius * 0.82f
-            val tickOuterR = if (showProgressRing) radius * 0.78f else radius * 0.88f
-            val innerRingR = if (showProgressRing) radius * 0.60f else radius * 0.68f
-
-            // 0. Ombra morbida di profondità attorno al perimetro della lente
-            drawCircle(
+            // 0b. Ombra di contatto scura morbida e sagomata sul fondo
+            drawOval(
                 brush = Brush.radialGradient(
                     colors = listOf(
-                        Color.Black.copy(alpha = 0.60f),
-                        Color.Black.copy(alpha = 0.25f),
+                        Color.Black.copy(alpha = 0.65f),
+                        Color.Black.copy(alpha = 0.30f),
                         Color.Transparent
                     ),
-                    center = center,
-                    radius = lensRadius * 1.04f
+                    center = shadowCenter,
+                    radius = radius * 0.88f
                 ),
-                radius = lensRadius * 1.04f,
-                center = center
+                topLeft = Offset(shadowCenter.x - radius * 0.85f, shadowCenter.y - radius * 0.65f),
+                size = androidx.compose.ui.geometry.Size(radius * 1.70f, radius * 1.30f)
             )
+        }
 
-            // 2. Base satinata della lente (dark cinema profondo e uniforme su tutta la superficie)
-            drawCircle(
-                brush = Brush.radialGradient(
-                    colors = if (isUnlocked) {
-                        listOf(
-                            Color(0xFF0F1118),
-                            Color(0xFF0A0C12),
-                            Color(0xFF06070B)
-                        )
+        // 1. CORPO ROTANTE 3D DELLA MONETA (GraphicsLayer con prospettiva e cameraDistance)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    rotationY = tiltX.value * 16f
+                    rotationX = -tiltY.value * 16f
+                    cameraDistance = 18f * density
+                },
+            contentAlignment = Alignment.Center
+        ) {
+            // A. BACKGROUND CANVAS (Spessore Estruso Moneta, Lente Dark, Tacche ottiche, Ghiera Speculare Dinamica)
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val center = Offset(this.size.width / 2f, this.size.height / 2f)
+                val radius = (this.size.minDimension / 2f)
+
+                val lensRadius = if (showProgressRing) radius * 0.92f else radius * 0.88f
+                val tickInnerR = if (showProgressRing) radius * 0.72f else radius * 0.82f
+                val tickOuterR = if (showProgressRing) radius * 0.78f else radius * 0.88f
+                val innerRingR = if (showProgressRing) radius * 0.60f else radius * 0.68f
+
+                // ── A1. SPESSORE ESTRUSO 3D DELLA MONETA (Coin Rim Extrusion) ──
+                // In prospettiva, lo spessore posteriore di una moneta inclinata proietta
+                // uno scostamento scalare lungo l'asse (-tiltX, -tiltY).
+                // Disegnando 4 fette scalari arretrate, emerge fisicamente il fianco metallico della medaglia!
+                val maxRimDepth = radius * 0.065f
+                val rimOffsetMagnitude = (tiltX.value * tiltX.value + tiltY.value * tiltY.value).coerceAtMost(1.5f)
+
+                if (rimOffsetMagnitude > 0.001f) {
+                    val rimColorDark = Color(0xFF0B0C12)
+                    val rimColorMetal = if (isUnlocked) {
+                        tier.secondaryColor.copy(alpha = 0.65f)
                     } else {
-                        listOf(
-                            Color(0xFF13151D),
-                            Color(0xFF0B0C12)
+                        Color(0xFF334155).copy(alpha = 0.35f)
+                    }
+
+                    for (slice in 4 downTo 1) {
+                        val depthFrac = slice / 4f
+                        val sliceOffset = Offset(
+                            -tiltX.value * maxRimDepth * depthFrac,
+                            -tiltY.value * maxRimDepth * depthFrac
                         )
-                    },
-                    center = center,
-                    radius = lensRadius
-                ),
-                radius = lensRadius,
-                center = center
-            )
+                        val sliceCenter = center + sliceOffset
 
-            // 3. Tacche ottiche graduate a telemetro cinematografico
-            val tickCount = 24
-            val tickColor = if (isUnlocked) tierColor.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f)
+                        // Fetta del corpo metallico della costa della moneta
+                        drawCircle(
+                            brush = Brush.radialGradient(
+                                colors = listOf(rimColorDark, rimColorMetal, rimColorDark),
+                                center = sliceCenter,
+                                radius = lensRadius
+                            ),
+                            radius = lensRadius,
+                            center = sliceCenter
+                        )
 
-            for (i in 0 until tickCount) {
-                val angle = Math.toRadians((i * (360.0 / tickCount)))
-                val startX = center.x + (tickInnerR * cos(angle)).toFloat()
-                val startY = center.y + (tickInnerR * sin(angle)).toFloat()
-                val endX = center.x + (tickOuterR * cos(angle)).toFloat()
-                val endY = center.y + (tickOuterR * sin(angle)).toFloat()
+                        // Zigrinatura / Bordo conico esterno (Costa della moneta)
+                        drawCircle(
+                            color = rimColorMetal.copy(alpha = 0.40f * (1f - depthFrac * 0.5f)),
+                            radius = lensRadius,
+                            center = sliceCenter,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                width = radius * 0.015f
+                            )
+                        )
+                    }
+                }
 
-                drawLine(
-                    color = tickColor,
-                    start = Offset(startX, startY),
-                    end = Offset(endX, endY),
-                    strokeWidth = radius * 0.018f
-                )
-            }
-
-            // 4. Anello concentrico di rifinitura della lente
-            drawCircle(
-                color = if (isUnlocked) tierColor.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.08f),
-                radius = innerRingR,
-                center = center,
-                style = androidx.compose.ui.graphics.drawscope.Stroke(
-                    width = radius * 0.02f
-                )
-            )
-
-            // 5. PROGRESS PILL CIRCOLARE INTORNO AL BADGE (O anello esterno standard)
-            if (showProgressRing) {
-                val ringRadius = radius * 0.92f
-                val ringStroke = (radius * 0.065f).coerceAtLeast(2.5.dp.toPx())
-
-                // Traccia satinata di sfondo scuro
+                // ── A2. BASE SATINATA DELLA LENTE (Faccia frontale dark cinema) ──
                 drawCircle(
-                    color = Color.White.copy(alpha = 0.09f),
-                    radius = ringRadius,
+                    brush = Brush.radialGradient(
+                        colors = if (isUnlocked) {
+                            listOf(
+                                Color(0xFF0F1118),
+                                Color(0xFF0A0C12),
+                                Color(0xFF06070B)
+                            )
+                        } else {
+                            listOf(
+                                Color(0xFF13151D),
+                                Color(0xFF0B0C12)
+                            )
+                        },
+                        center = center,
+                        radius = lensRadius
+                    ),
+                    radius = lensRadius,
+                    center = center
+                )
+
+                // ── A3. TACCHE OTTICHE GRADUATE A TELEMETRO CINEMATOGRAFICO ──
+                val tickCount = 24
+                val tickColor = if (isUnlocked) tierColor.copy(alpha = 0.38f) else Color.White.copy(alpha = 0.08f)
+
+                for (i in 0 until tickCount) {
+                    val angle = Math.toRadians((i * (360.0 / tickCount)))
+                    val startX = center.x + (tickInnerR * cos(angle)).toFloat()
+                    val startY = center.y + (tickInnerR * sin(angle)).toFloat()
+                    val endX = center.x + (tickOuterR * cos(angle)).toFloat()
+                    val endY = center.y + (tickOuterR * sin(angle)).toFloat()
+
+                    drawLine(
+                        color = tickColor,
+                        start = Offset(startX, startY),
+                        end = Offset(endX, endY),
+                        strokeWidth = radius * 0.018f
+                    )
+                }
+
+                // ── A4. ANELLO CONCENTRICO DI RIFINITURA INTERNA ──
+                drawCircle(
+                    color = if (isUnlocked) tierColor.copy(alpha = 0.42f) else Color.White.copy(alpha = 0.08f),
+                    radius = innerRingR,
                     center = center,
                     style = androidx.compose.ui.graphics.drawscope.Stroke(
-                        width = ringStroke
+                        width = radius * 0.02f
                     )
                 )
 
-                // Pillola di progresso curva con estremità arrotondate (StrokeCap.Round)
-                if (animatedProgress >= 0.999f) {
+                // ── A5. GHIERA METALLICA SPECULARE DINAMICA / PROGRESS PILL ──
+                if (showProgressRing) {
+                    val ringRadius = radius * 0.92f
+                    val ringStroke = (radius * 0.065f).coerceAtLeast(2.5.dp.toPx())
+
+                    // Traccia satinata di sfondo scuro
                     drawCircle(
-                        brush = Brush.sweepGradient(
-                            colors = listOf(
-                                tierColor,
-                                tier.secondaryColor,
-                                Color.White.copy(alpha = 0.90f),
-                                tierColor,
-                                tier.secondaryColor,
-                                tierColor
-                            ),
-                            center = center
-                        ),
+                        color = Color.White.copy(alpha = 0.09f),
                         radius = ringRadius,
                         center = center,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(
                             width = ringStroke
                         )
                     )
-                } else if (animatedProgress > 0f) {
-                    val sweep = 360f * animatedProgress
-                    drawArc(
-                        brush = Brush.sweepGradient(
-                            colors = listOf(
-                                tierColor,
-                                tier.secondaryColor,
-                                tierColor
+
+                    // Pillola di progresso curva con estremità arrotondate
+                    if (animatedProgress >= 0.999f) {
+                        drawCircle(
+                            brush = Brush.sweepGradient(
+                                colors = listOf(
+                                    tierColor,
+                                    tier.secondaryColor,
+                                    Color.White.copy(alpha = 0.95f),
+                                    tierColor,
+                                    tier.secondaryColor,
+                                    tierColor
+                                ),
+                                center = center
                             ),
+                            radius = ringRadius,
+                            center = center,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                width = ringStroke
+                            )
+                        )
+                    } else if (animatedProgress > 0f) {
+                        val sweep = 360f * animatedProgress
+                        drawArc(
+                            brush = Brush.sweepGradient(
+                                colors = listOf(
+                                    tierColor,
+                                    tier.secondaryColor,
+                                    tierColor
+                                ),
+                                center = center
+                            ),
+                            startAngle = -90f,
+                            sweepAngle = sweep,
+                            useCenter = false,
+                            topLeft = Offset(center.x - ringRadius, center.y - ringRadius),
+                            size = androidx.compose.ui.geometry.Size(ringRadius * 2, ringRadius * 2),
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(
+                                width = ringStroke,
+                                cap = StrokeCap.Round
+                            )
+                        )
+                    }
+                } else {
+                    // GHIERA A BISIELLO METALLICO 3D CON RIFLESSO SPECULARE DINAMICO
+                    // 1. Smusso esterno (Outer Chamfer): metallo pieno lucidato
+                    drawCircle(
+                        brush = Brush.sweepGradient(
+                            colors = if (isUnlocked) {
+                                listOf(
+                                    tierColor,
+                                    tier.secondaryColor,
+                                    Color.White.copy(alpha = 0.95f),
+                                    tierColor,
+                                    tier.secondaryColor,
+                                    tierColor
+                                )
+                            } else {
+                                listOf(
+                                    Color.White.copy(alpha = 0.20f),
+                                    Color.White.copy(alpha = 0.06f),
+                                    Color.White.copy(alpha = 0.35f),
+                                    Color.White.copy(alpha = 0.06f),
+                                    Color.White.copy(alpha = 0.20f)
+                                )
+                            },
                             center = center
                         ),
-                        startAngle = -90f,
-                        sweepAngle = sweep,
-                        useCenter = false,
-                        topLeft = Offset(center.x - ringRadius, center.y - ringRadius),
-                        size = androidx.compose.ui.geometry.Size(ringRadius * 2, ringRadius * 2),
+                        radius = radius * 0.88f,
+                        center = center,
                         style = androidx.compose.ui.graphics.drawscope.Stroke(
-                            width = ringStroke,
-                            cap = StrokeCap.Round
+                            width = radius * 0.045f
+                        )
+                    )
+
+                    // 2. Filo di luce diamantato interno (Inner Diamond-cut rim)
+                    drawCircle(
+                        color = if (isUnlocked) Color.White.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.06f),
+                        radius = radius * 0.86f,
+                        center = center,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(
+                            width = radius * 0.012f
                         )
                     )
                 }
-            } else {
-                // Anello concentrico standard a 360° per le viste senza track circolare
+            }
+
+            // B. AREA CENTRALE CON ICONA A BASSORILIEVO CONIATO (EFFETTO 3D SCULPTED)
+            val innerCircleSize = if (showProgressRing) size * 0.60f else size * 0.68f
+            val standardIconSize = if (showProgressRing) size * 0.46f else size * 0.52f
+
+            val currentIconSize = when {
+                iconKind.iconRes == R.drawable.ic_badge_light_projector ||
+                iconKind.iconRes == R.drawable.ic_badge_screaming ||
+                iconKind.iconRes == R.drawable.ic_badge_shaking_hands -> innerCircleSize * 1.15f
+                iconKind.iconRes == R.drawable.ic_badge_theater_curtains -> innerCircleSize * 1.15f
+                iconKind.iconRes == R.drawable.ic_badge_pocket_watch -> innerCircleSize * 1.15f
+                else -> standardIconSize
+            }
+
+            val isShiftedUpIcon = iconKind.iconRes == R.drawable.ic_badge_hot_meal ||
+                iconKind.iconRes == R.drawable.ic_badge_star_altar ||
+                iconKind.iconRes == R.drawable.ic_badge_tv ||
+                iconKind.iconRes == R.drawable.ic_badge_magnifying_glass ||
+                iconKind.iconRes == R.drawable.ic_badge_film_projector ||
+                iconKind.iconRes == R.drawable.ic_badge_scales ||
+                iconKind.iconRes == R.drawable.ic_badge_acoustic_megaphone ||
+                iconKind.iconRes == R.drawable.ic_badge_lantern_flame
+
+            val isShiftedDownIcon = iconKind.iconRes == R.drawable.ic_badge_star_medal
+
+            val iconOffsetY = when {
+                isShiftedUpIcon -> -size * 0.032f
+                isShiftedDownIcon -> size * 0.028f
+                else -> 0.dp
+            }
+
+            // Parallasse dell'icona in secondo piano
+            val maxParallaxDistance = innerCircleSize * 0.14f
+            val parallaxX = maxParallaxDistance * (-tiltX.value)
+            val parallaxY = maxParallaxDistance * (-tiltY.value)
+
+            Box(
+                modifier = Modifier
+                    .size(innerCircleSize)
+                    .clip(CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                if (isUnlocked) {
+                    // Icona limpida e razor-sharp, senza sdoppiamenti, recesso in profondità con pura parallasse cinematografica
+                    Icon(
+                        painter = painterResource(id = iconKind.iconRes),
+                        contentDescription = null,
+                        tint = tierColor,
+                        modifier = Modifier
+                            .offset(x = parallaxX, y = iconOffsetY + parallaxY)
+                            .wrapContentSize(align = Alignment.Center, unbounded = true)
+                            .requiredSize(currentIconSize)
+                    )
+                } else if (tier == PreviewBadgeTier.LOST_REEL) {
+                    // I trofei segreti Lost Reel mantengono il lucchetto
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_lock),
+                        contentDescription = "Trofeo Segreto",
+                        tint = Color(0xFF818CF8).copy(alpha = 0.70f),
+                        modifier = Modifier
+                            .offset(x = parallaxX * 0.7f, y = parallaxY * 0.7f)
+                            .size(standardIconSize * 0.82f)
+                    )
+                } else {
+                    // I trofei standard non sbloccati
+                    Icon(
+                        painter = painterResource(id = iconKind.iconRes),
+                        contentDescription = "Non sbloccato",
+                        tint = Color(0xFF94A3B8).copy(alpha = 0.40f),
+                        modifier = Modifier
+                            .offset(x = parallaxX, y = iconOffsetY + parallaxY)
+                            .wrapContentSize(align = Alignment.Center, unbounded = true)
+                            .requiredSize(currentIconSize)
+                    )
+                }
+            }
+
+            // C. FOREGROUND GLASS CANVAS: OMBRE DI INCASSO & LUCCICHIO DIAGONALE SUL VETRO
+            Canvas(modifier = Modifier.fillMaxSize()) {
+                val center = Offset(this.size.width / 2f, this.size.height / 2f)
+                val radius = (this.size.minDimension / 2f)
+                val lensRadius = if (showProgressRing) radius * 0.92f else radius * 0.88f
+                val innerRingR = if (showProgressRing) radius * 0.60f else radius * 0.68f
+
+                // 1. Ombra di incasso (Bezel Inner Shadow): la ghiera esterna proietta una sfumatura
+                // morbida continua e uniforme sul perimetro dell'oblò, senza stacchi netti o tagli improvvisi
                 drawCircle(
-                    brush = Brush.sweepGradient(
-                        colors = if (isUnlocked) {
+                    brush = Brush.radialGradient(
+                        0f to Color.Transparent,
+                        0.45f to Color.Transparent,
+                        0.68f to Color.Black.copy(alpha = 0.30f),
+                        0.86f to Color.Black.copy(alpha = 0.68f),
+                        0.96f to Color.Black.copy(alpha = 0.88f),
+                        1.0f to Color.Black.copy(alpha = 0.96f),
+                        center = center,
+                        radius = innerRingR
+                    ),
+                    radius = innerRingR,
+                    center = center
+                )
+
+                val glassPath = Path().apply {
+                    addOval(
+                        Rect(
+                            center.x - lensRadius,
+                            center.y - lensRadius,
+                            center.x + lensRadius,
+                            center.y + lensRadius
+                        )
+                    )
+                }
+
+                clipPath(glassPath) {
+                    // 2. Luccichio Periodico a Spazzamento Diagonale sul Vetro (ogni ~9s)
+                    // Fading continuo sfumato ai bordi con Color.Transparent a 45°, nessun bordo tronco o netto
+                    if (enablePeriodicGleam && isUnlocked && gleamProgress in 0.001f..0.999f) {
+                        val sweepMin = -lensRadius * 1.6f
+                        val sweepMax = lensRadius * 1.6f
+                        val currentSweep = sweepMin + (sweepMax - sweepMin) * gleamProgress
+
+                        val dirX = 0.7071f
+                        val dirY = 0.7071f
+                        val beamHalfWidth = lensRadius * 0.35f
+
+                        val startSweep = Offset(
+                            center.x + dirX * (currentSweep - beamHalfWidth),
+                            center.y + dirY * (currentSweep - beamHalfWidth)
+                        )
+                        val endSweep = Offset(
+                            center.x + dirX * (currentSweep + beamHalfWidth),
+                            center.y + dirY * (currentSweep + beamHalfWidth)
+                        )
+
+                        val beamColors = if (isUnlocked) {
                             listOf(
-                                tierColor,
-                                tier.secondaryColor,
-                                Color.White.copy(alpha = 0.85f),
-                                tierColor,
-                                tier.secondaryColor,
-                                tierColor
+                                Color.Transparent,
+                                tierColor.copy(alpha = 0.04f),
+                                Color.White.copy(alpha = 0.12f),
+                                Color.White.copy(alpha = 0.24f),
+                                Color.White.copy(alpha = 0.12f),
+                                tierColor.copy(alpha = 0.04f),
+                                Color.Transparent
                             )
                         } else {
                             listOf(
-                                Color.White.copy(alpha = 0.15f),
-                                Color.White.copy(alpha = 0.05f),
-                                Color.White.copy(alpha = 0.15f)
+                                Color.Transparent,
+                                Color.White.copy(alpha = 0.03f),
+                                Color.White.copy(alpha = 0.08f),
+                                Color.White.copy(alpha = 0.14f),
+                                Color.White.copy(alpha = 0.08f),
+                                Color.White.copy(alpha = 0.03f),
+                                Color.Transparent
                             )
-                        },
-                        center = center
-                    ),
-                    radius = radius * 0.88f,
-                    center = center,
-                    style = androidx.compose.ui.graphics.drawscope.Stroke(
-                        width = radius * 0.045f
-                    )
-                )
-            }
+                        }
 
-        }
-
-        // B. AREA CENTRALE DELLA LENTE CON ICONA IN SECONDO PIANO (EFFETTO PARALLASSE IN PROFONDITÀ)
-        val innerCircleSize = if (showProgressRing) size * 0.60f else size * 0.68f
-        val standardIconSize = if (showProgressRing) size * 0.46f else size * 0.52f
-
-        // Icone ingrandite su misura per riempire armoniosamente la lente circolare
-        val currentIconSize = when {
-            iconKind.iconRes == R.drawable.ic_badge_light_projector ||
-            iconKind.iconRes == R.drawable.ic_badge_screaming ||
-            iconKind.iconRes == R.drawable.ic_badge_shaking_hands -> innerCircleSize * 1.15f
-            iconKind.iconRes == R.drawable.ic_badge_theater_curtains -> innerCircleSize * 1.15f
-            iconKind.iconRes == R.drawable.ic_badge_pocket_watch -> innerCircleSize * 1.15f
-            else -> standardIconSize
-        }
-
-
-        // Sposta solo queste icone un pochetto più in alto per bilanciare la base
-        val isShiftedUpIcon = iconKind.iconRes == R.drawable.ic_badge_hot_meal ||
-            iconKind.iconRes == R.drawable.ic_badge_star_altar ||
-            iconKind.iconRes == R.drawable.ic_badge_tv ||
-            iconKind.iconRes == R.drawable.ic_badge_magnifying_glass ||
-            iconKind.iconRes == R.drawable.ic_badge_film_projector ||
-            iconKind.iconRes == R.drawable.ic_badge_scales ||
-            iconKind.iconRes == R.drawable.ic_badge_acoustic_megaphone ||
-            iconKind.iconRes == R.drawable.ic_badge_lantern_flame
-
-        // Abbassa la medaglia con stella (La Giuria) che ha la barra orizzontale larga in cima
-        val isShiftedDownIcon = iconKind.iconRes == R.drawable.ic_badge_star_medal
-
-        val iconOffsetY = when {
-            isShiftedUpIcon -> -size * 0.032f
-            isShiftedDownIcon -> size * 0.028f
-            else -> 0.dp
-        }
-
-        // Parallasse dell'icona in secondo piano (l'icona si muove in senso opposto al tilt per simulare profondità sotto il cristallo)
-        val maxParallaxDistance = innerCircleSize * 0.14f
-        val parallaxX = maxParallaxDistance * (-tiltX.value)
-        val parallaxY = maxParallaxDistance * (-tiltY.value)
-
-        Box(
-            modifier = Modifier
-                .size(innerCircleSize)
-                .clip(CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            // ICONA RECESSA NEL SECONDO PIANO (Tagliata con precisione alla circonferenza interna della lente)
-            if (isUnlocked) {
-                Icon(
-                    painter = painterResource(id = iconKind.iconRes),
-                    contentDescription = null,
-                    tint = tierColor,
-                    modifier = Modifier
-                        .offset(x = parallaxX, y = iconOffsetY + parallaxY)
-                        .wrapContentSize(align = Alignment.Center, unbounded = true)
-                        .requiredSize(currentIconSize)
-                )
-            } else if (tier == PreviewBadgeTier.LOST_REEL) {
-                // I trofei segreti Lost Reel mantengono il lucchetto per preservare il mistero della Bobina Perduta
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_lock),
-                    contentDescription = "Trofeo Segreto",
-                    tint = Color(0xFF818CF8).copy(alpha = 0.70f),
-                    modifier = Modifier
-                        .offset(x = parallaxX * 0.7f, y = parallaxY * 0.7f)
-                        .size(standardIconSize * 0.82f)
-                )
-            } else {
-                // I trofei standard mostrano la propria icona identificativa in silhouette satinata scura
-                Icon(
-                    painter = painterResource(id = iconKind.iconRes),
-                    contentDescription = "Non sbloccato",
-                    tint = Color(0xFF94A3B8).copy(alpha = 0.40f),
-                    modifier = Modifier
-                        .offset(x = parallaxX, y = iconOffsetY + parallaxY)
-                        .wrapContentSize(align = Alignment.Center, unbounded = true)
-                        .requiredSize(currentIconSize)
-                )
-            }
-        }
-
-        // C. FOREGROUND GLASS CANVAS: OMBRE DI RILIEVO E LUCCICHIO SUL VETRO
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val center = Offset(this.size.width / 2f, this.size.height / 2f)
-            val radius = (this.size.minDimension / 2f)
-            val lensRadius = if (showProgressRing) radius * 0.92f else radius * 0.88f
-            val innerRingR = if (showProgressRing) radius * 0.60f else radius * 0.68f
-
-            // 1. Ombra di incasso (Bezel Inner Shadow): la ghiera esterna con le tacche, essendo sopraelevata,
-            // proietta un'ombra interna morbida e profonda lungo il perimetro dell'oblò,
-            // facendo risaltare la parte esterna come fisicamente più alta e l'icona incassata in profondità.
-            drawCircle(
-                brush = Brush.radialGradient(
-                    0f to Color.Transparent,
-                    0.45f to Color.Transparent,
-                    0.68f to Color.Black.copy(alpha = 0.30f),
-                    0.86f to Color.Black.copy(alpha = 0.68f),
-                    0.96f to Color.Black.copy(alpha = 0.88f),
-                    1.0f to Color.Black.copy(alpha = 0.96f),
-                    center = center,
-                    radius = innerRingR
-                ),
-                radius = innerRingR,
-                center = center
-            )
-
-            val glassPath = Path().apply {
-                addOval(
-                    Rect(
-                        center.x - lensRadius,
-                        center.y - lensRadius,
-                        center.x + lensRadius,
-                        center.y + lensRadius
-                    )
-                )
-            }
-
-            clipPath(glassPath) {
-                // Luccichio Periodico a Spazzamento Diagonale sul Vetro (ogni ~9s)
-                if (enablePeriodicGleam && isUnlocked && gleamProgress in 0.001f..0.999f) {
-                    val sweepMin = -lensRadius * 1.6f
-                    val sweepMax = lensRadius * 1.6f
-                    val currentSweep = sweepMin + (sweepMax - sweepMin) * gleamProgress
-
-                    // Vettore diagonale a 45° (da in alto a sinistra a in basso a destra)
-                    val dirX = 0.7071f
-                    val dirY = 0.7071f
-                    val beamHalfWidth = lensRadius * 0.35f
-
-                    val startSweep = Offset(
-                        center.x + dirX * (currentSweep - beamHalfWidth),
-                        center.y + dirY * (currentSweep - beamHalfWidth)
-                    )
-                    val endSweep = Offset(
-                        center.x + dirX * (currentSweep + beamHalfWidth),
-                        center.y + dirY * (currentSweep + beamHalfWidth)
-                    )
-
-                    // Riflesso satinato e semitrasparente: lascia visibile l'icona sul fondo senza coprirla con bianco opaco
-                    val beamColors = if (isUnlocked) {
-                        listOf(
-                            Color.Transparent,
-                            tierColor.copy(alpha = 0.04f),
-                            Color.White.copy(alpha = 0.12f),
-                            Color.White.copy(alpha = 0.24f),
-                            Color.White.copy(alpha = 0.12f),
-                            tierColor.copy(alpha = 0.04f),
-                            Color.Transparent
-                        )
-                    } else {
-                        listOf(
-                            Color.Transparent,
-                            Color.White.copy(alpha = 0.03f),
-                            Color.White.copy(alpha = 0.08f),
-                            Color.White.copy(alpha = 0.14f),
-                            Color.White.copy(alpha = 0.08f),
-                            Color.White.copy(alpha = 0.03f),
-                            Color.Transparent
+                        drawRect(
+                            brush = Brush.linearGradient(
+                                colors = beamColors,
+                                start = startSweep,
+                                end = endSweep
+                            ),
+                            size = this.size
                         )
                     }
-
-                    drawRect(
-                        brush = Brush.linearGradient(
-                            colors = beamColors,
-                            start = startSweep,
-                            end = endSweep
-                        ),
-                        size = this.size
-                    )
                 }
             }
         }

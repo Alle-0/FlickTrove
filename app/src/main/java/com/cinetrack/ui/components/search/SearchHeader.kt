@@ -184,7 +184,7 @@ fun SearchHeader(
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
                             .fillMaxSize()
-                            .padding(horizontal = 14.dp)
+                            .padding(start = 14.dp, end = 2.dp)
                     ) {
                         Icon(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
@@ -257,19 +257,27 @@ fun SearchHeader(
                             )
                         }
                         if (query.isNotEmpty()) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                contentDescription = stringResource(R.string.search_content_desc_clear),
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                            Box(
                                 modifier = Modifier
-                                    .size(14.dp)
-                                    .bounceClick(scaleDown = 0.8f) {
+                                    .size(40.dp)
+                                    .bounceClick(scaleDown = 0.82f) {
                                         onTextFieldValueChange(TextFieldValue(""))
                                         onClearQuery()
                                         focusRequester.requestFocus()
                                         keyboardController?.show()
                                     }
-                            )
+                                    .clip(CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                    contentDescription = stringResource(R.string.search_content_desc_clear),
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        } else {
+                            Spacer(modifier = Modifier.width(12.dp))
                         }
                     }
                 }
