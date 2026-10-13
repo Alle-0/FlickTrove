@@ -130,21 +130,6 @@ fun BoxScope.MainScrollToTopFab(
         Box(
             modifier = Modifier
                 .size(34.dp)
-                .bounceClick(scaleDown = 0.85f) {
-                    coroutineScope.launch {
-                        try {
-                            arrowOffsetY.animateTo(-12f, tween(110, easing = FastOutLinearInEasing))
-                            arrowAlpha.snapTo(0f)
-                            arrowOffsetY.snapTo(12f)
-                            arrowAlpha.animateTo(1f, tween(80))
-                            arrowOffsetY.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
-                        } finally {
-                            arrowOffsetY.snapTo(0f)
-                            arrowAlpha.snapTo(1f)
-                        }
-                    }
-                    onScrollToTop()
-                }
                 .clip(CircleShape)
                 .hazeGlass(
                     state = contentHazeState,
@@ -163,6 +148,21 @@ fun BoxScope.MainScrollToTopFab(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier
                     .size(20.dp)
+                    .bounceClick(scaleDown = 0.85f) {
+                        coroutineScope.launch {
+                            try {
+                                arrowOffsetY.animateTo(-12f, tween(110, easing = FastOutLinearInEasing))
+                                arrowAlpha.snapTo(0f)
+                                arrowOffsetY.snapTo(12f)
+                                arrowAlpha.animateTo(1f, tween(80))
+                                arrowOffsetY.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy))
+                            } finally {
+                                arrowOffsetY.snapTo(0f)
+                                arrowAlpha.snapTo(1f)
+                            }
+                        }
+                        onScrollToTop()
+                    }
                     .offset(y = arrowOffsetY.value.dp)
                     .alpha(arrowAlpha.value)
                     .rotate(-90f)

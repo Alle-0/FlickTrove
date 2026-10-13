@@ -79,6 +79,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.util.lerp
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.R
+import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.hazeChild
@@ -244,35 +245,17 @@ class CommsUniCommentsScreen(
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(globalHazeState)
-                    .haze(hazeState)
             ) {
-                if (!effectiveBackdrop.isNullOrBlank()) {
-                    AsyncImage(
-                        model = effectiveBackdrop,
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .clipToBounds()
-                            .scale(1.05f)
-                            .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
-                            .drawWithContent {
-                                drawContent()
-                                // Scurito uniformemente su tutto lo schermo (senza gradiente) per garantire massimo contrasto
-                                drawRect(Color.Black.copy(alpha = 0.88f))
-                            }
-                    )
-                }
-
                 Scaffold(
-            modifier = Modifier
-                .fillMaxSize()
-                .imePadding()
-                .pointerInput(Unit) {
-                    detectTapGestures(onTap = {
-                        localFocusManager.clearFocus()
-                    })
-                },
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .imePadding()
+                        .pointerInput(Unit) {
+                            detectTapGestures(onTap = {
+                                localFocusManager.clearFocus()
+                            })
+                        },
+                    containerColor = Color.Transparent,
             topBar = {
                 TopAppBar(
                     modifier = Modifier
@@ -396,7 +379,26 @@ class CommsUniCommentsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .haze(state = hazeState, style = HazeStyles.PremiumDark)
                 ) {
+                    if (!effectiveBackdrop.isNullOrBlank()) {
+                        AsyncImage(
+                            model = effectiveBackdrop,
+                            contentDescription = null,
+                            contentScale = ContentScale.Crop,
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .clipToBounds()
+                                .scale(1.05f)
+                                .blur(8.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded)
+                                .drawWithContent {
+                                    drawContent()
+                                    // Scurito uniformemente su tutto lo schermo (senza gradiente) per garantire massimo contrasto
+                                    drawRect(Color.Black.copy(alpha = 0.88f))
+                                }
+                        )
+                    }
+
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
