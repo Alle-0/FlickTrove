@@ -9,9 +9,10 @@
   <a href="https://alle-0.github.io/FlickTrove/"><img src="https://img.shields.io/badge/Website-Live_Showcase-00F2FE?style=for-the-badge&logo=googlechrome&logoColor=black" alt="Official Website"></a>
   <a href="https://github.com/Alle-0/FlickTrove/releases/latest"><img src="https://img.shields.io/github/v/release/Alle-0/FlickTrove?label=Latest%20Release&style=for-the-badge&color=2DD4BF&logo=github" alt="Latest Release"></a>
   <a href="https://www.reddit.com/r/FlickTrove/"><img src="https://img.shields.io/badge/Reddit-r/FlickTrove-FF4500?style=for-the-badge&logo=reddit&logoColor=white" alt="Reddit Community"></a>
-  <img src="https://img.shields.io/badge/Platform-Android-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
-  <img src="https://img.shields.io/badge/Kotlin-1.9+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
+  <img src="https://img.shields.io/badge/Platform-Android_8.0+-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="Android">
+  <img src="https://img.shields.io/badge/Kotlin-2.0+-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin">
   <img src="https://img.shields.io/badge/Jetpack_Compose-Material_3-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Jetpack Compose">
+  <img src="https://img.shields.io/badge/Room_DB-Offline_First-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room DB">
   <img src="https://img.shields.io/badge/Firebase-Integrated-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase">
 </p>
 
@@ -34,6 +35,7 @@
     <li><a href="#design--ui"><img src="docs/assets/readme_icons/palette.svg" width="18" height="18" align="absmiddle" /> Design & UI</a></li>
     <li><a href="#developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="18" height="18" align="absmiddle" /> Developer Note</a></li>
     <li><a href="#usage"><img src="docs/assets/readme_icons/play.svg" width="18" height="18" align="absmiddle" /> Usage</a></li>
+    <li><a href="#future-roadmap"><img src="docs/assets/readme_icons/calendario.svg" width="18" height="18" align="absmiddle" /> Future Roadmap</a></li>
     <li><a href="#license"><img src="docs/assets/readme_icons/documento.svg" width="18" height="18" align="absmiddle" /> License</a></li>
     <li><a href="#support-the-project"><img src="docs/assets/readme_icons/heart.svg" width="18" height="18" align="absmiddle" /> Support the Project</a></li>
     <li><a href="#contacts--credits"><img src="docs/assets/readme_icons/people.svg" width="18" height="18" align="absmiddle" /> Contacts & Credits</a></li>
@@ -71,28 +73,33 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 ## <h2 id="key-features"><img src="docs/assets/readme_icons/sparkle.svg" width="24" height="24" align="absmiddle" /> Key Features</h2>
 
-FlickTrove is not just a tracker, it's a personal library built tailored for enthusiasts:
+FlickTrove is not just a tracker, it's a personal cinema companion and media library custom-built for movie and TV series lovers:
 
-- 🎠 **Cinematic Home Feed** *(New in 4.0)*: An immersive, auto-scrolling **Hero Spotlight Carousel** sits at the top, showcasing trending titles with dynamic ambilight glow effects extracted from each backdrop in real-time.
-- 🏆 **The Trove's Pick** *(New in 4.0)*: A premium full-width card that highlights the single best title our proprietary algorithm has curated for you, complete with a personalized Match Score and a real-time dynamic glow.
-- 🥇 **Top 10 FlickTrove** *(New in 4.0)*: Our own custom weekly ranking algorithm surfaces the 10 hottest titles among all users, updated every 30 days.
-- 🏛️ **Trophy Room & Cinephile Gamification**: 51 unique achievements and progressive milestones across historical film stock formats (*Super 8*, *16mm*, *35mm*, *70mm*, *The Final Cut*) and secret *Lost Reels*, celebrating your viewing history, binge marathons, director muse loyalty, and deep curated collections with real-time unlock banners and global community rarity stats.
-- 🔍 **Comprehensive Search**: Access the entire TMDB catalog. Find movies, TV shows, and explore biographical details and filmographies of actors.
-- 📁 **Custom Organization**: Create custom folders. Assign names, dynamic colors via a Color Wheel, and organize your watchlists the way you prefer.
-- 🔔 **Smart Notifications**: Never miss a release. Receive timely alerts when a movie or TV show episode you are waiting for is released.
-- 📊 **Advanced Statistics**: Monitor your watch time, analyze your favorite genres, and see how much of your life you've dedicated to cinema and TV series.
-- 🎬 **Episodic Tracking**: Keep track of which episodes you've already watched. Filter by seasons and always stay up to date with your favorite series.
-- ☁️ **Cloud & Live Sync**: Native support for Firebase to securely back up your library, alongside seamless two-way background synchronization with **Trakt.tv** and **SIMKL** (OAuth 2.0 with PKCE) for watch history, personal ratings, watchlist, and custom folders/lists.
-- 📴 **Offline-First**: Access your personal library and save your preferences even without an internet connection, thanks to solid local caching (Room DB).
-- 🌍 **Localization**: Native multi-language architecture supporting 13 languages (🇮🇹 🇬🇧 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇮🇩 🇹🇷) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC).
-- 🍿 **Streaming Providers**: Discover exactly where to stream your favorite movies and shows.
-- 📅 **Magazine & News Feed**: A dedicated editorial news section with curated articles from top film publications.
-- 🌍 **Global Rating System**: Your personal ratings contribute completely anonymously to the global FlickTrove rating, visible to all users.
-- 🖼️ **Custom Avatars**: Personalize your profile by uploading your own image, processed locally and securely stored on Supabase Storage.
-- 💬 **Community & Social**: Read and write reviews, upload images and GIFs, format your text using **Markdown**, and interact with the FlickTrove and **CommsUni (commsuni.tv)** federated community.
-- 👥 **Extensive Cast & Crew**: Dive deep into the people behind the camera. View full cast lists and explore the crew neatly grouped by department (Directing, Writing, Sound, etc.).
-- 🛡️ **Safe Environment**: Built-in reporting system to flag inappropriate content and maintain a high-quality community space.
-- 🔄 **Universal Data Import**: Smart migration engine that recognizes and imports exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, **Cinemaniac**, and any custom **CSV/JSON** format.
+- 🎠 **Cinematic Discovery & Home Feed**: An immersive, auto-scrolling **Hero Spotlight Carousel** sits at the top, showcasing trending titles with official logo overlays.
+- 🧠 **The Trove's Pick & Taste Matrix**: Our proprietary multi-vector recommendation engine evaluates your personal taste profile across genre affinities, 64-bit micro-clustering, recency half-life decay, Bayesian quality smoothing, and bilingual keyword dictionaries (`CalculateMatchScoreUseCase`) to highlight tailored recommendations with custom Match Scores.
+- 🎲 **Surprise Me**: A smart recommendation assistant to overcome decision fatigue. Choose an instant random pick or follow the guided path selecting your available time, emotional mood, and viewing company (*Solo*, *Date Night*, *Friends*, *Family*) to find the ideal title to watch.
+- 🥇 **Top 10 FlickTrove**: Custom ranking algorithm surfacing the 10 most popular titles among users, refreshed every 30 days.
+- 📈 **Box Office Insights**: Real-time domestic and international box office rankings, Weekend Top 10 grosses, and all-time box office records.
+- 🏛️ **Trophy Room & Cinephile Gamification**: 51 unique achievements and progressive milestones across historical film stock formats (*Super 8*, *16mm*, *35mm*, *70mm*, *The Final Cut*) and 12 secret *Lost Reels*. Features 100% offline-first async evaluation, real-time floating unlock banners (`TrophyUnlockBanner`), global community rarity stats (24h TTL cache), and server-validated Patron tier.
+- ⏱️ **Watch History & Multi-Rewatch Journal**: Dedicated watch history bottom sheet to log multiple viewings, customize watch dates, manage rewatches, and track cumulative viewing times across your cinephile journey.
+- 💖 **Vibes & Mood Journaling**: Tag titles with emotional *"Vibe"* stickers, personal star ratings (1-10 with half-star precision), and private review diaries via the interactive Peek-a-Boo Check-In Drawer.
+- 🎭 **Cinematic Sagas & Franchises**: Dedicated timelines for major movie franchises (Marvel MCU, Star Wars, Harry Potter, Middle-earth, etc.) tracking your completion percentage, progress pill, and total saga runtime.
+- 📁 **Custom Folders & Curated Collections**: Create bespoke folders with custom hex colors via an interactive Color Wheel, rich descriptions, and flexible sorting. Organize themed marathons, personal rankings, or watchlists your way.
+- 🎨 **Seasonal Adaptive App Icons**: Personalize your home screen with themed launcher icons (including Halloween, Christmas, Classic Gold, and Neo Mint) with an interactive in-app live preview carousel.
+- 🔍 **Natural Language Search & TMDB Catalog**: Instant search across the entire TMDB catalog for movies, TV shows, and people. Powered by a comprehensive bilingual keyword dictionary for semantic mood and theme lookups.
+- 🎬 **Episodic TV Tracking**: Full TV series lifecycle management. Spunta episodes and seasons, track next upcoming air dates, monitor *"In pari"* (up-to-date) completion status, and preserve your watched episode history even when dropping or pausing shows.
+- ☁️ **Cloud & Live Sync**: Native Firebase Firestore backup alongside seamless, two-way background synchronization with **Trakt.tv** and **SIMKL** (OAuth 2.0 with PKCE) for watch history, personal ratings, watchlist, and custom folders via Android WorkManager.
+- 📴 **Offline-First Architecture**: Access your entire library, update watch states, rate titles, and take personal notes without an internet connection, backed by a solid local Room database.
+- 🌍 **13+ Languages & Regional Age Ratings**: Full app-wide native localization supporting 13 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇮🇩 🇹🇷) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC).
+- 🍿 **Streaming Providers & Trailers**: Discover where to stream, buy, or rent any title in your country, powered by JustWatch data via TMDB, alongside high-definition in-app YouTube trailers.
+- 📅 **Release Reminders & Notifications**: Never miss theatrical premieres or streaming releases with local calendar notifications and customizable alert schedules.
+- 📰 **Film Magazine & Editorial Collections**: Dedicated news section featuring articles from top film publications alongside curated editorial spotlight collections.
+- 📊 **Advanced Statistics & Cinephile Wrapped**: Comprehensive watch time breakdowns (days, hours, minutes), genre distributions, release decade heatmaps, favorite actor/director frequency, and shareable Wrapped cards.
+- 🌍 **Global Anonymous Ratings**: Your personal ratings contribute anonymously and idempotently to the global FlickTrove rating, visible alongside TMDB, IMDb, Rotten Tomatoes, and Metacritic scores.
+- 💬 **Community & Federated Social Network**: Write reviews, rate titles, attach native images and Giphy GIFs, format with Markdown, tag spoilers, and interact with the federated **CommsUni (commsuni.tv)** network.
+- 📱 **Interactive Glance Widgets**: Glanceable Android home screen widgets for viewing your movie watchlist, now watching, and TV series in progress with direct episode check-off from your launcher.
+- 🔄 **Universal Data Import**: Effortless migration engine recognizing backup exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, **Cinemaniac**, and custom **CSV/JSON/YAML** files.
+- 🛡️ **Privacy & Safe Environment**: Built-in reporting system to flag inappropriate content, zero third-party telemetry, and full local backup export/import capabilities.
 
 ---
 
@@ -101,24 +108,34 @@ FlickTrove is not just a tracker, it's a personal library built tailored for ent
 <div align="center">
   <table>
     <tr>
-      <td align="center"><b>Home & Blur Effect</b></td>
+      <td align="center"><b>Home & Dynamic Glow</b></td>
       <td align="center"><b>Personal Collection</b></td>
       <td align="center"><b>Immersive Details</b></td>
     </tr>
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/HomeFeed.webp" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/YourList-Watched.webp" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_MoneyHeist.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_AliceInBorderland.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Advanced Statistics</b></td>
-      <td align="center"><br><b>Custom Folders</b></td>
-      <td align="center"><br><b>For You</b></td>
+      <td align="center"><br><b>Custom Folders & Curation</b></td>
+      <td align="center"><br><b>The Trove's Pick</b></td>
     </tr>
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/GeneralStats.webp" width="240" alt="Stats Screen"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/MyFolders.webp" width="240" alt="Folders Screen"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/TrovesPick.webp" width="240" alt="Trove's Pick"/>&nbsp;&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center"><br><b>Trophy Room Gamification</b></td>
+      <td align="center"><br><b>TV Series & Episodic Progress</b></td>
+      <td align="center"><br><b>Interactive Discovery Swiper</b></td>
+    </tr>
+    <tr>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/TrophyRoom.webp" width="240" alt="Trophy Room"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/ToWatchSeriesScreen.webp" width="240" alt="TV Series Tracking"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Raccomandated_Swiper.webp" width="240" alt="Discovery Swiper"/>&nbsp;&nbsp;</td>
     </tr>
   </table>
 </div>
@@ -132,18 +149,30 @@ Behind a gorgeous interface lies a solid and scalable engine. We used the best p
 | Category | Stack / Library |
 | :--- | :--- |
 | **Language** | <img src="https://img.shields.io/badge/100%25_Kotlin-7F52FF?style=for-the-badge&logo=kotlin&logoColor=white" alt="Kotlin"> |
-| **Architecture** | <img src="https://img.shields.io/badge/MVVM-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="MVVM"> |
+| **Architecture** | <img src="https://img.shields.io/badge/MVVM_%2B_Clean_Architecture-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="MVVM & Clean Architecture"> |
 | **UI Framework** | <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Compose"> <img src="https://img.shields.io/badge/Material_3-EADDFF?style=for-the-badge&logo=materialdesign&logoColor=black" alt="Material 3"> |
+| **Navigation** | <img src="https://img.shields.io/badge/Voyager_1.1-7B1FA2?style=for-the-badge&logo=compass&logoColor=white" alt="Voyager"> |
+| **Blur & Glassmorphism** | <img src="https://img.shields.io/badge/Haze_0.7-00B4D8?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Haze"> |
 | **Networking** | <img src="https://img.shields.io/badge/Retrofit_2-FF6347?style=for-the-badge&logo=square&logoColor=white" alt="Retrofit"> <img src="https://img.shields.io/badge/OkHttp-109D59?style=for-the-badge&logo=square&logoColor=white" alt="OkHttp"> |
-| **Local Database** | <img src="https://img.shields.io/badge/Room_DB-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room"> |
+| **Local Database** | <img src="https://img.shields.io/badge/Room_DB_2.8-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room"> |
 | **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=for-the-badge&logo=google&logoColor=white" alt="Hilt"> |
-| **Images & Colors** | <img src="https://img.shields.io/badge/Coil-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> (Loading & Dynamic Color Extraction) |
+| **Images & Colors** | <img src="https://img.shields.io/badge/Coil_2-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> <img src="https://img.shields.io/badge/AndroidX_Palette-FF7043?style=for-the-badge&logo=android&logoColor=white" alt="Palette"> |
+| **Background Sync** | <img src="https://img.shields.io/badge/WorkManager-34A853?style=for-the-badge&logo=android&logoColor=white" alt="WorkManager"> |
 | **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"> <img src="https://img.shields.io/badge/OAuth_2.0-Trakt_%26_SIMKL-232F3E?style=for-the-badge&logo=openid&logoColor=white" alt="OAuth2"> |
 
 <details>
 <summary><b><img src="docs/assets/readme_icons/2_server.svg" width="18" height="18" align="absmiddle" /> Technical Deep Dive</b></summary>
 <br>
-FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows for reactive data management. Hilt simplifies dependencies, making the code testable and modular. Navigation is handled by <b>Voyager</b> (tab + stack navigator) for a fully Compose-native, lifecycle-safe routing. The Home Feed runs on a dedicated <code>GetHomeFeedUseCase</code> that fires all API calls in parallel via coroutines, ensuring the fastest possible load time. Background syncing with cloud services (Firebase, Trakt, and SIMKL) is powered by Android <b>WorkManager</b> with resilient exponential backoff, rate-limit pacing, and automatic token refresh.
+
+FlickTrove adopts the most modern Android patterns:
+- **Reactive Data Layer**: Built on Kotlin Coroutines and StateFlows for snappy, unidirectional data flow (UDF) and lifecycle safety.
+- **Dependency Injection**: Powered by Dagger Hilt for clean modular boundaries, testability, and decoupled repository patterns.
+- **Compose-Native Routing**: Navigation is orchestrated by **Voyager** (tab + stack navigator) with transition animations and state preservation.
+- **Parallel Aggregation**: The Home Feed relies on `GetHomeFeedUseCase` firing TMDB and user database calls in parallel via coroutines, ensuring sub-second rendering.
+- **Taste Matrix Engine**: Multi-vector recommendation engine (`CalculateMatchScoreUseCase`) balancing genre affinity vectors, zero-allocation 64-bit micro-clustering, recency half-life decay, Bayesian TMDB quality smoothing, and bilingual keyword semantics.
+- **Offline-First Room SSOT**: Local Room DB acts as the immutable Single Source of Truth for watch states, custom folders, and 51 achievements.
+- **Resilient Cloud Sync**: Background synchronization with cloud backends (Firebase Firestore, Trakt.tv, and SIMKL) is powered by Android **WorkManager** with exponential backoff, rate-limit safety, and automatic OAuth2 token refreshing.
+- **Glassmorphic Render Hierarchy**: Custom `Haze` state architecture ensuring zero recursive self-blur feedback loops and 60/120 FPS buttery rendering.
 </details>
 
 ---
@@ -153,8 +182,9 @@ FlickTrove adopts the most modern Android patterns: Kotlin Coroutines and Flows 
 Design is the true crown jewel of FlickTrove.
 
 - 🪟 **Full Glassmorphism**: We use a custom blur engine to blur the content under panels, drawers, and top bars in real time at 60/120fps.
-- 🌈 **Dynamic Theming**: The predominant colors of movie posters and backgrounds are dynamically extracted by Coil to theme the entire screen (gradients, buttons, and accents).
+- 🌈 **Dynamic Theming**: The predominant colors of movie posters and backgrounds are dynamically extracted by Coil and AndroidX Palette to theme the entire screen (gradients, buttons, and accents).
 - ✨ **Premium Animations**: Micro-interactions, custom haptic feedback, and bounce-click effects make the app incredibly responsive and "alive" under your fingers.
+- 🎭 **Seasonal Customization**: Adaptive launcher icons with interactive carousel previews celebrating events like Halloween and Christmas.
 
 ---
 
@@ -170,24 +200,26 @@ Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not
 
 Once the app is launched:
 
-1. Log in or create an account (data will be securely saved on Firebase).
-2. Use the search bar to find your first movie or TV show.
-3. Click "To watch" and select which folder to put it in.
-4. *(Optional)* Go to the "Stats" tab to monitor your watch time.
+1. Log in with Google, email/password, or jump straight in as a **Guest** (with full offline-first functionality).
+2. Use the search bar or natural language keywords to find movies, TV series, actors, and directors.
+3. Mark titles as "To Watch" (Watchlist), "Watched", or organize them into bespoke custom folders.
+4. Log multiple viewings, customize watch dates, assign emotional *"Vibes"*, and record private diary notes.
+5. Explore your viewing journey in the **Stats** tab, use **Surprise Me** when indecisive, and check your unlocked achievements in the **Trophy Room**.
 
 ---
 
 ## <h2 id="future-roadmap"><img src="docs/assets/readme_icons/calendario.svg" width="24" height="24" align="absmiddle" /> Future Roadmap</h2>
 
-FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into a fully social experience:
+FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
-- [ ] **Social Integration:** Follow your friends and browse their personal libraries.
-- [ ] **Shared Folders:** Create collaborative watchlists with your partner or friends.
-- [ ] **Public Folders:** Make any folder public and shareable via link — let anyone browse your curated collection.
-- [ ] **Badges & Achievements:** Unlock special badges based on your watch history, streaks, genres explored, and community contributions.
-- [ ] **Follow Actors & Directors:** Get notified the moment a followed person announces or releases a new project.
-- [ ] **Official Website:** A public-facing companion website to showcase your profile, public folders, and stats.
-- [ ] **AI:** ?
+- [x] **Badges & Achievements:** 51 achievements across 5 historical film stock tiers and secret *Lost Reels*, with real-time unlock banners and global rarity stats.
+- [x] **Universal Data Importers:** Native migration engine supporting Letterboxd, IMDb, Trakt, SIMKL, TVTime, Serializd, and custom CSV/JSON/YAML.
+- [x] **Official Companion Website:** Public portal and landing page live at [alle-0.github.io/FlickTrove](https://alle-0.github.io/FlickTrove/).
+- [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
+- [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends.
+- [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collection on the web.
+- [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces or releases a new project.
+- [ ] **AI-Powered Cinephile Concierge:** Conversational discovery assistant for contextual mood queries, spoiler-free summaries, and deep film analysis.
 
 ---
 
@@ -253,3 +285,4 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 <div align="center">
   <i>Developed with passion for movie and TV show lovers.</i>
 </div>
+
