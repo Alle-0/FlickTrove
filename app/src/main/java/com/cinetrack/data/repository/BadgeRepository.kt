@@ -143,9 +143,22 @@ class BadgeRepository @Inject constructor(
                         .get()
                         .addOnSuccessListener { doc ->
                             if (doc.exists() && (doc.getBoolean("isSupporter") == true || doc.getBoolean("isExecutiveProducer") == true)) {
-                                if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
-                                    badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
-                                    evaluateBadgesAsync()
+                                val claimed = doc.getBoolean("claimed") == true
+                                val claimedByUid = doc.getString("claimedByUid")
+                                if (!claimed || claimedByUid == user.uid) {
+                                    if (!claimed) {
+                                        doc.reference.update(
+                                            mapOf(
+                                                "claimed" to true,
+                                                "claimedByUid" to user.uid,
+                                                "claimedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                            )
+                                        )
+                                    }
+                                    if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
+                                        badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                                        evaluateBadgesAsync()
+                                    }
                                 }
                             }
                         }
@@ -313,6 +326,100 @@ class BadgeRepository @Inject constructor(
     fun recordSupporterVerified() {
         badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
         evaluateBadgesAsync()
+    }
+
+    enum class SupporterVerificationResult {
+        SUCCESS,
+        NOT_FOUND,
+        ALREADY_CLAIMED,
+        INVALID_EMAIL,
+        ERROR
+    }
+
+    /**
+     * Verifica on-demand lo stato sostenitore tramite email (utile per Guest o donazioni
+     * effettuate con indirizzi PayPal/Ko-fi differenti rispetto al login).
+     *
+     * Anti-Abuse (Soluzione A - Riscatto Univoco):
+     * La donazione viene legata in modo univoco all'UID dell'account richiedente (registrato o guest).
+     * Se la donazione risulta già riscattata da un altro UID, il tentativo viene bloccato (ALREADY_CLAIMED),
+     * a meno che l'utente non sia autenticato via Google con quello stesso identico indirizzo email.
+     */
+    suspend fun verifySupporterByEmail(email: String): SupporterVerificationResult {
+        val cleanEmail = email.trim().lowercase()
+        if (cleanEmail.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(cleanEmail).matches()) {
+            return SupporterVerificationResult.INVALID_EMAIL
+        }
+
+        return try {
+            val supporterRef = firestore.collection("supporters").document(cleanEmail)
+            val user = auth.currentUser
+            val currentUid = user?.uid
+            val isVerifiedEmailOwner = user != null && !user.isAnonymous &&
+                user.email?.trim()?.equals(cleanEmail, ignoreCase = true) == true
+
+            val txResult = firestore.runTransaction { tx ->
+                val snapshot = tx.get(supporterRef)
+                if (!snapshot.exists()) {
+                    return@runTransaction SupporterVerificationResult.NOT_FOUND
+                }
+                val isSupporter = snapshot.getBoolean("isSupporter") == true ||
+                    snapshot.getBoolean("isExecutiveProducer") == true
+                if (!isSupporter) {
+                    return@runTransaction SupporterVerificationResult.NOT_FOUND
+                }
+
+                val claimed = snapshot.getBoolean("claimed") == true
+                val claimedByUid = snapshot.getString("claimedByUid")
+
+                // Se già riscattato da un altro account e l'utente non è il legittimo proprietario verificato dell'email
+                if (claimed && !claimedByUid.isNullOrBlank() && claimedByUid != currentUid && !isVerifiedEmailOwner) {
+                    return@runTransaction SupporterVerificationResult.ALREADY_CLAIMED
+                }
+
+                // Riscatto valido: bind atomico all'UID dell'account corrente
+                val updates = mutableMapOf<String, Any>(
+                    "claimed" to true,
+                    "claimedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                )
+                if (!currentUid.isNullOrBlank()) {
+                    updates["claimedByUid"] = currentUid
+                }
+                tx.update(supporterRef, updates)
+                SupporterVerificationResult.SUCCESS
+            }.await()
+
+            if (txResult == SupporterVerificationResult.SUCCESS) {
+                badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                if (user != null && !user.isAnonymous) {
+                    try {
+                        firestore.collection("users").document(user.uid)
+                            .update("isSupporter", true)
+                            .await()
+                    } catch (_: Exception) {}
+                }
+                evaluateBadgesAsync()
+                SupporterVerificationResult.SUCCESS
+            } else if (txResult == SupporterVerificationResult.NOT_FOUND) {
+                // Fallback: controlla anche il profilo utente corrente se registrato
+                if (user != null && !user.isAnonymous) {
+                    try {
+                        val userDoc = firestore.collection("users").document(user.uid).get().await()
+                        if (userDoc.exists() && (userDoc.getBoolean("isSupporter") == true || userDoc.getBoolean("isExecutiveProducer") == true)) {
+                            badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                            evaluateBadgesAsync()
+                            return SupporterVerificationResult.SUCCESS
+                        }
+                    } catch (_: Exception) {}
+                }
+                SupporterVerificationResult.NOT_FOUND
+            } else {
+                txResult
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("BadgeRepository", "Error verifying supporter email: $cleanEmail", e)
+            SupporterVerificationResult.ERROR
+        }
     }
 
     fun recordMovieBookmarked(movieId: Long) {
@@ -1084,11 +1191,28 @@ class BadgeRepository @Inject constructor(
 
             // 29. Day One Pioneer: Pioniere Prima Bobina
             "badge_day_one_pioneer" -> {
+                // Cutoff era di lancio: 31 Dicembre 2026 23:59:59 UTC
+                val launchEraCutoffMillis = 1798761600000L
+                val installTime = try {
+                    if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.TIRAMISU) {
+                        context.packageManager.getPackageInfo(
+                            context.packageName,
+                            android.content.pm.PackageManager.PackageInfoFlags.of(0)
+                        ).firstInstallTime
+                    } else {
+                        @Suppress("DEPRECATION")
+                        context.packageManager.getPackageInfo(context.packageName, 0).firstInstallTime
+                    }
+                } catch (e: Exception) {
+                    System.currentTimeMillis()
+                }
+
+                val isPioneer = prevEntity?.isUnlocked == true || installTime <= launchEraCutoffMillis
                 EvaluationResult(
-                    currentProgress = 1,
+                    currentProgress = if (isPioneer) 1 else 0,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.THE_FINAL_CUT,
-                    isUnlocked = true
+                    isUnlocked = isPioneer
                 )
             }
 
@@ -1193,10 +1317,8 @@ class BadgeRepository @Inject constructor(
                     !userNamePrefs.getString("avatar_backdrop_$currentUid", null).isNullOrBlank()
                 )
 
-                val hasMovieCustom = allMovies.any { it.customBackdropPath != null }
-
                 val avatarScore = if (hasAvatar) 1 else 0
-                val backdropScore = if (hasProfileBackdrop || hasMovieCustom) 1 else 0
+                val backdropScore = if (hasProfileBackdrop) 1 else 0
                 val totalCustomScore = avatarScore + backdropScore
 
                 EvaluationResult(

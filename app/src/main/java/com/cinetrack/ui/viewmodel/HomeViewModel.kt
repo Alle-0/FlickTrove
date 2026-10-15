@@ -369,9 +369,9 @@ class HomeViewModel @Inject constructor(
                 // localTvMap non la conterrà più. In questo caso saltiamo la card anziché
                 // usare il vecchio valore dalla cache del feed, che la farebbe rimanere visibile.
                 val localTv = localTvMap[tv.id] ?: return@mapNotNull null
-                if (!localTv.watched && !localTv.dropped) {
+                if (!localTv.dropped) {
                     val next = localTv.calculateNextEpisode()
-                    if (next != null && !next.isUpToDateWithAirDate) localTv else null
+                    if (next != null && !next.isUpToDateWithAirDate && next.remainingTotal > 0) localTv else null
                 } else null
             }.toImmutableList(),
             becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,

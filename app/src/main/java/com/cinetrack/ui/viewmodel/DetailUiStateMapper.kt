@@ -149,7 +149,7 @@ class DetailUiStateMapper @Inject constructor(
         val finalMovie = effectiveMovie.copy(
             watchedEpisodes = effectiveWatchedEpisodes,
             progress = progress.toDouble()
-        )
+        ).reconcileTvWatchState()
         // Prefer the pre-computed score from the Home/Recommendations (stored in movie.matchScore),
         // recalculate only when the movie arrives from a context without a pre-computed score.
         val matchScore = finalMovie.matchScore ?: calculateMatchScoreUseCase(finalMovie, localMovies)

@@ -42,9 +42,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -64,6 +71,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -71,8 +79,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlin.math.roundToInt
 import androidx.annotation.DrawableRes
 import com.cinetrack.R
 import com.cinetrack.ui.theme.FlickTroveTheme
@@ -733,6 +743,16 @@ val OFFICIAL_BADGES_CATALOG = listOf(
 // adotta esclusivamente la palette tonale del Tier con riflesso speculare naturale.
 // ════════════════════════════════════════════════════════════════════
 
+private fun Float.safeRoundToInt(): Int {
+    if (this.isNaN() || this.isInfinite()) return 0
+    return this.roundToInt()
+}
+
+private fun Float.safeCoerceTilt(): Float {
+    if (this.isNaN() || this.isInfinite()) return 0f
+    return this.coerceIn(-1.2f, 1.2f)
+}
+
 @Composable
 fun FlickTroveBadgeEmblem(
     tier: PreviewBadgeTier,
@@ -789,11 +809,157 @@ fun FlickTroveBadgeEmblem(
         0f
     }
 
-    // ── 2. EFFETTO PARALLASSE TATTILE 3D COL DITO ──
+    // ── 2. EFFETTO PARALLASSE TATTILE 3D + GIROSCOPIO FISICO ──
     val coroutineScope = rememberCoroutineScope()
     val context = LocalContext.current
-    val tiltX = remember { Animatable(0f) }
-    val tiltY = remember { Animatable(0f) }
+
+    // Valori effettivi di inclinazione che pilotano prospettiva, luce e ombre
+    val effectiveTiltX = remember { mutableFloatStateOf(0f) }
+    val effectiveTiltY = remember { mutableFloatStateOf(0f) }
+
+    // Tracciamento stato tocco
+    var isTouchActive by remember { mutableStateOf(false) }
+    var touchPosX by remember { mutableFloatStateOf(0f) }
+    var touchPosY by remember { mutableFloatStateOf(0f) }
+    val touchSpringOffsetX = remember { Animatable(0f) }
+    val touchSpringOffsetY = remember { Animatable(0f) }
+
+    // Valori correnti dal sensore di movimento del dispositivo
+    val gyroFilteredX = remember { mutableFloatStateOf(0f) }
+    val gyroFilteredY = remember { mutableFloatStateOf(0f) }
+
+    // Registrazione del sensore (Rotation Vector / Game Rotation Vector / Accelerometro)
+    val sensorManager = remember(context) {
+        context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+    }
+
+    DisposableEffect(enableInteractiveParallax, sensorManager) {
+        if (!enableInteractiveParallax || sensorManager == null) {
+            return@DisposableEffect onDispose {}
+        }
+
+        val sensor = sensorManager.getDefaultSensor(Sensor.TYPE_GYROSCOPE)
+            ?: sensorManager.getDefaultSensor(Sensor.TYPE_GAME_ROTATION_VECTOR)
+            ?: sensorManager.getDefaultSensor(Sensor.TYPE_ROTATION_VECTOR)
+            ?: sensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+        if (sensor == null) {
+            return@DisposableEffect onDispose {}
+        }
+
+        val listener = object : SensorEventListener {
+            private val rotationMatrix = FloatArray(9)
+            private val remappedMatrix = FloatArray(9)
+            private val orientation = FloatArray(3)
+            private var baselinePitch = Float.NaN
+            private var baselineRoll = Float.NaN
+            private var warmupSamples = 0
+            private var filteredX = 0f
+            private var filteredY = 0f
+
+            override fun onSensorChanged(event: SensorEvent?) {
+                if (event == null) return
+
+                val targetX: Float
+                val targetY: Float
+
+                if (event.sensor.type == Sensor.TYPE_GYROSCOPE) {
+                    // Il giroscopio misura la velocità angolare reale (rad/s)
+                    // A riposo è rigorosamente 0.0: l'emblema parte 100% centrato e dritto
+                    val rawGyroPitch = event.values[0]
+                    val rawGyroRoll = event.values[1]
+                    if (rawGyroPitch.isNaN() || rawGyroRoll.isNaN() || rawGyroPitch.isInfinite() || rawGyroRoll.isInfinite()) {
+                        return
+                    }
+                    val rateX = rawGyroRoll.coerceIn(-5f, 5f)
+                    val rateY = (-rawGyroPitch).coerceIn(-5f, 5f)
+
+                    // Risposta dinamica proporzionale al moto di inclinazione del polso
+                    val impulseX = (rateX * 0.45f).safeCoerceTilt()
+                    val impulseY = (rateY * 0.45f).safeCoerceTilt()
+
+                    // Ritorno elastico continuo al centro (0f) non appena il moto si arresta
+                    filteredX = (filteredX * 0.82f + impulseX * 0.18f)
+                    filteredY = (filteredY * 0.82f + impulseY * 0.18f)
+
+                    // Deadzone minimale per azzerare micro-rumore
+                    targetX = if (kotlin.math.abs(filteredX) < 0.015f) 0f else filteredX.safeCoerceTilt()
+                    targetY = if (kotlin.math.abs(filteredY) < 0.015f) 0f else filteredY.safeCoerceTilt()
+                } else {
+                    // Fallback per dispositivi sprovvisti di giroscopio puro
+                    val (rawPitch, rawRoll) = when (event.sensor.type) {
+                        Sensor.TYPE_ROTATION_VECTOR, Sensor.TYPE_GAME_ROTATION_VECTOR -> {
+                            SensorManager.getRotationMatrixFromVector(rotationMatrix, event.values)
+                            SensorManager.remapCoordinateSystem(
+                                rotationMatrix,
+                                SensorManager.AXIS_X,
+                                SensorManager.AXIS_Z,
+                                remappedMatrix
+                            )
+                            SensorManager.getOrientation(remappedMatrix, orientation)
+                            orientation[1] to orientation[2]
+                        }
+                        Sensor.TYPE_ACCELEROMETER -> {
+                            val ax = event.values[0]
+                            val ay = event.values[1]
+                            val az = event.values[2]
+                            val denom = kotlin.math.sqrt((ay * ay + az * az).toDouble())
+                            val r = if (denom > 0.0001) kotlin.math.atan2(ax.toDouble(), denom).toFloat() else 0f
+                            val p = kotlin.math.atan2(-ay.toDouble(), az.toDouble()).toFloat()
+                            p to r
+                        }
+                        else -> return
+                    }
+
+                    if (rawPitch.isNaN() || rawRoll.isNaN() || rawPitch.isInfinite() || rawRoll.isInfinite()) {
+                        return
+                    }
+                    val pitch = rawPitch.coerceIn(-3.14f, 3.14f)
+                    val roll = rawRoll.coerceIn(-3.14f, 3.14f)
+
+                    // Finestra di calibrazione iniziale: cattura la postura reale della mano all'apertura del modale
+                    if (warmupSamples < 15) {
+                        warmupSamples++
+                        baselinePitch = if (baselinePitch.isNaN()) pitch else baselinePitch * 0.70f + pitch * 0.30f
+                        baselineRoll = if (baselineRoll.isNaN()) roll else baselineRoll * 0.70f + roll * 0.30f
+                        return
+                    }
+
+                    // Compensazione deriva lenta
+                    baselinePitch = baselinePitch * 0.994f + pitch * 0.006f
+                    baselineRoll = baselineRoll * 0.994f + roll * 0.006f
+
+                    // Deadzone di 3.5 gradi per evitare che l'inclinazione naturale della mano ruoti l'emblema da fermo
+                    val deltaRoll = roll - baselineRoll
+                    val deltaPitch = pitch - baselinePitch
+                    val rawTargetX = if (kotlin.math.abs(deltaRoll) < 0.06f) 0f else (deltaRoll / 0.32f)
+                    val rawTargetY = if (kotlin.math.abs(deltaPitch) < 0.06f) 0f else (-deltaPitch / 0.32f)
+
+                    filteredX = filteredX * 0.80f + rawTargetX.safeCoerceTilt() * 0.20f
+                    filteredY = filteredY * 0.80f + rawTargetY.safeCoerceTilt() * 0.20f
+
+                    targetX = filteredX.safeCoerceTilt()
+                    targetY = filteredY.safeCoerceTilt()
+                }
+
+                gyroFilteredX.floatValue = if (targetX.isNaN()) 0f else targetX
+                gyroFilteredY.floatValue = if (targetY.isNaN()) 0f else targetY
+
+                if (!isTouchActive) {
+                    effectiveTiltX.floatValue = (targetX + touchSpringOffsetX.value).safeCoerceTilt()
+                    effectiveTiltY.floatValue = (targetY + touchSpringOffsetY.value).safeCoerceTilt()
+                }
+            }
+
+            override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+        }
+
+        sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_GAME)
+
+        onDispose {
+            sensorManager.unregisterListener(listener)
+        }
+    }
 
     val touchModifier = if (enableInteractiveParallax) {
         Modifier.pointerInput(Unit) {
@@ -802,11 +968,39 @@ fun FlickTroveBadgeEmblem(
                 VibrationHelper.vibrateTick(context)
                 val halfW = this.size.width / 2f
                 val halfH = this.size.height / 2f
-                val startNormX = if (halfW > 0f) ((down.position.x - halfW) / halfW).coerceIn(-1.2f, 1.2f) else 0f
-                val startNormY = if (halfH > 0f) ((down.position.y - halfH) / halfH).coerceIn(-1.2f, 1.2f) else 0f
+                val startNormX = if (halfW > 0f) ((down.position.x - halfW) / halfW).safeCoerceTilt() else 0f
+                val startNormY = if (halfH > 0f) ((down.position.y - halfH) / halfH).safeCoerceTilt() else 0f
+
+                isTouchActive = true
+                touchPosX = startNormX
+                touchPosY = startNormY
+
+                // Glissato armonico dal punto corrente del giroscopio al punto di tocco del dito
                 coroutineScope.launch {
-                    tiltX.animateTo(startNormX, spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow))
-                    tiltY.animateTo(startNormY, spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow))
+                    val initialDeltaX = effectiveTiltX.floatValue - startNormX
+                    val initialDeltaY = effectiveTiltY.floatValue - startNormY
+                    touchSpringOffsetX.snapTo(if (initialDeltaX.isNaN()) 0f else initialDeltaX)
+                    touchSpringOffsetY.snapTo(if (initialDeltaY.isNaN()) 0f else initialDeltaY)
+                    launch {
+                        touchSpringOffsetX.animateTo(
+                            0f,
+                            spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow)
+                        ) {
+                            if (isTouchActive) {
+                                effectiveTiltX.floatValue = (touchPosX + value).safeCoerceTilt()
+                            }
+                        }
+                    }
+                    launch {
+                        touchSpringOffsetY.animateTo(
+                            0f,
+                            spring(dampingRatio = 0.85f, stiffness = Spring.StiffnessMediumLow)
+                        ) {
+                            if (isTouchActive) {
+                                effectiveTiltY.floatValue = (touchPosY + value).safeCoerceTilt()
+                            }
+                        }
+                    }
                 }
 
                 var pointerId = down.id
@@ -815,33 +1009,47 @@ fun FlickTroveBadgeEmblem(
                     val currentPointer = event.changes.firstOrNull { it.id == pointerId } ?: break
                     if (!currentPointer.pressed) break
                     currentPointer.consume()
-                    val normX = if (halfW > 0f) ((currentPointer.position.x - halfW) / halfW).coerceIn(-1.2f, 1.2f) else 0f
-                    val normY = if (halfH > 0f) ((currentPointer.position.y - halfH) / halfH).coerceIn(-1.2f, 1.2f) else 0f
-                    coroutineScope.launch {
-                        tiltX.snapTo(normX)
-                        tiltY.snapTo(normY)
-                    }
+                    val normX = if (halfW > 0f) ((currentPointer.position.x - halfW) / halfW).safeCoerceTilt() else 0f
+                    val normY = if (halfH > 0f) ((currentPointer.position.y - halfH) / halfH).safeCoerceTilt() else 0f
+                    touchPosX = normX
+                    touchPosY = normY
+                    effectiveTiltX.floatValue = (normX + touchSpringOffsetX.value).safeCoerceTilt()
+                    effectiveTiltY.floatValue = (normY + touchSpringOffsetY.value).safeCoerceTilt()
                 }
 
-                // Rilascio del tocco: ritorno elastico armonico alla posizione neutrale
+                // Rilascio del tocco: ritorno elastico armonico e continuo alla posizione viva del giroscopio
+                isTouchActive = false
+                val releaseDeltaX = touchPosX - gyroFilteredX.floatValue
+                val releaseDeltaY = touchPosY - gyroFilteredY.floatValue
+
                 coroutineScope.launch {
+                    touchSpringOffsetX.snapTo(if (releaseDeltaX.isNaN()) 0f else releaseDeltaX)
+                    touchSpringOffsetY.snapTo(if (releaseDeltaY.isNaN()) 0f else releaseDeltaY)
                     launch {
-                        tiltX.animateTo(
+                        touchSpringOffsetX.animateTo(
                             0f,
                             spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
                                 stiffness = Spring.StiffnessMediumLow
                             )
-                        )
+                        ) {
+                            if (!isTouchActive) {
+                                effectiveTiltX.floatValue = (gyroFilteredX.floatValue + value).safeCoerceTilt()
+                            }
+                        }
                     }
                     launch {
-                        tiltY.animateTo(
+                        touchSpringOffsetY.animateTo(
                             0f,
                             spring(
                                 dampingRatio = Spring.DampingRatioMediumBouncy,
                                 stiffness = Spring.StiffnessMediumLow
                             )
-                        )
+                        ) {
+                            if (!isTouchActive) {
+                                effectiveTiltY.floatValue = (gyroFilteredY.floatValue + value).safeCoerceTilt()
+                            }
+                        }
                     }
                 }
             }
@@ -865,8 +1073,8 @@ fun FlickTroveBadgeEmblem(
             val radius = this.size.minDimension / 2f
 
             // L'ombra si allontana dal punto di sollevamento della moneta in base al tilt
-            val shadowOffsetX = -tiltX.value * radius * 0.16f
-            val shadowOffsetY = -tiltY.value * radius * 0.16f + radius * 0.08f // sorgente di luce dall'alto
+            val shadowOffsetX = -effectiveTiltX.floatValue * radius * 0.16f
+            val shadowOffsetY = -effectiveTiltY.floatValue * radius * 0.16f + radius * 0.08f // sorgente di luce dall'alto
             val shadowCenter = Offset(center.x + shadowOffsetX, center.y + shadowOffsetY)
 
             // 0a. Bagliore Ambilight volumetrico sul fondo (se sbloccato)
@@ -907,8 +1115,8 @@ fun FlickTroveBadgeEmblem(
             modifier = Modifier
                 .fillMaxSize()
                 .graphicsLayer {
-                    rotationY = tiltX.value * 16f
-                    rotationX = -tiltY.value * 16f
+                    rotationY = effectiveTiltX.floatValue * 16f
+                    rotationX = -effectiveTiltY.floatValue * 16f
                     cameraDistance = 18f * density
                 },
             contentAlignment = Alignment.Center
@@ -928,7 +1136,7 @@ fun FlickTroveBadgeEmblem(
                 // uno scostamento scalare lungo l'asse (-tiltX, -tiltY).
                 // Disegnando 4 fette scalari arretrate, emerge fisicamente il fianco metallico della medaglia!
                 val maxRimDepth = radius * 0.065f
-                val rimOffsetMagnitude = (tiltX.value * tiltX.value + tiltY.value * tiltY.value).coerceAtMost(1.5f)
+                val rimOffsetMagnitude = (effectiveTiltX.floatValue * effectiveTiltX.floatValue + effectiveTiltY.floatValue * effectiveTiltY.floatValue).coerceAtMost(1.5f)
 
                 if (rimOffsetMagnitude > 0.001f) {
                     val rimColorDark = Color(0xFF0B0C12)
@@ -941,8 +1149,8 @@ fun FlickTroveBadgeEmblem(
                     for (slice in 4 downTo 1) {
                         val depthFrac = slice / 4f
                         val sliceOffset = Offset(
-                            -tiltX.value * maxRimDepth * depthFrac,
-                            -tiltY.value * maxRimDepth * depthFrac
+                            -effectiveTiltX.floatValue * maxRimDepth * depthFrac,
+                            -effectiveTiltY.floatValue * maxRimDepth * depthFrac
                         )
                         val sliceCenter = center + sliceOffset
 
@@ -1153,8 +1361,9 @@ fun FlickTroveBadgeEmblem(
 
             // Parallasse dell'icona in secondo piano
             val maxParallaxDistance = innerCircleSize * 0.14f
-            val parallaxX = maxParallaxDistance * (-tiltX.value)
-            val parallaxY = maxParallaxDistance * (-tiltY.value)
+            val density = LocalDensity.current
+            val maxParallaxPx = with(density) { maxParallaxDistance.toPx() }
+            val iconOffsetPx = with(density) { iconOffsetY.toPx() }
 
             Box(
                 modifier = Modifier
@@ -1169,7 +1378,12 @@ fun FlickTroveBadgeEmblem(
                         contentDescription = null,
                         tint = tierColor,
                         modifier = Modifier
-                            .offset(x = parallaxX, y = iconOffsetY + parallaxY)
+                            .offset {
+                                IntOffset(
+                                    x = (-effectiveTiltX.floatValue * maxParallaxPx).safeRoundToInt(),
+                                    y = (iconOffsetPx + (-effectiveTiltY.floatValue * maxParallaxPx)).safeRoundToInt()
+                                )
+                            }
                             .wrapContentSize(align = Alignment.Center, unbounded = true)
                             .requiredSize(currentIconSize)
                     )
@@ -1180,7 +1394,12 @@ fun FlickTroveBadgeEmblem(
                         contentDescription = "Trofeo Segreto",
                         tint = Color(0xFF818CF8).copy(alpha = 0.70f),
                         modifier = Modifier
-                            .offset(x = parallaxX * 0.7f, y = parallaxY * 0.7f)
+                            .offset {
+                                IntOffset(
+                                    x = (-effectiveTiltX.floatValue * maxParallaxPx * 0.7f).safeRoundToInt(),
+                                    y = (-effectiveTiltY.floatValue * maxParallaxPx * 0.7f).safeRoundToInt()
+                                )
+                            }
                             .size(standardIconSize * 0.82f)
                     )
                 } else {
@@ -1190,7 +1409,12 @@ fun FlickTroveBadgeEmblem(
                         contentDescription = "Non sbloccato",
                         tint = Color(0xFF94A3B8).copy(alpha = 0.40f),
                         modifier = Modifier
-                            .offset(x = parallaxX, y = iconOffsetY + parallaxY)
+                            .offset {
+                                IntOffset(
+                                    x = (-effectiveTiltX.floatValue * maxParallaxPx).safeRoundToInt(),
+                                    y = (iconOffsetPx + (-effectiveTiltY.floatValue * maxParallaxPx)).safeRoundToInt()
+                                )
+                            }
                             .wrapContentSize(align = Alignment.Center, unbounded = true)
                             .requiredSize(currentIconSize)
                     )

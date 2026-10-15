@@ -1,9 +1,16 @@
 package com.cinetrack.ui.components.badge
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateContentSize
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -15,6 +22,7 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
+import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -25,6 +33,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.foundation.layout.displayCutout
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.foundation.text.KeyboardActions
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
@@ -63,6 +78,20 @@ import androidx.compose.ui.zIndex
 import androidx.compose.ui.platform.LocalConfiguration
 import com.cinetrack.R
 import androidx.compose.ui.res.stringResource
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.OutlinedTextFieldDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.ui.platform.LocalUriHandler
+import androidx.compose.ui.res.painterResource
+import com.google.firebase.auth.FirebaseAuth
+import com.cinetrack.data.repository.BadgeRepository
+import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.derivedStateOf
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.launch
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.dialog.DirectionChip
 import com.cinetrack.ui.components.dialog.ExpandableSection
@@ -582,7 +611,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             initialProgressiveTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.CINECLUB_PASS,
             categoryLabel = "FEDELTÀ",
-            defaultDescription = "Sei membro attivo del cineclub con continuità.",
+            defaultDescription = "Premia la tua fedeltà nel tempo: fai parte della cineteca di FlickTrove da 1 mese fino a oltre 3 anni di proiezioni.",
             progressiveSteps = mapOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 1, "1 mese di cineclub.", "1 mese"),
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 6, "6 mesi nel cineclub.", "6 mesi"),
@@ -1063,7 +1092,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.THE_FINAL_CUT,
             iconKind = CustomBadgeIconKind.PIONEER_CROWN,
             categoryLabel = "FONDATORI DAY-ONE",
-            defaultDescription = "Hai calcato la platea di FlickTrove nei primi mesi di vita. Un posto d'onore riservato ai veri fondatori.",
+            defaultDescription = "Onorificenza esclusiva per i fondatori: hai iniziato a usare FlickTrove durante la fase iniziale di lancio dell'applicazione.",
             progressCurrent = 0,
             progressTarget = 1,
             progressUnit = "",
@@ -1164,10 +1193,10 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.MM_35,
             iconKind = CustomBadgeIconKind.ACTOR_MUSE,
             categoryLabel = "PREFERENZE",
-            defaultDescription = "Hai selezionato lo stesso interprete del cuore in 8 check-in dedicati.",
+            defaultDescription = "Hai scelto lo stesso interprete come tuo attore preferito in almeno 8 film visti diversi.",
             progressCurrent = 0,
             progressTarget = 8,
-            progressUnit = "check-in",
+            progressUnit = "film",
             rarityPercent = "5.9%"
         ),
         currentTier = PreviewBadgeTier.MM_35,
@@ -1224,7 +1253,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
             fixedTier = PreviewBadgeTier.SUPER_8,
             iconKind = CustomBadgeIconKind.CUSTOM_BACKDROP,
             categoryLabel = "PERSONALIZZAZIONE",
-            defaultDescription = "Hai curato la tua identità cinefila completando la scenografia del tuo profilo con un avatar e un backdrop cinematografico.",
+            defaultDescription = "Cura la tua identità visiva al completo (2/2): imposta sia un Avatar che un Backdrop personalizzato nel tuo profilo.",
             progressCurrent = 0,
             progressTarget = 2,
             progressUnit = "elementi",
@@ -1418,11 +1447,36 @@ fun TrophyRoomScreenContent(
     trophyItems: List<TrophyRoomItemUi> = OFFICIAL_TROPHY_ROOM_CATALOG,
     paddingValues: PaddingValues = PaddingValues(),
     hazeState: HazeState? = null,
+    targetBadgeId: String? = null,
+    onTargetBadgeConsumed: () -> Unit = {},
     isFilterModalOpenExternal: Boolean = false,
-    onFilterModalOpenExternalChange: (Boolean) -> Unit = {}
+    onFilterModalOpenExternalChange: (Boolean) -> Unit = {},
+    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)? = null
 ) {
     val localHaze = hazeState ?: remember { HazeState() }
     val gridState = rememberLazyGridState()
+    val scope = rememberCoroutineScope()
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        derivedStateOf {
+            gridState.firstVisibleItemIndex > 3 || (gridState.firstVisibleItemIndex > 0 && gridState.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    LaunchedEffect(showScrollToTop, gridState) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { gridState.fastScrollToTop() }
+            }
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+        }
+    }
 
     var filterConfig by remember { mutableStateOf(TrophyFilterConfig()) }
     var filterTriggerBounds by remember { mutableStateOf<Rect?>(null) }
@@ -1430,6 +1484,24 @@ fun TrophyRoomScreenContent(
     var isFilterModalOpenInternal by remember { mutableStateOf(false) }
     val isFilterModalOpen = isFilterModalOpenExternal || isFilterModalOpenInternal
     var selectedBadgeForModal by remember { mutableStateOf<TrophyRoomItemUi?>(null) }
+    val activeTrophyDetailState = com.cinetrack.ui.LocalActiveTrophyDetailConfig.current
+    val onSelectBadge: (TrophyRoomItemUi) -> Unit = { item ->
+        selectedBadgeForModal = item
+        activeTrophyDetailState?.value = com.cinetrack.ui.TrophyDetailModalConfig(
+            item = item,
+            onClose = {
+                selectedBadgeForModal = null
+                activeTrophyDetailState.value = null
+            },
+            onVerifySupporter = onVerifySupporter
+        )
+    }
+
+    DisposableEffect(Unit) {
+        onDispose {
+            activeTrophyDetailState?.value = null
+        }
+    }
 
     // Registra la configurazione filtri nel contesto globale di MainScreen per la GlassyTopBar
     val activeTrophyFilterState = com.cinetrack.ui.LocalActiveTrophyFilterConfig.current
@@ -1519,6 +1591,24 @@ fun TrophyRoomScreenContent(
         filteredItems.sortedWith(finalComparator)
     }
 
+    LaunchedEffect(targetBadgeId, sortedItems) {
+        if (targetBadgeId != null && sortedItems.isNotEmpty()) {
+            val itemIndex = sortedItems.indexOfFirst { it.badge.id == targetBadgeId }
+            if (itemIndex != -1) {
+                val targetItem = sortedItems[itemIndex]
+                val gridIndex = itemIndex + 2 // Salta TrophyStatsSummaryCard e Spacer
+                try {
+                    gridState.animateScrollToItem(gridIndex)
+                } catch (_: Exception) {}
+                onSelectBadge(targetItem)
+                onTargetBadgeConsumed()
+            } else if (filterConfig.hasActiveFilters) {
+                // Se i filtri attivi nascondono il trofeo, resettiamo per mostrarlo
+                filterConfig = TrophyFilterConfig()
+            }
+        }
+    }
+
     // Il top padding viene fornito da LocalAppPadding di MainScreen (via GlassyTopBar height + status bar)
     // Il bottom padding viene fornito da LocalAppPadding (80.dp per BottomBar)
     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
@@ -1573,7 +1663,7 @@ fun TrophyRoomScreenContent(
                     tier = item.currentTier,
                     isUnlocked = item.isUnlocked,
                     onClick = {
-                        selectedBadgeForModal = item
+                        onSelectBadge(item)
                     },
                     modifier = Modifier.fillMaxWidth()
                 )
@@ -1582,25 +1672,28 @@ fun TrophyRoomScreenContent(
         // La GlassyTopBar e la GlassyBottomBar sono fornite da MainScreen (fisse e condivise).
         // Il pulsante filtro nella TopBar triggera isFilterModalOpen tramite onFilterRequest.
 
-        var lastSelectedBadge by remember { mutableStateOf<TrophyRoomItemUi?>(null) }
-        if (selectedBadgeForModal != null) {
-            lastSelectedBadge = selectedBadgeForModal
-        }
+        // 5. MODALE DI DETTAGLIO OVERLAY (Fallback locale se invocato fuori da MainScreen o in Preview)
+        if (activeTrophyDetailState == null) {
+            var lastSelectedBadge by remember { mutableStateOf<TrophyRoomItemUi?>(null) }
+            if (selectedBadgeForModal != null) {
+                lastSelectedBadge = selectedBadgeForModal
+            }
 
-        // 5. MODALE DI DETTAGLIO OVERLAY (GlassmorphicModal autentico di FlickTrove)
-        GlassmorphicModal(
-            visible = selectedBadgeForModal != null,
-            activeHazeState = hazeState,
-            dimBackground = true,
-            dismissOnClickOutside = true,
-            onDismissRequest = { selectedBadgeForModal = null }
-        ) {
-            val currentModalItem = selectedBadgeForModal ?: lastSelectedBadge
-            if (currentModalItem != null) {
-                TrophyDetailContent(
-                    item = currentModalItem,
-                    onClose = { selectedBadgeForModal = null }
-                )
+            GlassmorphicModal(
+                visible = selectedBadgeForModal != null,
+                activeHazeState = hazeState,
+                dimBackground = true,
+                dismissOnClickOutside = true,
+                onDismissRequest = { selectedBadgeForModal = null }
+            ) {
+                val currentModalItem = selectedBadgeForModal ?: lastSelectedBadge
+                if (currentModalItem != null) {
+                    TrophyDetailContent(
+                        item = currentModalItem,
+                        onClose = { selectedBadgeForModal = null },
+                        onVerifySupporter = onVerifySupporter
+                    )
+                }
             }
         }
 
@@ -2187,18 +2280,32 @@ fun TrophyFilterModal(
 @Composable
 fun TrophyDetailContent(
     item: TrophyRoomItemUi,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)? = null
 ) {
     val scrollState = rememberScrollState()
     val configuration = LocalConfiguration.current
+    val coroutineScope = rememberCoroutineScope()
     val maxHeight = (configuration.screenHeightDp * 0.85f).dp
+
+    // Auto-scroll when keyboard opens so the email input and verification button are fully visible
+    val imeInsets = WindowInsets.ime
+    val density = LocalDensity.current
+    val isImeVisible = imeInsets.getBottom(density) > 0
+
+    LaunchedEffect(isImeVisible) {
+        if (isImeVisible) {
+            kotlinx.coroutines.delay(120)
+            scrollState.animateScrollTo(scrollState.maxValue)
+        }
+    }
 
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .heightIn(max = maxHeight)
-            .padding(horizontal = 22.dp)
-            .padding(top = 16.dp, bottom = 22.dp)
+            .padding(horizontal = 16.dp)
+            .padding(top = 16.dp, bottom = 16.dp)
     ) {
         // Pulsante di Chiusura Concentrico a 16dp
         Box(modifier = Modifier.align(Alignment.TopEnd).zIndex(10f)) {
@@ -2358,6 +2465,31 @@ fun TrophyDetailContent(
             )
 
             Spacer(modifier = Modifier.height(16.dp))
+
+            // 4b. SEZIONE SPECIALE: Il Produttore Esecutivo (Supporto & Verifica Donazione per Registrati e Guest)
+            if (item.badge.id == "badge_executive_producer") {
+                ExecutiveProducerDonationSection(
+                    isUnlocked = item.isUnlocked,
+                    onVerifySupporter = onVerifySupporter,
+                    onExpandedChange = { expanded ->
+                        if (expanded) {
+                            coroutineScope.launch {
+                                kotlinx.coroutines.delay(160)
+                                scrollState.animateScrollTo(scrollState.maxValue)
+                            }
+                        }
+                    },
+                    onFocusField = {
+                        coroutineScope.launch {
+                            kotlinx.coroutines.delay(160)
+                            scrollState.animateScrollTo(scrollState.maxValue)
+                        }
+                    }
+                )
+                if (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS) {
+                    Spacer(modifier = Modifier.height(16.dp))
+                }
+            }
 
             // 5. PROGRESSIONE CHIARA: quanto ho visto e quanto serve per il prossimo traguardo
             if (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS) {
@@ -2529,9 +2661,330 @@ fun TrophyDetailContent(
                     )
                 }
             }
+            Spacer(modifier = Modifier.height(2.dp))
         }
     }
 }
+
+@Composable
+private fun ExecutiveProducerDonationSection(
+    isUnlocked: Boolean,
+    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)?,
+    modifier: Modifier = Modifier,
+    onExpandedChange: ((Boolean) -> Unit)? = null,
+    onFocusField: (() -> Unit)? = null
+) {
+    val scope = rememberCoroutineScope()
+    val focusManager = LocalFocusManager.current
+
+    var emailInput by remember { mutableStateOf("") }
+    var isVerifying by remember { mutableStateOf(false) }
+    var verificationResult by remember { mutableStateOf<BadgeRepository.SupporterVerificationResult?>(null) }
+
+    LaunchedEffect(Unit) {
+        val currentEmail = FirebaseAuth.getInstance().currentUser?.email
+        if (!currentEmail.isNullOrBlank() && emailInput.isBlank()) {
+            emailInput = currentEmail
+        }
+    }
+
+    if (isUnlocked) {
+        // Card celebrativa dorata per il mecenate
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(
+                    Brush.verticalGradient(
+                        listOf(
+                            Color(0xFFEAB308).copy(alpha = 0.14f),
+                            Color(0xFFCA8A04).copy(alpha = 0.05f)
+                        )
+                    )
+                )
+                .border(1.dp, Color(0xFFEAB308).copy(alpha = 0.38f), RoundedCornerShape(18.dp))
+                .padding(16.dp)
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
+                    contentDescription = null,
+                    tint = Color(0xFFFDE047),
+                    modifier = Modifier.size(34.dp)
+                )
+                Spacer(modifier = Modifier.height(8.dp))
+                Text(
+                    text = stringResource(R.string.trophy_producer_already_unlocked_title),
+                    style = MaterialTheme.typography.titleSmall.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 15.sp
+                    ),
+                    color = Color(0xFFFEF08A),
+                    textAlign = TextAlign.Center
+                )
+                Spacer(modifier = Modifier.height(6.dp))
+                Text(
+                    text = stringResource(R.string.trophy_producer_already_unlocked_desc),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp
+                    ),
+                    color = Color.White.copy(alpha = 0.75f),
+                    textAlign = TextAlign.Center
+                )
+            }
+        }
+    } else {
+        var isExpanded by remember { mutableStateOf(false) }
+        val arrowRotation by animateFloatAsState(
+            targetValue = if (isExpanded) 90f else 0f,
+            animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+            label = "ArrowRotation"
+        )
+
+        // Card Verifica Donazione Espandibile (per chi ha già donato)
+        Box(
+            modifier = modifier
+                .fillMaxWidth()
+                .clip(RoundedCornerShape(18.dp))
+                .background(Color.White.copy(alpha = 0.04f))
+                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
+                .animateContentSize()
+        ) {
+            Column(modifier = Modifier.fillMaxWidth()) {
+                // Header cliccabile a tutta larghezza con bounceClick prima del padding
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .bounceClick {
+                            isExpanded = !isExpanded
+                            onExpandedChange?.invoke(isExpanded)
+                        }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Text(
+                        text = stringResource(R.string.trophy_producer_verify_section_title),
+                        style = MaterialTheme.typography.titleSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 14.sp
+                        ),
+                        color = Color.White
+                    )
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        contentDescription = if (isExpanded) "Collassa" else "Espandi",
+                        tint = if (isExpanded) Color.White else Color.White.copy(alpha = 0.60f),
+                        modifier = Modifier
+                            .size(16.dp)
+                            .graphicsLayer { rotationZ = arrowRotation }
+                    )
+                }
+
+                // Sezione Espandibile con descrizione, input email, bottone e feedback
+                AnimatedVisibility(
+                    visible = isExpanded,
+                    enter = fadeIn() + expandVertically(),
+                    exit = fadeOut() + shrinkVertically()
+                ) {
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.trophy_producer_verify_section_desc),
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = 11.5.sp,
+                                lineHeight = 16.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.60f)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+                        OutlinedTextField(
+                            value = emailInput,
+                            onValueChange = {
+                                emailInput = it
+                                if (verificationResult != null) verificationResult = null
+                            },
+                            placeholder = {
+                                Text(
+                                    text = stringResource(R.string.trophy_producer_email_placeholder),
+                                    color = Color.White.copy(alpha = 0.35f),
+                                    fontSize = 13.sp
+                                )
+                            },
+                            singleLine = true,
+                            enabled = !isVerifying,
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .onFocusChanged { focusState ->
+                                    if (focusState.isFocused) {
+                                        onFocusField?.invoke()
+                                    }
+                                },
+                            shape = RoundedCornerShape(14.dp),
+                            colors = OutlinedTextFieldDefaults.colors(
+                                focusedContainerColor = Color.White.copy(alpha = 0.03f),
+                                unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
+                                unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
+                                focusedBorderColor = Color.White.copy(alpha = 0.80f),
+                                focusedTextColor = Color.White,
+                                unfocusedTextColor = Color.White,
+                                cursorColor = Color.White
+                            ),
+                            keyboardOptions = KeyboardOptions(
+                                keyboardType = KeyboardType.Email,
+                                imeAction = ImeAction.Done
+                            ),
+                            keyboardActions = KeyboardActions(
+                                onDone = { focusManager.clearFocus() }
+                            ),
+                            textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp)
+                        )
+                        Spacer(modifier = Modifier.height(12.dp))
+
+                        val isButtonEnabled = emailInput.isNotBlank() && !isVerifying
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(44.dp)
+                                .bounceClick(enabled = isButtonEnabled) {
+                                    if (isButtonEnabled && onVerifySupporter != null) {
+                                        focusManager.clearFocus()
+                                        isVerifying = true
+                                        scope.launch {
+                                            val res = onVerifySupporter(emailInput)
+                                            verificationResult = res
+                                            isVerifying = false
+                                        }
+                                    }
+                                }
+                                .clip(CircleShape)
+                                .background(
+                                    if (isButtonEnabled) {
+                                        Color.White
+                                    } else {
+                                        Color.White.copy(alpha = 0.10f)
+                                    }
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isVerifying) {
+                                Row(verticalAlignment = Alignment.CenterVertically) {
+                                    CircularProgressIndicator(
+                                        modifier = Modifier.size(16.dp),
+                                        color = Color.Black,
+                                        strokeWidth = 2.dp
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.trophy_producer_verifying),
+                                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                        color = Color.Black
+                                    )
+                                }
+                            } else {
+                                Text(
+                                    text = stringResource(R.string.trophy_producer_verify_button),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 13.sp
+                                    ),
+                                    color = if (isButtonEnabled) Color.Black else Color.White.copy(alpha = 0.35f)
+                                )
+                            }
+                        }
+
+                        // Box di Feedback (Successo, Non Trovato, Errore)
+                        AnimatedVisibility(
+                            visible = verificationResult != null,
+                            enter = fadeIn() + expandVertically(),
+                            exit = fadeOut() + shrinkVertically()
+                        ) {
+                            verificationResult?.let { res ->
+                                Column(modifier = Modifier.fillMaxWidth()) {
+                                    Spacer(modifier = Modifier.height(12.dp))
+                                    val tuple = when (res) {
+                                        BadgeRepository.SupporterVerificationResult.SUCCESS -> {
+                                            SupportFeedbackTuple(
+                                                Color(0xFF10B981).copy(alpha = 0.14f),
+                                                Color(0xFF10B981).copy(alpha = 0.40f),
+                                                Color(0xFF6EE7B7),
+                                                R.string.trophy_producer_verify_success
+                                            )
+                                        }
+                                        BadgeRepository.SupporterVerificationResult.ALREADY_CLAIMED -> {
+                                            SupportFeedbackTuple(
+                                                Color(0xFFEF4444).copy(alpha = 0.14f),
+                                                Color(0xFFEF4444).copy(alpha = 0.40f),
+                                                Color(0xFFFCA5A5),
+                                                R.string.trophy_producer_verify_already_claimed
+                                            )
+                                        }
+                                        BadgeRepository.SupporterVerificationResult.NOT_FOUND -> {
+                                            SupportFeedbackTuple(
+                                                Color(0xFFF59E0B).copy(alpha = 0.14f),
+                                                Color(0xFFF59E0B).copy(alpha = 0.40f),
+                                                Color(0xFFFCD34D),
+                                                R.string.trophy_producer_verify_not_found
+                                            )
+                                        }
+                                        BadgeRepository.SupporterVerificationResult.INVALID_EMAIL -> {
+                                            SupportFeedbackTuple(
+                                                Color(0xFFEF4444).copy(alpha = 0.14f),
+                                                Color(0xFFEF4444).copy(alpha = 0.40f),
+                                                Color(0xFFFCA5A5),
+                                                R.string.trophy_producer_verify_invalid_email
+                                            )
+                                        }
+                                        BadgeRepository.SupporterVerificationResult.ERROR -> {
+                                            SupportFeedbackTuple(
+                                                Color(0xFFEF4444).copy(alpha = 0.14f),
+                                                Color(0xFFEF4444).copy(alpha = 0.40f),
+                                                Color(0xFFFCA5A5),
+                                                R.string.trophy_producer_verify_error
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(tuple.bg)
+                                            .border(1.dp, tuple.border, RoundedCornerShape(12.dp))
+                                            .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    ) {
+                                        Text(
+                                            text = stringResource(tuple.stringRes),
+                                            style = MaterialTheme.typography.bodySmall.copy(
+                                                fontSize = 11.5.sp,
+                                                lineHeight = 16.sp
+                                            ),
+                                            color = tuple.text
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+private data class SupportFeedbackTuple(
+    val bg: Color,
+    val border: Color,
+    val text: Color,
+    val stringRes: Int
+)
 
 // -------------------------------------------------------------
 // ANTEPRIME COMPOSE ANDROID STUDIO (SPLIT VIEW)

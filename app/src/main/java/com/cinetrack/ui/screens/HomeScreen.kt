@@ -54,6 +54,7 @@ import com.cinetrack.ui.components.dialog.HomeFilterModal
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
 import com.cinetrack.ui.viewmodel.HomeViewModel
 import dev.chrisbanes.haze.*
 import kotlinx.coroutines.launch
@@ -174,20 +175,14 @@ fun HomeScreenContent(
             gs.firstVisibleItemIndex > 3 || (gs.firstVisibleItemIndex > 0 && gs.firstVisibleItemScrollOffset > 150)
         }
     }
-    DisposableEffect(showScrollToTop, currentGridState, uiState.activeTab) {
-        if (showScrollToTop) {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
-                isVisible = true,
-                onScrollToTop = {
-                    scope.launch { currentGridState.animateScrollToItem(0) }
-                }
-            )
-        } else {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
-        }
-        onDispose {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
-        }
+    LaunchedEffect(showScrollToTop, currentGridState, uiState.activeTab) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { currentGridState.fastScrollToTop() }
+            }
+        )
     }
 
     var previousSortConfig by remember { mutableStateOf<com.cinetrack.data.model.SortConfig?>(null) }

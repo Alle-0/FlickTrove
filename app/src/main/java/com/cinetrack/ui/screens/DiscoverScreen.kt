@@ -41,6 +41,8 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
+import kotlinx.coroutines.launch
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.animation.*
@@ -129,6 +131,28 @@ fun DiscoverScreenContent(
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val lazyGridState = viewModel.lazyGridState
+    val scope = rememberCoroutineScope()
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        derivedStateOf {
+            lazyGridState.firstVisibleItemIndex > 3 || (lazyGridState.firstVisibleItemIndex > 0 && lazyGridState.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    LaunchedEffect(showScrollToTop, lazyGridState) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { lazyGridState.fastScrollToTop() }
+            }
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+        }
+    }
     
     // Detect scroll to end
     val endOfListReached by remember {

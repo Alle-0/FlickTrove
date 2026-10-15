@@ -14,7 +14,9 @@ import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.lazy.rememberLazyListState
+import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -49,6 +51,7 @@ import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton
+import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.LocalHazeState
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -144,6 +147,29 @@ fun AvatarSelectionContent(
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<TMDBSearchResult>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
+
+    val searchListState = rememberLazyListState()
+    val gridState = rememberLazyGridState()
+    
+    val filteredSearchResults = remember(searchResults, mode) {
+        searchResults.filter { result ->
+            when (result) {
+                is TMDBSearchResult.MovieResult -> {
+                    val hasPoster = !result.posterPath.isNullOrBlank()
+                    val isNotDoc = mode != AvatarSelectionMode.AVATAR || 99L !in result.genreIds
+                    val hasBackdropIfRequired = mode != AvatarSelectionMode.BACKDROP || !result.backdropPath.isNullOrBlank()
+                    hasPoster && isNotDoc && hasBackdropIfRequired
+                }
+                is TMDBSearchResult.TvResult -> {
+                    val hasPoster = !result.posterPath.isNullOrBlank()
+                    val isNotDoc = mode != AvatarSelectionMode.AVATAR || 99L !in result.genreIds
+                    val hasBackdropIfRequired = mode != AvatarSelectionMode.BACKDROP || !result.backdropPath.isNullOrBlank()
+                    hasPoster && isNotDoc && hasBackdropIfRequired
+                }
+                else -> false
+            }
+        }
+    }
     
     var characterImagesMap by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
     var selectedMedia by remember { mutableStateOf<TMDBSearchResult?>(null) }
@@ -195,6 +221,7 @@ fun AvatarSelectionContent(
         isSearching = true
         try {
             searchResults = viewModel.searchMulti(searchQuery)
+            searchListState.scrollToItem(0)
         } catch (e: Exception) {
             // Handle error
             searchResults = emptyList()
@@ -215,7 +242,16 @@ fun AvatarSelectionContent(
             }
             
             if (mode == AvatarSelectionMode.BACKDROP) {
-                backdrops = response?.images?.backdrops
+                val list = response?.images?.backdrops?.toMutableList() ?: mutableListOf()
+                val mainBackdrop = response?.backdropPath ?: when (media) {
+                    is TMDBSearchResult.MovieResult -> media.backdropPath
+                    is TMDBSearchResult.TvResult -> media.backdropPath
+                    else -> null
+                }
+                if (mainBackdrop != null && list.none { it.filePath == mainBackdrop }) {
+                    list.add(0, com.cinetrack.data.api.ImageItem(filePath = mainBackdrop))
+                }
+                backdrops = list
                 return@LaunchedEffect
             }
             
@@ -235,12 +271,13 @@ fun AvatarSelectionContent(
             }
             characterImagesMap = tvdbMap
 
-            // Only keep characters that have a TVDB image
+            // Keep characters that have a TVDB image or a TMDB profile photo
             characters = response?.credits?.cast?.filter { 
                 val charName = it.character?.lowercase()?.trim()
                 val actorName = it.name.lowercase().trim()
-                val tvdbImage = charName?.let { name -> tvdbMap[name] } ?: tvdbMap[actorName]
-                tvdbImage != null
+                val hasTvdbImage = (charName?.let { name -> tvdbMap[name] } ?: tvdbMap[actorName]) != null
+                val hasTmdbProfile = !it.profilePath.isNullOrBlank()
+                hasTvdbImage || hasTmdbProfile
             } ?: emptyList()
         } catch (e: Exception) {
             characters = emptyList()
@@ -258,11 +295,13 @@ fun AvatarSelectionContent(
         Column(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(24.dp)
+                .padding(top = 24.dp, bottom = 12.dp)
         ) {
             // Header
             Row(
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 24.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -302,7 +341,8 @@ fun AvatarSelectionContent(
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .height(80.dp),
+                                .height(80.dp)
+                                .padding(horizontal = 24.dp),
                             contentAlignment = Alignment.Center
                         ) {
                             CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
@@ -310,60 +350,75 @@ fun AvatarSelectionContent(
                     } else {
                         // Action buttons (Remove and Import)
                         Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 24.dp),
+                            horizontalArrangement = Arrangement.spacedBy(10.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Row(
+                            Box(
                                 modifier = Modifier
                                     .weight(1f)
+                                    .bounceClick(scaleDown = 0.94f) { onCharacterSelected(null, null) }
                                     .clip(CircleShape)
                                     .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
-                                    .bounceClick { onCharacterSelected(null, null) }
-                                    .padding(vertical = 12.dp, horizontal = 14.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
+                                    .padding(vertical = 11.dp, horizontal = 12.dp),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_trash),
-                                    contentDescription = if (mode == AvatarSelectionMode.BACKDROP) stringResource(R.string.avatar_selection_remove_cover) else stringResource(R.string.avatar_selection_remove_avatar),
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = if (mode == AvatarSelectionMode.BACKDROP) stringResource(R.string.avatar_selection_remove_cover) else stringResource(R.string.avatar_selection_remove_avatar),
-                                    style = MaterialTheme.typography.bodyLarge.copy(
-                                        color = MaterialTheme.colorScheme.error,
-                                        fontWeight = FontWeight.SemiBold
-                                    )
-                                )
-                            }
-    
-                            if (mode == AvatarSelectionMode.AVATAR) {
                                 Row(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.1f))
-                                        .bounceClick { galleryLauncher.launch("image/*") }
-                                        .padding(vertical = 12.dp, horizontal = 14.dp),
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_image),
-                                        contentDescription = "Import",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(20.dp)
+                                        painter = painterResource(id = R.drawable.ic_trash),
+                                        contentDescription = if (mode == AvatarSelectionMode.BACKDROP) stringResource(R.string.avatar_selection_remove_cover) else stringResource(R.string.avatar_selection_remove_avatar),
+                                        tint = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier.size(18.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Spacer(modifier = Modifier.width(6.dp))
                                     Text(
-                                        text = stringResource(R.string.avatar_selection_import_avatar),
-                                        style = MaterialTheme.typography.bodyLarge.copy(
-                                            color = Color.White,
+                                        text = if (mode == AvatarSelectionMode.BACKDROP) stringResource(R.string.avatar_selection_remove_cover) else stringResource(R.string.avatar_selection_remove_avatar),
+                                        style = MaterialTheme.typography.bodyMedium.copy(
+                                            color = MaterialTheme.colorScheme.error,
                                             fontWeight = FontWeight.SemiBold
-                                        )
+                                        ),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
                                     )
+                                }
+                            }
+    
+                            if (mode == AvatarSelectionMode.AVATAR) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick(scaleDown = 0.94f) { galleryLauncher.launch("image/*") }
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.1f))
+                                        .padding(vertical = 11.dp, horizontal = 12.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_image),
+                                            contentDescription = "Import",
+                                            tint = Color.White,
+                                            modifier = Modifier.size(18.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(6.dp))
+                                        Text(
+                                            text = stringResource(R.string.avatar_selection_import_avatar),
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                color = Color.White,
+                                                fontWeight = FontWeight.SemiBold
+                                            ),
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                             }
                         }
@@ -375,7 +430,9 @@ fun AvatarSelectionContent(
                     OutlinedTextField(
                         value = searchQuery,
                         onValueChange = { searchQuery = it },
-                        modifier = Modifier.fillMaxWidth(),
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 24.dp),
                         singleLine = true,
                         placeholder = {
                             Text(
@@ -407,18 +464,63 @@ fun AvatarSelectionContent(
                     Spacer(modifier = Modifier.height(16.dp))
 
                     if (isSearching) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        Column(
+                            verticalArrangement = Arrangement.spacedBy(12.dp),
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .padding(horizontal = 24.dp)
+                        ) {
+                            repeat(5) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(12.dp))
+                                        .background(Color.White.copy(alpha = 0.04f))
+                                        .padding(12.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .size(width = 40.dp, height = 60.dp)
+                                            .clip(RoundedCornerShape(4.dp))
+                                            .background(Color.White.copy(alpha = 0.06f))
+                                            .shimmerEffect()
+                                    )
+                                    Spacer(modifier = Modifier.width(16.dp))
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.65f)
+                                                .height(14.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color.White.copy(alpha = 0.07f))
+                                                .shimmerEffect()
+                                        )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth(0.35f)
+                                                .height(10.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color.White.copy(alpha = 0.05f))
+                                                .shimmerEffect()
+                                        )
+                                    }
+                                }
+                            }
                         }
                     } else {
-                        val listState = rememberLazyListState()
                         LazyColumn(
-                            state = listState,
+                            state = searchListState,
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 4.dp),
                             verticalArrangement = Arrangement.spacedBy(12.dp),
-                            modifier = Modifier.verticalFadingEdges(listState, 16.dp, 16.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .weight(1f)
+                                .verticalFadingEdges(searchListState, 16.dp, 16.dp)
+                                .premiumScrollbar(searchListState, width = 3f, paddingEnd = 6f, paddingVertical = 12f)
                         ) {
                             items(
-                                items = searchResults.filter { it is TMDBSearchResult.MovieResult || it is TMDBSearchResult.TvResult },
+                                items = filteredSearchResults,
                                 key = { "${it.id}_${it.mediaType}" }
                             ) { result ->
                                 val title = when (result) {
@@ -436,9 +538,9 @@ fun AvatarSelectionContent(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
+                                        .bounceClick(scaleDown = 0.96f) { selectedMedia = result }
                                         .clip(RoundedCornerShape(12.dp))
                                         .background(Color.White.copy(alpha = 0.05f))
-                                        .bounceClick { selectedMedia = result }
                                         .padding(12.dp),
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -472,15 +574,56 @@ fun AvatarSelectionContent(
                 } else {
                     // Step 2: Character/Backdrop Selection
                     if (isLoadingCharacters) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
+                        LazyVerticalGrid(
+                            columns = GridCells.Fixed(if (mode == AvatarSelectionMode.BACKDROP) 2 else 3),
+                            horizontalArrangement = Arrangement.spacedBy(16.dp),
+                            verticalArrangement = Arrangement.spacedBy(24.dp),
+                            contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                            modifier = Modifier.fillMaxSize()
+                        ) {
+                            if (mode == AvatarSelectionMode.BACKDROP) {
+                                items(6) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .aspectRatio(dynamicCoverRatio)
+                                            .clip(RoundedCornerShape(12.dp))
+                                            .background(Color.White.copy(alpha = 0.05f))
+                                            .shimmerEffect()
+                                    )
+                                }
+                            } else {
+                                items(9) {
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.fillMaxWidth()
+                                    ) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(80.dp)
+                                                .clip(CircleShape)
+                                                .background(Color.White.copy(alpha = 0.05f))
+                                                .shimmerEffect()
+                                        )
+                                        Spacer(modifier = Modifier.height(8.dp))
+                                        Box(
+                                            modifier = Modifier
+                                                .width(60.dp)
+                                                .height(11.dp)
+                                                .clip(RoundedCornerShape(4.dp))
+                                                .background(Color.White.copy(alpha = 0.07f))
+                                                .shimmerEffect()
+                                        )
+                                    }
+                                }
+                            }
                         }
                     } else if (mode == AvatarSelectionMode.BACKDROP && backdrops.isNullOrEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp), contentAlignment = Alignment.Center) {
                             Text(stringResource(R.string.avatar_selection_no_covers_found), color = Color.White.copy(alpha = 0.5f))
                         }
                     } else if (mode == AvatarSelectionMode.AVATAR && characters.isNullOrEmpty()) {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                        Box(modifier = Modifier.fillMaxSize().padding(horizontal = 24.dp), contentAlignment = Alignment.Center) {
                             Text(stringResource(R.string.avatar_selection_no_characters_found), color = Color.White.copy(alpha = 0.5f))
                         }
                     } else {
@@ -502,10 +645,14 @@ fun AvatarSelectionContent(
                                 }
                         ) {
                             LazyVerticalGrid(
+                                state = gridState,
                                 columns = GridCells.Fixed(if (mode == AvatarSelectionMode.BACKDROP) 2 else 3),
                                 horizontalArrangement = Arrangement.spacedBy(16.dp),
                                 verticalArrangement = Arrangement.spacedBy(24.dp),
-                                contentPadding = PaddingValues(vertical = 16.dp)
+                                contentPadding = PaddingValues(horizontal = 24.dp, vertical = 16.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .premiumScrollbar(gridState, width = 3f, paddingEnd = 6f, paddingVertical = 16f)
                             ) {
                                 if (mode == AvatarSelectionMode.BACKDROP) {
                                     items(backdrops ?: emptyList()) { backdrop ->
@@ -534,7 +681,8 @@ fun AvatarSelectionContent(
                                                 val charName = character.character?.lowercase()?.trim()
                                                 val actorName = character.name.lowercase().trim()
                                                 val tvdbImage = charName?.let { name -> characterImagesMap[name] } ?: characterImagesMap[actorName]
-                                                val url = tvdbImage ?: ""
+                                                val tmdbProfile = character.profilePath?.let { "https://image.tmdb.org/t/p/w200$it" }
+                                                val url = tvdbImage ?: tmdbProfile ?: ""
                                                 if (url.isNotEmpty()) {
                                                     val backdrop = selectedMedia?.let {
                                                         when (it) {
@@ -550,8 +698,9 @@ fun AvatarSelectionContent(
                                             val charNameForDisplay = character.character?.lowercase()?.trim()
                                             val actorNameForDisplay = character.name.lowercase().trim()
                                             val tvdbImageForDisplay = charNameForDisplay?.let { name -> characterImagesMap[name] } ?: characterImagesMap[actorNameForDisplay]
+                                            val effectiveImage = tvdbImageForDisplay ?: character.profilePath?.let { "https://image.tmdb.org/t/p/w200$it" }
                                             AsyncImage(
-                                                model = tvdbImageForDisplay,
+                                                model = effectiveImage,
                                                 contentDescription = character.name,
                                                 modifier = Modifier
                                                     .size(80.dp)

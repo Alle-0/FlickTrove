@@ -11,6 +11,8 @@ import com.google.mlkit.nl.translate.Translation
 import com.google.mlkit.nl.translate.Translator
 import com.google.mlkit.nl.translate.TranslatorOptions
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.async
+import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
@@ -177,23 +179,41 @@ class TranslationManager @Inject constructor(
      * Translates [text] explicitly from [sourceLang] to [targetLang].
      * Falls back to online translation if on-device model translation fails.
      */
+    /**
+     * Translates [text] explicitly from [sourceLang] to [targetLang].
+     * Falls back to online translation if on-device model translation fails.
+     * Strictly preserves all paragraphs, blank lines, and line breaks (\n and \n\n).
+     */
     suspend fun translateFrom(text: String, sourceLang: String, targetLang: String = currentTargetLanguage): String? {
         val validSource = toSupportedMlKitLanguage(sourceLang) ?: return translateOnline(text, sourceLang, targetLang)
         val validTarget = toSupportedMlKitLanguage(targetLang) ?: return translateOnline(text, sourceLang, targetLang)
-        return try {
-            val translator = getOrCreateTranslator(validSource, validTarget)
-            translator.translate(text).await()
-        } catch (e: Exception) {
-            Log.w("TranslationManager", "On-device translateFrom failed, trying online fallback", e)
-            translateOnline(text, validSource, validTarget)
+        return translatePreservingNewlines(text) { chunk ->
+            try {
+                val translator = getOrCreateTranslator(validSource, validTarget)
+                translator.translate(chunk).await()
+            } catch (e: Exception) {
+                Log.w("TranslationManager", "On-device translateFrom failed, trying online fallback", e)
+                translateOnlineDirect(chunk, validSource, validTarget)
+            }
         }
     }
 
     /**
      * Translates [text] online via reliable translation endpoints when on-device models
      * cannot be downloaded or fail.
+     * Strictly preserves all paragraphs, blank lines, and line breaks (\n and \n\n).
      */
     suspend fun translateOnline(
+        text: String,
+        sourceLang: String,
+        targetLang: String = currentTargetLanguage
+    ): String? {
+        return translatePreservingNewlines(text) { chunk ->
+            translateOnlineDirect(chunk, sourceLang, targetLang)
+        }
+    }
+
+    private suspend fun translateOnlineDirect(
         text: String,
         sourceLang: String,
         targetLang: String = currentTargetLanguage
@@ -271,6 +291,41 @@ class TranslationManager @Inject constructor(
     }
 
     /**
+     * Preserves paragraphs, blank lines, and line breaks (\n and \n\n) when translating text.
+     * Both ML Kit's on-device NMT model and public translation endpoints strip \n or treat them
+     * as token separators, turning multi-paragraph reviews into an unreadable wall of text.
+     * This helper splits by \n, translates non-blank chunks concurrently, and reconstructs
+     * the exact original paragraph and newline structure.
+     */
+    private suspend fun translatePreservingNewlines(
+        text: String,
+        translateChunk: suspend (String) -> String?
+    ): String? = coroutineScope {
+        if (!text.contains('\n')) {
+            val clean = text.trim()
+            if (clean.isEmpty()) return@coroutineScope text
+            return@coroutineScope translateChunk(clean)
+        }
+
+        val lines = text.split('\n')
+        val deferredLines = lines.map { line ->
+            if (line.isBlank()) {
+                null
+            } else {
+                async {
+                    translateChunk(line.trim()) ?: line
+                }
+            }
+        }
+
+        val translatedLines = deferredLines.mapIndexed { index, deferred ->
+            deferred?.await() ?: lines[index]
+        }
+
+        translatedLines.joinToString("\n")
+    }
+
+    /**
      * Translates [text] from any detected language to the user's target language.
      * The caller can call downloadModels() first or rely on seamless online fallback.
      */
@@ -295,11 +350,13 @@ class TranslationManager @Inject constructor(
         downloadModels(TranslateLanguage.ENGLISH, currentTargetLanguage, requireWifi)
 
     suspend fun translate(text: String): String? {
-        return try {
-            legacyTranslator.translate(text).await()
-        } catch (e: Exception) {
-            Log.w("TranslationManager", "ML Kit legacy translate failed, trying online fallback", e)
-            translateOnline(text, "en", mapMlKitToBcp47(currentTargetLanguage))
+        return translatePreservingNewlines(text) { chunk ->
+            try {
+                legacyTranslator.translate(chunk).await()
+            } catch (e: Exception) {
+                Log.w("TranslationManager", "ML Kit legacy translate failed, trying online fallback", e)
+                translateOnlineDirect(chunk, "en", mapMlKitToBcp47(currentTargetLanguage))
+            }
         }
     }
 

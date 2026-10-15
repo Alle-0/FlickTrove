@@ -22,7 +22,21 @@ class GetHomeUiStateUseCase @Inject constructor() {
     ): Flow<HomeUiState> {
         @OptIn(kotlinx.coroutines.FlowPreview::class)
         val baseMoviesFlow = moviesFlow.map { movies -> 
-            movies.filter { ((it.favorite || it.reminder) || (it.mediaType == "tv" && it.dropped)) && !it.watched } 
+            movies.filter { movie ->
+                if (movie.mediaType == "tv") {
+                    val isUpToDate = movie.isTvUpToDateOrCompleted()
+                    val watchedCount = movie.watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+                    if (movie.dropped) {
+                        !isUpToDate
+                    } else if (!isUpToDate && watchedCount > 0) {
+                        true
+                    } else {
+                        (movie.favorite || movie.reminder) && !isUpToDate
+                    }
+                } else {
+                    (movie.favorite || movie.reminder) && !movie.watched
+                }
+            }
         }.distinctUntilChanged()
         
         @OptIn(kotlinx.coroutines.FlowPreview::class)

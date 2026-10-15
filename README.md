@@ -165,6 +165,7 @@ Behind a gorgeous interface lies a solid and scalable engine. We used the best p
 <br>
 
 FlickTrove adopts the most modern Android patterns:
+
 - **Reactive Data Layer**: Built on Kotlin Coroutines and StateFlows for snappy, unidirectional data flow (UDF) and lifecycle safety.
 - **Dependency Injection**: Powered by Dagger Hilt for clean modular boundaries, testability, and decoupled repository patterns.
 - **Compose-Native Routing**: Navigation is orchestrated by **Voyager** (tab + stack navigator) with transition animations and state preservation.
@@ -173,6 +174,7 @@ FlickTrove adopts the most modern Android patterns:
 - **Offline-First Room SSOT**: Local Room DB acts as the immutable Single Source of Truth for watch states, custom folders, and 51 achievements.
 - **Resilient Cloud Sync**: Background synchronization with cloud backends (Firebase Firestore, Trakt.tv, and SIMKL) is powered by Android **WorkManager** with exponential backoff, rate-limit safety, and automatic OAuth2 token refreshing.
 - **Glassmorphic Render Hierarchy**: Custom `Haze` state architecture ensuring zero recursive self-blur feedback loops and 60/120 FPS buttery rendering.
+
 </details>
 
 ---
@@ -212,9 +214,6 @@ Once the app is launched:
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
-- [x] **Badges & Achievements:** 51 achievements across 5 historical film stock tiers and secret *Lost Reels*, with real-time unlock banners and global rarity stats.
-- [x] **Universal Data Importers:** Native migration engine supporting Letterboxd, IMDb, Trakt, SIMKL, TVTime, Serializd, and custom CSV/JSON/YAML.
-- [x] **Official Companion Website:** Public portal and landing page live at [alle-0.github.io/FlickTrove](https://alle-0.github.io/FlickTrove/).
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collection on the web.
@@ -285,4 +284,3 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 <div align="center">
   <i>Developed with passion for movie and TV show lovers.</i>
 </div>
-

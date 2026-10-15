@@ -1514,9 +1514,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">對電影堅定不移的熱愛。你連續7天每天至少觀看了一部電影。</string>
     <string name="badge_secret_cinephile_streak_hint">幽暗的放映廳在一週的每一天都在呼喚你...</string>
-    <string name="badge_day_one_pioneer_title">默片拓荒者</string>
+    <string name="badge_day_one_pioneer_title">第一膠捲開拓者</string>
     <string name="badge_day_one_pioneer_cat">創始首日榮譽</string>
-    <string name="badge_day_one_pioneer_desc">FlickTrove 電影資料館最初的守護者之一。自首次放映便已入座見證。</string>
+    <string name="badge_day_one_pioneer_desc">創始成員專屬榮譽：在應用程式最初的上線發布階段便加入並使用 FlickTrove。</string>
     <string name="badge_movies_title">每秒24格頻率</string>
     <string name="badge_movies_cat">觀影記錄</string>
     <string name="badge_movies_desc">穿梭於歷史膠卷規格之中，對大銀幕永不熄滅的熱忱。</string>
@@ -1612,7 +1612,7 @@
     <string name="badge_personal_diary_desc">您透過對觀看過的電影撰寫10篇個人筆記，記錄了感觸與深層思考。</string>
     <string name="badge_custom_backdrop_title">私人美術指導</string>
     <string name="badge_custom_backdrop_cat">個人化裝扮</string>
-    <string name="badge_custom_backdrop_desc">您透過頭像和電影背景裝點個人檔案，打造了專屬的影迷身分標識。</string>
+    <string name="badge_custom_backdrop_desc">全面打造個人專屬視覺形象 (2/2)：在個人檔案中同時設定自訂頭像與背景圖。</string>
 
     <string name="trophy_track_title">規格進階歷程</string>
     <string name="trophy_completed_badge">已完成</string>
@@ -1638,7 +1638,7 @@
     <string name="badge_colossal_desc">您在一次觀影中完成了一部長達3小時30分鐘以上的史詩鉅作。</string>
     <string name="badge_actor_muse_title">最愛演員</string>
     <string name="badge_actor_muse_cat">偏好</string>
-    <string name="badge_actor_muse_desc">您在8次簽到中選擇了同一位最愛的演員。</string>
+    <string name="badge_actor_muse_desc">您在至少8部觀看過的不同電影中，將同一位演員選為最愛演員。</string>
     <string name="badge_director_heart_title">最愛導演</string>
     <string name="badge_director_heart_cat">作者論</string>
     <string name="badge_director_heart_desc">您觀看了最愛導演的8部以上作品，探索了其作者視野。</string>
@@ -1704,9 +1704,9 @@
     <string name="badge_tv_cat">电视剧集</string>
     <string name="badge_tv_desc">从试播集一路追到最终季的片尾字幕。</string>
     <string name="badge_tv_title">追剧马拉松</string>
-    <string name="badge_veteran_club_cat">忠实会员</string>
-    <string name="badge_veteran_club_desc">迷影俱乐部持续活跃的资深成员。</string>
-    <string name="badge_veteran_club_title">迷影俱乐部徽章</string>
+    <string name="badge_veteran_club_cat">忠實會員</string>
+    <string name="badge_veteran_club_desc">獎勵您長久以來的熱忱：成為 FlickTrove 影迷俱樂部成員從1個月到超過3年以上。</string>
+    <string name="badge_veteran_club_title">迷影俱樂部徽章</string>
     <string name="badge_vibes_cat">情绪标签</string>
     <string name="badge_vibes_desc">从欢笑到泪水：用Vibe捕捉光影带来的内心震撼。</string>
     <string name="badge_vibes_title">情感光谱</string>
@@ -1789,6 +1789,21 @@
     <string name="settings_seasonal_preview_halloween_desc">10月10日 – 11月5日</string>
     <string name="settings_seasonal_preview_active_now">当前生效</string>
     <string name="settings_seasonal_preview_upcoming">即将到来</string>
-    <string name="settings_seasonal_preview_christmas">圣诞节</string>
+    <string name="settings_seasonal_preview_christmas">聖誕節</string>
     <string name="settings_seasonal_preview_christmas_desc">12月1日 – 1月6日</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">FlickTrove 官方贊助人</string>
+    <string name="trophy_producer_already_unlocked_desc">衷心感謝您對本專案的信任以及對獨立應用程式開發的全力支持。</string>
+    <string name="trophy_producer_support_intro">FlickTrove 是一款無廣告的獨立應用程式。您可以透過 Ko-fi 或 PayPal 進行自願贊助以支持本專案。</string>
+    <string name="trophy_producer_verify_section_title">已經完成贊助？</string>
+    <string name="trophy_producer_verify_section_desc">請輸入在 Ko-fi 或 PayPal 贊助時使用的電子郵件（訪客模式或使用不同支付郵件時必填）：</string>
+    <string name="trophy_producer_email_placeholder">your.email@example.com</string>
+    <string name="trophy_producer_verify_button">驗證贊助</string>
+    <string name="trophy_producer_verifying">正在驗證…</string>
+    <string name="trophy_producer_verify_success">贊助確認成功！執行製片人獎盃已解鎖 🎉</string>
+    <string name="trophy_producer_verify_not_found">未找到該信箱的贊助紀錄。款項入帳可能需要幾分鐘時間。</string>
+    <string name="trophy_producer_verify_invalid_email">請輸入有效的電子郵件地址。</string>
+    <string name="trophy_producer_verify_already_claimed">此贊助已被其他帳號兌換。</string>
+    <string name="trophy_producer_verify_error">驗證時發生網路連線錯誤，請稍後再試。</string>
 </resources>

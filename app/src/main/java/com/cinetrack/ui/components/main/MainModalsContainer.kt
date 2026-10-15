@@ -35,6 +35,12 @@ import com.cinetrack.ui.viewmodel.FlowViewModel
 import com.cinetrack.ui.LocalActiveTrophyFilterConfig
 import com.cinetrack.ui.components.badge.TrophyFilterModal
 import com.cinetrack.ui.screens.TrophyRoomTab
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
+import com.cinetrack.ui.LocalActiveTrophyDetailConfig
+import com.cinetrack.ui.components.glass.GlassmorphicModal
+import com.cinetrack.ui.components.badge.TrophyDetailContent
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -201,6 +207,32 @@ fun MainModalsContainer(
                         },
                         onDismissRequest = onFilterModalDismiss
                     )
+                }
+            }
+
+            val activeTrophyDetailState = LocalActiveTrophyDetailConfig.current
+            val detailConfig = activeTrophyDetailState?.value
+            var lastDetailConfig by remember { mutableStateOf<com.cinetrack.ui.TrophyDetailModalConfig?>(null) }
+            if (detailConfig != null) {
+                lastDetailConfig = detailConfig
+            }
+            val currentModalConfig = detailConfig ?: lastDetailConfig
+
+            if (currentModalConfig != null) {
+                Box(modifier = Modifier.zIndex(70000f)) {
+                    GlassmorphicModal(
+                        visible = detailConfig != null,
+                        activeHazeState = globalHazeState,
+                        dimBackground = true,
+                        dismissOnClickOutside = true,
+                        onDismissRequest = { currentModalConfig.onClose() }
+                    ) {
+                        TrophyDetailContent(
+                            item = currentModalConfig.item,
+                            onClose = { currentModalConfig.onClose() },
+                            onVerifySupporter = currentModalConfig.onVerifySupporter
+                        )
+                    }
                 }
             }
         }

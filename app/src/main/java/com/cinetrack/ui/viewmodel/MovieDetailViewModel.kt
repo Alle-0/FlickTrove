@@ -239,6 +239,19 @@ class MovieDetailViewModel @Inject constructor(
                 }
             }
 
+            // Immediate local TV watch state reconciliation if new episodes have aired
+            if (mediaType == "tv") {
+                viewModelScope.launch {
+                    val local = repository.getMovie(movieId, mediaType)
+                    if (local != null) {
+                        val reconciled = local.reconcileTvWatchState()
+                        if (reconciled.watched != local.watched || reconciled.favorite != local.favorite || reconciled.progress != local.progress) {
+                            repository.saveMovie(reconciled)
+                        }
+                    }
+                }
+            }
+
             // Fetch watch history
             viewModelScope.launch {
                 // Backfill for older movies marked as watched before the history feature
@@ -525,7 +538,7 @@ class MovieDetailViewModel @Inject constructor(
                             watchedEpisodes = updatedEpisodes,
                             progress = updatedProgress
                         )
-                        repository.saveMovie(updatedMovie)
+                        repository.saveMovie(updatedMovie.reconcileTvWatchState())
                     }
 
                     // Fetch Collection if present
@@ -1133,7 +1146,7 @@ class MovieDetailViewModel @Inject constructor(
                                 season.copy(episodeCount = season.episodes?.size ?: it.episodeCount ?: season.episodeCount)
                             } else it
                         } ?: listOf(season.copy(episodeCount = season.episodes?.size ?: season.episodeCount))
-                        repository.saveMovie(currentMovie.copy(seasons = updatedSeasons))
+                        repository.saveMovie(currentMovie.copy(seasons = updatedSeasons).reconcileTvWatchState())
                     }
                 }
             } catch (e: Exception) {

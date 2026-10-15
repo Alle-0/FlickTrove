@@ -1442,9 +1442,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">सिनेमा के प्रति अटूट निष्ठा। आपने लगातार 7 दिनों तक हर दिन कम से कम एक फ़िल्म देखी।</string>
     <string name="badge_secret_cinephile_streak_hint">अंधेरा थिएटर सप्ताह के हर एक दिन बुलाता है...</string>
-    <string name="badge_day_one_pioneer_title">शांत पथप्रदर्शक</string>
+    <string name="badge_day_one_pioneer_title">प्रथम रील पथप्रदर्शक</string>
     <string name="badge_day_one_pioneer_cat">डे वन सम्मान</string>
-    <string name="badge_day_one_pioneer_desc">FlickTrove सिनेमा लाइब्रेरी के पहले संरक्षकों में से एक। शुरुआती प्रदर्शनों से ही उपस्थित।</string>
+    <string name="badge_day_one_pioneer_desc">संस्थापकों के लिए विशेष सम्मान: आपने ऐप के शुरुआती लॉन्च चरण के दौरान FlickTrove का उपयोग करना शुरू किया।</string>
     <string name="badge_movies_title">24fps आवृत्ति</string>
     <string name="badge_movies_cat">देखी गई फ़िल्में</string>
     <string name="badge_movies_desc">फ़िल्म के ऐतिहासिक प्रारूपों के माध्यम से बड़े पर्दे के प्रति जुनून।</string>
@@ -1540,7 +1540,7 @@
     <string name="badge_personal_diary_desc">आपने देखी गई फिल्मों पर 10 व्यक्तिगत नोट्स लिखकर अपनी धारणाओं और अंतरंग विचारों को दर्ज किया है।</string>
     <string name="badge_custom_backdrop_title">व्यक्तिगत सेट डिज़ाइनर</string>
     <string name="badge_custom_backdrop_cat">अनुकूलन</string>
-    <string name="badge_custom_backdrop_desc">आपने एक कस्टम अवतार और सिनेमाई बैकड्रॉप के साथ अपनी प्रोफ़ाइल सेटिंग को पूरा करके अपनी सिनेप्रेमी पहचान को संवारा है।</string>
+    <string name="badge_custom_backdrop_desc">अपनी दृश्य पहचान को पूरी तरह से अनुकूलित करें (2/2): अपनी प्रोफ़ाइल में एक कस्टम अवतार और बैकड्रॉप दोनों सेट करें।</string>
 
     <string name="trophy_track_title">प्रारूप प्रगति</string>
     <string name="trophy_completed_badge">पूर्ण</string>
@@ -1566,7 +1566,7 @@
     <string name="badge_colossal_desc">आपने एक ही बैठक में 3 घंटे 30 मिनट से अधिक समय की स्मारकीय कृति पूरी की है।</string>
     <string name="badge_actor_muse_title">पसंदीदा अभिनेता</string>
     <string name="badge_actor_muse_cat">प्राथमिकताएं</string>
-    <string name="badge_actor_muse_desc">आपने 8 समर्पित चेक-इन में एक ही पसंदीदा कलाकार को चुना है।</string>
+    <string name="badge_actor_muse_desc">आपने कम से कम 8 अलग-अलग देखी गई फिल्मों में एक ही कलाकार को अपने पसंदीदा अभिनेता के रूप में चुना है।</string>
     <string name="badge_director_heart_title">पसंदीदा निर्देशक</string>
     <string name="badge_director_heart_cat">निर्देशन</string>
     <string name="badge_director_heart_desc">आपने अपने पसंदीदा निर्देशक की 8 से अधिक कृतियों को पूरा करके उनके दृष्टिकोण का पता लगाया है।</string>
@@ -1633,7 +1633,7 @@
     <string name="badge_tv_desc">पायलट एपिसोड से लेकर अंतिम सीज़न के क्रेडिट्स तक।</string>
     <string name="badge_tv_title">धारावाहिक मैराथनर</string>
     <string name="badge_veteran_club_cat">वफादारी</string>
-    <string name="badge_veteran_club_desc">हमारे सिनेप्रेमी समुदाय के सक्रिय और समर्पित सदस्य।</string>
+    <string name="badge_veteran_club_desc">समय के साथ आपकी निष्ठा को पुरस्कृत करता है: आप 1 महीने से लेकर 3+ वर्षों से अधिक समय से FlickTrove सिनेक्लब का हिस्सा हैं।</string>
     <string name="badge_veteran_club_title">सिनेक्लब कार्ड</string>
     <string name="badge_vibes_cat">भावनाएं</string>
     <string name="badge_vibes_desc">हंसी से आंसुओं तक: वाइब्स के साथ अपनी भावनाओं को दर्ज करें।</string>
@@ -1783,6 +1783,21 @@
     <string name="settings_seasonal_preview_upcoming">जल्द आ रहा है</string>
     <string name="settings_seasonal_preview_christmas">क्रिसमस</string>
     <string name="settings_seasonal_preview_christmas_desc">1 दिस – 6 जन</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">FlickTrove के आधिकारिक संरक्षक</string>
+    <string name="trophy_producer_already_unlocked_desc">प्रोजेक्ट पर विश्वास करने और स्वतंत्र ऐप विकास का समर्थन करने के लिए आपका हार्दिक धन्यवाद।</string>
+    <string name="trophy_producer_support_intro">FlickTrove एक विज्ञापन-मुक्त स्वतंत्र ऐप है। आप Ko-fi या PayPal के माध्यम से दान देकर प्रोजेक्ट का समर्थन कर सकते हैं।</string>
+    <string name="trophy_producer_verify_section_title">क्या आपने पहले ही दान दिया है?</string>
+    <string name="trophy_producer_verify_section_desc">Ko-fi या PayPal पर दान के लिए उपयोग किया गया ईमेल दर्ज करें (अतिथि प्रोफ़ाइल या भिन्न भुगतान ईमेल के लिए आवश्यक):</string>
+    <string name="trophy_producer_email_placeholder">your.email@example.com</string>
+    <string name="trophy_producer_verify_button">दान सत्यापित करें</string>
+    <string name="trophy_producer_verifying">सत्यापित किया जा रहा है…</string>
+    <string name="trophy_producer_verify_success">दान की पुष्टि हो गई! कार्यकारी निर्माता ट्रॉफी अनलॉक हो गई 🎉</string>
+    <string name="trophy_producer_verify_not_found">इस ईमेल के लिए कोई दान नहीं मिला। भुगतान रिकॉर्ड होने में कुछ मिनट लग सकते हैं।</string>
+    <string name="trophy_producer_verify_invalid_email">कृपया एक मान्य ईमेल पता दर्ज करें।</string>
+    <string name="trophy_producer_verify_already_claimed">यह दान पहले ही किसी अन्य खाते द्वारा क्लेम किया जा चुका है।</string>
+    <string name="trophy_producer_verify_error">सत्यापन के दौरान कनेक्शन त्रुटि। कृपया थोड़ी देर बाद पुनः प्रयास करें।</string>
 </resources>
 
 

@@ -76,7 +76,7 @@ import kotlinx.coroutines.delay
 fun TrophyUnlockBanner(
     trophyRoomViewModel: TrophyRoomViewModel,
     hazeState: HazeState? = null,
-    onNavigateToTrophyRoom: () -> Unit,
+    onNavigateToTrophyRoom: (String?) -> Unit,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -132,10 +132,6 @@ fun TrophyUnlockBanner(
                 .fillMaxWidth()
                 .wrapContentWidth(Alignment.CenterHorizontally)
                 .widthIn(max = 440.dp)
-                .bounceClick {
-                    isVisible = false
-                    onNavigateToTrophyRoom()
-                }
                 .pointerInput(Unit) {
                     detectVerticalDragGestures { _, dragAmount ->
                         if (dragAmount < -15f) {
@@ -162,6 +158,12 @@ fun TrophyUnlockBanner(
         ) {
             Box(
                 modifier = Modifier
+                    .fillMaxWidth()
+                    .bounceClick {
+                        isVisible = false
+                        val targetBadgeId = (current as? TrophyUnlockBannerEvent.SingleBadge)?.badgeId
+                        onNavigateToTrophyRoom(targetBadgeId)
+                    }
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .padding(horizontal = 16.dp, vertical = 11.dp)
             ) {

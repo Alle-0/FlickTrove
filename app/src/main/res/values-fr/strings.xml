@@ -1445,9 +1445,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">Une dévotion inébranlable pour le cinéma. Vous avez regardé au moins un film par jour pendant 7 jours consécutifs.</string>
     <string name="badge_secret_cinephile_streak_hint">La salle obscure vous appelle chaque jour de la semaine...</string>
-    <string name="badge_day_one_pioneer_title">Pionnier du silence</string>
+    <string name="badge_day_one_pioneer_title">Pionnier de la Première Bobine</string>
     <string name="badge_day_one_pioneer_cat">HONNEUR DU PREMIER JOUR</string>
-    <string name="badge_day_one_pioneer_desc">Parmi les premiers gardiens de la cinémathèque FlickTrove. Présent dès les premières projections.</string>
+    <string name="badge_day_one_pioneer_desc">Honneur exclusif des fondateurs : vous avez commencé à utiliser FlickTrove durant la phase initiale de lancement.</string>
     <string name="badge_movies_title">Fréquence 24fps</string>
     <string name="badge_movies_cat">FILMS VUS</string>
     <string name="badge_movies_desc">La passion du grand écran à travers les formats historiques de la pellicule.</string>
@@ -1543,7 +1543,7 @@
     <string name="badge_personal_diary_desc">Vous avez consigné impressions et pensées intimes en écrivant 10 notes personnelles sur des films vus.</string>
     <string name="badge_custom_backdrop_title">Chef décorateur personnel</string>
     <string name="badge_custom_backdrop_cat">PERSONNALISATION</string>
-    <string name="badge_custom_backdrop_desc">Vous avez soigné votre identité cinéphile en complétant le décor de votre profil avec un avatar et un arrière-plan cinématographique.</string>
+    <string name="badge_custom_backdrop_desc">Personnalisez pleinement votre identité visuelle (2/2) : définissez à la fois un Avatar et un Arrière-plan personnalisé dans votre profil.</string>
 
     <string name="trophy_track_title">ASCENSION DES FORMATS</string>
     <string name="trophy_completed_badge">COMPLÉTÉ</string>
@@ -1569,7 +1569,7 @@
     <string name="badge_colossal_desc">Vous avez terminé une œuvre monumentale de plus de 3 heures et 30 minutes en une seule session.</string>
     <string name="badge_actor_muse_title">Acteur Fétiche</string>
     <string name="badge_actor_muse_cat">PRÉFÉRENCES</string>
-    <string name="badge_actor_muse_desc">Vous avez sélectionné le même interprète préféré lors de 8 check-ins dédiés.</string>
+    <string name="badge_actor_muse_desc">Vous avez choisi le même interprète comme acteur préféré dans au moins 8 films vus différents.</string>
     <string name="badge_director_heart_title">Réalisateur de Cœur</string>
     <string name="badge_director_heart_cat">AUTEURISME</string>
     <string name="badge_director_heart_desc">Vous avez exploré la vision d\'auteur de votre réalisateur préféré en terminant plus de 8 de ses œuvres.</string>
@@ -1636,7 +1636,7 @@
     <string name="badge_tv_desc">Du pilote jusqu\'au générique final de l\'ultime saison.</string>
     <string name="badge_tv_title">Marathonien des Séries</string>
     <string name="badge_veteran_club_cat">FIDÉLITÉ</string>
-    <string name="badge_veteran_club_desc">Membre actif et fidèle de notre communauté cinéphile.</string>
+    <string name="badge_veteran_club_desc">Récompense votre fidélité dans le temps : vous faites partie du ciné-club FlickTrove depuis 1 mois jusqu\'à plus de 3 ans.</string>
     <string name="badge_veteran_club_title">Carte du Ciné-Club</string>
     <string name="badge_vibes_cat">ÉMOTIONS</string>
     <string name="badge_vibes_desc">Du rire aux larmes : capturez vos ressentis grâce aux Vibes.</string>
@@ -1785,5 +1785,20 @@
     <string name="settings_seasonal_preview_upcoming">À VENIR</string>
     <string name="settings_seasonal_preview_christmas">Noël</string>
     <string name="settings_seasonal_preview_christmas_desc">1 déc. – 6 janv.</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">Mécène Officiel de FlickTrove</string>
+    <string name="trophy_producer_already_unlocked_desc">Un grand merci d\'avoir cru au projet et de soutenir le développement indépendant de l\'application.</string>
+    <string name="trophy_producer_support_intro">FlickTrove est une application indépendante et sans publicité. Vous pouvez soutenir le projet par un don libre via Ko-fi ou PayPal.</string>
+    <string name="trophy_producer_verify_section_title">Vous avez déjà fait un don ?</string>
+    <string name="trophy_producer_verify_section_desc">Saisissez l\'e-mail utilisé pour votre don sur Ko-fi ou PayPal (essentiel pour les profils Invité ou si vous avez payé avec un autre e-mail) :</string>
+    <string name="trophy_producer_email_placeholder">votre.email@exemple.fr</string>
+    <string name="trophy_producer_verify_button">Vérifier le don</string>
+    <string name="trophy_producer_verifying">Vérification en cours…</string>
+    <string name="trophy_producer_verify_success">Don confirmé ! Trophée Producteur Exécutif débloqué 🎉</string>
+    <string name="trophy_producer_verify_not_found">Aucun don trouvé pour cet e-mail. L\'enregistrement du paiement peut prendre quelques minutes.</string>
+    <string name="trophy_producer_verify_invalid_email">Veuillez saisir une adresse e-mail valide.</string>
+    <string name="trophy_producer_verify_already_claimed">Ce don a déjà été réclamé par un autre compte.</string>
+    <string name="trophy_producer_verify_error">Erreur de connexion lors de la vérification. Veuillez réessayer dans un instant.</string>
 </resources>
 

@@ -53,6 +53,7 @@ import kotlinx.coroutines.launch
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.ui.viewmodel.FoldersViewModel
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.components.shared.FolderColorPicker
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -209,6 +210,27 @@ fun FoldersScreenContent(
                 val density = androidx.compose.ui.platform.LocalDensity.current
                 val coroutineScope = rememberCoroutineScope()
                 val context = LocalContext.current
+
+                val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+                val showScrollToTop by remember {
+                    androidx.compose.runtime.derivedStateOf {
+                        listState.firstVisibleItemIndex > 3 || (listState.firstVisibleItemIndex > 0 && listState.firstVisibleItemScrollOffset > 150)
+                    }
+                }
+                LaunchedEffect(showScrollToTop, listState) {
+                    scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+                        isVisible = showScrollToTop,
+                        scrollProgress = if (showScrollToTop) 1f else 0f,
+                        onScrollToTop = {
+                            coroutineScope.launch { listState.fastScrollToTop() }
+                        }
+                    )
+                }
+                DisposableEffect(Unit) {
+                    onDispose {
+                        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+                    }
+                }
                 
                 // Use fixed standard heights to prevent first-frame measurement clipping
                 val searchBarMaxHeightDp = 64.dp // 56dp for the bar + 8dp bottom padding

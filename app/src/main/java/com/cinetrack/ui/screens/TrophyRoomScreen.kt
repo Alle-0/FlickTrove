@@ -4,7 +4,9 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -31,6 +33,8 @@ import com.cinetrack.ui.viewmodel.TrophyRoomViewModel
  * e animato con MorphGlassModal dalle coordinate del pulsante filtri della top bar.
  */
 object TrophyRoomTab : Tab {
+    var targetBadgeId: String? by androidx.compose.runtime.mutableStateOf(null)
+
     override val options: TabOptions
         @Composable
         get() {
@@ -57,7 +61,10 @@ object TrophyRoomTab : Tab {
         TrophyRoomScreenContent(
             trophyItems = trophyItems,
             paddingValues = paddingValues,
-            hazeState = hazeState
+            hazeState = hazeState,
+            targetBadgeId = targetBadgeId,
+            onTargetBadgeConsumed = { targetBadgeId = null },
+            onVerifySupporter = { email -> viewModel.verifySupporterEmail(email) }
         )
     }
 }
@@ -67,7 +74,7 @@ object TrophyRoomTab : Tab {
  * Conservata come fallback per eventuali deep link o accessi diretti via parentNavigator.
  * La navigazione primaria avviene tramite TrophyRoomTab in MainScreen.
  */
-class TrophyRoomScreen : Screen {
+class TrophyRoomScreen(private val targetBadgeId: String? = null) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
     @Composable
@@ -86,10 +93,18 @@ class TrophyRoomScreen : Screen {
             ?: hiltViewModel<TrophyRoomViewModel>()
         val trophyItems by viewModel.trophyItems.collectAsStateWithLifecycle()
 
+        var currentTargetBadgeId by androidx.compose.runtime.remember(targetBadgeId) {
+            androidx.compose.runtime.mutableStateOf(targetBadgeId)
+        }
+
         TrophyRoomScreenContent(
             trophyItems = trophyItems,
             paddingValues = paddingValues,
-            hazeState = hazeState
+            hazeState = hazeState,
+            targetBadgeId = currentTargetBadgeId,
+            onTargetBadgeConsumed = { currentTargetBadgeId = null },
+            onVerifySupporter = { email -> viewModel.verifySupporterEmail(email) }
         )
     }
 }
+

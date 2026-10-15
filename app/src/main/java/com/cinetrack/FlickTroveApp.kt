@@ -344,11 +344,15 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                     com.cinetrack.ui.components.badge.TrophyUnlockBanner(
                                         trophyRoomViewModel = trophyRoomViewModel,
                                         hazeState = globalHazeState,
-                                        onNavigateToTrophyRoom = {
+                                        onNavigateToTrophyRoom = { targetBadgeId ->
                                             if (navigator.size > 1) {
                                                 navigator.popUntil { it is com.cinetrack.ui.screens.MainScreen }
                                             }
-                                            deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_TROPHY_ROOM")
+                                            deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_TROPHY_ROOM").apply {
+                                                if (targetBadgeId != null) {
+                                                    putExtra("targetBadgeId", targetBadgeId)
+                                                }
+                                            }
                                         },
                                         modifier = Modifier
                                             .align(Alignment.TopCenter)

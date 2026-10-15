@@ -47,8 +47,17 @@ data class TrophyFilterModalConfig(
 
 val LocalActiveTrophyFilterConfig = compositionLocalOf<MutableState<TrophyFilterModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }
 
+data class TrophyDetailModalConfig(
+    val item: com.cinetrack.ui.components.badge.TrophyRoomItemUi,
+    val onClose: () -> Unit,
+    val onVerifySupporter: (suspend (String) -> com.cinetrack.data.repository.BadgeRepository.SupporterVerificationResult)? = null
+)
+
+val LocalActiveTrophyDetailConfig = compositionLocalOf<MutableState<TrophyDetailModalConfig?>?> { null }
+
 data class ScrollToTopState(
     val isVisible: Boolean = false,
+    val scrollProgress: Float = if (isVisible) 1f else 0f,
     val onScrollToTop: () -> Unit = {}
 )
 

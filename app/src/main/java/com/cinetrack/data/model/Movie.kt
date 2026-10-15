@@ -465,8 +465,6 @@ data class Movie(
         get() {
             if (mediaType != "tv") return 99
             if (dropped) return 5
-            if (watched) return 4
-            if (!isReleased) return 3
 
             val watchedCount = watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
             if (watchedCount == 0) {
@@ -480,6 +478,9 @@ data class Movie(
                 }
                 return 1 // Ha episodi disponibili ancora da guardare: 'In corso'
             }
+
+            if (watched) return 4
+            if (!isReleased) return 3
 
             val total = numberOfEpisodes ?: 0
             if (total > 0 && watchedCount >= total) return 4
@@ -734,6 +735,82 @@ data class Movie(
             isLastEpisodeOfSeries = isEntireSeriesCompleted,
             isUpToDateWithAirDate = !isEntireSeriesCompleted
         )
+    }
+
+    /**
+     * Determines if a TV series is genuinely completed or up to date with the latest aired episodes.
+     * Prevents stale "watched = true" flags when new episodes have aired.
+     */
+    fun isTvUpToDateOrCompleted(): Boolean {
+        if (mediaType != "tv") return watched
+        if (dropped) return false
+        val watchedCount = watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+        if (watchedCount == 0) return false
+        val info = calculateNextEpisode()
+        return if (info != null) {
+            info.isUpToDateWithAirDate || (info.remainingTotal == 0 && info.remainingInSeason == 0)
+        } else {
+            val total = numberOfEpisodes ?: 0
+            total > 0 && watchedCount >= total
+        }
+    }
+
+    /**
+     * Reconciles the watched, favorite, and progress state of a TV series based on currently aired episodes.
+     * Invariants:
+     * - Dropped shows preserve dropped = true and are never forced to favorite.
+     * - Series with un-watched aired episodes assume watched = false and favorite = true (In corso).
+     * - Series with all aired episodes watched assume watched = true, favorite = false (Visti).
+     */
+    fun reconcileTvWatchState(): Movie {
+        if (mediaType != "tv") return this
+
+        val nextInfo = calculateNextEpisode()
+        val totalWatched = watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+
+        if (dropped) {
+            val isAllAiredWatched = nextInfo != null && (nextInfo.isUpToDateWithAirDate || nextInfo.remainingTotal == 0)
+            return copy(
+                watched = isAllAiredWatched,
+                progress = nextInfo?.progress?.toDouble() ?: progress
+            )
+        }
+
+        if (nextInfo != null) {
+            val isAllAiredWatched = (nextInfo.isUpToDateWithAirDate || nextInfo.remainingTotal == 0) && totalWatched > 0
+            return if (isAllAiredWatched) {
+                copy(
+                    watched = true,
+                    favorite = false,
+                    reminder = false,
+                    progress = if (nextInfo.isLastEpisodeOfSeries) 1.0 else nextInfo.progress.toDouble()
+                )
+            } else if (nextInfo.remainingTotal > 0 && totalWatched > 0) {
+                // In corso: new episode aired, show is no longer completed
+                copy(
+                    watched = false,
+                    favorite = true,
+                    reminder = false,
+                    progress = nextInfo.progress.toDouble()
+                )
+            } else if (totalWatched == 0) {
+                copy(
+                    watched = false,
+                    progress = 0.0
+                )
+            } else {
+                this
+            }
+        } else {
+            val totalEps = numberOfEpisodes ?: 0
+            if (totalEps > 0 && totalWatched >= totalEps) {
+                return copy(watched = true, favorite = false, reminder = false, progress = 1.0)
+            } else if (totalWatched > 0) {
+                return copy(watched = false, favorite = true, reminder = false)
+            }
+        }
+
+        return this
     }
 
     // --- Emotional Check-In (Peek-a-boo) – local only, not synced to Firestore or kotlinx.serialization ---

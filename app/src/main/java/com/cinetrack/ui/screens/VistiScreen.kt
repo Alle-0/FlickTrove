@@ -54,6 +54,7 @@ import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.viewmodel.VistiViewModel
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
 import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeState
@@ -154,20 +155,14 @@ fun VistiScreenContent(
             listState.firstVisibleItemIndex > 3 || (listState.firstVisibleItemIndex > 0 && listState.firstVisibleItemScrollOffset > 150)
         }
     }
-    DisposableEffect(showScrollToTop, listState) {
-        if (showScrollToTop) {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
-                isVisible = true,
-                onScrollToTop = {
-                    scope.launch { listState.animateScrollToItem(0) }
-                }
-            )
-        } else {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
-        }
-        onDispose {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
-        }
+    LaunchedEffect(showScrollToTop, listState) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { listState.fastScrollToTop() }
+            }
+        )
     }
     
     androidx.activity.compose.BackHandler(enabled = isFilterVisible) {

@@ -1514,9 +1514,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">映画への揺るぎない献身。7日間連続で毎日少なくとも1本の映画を鑑賞しました。</string>
     <string name="badge_secret_cinephile_streak_hint">暗闇のシアターは、一週間の毎日あなたを呼んでいる…</string>
-    <string name="badge_day_one_pioneer_title">無声の先駆者</string>
+    <string name="badge_day_one_pioneer_title">ファーストリールパイオニア</string>
     <string name="badge_day_one_pioneer_cat">DAY ONE 名誉章</string>
-    <string name="badge_day_one_pioneer_desc">FlickTroveシネマテークの最初期の守護者。最初の放映時から立ち会っています。</string>
+    <string name="badge_day_one_pioneer_desc">初期メンバー限定の栄誉：アプリの初期リリース期間中にFlickTroveに参加し利用を開始しました。</string>
     <string name="badge_movies_title">毎秒24コマの鼓動</string>
     <string name="badge_movies_cat">鑑賞済み映画</string>
     <string name="badge_movies_desc">歴史的なフィルム形式を通じて映画館の大銀幕を愛する情熱。</string>
@@ -1612,7 +1612,7 @@
     <string name="badge_personal_diary_desc">鑑賞した映画に10件の個人メモを書き、感想や親密な思いを記録しました。</string>
     <string name="badge_custom_backdrop_title">専属セットデザイナー</string>
     <string name="badge_custom_backdrop_cat">カスタマイズ</string>
-    <string name="badge_custom_backdrop_desc">アバターと映画の背景を設定してプロフィールを完成させ、映画ファンとしてのアイデンティティを確立しました。</string>
+    <string name="badge_custom_backdrop_desc">ビジュアルアイデンティティを完全にカスタマイズ（2/2）：プロフィールにカスタムアバターと背景画像の両方を設定します。</string>
 
     <string name="trophy_track_title">フォーマットの進化</string>
     <string name="trophy_completed_badge">完了</string>
@@ -1638,7 +1638,7 @@
     <string name="badge_colossal_desc">1回のセッションで3時間30分を超える記念碑的な作品を見終えました。</string>
     <string name="badge_actor_muse_title">お気に入りの俳優</string>
     <string name="badge_actor_muse_cat">好み</string>
-    <string name="badge_actor_muse_desc">8回のチェックインで同じお気に入りの俳優を選択しました。</string>
+    <string name="badge_actor_muse_desc">視聴した8本以上の異なる映画で、同じ出演者をお気に入りの俳優として選びました。</string>
     <string name="badge_director_heart_title">お気に入りの監督</string>
     <string name="badge_director_heart_cat">作家性</string>
     <string name="badge_director_heart_desc">お気に入りの監督の作品を8本以上見終え、その作家性を探求しました。</string>
@@ -1705,7 +1705,7 @@
     <string name="badge_tv_desc">パイロット版から最終シーズンのエンドロールまで駆け抜けました。</string>
     <string name="badge_tv_title">シリアルマラソナー</string>
     <string name="badge_veteran_club_cat">ロイヤルティ</string>
-    <string name="badge_veteran_club_desc">シネクラブのアクティブで熱心な継続メンバーです。</string>
+    <string name="badge_veteran_club_desc">長期にわたる映画への情熱を称えます：1か月から3年以上にわたりFlickTroveシネクラブのメンバーとして参加しています。</string>
     <string name="badge_veteran_club_title">シネクラブ会員証</string>
     <string name="badge_vibes_cat">エモーション</string>
     <string name="badge_vibes_desc">笑いから涙まで：映画が呼び起こした感動をバイブで記録しました。</string>
@@ -1791,4 +1791,19 @@
     <string name="settings_seasonal_preview_upcoming">近日公開</string>
     <string name="settings_seasonal_preview_christmas">クリスマス</string>
     <string name="settings_seasonal_preview_christmas_desc">12月1日～1月6日</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">FlickTrove公式パトロン</string>
+    <string name="trophy_producer_already_unlocked_desc">プロジェクトを信頼し、アプリの独立開発をご支援いただき心より感謝申し上げます。</string>
+    <string name="trophy_producer_support_intro">FlickTroveは完全広告なしの独立系アプリです。Ko-fiまたはPayPalからのご寄付で開発を支援できます。</string>
+    <string name="trophy_producer_verify_section_title">すでに寄付をされましたか？</string>
+    <string name="trophy_producer_verify_section_desc">Ko-fiまたはPayPalでのお支払いに使用したメールアドレスを入力してください（ゲスト利用や別アドレスでの決済時に必須です）：</string>
+    <string name="trophy_producer_email_placeholder">your.email@example.com</string>
+    <string name="trophy_producer_verify_button">寄付状況を確認</string>
+    <string name="trophy_producer_verifying">確認中…</string>
+    <string name="trophy_producer_verify_success">寄付が確認されました！「エグゼクティブ・プロデューサー」トロフィーが解放されました 🎉</string>
+    <string name="trophy_producer_verify_not_found">このメールアドレスによる寄付は見つかりませんでした。支払いの反映に数分かかる場合があります。</string>
+    <string name="trophy_producer_verify_invalid_email">有効なメールアドレスを入力してください。</string>
+    <string name="trophy_producer_verify_already_claimed">この寄付はすでに別のアカウントによって引き換えられています。</string>
+    <string name="trophy_producer_verify_error">確認中に接続エラーが発生しました。しばらくしてからもう一度お試しください。</string>
 </resources>

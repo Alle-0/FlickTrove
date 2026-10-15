@@ -60,7 +60,9 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.LocalMovieActions
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.theme.NeonTeal
+import kotlinx.coroutines.launch
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
 import com.cinetrack.ui.viewmodel.BoxOfficeCategory
 import com.cinetrack.ui.viewmodel.BoxOfficeUiState
 import com.cinetrack.ui.viewmodel.BoxOfficeViewModel
@@ -184,6 +186,28 @@ fun BoxOfficeScreenContent(
         val weekendListState = rememberLazyListState()
         val allTimeListState = rememberLazyListState()
         val listState = if (uiState.activeTab == BoxOfficeCategory.WEEKEND) weekendListState else allTimeListState
+        val scope = rememberCoroutineScope()
+
+        val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+        val showScrollToTop by remember {
+            derivedStateOf {
+                listState.firstVisibleItemIndex > 3 || (listState.firstVisibleItemIndex > 0 && listState.firstVisibleItemScrollOffset > 150)
+            }
+        }
+        LaunchedEffect(showScrollToTop, listState) {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+                isVisible = showScrollToTop,
+                scrollProgress = if (showScrollToTop) 1f else 0f,
+                onScrollToTop = {
+                    scope.launch { listState.fastScrollToTop() }
+                }
+            )
+        }
+        DisposableEffect(Unit) {
+            onDispose {
+                scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+            }
+        }
 
         LazyColumn(
             state = listState,

@@ -131,3 +131,32 @@ fun Modifier.premiumScrollbar(
     }
 }
 
+/**
+ * Pattern "Fast Jump + Smooth Glide" consigliato da Google per Jetpack Compose:
+ * Se la lista si trova molto in basso (oltre [glideItemIndex]), esegue prima un salto istantaneo
+ * (senza animazione) in prossimità della cima per evitare di comporre e misurare centinaia di card
+ * intermedie con decine di locandine Coil. Dopodiché esegue un'animazione morbida e fluida degli ultimi
+ * elementi fino a zero, garantendo 60/120 FPS costanti senza alcun micro-scatto o allocazioni GC massive.
+ */
+suspend fun androidx.compose.foundation.lazy.LazyListState.fastScrollToTop(glideItemIndex: Int = 10) {
+    if (firstVisibleItemIndex > glideItemIndex) {
+        scrollToItem(glideItemIndex)
+    }
+    animateScrollToItem(0)
+}
+
+suspend fun androidx.compose.foundation.lazy.grid.LazyGridState.fastScrollToTop(glideItemIndex: Int = 12) {
+    if (firstVisibleItemIndex > glideItemIndex) {
+        scrollToItem(glideItemIndex)
+    }
+    animateScrollToItem(0)
+}
+
+suspend fun androidx.compose.foundation.lazy.staggeredgrid.LazyStaggeredGridState.fastScrollToTop(glideItemIndex: Int = 12) {
+    if (firstVisibleItemIndex > glideItemIndex) {
+        scrollToItem(glideItemIndex)
+    }
+    animateScrollToItem(0)
+}
+
+

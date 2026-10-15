@@ -59,4 +59,8 @@ class TrophyRoomViewModel @Inject constructor(
     ) {
         badgeRepository.triggerTestUnlockBanner(badgeId, tier)
     }
+
+    suspend fun verifySupporterEmail(email: String): BadgeRepository.SupporterVerificationResult {
+        return badgeRepository.verifySupporterByEmail(email)
+    }
 }

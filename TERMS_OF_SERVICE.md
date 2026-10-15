@@ -1,6 +1,6 @@
 # Terms of Service (ToS)
 
-**Last Updated:** September 14, 2026
+**Last Updated:** October 15, 2026
 
 Welcome to **FlickTrove**. Please read the following Terms of Service carefully before using our application.
 
@@ -22,11 +22,17 @@ To the maximum extent permitted by applicable law, the developer disclaims any l
 
 FlickTrove allows users to post comments, write reviews, and upload custom avatars or images. Users can choose to publish comments either locally within FlickTrove or across the federated CommsUni network (commsuni.tv). By using these features, you agree not to upload or post content that is illegal, offensive, pornographic, violent, discriminatory, or that violates third-party copyrights. You must also use the designated "Spoiler" feature if your comment contains spoilers about the plot of movies or TV shows. You are solely responsible for the content you create and upload. Comments published to CommsUni are subject to CommsUni community rules and moderation policies. The developer reserves the unchallengeable right to remove any inappropriate content (including comments and avatars) and restrict, suspend (temporarily or permanently), or ban the user's ability to post comments, or in severe cases, suspend the user's account without prior notice. We encourage users to use the in-app "Reporting" (segnalazioni) feature to flag any content that violates these guidelines.
 
-### 5. Suspension of Account and Service
+### 5. Voluntary Donations and Patron Recognition ("Executive Producer")
+
+1. **Nature of Donations:** FlickTrove is a free and ad-free application. Any donations made through external platforms such as Ko-fi or PayPal are strictly voluntary contributions (erogazioni liberali) intended to support ongoing independent development and hosting costs. They do not constitute purchases of commercial products, subscriptions, securities, investments, or promises of financial returns.
+2. **Symbolic Digital In-App Recognition:** The "Executive Producer" badge, tier, and trophies are purely honorary, decorative, and symbolic recognitions granted within the application. Donations are non-refundable.
+3. **One-Time Claim Binding and Anti-Abuse:** Each donation can be claimed by and bound to only **one** FlickTrove account or device profile (One-Time Claim Binding). Sharing donation receipt emails publicly or attempting to claim someone else's donation without authorization is considered fraudulent abuse of the platform and will result in the immediate revocation of the supporter badge and potential account restriction.
+
+### 6. Suspension of Account and Service
 
 The developer reserves the unchallengeable right, without any obligation of prior notice, to modify, suspend, or discontinue, in whole or in part, the features of the App, the cloud services connected to it, or the hosting servers.
 In the event of abuse, violation of these Terms, improper use of third-party APIs, spam, or behaviors deemed harmful to the infrastructure, the developer reserves the right to limit, suspend, or permanently terminate the user's access to the App and delete their account.
 
-### 6. Governing Law and Jurisdiction
+### 7. Governing Law and Jurisdiction
 
 These Terms of Service are governed by and construed in accordance with the laws of the Italian Republic and European Union law. Any dispute concerning the interpretation, execution, or termination of these Terms shall be subject to the exclusive jurisdiction of the Italian courts (or the competent court according to the current consumer protection regulations in Europe).

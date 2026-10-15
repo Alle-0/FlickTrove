@@ -169,14 +169,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
         TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current
-            var previousTab by remember { mutableStateOf<Tab>(initialTab) }
-            var _lastTab by remember { mutableStateOf<Tab>(initialTab) }
+            var previousTab by remember { mutableStateOf<Tab>(currentTab) }
+            var _lastTab by remember { mutableStateOf<Tab>(currentTab) }
             val scrollToTopState = remember { mutableStateOf(com.cinetrack.ui.ScrollToTopState()) }
 
             LaunchedEffect(currentTab) {
-                scrollToTopState.value = com.cinetrack.ui.ScrollToTopState()
                 // previousTab = il tab in cui eravamo PRIMA di questo cambio
                 if (currentTab != _lastTab) {
+                    scrollToTopState.value = com.cinetrack.ui.ScrollToTopState()
                     previousTab = _lastTab
                     _lastTab = currentTab
                 }
@@ -210,12 +210,21 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             Box(modifier = Modifier.fillMaxSize().zIndex(-100f).graphicsLayer { }) {
                 val activeFilterConfig = remember { mutableStateOf<FilterModalConfig?>(null) }
                 val activeTrophyFilterConfig = remember { mutableStateOf<com.cinetrack.ui.TrophyFilterModalConfig?>(null) }
+                val activeTrophyDetailConfig = remember { mutableStateOf<com.cinetrack.ui.TrophyDetailModalConfig?>(null) }
                 val folderReorderRequest = remember { mutableStateOf<(() -> Unit)?>(null) }
                 val folderReorderConfig = remember { mutableStateOf<com.cinetrack.ui.FolderReorderModalConfig?>(null) }
+
+                val isTrophyDetailOpen = activeTrophyDetailConfig.value != null
+                val isBarDimmed = isSettingsDialogOpen || isTrophyDetailOpen
+                BackHandler(enabled = isTrophyDetailOpen) {
+                    activeTrophyDetailConfig.value?.onClose?.invoke()
+                }
+
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
                     LocalActiveFilterConfig provides activeFilterConfig,
                     com.cinetrack.ui.LocalActiveTrophyFilterConfig provides activeTrophyFilterConfig,
+                    com.cinetrack.ui.LocalActiveTrophyDetailConfig provides activeTrophyDetailConfig,
                     com.cinetrack.ui.LocalFolderReorderRequest provides folderReorderRequest,
                     com.cinetrack.ui.LocalFolderReorderConfig provides folderReorderConfig,
                     com.cinetrack.ui.LocalScrollToTopState provides scrollToTopState,
@@ -352,8 +361,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 GlassyTopBar(
                                     title = title,
                                     hazeState = contentHazeState,
-                                    isDimmed = isSettingsDialogOpen,
-                                    onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
+                                    isDimmed = isBarDimmed,
+                                    onDimmedAreaClick = {
+                                        if (isTrophyDetailOpen) {
+                                            activeTrophyDetailConfig.value?.onClose?.invoke()
+                                        } else {
+                                            settingsViewModel.triggerCloseDialogs()
+                                        }
+                                    },
                                     onMenuClick = null, // Menu rimosso
                                     onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is TrophyRoomTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
@@ -391,8 +406,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             MainBottomBarOverlay(
                                 currentTab = currentTab,
                                 contentHazeState = contentHazeState,
-                                isSettingsDialogOpen = isSettingsDialogOpen,
-                                onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() },
+                                isSettingsDialogOpen = isBarDimmed,
+                                onDimmedAreaClick = {
+                                    if (isTrophyDetailOpen) {
+                                        activeTrophyDetailConfig.value?.onClose?.invoke()
+                                    } else {
+                                        settingsViewModel.triggerCloseDialogs()
+                                    }
+                                },
                                 onNavigate = { routeStr ->
                                     when (routeStr) {
                                         "feed" -> tabNavigator.current = HomeFeedTab
@@ -405,6 +426,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                             MainScrollToTopFab(
                                 visible = scrollToTopState.value.isVisible && currentTab !is SettingsTab,
+                                scrollProgress = if (currentTab !is SettingsTab) scrollToTopState.value.scrollProgress else 0f,
                                 contentHazeState = contentHazeState,
                                 onScrollToTop = scrollToTopState.value.onScrollToTop
                             )

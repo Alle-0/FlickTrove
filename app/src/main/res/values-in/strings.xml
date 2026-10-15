@@ -1513,9 +1513,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">Dedikasi tanpa henti untuk sinema. Anda menonton setidaknya satu film setiap hari selama 7 hari berturut-turut.</string>
     <string name="badge_secret_cinephile_streak_hint">Bioskop yang temaram memanggil setiap hari dalam seminggu...</string>
-    <string name="badge_day_one_pioneer_title">Perintis Hening</string>
+    <string name="badge_day_one_pioneer_title">Perintis Rol Pertama</string>
     <string name="badge_day_one_pioneer_cat">PENGHARGAAN HARI PERTAMA</string>
-    <string name="badge_day_one_pioneer_desc">Termasuk penjaga pertama sinemateka FlickTrove. Hadir sejak pemutaran perdana.</string>
+    <string name="badge_day_one_pioneer_desc">Penghargaan eksklusif untuk para perintis: Anda mulai menggunakan FlickTrove selama fase awal peluncuran aplikasi.</string>
     <string name="badge_movies_title">Frekuensi 24fps</string>
     <string name="badge_movies_cat">FILM DITONTON</string>
     <string name="badge_movies_desc">Kecintaan pada layar lebar melalui format film bersejarah.</string>
@@ -1611,7 +1611,7 @@
     <string name="badge_personal_diary_desc">Anda mencatat kesan dan pemikiran intim dengan menulis 10 catatan pribadi tentang film yang ditonton.</string>
     <string name="badge_custom_backdrop_title">Penata Panggung Pribadi</string>
     <string name="badge_custom_backdrop_cat">KUSTOMISASI</string>
-    <string name="badge_custom_backdrop_desc">Anda merawat identitas pencinta film Anda dengan melengkapi latar profil Anda dengan avatar dan latar belakang sinematik.</string>
+    <string name="badge_custom_backdrop_desc">Personalisasi identitas visual Anda sepenuhnya (2/2): atur Avatar dan Latar Belakang kustom di profil Anda.</string>
 
     <string name="trophy_track_title">PROGRESI FORMAT</string>
     <string name="trophy_completed_badge">SELESAI</string>
@@ -1637,7 +1637,7 @@
     <string name="badge_colossal_desc">Anda menyelesaikan karya monumental berdurasi lebih dari 3 jam 30 menit dalam satu sesi.</string>
     <string name="badge_actor_muse_title">Aktor Favorit</string>
     <string name="badge_actor_muse_cat">PREFERENSI</string>
-    <string name="badge_actor_muse_desc">Anda memilih pemeran favorit yang sama dalam 8 check-in khusus.</string>
+    <string name="badge_actor_muse_desc">Anda memilih pemeran yang sama sebagai aktor favorit Anda di setidaknya 8 film berbeda yang telah ditonton.</string>
     <string name="badge_director_heart_title">Sutradara Favorit</string>
     <string name="badge_director_heart_cat">KEPENGARANGAN</string>
     <string name="badge_director_heart_desc">Anda mengeksplorasi visi sutradara favorit Anda dengan menyelesaikan lebih dari 8 karyanya.</string>
@@ -1704,7 +1704,7 @@
     <string name="badge_tv_desc">Dari episode pilot hingga kredit akhir musim pemungkas.</string>
     <string name="badge_tv_title">Maraton Serial</string>
     <string name="badge_veteran_club_cat">LOYALITAS</string>
-    <string name="badge_veteran_club_desc">Anggota aktif dan setia dari komunitas sinefil kami.</string>
+    <string name="badge_veteran_club_desc">Menghargai kesetiaan Anda dari waktu ke waktu: Anda telah menjadi bagian dari klub film FlickTrove dari 1 bulan hingga lebih dari 3 tahun.</string>
     <string name="badge_veteran_club_title">Kartu Klub Film</string>
     <string name="badge_vibes_cat">EMOSI</string>
     <string name="badge_vibes_desc">Dari tawa hingga air mata: abadikan perasaan Anda lewat Vibes.</string>
@@ -1790,4 +1790,19 @@
     <string name="settings_seasonal_preview_upcoming">SEGERA HADIR</string>
     <string name="settings_seasonal_preview_christmas">Natal</string>
     <string name="settings_seasonal_preview_christmas_desc">1 Des – 6 Jan</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">Pelindung Resmi FlickTrove</string>
+    <string name="trophy_producer_already_unlocked_desc">Terima kasih tulus telah percaya pada proyek ini dan mendukung pengembangan aplikasi independen.</string>
+    <string name="trophy_producer_support_intro">FlickTrove adalah aplikasi independen tanpa iklan. Anda dapat mendukung proyek ini dengan donasi sukarela melalui Ko-fi atau PayPal.</string>
+    <string name="trophy_producer_verify_section_title">Sudah berdonasi?</string>
+    <string name="trophy_producer_verify_section_desc">Masukkan email yang digunakan untuk donasi di Ko-fi atau PayPal (wajib untuk profil Tamu atau jika menggunakan email pembayaran berbeda):</string>
+    <string name="trophy_producer_email_placeholder">email.anda@contoh.com</string>
+    <string name="trophy_producer_verify_button">Verifikasi donasi</string>
+    <string name="trophy_producer_verifying">Memverifikasi…</string>
+    <string name="trophy_producer_verify_success">Donasi terkonfirmasi! Trofi Produser Eksekutif terbuka 🎉</string>
+    <string name="trophy_producer_verify_not_found">Tidak ada donasi yang ditemukan untuk email ini. Pendaftaran pembayaran mungkin memerlukan beberapa menit.</string>
+    <string name="trophy_producer_verify_invalid_email">Silakan masukkan alamat email yang valid.</string>
+    <string name="trophy_producer_verify_already_claimed">Donasi ini sudah diklaim oleh akun lain.</string>
+    <string name="trophy_producer_verify_error">Terjadi kesalahan koneksi saat memverifikasi. Silakan coba lagi sebentar lagi.</string>
 </resources>

@@ -1514,9 +1514,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">对电影坚定不移的热爱。你连续7天每天至少观看了一部电影。</string>
     <string name="badge_secret_cinephile_streak_hint">幽暗的放映厅在一周的每一天都在呼唤你...</string>
-    <string name="badge_day_one_pioneer_title">默片拓荒者</string>
+    <string name="badge_day_one_pioneer_title">第一胶卷开拓者</string>
     <string name="badge_day_one_pioneer_cat">创始首日荣誉</string>
-    <string name="badge_day_one_pioneer_desc">FlickTrove 电影资料馆最初的守护者之一。自首次放映便已入座见证。</string>
+    <string name="badge_day_one_pioneer_desc">创始成员专属荣誉：在应用程序最初的上线发布阶段便加入并使用 FlickTrove。</string>
     <string name="badge_movies_title">每秒24格频率</string>
     <string name="badge_movies_cat">观影记录</string>
     <string name="badge_movies_desc">穿梭于历史胶卷规格之中，对大银幕永不熄灭的热忱。</string>
@@ -1612,7 +1612,7 @@
     <string name="badge_personal_diary_desc">您通过对观看过的电影撰写10篇个人笔记，记录了感触与深层思考。</string>
     <string name="badge_custom_backdrop_title">私人美术指导</string>
     <string name="badge_custom_backdrop_cat">个性化装扮</string>
-    <string name="badge_custom_backdrop_desc">您通过头像和电影背景装点个人档案，打造了专属的影迷身份标识。</string>
+    <string name="badge_custom_backdrop_desc">全面打造个人专属视觉形象 (2/2)：在个人档案中同时设置自定义头像与背景图。</string>
 
     <string name="trophy_track_title">规格进阶历程</string>
     <string name="trophy_completed_badge">已完成</string>
@@ -1638,7 +1638,7 @@
     <string name="badge_colossal_desc">您在一次观影中完成了一部长达3小时30分钟以上的史诗巨作。</string>
     <string name="badge_actor_muse_title">最爱演员</string>
     <string name="badge_actor_muse_cat">偏好</string>
-    <string name="badge_actor_muse_desc">您在8次签到中选择了同一位最爱的演员。</string>
+    <string name="badge_actor_muse_desc">您在至少8部观看过的不同电影中，将同一位演员选为最爱演员。</string>
     <string name="badge_director_heart_title">最爱导演</string>
     <string name="badge_director_heart_cat">作者论</string>
     <string name="badge_director_heart_desc">您观看了最爱导演的8部以上作品，探索了其作者视野。</string>
@@ -1705,7 +1705,7 @@
     <string name="badge_tv_desc">从试播集一路追到最终季的片尾字幕。</string>
     <string name="badge_tv_title">追剧马拉松</string>
     <string name="badge_veteran_club_cat">忠实会员</string>
-    <string name="badge_veteran_club_desc">迷影俱乐部持续活跃的资深成员。</string>
+    <string name="badge_veteran_club_desc">奖励您长久以来的热忱：成为 FlickTrove 影迷俱乐部成员从1个月到超过3年以上。</string>
     <string name="badge_veteran_club_title">迷影俱乐部徽章</string>
     <string name="badge_vibes_cat">情绪标签</string>
     <string name="badge_vibes_desc">从欢笑到泪水：用Vibe捕捉光影带来的内心震撼。</string>
@@ -1791,4 +1791,19 @@
     <string name="settings_seasonal_preview_upcoming">即将到来</string>
     <string name="settings_seasonal_preview_christmas">圣诞节</string>
     <string name="settings_seasonal_preview_christmas_desc">12月1日 – 1月6日</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">FlickTrove 官方赞助人</string>
+    <string name="trophy_producer_already_unlocked_desc">衷心感谢您对本项目的信任以及对独立应用开发的大力支持。</string>
+    <string name="trophy_producer_support_intro">FlickTrove 是一款无广告的独立应用。您可以通过 Ko-fi 或 PayPal 进行自愿捐赠以支持本项目。</string>
+    <string name="trophy_producer_verify_section_title">已经完成捐赠？</string>
+    <string name="trophy_producer_verify_section_desc">请输入在 Ko-fi 或 PayPal 捐赠时填写的电子邮箱（访客模式或使用其他支付邮箱时必备）：</string>
+    <string name="trophy_producer_email_placeholder">your.email@example.com</string>
+    <string name="trophy_producer_verify_button">验证捐赠</string>
+    <string name="trophy_producer_verifying">正在验证…</string>
+    <string name="trophy_producer_verify_success">捐赠确认成功！执行制片人奖杯已解锁 🎉</string>
+    <string name="trophy_producer_verify_not_found">未找到该邮箱的捐赠记录。款项入账记录可能需要几分钟时间。</string>
+    <string name="trophy_producer_verify_invalid_email">请输入有效的电子邮箱地址。</string>
+    <string name="trophy_producer_verify_already_claimed">此赞助已被其他账号兑换。</string>
+    <string name="trophy_producer_verify_error">验证时发生网络连接错误，请稍后重试。</string>
 </resources>

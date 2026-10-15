@@ -32,6 +32,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
@@ -73,6 +74,7 @@ import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.viewmodel.RecommendationsViewModel
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
 import com.cinetrack.ui.components.recommendations.FlickMovieCard
 import com.cinetrack.ui.components.recommendations.FlickControls
 import com.cinetrack.ui.components.recommendations.FlickDeckSkeleton
@@ -159,6 +161,27 @@ fun RecommendationsScreenContent(
     
     var isFlickMode by viewModel::isFlickMode
     var topCardIndex by viewModel::topCardIndex
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        derivedStateOf {
+            !isFlickMode && (lazyGridState.firstVisibleItemIndex > 3 || (lazyGridState.firstVisibleItemIndex > 0 && lazyGridState.firstVisibleItemScrollOffset > 150))
+        }
+    }
+    LaunchedEffect(showScrollToTop, lazyGridState, isFlickMode) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { lazyGridState.fastScrollToTop() }
+            }
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+        }
+    }
     
     val endOfListReached by remember {
         derivedStateOf {

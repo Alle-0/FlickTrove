@@ -41,7 +41,13 @@ class GetVistiUiStateUseCase @Inject constructor() {
             
             val historyMap = historyList.groupBy { it.movieId }
 
-            val watchedMovies = movies.filter { it.watched }.distinctBy { "${it.id}_${it.mediaType}" }
+            val watchedMovies = movies.filter { movie ->
+                if (movie.mediaType == "tv") {
+                    movie.isTvUpToDateOrCompleted()
+                } else {
+                    movie.watched
+                }
+            }.distinctBy { "${it.id}_${it.mediaType}" }
             val movieCount = watchedMovies.count { it.mediaType != "tv" }
             val tvCount = watchedMovies.count { it.mediaType == "tv" }
             

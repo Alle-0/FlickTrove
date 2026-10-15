@@ -8,6 +8,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
@@ -16,6 +17,12 @@ import androidx.compose.material.icons.automirrored.rounded.ArrowForward
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.DisposableEffect
+import kotlinx.coroutines.launch
+import com.cinetrack.ui.utils.fastScrollToTop
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -96,6 +103,30 @@ fun NewsScreenContent(
     val context = LocalContext.current
     val (visibleItems, setVisibleItems) = remember { androidx.compose.runtime.mutableIntStateOf(5) }
 
+    val listState = rememberLazyListState()
+    val scope = rememberCoroutineScope()
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        derivedStateOf {
+            listState.firstVisibleItemIndex > 3 || (listState.firstVisibleItemIndex > 0 && listState.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    LaunchedEffect(showScrollToTop, listState) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { listState.fastScrollToTop() }
+            }
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         CinematicBackground(modifier = Modifier.fillMaxSize())
         Box(
@@ -157,6 +188,7 @@ fun NewsScreenContent(
                         }
                     } else {
                         LazyColumn(
+                            state = listState,
                             contentPadding = PaddingValues(
                                 start = 16.dp,
                                 end = 16.dp,

@@ -1445,9 +1445,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">Непоколебимая преданность кинематографу. Вы смотрели хотя бы по фильму каждый день 7 дней подряд.</string>
     <string name="badge_secret_cinephile_streak_hint">Тёмный кинозал зовёт каждый день недели...</string>
-    <string name="badge_day_one_pioneer_title">Первопроходец эпохи</string>
+    <string name="badge_day_one_pioneer_title">Первопроходец Первой Бобины</string>
     <string name="badge_day_one_pioneer_cat">ПОЧЁТ ПЕРВОГО ДНЯ</string>
-    <string name="badge_day_one_pioneer_desc">В числе первых хранителей синематеки FlickTrove. С нами с самых первых показов.</string>
+    <string name="badge_day_one_pioneer_desc">Эксклюзивная награда для первопроходцев: вы начали пользоваться FlickTrove во время начального периода запуска приложения.</string>
     <string name="badge_movies_title">Частота 24 кадра/с</string>
     <string name="badge_movies_cat">ПРОСМОТРЕННЫЕ ФИЛЬМЫ</string>
     <string name="badge_movies_desc">Страсть к большому экрану через призму исторических форматов плёнки.</string>
@@ -1543,7 +1543,7 @@
     <string name="badge_personal_diary_desc">Вы зафиксировали впечатления и сокровенные мысли, написав 10 личных заметок к просмотренным фильмам.</string>
     <string name="badge_custom_backdrop_title">Личный художник-постановщик</string>
     <string name="badge_custom_backdrop_cat">ПЕРСОНАЛИЗАЦИЯ</string>
-    <string name="badge_custom_backdrop_desc">Вы подчеркнули свою синефильскую индивидуальность, дополнив профиль аватаром и кинематографическим фоном.</string>
+    <string name="badge_custom_backdrop_desc">Полная настройка визуального профиля (2/2): установите в своём профиле и аватар, и кинематографический фон.</string>
 
     <string name="trophy_track_title">ВОСХОЖДЕНИЕ ФОРМАТОВ</string>
     <string name="trophy_completed_badge">ЗАВЕРШЕНО</string>
@@ -1569,7 +1569,7 @@
     <string name="badge_colossal_desc">Вы посмотрели монументальную работу продолжительностью более 3 часов 30 минут за один сеанс.</string>
     <string name="badge_actor_muse_title">Любимый актер</string>
     <string name="badge_actor_muse_cat">ПРЕДПОЧТЕНИЯ</string>
-    <string name="badge_actor_muse_desc">Вы выбрали одного и того же любимого исполнителя в 8 чекинах.</string>
+    <string name="badge_actor_muse_desc">Вы выбрали одного и того же исполнителя любимым актёром как минимум в 8 разных просмотренных фильмах.</string>
     <string name="badge_director_heart_title">Любимый режиссер</string>
     <string name="badge_director_heart_cat">АВТОРСТВО</string>
     <string name="badge_director_heart_desc">Вы изучили авторское видение вашего любимого режиссера, посмотрев более 8 его работ.</string>
@@ -1636,7 +1636,7 @@
     <string name="badge_tv_desc">От пилотного эпизода до финальных титров последнего сезона.</string>
     <string name="badge_tv_title">Сериальный марафонец</string>
     <string name="badge_veteran_club_cat">ПРЕДАННОСТЬ</string>
-    <string name="badge_veteran_club_desc">Активный и постоянный участник нашего киноклуба.</string>
+    <string name="badge_veteran_club_desc">Награда за преданность кино: вы состоите в киноклубе FlickTrove от 1 месяца до более чем 3 лет.</string>
     <string name="badge_veteran_club_title">Билет киноклуба</string>
     <string name="badge_vibes_cat">ЭМОЦИИ</string>
     <string name="badge_vibes_desc">От смеха до слез: фиксируйте свои кинематографические эмоции вайбами.</string>
@@ -1785,5 +1785,20 @@
     <string name="settings_seasonal_preview_upcoming">СКОРО</string>
     <string name="settings_seasonal_preview_christmas">Рождество</string>
     <string name="settings_seasonal_preview_christmas_desc">1 дек – 6 янв</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">Официальный меценат FlickTrove</string>
+    <string name="trophy_producer_already_unlocked_desc">Сердечно благодарим за веру в проект и поддержку независимой разработки приложения.</string>
+    <string name="trophy_producer_support_intro">FlickTrove — независимое приложение без рекламы. Вы можете поддержать проект добровольным пожертвованием через Ko-fi или PayPal.</string>
+    <string name="trophy_producer_verify_section_title">Уже сделали пожертвование?</string>
+    <string name="trophy_producer_verify_section_desc">Введите адрес электронной почты, использованный при пожертвовании на Ko-fi или PayPal (важно для гостей или другого email оплаты):</string>
+    <string name="trophy_producer_email_placeholder">vash.email@example.com</string>
+    <string name="trophy_producer_verify_button">Проверить пожертвование</string>
+    <string name="trophy_producer_verifying">Проверка…</string>
+    <string name="trophy_producer_verify_success">Пожертвование подтверждено! Трофей Исполнительный продюсер разблокирован 🎉</string>
+    <string name="trophy_producer_verify_not_found">Для этого адреса пожертвований не найдено. Регистрация платежа может занять пару минут.</string>
+    <string name="trophy_producer_verify_invalid_email">Пожалуйста, введите корректный адрес электронной почты.</string>
+    <string name="trophy_producer_verify_already_claimed">Это пожертвование уже активировано другим аккаунтом.</string>
+    <string name="trophy_producer_verify_error">Ошибка подключения при проверке. Пожалуйста, повторите попытку позже.</string>
 </resources>
 

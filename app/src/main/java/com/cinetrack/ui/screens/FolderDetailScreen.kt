@@ -57,6 +57,7 @@ import com.cinetrack.ui.components.shared.DeleteFolderDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.utils.fastScrollToTop
 import com.cinetrack.util.toComposeColor
 
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -156,20 +157,14 @@ fun FolderDetailScreenContent(
             lazyGridState.firstVisibleItemIndex > 3 || (lazyGridState.firstVisibleItemIndex > 0 && lazyGridState.firstVisibleItemScrollOffset > 150)
         }
     }
-    DisposableEffect(showScrollToTop, lazyGridState) {
-        if (showScrollToTop) {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
-                isVisible = true,
-                onScrollToTop = {
-                    scope.launch { lazyGridState.animateScrollToItem(0) }
-                }
-            )
-        } else {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
-        }
-        onDispose {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(isVisible = false)
-        }
+    LaunchedEffect(showScrollToTop, lazyGridState) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { lazyGridState.fastScrollToTop() }
+            }
+        )
     }
 
     val folderReorderRequest = com.cinetrack.ui.LocalFolderReorderRequest.current

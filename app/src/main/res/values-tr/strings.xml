@@ -1514,9 +1514,9 @@
     <string name="badge_secret_cinephile_streak_cat">LOST REEL #04</string>
     <string name="badge_secret_cinephile_streak_desc">Sinemaya sarsılmaz bir bağlılık. Art arda 7 gün boyunca her gün en az bir film izlediniz.</string>
     <string name="badge_secret_cinephile_streak_hint">Karanlık salon haftanın her günü sizi çağırıyor...</string>
-    <string name="badge_day_one_pioneer_title">Sessiz Öncü</string>
+    <string name="badge_day_one_pioneer_title">İlk Makara Öncüsü</string>
     <string name="badge_day_one_pioneer_cat">İLK GÜN ONURU</string>
-    <string name="badge_day_one_pioneer_desc">FlickTrove sinematek arşivinin ilk koruyucularından. İlk gösterimlerden bu yana bizimle.</string>
+    <string name="badge_day_one_pioneer_desc">Kurucular için özel onur: FlickTrove\'u uygulamanın ilk lansman döneminde kullanmaya başladınız.</string>
     <string name="badge_movies_title">24fps Frekansı</string>
     <string name="badge_movies_cat">İZLENEN FİLMLER</string>
     <string name="badge_movies_desc">Tarihi film formatları aracılığıyla beyaz perdeye duyulan tutku.</string>
@@ -1612,7 +1612,7 @@
     <string name="badge_personal_diary_desc">İzlediğiniz filmlere 10 kişisel not yazarak izlenimlerinizi ve samimi düşüncelerinizi kaydettiniz.</string>
     <string name="badge_custom_backdrop_title">Kişisel Sahne Tasarımcısı</string>
     <string name="badge_custom_backdrop_cat">ÖZELLEŞTİRME</string>
-    <string name="badge_custom_backdrop_desc">Profilinizi bir avatar ve sinematik bir arka planla tamamlayarak sinefil kimliğinizi şekillendirdiniz.</string>
+    <string name="badge_custom_backdrop_desc">Görsel kimliğinizi eksiksiz özelleştirin (2/2): Profilinizde hem özel bir Avatar hem de özel bir Arka Plan ayarlayın.</string>
 
     <string name="trophy_track_title">FORMAT İLERLEMESİ</string>
     <string name="trophy_completed_badge">TAMAMLANDI</string>
@@ -1638,7 +1638,7 @@
     <string name="badge_colossal_desc">Tek oturuşta 3 saat 30 dakikayı aşan anıtsal bir eseri tamamladınız.</string>
     <string name="badge_actor_muse_title">Favori Oyuncu</string>
     <string name="badge_actor_muse_cat">TERCİHLER</string>
-    <string name="badge_actor_muse_desc">8 özel check-in\'de aynı favori oyuncuyu seçtiniz.</string>
+    <string name="badge_actor_muse_desc">İzlediğiniz en az 8 farklı filmde aynı oyuncuyu favori oyuncunuz olarak seçtiniz.</string>
     <string name="badge_director_heart_title">Gönüllerin Yönetmeni</string>
     <string name="badge_director_heart_cat">YÖNETMENLİK</string>
     <string name="badge_director_heart_desc">Favori yönetmeninizin 8\'den fazla eserini tamamlayarak onun vizyonunu keşfettiniz.</string>
@@ -1705,7 +1705,7 @@
     <string name="badge_tv_desc">Pilot bölümden final sezonunun kapanış jeneriğine kadar.</string>
     <string name="badge_tv_title">Dizi Maratoncusu</string>
     <string name="badge_veteran_club_cat">SADAKAT</string>
-    <string name="badge_veteran_club_desc">Sinekulübün aktif ve sadık bir üyesisiniz.</string>
+    <string name="badge_veteran_club_desc">Zaman içindeki bağlılığınızı ödüllendirir: 1 aydan 3 yılı aşkın süreye kadar FlickTrove sinekulübünün bir parçasısınız.</string>
     <string name="badge_veteran_club_title">Sinekulüp Kartı</string>
     <string name="badge_vibes_cat">DUYGULAR</string>
     <string name="badge_vibes_desc">Kahkahadan gözyaşına: sinema hislerinizi Vibe\'lar ile ölümsüzleştirdiniz.</string>
@@ -1791,4 +1791,19 @@
     <string name="settings_seasonal_preview_upcoming">YAKINDA</string>
     <string name="settings_seasonal_preview_christmas">Yılbaşı</string>
     <string name="settings_seasonal_preview_christmas_desc">1 Ara – 6 Oca</string>
+
+    <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
+    <string name="trophy_producer_already_unlocked_title">Resmi FlickTrove Destekçisi</string>
+    <string name="trophy_producer_already_unlocked_desc">Projeye inandığınız ve uygulamanın bağımsız gelişimini desteklediğiniz için yürekten teşekkür ederiz.</string>
+    <string name="trophy_producer_support_intro">FlickTrove bağımsız ve reklamsız bir uygulamadır. Projeyi Ko-fi veya PayPal üzerinden gönüllü bir bağışla destekleyebilirsiniz.</string>
+    <string name="trophy_producer_verify_section_title">Zaten bağış yaptınız mı?</string>
+    <string name="trophy_producer_verify_section_desc">Ko-fi veya PayPal bağışınızda kullandığınız e-posta adresini girin (Misafir profilleri veya farklı ödeme e-postaları için gereklidir):</string>
+    <string name="trophy_producer_email_placeholder">ornek.eposta@ornek.com</string>
+    <string name="trophy_producer_verify_button">Bağışı doğrula</string>
+    <string name="trophy_producer_verifying">Doğrulanıyor…</string>
+    <string name="trophy_producer_verify_success">Bağış onaylandı! Sorumlu Yapımcı kupası açıldı 🎉</string>
+    <string name="trophy_producer_verify_not_found">Bu e-posta adresi için bağış bulunamadı. Ödemenin sisteme yansıması birkaç dakika sürebilir.</string>
+    <string name="trophy_producer_verify_invalid_email">Lütfen geçerli bir e-posta adresi girin.</string>
+    <string name="trophy_producer_verify_already_claimed">Bu bağış zaten başka bir hesap tarafından talep edilmiş.</string>
+    <string name="trophy_producer_verify_error">Doğrulama sırasında bağlantı hatası oluştu. Lütfen birazdan tekrar deneyin.</string>
 </resources>

@@ -290,12 +290,6 @@ object AccountTab : Tab {
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(480.dp)
-                        .clickable(
-                            indication = null,
-                            interactionSource = remember { MutableInteractionSource() }
-                        ) {
-                            settingsViewModel.triggerEditProfileMenu()
-                        }
                 ) {
                     if (avatarBackdrop != null) {
                         val imageUrl = buildTmdbImageUrl(avatarBackdrop!!, ImageType.BACKDROP, currentImageQuality)
@@ -337,17 +331,11 @@ object AccountTab : Tab {
                             .verticalScroll(rememberScrollState())
                             .padding(bottom = paddingValues.calculateBottomPadding() + 80.dp)
                     ) {
-                    // Top Spacer for Status Bar & padding + GlassyTopBar clearance (tappable to trigger profile customization)
+                    // Top Spacer for Status Bar & padding + GlassyTopBar clearance
                     Spacer(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp)
-                            .clickable(
-                                indication = null,
-                                interactionSource = remember { MutableInteractionSource() }
-                            ) {
-                                settingsViewModel.triggerEditProfileMenu()
-                            }
                     )
                     
                     // Capture delegated props into local vals (needed by name pill + dashboard cards)

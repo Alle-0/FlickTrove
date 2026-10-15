@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.glass
 
+import androidx.compose.foundation.layout.displayCutoutPadding
+import androidx.compose.foundation.layout.imePadding
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.EnterExitState
 import androidx.compose.animation.core.animateFloat
@@ -61,8 +65,7 @@ fun GlassmorphicModal(
                 .then(
                     if (dimBackground) Modifier.background(Color.Black.copy(alpha = scrimAlpha * alpha))
                     else Modifier
-                ),
-            contentAlignment = Alignment.Center
+                )
         ) {
             if (onDismissRequest != null && dismissOnClickOutside) {
                 Box(
@@ -79,23 +82,33 @@ fun GlassmorphicModal(
 
             Box(
                 modifier = Modifier
-                    .widthIn(max = 400.dp)
-                    .fillMaxWidth(0.9f)
-                    .clip(RoundedCornerShape(32.dp))
-                    .hazeGlass(
-                        state = activeHazeState,
-                        alpha = alpha,
-                        shape = RoundedCornerShape(32.dp),
-                        style = style
-                    )
-                    .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
-                    .pointerInput(Unit) { 
-                        detectTapGestures {
-                            focusManager.clearFocus()
-                        } 
-                    }
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .displayCutoutPadding()
+                    .imePadding()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
             ) {
-                content(alpha)
+                Box(
+                    modifier = Modifier
+                        .widthIn(max = 400.dp)
+                        .fillMaxWidth(0.9f)
+                        .clip(RoundedCornerShape(32.dp))
+                        .hazeGlass(
+                            state = activeHazeState,
+                            alpha = alpha,
+                            shape = RoundedCornerShape(32.dp),
+                            style = style
+                        )
+                        .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
+                        .pointerInput(Unit) { 
+                            detectTapGestures {
+                                focusManager.clearFocus()
+                            } 
+                        }
+                ) {
+                    content(alpha)
+                }
             }
         }
     }

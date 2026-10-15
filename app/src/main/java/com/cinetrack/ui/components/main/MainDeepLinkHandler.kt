@@ -102,6 +102,8 @@ fun MainDeepLinkHandler(
                 DiscoverTab.requestedType = reqType
                 tabNavigator.current = DiscoverTab
             } else if (action == "com.cinetrack.OPEN_TROPHY_ROOM") {
+                val targetBadgeId = intent.getStringExtra("targetBadgeId")
+                TrophyRoomTab.targetBadgeId = targetBadgeId
                 tabNavigator.current = TrophyRoomTab
             } else if (action == "com.cinetrack.FLICKTROVE_SOCIAL_NOTIFICATION") {
                 val mediaId = intent.getStringExtra("mediaId")?.toLongOrNull()
