@@ -90,7 +90,6 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
 import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.utils.fastScrollToTop
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.viewmodel.HomeViewModel
 import com.cinetrack.util.ImageQuality
@@ -196,27 +195,6 @@ fun HomeFeedScreenContent(
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
     val activeHazeState = hazeState ?: remember { HazeState() }
     val surpriseMeRequest = com.cinetrack.ui.LocalSurpriseMeRequest.current
-
-    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
-    val showScrollToTop by remember {
-        androidx.compose.runtime.derivedStateOf {
-            viewModel.feedListState.firstVisibleItemIndex > 3 || (viewModel.feedListState.firstVisibleItemIndex > 0 && viewModel.feedListState.firstVisibleItemScrollOffset > 150)
-        }
-    }
-    LaunchedEffect(showScrollToTop, viewModel.feedListState) {
-        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
-            isVisible = showScrollToTop,
-            scrollProgress = if (showScrollToTop) 1f else 0f,
-            onScrollToTop = {
-                scope.launch { viewModel.feedListState.fastScrollToTop() }
-            }
-        )
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
-        }
-    }
 
     val isTv = uiState.activeTab == "tv"
     

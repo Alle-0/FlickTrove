@@ -86,11 +86,9 @@ import androidx.compose.ui.res.painterResource
 import com.google.firebase.auth.FirebaseAuth
 import com.cinetrack.data.repository.BadgeRepository
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.utils.fastScrollToTop
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.dialog.DirectionChip
@@ -1455,28 +1453,6 @@ fun TrophyRoomScreenContent(
 ) {
     val localHaze = hazeState ?: remember { HazeState() }
     val gridState = rememberLazyGridState()
-    val scope = rememberCoroutineScope()
-
-    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
-    val showScrollToTop by remember {
-        derivedStateOf {
-            gridState.firstVisibleItemIndex > 3 || (gridState.firstVisibleItemIndex > 0 && gridState.firstVisibleItemScrollOffset > 150)
-        }
-    }
-    LaunchedEffect(showScrollToTop, gridState) {
-        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
-            isVisible = showScrollToTop,
-            scrollProgress = if (showScrollToTop) 1f else 0f,
-            onScrollToTop = {
-                scope.launch { gridState.fastScrollToTop() }
-            }
-        )
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
-        }
-    }
 
     var filterConfig by remember { mutableStateOf(TrophyFilterConfig()) }
     var filterTriggerBounds by remember { mutableStateOf<Rect?>(null) }
