@@ -158,211 +158,25 @@ fun SearchHeader(
                     )
                 }
                 Spacer(modifier = Modifier.width(12.dp))
-                Box(
-                    modifier = Modifier
-                        .weight(1f)
-                        .height(44.dp)
-                        .clip(CircleShape)
-                        .clickable(
-                            interactionSource = remember { MutableInteractionSource() },
-                            indication = null,
-                            onClick = {
-                                try {
-                                    focusRequester.requestFocus()
-                                } catch (_: Exception) {}
-                                keyboardController?.show()
-                            }
-                        ),
-                    contentAlignment = Alignment.CenterStart
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(start = 14.dp, end = 2.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
-                            contentDescription = stringResource(R.string.search_content_desc),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
-                            modifier = Modifier.size(20.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        val primaryColor = MaterialTheme.colorScheme.primary
-                        CompositionLocalProvider(
-                            LocalTextSelectionColors provides TextSelectionColors(
-                                handleColor = primaryColor,
-                                backgroundColor = primaryColor.copy(alpha = 0.4f)
-                            )
-                        ) {
-                            BasicTextField(
-                                value = textFieldValue,
-                                onValueChange = {
-                                    onTextFieldValueChange(it)
-                                    onQueryChanged(it.text)
-                                },
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .focusRequester(focusRequester),
-                                textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp),
-                                cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
-                                singleLine = true,
-                                keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                                keyboardActions = KeyboardActions(onSearch = { onQueryChanged(query) }),
-                                decorationBox = { innerTextField ->
-                                    Box(contentAlignment = Alignment.CenterStart) {
-                                        if (query.isEmpty()) {
-                                            val placeholderText = when {
-                                                sortConfig.selectedGenres.isNotEmpty() -> {
-                                                    val gid = sortConfig.selectedGenres.first()
-                                                    val name = suggestedFilters.find { it.id == gid && !it.isKeyword }?.name
-                                                        ?: initialGenreName
-                                                        ?: stringResource(R.string.search_fallback_genre)
-                                                    stringResource(R.string.search_active_genre_format, name)
-                                                }
-                                                sortConfig.selectedKeywords.isNotEmpty() -> {
-                                                    val kid = sortConfig.selectedKeywords.first()
-                                                    val dictName = KeywordDictionary.getLocalizedKeywordName(kid, preferences.contentLanguage)
-                                                        ?.replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.getDefault()) else it.toString() }
-                                                    val name = suggestedFilters.find { it.id == kid }?.name
-                                                        ?: dictName
-                                                        ?: initialKeywordName
-                                                        ?: stringResource(R.string.search_fallback_keyword)
-                                                    stringResource(R.string.search_active_keyword_format, name)
-                                                }
-                                                else -> when (category) {
-                                                    "tv" -> stringResource(R.string.search_placeholder_tv)
-                                                    "person" -> stringResource(R.string.search_placeholder_person)
-                                                    "collection" -> stringResource(R.string.search_placeholder_collection)
-                                                    else -> stringResource(R.string.search_placeholder_movie)
-                                                }
-                                            }
-                                            val hasActiveFilter = sortConfig.selectedGenres.isNotEmpty() || sortConfig.selectedKeywords.isNotEmpty()
-                                            Text(
-                                                text = placeholderText,
-                                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f),
-                                                fontSize = 14.sp,
-                                                maxLines = 1,
-                                                overflow = TextOverflow.Ellipsis
-                                            )
-                                        }
-                                        innerTextField()
-                                    }
-                                }
-                            )
-                        }
-                        if (query.isNotEmpty()) {
-                            Box(
-                                modifier = Modifier
-                                    .size(40.dp)
-                                    .bounceClick(scaleDown = 0.82f) {
-                                        onTextFieldValueChange(TextFieldValue(""))
-                                        onClearQuery()
-                                        focusRequester.requestFocus()
-                                        keyboardController?.show()
-                                    }
-                                    .clip(CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                    contentDescription = stringResource(R.string.search_content_desc_clear),
-                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
-                        } else {
-                            Spacer(modifier = Modifier.width(12.dp))
-                        }
-                    }
-                }
-                AnimatedVisibility(
-                    visible = category != "person" && category != "collection",
-                    enter = expandHorizontally(
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessMediumLow
-                        ),
-                        expandFrom = Alignment.End
-                    ) + fadeIn(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)),
-                    exit = shrinkHorizontally(
-                        animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioNoBouncy,
-                            stiffness = Spring.StiffnessMediumLow
-                        ),
-                        shrinkTowards = Alignment.End
-                    ) + fadeOut(animationSpec = spring(stiffness = Spring.StiffnessMediumLow))
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Spacer(modifier = Modifier.width(12.dp))
-                        val hasActiveFilters = sortConfig.selectedGenres.isNotEmpty() ||
-                                sortConfig.selectedKeywords.isNotEmpty() ||
-                                sortConfig.selectedProviders.isNotEmpty() ||
-                                sortConfig.selectedDecades.isNotEmpty() ||
-                                sortConfig.sortType != "popularity"
-
-                        if (preferences.showLayoutToggle) {
-                            Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .bounceClick(scaleDown = 0.92f) {
-                                        val nextColumns = nextGridColumns(preferences.gridColumns)
-                                        onLayoutToggleClick(nextColumns)
-                                    }
-                                    .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = layoutToggleIcon(preferences.gridColumns),
-                                    contentDescription = stringResource(R.string.search_content_desc_layout),
-                                    tint = MaterialTheme.colorScheme.onSurface,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(12.dp))
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .onGloballyPositioned { layoutCoordinates ->
-                                    val position = layoutCoordinates.positionInWindow()
-                                    onFilterBoundsMeasured(
-                                        Rect(
-                                            position.x,
-                                            position.y,
-                                            position.x + layoutCoordinates.size.width,
-                                            position.y + layoutCoordinates.size.height
-                                        )
-                                    )
-                                }
-                                .bounceClick {
-                                    keyboardController?.hide()
-                                    onFilterClick()
-                                }
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape)
-                                .then(
-                                    if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), CircleShape)
-                                    else Modifier
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                                contentDescription = stringResource(R.string.folder_detail_filters),
-                                tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                    }
-                }
+                SymbiontSearchBarWithFilters(
+                    query = query,
+                    category = category,
+                    sortConfig = sortConfig,
+                    preferences = preferences,
+                    suggestedFilters = suggestedFilters,
+                    initialGenreName = initialGenreName,
+                    initialKeywordName = initialKeywordName,
+                    textFieldValue = textFieldValue,
+                    onTextFieldValueChange = onTextFieldValueChange,
+                    onQueryChanged = onQueryChanged,
+                    onClearQuery = onClearQuery,
+                    onLayoutToggleClick = onLayoutToggleClick,
+                    onFilterClick = onFilterClick,
+                    focusRequester = focusRequester,
+                    keyboardController = keyboardController,
+                    onFilterBoundsMeasured = onFilterBoundsMeasured,
+                    modifier = Modifier.weight(1f)
+                )
             }
 
             if (sortConfig.selectedKeywords.isNotEmpty()) {
