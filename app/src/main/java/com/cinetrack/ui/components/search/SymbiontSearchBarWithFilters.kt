@@ -44,8 +44,12 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -236,21 +240,53 @@ fun SymbiontSearchBarWithFilters(
         // Posizione della calotta destra della barra
         val xLeftCapPx = searchBarWidthPx - rCapPx
 
-        // Disegno del ponte liquido e metaball quando connesso (0.02 < p < 0.68)
-        if (!isDetached && p > 0.02f) {
-            val t = (p / 0.68f).coerceIn(0f, 1f)
+        val onSurfaceColor = MaterialTheme.colorScheme.onSurface
 
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                // Il centro della goccia emerge dal bordo destro della barra e viaggia verso la posizione di riposo
+        // --- LAYER UNIFICATO SFONDO SIMBIONTE (CompositingStrategy.Offscreen per Zero Sovrapposizione Alpha) ---
+        Canvas(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer(
+                    compositingStrategy = CompositingStrategy.Offscreen,
+                    alpha = 0.05f
+                )
+        ) {
+            // 1. Sfondo base della barra di ricerca a capsula (onSurface solido ad alpha 1.0)
+            drawRoundRect(
+                color = onSurfaceColor,
+                topLeft = Offset.Zero,
+                size = Size(searchBarWidthPx, heightPx),
+                cornerRadius = CornerRadius(cy, cy)
+            )
+
+            // 2. Rinculo del filamento subito dopo lo snap elastico (da 6dp a 0dp in 130ms)
+            if (isDetached && filamentRecoil > 0.01f) {
+                val recoilLen = with(density) { 6.dp.toPx() } * filamentRecoil
+                val nubPath = Path().apply {
+                    moveTo(xLeftCapPx, cy - rCapPx * 0.4f * filamentRecoil)
+                    cubicTo(
+                        x1 = xLeftCapPx + rCapPx * 0.8f, y1 = cy - rCapPx * 0.2f * filamentRecoil,
+                        x2 = xLeftCapPx + rCapPx + recoilLen, y2 = cy,
+                        x3 = xLeftCapPx + rCapPx + recoilLen, y3 = cy
+                    )
+                    cubicTo(
+                        x1 = xLeftCapPx + rCapPx + recoilLen, y1 = cy,
+                        x2 = xLeftCapPx + rCapPx * 0.8f, y2 = cy + rCapPx * 0.2f * filamentRecoil,
+                        x3 = xLeftCapPx, y3 = cy + rCapPx * 0.4f * filamentRecoil
+                    )
+                    close()
+                }
+                drawPath(nubPath, color = onSurfaceColor)
+            }
+
+            // 3. Ponte liquido viscoelastico e goccia emergente durante la connessione simbiotica (0.02 < p < 0.68)
+            if (!isDetached && p > 0.02f) {
+                val t = (p / 0.68f).coerceIn(0f, 1f)
                 val startDropX = xLeftCapPx + rCapPx
                 val xDrop = startDropX + (restBtnCenterPx - startDropX) * t
-                // Raggio della goccia in sboccio: germoglia da 4dp fino a 22dp (pieno raggio)
                 val rDrop = (with(density) { 4.dp.toPx() } + (rCapPx - with(density) { 4.dp.toPx() }) * t).coerceAtLeast(1f)
 
-                // Base di attacco sul lato destro della barra
                 val yBase = rCapPx * (1f - 0.25f * t)
-
-                // Strozzatura del punto vita (waist) durante lo stiro del filamento
                 val waistHalfHeight = (yBase.coerceAtMost(rDrop) * (1f - 0.72f * t))
                     .coerceAtLeast(with(density) { 1.5.dp.toPx() })
 
@@ -259,24 +295,18 @@ fun SymbiontSearchBarWithFilters(
                 val c1YTop = cy - waistHalfHeight * 1.15f
                 val c1YBot = cy + waistHalfHeight * 1.15f
 
-                // Pointedness conica della goccia durante l'allungamento
                 val pointedness = 0.3f + 0.9f * t
                 val c2X = (xDrop - rDrop * pointedness).coerceAtLeast(c1X + distX * 0.1f)
                 val c2YTop = cy - rDrop
                 val c2YBot = cy + rDrop
 
                 val bridgePath = Path().apply {
-                    // 1. Apice superiore della calotta destra della barra
                     moveTo(xLeftCapPx, cy - yBase)
-
-                    // 2. Ponte superiore verso la sommità della goccia
                     cubicTo(
                         x1 = c1X, y1 = c1YTop,
                         x2 = c2X, y2 = c2YTop,
                         x3 = xDrop, y3 = cy - rDrop
                     )
-
-                    // 3. Calotta circolare destra della goccia (arco di 180 gradi da ore 12 a ore 6)
                     arcTo(
                         rect = Rect(
                             left = xDrop - rDrop,
@@ -288,35 +318,23 @@ fun SymbiontSearchBarWithFilters(
                         sweepAngleDegrees = 180f,
                         forceMoveTo = false
                     )
-
-                    // 4. Ponte inferiore di ritorno verso il fondo della barra
                     cubicTo(
                         x1 = c2X, y1 = c2YBot,
                         x2 = c1X, y2 = c1YBot,
                         x3 = xLeftCapPx, y3 = cy + yBase
                     )
-
-                    // 5. Chiusura del profilo
                     lineTo(xLeftCapPx, cy - yBase)
                     close()
                 }
 
-                drawPath(bridgePath, color = symbioteColor)
-
-                // Bordo accentuato della gemma durante l'allungamento se ci sono filtri attivi
-                if (hasActiveFilters) {
-                    val borderAlpha = ((p - 0.40f) / 0.28f).coerceIn(0f, 1f) * 0.45f
-                    drawCircle(
-                        color = Color(0xFFE50914).copy(alpha = borderAlpha), // o MaterialTheme primary
-                        radius = rDrop,
-                        center = androidx.compose.ui.geometry.Offset(xDrop, cy),
-                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = with(density) { 1.5.dp.toPx() })
-                    )
-                }
+                // Disegno con onSurface solido: dove il ponte si innesta nella calotta della barra,
+                // la fusione è al 100% solida nel buffer e viene scalata globalmente a 0.05f alpha
+                // eliminando alla radice qualsiasi regione più chiara o bordo interno.
+                drawPath(bridgePath, color = onSurfaceColor)
             }
         }
 
-        // --- BARRA DI RICERCA (Capsula elastica) ---
+        // --- BARRA DI RICERCA (Capsula elastica con contenuti) ---
         Box(
             modifier = Modifier
                 .width(searchBarWidth)
@@ -334,12 +352,6 @@ fun SymbiontSearchBarWithFilters(
                 ),
             contentAlignment = Alignment.CenterStart
         ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(symbioteColor, CircleShape)
-            )
-
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
@@ -443,9 +455,13 @@ fun SymbiontSearchBarWithFilters(
             }
         }
 
-        // --- ICONA FILTRI D'INTERA FORMA (A distacco avvenuto p >= 0.68) ---
-        if (p > 0.35f) {
-            val buttonsAlpha = if (isDetached) 1f else ((p - 0.35f) / 0.33f).coerceIn(0f, 1f)
+        // --- CONTROLLI E ICONE DEI FILTRI (Visibili a distacco avvenuto p >= 0.68) ---
+        if (isDetached || (p > 0.65f && filtersVisible)) {
+            val buttonsAlpha = if (isDetached) {
+                if (!filtersVisible) ((p - 0.68f) / 0.25f).coerceIn(0f, 1f) else 1f
+            } else {
+                ((p - 0.65f) / 0.03f).coerceIn(0f, 1f)
+            }
 
             Row(
                 modifier = Modifier
