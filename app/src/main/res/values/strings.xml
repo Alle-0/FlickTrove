@@ -823,6 +823,9 @@
     <string name="detail_collection">COLLECTION</string>
     <string name="detail_recommendations">RECOMMENDED</string>
     <string name="detail_technical_info">TECHNICAL DETAILS</string>
+    <string name="detail_rated_all_ages_note">This title is suitable for all audiences with no specific parental warnings.</string>
+    <string name="detail_btn_tech_specs">Technical details</string>
+    <string name="detail_btn_parents_guide">Parents guide</string>
     <string name="detail_official_trailers">OFFICIAL TRAILERS</string>
     <string name="detail_official_trailer">OFFICIAL TRAILER</string>
     <string name="detail_video_title_teaser">TEASERS &amp; PROMOS</string>

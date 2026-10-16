@@ -31,6 +31,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Shape
@@ -254,7 +255,8 @@ fun MovieDetailScreenContent(
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
     val autoOpenVibeOnWatch by settingsViewModel.autoOpenVibeOnWatch.collectAsStateWithLifecycle()
     var showWatchDatePrompt by remember { mutableStateOf(false) }
-    var parentsGuideYOffset by remember(movieId) { mutableStateOf<Float?>(null) }
+    var showTrailerModal by remember { mutableStateOf(false) }
+    var trailerTriggerBounds by remember { mutableStateOf<Rect?>(null) }
 
     var hasCompletedFirstEnter by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     LaunchedEffect(Unit) {
@@ -276,6 +278,8 @@ fun MovieDetailScreenContent(
             showEpisodesSheet = false
         } else if (showCoverSelectionSheet) {
             showCoverSelectionSheet = false
+        } else if (showTrailerModal) {
+            showTrailerModal = false
         } else {
             onBackClick()
         }
@@ -423,8 +427,6 @@ fun MovieDetailScreenContent(
     if (uiState is DetailUiState.Success) {
         cachedSuccess = uiState as DetailUiState.Success
     }
-    var trailersMenuData by remember { mutableStateOf<com.cinetrack.ui.components.detail.TrailersMenuModalData?>(null) }
-    var trailersYOffset by remember { mutableFloatStateOf(0f) }
 
     Box(modifier = Modifier.fillMaxSize()) {
         MovieActionsWrapper(
@@ -496,7 +498,7 @@ fun MovieDetailScreenContent(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .haze(localHazeState, style = HazeStyles.PremiumDark)
-                                    .verticalScroll(scrollState, enabled = trailersMenuData == null)
+                                    .verticalScroll(scrollState)
                             ) {
                                 Box(modifier = Modifier.fillMaxWidth()) {
                                     DetailBackdrop(
@@ -523,8 +525,17 @@ fun MovieDetailScreenContent(
                                         .offset(y = (-140).dp)
                                         .padding(bottom = paddingValues.calculateBottomPadding() + 60.dp)
                                  ) {
+                                    val effectiveVideos = remember(state.videos, state.trailers) {
+                                        if (state.videos.isNotEmpty()) {
+                                            state.videos.filter { it.site == "YouTube" || it.site == "Vimeo" }
+                                        } else {
+                                            state.trailers.map { com.cinetrack.data.api.Video(key = it, site = "YouTube", type = "Trailer", name = "Trailer") }
+                                        }
+                                    }
+
                                     DetailHeader(
                                         movie = activeMovie,
+                                        movieDetails = state.details,
                                         ratings = state.externalRatings,
                                         accentColor = accentColor,
                                         matchPercentage = state.matchPercentage,
@@ -540,8 +551,11 @@ fun MovieDetailScreenContent(
                                         onRatingClick = { showRatingInfoDialog = true },
                                         hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
                                         onCoverSelectClick = { showCoverSelectionSheet = true },
-                                        onTrailerClick = if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
-                                            { scope.launch { scrollState.animateScrollTo(trailersYOffset.toInt()) } }
+                                        onTrailerClick = if (effectiveVideos.isNotEmpty()) {
+                                            { bounds ->
+                                                trailerTriggerBounds = bounds
+                                                showTrailerModal = true
+                                            }
                                         } else null,
                                         isOffline = isOffline,
                                         movieStatus = state.details.status ?: activeMovie.status
@@ -676,49 +690,6 @@ fun MovieDetailScreenContent(
                                     )
 
                                     Spacer(modifier = Modifier.height(40.dp))
-
-                                    DetailTechnicalInfo(
-                                        details = state.details,
-                                        accentColor = accentColor
-                                    )
-
-                                    val cert = state.externalRatings.certification
-                                    val country = state.externalRatings.certificationCountry
-                                    val hasParentsGuide = remember(cert, country) {
-                                        ParentsGuideResolver.resolve(cert, country) != null
-                                    }
-                                    if (hasParentsGuide) {
-                                        Spacer(modifier = Modifier.height(56.dp))
-                                        DetailParentsGuide(
-                                            certification = cert,
-                                            countryCode = country,
-                                            accentColor = accentColor,
-                                            modifier = Modifier.onGloballyPositioned { coordinates ->
-                                                parentsGuideYOffset = coordinates.positionInParent().y
-                                            }
-                                        )
-                                        Spacer(modifier = Modifier.height(56.dp))
-                                    } else {
-                                        Spacer(modifier = Modifier.height(48.dp))
-                                    }
-
-                                    if (state.videos.isNotEmpty() || state.trailers.isNotEmpty()) {
-                                        DetailTrailers(
-                                            modifier = Modifier.onGloballyPositioned { coordinates ->
-                                                trailersYOffset = coordinates.positionInParent().y
-                                            },
-                                            videos = state.videos,
-                                            trailers = state.trailers,
-                                            accentColor = accentColor,
-                                            hazeState = localHazeState,
-                                            isMenuOpen = trailersMenuData != null,
-                                            onMenuOpenChange = { if (!it) trailersMenuData = null },
-                                            onOpenCategoryMenu = { data ->
-                                                trailersMenuData = data
-                                            }
-                                        )
-                                        Spacer(modifier = Modifier.height(48.dp))
-                                    }
 
                                     DetailRecommendations(
                                         collection = state.details.belongsToCollection,
@@ -876,15 +847,7 @@ fun MovieDetailScreenContent(
         hazeState = rootHazeState,
         countryCode = currentRatings?.certificationCountry ?: "US",
         isTv = isTvShow,
-        onViewGuideClick = if (hasParentsGuide) {
-            {
-                scope.launch {
-                    parentsGuideYOffset?.let {
-                        scrollState.animateScrollTo(it.toInt())
-                    }
-                }
-            }
-        } else null
+        onViewGuideClick = null
     )
     // Translation Prompt Dialog
     DetailTranslationPromptModal(
@@ -910,11 +873,26 @@ fun MovieDetailScreenContent(
         }
     )
 
-    com.cinetrack.ui.components.detail.DetailTrailersMenuModal(
-        data = trailersMenuData,
-        accentColor = globalAccentColor,
-        hazeState = rootHazeState,
-        onDismiss = { trailersMenuData = null }
-    )
+    if (showTrailerModal && cachedSuccess != null) {
+        val modalVideos = remember(cachedSuccess?.videos, cachedSuccess?.trailers) {
+            val vids = cachedSuccess?.videos ?: emptyList()
+            if (vids.isNotEmpty()) {
+                vids.filter { it.site == "YouTube" || it.site == "Vimeo" }
+            } else {
+                (cachedSuccess?.trailers ?: emptyList()).map { 
+                    com.cinetrack.data.api.Video(key = it, site = "YouTube", type = "Trailer", name = "Trailer") 
+                }
+            }
+        }
+        if (modalVideos.isNotEmpty()) {
+            com.cinetrack.ui.components.detail.DetailTrailerModal(
+                videos = modalVideos,
+                accentColor = globalAccentColor,
+                hazeState = rootHazeState,
+                triggerBounds = trailerTriggerBounds,
+                onDismiss = { showTrailerModal = false }
+            )
+        }
+    }
     } // end root Box
 }

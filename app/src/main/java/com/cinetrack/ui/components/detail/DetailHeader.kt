@@ -14,6 +14,10 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.basicMarquee
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.ui.draw.clipToBounds
+import kotlin.math.roundToInt
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material3.*
@@ -22,12 +26,15 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.BlendMode
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.onSizeChanged
@@ -57,11 +64,66 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.LocalAdvancedVisualEffects
+import com.cinetrack.data.api.MovieDetailResponse
+import java.text.DecimalFormat
+import java.text.DecimalFormatSymbols
+import java.util.Locale
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.ui.text.style.TextOverflow
+
+enum class DetailHeaderExpandedSection {
+    NONE,
+    RATINGS,
+    PARENTS_GUIDE,
+    TECHNICAL
+}
+
+private data class HeaderRatingInfo(
+    val code: String,
+    val labelRes: Int,
+    val descriptionRes: Int,
+    val color: Color
+)
+
+private fun getCertificationColor(cleanCert: String): Color {
+    return when (cleanCert) {
+        in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") -> Color(0xFF4CAF50)
+        in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+", "UA") -> Color(0xFF8BC34A)
+        in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM14", "15") -> Color(0xFFFF9800)
+        in listOf("R", "TV-MA", "16", "16+", "FSK 16", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> Color(0xFFF44336)
+        else -> Color.White
+    }
+}
+
+private fun resolveHeaderRatingInfo(certification: String?): HeaderRatingInfo {
+    if (certification.isNullOrBlank()) {
+        return HeaderRatingInfo("NR", R.string.rated_guide_title, R.string.rated_guide_help, Color.White)
+    }
+    val clean = certification.trim().uppercase(Locale.ROOT)
+    return when {
+        clean in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") ->
+            HeaderRatingInfo(certification, R.string.rating_g_label, R.string.rating_g_desc, Color(0xFF4CAF50))
+        clean in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+", "UA") ->
+            HeaderRatingInfo(certification, R.string.rating_pg_label, R.string.rating_pg_desc, Color(0xFF8BC34A))
+        clean in listOf("PG-13", "PG12", "PG-12", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM14", "15") ->
+            HeaderRatingInfo(certification, R.string.rating_pg13_label, R.string.rating_pg13_desc, Color(0xFFFF9800))
+        clean in listOf("TV-14") ->
+            HeaderRatingInfo(certification, R.string.rating_tv14_label, R.string.rating_tv14_desc, Color(0xFFFF7043))
+        clean in listOf("TV-MA") ->
+            HeaderRatingInfo(certification, R.string.rating_tvma_label, R.string.rating_tvma_desc, Color(0xFFD32F2F))
+        clean in listOf("NC-17", "18", "18+", "19", "21+", "VM18", "FSK 18") ->
+            HeaderRatingInfo(certification, R.string.rating_nc17_label, R.string.rating_nc17_desc, Color(0xFFB71C1C))
+        clean in listOf("R", "16", "16+", "FSK 16", "17+", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") ->
+            HeaderRatingInfo(certification, R.string.rating_r_label, R.string.rating_r_desc, Color(0xFFF44336))
+        else ->
+            HeaderRatingInfo(certification, R.string.rated_guide_title, R.string.rated_guide_help, Color.White)
+    }
+}
 
 /**
  * DetailHeader
- * Fused Container with TMDB rating that expands to show extra ratings.
- * Features 120fps morphing animations via manual float interpolation.
+ * Fused Container with TMDB rating, dynamic age rating, and technical specifications
+ * that smoothly expand into dedicated inspection zones.
  */
 @OptIn(ExperimentalSharedTransitionApi::class)
 @Composable
@@ -69,6 +131,7 @@ fun DetailHeader(
     movie: Movie,
     ratings: ExternalRatings,
     accentColor: Color,
+    movieDetails: MovieDetailResponse? = null,
     matchPercentage: Int? = null,
     logoPath: String? = null,
     hazeState: HazeState? = null,
@@ -77,37 +140,66 @@ fun DetailHeader(
     onRatingClick: () -> Unit = {},
     hasAlternativeCovers: Boolean = false,
     onCoverSelectClick: (() -> Unit)? = null,
-    onTrailerClick: (() -> Unit)? = null,
+    onTrailerClick: ((Rect?) -> Unit)? = null,
     isOffline: Boolean = false,
     movieStatus: String? = null,
     modifier: Modifier = Modifier
 ) {
-    var isExpanded by remember { mutableStateOf(false) }
-    
-    // Manual float interpolation for "surgical" control over physics (0.0 to 1.0)
-    val expansion by animateFloatAsState(
-        targetValue = if (isExpanded) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = 600,
-            easing = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
-        ),
-        label = "HeaderExpansion"
-    )
+    var expandedSection by remember { mutableStateOf(DetailHeaderExpandedSection.NONE) }
 
     val hasAwards = !ratings.awards.isNullOrBlank() && ratings.awards != "N/A"
-    val hasBottomBadges = (movie.revenue ?: 0L) > 0 || !ratings.certification.isNullOrBlank()
+    val hasBoxOffice = (movie.revenue ?: 0L) > 0
 
-    val targetExtraHeight = when {
-        hasAwards && hasBottomBadges -> 164.dp
-        !hasAwards && hasBottomBadges -> 118.dp
-        hasAwards && !hasBottomBadges -> 120.dp
-        else -> 74.dp
+    val parentsGuideData = remember(ratings.certification, ratings.certificationCountry) {
+        ParentsGuideResolver.resolve(ratings.certification, ratings.certificationCountry)
     }
-    val targetHeight = if (isExpanded) targetExtraHeight else 0.dp
-    val animatedHeight by animateDpAsState(
-        targetValue = targetHeight,
-        animationSpec = tween(600, easing = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)),
-        label = "ExtraHeight"
+
+    val sectionHeights = remember { mutableStateMapOf<DetailHeaderExpandedSection, Int>() }
+    var measuredContentHeightPx by remember { mutableIntStateOf(0) }
+
+    var lastNonNoneSection by remember { mutableStateOf(DetailHeaderExpandedSection.RATINGS) }
+    LaunchedEffect(expandedSection) {
+        if (expandedSection != DetailHeaderExpandedSection.NONE) {
+            lastNonNoneSection = expandedSection
+        }
+    }
+    val activeDisplaySection = if (expandedSection != DetailHeaderExpandedSection.NONE) {
+        expandedSection
+    } else {
+        lastNonNoneSection
+    }
+
+    val targetHeightPx = if (expandedSection != DetailHeaderExpandedSection.NONE) {
+        sectionHeights[expandedSection] ?: measuredContentHeightPx
+    } else {
+        0
+    }
+
+    val animatedHeightPx by animateIntAsState(
+        targetValue = targetHeightPx,
+        animationSpec = tween(
+            durationMillis = 380,
+            easing = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
+        ),
+        label = "HeaderSectionHeight"
+    )
+
+    val contentAlpha by animateFloatAsState(
+        targetValue = if (expandedSection != DetailHeaderExpandedSection.NONE) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 280,
+            easing = LinearEasing
+        ),
+        label = "HeaderContentAlpha"
+    )
+
+    val ratingsExpansion by animateFloatAsState(
+        targetValue = if (expandedSection == DetailHeaderExpandedSection.RATINGS) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 380,
+            easing = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
+        ),
+        label = "RatingsExpansion"
     )
 
     Column(
@@ -117,14 +209,7 @@ fun DetailHeader(
             .layout { measurable, constraints ->
                 val placeable = measurable.measure(constraints)
                 
-                // If we are in the lookahead pass, we use the stable target height
-                // to avoid registering state reads on animating values during lookahead.
-                val heightToSubtract = if (isLookingAhead) {
-                    targetHeight.roundToPx()
-                } else {
-                    animatedHeight.roundToPx()
-                }
-                
+                val heightToSubtract = animatedHeightPx
                 val stableHeight = (placeable.height - heightToSubtract).coerceAtLeast(0)
                 
                 layout(placeable.width, stableHeight) {
@@ -274,9 +359,11 @@ fun DetailHeader(
                     }
 
                     if (onTrailerClick != null) {
+                        var buttonCoords by remember { mutableStateOf<LayoutCoordinates?>(null) }
                         Row(
                             modifier = Modifier
-                                .bounceClick { onTrailerClick() }
+                                .onGloballyPositioned { buttonCoords = it }
+                                .bounceClick { onTrailerClick(buttonCoords?.boundsInRoot()) }
                                 .padding(horizontal = 4.dp, vertical = 2.dp),
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
                             verticalAlignment = Alignment.CenterVertically
@@ -339,23 +426,59 @@ fun DetailHeader(
                     blurRadius = 32.dp
                 )
         ) {
-
             Column(
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Primary Row (TMDB Badge) - NOW ON TOP of the extra content
+                // Primary Row (TMDB Badge, Rated Badge, Technical Specs)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(vertical = 6.dp, horizontal = 6.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    RatingPill(
-                        voteAverage = movie.voteAverage ?: 0.0,
-                        expansion = expansion,
-                        accentColor = accentColor,
-                        modifier = Modifier.bounceClick(scaleDown = 0.92f) { isExpanded = !isExpanded }
-                    )
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        RatingPill(
+                            voteAverage = movie.voteAverage ?: 0.0,
+                            expansion = ratingsExpansion,
+                            accentColor = accentColor,
+                            onClick = {
+                                expandedSection = if (expandedSection == DetailHeaderExpandedSection.RATINGS) {
+                                    DetailHeaderExpandedSection.NONE
+                                } else {
+                                    DetailHeaderExpandedSection.RATINGS
+                                }
+                            }
+                        )
+
+                        HeaderRatedPill(
+                            certification = ratings.certification,
+                            certificationCountry = ratings.certificationCountry,
+                            isSelected = expandedSection == DetailHeaderExpandedSection.PARENTS_GUIDE,
+                            accentColor = accentColor,
+                            onClick = {
+                                expandedSection = if (expandedSection == DetailHeaderExpandedSection.PARENTS_GUIDE) {
+                                    DetailHeaderExpandedSection.NONE
+                                } else {
+                                    DetailHeaderExpandedSection.PARENTS_GUIDE
+                                }
+                            }
+                        )
+
+                        HeaderTechnicalPill(
+                            isSelected = expandedSection == DetailHeaderExpandedSection.TECHNICAL,
+                            accentColor = accentColor,
+                            onClick = {
+                                expandedSection = if (expandedSection == DetailHeaderExpandedSection.TECHNICAL) {
+                                    DetailHeaderExpandedSection.NONE
+                                } else {
+                                    DetailHeaderExpandedSection.TECHNICAL
+                                }
+                            }
+                        )
+                    }
 
                     Spacer(modifier = Modifier.weight(1f))
 
@@ -434,153 +557,59 @@ fun DetailHeader(
                     }
                 }
 
-                // Extra Ratings section - NOW BELOW the Pill Row
-                if (isExpanded || animatedHeight > 0.dp) {
-                    Column(
+                // Expanded Section Content - NOW BELOW the Pill Row
+                if (expandedSection != DetailHeaderExpandedSection.NONE || animatedHeightPx > 0) {
+                    Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(animatedHeight)
-                            .alpha(expansion)
-                            .padding(horizontal = 16.dp)
+                            .clipToBounds()
+                            .layout { measurable, constraints ->
+                                val placeable = measurable.measure(
+                                    constraints.copy(minHeight = 0, maxHeight = androidx.compose.ui.unit.Constraints.Infinity)
+                                )
+                                if (placeable.height > 0) {
+                                    measuredContentHeightPx = placeable.height
+                                    if (activeDisplaySection != DetailHeaderExpandedSection.NONE) {
+                                        sectionHeights[activeDisplaySection] = placeable.height
+                                    }
+                                }
+                                layout(placeable.width, animatedHeightPx) {
+                                    placeable.place(0, 0)
+                                }
+                            }
+                            .alpha(contentAlpha)
                     ) {
-                        HorizontalDivider(color = Color.White.copy(alpha = 0.04f))
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        val uriHandler = LocalUriHandler.current
-                        val imdbId = movie.imdbId ?: ratings.imdb
-
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.SpaceBetween,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            ModernRatingItem(
-                                badge = { Badge("IMDb", Color(0xFFF5C518), Color.Black) },
-                                value = ratings.imdb ?: "-",
-                                subValue = ratings.imdbVotes,
-                                onClick = {
-                                    imdbId?.let { uriHandler.openUri("https://www.imdb.com/title/$it") }
-                                }
-                            )
-                            VerticalDivider()
-                            
-                            val rtScore = ratings.rottenTomatoes?.removeSuffix("%")?.toIntOrNull() ?: 0
-                            val rtIcon = if (rtScore >= 60 || ratings.rottenTomatoes == null) "🍅" else "🤢"
-                            ModernRatingItem(
-                                badge = { Text(rtIcon, fontSize = 14.sp) },
-                                value = ratings.rottenTomatoes ?: "-",
-                                subValue = null,
-                                onClick = {
-                                    val title = movie.title ?: movie.name
-                                    title?.let { uriHandler.openUri("https://www.rottentomatoes.com/search?search=${it}") }
-                                }
-                            )
-                            VerticalDivider()
-                            
-                            val mcScore = ratings.metacritic?.split("/")?.firstOrNull()?.toIntOrNull() ?: 0
-                            val mcColor = when {
-                                mcScore >= 61 -> Color(0xFF66CC33)
-                                mcScore >= 40 -> Color(0xFFFFCC33)
-                                else -> Color(0xFFFF0000)
-                            }
-                            ModernRatingItem(
-                                badge = {
-                                    Box(
-                                        modifier = Modifier
-                                            .size(20.dp)
-                                            .clip(RoundedCornerShape(4.dp))
-                                            .background(mcColor),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Image(
-                                            painter = painterResource(id = com.cinetrack.R.drawable.ic_metacritic_logo),
-                                            contentDescription = "Metacritic Logo",
-                                            modifier = Modifier
-                                                .size(14.dp),
-                                            contentScale = ContentScale.Fit
-                                        )
-                                    }
-                                },
-                                value = ratings.metacritic?.replace("/100", "") ?: "-",
-                                subValue = "Score",
-                                onClick = {
-                                    val title = movie.title ?: movie.name
-                                    title?.let { uriHandler.openUri("https://www.metacritic.com/search/${it}/") }
-                                }
-                            )
-                            VerticalDivider()
-                            ModernRatingItem(
-                                badge = {
-                                    Image(
-                                        painter = painterResource(id = com.cinetrack.R.drawable.ic_trakt_logo),
-                                        contentDescription = "Trakt.tv Logo",
-                                        modifier = Modifier.size(20.dp),
-                                        contentScale = ContentScale.Fit
+                        Crossfade(
+                            targetState = activeDisplaySection,
+                            animationSpec = tween(220),
+                            label = "HeaderSectionCrossfade"
+                        ) { section ->
+                            when (section) {
+                                DetailHeaderExpandedSection.NONE -> {}
+                                DetailHeaderExpandedSection.RATINGS -> {
+                                    HeaderRatingsSection(
+                                        movie = movie,
+                                        ratings = ratings,
+                                        accentColor = accentColor
                                     )
-                                },
-                                value = ratings.trakt?.let { "${(it * 10).toInt()}%" } ?: "-",
-                                subValue = ratings.traktVotes,
-                                onClick = {
-                                    if (imdbId != null) {
-                                        uriHandler.openUri("https://trakt.tv/search?query=$imdbId")
-                                    }
                                 }
-                            )
-                        }
-                        
-                        Spacer(modifier = Modifier.height(16.dp))
-
-                        ratings.awards?.let { awardText ->
-                            if (awardText != "N/A" && awardText.isNotEmpty()) {
-                                AwardBox(
-                                    awards = awardText,
-                                    accentColor = accentColor,
-                                    onClick = {
-                                        imdbId?.let { uriHandler.openUri("https://www.imdb.com/title/$it/awards") }
-                                    }
-                                )
-                                Spacer(modifier = Modifier.height(14.dp))
-                            }
-                        }
-                        
-                        Row(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalArrangement = Arrangement.Center,
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            movie.revenue?.let { rev ->
-                                if (rev > 0) {
-                                    val formattedRevenue = java.text.NumberFormat.getCurrencyInstance(java.util.Locale.US).apply {
-                                        maximumFractionDigits = 0
-                                    }.format(rev)
-                                    MetaBadge(label = "BOX OFFICE", value = formattedRevenue)
-                                    Spacer(modifier = Modifier.width(12.dp))
+                                DetailHeaderExpandedSection.PARENTS_GUIDE -> {
+                                    HeaderParentsGuideSection(
+                                        certification = ratings.certification,
+                                        certificationCountry = ratings.certificationCountry,
+                                        accentColor = accentColor,
+                                        onCardClick = onRatingClick
+                                    )
+                                }
+                                DetailHeaderExpandedSection.TECHNICAL -> {
+                                    HeaderTechnicalSection(
+                                        details = movieDetails,
+                                        movie = movie,
+                                        accentColor = accentColor
+                                    )
                                 }
                             }
-                            ratings.certification?.let { cert ->
-                                val cleanCert = cert.trim().uppercase(java.util.Locale.ROOT)
-                                val certColor = when (cleanCert) {
-                                    in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") -> Color(0xFF4CAF50)
-                                    in listOf("PG", "TV-PG", "TV-Y7", "6", "6+", "7", "7+", "7A", "10", "10+", "UA") -> Color(0xFF8BC34A)
-                                    in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "13+", "13A", "14", "14+", "VM14", "15") -> Color(0xFFFF9800)
-                                    in listOf("R", "TV-MA", "16", "16+", "17+", "18", "18+", "19", "21+", "VM18", "NC-17", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> Color(0xFFF44336)
-                                    else -> Color.White
-                                }
-                                val displayValue = if (!ratings.certificationCountry.isNullOrBlank()) {
-                                    "${ratings.certificationCountry} · $cert"
-                                } else {
-                                    cert
-                                }
-                                MetaBadge(
-                                    label = "RATED",
-                                    value = displayValue,
-                                    valueColor = certColor,
-                                    showValueBox = true,
-                                    onClick = onRatingClick
-                                )
-                            }
                         }
-                        Spacer(modifier = Modifier.height(16.dp))
                     }
                 }
             }
@@ -595,20 +624,20 @@ fun RatingPill(
     voteAverage: Double,
     expansion: Float,
     accentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit = {}
 ) {
-    val vPadding = 6.dp
-    val topPadding = vPadding
-    val bottomPadding = vPadding
-    
     val pillRadius = 48.dp
+    val pillShape = RoundedCornerShape(pillRadius)
     val pillContentColor = ColorUtils.contentColorForAccent(accentColor)
     
     Box(
         modifier = modifier
+            .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .defaultMinSize(minWidth = 80.dp, minHeight = 36.dp)
-            .background(accentColor, RoundedCornerShape(pillRadius))
-            .padding(horizontal = 16.dp),
+            .clip(pillShape)
+            .background(accentColor, pillShape)
+            .padding(horizontal = 14.dp),
         contentAlignment = Alignment.Center
     ) {
         // Main Rating
@@ -622,7 +651,7 @@ fun RatingPill(
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Image(
-                    painter = painterResource(id = com.cinetrack.R.drawable.ic_tmdb_logo),
+                    painter = painterResource(id = R.drawable.ic_tmdb_logo),
                     contentDescription = "TMDB Logo",
                     modifier = Modifier.height(11.dp),
                     contentScale = ContentScale.Fit,
@@ -637,7 +666,7 @@ fun RatingPill(
                 )
                 Spacer(modifier = Modifier.width(3.dp))
                 Text(
-                    text = String.format("%.1f", voteAverage),
+                    text = String.format(Locale.US, "%.1f", voteAverage),
                     fontSize = 12.sp,
                     fontWeight = FontWeight.Black,
                     color = pillContentColor.copy(alpha = 0.9f)
@@ -659,6 +688,563 @@ fun RatingPill(
                     translationY = startOffset
                 }
         )
+    }
+}
+
+@Composable
+private fun HeaderRatedPill(
+    certification: String?,
+    certificationCountry: String?,
+    isSelected: Boolean,
+    accentColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val pillShape = CircleShape
+    val cleanCert = certification?.trim()?.uppercase(Locale.ROOT)?.takeIf { it.isNotBlank() } ?: "NR"
+    val certColor = remember(cleanCert) { getCertificationColor(cleanCert) }
+    val selectedContentColor = if (certColor == Color.White) Color.Black else Color.Black
+
+    val animatedContentColor by animateColorAsState(
+        targetValue = if (isSelected) selectedContentColor else certColor,
+        animationSpec = tween(250),
+        label = "RatedContentColor"
+    )
+
+    val revealProgress by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 320,
+            easing = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
+        ),
+        label = "RatedReveal"
+    )
+
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) Color.Transparent else certColor.copy(alpha = 0.55f),
+        animationSpec = tween(200),
+        label = "RatedBorderColor"
+    )
+
+    Box(
+        modifier = modifier
+            .bounceClick(scaleDown = 0.92f, onClick = onClick)
+            .defaultMinSize(minWidth = 36.dp, minHeight = 36.dp)
+            .clip(pillShape)
+            .background(Color.White.copy(alpha = 0.08f), pillShape)
+            .drawBehind {
+                if (revealProgress > 0f) {
+                    val maxRadius = kotlin.math.hypot(size.width / 2f, size.height / 2f)
+                    drawCircle(
+                        color = certColor,
+                        radius = maxRadius * revealProgress,
+                        center = center
+                    )
+                }
+            }
+            .border(
+                width = 0.5.dp,
+                color = animatedBorderColor,
+                shape = pillShape
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = cleanCert,
+            fontSize = 11.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 0.5.sp,
+            color = animatedContentColor
+        )
+    }
+}
+
+@Composable
+private fun HeaderTechnicalPill(
+    isSelected: Boolean,
+    accentColor: Color,
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
+) {
+    val pillShape = CircleShape
+    val selectedContentColor = ColorUtils.contentColorForAccent(accentColor)
+
+    val animatedContentColor by animateColorAsState(
+        targetValue = if (isSelected) selectedContentColor else Color.White.copy(alpha = 0.85f),
+        animationSpec = tween(250),
+        label = "TechContentColor"
+    )
+
+    val revealProgress by animateFloatAsState(
+        targetValue = if (isSelected) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = 320,
+            easing = CubicBezierEasing(0.2f, 0.8f, 0.2f, 1f)
+        ),
+        label = "TechReveal"
+    )
+
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) Color.Transparent else Color.White.copy(alpha = 0.15f),
+        animationSpec = tween(200),
+        label = "TechBorderColor"
+    )
+
+    Box(
+        modifier = modifier
+            .bounceClick(scaleDown = 0.92f, onClick = onClick)
+            .defaultMinSize(minWidth = 36.dp, minHeight = 36.dp)
+            .clip(pillShape)
+            .background(Color.White.copy(alpha = 0.08f), pillShape)
+            .drawBehind {
+                if (revealProgress > 0f) {
+                    val maxRadius = kotlin.math.hypot(size.width / 2f, size.height / 2f)
+                    drawCircle(
+                        color = accentColor,
+                        radius = maxRadius * revealProgress,
+                        center = center
+                    )
+                }
+            }
+            .border(
+                width = 0.5.dp,
+                color = animatedBorderColor,
+                shape = pillShape
+            )
+            .padding(horizontal = 10.dp, vertical = 6.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = ImageVector.vectorResource(id = if (isSelected) R.drawable.ic_open_ciak else R.drawable.ic_ciak),
+            contentDescription = stringResource(R.string.detail_btn_tech_specs),
+            tint = animatedContentColor,
+            modifier = Modifier.size(15.dp)
+        )
+    }
+}
+
+@Composable
+private fun HeaderRatingsSection(
+    movie: Movie,
+    ratings: ExternalRatings,
+    accentColor: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        HorizontalDivider(color = Color.White.copy(alpha = 0.04f))
+        Spacer(modifier = Modifier.height(16.dp))
+        
+        val uriHandler = LocalUriHandler.current
+        val imdbId = movie.imdbId ?: ratings.imdb
+
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            ModernRatingItem(
+                badge = { Badge("IMDb", Color(0xFFF5C518), Color.Black) },
+                value = ratings.imdb ?: "-",
+                subValue = ratings.imdbVotes,
+                onClick = {
+                    imdbId?.let { uriHandler.openUri("https://www.imdb.com/title/$it") }
+                }
+            )
+            VerticalDivider()
+            
+            val rtScore = ratings.rottenTomatoes?.removeSuffix("%")?.toIntOrNull() ?: 0
+            val rtIcon = if (rtScore >= 60 || ratings.rottenTomatoes == null) "🍅" else "🤢"
+            ModernRatingItem(
+                badge = { Text(rtIcon, fontSize = 14.sp) },
+                value = ratings.rottenTomatoes ?: "-",
+                subValue = null,
+                onClick = {
+                    val title = movie.title ?: movie.name
+                    title?.let { uriHandler.openUri("https://www.rottentomatoes.com/search?search=${it}") }
+                }
+            )
+            VerticalDivider()
+            
+            val mcScore = ratings.metacritic?.split("/")?.firstOrNull()?.toIntOrNull() ?: 0
+            val mcColor = when {
+                mcScore >= 61 -> Color(0xFF66CC33)
+                mcScore >= 40 -> Color(0xFFFFCC33)
+                else -> Color(0xFFFF0000)
+            }
+            ModernRatingItem(
+                badge = {
+                    Box(
+                        modifier = Modifier
+                            .size(20.dp)
+                            .clip(RoundedCornerShape(4.dp))
+                            .background(mcColor),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Image(
+                            painter = painterResource(id = R.drawable.ic_metacritic_logo),
+                            contentDescription = "Metacritic Logo",
+                            modifier = Modifier.size(14.dp),
+                            contentScale = ContentScale.Fit
+                        )
+                    }
+                },
+                value = ratings.metacritic?.replace("/100", "") ?: "-",
+                subValue = "Score",
+                onClick = {
+                    val title = movie.title ?: movie.name
+                    title?.let { uriHandler.openUri("https://www.metacritic.com/search/${it}/") }
+                }
+            )
+            VerticalDivider()
+            ModernRatingItem(
+                badge = {
+                    Image(
+                        painter = painterResource(id = R.drawable.ic_trakt_logo),
+                        contentDescription = "Trakt.tv Logo",
+                        modifier = Modifier.size(20.dp),
+                        contentScale = ContentScale.Fit
+                    )
+                },
+                value = ratings.trakt?.let { "${(it * 10).toInt()}%" } ?: "-",
+                subValue = ratings.traktVotes,
+                onClick = {
+                    if (imdbId != null) {
+                        uriHandler.openUri("https://trakt.tv/search?query=$imdbId")
+                    }
+                }
+            )
+        }
+        
+        Spacer(modifier = Modifier.height(16.dp))
+
+        val hasBoxOffice = (movie.revenue ?: 0L) > 0
+        ratings.awards?.let { awardText ->
+            if (awardText != "N/A" && awardText.isNotEmpty()) {
+                AwardBox(
+                    awards = awardText,
+                    accentColor = accentColor,
+                    onClick = {
+                        imdbId?.let { uriHandler.openUri("https://www.imdb.com/title/$it/awards") }
+                    }
+                )
+                if (hasBoxOffice) {
+                    Spacer(modifier = Modifier.height(12.dp))
+                }
+            }
+        }
+        
+        movie.revenue?.let { rev ->
+            if (rev > 0) {
+                val formattedRevenue = java.text.NumberFormat.getCurrencyInstance(Locale.US).apply {
+                    maximumFractionDigits = 0
+                }.format(rev)
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.Center,
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    MetaBadge(label = "BOX OFFICE", value = formattedRevenue)
+                }
+            }
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+    }
+}
+
+@Composable
+private fun HeaderParentsGuideSection(
+    certification: String?,
+    certificationCountry: String?,
+    accentColor: Color,
+    onCardClick: () -> Unit
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp)
+    ) {
+        HorizontalDivider(color = Color.White.copy(alpha = 0.04f))
+        Spacer(modifier = Modifier.height(10.dp))
+
+        val cleanCert = certification?.trim()?.uppercase(Locale.ROOT)?.takeIf { it.isNotBlank() } ?: "NR"
+        val ratingInfo = remember(cleanCert) { resolveHeaderRatingInfo(cleanCert) }
+        val certColor = remember(cleanCert) { getCertificationColor(cleanCert) }
+
+        // Line 1: Rated Detail Card for this specific film/series
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .bounceClick(scaleDown = 0.98f) { onCardClick() }
+                .clip(CircleShape)
+                .background(Color.White.copy(alpha = 0.04f))
+                .border(0.5.dp, certColor.copy(alpha = 0.35f), CircleShape)
+                .padding(start = 20.dp, end = 20.dp, top = 10.dp, bottom = 10.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Box(
+                modifier = Modifier
+                    .height(28.dp)
+                    .defaultMinSize(minWidth = 48.dp)
+                    .clip(CircleShape)
+                    .background(certColor.copy(alpha = 0.15f))
+                    .border(0.5.dp, certColor.copy(alpha = 0.5f), CircleShape)
+                    .padding(horizontal = 9.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                val displayCode = if (!certificationCountry.isNullOrBlank()) {
+                    "$certificationCountry · $cleanCert"
+                } else {
+                    cleanCert
+                }
+                Text(
+                    text = displayCode,
+                    color = certColor,
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Black
+                )
+            }
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(
+                modifier = Modifier.weight(1f),
+                verticalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = stringResource(ratingInfo.labelRes),
+                    color = Color.White,
+                    fontSize = 11.5.sp,
+                    fontWeight = FontWeight.ExtraBold,
+                    letterSpacing = 0.3.sp,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+                Spacer(modifier = Modifier.height(2.dp))
+                Text(
+                    text = stringResource(ratingInfo.descriptionRes),
+                    color = Color.White.copy(alpha = 0.6f),
+                    fontSize = 10.sp,
+                    lineHeight = 13.sp,
+                    fontWeight = FontWeight.Medium,
+                    maxLines = 2,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+
+        // Lines below: Parents Guide category meter rows
+        val parentsGuideData = remember(certification, certificationCountry) {
+            ParentsGuideResolver.resolve(certification, certificationCountry)
+        }
+
+        if (parentsGuideData != null) {
+            Spacer(modifier = Modifier.height(8.dp))
+            HorizontalDivider(color = Color.White.copy(alpha = 0.04f))
+            Spacer(modifier = Modifier.height(8.dp))
+
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                parentsGuideData.categories.forEach { category ->
+                    CategoryMeterRow(category = category, accentColor = accentColor)
+                }
+            }
+            Spacer(modifier = Modifier.height(10.dp))
+        } else {
+            Spacer(modifier = Modifier.height(8.dp))
+            Text(
+                text = stringResource(R.string.detail_rated_all_ages_note),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    lineHeight = 14.sp
+                ),
+                color = Color.White.copy(alpha = 0.5f),
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 4.dp),
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+            Spacer(modifier = Modifier.height(10.dp))
+        }
+    }
+}
+
+@Composable
+private fun HeaderTechnicalSection(
+    details: MovieDetailResponse?,
+    movie: Movie,
+    accentColor: Color
+) {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 12.dp)
+    ) {
+        HorizontalDivider(color = Color.White.copy(alpha = 0.04f))
+        Spacer(modifier = Modifier.height(14.dp))
+
+        val symbols = DecimalFormatSymbols(Locale.ITALIAN).apply {
+            groupingSeparator = '.'
+        }
+        val formatter = DecimalFormat("#,###", symbols)
+
+        Column(
+            verticalArrangement = Arrangement.spacedBy(12.dp)
+        ) {
+            val originalTitle = details?.originalTitle ?: details?.originalName ?: movie.displayName
+            val rawStatus = details?.status ?: "—"
+            val status = when (rawStatus) {
+                "Returning Series" -> stringResource(R.string.status_returning_series)
+                "Planned" -> stringResource(R.string.status_planned)
+                "In Production" -> stringResource(R.string.status_in_production)
+                "Ended" -> stringResource(R.string.status_ended)
+                "Canceled", "Cancelled" -> stringResource(R.string.status_canceled)
+                "Pilot" -> stringResource(R.string.status_pilot)
+                "Rumored" -> stringResource(R.string.status_rumored)
+                "Post Production" -> stringResource(R.string.status_post_production)
+                "Released" -> stringResource(R.string.status_released)
+                else -> rawStatus
+            }
+
+            // Row 1: Original Title & Status
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_original_title),
+                    value = originalTitle,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1.15f)
+                )
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_status),
+                    value = status,
+                    icon = Icons.Rounded.Info,
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(0.85f)
+                )
+            }
+
+            // Row 2: Release Date & Budget
+            val releaseDate = details?.releaseDate ?: details?.firstAirDate ?: movie.releaseDate ?: movie.firstAirDate ?: "—"
+            val budget = details?.budget
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_release_date),
+                    value = releaseDate,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1.15f)
+                )
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_budget),
+                    value = if (budget != null && budget > 0) "${formatter.format(budget)} USD" else "—",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_dollar),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(0.85f)
+                )
+            }
+
+            // Row 3: Language & Revenue
+            val origLang = details?.originalLanguage
+            val revenue = details?.revenue
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_language),
+                    value = origLang?.uppercase(Locale.getDefault()) ?: "—",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1.15f)
+                )
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_revenue),
+                    value = if (revenue != null && revenue > 0) "${formatter.format(revenue)} USD" else "—",
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_world),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(0.85f)
+                )
+            }
+
+            // Row 4: Production & Country
+            val production = details?.productionCompanies?.firstOrNull()?.name ?: "—"
+            val country = details?.productionCountries?.firstOrNull()?.name ?: "—"
+            Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(14.dp)) {
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_production),
+                    value = production,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_edifici),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1.15f)
+                )
+                HeaderTechnicalItem(
+                    label = stringResource(R.string.detail_tech_country),
+                    value = country,
+                    icon = ImageVector.vectorResource(id = R.drawable.ic_partenone),
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(0.85f)
+                )
+            }
+        }
+        Spacer(modifier = Modifier.height(14.dp))
+    }
+}
+
+@Composable
+private fun HeaderTechnicalItem(
+    label: String,
+    value: String,
+    icon: ImageVector,
+    accentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Row(
+        modifier = modifier,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        val iconShape = RoundedCornerShape(10.dp)
+        Box(
+            modifier = Modifier
+                .size(32.dp)
+                .background(accentColor.copy(alpha = 0.15f), iconShape)
+                .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.4f), iconShape),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = ColorUtils.lightenForText(accentColor, 1.35f),
+                modifier = Modifier.size(15.dp)
+            )
+        }
+        
+        Spacer(modifier = Modifier.width(8.dp))
+        
+        Column(modifier = Modifier.weight(1f)) {
+            Text(
+                text = label,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 8.5.sp,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 0.8.sp
+                ),
+                color = Color.White.copy(alpha = 0.55f),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = value,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 12.sp,
+                    fontWeight = FontWeight.ExtraBold
+                ),
+                color = Color.White,
+                maxLines = 2,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

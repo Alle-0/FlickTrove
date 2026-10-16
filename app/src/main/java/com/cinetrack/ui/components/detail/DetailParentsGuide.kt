@@ -17,6 +17,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
@@ -170,7 +171,7 @@ fun DetailParentsGuide(
 }
 
 @Composable
-private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color) {
+fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color) {
     val isNone = category.isNone
 
     Row(
@@ -192,11 +193,15 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
             text = stringResource(category.titleRes),
             style = MaterialTheme.typography.bodyMedium.copy(
                 fontWeight = FontWeight.Medium,
-                fontSize = 13.sp
+                fontSize = 12.5.sp
             ),
             color = if (isNone) Color.White.copy(alpha = 0.70f) else Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
+
+        Spacer(modifier = Modifier.width(10.dp))
 
         // 3-segment Pill Capsules (Design per Quantità: 0=None, 1=Mild, 2=Moderate, 3=Severe)
         Row(
@@ -212,7 +217,7 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
                 }
                 Box(
                     modifier = Modifier
-                        .width(20.dp)
+                        .width(18.dp)
                         .height(5.dp)
                         .clip(RoundedCornerShape(percent = 50))
                         .background(segmentColor)
@@ -220,7 +225,7 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
             }
         }
 
-        Spacer(modifier = Modifier.width(12.dp))
+        Spacer(modifier = Modifier.width(10.dp))
 
         // Severity Label (Bold & bright accent when active, legible grey when None)
         Text(
@@ -231,7 +236,7 @@ private fun CategoryMeterRow(category: ParentsGuideCategory, accentColor: Color)
             ),
             color = if (isNone) Color.White.copy(alpha = 0.65f) else ColorUtils.lightenForText(accentColor, 1.4f),
             textAlign = TextAlign.End,
-            modifier = Modifier.widthIn(min = 60.dp)
+            modifier = Modifier.widthIn(min = 58.dp)
         )
     }
 }

@@ -776,6 +776,9 @@
     <string name="detail_collection">COLLEZIONE</string>
     <string name="detail_recommendations">CONSIGLIATI</string>
     <string name="detail_technical_info">DETTAGLI TECNICI</string>
+    <string name="detail_rated_all_ages_note">Questo titolo è adatto a tutte le età senza avvisi specifici per i genitori.</string>
+    <string name="detail_btn_tech_specs">Dettagli tecnici</string>
+    <string name="detail_btn_parents_guide">Guida genitori</string>
     <string name="detail_official_trailers">TRAILER UFFICIALI</string>
     <string name="detail_official_trailer">TRAILER UFFICIALE</string>
     <string name="detail_video_title_teaser">TEASER &amp; PROMO</string>

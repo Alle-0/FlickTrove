@@ -70,6 +70,7 @@ fun DetailTrailersMenuModal(
     data: TrailersMenuModalData?,
     accentColor: Color,
     hazeState: HazeState?,
+    rootHazeState: HazeState? = null,
     onDismiss: () -> Unit
 ) {
     val density = androidx.compose.ui.platform.LocalDensity.current
@@ -154,26 +155,61 @@ fun DetailTrailersMenuModal(
                     .offset { androidx.compose.ui.unit.IntOffset(xPos.toInt(), yPos.toInt()) }
                     .zIndex(100f)
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .onGloballyPositioned { coords ->
                             actualMenuHeightPx = coords.size.height.toFloat()
                         }
                         .width(menuWidth)
                         .clip(RoundedCornerShape(20.dp))
-                        .then(
-                            if (hazeState != null) {
-                                Modifier.hazeGlass(
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(20.dp))
+                ) {
+                    // Layer 1: Frosted glass blur of the general screen background (rootHazeState)
+                    if (rootHazeState != null) {
+                        Spacer(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .hazeGlass(
+                                    state = rootHazeState,
+                                    alpha = blurAlpha,
+                                    shape = RoundedCornerShape(20.dp),
+                                    blurRadius = 24.dp,
+                                    containerColor = Color(0xFF16161A).copy(alpha = 0.85f),
+                                    borderColor = Color.Transparent
+                                )
+                        )
+                    }
+
+                    // Layer 2: Frosted glass blur of the modal content (hazeState / modalHazeState)
+                    if (hazeState != null) {
+                        Spacer(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .hazeGlass(
                                     state = hazeState,
                                     alpha = blurAlpha,
-                                    shape = RoundedCornerShape(20.dp)
+                                    shape = RoundedCornerShape(20.dp),
+                                    blurRadius = 24.dp,
+                                    containerColor = if (rootHazeState != null) Color.Transparent else Color(0xFF16161A).copy(alpha = 0.85f),
+                                    borderColor = Color.Transparent
                                 )
-                            } else {
-                                Modifier.background(Color(0xFF141414).copy(alpha = 0.95f))
-                            }
                         )
-                        .padding(vertical = 6.dp)
-                ) {
+                    }
+
+                    // Fallback dark background if neither hazeState is provided
+                    if (hazeState == null && rootHazeState == null) {
+                        Spacer(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(Color(0xFF16161A).copy(alpha = 0.95f), RoundedCornerShape(20.dp))
+                        )
+                    }
+
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(vertical = 6.dp)
+                    ) {
                     targetData.availableCategories.forEach { cat ->
                         val count = targetData.categoryCounts[cat] ?: 0
                         val isSelected = targetData.selectedCategory == cat
@@ -232,6 +268,7 @@ fun DetailTrailersMenuModal(
             }
         }
     }
+}
 }
 
 /**
@@ -446,21 +483,6 @@ fun DetailTrailers(
     }
 }
 
-private fun getSimulatedDuration(video: Video): String {
-    val hash = video.key.hashCode().absoluteValue
-    val (minSeconds, maxSeconds) = when (video.type) {
-        "Teaser" -> 30 to 75
-        "Clip" -> 45 to 180
-        "Featurette", "Behind the Scenes" -> 150 to 360
-        "Bloopers" -> 120 to 300
-        else -> 90 to 160
-    }
-    val totalSeconds = minSeconds + (hash % (maxSeconds - minSeconds + 1))
-    val minutes = totalSeconds / 60
-    val seconds = totalSeconds % 60
-    return "%d:%02d".format(minutes, seconds)
-}
-
 @Composable
 fun TrailerThumbnail(video: Video, accentColor: Color) {
     Box(
@@ -528,34 +550,16 @@ fun TrailerThumbnail(video: Video, accentColor: Color) {
             overflow = TextOverflow.Ellipsis,
             modifier = Modifier
                 .align(Alignment.BottomStart)
-                .padding(start = 18.dp, end = 64.dp, bottom = 14.dp)
+                .padding(horizontal = 18.dp, vertical = 14.dp)
         )
-
-        // Duration Badge on bottom right
-        val durationText = remember(video.key, video.type) {
-            getSimulatedDuration(video)
-        }
-        Box(
-            modifier = Modifier
-                .align(Alignment.BottomEnd)
-                .padding(end = 14.dp, bottom = 14.dp)
-                .background(Color.Black.copy(alpha = 0.85f), RoundedCornerShape(6.dp))
-                .padding(horizontal = 6.dp, vertical = 3.dp)
-        ) {
-            Text(
-                text = durationText,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 11.sp
-                ),
-                color = Color.White
-            )
-        }
     }
 }
 
 @Composable
-fun YouTubePlayer(videoId: String) {
+fun YouTubePlayer(
+    videoId: String,
+    autoPlay: Boolean = false
+) {
     AndroidView(
         factory = { ctx ->
             WebView(ctx).apply {
@@ -567,7 +571,7 @@ fun YouTubePlayer(videoId: String) {
                 settings.apply {
                     javaScriptEnabled = true
                     domStorageEnabled = true
-                    mediaPlaybackRequiresUserGesture = false // Cruciale per l'autoplay
+                    mediaPlaybackRequiresUserGesture = !autoPlay
                     allowFileAccess = false
                     allowContentAccess = false
                 }
@@ -636,7 +640,7 @@ fun YouTubePlayer(videoId: String) {
                 }
                 setBackgroundColor(android.graphics.Color.BLACK)
 
-                // Use youtube-nocookie.com to avoid some tracking issues and embedding restrictions
+                val autoPlayParam = if (autoPlay) 1 else 0
                 val domain = "https://www.youtube-nocookie.com"
                 val html = """
                     <!DOCTYPE html>
@@ -650,7 +654,7 @@ fun YouTubePlayer(videoId: String) {
                     </head>
                     <body>
                         <iframe 
-                            src="$domain/embed/$videoId?autoplay=1&playsinline=1&rel=0&modestbranding=1" 
+                            src="$domain/embed/$videoId?autoplay=$autoPlayParam&playsinline=1&rel=0&modestbranding=1" 
                             allow="autoplay; encrypted-media; picture-in-picture" 
                             allowfullscreen>
                         </iframe>

@@ -96,7 +96,7 @@ fun BoxScope.MainSearchFab(
         }
 
         val p = animProgress.value
-        val isDetached = p >= 0.68f
+        val isDetached = p >= 0.70f
 
         // Rinculo elastico del Search FAB al momento del distacco della goccia (snap a 3.5dp e rimbalzo a molla)
         LaunchedEffect(isDetached) {
@@ -115,7 +115,7 @@ fun BoxScope.MainSearchFab(
             }
         }
 
-        val t = (p / 0.68f).coerceIn(0f, 1f)
+        val t = (p / 0.70f).coerceIn(0f, 1f)
         // Durante la trazione il Search FAB si stira organicamente verso l'alto (da 52.dp a 56.5.dp)
         val stretchHeight = if (!isDetached && p > 0.02f) 4.5.dp * t else 0.dp
         val fabShape = androidx.compose.foundation.shape.RoundedCornerShape(percent = 50)
@@ -200,8 +200,8 @@ fun BoxScope.MainScrollToTopFab(
 
     val p = animProgress.value
 
-    LaunchedEffect(p >= 0.68f) {
-        if (p >= 0.68f && !hasSnappedBounce) {
+    LaunchedEffect(p >= 0.70f) {
+        if (p >= 0.70f && !hasSnappedBounce) {
             hasSnappedBounce = true
             launch {
                 bounceOffsetY.snapTo(4f)
@@ -262,16 +262,9 @@ fun BoxScope.MainScrollToTopFab(
     // - cx = 26.dp (centro comune)
     // - Y_rest = 194 - 170 = 24.dp
     // - Y_fab_top = 194 - 142 = 52.dp
-    val isDetached = p >= 0.68f
+    val isDetached = p >= 0.70f
     val overallAlpha = (p / 0.08f).coerceIn(0f, 1f)
-    val iconAlpha = ((p - 0.65f) / 0.25f).coerceIn(0f, 1f) * arrowAlpha.value
-
-    // Ritrazione rapida del filamento residuo verso il Search FAB dopo lo snap (come in SymbiontPullToRefresh)
-    val filamentRecoil by animateFloatAsState(
-        targetValue = if (isDetached) 0f else 1f,
-        animationSpec = tween(durationMillis = 130, easing = FastOutLinearInEasing),
-        label = "SymbiontFilamentRecoil"
-    )
+    val iconAlpha = ((p - 0.70f) / 0.20f).coerceIn(0f, 1f) * arrowAlpha.value
 
     Box(
         modifier = Modifier
@@ -280,9 +273,9 @@ fun BoxScope.MainScrollToTopFab(
             .size(width = 52.dp, height = 104.dp)
             .zIndex(59f)
     ) {
-        // QUANDO È ANCORA ATTACCATO (0.02 < p < 0.68): emersione organica secondo le formule esatte di SymbiontPullToRefresh
+        // QUANDO È ANCORA ATTACCATO (0.02 < p < 0.70): emersione organica e rientro profondo nel Search FAB
         if (!isDetached && p > 0.02f) {
-            val t = (p / 0.68f).coerceIn(0f, 1f)
+            val t = (p / 0.70f).coerceIn(0f, 1f)
 
             val symbioteShape = remember(t, density) {
                 object : Shape {
@@ -292,29 +285,30 @@ fun BoxScope.MainScrollToTopFab(
                         density: Density
                     ): Outline {
                         val cx = size.width / 2f
-                        val cyFab = with(density) { 52.dp.toPx() }
-                        // La sfera sale dall'apice del Search FAB (52.dp) alla posizione finale di riposo (24.dp)
-                        val dropY = with(density) { (52.dp - 28.dp * t).toPx() }
-                        // Il raggio sboccia da un piccolo germoglio (2.dp) fino a 17.dp (esattamente come 2.dp -> 20.dp nel pull-to-refresh)
+                        // Base ancorata in profondità nel Search FAB (68.dp nel container, ben dentro i 52..104dp del search button)
+                        val cyFab = with(density) { 68.dp.toPx() }
+                        // La sfera sale dal corpo del Search FAB (64.dp al rientro) alla posizione finale di riposo (24.dp)
+                        val dropY = with(density) { (64.dp - 40.dp * t).toPx() }
+                        // Il raggio sboccia da un piccolo germoglio interno (2.dp) fino a 17.dp (sfera 34.dp perfetta)
                         val rDrop = with(density) { (2.dp + 15.dp * t).toPx() }.coerceAtLeast(0.1f)
 
-                        // Base di attacco sul Search FAB
-                        val rBase = with(density) { (3.5.dp + 3.dp * (1f - t * 0.50f)).toPx() }
+                        // Base di attacco sul Search FAB: ampia all'ingresso nel FAB, affusolata durante lo stiro
+                        val rBase = with(density) { (5.dp + 9.dp * (1f - t * 0.60f)).toPx() }
                         val xBase = rBase
 
                         // Restringimento del punto vita (waist) durante lo stiro del filamento
-                        val waistHalfWidth = (xBase.coerceAtMost(rDrop) * (1f - t * 0.72f))
-                            .coerceAtLeast(with(density) { 1.2.dp.toPx() })
+                        val waistHalfWidth = (xBase.coerceAtMost(rDrop) * (1f - t * 0.65f))
+                            .coerceAtLeast(with(density) { 1.5.dp.toPx() })
 
                         val distY = (cyFab - dropY).coerceAtLeast(1f)
                         val c1Y = cyFab - distY * 0.35f
-                        // Pointedness della goccia organica: arrotondata all'inizio, cono affilato durante lo stiro
-                        val pointedness = 0.3f + 0.9f * t
-                        val c2Y = (dropY + rDrop * pointedness).coerceAtMost(c1Y - distY * 0.1f)
+                        // Pointedness della goccia organica: arrotondata al rientro nel FAB, affilata durante lo stiro
+                        val pointedness = 0.3f + 0.8f * t
+                        val c2Y = (dropY + rDrop * pointedness).coerceAtMost(c1Y - distY * 0.05f)
                         val c1X = cx + waistHalfWidth * 1.15f
 
                         val path = Path().apply {
-                            // 1. Base sinistra sul Search FAB
+                            // 1. Base sinistra nel Search FAB
                             moveTo(cx - xBase, cyFab)
 
                             // 2. Ponte liquido sinistro verso l'equatore della goccia
@@ -363,20 +357,20 @@ fun BoxScope.MainScrollToTopFab(
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
                     val cx = size.width / 2f
-                    val cyFab = with(density) { 52.dp.toPx() }
-                    val dropY = with(density) { (52.dp - 28.dp * t).toPx() }
+                    val cyFab = with(density) { 68.dp.toPx() }
+                    val dropY = with(density) { (64.dp - 40.dp * t).toPx() }
                     val rDrop = with(density) { (2.dp + 15.dp * t).toPx() }.coerceAtLeast(0.1f)
 
-                    val rBase = with(density) { (3.5.dp + 3.dp * (1f - t * 0.50f)).toPx() }
+                    val rBase = with(density) { (5.dp + 9.dp * (1f - t * 0.60f)).toPx() }
                     val xBase = rBase
 
-                    val waistHalfWidth = (xBase.coerceAtMost(rDrop) * (1f - t * 0.72f))
-                        .coerceAtLeast(with(density) { 1.2.dp.toPx() })
+                    val waistHalfWidth = (xBase.coerceAtMost(rDrop) * (1f - t * 0.65f))
+                        .coerceAtLeast(with(density) { 1.5.dp.toPx() })
 
                     val distY = (cyFab - dropY).coerceAtLeast(1f)
                     val c1Y = cyFab - distY * 0.35f
-                    val pointedness = 0.3f + 0.9f * t
-                    val c2Y = (dropY + rDrop * pointedness).coerceAtMost(c1Y - distY * 0.1f)
+                    val pointedness = 0.3f + 0.8f * t
+                    val c2Y = (dropY + rDrop * pointedness).coerceAtMost(c1Y - distY * 0.05f)
                     val c1X = cx + waistHalfWidth * 1.15f
 
                     val strokePath = Path().apply {
@@ -413,28 +407,7 @@ fun BoxScope.MainScrollToTopFab(
             }
         }
 
-        // RITRAZIONE RESIDUA DEL FILAMENTO DOPO LO SNAP (come in SymbiontPullToRefresh)
-        if (isDetached && filamentRecoil > 0.02f) {
-            Canvas(modifier = Modifier.fillMaxSize()) {
-                val cx = size.width / 2f
-                val cyFab = with(density) { 52.dp.toPx() }
-                val snapHeight = with(density) { 8.dp.toPx() } * filamentRecoil
-                val snapWidth = with(density) { 1.8.dp.toPx() } * filamentRecoil
-                val filamentPath = Path().apply {
-                    moveTo(cx - snapWidth, cyFab)
-                    lineTo(cx + snapWidth, cyFab)
-                    lineTo(cx, cyFab - snapHeight)
-                    close()
-                }
-                drawPath(
-                    filamentPath,
-                    color = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop * filamentRecoil),
-                    style = Stroke(width = with(density) { 1.dp.toPx() })
-                )
-            }
-        }
-
-        // QUANDO È STACCATO (p >= 0.68): la goccia si stabilizza nel pulsante hazeGlass con rimbalzo elastico
+        // QUANDO È STACCATO (p >= 0.70): la goccia si stabilizza nel pulsante hazeGlass con rimbalzo elastico
         if (isDetached) {
             Box(
                 modifier = Modifier
