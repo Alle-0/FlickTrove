@@ -145,12 +145,12 @@ fun SymbiontSearchBarWithFilters(
 
     val p = animProgress.value
 
-    // Trigger dello Snap e del rimbalzo elastico alla soglia p = 0.68
-    LaunchedEffect(p >= 0.68f) {
-        if (p >= 0.68f && !hasSnappedBounce) {
+    // Trigger dello Snap e del rimbalzo elastico alla soglia p = 0.88 (a distacco avvenuto con gap positivo)
+    LaunchedEffect(p >= 0.88f) {
+        if (p >= 0.88f && !hasSnappedBounce) {
             hasSnappedBounce = true
             launch {
-                bounceOffsetX.snapTo(4f)
+                bounceOffsetX.snapTo(3f)
                 bounceOffsetX.animateTo(
                     targetValue = 0f,
                     animationSpec = spring(
@@ -160,7 +160,7 @@ fun SymbiontSearchBarWithFilters(
                 )
             }
             launch {
-                bounceScale.snapTo(1.16f)
+                bounceScale.snapTo(1.12f)
                 bounceScale.animateTo(
                     targetValue = 1f,
                     animationSpec = spring(
@@ -170,7 +170,7 @@ fun SymbiontSearchBarWithFilters(
                 )
             }
             launch {
-                searchBounceX.snapTo(-3f)
+                searchBounceX.snapTo(-2.5f)
                 searchBounceX.animateTo(
                     targetValue = 0f,
                     animationSpec = spring(
@@ -179,7 +179,7 @@ fun SymbiontSearchBarWithFilters(
                     )
                 )
             }
-        } else if (p < 0.20f) {
+        } else if (p < 0.30f) {
             hasSnappedBounce = false
         }
     }
@@ -198,14 +198,7 @@ fun SymbiontSearchBarWithFilters(
         }
     }
 
-    val isDetached = p >= 0.68f
-
-    // Ritrazione rapida del filamento residuo verso la calotta della barra dopo lo snap
-    val filamentRecoil by animateFloatAsState(
-        targetValue = if (isDetached) 0f else 1f,
-        animationSpec = tween(durationMillis = 130, easing = FastOutLinearInEasing),
-        label = "SymbiontFilamentRecoil"
-    )
+    val isDetached = p >= 0.88f
 
     val hasActiveFilters = sortConfig.selectedGenres.isNotEmpty() ||
             sortConfig.selectedKeywords.isNotEmpty() ||
@@ -259,35 +252,14 @@ fun SymbiontSearchBarWithFilters(
                 cornerRadius = CornerRadius(cy, cy)
             )
 
-            // 2. Rinculo del filamento subito dopo lo snap elastico (da 6dp a 0dp in 130ms)
-            if (isDetached && filamentRecoil > 0.01f) {
-                val recoilLen = with(density) { 6.dp.toPx() } * filamentRecoil
-                val nubPath = Path().apply {
-                    moveTo(xLeftCapPx, cy - rCapPx * 0.4f * filamentRecoil)
-                    cubicTo(
-                        x1 = xLeftCapPx + rCapPx * 0.8f, y1 = cy - rCapPx * 0.2f * filamentRecoil,
-                        x2 = xLeftCapPx + rCapPx + recoilLen, y2 = cy,
-                        x3 = xLeftCapPx + rCapPx + recoilLen, y3 = cy
-                    )
-                    cubicTo(
-                        x1 = xLeftCapPx + rCapPx + recoilLen, y1 = cy,
-                        x2 = xLeftCapPx + rCapPx * 0.8f, y2 = cy + rCapPx * 0.2f * filamentRecoil,
-                        x3 = xLeftCapPx, y3 = cy + rCapPx * 0.4f * filamentRecoil
-                    )
-                    close()
-                }
-                drawPath(nubPath, color = onSurfaceColor)
-            }
+            // 2. Ponte liquido viscoelastico e goccia emergente durante la connessione simbiotica (0.60 < p < 0.88)
+            if (!isDetached && p > 0.60f) {
+                val s = ((p - 0.60f) / 0.28f).coerceIn(0f, 1f)
+                val xDrop = restBtnCenterPx
+                val rDrop = rCapPx
 
-            // 3. Ponte liquido viscoelastico e goccia emergente durante la connessione simbiotica (0.02 < p < 0.68)
-            if (!isDetached && p > 0.02f) {
-                val t = (p / 0.68f).coerceIn(0f, 1f)
-                val startDropX = xLeftCapPx + rCapPx
-                val xDrop = startDropX + (restBtnCenterPx - startDropX) * t
-                val rDrop = (with(density) { 4.dp.toPx() } + (rCapPx - with(density) { 4.dp.toPx() }) * t).coerceAtLeast(1f)
-
-                // Angolo di attacco del collo sulla goccia (da 60° a 15°, aprendo fino a 330° di arco sferico continuo)
-                val thetaDeg = (60f * (1f - 0.75f * t)).coerceIn(15f, 60f)
+                // Angolo di attacco del collo sulla goccia (da 55° a 16°, aprendo fino a 330° di arco sferico continuo)
+                val thetaDeg = (55f * (1f - 0.70f * s)).coerceIn(16f, 55f)
                 val thetaRad = Math.toRadians(thetaDeg.toDouble()).toFloat()
                 val cosTheta = kotlin.math.cos(thetaRad)
                 val sinTheta = kotlin.math.sin(thetaRad)
@@ -299,7 +271,7 @@ fun SymbiontSearchBarWithFilters(
                 val dropBotY = cy + rDrop * sinTheta
 
                 // Angolo di attacco del collo sulla calotta destra della barra
-                val phiDeg = (65f * (1f - 0.65f * t)).coerceIn(20f, 65f)
+                val phiDeg = (55f * (1f - 0.65f * s)).coerceIn(18f, 55f)
                 val phiRad = Math.toRadians(phiDeg.toDouble()).toFloat()
                 val cosPhi = kotlin.math.cos(phiRad)
                 val sinPhi = kotlin.math.sin(phiRad)
@@ -310,7 +282,7 @@ fun SymbiontSearchBarWithFilters(
                 val barBotY = cy + rCapPx * sinPhi
 
                 // Strozzatura organica del punto vita
-                val waistHalfHeight = (rCapPx.coerceAtMost(rDrop) * (0.80f - 0.68f * t))
+                val waistHalfHeight = (rCapPx * (0.75f - 0.65f * s))
                     .coerceAtLeast(with(density) { 1.5.dp.toPx() })
 
                 val spanX = (dropTopX - barTopX).coerceAtLeast(1f)
@@ -487,13 +459,9 @@ fun SymbiontSearchBarWithFilters(
             }
         }
 
-        // --- CONTROLLI E ICONE DEI FILTRI (Visibili a distacco avvenuto p >= 0.68) ---
-        if (isDetached || (p > 0.65f && filtersVisible)) {
-            val buttonsAlpha = if (isDetached) {
-                if (!filtersVisible) ((p - 0.68f) / 0.25f).coerceIn(0f, 1f) else 1f
-            } else {
-                ((p - 0.65f) / 0.03f).coerceIn(0f, 1f)
-            }
+        // --- CONTROLLI E ICONE DEI FILTRI (Visibili a distacco avvenuto p >= 0.88) ---
+        if (isDetached) {
+            val buttonsAlpha = if (!filtersVisible) ((p - 0.88f) / 0.12f).coerceIn(0f, 1f) else 1f
 
             Row(
                 modifier = Modifier
