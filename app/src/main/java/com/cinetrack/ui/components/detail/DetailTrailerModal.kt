@@ -57,6 +57,7 @@ import dev.chrisbanes.haze.HazeState
  */
 @Composable
 fun DetailTrailerModal(
+    isVisible: Boolean = true,
     videos: List<Video>,
     accentColor: Color,
     hazeState: HazeState? = null,
@@ -108,13 +109,20 @@ fun DetailTrailerModal(
         categoryMenuData = null
     }
 
+    LaunchedEffect(isVisible) {
+        if (!isVisible) {
+            isPlaying = false
+            categoryMenuData = null
+        }
+    }
+
     Box(
         modifier = Modifier
             .fillMaxSize()
             .zIndex(100000f)
     ) {
         MorphGlassModal(
-            isVisible = true,
+            isVisible = isVisible,
             onDismissRequest = onDismiss,
             triggerBounds = triggerBounds,
             hazeState = hazeState,
@@ -346,7 +354,7 @@ fun DetailTrailerModal(
                                         modifier = Modifier
                                             .align(Alignment.Center)
                                             .size(26.dp)
-                                            .offset(x = 1.dp)
+                                            .offset(x = (-1.5).dp)
                                     )
                                 }
                             }

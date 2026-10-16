@@ -873,7 +873,7 @@ fun MovieDetailScreenContent(
         }
     )
 
-    if (showTrailerModal && cachedSuccess != null) {
+    if (cachedSuccess != null) {
         val modalVideos = remember(cachedSuccess?.videos, cachedSuccess?.trailers) {
             val vids = cachedSuccess?.videos ?: emptyList()
             if (vids.isNotEmpty()) {
@@ -886,6 +886,7 @@ fun MovieDetailScreenContent(
         }
         if (modalVideos.isNotEmpty()) {
             com.cinetrack.ui.components.detail.DetailTrailerModal(
+                isVisible = showTrailerModal,
                 videos = modalVideos,
                 accentColor = globalAccentColor,
                 hazeState = rootHazeState,

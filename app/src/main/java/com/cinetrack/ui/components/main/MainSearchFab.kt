@@ -417,7 +417,7 @@ fun BoxScope.MainScrollToTopFab(
         if (isDetached && filamentRecoil > 0.02f) {
             Canvas(modifier = Modifier.fillMaxSize()) {
                 val cx = size.width / 2f
-                val cyFab = with(density) { 52.dp.toPx() }
+                val cyFab = with(density) { 56.dp.toPx() }
                 val snapHeight = with(density) { 8.dp.toPx() } * filamentRecoil
                 val snapWidth = with(density) { 1.8.dp.toPx() } * filamentRecoil
                 val filamentPath = Path().apply {

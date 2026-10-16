@@ -126,7 +126,12 @@ fun DetailTrailersMenuModal(
 
             val minY = topSafetyPx
             val maxY = screenHeightPx - bottomSafetyPx - menuHeightPx
-            val yPos = if (openDownY + menuHeightPx <= screenHeightPx - bottomSafetyPx) {
+            // Se il trigger è nella metà inferiore dello schermo (come in DetailTrailerModal),
+            // o se aprendo in basso il menu uscirebbe dal modale/schermo, apriamo verso l'alto sopra al trigger
+            val prefersUp = openUpY >= topSafetyPx && (triggerRect.top > screenHeightPx * 0.45f || openDownY + menuHeightPx > screenHeightPx - bottomSafetyPx)
+            val yPos = if (prefersUp) {
+                openUpY
+            } else if (openDownY + menuHeightPx <= screenHeightPx - bottomSafetyPx) {
                 openDownY
             } else if (openUpY >= topSafetyPx) {
                 openUpY
@@ -139,7 +144,7 @@ fun DetailTrailersMenuModal(
             val blurAlpha by transition.animateFloat(
                 transitionSpec = { tween(200) },
                 label = "blurAlpha"
-            ) { if (it) 0.85f else 0f }
+            ) { if (it) 1f else 0f }
 
             AnimatedVisibility(
                 visible = isVisible,
@@ -174,7 +179,7 @@ fun DetailTrailersMenuModal(
                                     alpha = blurAlpha,
                                     shape = RoundedCornerShape(20.dp),
                                     blurRadius = 24.dp,
-                                    containerColor = Color(0xFF16161A).copy(alpha = 0.85f),
+                                    containerColor = Color(0xFF0C0C0F).copy(alpha = 0.94f),
                                     borderColor = Color.Transparent
                                 )
                         )
@@ -190,7 +195,7 @@ fun DetailTrailersMenuModal(
                                     alpha = blurAlpha,
                                     shape = RoundedCornerShape(20.dp),
                                     blurRadius = 24.dp,
-                                    containerColor = if (rootHazeState != null) Color.Transparent else Color(0xFF16161A).copy(alpha = 0.85f),
+                                    containerColor = Color(0xFF0C0C0F).copy(alpha = if (rootHazeState != null) 0.65f else 0.94f),
                                     borderColor = Color.Transparent
                                 )
                         )
@@ -201,7 +206,7 @@ fun DetailTrailersMenuModal(
                         Spacer(
                             modifier = Modifier
                                 .matchParentSize()
-                                .background(Color(0xFF16161A).copy(alpha = 0.95f), RoundedCornerShape(20.dp))
+                                .background(Color(0xFF0C0C0F).copy(alpha = 0.95f), RoundedCornerShape(20.dp))
                         )
                     }
 
