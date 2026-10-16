@@ -327,8 +327,14 @@
     <string name="settings_dialog_logout_desc">Êtes-vous sûr de vouloir vous déconnecter ? Vous devrez vous reconnecter pour synchroniser vos données.</string>
     <string name="settings_wipe_local_data_title">Effacer les données de l\'application (Sûr)</string>
     <string name="settings_wipe_local_data_desc">Efface toutes les données de votre appareil. Les données du cloud restent intactes.</string>
+    <string name="settings_group_account_security">Sécurité et session</string>
+    <string name="settings_group_data_danger">Données et zone de danger</string>
+    <string name="settings_logout_desc">Se déconnecter de cet appareil</string>
+    <string name="settings_login_desc">Connectez-vous pour synchroniser votre bibliothèque</string>
+    <string name="settings_link_google_desc">Associez votre compte Google pour une connexion rapide</string>
+    <string name="settings_delete_account_desc">Supprimer définitivement le compte et toutes les données cloud</string>
     <string name="settings_dialog_wipe_data_title">Effacer les données</string>
-    <string name="settings_wipe_data_desc">Choisissez comment vous souhaitez effacer vos données :</string>
+    <string name="settings_wipe_data_desc">Choisir d\'effacer le cache local ou la bibliothèque cloud</string>
     <string name="settings_dialog_wipe_local_data_title">Effacer les données locales</string>
     <string name="settings_dialog_wipe_local_data_desc">Êtes-vous sûr de vouloir effacer votre base de données locale ? Vos données sur le cloud ne seront pas affectées et seront téléchargées à nouveau.</string>
     <string name="settings_yes_wipe_local">Effacer les données locales</string>

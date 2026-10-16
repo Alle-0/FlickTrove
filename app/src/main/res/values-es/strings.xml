@@ -328,8 +328,14 @@
     <string name="settings_dialog_logout_desc">¿Estás seguro de que deseas cerrar sesión? Deberás iniciar sesión de nuevo para sincronizar tus datos.</string>
     <string name="settings_wipe_local_data_title">Borrar datos de la app (Seguro)</string>
     <string name="settings_wipe_local_data_desc">Borra todos los datos de tu dispositivo. Los datos en la nube permanecen intactos.</string>
+    <string name="settings_group_account_security">Seguridad y sesión</string>
+    <string name="settings_group_data_danger">Datos y zona de peligro</string>
+    <string name="settings_logout_desc">Cerrar sesión en este dispositivo</string>
+    <string name="settings_login_desc">Inicia sesión para sincronizar tu biblioteca en tus dispositivos</string>
+    <string name="settings_link_google_desc">Conecta tu cuenta de Google para iniciar sesión rápidamente</string>
+    <string name="settings_delete_account_desc">Eliminar definitivamente la cuenta y los datos en la nube</string>
     <string name="settings_dialog_wipe_data_title">Borrar datos</string>
-    <string name="settings_wipe_data_desc">Elige cómo deseas borrar tus datos:</string>
+    <string name="settings_wipe_data_desc">Elige borrar la caché local o la biblioteca en la nube</string>
     <string name="settings_dialog_wipe_local_data_title">Borrar datos locales</string>
     <string name="settings_dialog_wipe_local_data_desc">¿Estás seguro de que deseas borrar tu base de datos local? Tus datos en la nube no se verán afectados y se volverán a descargar.</string>
     <string name="settings_yes_wipe_local">Borrar datos locales</string>

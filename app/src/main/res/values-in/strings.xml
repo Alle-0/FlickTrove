@@ -342,8 +342,14 @@
     <string name="settings_dialog_logout_desc">Apakah Anda yakin ingin keluar? Anda harus masuk kembali untuk menyinkronkan data Anda.</string>
     <string name="settings_wipe_local_data_title">Hapus Data Aplikasi (Aman)</string>
     <string name="settings_wipe_local_data_desc">Hapus semua data dari perangkat Anda. Data cloud tetap utuh.</string>
+    <string name="settings_group_account_security">Keamanan &amp; Sesi</string>
+    <string name="settings_group_data_danger">Data &amp; Zona Bahaya</string>
+    <string name="settings_logout_desc">Keluar dari akun di perangkat ini</string>
+    <string name="settings_login_desc">Masuk untuk menyinkronkan perpustakaan di semua perangkat</string>
+    <string name="settings_link_google_desc">Hubungkan akun Google untuk masuk cepat</string>
+    <string name="settings_delete_account_desc">Hapus akun dan semua data cloud secara permanen</string>
     <string name="settings_dialog_wipe_data_title">Hapus Data</string>
-    <string name="settings_wipe_data_desc">Pilih cara menghapus data Anda:</string>
+    <string name="settings_wipe_data_desc">Pilih untuk menghapus cache lokal atau perpustakaan cloud</string>
     <string name="settings_dialog_wipe_local_data_title">Hapus Data Lokal</string>
     <string name="settings_dialog_wipe_local_data_desc">Apakah Anda yakin ingin menghapus database lokal? Data cloud Anda tidak akan terpengaruh dan akan diunduh ulang.</string>
     <string name="settings_yes_wipe_local">Hapus Data Lokal</string>

@@ -333,8 +333,14 @@
     <string name="settings_dialog_logout_desc">Sei sicuro di voler uscire dal tuo account? Dovrai effettuare nuovamente l\'accesso per sincronizzare i tuoi dati.</string>
     <string name="settings_wipe_local_data_title">Elimina Dati App (Sicuro)</string>
     <string name="settings_wipe_local_data_desc">Cancella tutti i dati dal tuo dispositivo. I dati sul cloud rimarranno intatti.</string>
+    <string name="settings_group_account_security">Sicurezza &amp; Sessione</string>
+    <string name="settings_group_data_danger">Dati &amp; Zona Pericolo</string>
+    <string name="settings_logout_desc">Disconnetti l\'account da questo dispositivo</string>
+    <string name="settings_login_desc">Accedi per sincronizzare la libreria su più dispositivi</string>
+    <string name="settings_link_google_desc">Collega il tuo account Google per un accesso rapido</string>
+    <string name="settings_delete_account_desc">Elimina definitivamente l\'account e tutti i dati cloud</string>
     <string name="settings_dialog_wipe_data_title">Elimina Dati</string>
-    <string name="settings_wipe_data_desc">Scegli come eliminare i tuoi dati:</string>
+    <string name="settings_wipe_data_desc">Scegli se azzerare dati locali o libreria cloud</string>
     <string name="settings_dialog_wipe_local_data_title">Elimina Dati Locali</string>
     <string name="settings_dialog_wipe_local_data_desc">Vuoi eliminare il database locale? I dati sul cloud non verranno toccati e saranno riscaricati in seguito.</string>
     <string name="settings_yes_wipe_local">Elimina Dati Locali</string>

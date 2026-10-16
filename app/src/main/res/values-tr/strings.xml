@@ -342,8 +342,14 @@
     <string name="settings_dialog_logout_desc">Çıkış yapmak istediğinizden emin misiniz? Verilerinizi senkronize etmek için tekrar giriş yapmanız gerekecektir.</string>
     <string name="settings_wipe_local_data_title">Uygulama Verilerini Sıfırla (Güvenli)</string>
     <string name="settings_wipe_local_data_desc">Cihazınızdaki tüm verileri temizleyin. Bulut verileri bozulmadan kalır.</string>
+    <string name="settings_group_account_security">Güvenlik ve Oturum</string>
+    <string name="settings_group_data_danger">Veri ve Tehlike Bölgesi</string>
+    <string name="settings_logout_desc">Bu cihazdaki hesaptan çıkış yapın</string>
+    <string name="settings_login_desc">Kitaplığınızı cihazlar arasında eşitlemek için giriş yapın</string>
+    <string name="settings_link_google_desc">Hızlı giriş için Google hesabınızı bağlayın</string>
+    <string name="settings_delete_account_desc">Hesabı ve tüm bulut verilerini kalıcı olarak silin</string>
     <string name="settings_dialog_wipe_data_title">Verileri Sıfırla</string>
-    <string name="settings_wipe_data_desc">Verilerinizi nasıl sıfırlamak istediğinizi seçin:</string>
+    <string name="settings_wipe_data_desc">Yerel önbelleği veya bulut kitaplığını temizlemeyi seçin</string>
     <string name="settings_dialog_wipe_local_data_title">Yerel Verileri Sıfırla</string>
     <string name="settings_dialog_wipe_local_data_desc">Yerel veritabanınızı temizlemek istediğinizden emin misiniz? Bulut verileriniz etkilenmeyecek ve yeniden indirilecektir.</string>
     <string name="settings_yes_wipe_local">Yerel Verileri Sıfırla</string>

@@ -333,8 +333,14 @@
     <string name="settings_dialog_logout_desc">क्या आप वाकई लॉग आउट करना चाहते हैं? अपना डेटा सिंक करने के लिए आपको फिर से लॉग इन करना होगा।</string>
     <string name="settings_wipe_local_data_title">ऐप डेटा मिटाएँ (सुरक्षित)</string>
     <string name="settings_wipe_local_data_desc">अपने डिवाइस से सभी डेटा साफ़ करें। क्लाउड डेटा सुरक्षित रहता है।</string>
+    <string name="settings_group_account_security">सुरक्षा और सत्र</string>
+    <string name="settings_group_data_danger">डेटा और डेंजर ज़ोन</string>
+    <string name="settings_logout_desc">इस डिवाइस से लॉग आउट करें</string>
+    <string name="settings_login_desc">अपनी लाइब्रेरी सिंक करने के लिए साइन इन करें</string>
+    <string name="settings_link_google_desc">त्वरित साइन-इन के लिए अपना Google खाता कनेक्ट करें</string>
+    <string name="settings_delete_account_desc">खाता और सभी क्लाउड डेटा हमेशा के लिए हटाएं</string>
     <string name="settings_dialog_wipe_data_title">डेटा मिटाएँ</string>
-    <string name="settings_wipe_data_desc">चुनें कि आप अपना डेटा कैसे मिटाना चाहते हैं:</string>
+    <string name="settings_wipe_data_desc">लोकल कैश या क्लाउड लाइब्रेरी साफ़ करने का विकल्प चुनें</string>
     <string name="settings_dialog_wipe_local_data_title">स्थानीय डेटा मिटाएँ</string>
     <string name="settings_dialog_wipe_local_data_desc">क्या आप वाकई अपना स्थानीय डेटाबेस साफ़ करना चाहते हैं? आपका क्लाउड डेटा प्रभावित नहीं होगा और उसे फिर से डाउनलोड किया जाएगा।</string>
     <string name="settings_yes_wipe_local">स्थानीय डेटा मिटाएँ</string>

@@ -342,8 +342,14 @@
     <string name="settings_dialog_logout_desc">确定要退出登录吗？您需要重新登录才能同步数据。</string>
     <string name="settings_wipe_local_data_title">清除本地数据（安全）</string>
     <string name="settings_wipe_local_data_desc">清除设备上的所有数据。云端数据保持不变。</string>
+    <string name="settings_group_account_security">安全与会话</string>
+    <string name="settings_group_data_danger">数据与危险区域</string>
+    <string name="settings_logout_desc">在此设备上退出账号</string>
+    <string name="settings_login_desc">登录以跨设备同步媒体库</string>
+    <string name="settings_link_google_desc">关联 Google 账号以便快速登录</string>
+    <string name="settings_delete_account_desc">永久删除账号及所有云端数据</string>
     <string name="settings_dialog_wipe_data_title">清除数据</string>
-    <string name="settings_wipe_data_desc">选择清除数据的方式：</string>
+    <string name="settings_wipe_data_desc">选择清理本地缓存或云端媒体库</string>
     <string name="settings_dialog_wipe_local_data_title">清除本地数据</string>
     <string name="settings_dialog_wipe_local_data_desc">确定要清除本地数据库吗？云端数据不受影响，可在联网后重新下载。</string>
     <string name="settings_yes_wipe_local">清除本地数据</string>

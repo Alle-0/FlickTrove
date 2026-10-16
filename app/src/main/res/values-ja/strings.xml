@@ -342,8 +342,14 @@
     <string name="settings_dialog_logout_desc">本当にログアウトしますか？ データを同期するには再度ログインが必要です。</string>
     <string name="settings_wipe_local_data_title">端末データを消去（安全）</string>
     <string name="settings_wipe_local_data_desc">端末上の全データを削除します。クラウドデータは影響を受けません。</string>
+    <string name="settings_group_account_security">セキュリティとセッション</string>
+    <string name="settings_group_data_danger">データと危険ゾーン</string>
+    <string name="settings_logout_desc">この端末からログアウト</string>
+    <string name="settings_login_desc">サインインして端末間でライブラリを同期</string>
+    <string name="settings_link_google_desc">Googleアカウントを連携して素早くサインイン</string>
+    <string name="settings_delete_account_desc">アカウントとすべてのクラウドデータを完全に削除</string>
     <string name="settings_dialog_wipe_data_title">データの消去</string>
-    <string name="settings_wipe_data_desc">データの消去方法を選択してください:</string>
+    <string name="settings_wipe_data_desc">ローカルキャッシュまたはクラウドライブラリの消去を選択</string>
     <string name="settings_dialog_wipe_local_data_title">ローカルデータを消去</string>
     <string name="settings_dialog_wipe_local_data_desc">ローカルデータベースを消去しますか？ クラウド上のデータは安全に保持され、再ダウンロードされます。</string>
     <string name="settings_yes_wipe_local">ローカルデータを消去</string>

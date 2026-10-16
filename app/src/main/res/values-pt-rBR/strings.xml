@@ -333,8 +333,14 @@
     <string name="settings_dialog_logout_desc">Tem certeza de que deseja sair? Você precisará entrar novamente para sincronizar seus dados.</string>
     <string name="settings_wipe_local_data_title">Limpar Dados do App (Seguro)</string>
     <string name="settings_wipe_local_data_desc">Limpe todos os dados do seu dispositivo. Os dados da nuvem permanecem intactos.</string>
+    <string name="settings_group_account_security">Segurança e Sessão</string>
+    <string name="settings_group_data_danger">Dados e Zona de Perigo</string>
+    <string name="settings_logout_desc">Desconectar sua conta deste dispositivo</string>
+    <string name="settings_login_desc">Entre para sincronizar sua biblioteca em seus dispositivos</string>
+    <string name="settings_link_google_desc">Conecte sua conta do Google para login rápido</string>
+    <string name="settings_delete_account_desc">Excluir permanentemente a conta e todos os dados na nuvem</string>
     <string name="settings_dialog_wipe_data_title">Limpar Dados</string>
-    <string name="settings_wipe_data_desc">Escolha como deseja limpar seus dados:</string>
+    <string name="settings_wipe_data_desc">Escolha limpar o cache local ou a biblioteca na nuvem</string>
     <string name="settings_dialog_wipe_local_data_title">Limpar Dados Locais</string>
     <string name="settings_dialog_wipe_local_data_desc">Tem certeza de que deseja limpar seu banco de dados local? Seus dados da nuvem não serão afetados e serão baixados novamente.</string>
     <string name="settings_yes_wipe_local">Limpar Dados Locais</string>

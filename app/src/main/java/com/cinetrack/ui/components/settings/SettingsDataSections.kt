@@ -550,9 +550,21 @@ fun SettingsAccountSection(
         subtitle = email,
         icon = ImageVector.vectorResource(id = R.drawable.ic_persona)
     ) {
+        Text(
+            text = stringResource(R.string.settings_group_account_security).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = currentAccentColor.copy(alpha = 0.85f),
+            modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp)
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_exit),
             title = if (!isGuest) stringResource(R.string.settings_dialog_logout_title) else stringResource(R.string.settings_login),
+            description = if (!isGuest) stringResource(R.string.settings_logout_desc) else stringResource(R.string.settings_login_desc),
             tint = if (!isGuest) Color.White else currentAccentColor,
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -568,6 +580,7 @@ fun SettingsAccountSection(
             SettingsItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_google),
                 title = stringResource(R.string.settings_link_google),
+                description = stringResource(R.string.settings_link_google_desc),
                 tint = Color.Unspecified,
                 onClick = {
                     if (vibrationEnabled) VibrationHelper.vibrateLongClick(context)
@@ -623,6 +636,19 @@ fun SettingsAccountSection(
             )
         }
         
+        Spacer(modifier = Modifier.height(14.dp))
+
+        Text(
+            text = stringResource(R.string.settings_group_data_danger).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = Color(0xFFFF5252).copy(alpha = 0.85f),
+            modifier = Modifier.padding(start = 8.dp, top = 4.dp, bottom = 4.dp)
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
             title = stringResource(id = R.string.settings_cleanup_rewatches_title),
@@ -649,6 +675,7 @@ fun SettingsAccountSection(
             SettingsItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                 title = stringResource(R.string.settings_delete_account),
+                description = stringResource(R.string.settings_delete_account_desc),
                 tint = Color(0xFFFF5252),
                 borderColor = Color(0xFFFF5252),
                 onClick = { 

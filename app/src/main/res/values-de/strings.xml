@@ -327,8 +327,14 @@
     <string name="settings_dialog_logout_desc">Möchtest du dich wirklich abmelden? Du musst dich erneut anmelden, um deine Daten zu synchronisieren.</string>
     <string name="settings_wipe_local_data_title">App-Daten löschen (Sicher)</string>
     <string name="settings_wipe_local_data_desc">Löscht alle Daten von deinem Gerät. Cloud-Daten bleiben intakt.</string>
+    <string name="settings_group_account_security">Sicherheit &amp; Sitzung</string>
+    <string name="settings_group_data_danger">Daten &amp; Gefahrenzone</string>
+    <string name="settings_logout_desc">Von diesem Gerät abmelden</string>
+    <string name="settings_login_desc">Anmelden, um deine Bibliothek geräteübergreifend zu synchronisieren</string>
+    <string name="settings_link_google_desc">Google-Konto für eine schnelle Anmeldung verknüpfen</string>
+    <string name="settings_delete_account_desc">Konto und alle Cloud-Daten unwiderruflich löschen</string>
     <string name="settings_dialog_wipe_data_title">Daten löschen</string>
-    <string name="settings_wipe_data_desc">Wähle, wie du deine Daten löschen möchtest:</string>
+    <string name="settings_wipe_data_desc">Lokalen Cache oder Cloud-Bibliothek leeren</string>
     <string name="settings_dialog_wipe_local_data_title">Lokale Daten löschen</string>
     <string name="settings_dialog_wipe_local_data_desc">Möchtest du deine lokale Datenbank wirklich löschen? Deine Cloud-Daten sind nicht betroffen und werden erneut heruntergeladen.</string>
     <string name="settings_yes_wipe_local">Lokale Daten löschen</string>

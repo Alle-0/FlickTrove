@@ -334,8 +334,14 @@
     <string name="settings_dialog_logout_desc">Вы уверены, что хотите выйти? Вам нужно будет войти снова, чтобы синхронизировать ваши данные.</string>
     <string name="settings_wipe_local_data_title">Удалить данные приложения (безопасно)</string>
     <string name="settings_wipe_local_data_desc">Очистить все данные с вашего устройства. Данные в облаке останутся нетронутыми.</string>
+    <string name="settings_group_account_security">Безопасность и сеанс</string>
+    <string name="settings_group_data_danger">Данные и опасная зона</string>
+    <string name="settings_logout_desc">Выйти из аккаунта на этом устройстве</string>
+    <string name="settings_login_desc">Войдите, чтобы синхронизировать библиотеку между устройствами</string>
+    <string name="settings_link_google_desc">Подключите аккаунт Google для быстрого входа</string>
+    <string name="settings_delete_account_desc">Навсегда удалить аккаунт и все данные в облаке</string>
     <string name="settings_dialog_wipe_data_title">Удалить данные</string>
-    <string name="settings_wipe_data_desc">Выберите, как вы хотите удалить свои данные:</string>
+    <string name="settings_wipe_data_desc">Очистить локальный кэш или облачную библиотеку</string>
     <string name="settings_dialog_wipe_local_data_title">Удалить локальные данные</string>
     <string name="settings_dialog_wipe_local_data_desc">Вы уверены, что хотите очистить вашу локальную базу данных? Ваши данные в облаке не пострадают и будут загружены заново.</string>
     <string name="settings_yes_wipe_local">Удалить локальные данные</string>
