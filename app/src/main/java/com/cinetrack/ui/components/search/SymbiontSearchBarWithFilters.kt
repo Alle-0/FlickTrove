@@ -286,27 +286,57 @@ fun SymbiontSearchBarWithFilters(
                 val xDrop = startDropX + (restBtnCenterPx - startDropX) * t
                 val rDrop = (with(density) { 4.dp.toPx() } + (rCapPx - with(density) { 4.dp.toPx() }) * t).coerceAtLeast(1f)
 
-                val yBase = rCapPx * (1f - 0.25f * t)
-                val waistHalfHeight = (yBase.coerceAtMost(rDrop) * (1f - 0.72f * t))
+                // Angolo di attacco del collo sulla goccia (da 60° a 15°, aprendo fino a 330° di arco sferico continuo)
+                val thetaDeg = (60f * (1f - 0.75f * t)).coerceIn(15f, 60f)
+                val thetaRad = Math.toRadians(thetaDeg.toDouble()).toFloat()
+                val cosTheta = kotlin.math.cos(thetaRad)
+                val sinTheta = kotlin.math.sin(thetaRad)
+
+                // Punti di tangenza del collo sul perimetro curvo della goccia
+                val dropTopX = xDrop - rDrop * cosTheta
+                val dropTopY = cy - rDrop * sinTheta
+                val dropBotX = xDrop - rDrop * cosTheta
+                val dropBotY = cy + rDrop * sinTheta
+
+                // Angolo di attacco del collo sulla calotta destra della barra
+                val phiDeg = (65f * (1f - 0.65f * t)).coerceIn(20f, 65f)
+                val phiRad = Math.toRadians(phiDeg.toDouble()).toFloat()
+                val cosPhi = kotlin.math.cos(phiRad)
+                val sinPhi = kotlin.math.sin(phiRad)
+
+                val barTopX = xLeftCapPx + rCapPx * cosPhi
+                val barTopY = cy - rCapPx * sinPhi
+                val barBotX = xLeftCapPx + rCapPx * cosPhi
+                val barBotY = cy + rCapPx * sinPhi
+
+                // Strozzatura organica del punto vita
+                val waistHalfHeight = (rCapPx.coerceAtMost(rDrop) * (0.80f - 0.68f * t))
                     .coerceAtLeast(with(density) { 1.5.dp.toPx() })
 
-                val distX = (xDrop - xLeftCapPx).coerceAtLeast(1f)
-                val c1X = xLeftCapPx + distX * 0.35f
-                val c1YTop = cy - waistHalfHeight * 1.15f
-                val c1YBot = cy + waistHalfHeight * 1.15f
+                val spanX = (dropTopX - barTopX).coerceAtLeast(1f)
+                val c1X = barTopX + spanX * 0.35f
+                val c1YTop = cy - waistHalfHeight
+                val c2X = dropTopX - spanX * 0.35f
+                val c2YTop = cy - waistHalfHeight
 
-                val pointedness = 0.3f + 0.9f * t
-                val c2X = (xDrop - rDrop * pointedness).coerceAtLeast(c1X + distX * 0.1f)
-                val c2YTop = cy - rDrop
-                val c2YBot = cy + rDrop
+                val c3X = dropBotX - spanX * 0.35f
+                val c3YBot = cy + waistHalfHeight
+                val c4X = barBotX + spanX * 0.35f
+                val c4YBot = cy + waistHalfHeight
 
                 val bridgePath = Path().apply {
-                    moveTo(xLeftCapPx, cy - yBase)
+                    // 1. Partenza dalla calotta destra della barra
+                    moveTo(barTopX, barTopY)
+
+                    // 2. Ponte superiore verso il punto di contatto con la goccia sferica
                     cubicTo(
                         x1 = c1X, y1 = c1YTop,
                         x2 = c2X, y2 = c2YTop,
-                        x3 = xDrop, y3 = cy - rDrop
+                        x3 = dropTopX, y3 = dropTopY
                     )
+
+                    // 3. Arco sferico puro della goccia: copre da 240° a 330° di cerchio perfetto,
+                    // garantendo calotta superiore, frontale e inferiore impeccabilmente arrotondate (zero faccette o ottagoni)
                     arcTo(
                         rect = Rect(
                             left = xDrop - rDrop,
@@ -314,22 +344,24 @@ fun SymbiontSearchBarWithFilters(
                             right = xDrop + rDrop,
                             bottom = cy + rDrop
                         ),
-                        startAngleDegrees = -90f,
-                        sweepAngleDegrees = 180f,
+                        startAngleDegrees = -180f + thetaDeg,
+                        sweepAngleDegrees = 360f - 2f * thetaDeg,
                         forceMoveTo = false
                     )
+
+                    // 4. Ponte inferiore di ritorno verso la calotta della barra
                     cubicTo(
-                        x1 = c2X, y1 = c2YBot,
-                        x2 = c1X, y2 = c1YBot,
-                        x3 = xLeftCapPx, y3 = cy + yBase
+                        x1 = c3X, y1 = c3YBot,
+                        x2 = c4X, y2 = c4YBot,
+                        x3 = barBotX, y3 = barBotY
                     )
-                    lineTo(xLeftCapPx, cy - yBase)
+
+                    // 5. Chiusura del profilo all'interno della calotta della barra
+                    lineTo(xLeftCapPx, barBotY)
+                    lineTo(xLeftCapPx, barTopY)
                     close()
                 }
 
-                // Disegno con onSurface solido: dove il ponte si innesta nella calotta della barra,
-                // la fusione è al 100% solida nel buffer e viene scalata globalmente a 0.05f alpha
-                // eliminando alla radice qualsiasi regione più chiara o bordo interno.
                 drawPath(bridgePath, color = onSurfaceColor)
             }
         }
