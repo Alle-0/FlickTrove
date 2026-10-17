@@ -69,7 +69,11 @@ class EditorialCollectionViewModel @Inject constructor(
         return if (isChronological) {
             movies.sortedBy { it.second } // Sort by timelineIndex
         } else {
-            movies.sortedBy { it.first.releaseDate } // Sort by release date
+            movies.sortedWith(
+                compareBy<Pair<Movie, Int>> { (movie, _) ->
+                    movie.effectiveReleaseDate ?: "9999-99-99"
+                }.thenBy { it.second }
+            )
         }
     }
 }

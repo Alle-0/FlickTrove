@@ -295,7 +295,7 @@ fun CollectionDetailScreenContent(
                             val watchedCount = remember(uiState.displayedParts, uiState.favorites) {
                                 if (uiState.displayedParts.isNotEmpty()) {
                                     uiState.displayedParts.count { part ->
-                                        val local = uiState.favorites.find { it.id == part.id }
+                                        val local = uiState.favorites.find { it.id == part.id && (it.mediaType == part.mediaType || it.mediaType.isBlank() || part.mediaType.isBlank()) }
                                         local?.watched == true || (local == null && part.watched)
                                     }
                                 } else 0
@@ -443,7 +443,7 @@ fun CollectionDetailScreenContent(
                                         .weight(1f),
                                     contentAlignment = Alignment.Center
                                 ) {
-                                    val fav = uiState.favorites.find { it.id == movie.id }
+                                    val fav = uiState.favorites.find { it.id == movie.id && (it.mediaType == movie.mediaType || it.mediaType.isBlank() || movie.mediaType.isBlank()) }
                                     val effectiveMovie = if (fav != null) {
                                         fav.copy(
                                             genreIds = if (!movie.genreIds.isNullOrEmpty()) movie.genreIds else fav.genreIds

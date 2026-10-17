@@ -401,6 +401,10 @@ data class Movie(
         get() = (if (!title.isNullOrEmpty()) title else name) ?: ""
 
     @get:Exclude
+    val effectiveReleaseDate: String?
+        get() = (releaseDate ?: firstAirDate)?.takeIf { it.isNotBlank() }
+
+    @get:Exclude
     val isReleased: Boolean
         get() {
             // 1. Robust date comparison (Priority)
@@ -412,7 +416,7 @@ data class Movie(
             val currentYear = todayIso.take(4).toIntOrNull() ?: 2024
 
             // Check date if available
-            val dateStr = releaseDate ?: firstAirDate
+            val dateStr = effectiveReleaseDate
             if (!dateStr.isNullOrBlank()) {
                 try {
                     if (dateStr.length >= 10) {

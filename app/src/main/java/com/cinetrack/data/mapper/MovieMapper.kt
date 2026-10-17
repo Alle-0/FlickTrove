@@ -31,7 +31,7 @@ object MovieMapper {
                 ?: regionalReleases?.firstOrNull()?.releaseDate?.take(10)
                 ?: response.releaseDate
         } else {
-            response.releaseDate
+            response.firstAirDate ?: response.releaseDate
         }
 
         val topCast = response.credits?.cast?.distinctBy { it.id }?.map { 

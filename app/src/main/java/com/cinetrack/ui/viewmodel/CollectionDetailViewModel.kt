@@ -228,13 +228,17 @@ class CollectionDetailViewModel @Inject constructor(
         val sortedParts = when (sortConfig.sortType) {
             "release_date" -> {
                 if (sortConfig.sortDirection == "desc") {
-                    filteredItems.sortedByDescending { (movie, _) ->
-                        movie.releaseDate?.takeIf { it.isNotBlank() } ?: ""
-                    }
+                    filteredItems.sortedWith(
+                        compareByDescending<Pair<Movie, Int>> { (movie, _) ->
+                            movie.effectiveReleaseDate ?: ""
+                        }.thenByDescending { it.second }
+                    )
                 } else {
-                    filteredItems.sortedBy { (movie, _) ->
-                        movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
-                    }
+                    filteredItems.sortedWith(
+                        compareBy<Pair<Movie, Int>> { (movie, _) ->
+                            movie.effectiveReleaseDate ?: "9999-99-99"
+                        }.thenBy { it.second }
+                    )
                 }
             }
             else -> { // "chronological"
@@ -248,7 +252,7 @@ class CollectionDetailViewModel @Inject constructor(
 
         val totalParts = baseItems.size
         val watchedParts = baseItems.count { (part, _) ->
-            val local = favorites.find { it.id == part.id }
+            val local = favorites.find { it.id == part.id && (it.mediaType == part.mediaType || it.mediaType.isBlank() || part.mediaType.isBlank()) }
             local?.watched == true || (local == null && part.watched)
         }
         val currentCollId = _collectionId.value
@@ -316,7 +320,7 @@ class CollectionDetailViewModel @Inject constructor(
                         val sortedParts = details.parts.map { movie ->
                             if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
                         }.sortedBy { movie ->
-                            movie.releaseDate?.takeIf { it.isNotBlank() } ?: "9999-99-99"
+                            movie.effectiveReleaseDate ?: "9999-99-99"
                         }
                         val withIndex = sortedParts.mapIndexed { idx, movie -> Pair(movie, idx + 1) }
                         _rawPartsWithTimeline.value = withIndex.toImmutableList()
