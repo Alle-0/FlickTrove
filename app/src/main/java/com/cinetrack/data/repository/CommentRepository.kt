@@ -124,7 +124,8 @@ class CommentRepository @Inject constructor(
         depth: Int = 0,
         mediaTitle: String = "",
         mediaImage: String? = null,
-        attachedMedia: List<String> = emptyList()
+        attachedMedia: List<String> = emptyList(),
+        language: String? = null
     ): String? {
         val user = auth.currentUser ?: return null
         
@@ -153,7 +154,7 @@ class CommentRepository @Inject constructor(
             parentUserId = parentUserId,
             depth = depth,
             attachedMedia = attachedMedia,
-            language = java.util.Locale.getDefault().language.lowercase().takeIf { it.isNotBlank() } ?: "en"
+            language = language ?: java.util.Locale.getDefault().language.lowercase().takeIf { it.isNotBlank() } ?: "en"
         )
 
         return try {

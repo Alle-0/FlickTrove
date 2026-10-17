@@ -686,7 +686,7 @@ class CommsUniViewModel @Inject constructor(
                 }
             } else null
 
-            val currentLanguage = java.util.Locale.getDefault().language.lowercase().takeIf { it.isNotBlank() } ?: "en"
+            val currentLanguage = translationManager.detectCommentLanguage(cleanText)
             val tempId = "temp_${System.currentTimeMillis()}"
             val optimistic = com.cinetrack.data.model.AppComment(
                 id = tempId,
@@ -761,7 +761,8 @@ class CommsUniViewModel @Inject constructor(
                         depth = depth.coerceAtMost(1),
                         mediaTitle = "",
                         mediaImage = optimisticAvatar,
-                        attachedMedia = attachedMedia
+                        attachedMedia = attachedMedia,
+                        language = currentLanguage
                     )
                 } catch (e: Exception) {
                     null

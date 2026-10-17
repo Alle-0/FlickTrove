@@ -121,6 +121,36 @@ class TranslationManager @Inject constructor(
     }
 
     /**
+     * Determines the most accurate ISO language code for a newly composed comment:
+     * 1. Evaluates [text] on-device using ML Kit language detection (fast ~5ms, zero network).
+     * 2. If [text] is sufficiently long (>= 6 chars) and a language is identified with confidence, returns its ISO tag.
+     * 3. If [text] is short, undetermined ("und"), or detection fails, falls back gracefully to the device's default locale language.
+     */
+    suspend fun detectCommentLanguage(text: String): String {
+        val clean = text.trim()
+        if (clean.length >= 6) {
+            try {
+                val identifier = LanguageIdentification.getClient(
+                    LanguageIdentificationOptions.Builder()
+                        .setConfidenceThreshold(0.45f)
+                        .build()
+                )
+                val lang = identifier.identifyLanguage(clean).await()
+                identifier.close()
+                if (lang != "und" && !lang.isNullOrBlank()) {
+                    val normalized = resolveTargetLanguageCode(lang)
+                    if (normalized.isNotBlank()) {
+                        return normalized
+                    }
+                }
+            } catch (e: Exception) {
+                Log.w("TranslationManager", "detectCommentLanguage failed, using device locale fallback", e)
+            }
+        }
+        return java.util.Locale.getDefault().language.lowercase().takeIf { it.isNotBlank() } ?: "en"
+    }
+
+    /**
      * Returns true if the model for the given source→target pair is already on-device.
      */
     suspend fun isModelDownloaded(sourceLang: String, targetLang: String = currentTargetLanguage): Boolean {
