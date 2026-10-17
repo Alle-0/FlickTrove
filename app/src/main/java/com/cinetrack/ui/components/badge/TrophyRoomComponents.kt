@@ -2329,6 +2329,8 @@ fun TrophyDetailContent(
             } else {
                 availableTiers.firstOrNull { it.ordinal > item.currentTier.ordinal }
             }
+            val isMaxTier = item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS &&
+                item.isUnlocked && (targetTier == null || item.currentTier == availableTiers.lastOrNull())
 
             // Pillola Formato Tier sopra al badge circolare
             if (item.isUnlocked) {
@@ -2731,7 +2733,6 @@ fun TrophyDetailContent(
             if (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS) {
                 val currentVal = item.badge.progressCurrent
                 val unit = item.badge.localizedUnit()
-                val isMaxTier = item.isUnlocked && (targetTier == null || item.currentTier == availableTiers.lastOrNull())
 
                 val nextTarget = if (!item.isUnlocked) {
                     item.badge.progressiveSteps[firstTier]?.targetThreshold ?: item.badge.progressTarget
@@ -2748,8 +2749,12 @@ fun TrophyDetailContent(
                         .fillMaxWidth()
                         .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-                        .padding(14.dp)
+                        .border(
+                            1.dp,
+                            if (isMaxTier) item.currentTier.primaryColor.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.08f),
+                            RoundedCornerShape(16.dp)
+                        )
+                        .padding(horizontal = 14.dp, vertical = 12.dp)
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
@@ -2764,7 +2769,7 @@ fun TrophyDetailContent(
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 1.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.50f)
+                                color = if (isMaxTier) item.currentTier.primaryColor else Color.White.copy(alpha = 0.50f)
                             )
 
                             if (targetTier != null) {
@@ -2779,13 +2784,13 @@ fun TrophyDetailContent(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(6.dp))
+                        Spacer(modifier = Modifier.height(4.dp))
 
                         // Valore numerico
                         Row(verticalAlignment = Alignment.Bottom) {
                             Text(
                                 text = "$currentVal",
-                                fontSize = 22.sp,
+                                fontSize = 20.sp,
                                 fontWeight = FontWeight.Black,
                                 color = Color.White
                             )
@@ -2813,7 +2818,7 @@ fun TrophyDetailContent(
                             }
                         }
 
-                        Spacer(modifier = Modifier.height(10.dp))
+                        Spacer(modifier = Modifier.height(8.dp))
 
                         // Barra di avanzamento
                         Box(
@@ -2898,7 +2903,9 @@ fun TrophyDetailContent(
                 }
             }
 
-            if (hasExtraSections) {
+            val hasTrailingBottomSection = (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS && !isMaxTier) ||
+                (item.badge.id == "badge_executive_producer")
+            if (hasTrailingBottomSection) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
         }
