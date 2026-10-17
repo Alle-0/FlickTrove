@@ -194,12 +194,12 @@ class CommentsViewModel @Inject constructor(
     }
 
     /**
-     * Requests translation of a comment.
+     * Requests translation of a comment on-demand.
      * If already translated, toggles back to the original text.
      */
     fun translateComment(commentId: String, text: String, requireWifi: Boolean? = null) {
         val current = _translationStates.value[commentId]
-        // Toggle: if already translated, reset to Idle
+        // Toggle: if already translated, reset to Idle (original text)
         if (current is TranslationState.Translated) {
             _translationStates.value = _translationStates.value + (commentId to TranslationState.Idle)
             return
@@ -217,87 +217,28 @@ class CommentsViewModel @Inject constructor(
             translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
 
             val targetMlKit = translationManager.getCurrentTargetLanguage()
-            val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
 
-            // Step 1: Detect source language
-            val detectedLang = translationManager.identifyLanguage(cleanText)
-            if (detectedLang != null && (detectedLang == targetBcp47 || detectedLang == targetMlKit)) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                return@launch
-            }
-
-            val effectiveSourceLang = detectedLang ?: run {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                return@launch
-            }
-
-            // Step 2: Check / Download models in background without blocking modal prompt
-            _showTranslationPrompt.value = null
-            val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
-            if (!modelReady) {
-                _translationStates.value = _translationStates.value + (commentId to TranslationState.Downloading)
-                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit, requireWifi = requireWifi ?: false)
-                if (!downloaded) {
-                    // Seamless fallback to online translation immediately if model download fails
-                    _translationStates.value = _translationStates.value + (commentId to TranslationState.Translating)
-                    val onlineResult = translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
-                    if (onlineResult != null && onlineResult.trim().lowercase() != cleanText.trim().lowercase()) {
-                        _translationStates.value = _translationStates.value + (commentId to TranslationState.Translated(onlineResult))
-                        return@launch
-                    } else {
-                        _translationStates.value = _translationStates.value + (commentId to TranslationState.Error)
-                        actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_lang_model))
-                        return@launch
-                    }
-                }
-            }
-
-            // Step 3: Translate
             _translationStates.value = _translationStates.value + (commentId to TranslationState.Translating)
-            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
-                ?: translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
-            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                _translationStates.value = _translationStates.value + (commentId to TranslationState.Translated(translated))
-            } else {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                _translationStates.value = _translationStates.value + (commentId to TranslationState.Idle)
+
+            when (val result = translationManager.translateCommentSmart(cleanText, targetMlKit)) {
+                is com.cinetrack.util.TranslationManager.TranslationResult.Success -> {
+                    _translationStates.value = _translationStates.value + (commentId to TranslationState.Translated(result.text))
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.AlreadyInLanguage -> {
+                    _translationStates.value = _translationStates.value + (commentId to TranslationState.Idle)
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.Error -> {
+                    _translationStates.value = _translationStates.value + (commentId to TranslationState.Error)
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_translating))
+                }
             }
         }
     }
 
     private fun autoTranslateCommentsIfModelsDownloaded(comments: List<AppComment>) {
-        if (comments.isEmpty()) return
-        viewModelScope.launch {
-            try {
-                val prefs = preferenceRepository.userPreferencesFlow.first()
-                val systemLang = java.util.Locale.getDefault().language
-                translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-                val targetMlKit = translationManager.getCurrentTargetLanguage()
-                val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
-
-                val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-
-                for (comment in comments) {
-                    val commentId = comment.id
-                    if (commentId.isBlank() || _translationStates.value.containsKey(commentId)) continue
-
-                    val cleanText = comment.text.replace(mediaRegex, "").trim()
-                    if (cleanText.length < 5) continue
-
-                    val detectedLang = translationManager.identifyLanguage(cleanText) ?: continue
-                    if (detectedLang == targetBcp47 || detectedLang == targetMlKit) continue
-
-                    if (translationManager.isModelDownloaded(detectedLang, targetMlKit)) {
-                        val translated = translationManager.translateFrom(cleanText, detectedLang, targetMlKit)
-                        if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                            _translationStates.value = _translationStates.value + (commentId to TranslationState.Translated(translated))
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("CommentsViewModel", "Error in auto-translating comments", e)
-            }
-        }
+        // Disabled: Never auto-mangle comments into machine translations on initial load.
+        // Translation is strictly on-demand per comment to prevent rate-limits and preserve authentic discussion.
     }
 
     // ── Gotcha 3: release all Translator native resources when ViewModel is destroyed ──

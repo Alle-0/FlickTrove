@@ -152,7 +152,8 @@ class CommentRepository @Inject constructor(
             parentId = parentId,
             parentUserId = parentUserId,
             depth = depth,
-            attachedMedia = attachedMedia
+            attachedMedia = attachedMedia,
+            language = java.util.Locale.getDefault().language.lowercase().takeIf { it.isNotBlank() } ?: "en"
         )
 
         return try {

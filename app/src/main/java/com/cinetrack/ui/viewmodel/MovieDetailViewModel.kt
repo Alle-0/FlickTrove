@@ -1222,27 +1222,17 @@ class MovieDetailViewModel @Inject constructor(
             val prefs = preferenceRepository.userPreferencesFlow.first()
             val systemLang = java.util.Locale.getDefault().language
             translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-            val success = translationManager.downloadModel(requireWifi)
-            if (success) {
-                val translated = translationManager.translate(text)
-                if (translated != null) {
-                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = translated)) }
-                } else {
-                    val onlineFallback = translationManager.translateOnline(text, "en", translationManager.getCurrentTargetLanguage())
-                    if (onlineFallback != null) {
-                        _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = onlineFallback)) }
-                    } else {
-                        _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
-                        emitMessage(UiText.StringResource(R.string.msg_error_translating))
-                    }
+            when (val result = translationManager.translateCommentSmart(text)) {
+                is com.cinetrack.util.TranslationManager.TranslationResult.Success -> {
+                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = result.text)) }
                 }
-            } else {
-                val onlineFallback = translationManager.translateOnline(text, "en", translationManager.getCurrentTargetLanguage())
-                if (onlineFallback != null) {
-                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = onlineFallback)) }
-                } else {
-                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore nel download del modello lingua")) }
-                    emitMessage(UiText.StringResource(R.string.msg_error_lang_model))
+                is com.cinetrack.util.TranslationManager.TranslationResult.AlreadyInLanguage -> {
+                    _translationStates.update { it - commentId }
+                    emitMessage(UiText.StringResource(R.string.comment_already_in_language))
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.Error -> {
+                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
+                    emitMessage(UiText.StringResource(R.string.msg_error_translating))
                 }
             }
         }

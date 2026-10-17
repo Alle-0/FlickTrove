@@ -794,7 +794,7 @@ private fun HeaderTechnicalPill(
     Box(
         modifier = modifier
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .defaultMinSize(minWidth = 36.dp, minHeight = 36.dp)
+            .size(36.dp)
             .clip(pillShape)
             .background(Color.White.copy(alpha = 0.08f), pillShape)
             .drawBehind {
@@ -811,8 +811,7 @@ private fun HeaderTechnicalPill(
                 width = 0.5.dp,
                 color = animatedBorderColor,
                 shape = pillShape
-            )
-            .padding(horizontal = 10.dp, vertical = 6.dp),
+            ),
         contentAlignment = Alignment.Center
     ) {
         Icon(

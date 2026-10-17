@@ -686,6 +686,7 @@ class CommsUniViewModel @Inject constructor(
                 }
             } else null
 
+            val currentLanguage = java.util.Locale.getDefault().language.lowercase().takeIf { it.isNotBlank() } ?: "en"
             val tempId = "temp_${System.currentTimeMillis()}"
             val optimistic = com.cinetrack.data.model.AppComment(
                 id = tempId,
@@ -710,6 +711,7 @@ class CommsUniViewModel @Inject constructor(
                 archivedLikes = 0,
                 nativeLikes = 0,
                 attachedMedia = attachedMedia,
+                language = currentLanguage,
                 isOnCommsUni = effectivePostToCommsUni
             )
 
@@ -728,13 +730,20 @@ class CommsUniViewModel @Inject constructor(
             val result = if (effectivePostToCommsUni && currentEntityId.isNotBlank()) {
                 // Destinazione CommsUni: pubblica solo sulla rete CommsUni
                 if (parentId != null) {
-                    commsUniRepository.createReply(parentId, cleanText, isSpoiler, attachments = commsUniAttachments)
+                    commsUniRepository.createReply(
+                        commentId = parentId,
+                        text = cleanText,
+                        isSpoiler = isSpoiler,
+                        language = currentLanguage,
+                        attachments = commsUniAttachments
+                    )
                 } else {
                     commsUniRepository.createComment(
                         entityType = currentEntityType,
                         entityId = currentEntityId,
                         text = cleanText,
                         isSpoiler = isSpoiler,
+                        language = currentLanguage,
                         title = currentTitle,
                         attachments = commsUniAttachments
                     )
@@ -807,6 +816,7 @@ class CommsUniViewModel @Inject constructor(
                                 originName = "FlickTrove",
                                 originColor = "#2dd4bf",
                                 attachedMedia = if (finalReal.attachedMedia.isNotEmpty()) finalReal.attachedMedia else attachedMedia,
+                                language = finalReal.language ?: currentLanguage,
                                 isOnCommsUni = true
                             )
                             commentRepository.mirrorCommsUniComment(
@@ -1182,7 +1192,7 @@ class CommsUniViewModel @Inject constructor(
     
     fun translateComment(commentId: String, text: String, requireWifi: Boolean? = null) {
         val current = _translationStates.value[commentId]
-        // Toggle: if already translated, reset to untranslated
+        // Toggle: if already translated, reset to untranslated (original text)
         if (current is CommentsViewModel.TranslationState.Translated) {
             _translationStates.value = _translationStates.value - commentId
             return
@@ -1200,50 +1210,21 @@ class CommsUniViewModel @Inject constructor(
             translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
 
             val targetMlKit = translationManager.getCurrentTargetLanguage()
-            val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
 
-            // Step 1: Detect source language
-            val detectedLang = translationManager.identifyLanguage(cleanText)
-            if (detectedLang != null && (detectedLang == targetBcp47 || detectedLang == targetMlKit)) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                return@launch
-            }
-
-            val effectiveSourceLang = detectedLang ?: run {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                return@launch
-            }
-
-            // Step 2: Check / Download models in background without blocking modal prompt
-            _showTranslationPrompt.value = null
-            val modelReady = translationManager.isModelDownloaded(effectiveSourceLang, targetMlKit)
-            if (!modelReady) {
-                _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Downloading)
-                val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit, requireWifi = requireWifi ?: false)
-                if (!downloaded) {
-                    // Seamless fallback to online translation immediately if model download fails
-                    _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translating)
-                    val onlineResult = translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
-                    if (onlineResult != null && onlineResult.trim().lowercase() != cleanText.trim().lowercase()) {
-                        _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translated(onlineResult))
-                        return@launch
-                    } else {
-                        _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Error)
-                        actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_lang_model))
-                        return@launch
-                    }
-                }
-            }
-
-            // Step 3: Translate
             _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translating)
-            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
-                ?: translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
-            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translated(translated))
-            } else {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                _translationStates.value = _translationStates.value - commentId
+
+            when (val result = translationManager.translateCommentSmart(cleanText, targetMlKit)) {
+                is com.cinetrack.util.TranslationManager.TranslationResult.Success -> {
+                    _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translated(result.text))
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.AlreadyInLanguage -> {
+                    _translationStates.value = _translationStates.value - commentId
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.Error -> {
+                    _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Error)
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_translating))
+                }
             }
         }
     }
@@ -1334,38 +1315,8 @@ class CommsUniViewModel @Inject constructor(
     }
 
     private fun autoTranslateCommentsIfModelsDownloaded(comments: List<com.cinetrack.data.model.AppComment>) {
-        if (comments.isEmpty()) return
-        viewModelScope.launch {
-            try {
-                val prefs = preferenceRepository.userPreferencesFlow.first()
-                val systemLang = java.util.Locale.getDefault().language
-                translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-                val targetMlKit = translationManager.getCurrentTargetLanguage()
-                val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
-
-                val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-
-                for (comment in comments) {
-                    val commentId = comment.id
-                    if (commentId.isBlank() || _translationStates.value.containsKey(commentId)) continue
-
-                    val cleanText = comment.text.replace(mediaRegex, "").trim()
-                    if (cleanText.length < 5) continue
-
-                    val detectedLang = translationManager.identifyLanguage(cleanText) ?: continue
-                    if (detectedLang == targetBcp47 || detectedLang == targetMlKit) continue
-
-                    if (translationManager.isModelDownloaded(detectedLang, targetMlKit)) {
-                        val translated = translationManager.translateFrom(cleanText, detectedLang, targetMlKit)
-                        if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                            _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translated(translated))
-                        }
-                    }
-                }
-            } catch (e: Exception) {
-                android.util.Log.e("CommsUniViewModel", "Error in auto-translating comments", e)
-            }
-        }
+        // Disabled: Never auto-mangle comments into machine translations on initial load.
+        // Translation is strictly on-demand per comment to prevent rate-limits and preserve authentic discussion.
     }
 
     fun translateAllComments() {}

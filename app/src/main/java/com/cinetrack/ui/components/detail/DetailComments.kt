@@ -223,38 +223,6 @@ private fun CommentCard(
         )
     }
     var translationState by remember { mutableStateOf<com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState>(com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle) }
-    var showPrompt by remember { mutableStateOf<Pair<String, String>?>(null) } // <commentId, cleanText>
-
-    fun confirmTranslation(requireWifi: Boolean, cleanText: String, effectiveSourceLang: String, targetMlKit: String) {
-        coroutineScope.launch {
-            val translationManager = entryPoint.translationManager()
-            val actionFeedbackManager = entryPoint.actionFeedbackManager()
-            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Downloading
-            val downloaded = translationManager.downloadModels(effectiveSourceLang, targetMlKit, requireWifi)
-            if (!downloaded) {
-                // Seamless fallback to online translation immediately if model download fails
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
-                val onlineResult = translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
-                if (onlineResult != null && onlineResult.trim().lowercase() != cleanText.trim().lowercase()) {
-                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(onlineResult)
-                    return@launch
-                } else {
-                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
-                    actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_lang_model))
-                    return@launch
-                }
-            }
-            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
-            val translated = translationManager.translateFrom(cleanText, effectiveSourceLang, targetMlKit)
-                ?: translationManager.translateOnline(cleanText, effectiveSourceLang, targetMlKit)
-            if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
-            } else {
-                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
-                translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle
-            }
-        }
-    }
 
     fun handleTranslate() {
         if (translationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated) {
@@ -275,69 +243,23 @@ private fun CommentCard(
             translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
 
             val targetMlKit = translationManager.getCurrentTargetLanguage()
-            val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
+            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translating
 
-            val detectedLang = translationManager.identifyLanguage(cleanText)
-            if (detectedLang != null && (detectedLang == targetBcp47 || detectedLang == targetMlKit)) {
-                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
-                return@launch
+            when (val result = translationManager.translateCommentSmart(cleanText, targetMlKit)) {
+                is com.cinetrack.util.TranslationManager.TranslationResult.Success -> {
+                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(result.text)
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.AlreadyInLanguage -> {
+                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle
+                    actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
+                }
+                is com.cinetrack.util.TranslationManager.TranslationResult.Error -> {
+                    translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Error
+                    actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.msg_error_translating))
+                }
             }
-
-            val effectiveSourceLang = detectedLang ?: run {
-                actionFeedbackManager.emit(com.cinetrack.ui.utils.UiText.StringResource(R.string.comment_already_in_language))
-                return@launch
-            }
-
-            confirmTranslation(false, cleanText, effectiveSourceLang, targetMlKit)
         }
     }
-
-    LaunchedEffect(comment.id) {
-        val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-        val cleanText = comment.text.replace(mediaRegex, "").trim()
-        if (cleanText.length >= 5 && translationState is com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Idle) {
-            try {
-                val translationManager = entryPoint.translationManager()
-                val preferenceRepository = entryPoint.preferenceRepository()
-                val prefs = preferenceRepository.userPreferencesFlow.first()
-                val systemLang = java.util.Locale.getDefault().language
-                translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-                val targetMlKit = translationManager.getCurrentTargetLanguage()
-                val targetBcp47 = translationManager.mapMlKitToBcp47(targetMlKit)
-                val detectedLang = translationManager.identifyLanguage(cleanText)
-                if (detectedLang != null && detectedLang != targetBcp47 && detectedLang != targetMlKit) {
-                    if (translationManager.isModelDownloaded(detectedLang, targetMlKit)) {
-                        val translated = translationManager.translateFrom(cleanText, detectedLang, targetMlKit)
-                        if (translated != null && translated.trim().lowercase() != cleanText.trim().lowercase()) {
-                            translationState = com.cinetrack.ui.viewmodel.CommentsViewModel.TranslationState.Translated(translated)
-                        }
-                    }
-                }
-            } catch (_: Exception) {}
-        }
-    }
-
-    DetailTranslationPromptModal(
-        showTranslationPrompt = showPrompt,
-        onDismiss = { showPrompt = null },
-        onTranslate = { _, text, requireWifi ->
-            showPrompt = null
-            coroutineScope.launch {
-                val translationManager = entryPoint.translationManager()
-                val preferenceRepository = entryPoint.preferenceRepository()
-                val prefs = preferenceRepository.userPreferencesFlow.first()
-                val systemLang = java.util.Locale.getDefault().language
-                translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-                val targetMlKit = translationManager.getCurrentTargetLanguage()
-                val detectedLang = translationManager.identifyLanguage(text)
-                val effectiveSourceLang = detectedLang ?: run {
-                    return@launch
-                }
-                confirmTranslation(requireWifi, text, effectiveSourceLang, targetMlKit)
-            }
-        },
-        accentColor = accentColor
-    )
 
     val currentTranslation = translationState
     val displayedTextRaw = when (currentTranslation) {

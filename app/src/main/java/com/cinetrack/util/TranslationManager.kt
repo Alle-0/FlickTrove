@@ -19,6 +19,8 @@ import okhttp3.OkHttpClient
 import okhttp3.Request
 import org.json.JSONArray
 import org.json.JSONObject
+import java.nio.charset.StandardCharsets
+import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -175,10 +177,124 @@ class TranslationManager @Inject constructor(
         }
     }
 
+    sealed class TranslationResult {
+        data class Success(val text: String) : TranslationResult()
+        object AlreadyInLanguage : TranslationResult()
+        object Error : TranslationResult()
+    }
+
     /**
-     * Translates [text] explicitly from [sourceLang] to [targetLang].
-     * Falls back to online translation if on-device model translation fails.
+     * Translates a comment on-demand using Google Translate GTX endpoint with server-side auto-detection.
+     * - Iterates over all sentences in JSONArray(0) concatenating fragments so long comments are never truncated.
+     * - Uses URLEncoder with StandardCharsets.UTF_8 for emoji, newlines, and special characters.
+     * - Checks rootArray index 2 for detected source language (returns AlreadyInLanguage if matching target).
+     * - Unescapes HTML entities.
+     * - If offline / network error: falls back to local on-device ML Kit if the model was already downloaded.
      */
+    suspend fun translateCommentSmart(
+        text: String,
+        targetLang: String = currentTargetLanguage
+    ): TranslationResult = withContext(Dispatchers.IO) {
+        val clean = text.trim()
+        if (clean.isEmpty()) return@withContext TranslationResult.AlreadyInLanguage
+
+        val tgt = resolveTargetLanguageCode(targetLang)
+
+        // 1. Primary: Google Translate GTX public client with sl=auto (instant, full sentences, zero model download)
+        try {
+            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$tgt&dt=t&q=$encodedQuery"
+            val request = Request.Builder()
+                .url(url)
+                .header("User-Agent", "Mozilla/5.0 (Android; Mobile)")
+                .build()
+
+            val response = okHttpClient.newCall(request).execute()
+            if (response.isSuccessful) {
+                val body = response.body?.string()
+                if (!body.isNullOrBlank()) {
+                    val rootArray = JSONArray(body)
+
+                    // Detected source language from index 2 if available
+                    val detectedSource = rootArray.optString(2)
+                    if (detectedSource.isNotBlank() && detectedSource.equals(tgt, ignoreCase = true)) {
+                        return@withContext TranslationResult.AlreadyInLanguage
+                    }
+
+                    // Iterate over sentences in array[0] to prevent truncating long or multi-line comments
+                    val sentences = rootArray.optJSONArray(0)
+                    if (sentences != null && sentences.length() > 0) {
+                        val fullTranslation = StringBuilder()
+                        for (i in 0 until sentences.length()) {
+                            val chunk = sentences.optJSONArray(i)?.optString(0)
+                            if (!chunk.isNullOrEmpty()) {
+                                fullTranslation.append(chunk)
+                            }
+                        }
+                        val rawTranslated = fullTranslation.toString().trim()
+                        if (rawTranslated.isNotEmpty()) {
+                            val unescaped = android.text.Html.fromHtml(rawTranslated, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
+                            if (unescaped.equals(clean, ignoreCase = true)) {
+                                return@withContext TranslationResult.AlreadyInLanguage
+                            }
+                            return@withContext TranslationResult.Success(unescaped)
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("TranslationManager", "Google Translate GTX online failed: ${e.message}")
+        }
+
+        // 2. Offline Fallback: ML Kit on-device if models are already downloaded
+        try {
+            val detectedSource = identifyLanguage(clean)
+            if (detectedSource != null && (detectedSource.equals(tgt, ignoreCase = true) || detectedSource == targetLang)) {
+                return@withContext TranslationResult.AlreadyInLanguage
+            }
+            val validSource = toSupportedMlKitLanguage(detectedSource)
+            val validTarget = toSupportedMlKitLanguage(targetLang)
+            if (validSource != null && validTarget != null && isModelDownloaded(validSource, validTarget)) {
+                val localResult = translateFrom(clean, validSource, validTarget)
+                if (localResult != null && !localResult.trim().equals(clean, ignoreCase = true)) {
+                    return@withContext TranslationResult.Success(localResult)
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("TranslationManager", "Offline ML Kit fallback failed: ${e.message}")
+        }
+
+        // 3. Secondary Online Fallback: MyMemory Translate API
+        try {
+            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val url = "https://api.mymemory.translated.net/get?q=$encodedQuery&langpair=auto|$tgt"
+            val request = Request.Builder()
+                .url(url)
+                .header("User-Agent", "FlickTrove/1.0")
+                .build()
+
+            val response = okHttpClient.newCall(request).execute()
+            if (response.isSuccessful) {
+                val body = response.body?.string()
+                if (!body.isNullOrBlank()) {
+                    val json = JSONObject(body)
+                    val responseData = json.optJSONObject("responseData")
+                    val translatedText = responseData?.optString("translatedText")
+                    if (!translatedText.isNullOrBlank() && !translatedText.startsWith("MYMEMORY WARNING")) {
+                        val unescaped = android.text.Html.fromHtml(translatedText, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
+                        if (unescaped.isNotEmpty() && !unescaped.equals(clean, ignoreCase = true)) {
+                            return@withContext TranslationResult.Success(unescaped)
+                        }
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            Log.w("TranslationManager", "MyMemory fallback failed: ${e.message}")
+        }
+
+        TranslationResult.Error
+    }
+
     /**
      * Translates [text] explicitly from [sourceLang] to [targetLang].
      * Falls back to online translation if on-device model translation fails.
@@ -221,13 +337,13 @@ class TranslationManager @Inject constructor(
         val clean = text.trim()
         if (clean.isEmpty()) return@withContext null
 
-        val src = mapMlKitToBcp47(sourceLang)
-        val tgt = mapMlKitToBcp47(targetLang)
-        if (src == tgt) return@withContext clean
+        val src = if (sourceLang.isBlank() || sourceLang.equals("auto", ignoreCase = true)) "auto" else mapMlKitToBcp47(sourceLang)
+        val tgt = resolveTargetLanguageCode(targetLang)
+        if (src == tgt && src != "auto") return@withContext clean
 
         // 1. Primary: Google Translate GTX public client endpoint (fast, accurate, no api key required)
         try {
-            val encodedQuery = java.net.URLEncoder.encode(clean, "UTF-8")
+            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
             val url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=$src&tl=$tgt&dt=t&q=$encodedQuery"
             val request = Request.Builder()
                 .url(url)
@@ -241,16 +357,17 @@ class TranslationManager @Inject constructor(
                     val rootArray = JSONArray(body)
                     val parts = rootArray.optJSONArray(0)
                     if (parts != null && parts.length() > 0) {
-                        val sb = StringBuilder()
+                        val fullTranslation = StringBuilder()
                         for (i in 0 until parts.length()) {
                             val chunk = parts.optJSONArray(i)?.optString(0)
                             if (!chunk.isNullOrEmpty()) {
-                                sb.append(chunk)
+                                fullTranslation.append(chunk)
                             }
                         }
-                        val translated = sb.toString().trim()
-                        if (translated.isNotEmpty()) {
-                            return@withContext translated
+                        val rawTranslated = fullTranslation.toString().trim()
+                        if (rawTranslated.isNotEmpty()) {
+                            val unescaped = android.text.Html.fromHtml(rawTranslated, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
+                            return@withContext unescaped
                         }
                     }
                 }
@@ -261,8 +378,9 @@ class TranslationManager @Inject constructor(
 
         // 2. Secondary fallback: MyMemory Translate API
         try {
-            val encodedQuery = java.net.URLEncoder.encode(clean, "UTF-8")
-            val url = "https://api.mymemory.translated.net/get?q=$encodedQuery&langpair=$src|$tgt"
+            val querySrc = if (src == "auto") "en" else src
+            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val url = "https://api.mymemory.translated.net/get?q=$encodedQuery&langpair=$querySrc|$tgt"
             val request = Request.Builder()
                 .url(url)
                 .header("User-Agent", "FlickTrove/1.0")
@@ -425,4 +543,28 @@ class TranslationManager @Inject constructor(
             else -> mlkitLang.lowercase().take(2).ifEmpty { "en" }
         }
     }
+
+    /** Resolves BCP-47 / Google Translate language tag with regional variant support (e.g. zh-CN, zh-TW, pt-BR, pt) */
+    fun resolveTargetLanguageCode(langCode: String?, locale: Locale = Locale.getDefault()): String {
+        val raw = (if (langCode.isNullOrBlank() || langCode == "system") locale.language else langCode).trim().lowercase()
+        if (raw.startsWith("zh")) {
+            val script = locale.script.lowercase()
+            val country = locale.country.lowercase()
+            return if (raw.contains("tw") || raw.contains("hk") || script.contains("hant") || country == "tw" || country == "hk") {
+                "zh-TW"
+            } else {
+                "zh-CN"
+            }
+        }
+        if (raw.startsWith("pt")) {
+            val country = locale.country.lowercase()
+            return if (raw.contains("br") || country == "br") {
+                "pt-BR"
+            } else {
+                "pt"
+            }
+        }
+        return raw.take(2).ifEmpty { "en" }
+    }
 }
+

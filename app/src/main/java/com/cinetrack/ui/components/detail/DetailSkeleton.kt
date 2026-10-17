@@ -243,12 +243,11 @@ fun DetailSkeleton(
                                         .shimmerEffect()
                                 )
 
-                                // Technical Specs Pill (e.g. 4K UHD / Atmos)
+                                // Technical Specs Circle (matching HeaderTechnicalPill)
                                 Box(
                                     modifier = Modifier
-                                        .width(62.dp)
-                                        .height(36.dp)
-                                        .clip(RoundedCornerShape(48.dp))
+                                        .size(36.dp)
+                                        .clip(CircleShape)
                                         .background(Color.White.copy(alpha = 0.04f))
                                         .shimmerEffect()
                                 )
