@@ -81,7 +81,7 @@ import com.cinetrack.ui.components.account.YourFlowCard
 import com.cinetrack.ui.screens.FlowStatsTab
 import com.cinetrack.ui.screens.FoldersTab
 import com.cinetrack.ui.screens.FolderDetailTab
-import com.cinetrack.ui.screens.FolderCreateDialog
+import com.cinetrack.ui.components.shared.FolderCreateDialog
 import com.cinetrack.ui.screens.TrophyRoomTab
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext

@@ -104,3 +104,4 @@ partner-api/
 screenshot*.png
 *.bak
 scratch/
+.markdownlint.json
