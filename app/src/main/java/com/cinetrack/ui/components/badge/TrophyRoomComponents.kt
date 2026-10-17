@@ -2903,8 +2903,7 @@ fun TrophyDetailContent(
                 }
             }
 
-            val hasTrailingBottomSection = (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS && !isMaxTier) ||
-                (item.badge.id == "badge_executive_producer")
+            val hasTrailingBottomSection = (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS && !isMaxTier)
             if (hasTrailingBottomSection) {
                 Spacer(modifier = Modifier.height(8.dp))
             }
@@ -2939,7 +2938,7 @@ private fun ExecutiveProducerDonationSection(
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(
                     Brush.verticalGradient(
                         listOf(
@@ -2948,8 +2947,8 @@ private fun ExecutiveProducerDonationSection(
                         )
                     )
                 )
-                .border(1.dp, Color(0xFFEAB308).copy(alpha = 0.38f), RoundedCornerShape(18.dp))
-                .padding(16.dp)
+                .border(1.dp, Color(0xFFEAB308).copy(alpha = 0.38f), RoundedCornerShape(16.dp))
+                .padding(horizontal = 14.dp, vertical = 14.dp)
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -2995,9 +2994,9 @@ private fun ExecutiveProducerDonationSection(
         Box(
             modifier = modifier
                 .fillMaxWidth()
-                .clip(RoundedCornerShape(18.dp))
+                .clip(RoundedCornerShape(16.dp))
                 .background(Color.White.copy(alpha = 0.04f))
-                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
                 .animateContentSize()
         ) {
             Column(modifier = Modifier.fillMaxWidth()) {
@@ -3009,15 +3008,15 @@ private fun ExecutiveProducerDonationSection(
                             isExpanded = !isExpanded
                             onExpandedChange?.invoke(isExpanded)
                         }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                        .padding(horizontal = 14.dp, vertical = 12.dp),
                     horizontalArrangement = Arrangement.SpaceBetween,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     Text(
                         text = stringResource(R.string.trophy_producer_verify_section_title),
-                        style = MaterialTheme.typography.titleSmall.copy(
+                        style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 14.sp
+                            fontSize = 13.sp
                         ),
                         color = Color.White
                     )
@@ -3025,9 +3024,9 @@ private fun ExecutiveProducerDonationSection(
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = if (isExpanded) "Collassa" else "Espandi",
-                        tint = if (isExpanded) Color.White else Color.White.copy(alpha = 0.60f),
+                        tint = if (isExpanded) Color.White else Color.White.copy(alpha = 0.40f),
                         modifier = Modifier
-                            .size(16.dp)
+                            .size(14.dp)
                             .graphicsLayer { rotationZ = arrowRotation }
                     )
                 }
@@ -3041,7 +3040,7 @@ private fun ExecutiveProducerDonationSection(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(start = 16.dp, end = 16.dp, bottom = 16.dp)
+                            .padding(start = 14.dp, end = 14.dp, bottom = 14.dp)
                     ) {
                         Text(
                             text = stringResource(R.string.trophy_producer_verify_section_desc),
