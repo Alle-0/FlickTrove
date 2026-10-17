@@ -1040,6 +1040,8 @@
     <string name="collection_badge_items_single">%1$d TITEL</string>
     <string name="collection_badge_series_plural">%1$d SERIEN</string>
     <string name="collection_badge_series_single">%1$d SERIE</string>
+    <string name="collection_progress_popup">%1$d/%2$d gesehen (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">%1$d/%2$d abgeschlossen (100%%)</string>
     <string name="collection_filter_sort_chronological">Chronologisch</string>
     <string name="collection_filter_modal_title">Sammlungsfilter</string>
     <string name="collection_filter_empty">Keine Einträge entsprechen den ausgewählten Filtern</string>
@@ -1415,6 +1417,7 @@
     <string name="trophy_format_lost_reel">Lost Reel</string>
     <string name="trophy_palmares_title">FILMPALMARES</string>
     <string name="trophy_unlocked_on">Freigeschaltet am %s</string>
+    <string name="trophy_unlocked_with">Freigeschaltet mit</string>
     <string name="trophy_rarity_pct">Von %s der Filmfans freigeschaltet</string>
     <string name="trophy_to_unlock_tier">FREISCHALTEN • %s</string>
     <string name="trophy_tier_1">STUFE 1</string>

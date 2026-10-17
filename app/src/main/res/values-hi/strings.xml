@@ -1042,6 +1042,8 @@
     <string name="collection_badge_items_single">%1$d शीर्षक</string>
     <string name="collection_badge_series_plural">%1$d टीवी शो</string>
     <string name="collection_badge_series_single">%1$d टीवी शो</string>
+    <string name="collection_progress_popup">%1$d/%2$d देखे गए (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">%1$d/%2$d पूरे किए गए (100%%)</string>
     <string name="collection_filter_sort_chronological">कालानुक्रमिक</string>
     <string name="collection_filter_modal_title">कलेक्शन फ़िल्टर</string>
     <string name="collection_filter_empty">चयनित फ़िल्टर से कोई आइटम मेल नहीं खाता</string>
@@ -1411,6 +1413,7 @@
     <string name="trophy_format_lost_reel">Lost Reel</string>
     <string name="trophy_palmares_title">सिनेमाई सम्मान</string>
     <string name="trophy_unlocked_on">%s को अनलॉक किया गया</string>
+    <string name="trophy_unlocked_with">इस फ़िल्म से अनलॉक हुआ</string>
     <string name="trophy_rarity_pct">%s सिनेप्रेमियों द्वारा अनलॉक</string>
     <string name="trophy_to_unlock_tier">अनलॉक करने के लिए • %s</string>
     <string name="trophy_tier_1">स्तर 1</string>

@@ -101,7 +101,8 @@ data class SearchScreen(
     val initialGenreId: Long? = null,
     val initialGenreName: String? = null,
     val initialKeywordId: Long? = null,
-    val initialKeywordName: String? = null
+    val initialKeywordName: String? = null,
+    val initialCategory: String? = null
 ) : Screen {
     override val key: ScreenKey = uniqueScreenKey
 
@@ -111,7 +112,10 @@ data class SearchScreen(
         val viewModel = getViewModel<SearchViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
-        LaunchedEffect(initialGenreId, initialGenreName, initialKeywordName) {
+        LaunchedEffect(initialGenreId, initialGenreName, initialKeywordName, initialCategory) {
+            if (initialCategory != null) {
+                viewModel.onCategoryChanged(initialCategory)
+            }
             if (initialGenreId != null) {
                 viewModel.updateSortConfig(
                     viewModel.uiState.value.sortConfig.copy(

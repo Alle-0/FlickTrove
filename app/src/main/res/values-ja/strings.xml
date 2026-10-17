@@ -1123,6 +1123,8 @@
     <string name="collection_badge_items_single">%1$d作品</string>
     <string name="collection_badge_series_plural">%1$dシリーズ</string>
     <string name="collection_badge_series_single">%1$dシリーズ</string>
+    <string name="collection_progress_popup">%1$d/%2$d 視聴済み (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">%1$d/%2$d 完了 (100%%)</string>
     <string name="collection_filter_sort_chronological">時系列順</string>
     <string name="collection_filter_modal_title">コレクションフィルター</string>
     <string name="collection_filter_empty">選択したフィルターに一致する作品はありません</string>
@@ -1483,6 +1485,7 @@
     <string name="trophy_format_lost_reel">ロスト・リール</string>
     <string name="trophy_palmares_title">シネフィルの栄誉殿堂</string>
     <string name="trophy_unlocked_on">%s に解除</string>
+    <string name="trophy_unlocked_with">解除作品</string>
     <string name="trophy_rarity_pct">映画ファンの %s が獲得</string>
     <string name="trophy_to_unlock_tier">未解除 • %s</string>
     <string name="trophy_tier_1">第1段階</string>

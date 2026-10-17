@@ -22,7 +22,7 @@ fun MainDeepLinkHandler(
     rootNavigator: Navigator,
     tabNavigator: TabNavigator,
     settingsViewModel: SettingsViewModel,
-    searchOverlay: ((Offset?, Long?, String?, Long?, String?) -> Unit)?
+    searchOverlay: com.cinetrack.ui.SearchOverlayTrigger?
 ) {
     LaunchedEffect(deepLinkIntent.value) {
         val intent = deepLinkIntent.value ?: return@LaunchedEffect

@@ -21,6 +21,10 @@ import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.clickable
+import androidx.compose.ui.layout.ContentScale
+import coil.compose.AsyncImage
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.ime
 import androidx.compose.foundation.layout.asPaddingValues
@@ -1449,7 +1453,10 @@ fun TrophyRoomScreenContent(
     onTargetBadgeConsumed: () -> Unit = {},
     isFilterModalOpenExternal: Boolean = false,
     onFilterModalOpenExternalChange: (Boolean) -> Unit = {},
-    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)? = null
+    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)? = null,
+    onMovieClick: ((Long, String) -> Unit)? = null,
+    onResolveUnlockingMovies: (suspend (String) -> List<com.cinetrack.data.model.Movie>)? = null,
+    onResolveUnlockingMovie: (suspend (String) -> com.cinetrack.data.model.Movie?)? = null
 ) {
     val localHaze = hazeState ?: remember { HazeState() }
     val gridState = rememberLazyGridState()
@@ -1469,7 +1476,10 @@ fun TrophyRoomScreenContent(
                 selectedBadgeForModal = null
                 activeTrophyDetailState.value = null
             },
-            onVerifySupporter = onVerifySupporter
+            onVerifySupporter = onVerifySupporter,
+            onMovieClick = onMovieClick,
+            onResolveUnlockingMovies = onResolveUnlockingMovies,
+            onResolveUnlockingMovie = onResolveUnlockingMovie
         )
     }
 
@@ -1667,7 +1677,10 @@ fun TrophyRoomScreenContent(
                     TrophyDetailContent(
                         item = currentModalItem,
                         onClose = { selectedBadgeForModal = null },
-                        onVerifySupporter = onVerifySupporter
+                        onVerifySupporter = onVerifySupporter,
+                        onMovieClick = onMovieClick,
+                        onResolveUnlockingMovies = onResolveUnlockingMovies,
+                        onResolveUnlockingMovie = onResolveUnlockingMovie
                     )
                 }
             }
@@ -2257,12 +2270,27 @@ fun TrophyFilterModal(
 fun TrophyDetailContent(
     item: TrophyRoomItemUi,
     onClose: () -> Unit,
-    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)? = null
+    onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)? = null,
+    onMovieClick: ((Long, String) -> Unit)? = null,
+    onResolveUnlockingMovies: (suspend (String) -> List<com.cinetrack.data.model.Movie>)? = null,
+    onResolveUnlockingMovie: (suspend (String) -> com.cinetrack.data.model.Movie?)? = null
 ) {
     val scrollState = rememberScrollState()
     val configuration = LocalConfiguration.current
     val coroutineScope = rememberCoroutineScope()
     val maxHeight = (configuration.screenHeightDp * 0.85f).dp
+
+    var unlockingMovies by remember(item.badge.id, item.isUnlocked) { mutableStateOf<List<com.cinetrack.data.model.Movie>>(emptyList()) }
+    LaunchedEffect(item.badge.id, item.isUnlocked) {
+        if (item.isUnlocked) {
+            if (onResolveUnlockingMovies != null) {
+                unlockingMovies = onResolveUnlockingMovies(item.badge.id)
+            } else if (onResolveUnlockingMovie != null) {
+                val single = onResolveUnlockingMovie(item.badge.id)
+                unlockingMovies = if (single != null) listOf(single) else emptyList()
+            }
+        }
+    }
 
     // Auto-scroll when keyboard opens so the email input and verification button are fully visible
     val imeInsets = WindowInsets.ime
@@ -2440,7 +2468,239 @@ fun TrophyDetailContent(
                 modifier = Modifier.padding(horizontal = 4.dp)
             )
 
-            Spacer(modifier = Modifier.height(16.dp))
+            // Card Cinefila: Film sbloccante / Film della sessione
+            if (unlockingMovies.isNotEmpty()) {
+                Spacer(modifier = Modifier.height(16.dp))
+
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .then(
+                            if (unlockingMovies.size == 1) {
+                                val single = unlockingMovies.first()
+                                Modifier.bounceClick(
+                                    scaleDown = 0.96f,
+                                    enabled = onMovieClick != null,
+                                    onClick = {
+                                        onClose()
+                                        onMovieClick?.invoke(single.id, single.mediaType.ifBlank { "movie" })
+                                    }
+                                )
+                            } else Modifier
+                        )
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, item.currentTier.primaryColor.copy(alpha = 0.30f), RoundedCornerShape(16.dp))
+                        .padding(horizontal = 14.dp, vertical = 12.dp)
+                ) {
+                    if (unlockingMovies.size == 1) {
+                        val movie = unlockingMovies.first()
+                        val displayTitle = movie.title ?: movie.name ?: ""
+                        val releaseYear = movie.releaseDate?.take(4) ?: movie.firstAirDate?.take(4)
+                        val subtitleText = if (item.badge.id == "colossal" && (movie.runtime ?: 0) > 0) {
+                            val rt = movie.runtime ?: 0
+                            val h = rt / 60
+                            val m = rt % 60
+                            if (h > 0) "${h}h ${if (m < 10) "0$m" else "$m"}m" else "${m}m"
+                        } else {
+                            releaseYear
+                        }
+                        val fullPosterUrl = movie.posterPath?.let { path ->
+                            if (path.startsWith("http")) path else "https://image.tmdb.org/t/p/w185$path"
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier.fillMaxWidth()
+                        ) {
+                            // Poster miniatura con aspect ratio cinema (2:3)
+                            Box(
+                                modifier = Modifier
+                                    .width(36.dp)
+                                    .height(54.dp)
+                                    .clip(RoundedCornerShape(8.dp))
+                                    .background(Color.White.copy(alpha = 0.08f))
+                            ) {
+                                if (!fullPosterUrl.isNullOrBlank()) {
+                                    AsyncImage(
+                                        model = fullPosterUrl,
+                                        contentDescription = displayTitle,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                } else {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(R.drawable.ic_videocamera),
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.3f),
+                                        modifier = Modifier.size(18.dp).align(Alignment.Center)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.width(12.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Text(
+                                    text = stringResource(R.string.trophy_unlocked_with).uppercase(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 1.sp
+                                    ),
+                                    color = item.currentTier.primaryColor
+                                )
+
+                                Spacer(modifier = Modifier.height(2.dp))
+
+                                Text(
+                                    text = displayTitle,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Bold
+                                    ),
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+
+                                if (!subtitleText.isNullOrBlank()) {
+                                    Text(
+                                        text = subtitleText,
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontSize = 10.sp,
+                                            fontWeight = FontWeight.Medium
+                                        ),
+                                        color = Color.White.copy(alpha = 0.50f)
+                                    )
+                                }
+                            }
+
+                            if (onMovieClick != null) {
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_right),
+                                    contentDescription = null,
+                                    tint = Color.White.copy(alpha = 0.40f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        // Multi-film (es. Doppio Spettacolo con i 2 film della giornata)
+                        Column(modifier = Modifier.fillMaxWidth()) {
+                            Text(
+                                text = stringResource(R.string.trophy_unlocked_with).uppercase(),
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 1.sp
+                                ),
+                                color = item.currentTier.primaryColor,
+                                modifier = Modifier.padding(start = 2.dp, bottom = 6.dp)
+                            )
+
+                            unlockingMovies.forEachIndexed { index, movie ->
+                                if (index > 0) {
+                                    Box(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .padding(vertical = 6.dp)
+                                            .height(1.dp)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                    )
+                                }
+
+                                val displayTitle = movie.title ?: movie.name ?: ""
+                                val releaseYear = movie.releaseDate?.take(4) ?: movie.firstAirDate?.take(4)
+                                val fullPosterUrl = movie.posterPath?.let { path ->
+                                    if (path.startsWith("http")) path else "https://image.tmdb.org/t/p/w185$path"
+                                }
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clip(RoundedCornerShape(8.dp))
+                                        .bounceClick(
+                                            scaleDown = 0.97f,
+                                            enabled = onMovieClick != null,
+                                            onClick = {
+                                                onClose()
+                                                onMovieClick?.invoke(movie.id, movie.mediaType.ifBlank { "movie" })
+                                            }
+                                        )
+                                        .padding(vertical = 2.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .width(32.dp)
+                                            .height(48.dp)
+                                            .clip(RoundedCornerShape(6.dp))
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                    ) {
+                                        if (!fullPosterUrl.isNullOrBlank()) {
+                                            AsyncImage(
+                                                model = fullPosterUrl,
+                                                contentDescription = displayTitle,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        } else {
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(R.drawable.ic_videocamera),
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.3f),
+                                                modifier = Modifier.size(16.dp).align(Alignment.Center)
+                                            )
+                                        }
+                                    }
+
+                                    Spacer(modifier = Modifier.width(10.dp))
+
+                                    Column(modifier = Modifier.weight(1f)) {
+                                        Text(
+                                            text = displayTitle,
+                                            style = MaterialTheme.typography.bodyMedium.copy(
+                                                fontSize = 13.sp,
+                                                fontWeight = FontWeight.Bold
+                                            ),
+                                            color = Color.White,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+
+                                        if (!releaseYear.isNullOrBlank()) {
+                                            Text(
+                                                text = releaseYear,
+                                                style = MaterialTheme.typography.labelSmall.copy(
+                                                    fontSize = 10.sp,
+                                                    fontWeight = FontWeight.Medium
+                                                ),
+                                                color = Color.White.copy(alpha = 0.50f)
+                                            )
+                                        }
+                                    }
+
+                                    if (onMovieClick != null) {
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(R.drawable.ic_right),
+                                            contentDescription = null,
+                                            tint = Color.White.copy(alpha = 0.40f),
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+
+            val hasExtraSections = item.badge.id == "badge_executive_producer" || item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS
+            if (hasExtraSections) {
+                Spacer(modifier = Modifier.height(16.dp))
+            }
 
             // 4b. SEZIONE SPECIALE: Il Produttore Esecutivo (Supporto & Verifica Donazione per Registrati e Guest)
             if (item.badge.id == "badge_executive_producer") {
@@ -2486,9 +2746,9 @@ fun TrophyDetailContent(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(18.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(18.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
                         .padding(14.dp)
                 ) {
                     Column(modifier = Modifier.fillMaxWidth()) {
@@ -2637,7 +2897,10 @@ fun TrophyDetailContent(
                     )
                 }
             }
-            Spacer(modifier = Modifier.height(2.dp))
+
+            if (hasExtraSections) {
+                Spacer(modifier = Modifier.height(8.dp))
+            }
         }
     }
 }

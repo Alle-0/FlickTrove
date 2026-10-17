@@ -9,6 +9,8 @@ import androidx.compose.foundation.lazy.grid.GridItemSpan
 import androidx.compose.foundation.lazy.grid.LazyGridScope
 import androidx.compose.foundation.lazy.grid.items
 import androidx.compose.foundation.lazy.grid.itemsIndexed
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -664,6 +666,18 @@ fun CollectionCollageCard(
 ) {
     val backdropUrl = buildTmdbImageUrl(collection.backdropPath ?: collection.posterPath, ImageType.BACKDROP, LocalImageQuality.current)
 
+    val totalCount = collection.partsCount
+    val watchedCount = remember(collection.partsIds, favorites) {
+        if (collection.partsIds.isNotEmpty()) {
+            val watchedIds = favorites.filter { it.watched }.map { it.id }.toSet()
+            collection.partsIds.count { it in watchedIds }
+        } else 0
+    }
+    val isCompleted = totalCount > 0 && watchedCount >= totalCount
+    val progress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
+    val accentColor = MaterialTheme.colorScheme.primary
+    val globalAccentColor = remember(accentColor) { ColorUtils.ensureVividAccent(accentColor) }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -727,6 +741,20 @@ fun CollectionCollageCard(
                 )
         )
 
+        // Completed rosette ribbon badge in top-right
+        if (isCompleted) {
+            com.cinetrack.ui.components.common.CollectionRosetteBadge(
+                accentColor = globalAccentColor,
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(top = 8.dp, end = 12.dp),
+                width = 32.dp,
+                height = 44.dp,
+                starSize = 13.dp,
+                contentDescription = stringResource(R.string.action_completed)
+            )
+        }
+
         Row(
             modifier = Modifier
                 .align(Alignment.BottomStart)
@@ -753,54 +781,27 @@ fun CollectionCollageCard(
                 )
             }
 
-            val totalCount = collection.partsCount
-            val watchedCount = remember(collection.partsIds, favorites) {
-                if (collection.partsIds.isNotEmpty()) {
-                    val watchedIds = favorites.filter { it.watched }.map { it.id }.toSet()
-                    collection.partsIds.count { it in watchedIds }
-                } else 0
-            }
-            val progress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
-            val accentColor = MaterialTheme.colorScheme.primary
-            val globalAccentColor = remember(accentColor) { ColorUtils.ensureVividAccent(accentColor) }
-
-            Box(
-                modifier = Modifier
-                    .background(
-                        color = Color(0xFF0F0F1A).copy(alpha = 0.82f),
-                        shape = RoundedCornerShape(20.dp)
-                    )
-                    .border(
-                        width = 1.dp,
-                        color = Color.White.copy(alpha = 0.35f),
-                        shape = RoundedCornerShape(20.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                PillProgressBorder(
-                    progress = progress,
-                    color = globalAccentColor,
-                    modifier = Modifier.matchParentSize()
-                )
-                val badgeText = when {
-                    collection.hasTvSeries -> {
-                        if (totalCount == 1) stringResource(R.string.collection_badge_items_single, 1)
-                        else stringResource(R.string.collection_badge_items_plural, totalCount)
-                    }
-                    totalCount == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
-                    totalCount > 1 -> stringResource(R.string.collection_badge_movies_plural, totalCount)
-                    collection.partsPosterPaths.isNotEmpty() -> stringResource(R.string.collection_badge_movies_plus, collection.partsPosterPaths.size)
-                    else -> "SAGA"
+            val badgeText = when {
+                collection.hasTvSeries -> {
+                    if (totalCount == 1) stringResource(R.string.collection_badge_items_single, 1)
+                    else stringResource(R.string.collection_badge_items_plural, totalCount)
                 }
-                Text(
-                    text = badgeText,
-                    color = Color.White,
-                    fontWeight = FontWeight.ExtraBold,
-                    fontSize = 11.sp,
-                    letterSpacing = 0.5.sp,
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
-                )
+                totalCount == 1 -> stringResource(R.string.collection_badge_movies_single, 1)
+                totalCount > 1 -> stringResource(R.string.collection_badge_movies_plural, totalCount)
+                collection.partsPosterPaths.isNotEmpty() -> stringResource(R.string.collection_badge_movies_plus, collection.partsPosterPaths.size)
+                else -> "SAGA"
             }
+
+            com.cinetrack.ui.components.common.CollectionProgressPill(
+                watchedCount = watchedCount,
+                totalCount = totalCount,
+                badgeText = badgeText,
+                accentColor = globalAccentColor,
+                containerColor = Color(0xFF0F0F1A).copy(alpha = 0.82f),
+                fontSize = 11.sp,
+                horizontalPadding = 12.dp,
+                verticalPadding = 6.dp
+            )
         }
     }
 }

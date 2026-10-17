@@ -1123,6 +1123,8 @@
     <string name="collection_badge_items_single">%1$d 部作品</string>
     <string name="collection_badge_series_plural">%1$d 部影集</string>
     <string name="collection_badge_series_single">%1$d 部影集</string>
+    <string name="collection_progress_popup">已看 %1$d/%2$d (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">全部看完 %1$d/%2$d (100%%)</string>
     <string name="collection_filter_sort_chronological">時間軸順序</string>
     <string name="collection_filter_modal_title">合集篩選</string>
     <string name="collection_filter_empty">沒有符合所選篩選條件的項目</string>
@@ -1483,6 +1485,7 @@
     <string name="trophy_format_lost_reel">失落膠卷</string>
     <string name="trophy_palmares_title">影迷榮譽榜</string>
     <string name="trophy_unlocked_on">解鎖於 %s</string>
+    <string name="trophy_unlocked_with">解鎖作品</string>
     <string name="trophy_rarity_pct">已有 %s 的影迷解鎖</string>
     <string name="trophy_to_unlock_tier">待解鎖 • %s</string>
     <string name="trophy_tier_1">第1階</string>

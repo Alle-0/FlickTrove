@@ -1141,6 +1141,8 @@
     <string name="collection_badge_items_single">%1$d ITEM</string>
     <string name="collection_badge_series_plural">%1$d TV SHOWS</string>
     <string name="collection_badge_series_single">%1$d TV SHOW</string>
+    <string name="collection_progress_popup">%1$d/%2$d watched (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">%1$d/%2$d completed (100%%)</string>
     <string name="collection_filter_sort_chronological">Chronological</string>
     <string name="collection_filter_modal_title">Collection Filters</string>
     <string name="collection_filter_empty">No items match the selected filters</string>
@@ -1498,6 +1500,7 @@
     <string name="trophy_format_lost_reel">Lost Reel</string>
     <string name="trophy_palmares_title">CINEPHILE PALMARÈS</string>
     <string name="trophy_unlocked_on">Unlocked on %s</string>
+    <string name="trophy_unlocked_with">Unlocked with</string>
     <string name="trophy_rarity_pct">Unlocked by %s of cinephiles</string>
     <string name="trophy_to_unlock_tier">TO UNLOCK • %s</string>
     <string name="trophy_tier_1">TIER 1</string>

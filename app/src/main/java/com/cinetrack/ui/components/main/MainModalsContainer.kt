@@ -41,6 +41,7 @@ import androidx.compose.runtime.setValue
 import com.cinetrack.ui.LocalActiveTrophyDetailConfig
 import com.cinetrack.ui.components.glass.GlassmorphicModal
 import com.cinetrack.ui.components.badge.TrophyDetailContent
+import cafe.adriel.voyager.navigator.Navigator
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -54,7 +55,8 @@ fun MainModalsContainer(
     yearPickerButtonBounds: Rect?,
     globalHazeState: HazeState,
     onFilterModalDismiss: () -> Unit,
-    onYearPickerDismiss: () -> Unit
+    onYearPickerDismiss: () -> Unit,
+    rootNavigator: Navigator? = null
 ) {
     key(currentTab) {
         if (currentTab is HomeTab) {
@@ -230,7 +232,14 @@ fun MainModalsContainer(
                         TrophyDetailContent(
                             item = currentModalConfig.item,
                             onClose = { currentModalConfig.onClose() },
-                            onVerifySupporter = currentModalConfig.onVerifySupporter
+                            onVerifySupporter = currentModalConfig.onVerifySupporter,
+                            onMovieClick = currentModalConfig.onMovieClick ?: { movieId: Long, mediaType: String ->
+                                currentModalConfig.onClose()
+                                rootNavigator?.push(com.cinetrack.ui.screens.MovieDetailScreen(movieId, mediaType))
+                                Unit
+                            },
+                            onResolveUnlockingMovies = currentModalConfig.onResolveUnlockingMovies,
+                            onResolveUnlockingMovie = currentModalConfig.onResolveUnlockingMovie
                         )
                     }
                 }

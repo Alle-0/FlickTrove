@@ -156,6 +156,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         var searchInitialGenreName by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         var searchInitialKeywordId by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<Long?>(null) }
         var searchInitialKeywordName by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
+        var searchInitialCategory by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         var searchOverlaySourceScreenKey by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         
         val avatarSelectionState = remember { com.cinetrack.ui.components.account.AvatarSelectionState() }
@@ -181,13 +182,14 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                     Box(modifier = Modifier.fillMaxSize()) {
                         Navigator(SplashScreen()) { navigator ->
                             CompositionLocalProvider(
-                                com.cinetrack.ui.LocalSearchOverlay provides { offset, genreId, genreName, keywordId, keywordName ->
+                                com.cinetrack.ui.LocalSearchOverlay provides com.cinetrack.ui.SearchOverlayTrigger { offset, genreId, genreName, keywordId, keywordName, category ->
                                     searchOverlayTriggerX = offset?.x ?: -1f
                                     searchOverlayTriggerY = offset?.y ?: -1f
                                     searchInitialGenreId = genreId
                                     searchInitialGenreName = genreName
                                     searchInitialKeywordId = keywordId
                                     searchInitialKeywordName = keywordName
+                                    searchInitialCategory = category
                                     searchOverlaySourceScreenKey = navigator.lastItem.key
                                     isSearchOverlayOpen = true
                                 }
@@ -290,17 +292,30 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                         androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SearchViewModel>()
                                                     }
 
-                                                    androidx.compose.runtime.LaunchedEffect(searchInitialGenreId, searchInitialGenreName, searchInitialKeywordId, searchInitialKeywordName) {
-                                                        if (searchInitialGenreId != null) {
-                                                            viewModel.updateSortConfig(viewModel.uiState.value.sortConfig.copy(selectedGenres = listOf(searchInitialGenreId!!), selectedKeywords = emptyList()))
-                                                            viewModel.onQueryChanged("")
-                                                        } else if (searchInitialGenreName != null) {
-                                                            viewModel.onQueryChanged("")
-                                                        } else if (searchInitialKeywordId != null) {
-                                                            viewModel.updateSortConfig(viewModel.uiState.value.sortConfig.copy(selectedGenres = emptyList(), selectedKeywords = listOf(searchInitialKeywordId!!)))
-                                                            viewModel.onQueryChanged("")
-                                                        } else if (searchInitialKeywordName != null) {
-                                                            viewModel.onQueryChanged("")
+                                                    androidx.compose.runtime.LaunchedEffect(isSearchOverlayOpen, searchInitialGenreId, searchInitialGenreName, searchInitialKeywordId, searchInitialKeywordName, searchInitialCategory) {
+                                                        if (isSearchOverlayOpen) {
+                                                            if (searchInitialCategory != null) {
+                                                                val cat = searchInitialCategory!!
+                                                                searchInitialCategory = null
+                                                                viewModel.onCategoryChanged(cat)
+                                                            }
+                                                            if (searchInitialGenreId != null) {
+                                                                val gId = searchInitialGenreId!!
+                                                                searchInitialGenreId = null
+                                                                viewModel.updateSortConfig(viewModel.uiState.value.sortConfig.copy(selectedGenres = listOf(gId), selectedKeywords = emptyList()))
+                                                                viewModel.onQueryChanged("")
+                                                            } else if (searchInitialGenreName != null) {
+                                                                searchInitialGenreName = null
+                                                                viewModel.onQueryChanged("")
+                                                            } else if (searchInitialKeywordId != null) {
+                                                                val kId = searchInitialKeywordId!!
+                                                                searchInitialKeywordId = null
+                                                                viewModel.updateSortConfig(viewModel.uiState.value.sortConfig.copy(selectedGenres = emptyList(), selectedKeywords = listOf(kId)))
+                                                                viewModel.onQueryChanged("")
+                                                            } else if (searchInitialKeywordName != null) {
+                                                                searchInitialKeywordName = null
+                                                                viewModel.onQueryChanged("")
+                                                            }
                                                         }
                                                     }
 
@@ -311,7 +326,10 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                         startY = if (searchOverlayTriggerY >= 0) searchOverlayTriggerY else null,
                                                         initialGenreName = searchInitialGenreName,
                                                         initialKeywordName = searchInitialKeywordName,
-                                                        onBack = { isSearchOverlayOpen = false },
+                                                        onBack = { 
+                                                            isSearchOverlayOpen = false 
+                                                            searchInitialCategory = null
+                                                        },
                                                         onMovieClick = { 
                                                             navigator.push(com.cinetrack.ui.screens.MovieDetailScreen(it.id, it.mediaType)) 
                                                         },
@@ -323,6 +341,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                         },
                                                         onDiscoverTrendingClick = { reqType ->
                                                             isSearchOverlayOpen = false
+                                                            searchInitialCategory = null
                                                             deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_DISCOVER_TAB").apply {
                                                                 putExtra("requestedType", reqType)
                                                             }

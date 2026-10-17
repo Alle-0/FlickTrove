@@ -1047,6 +1047,8 @@
     <string name="collection_badge_items_single">%1$d НАИМЕНОВАНИЕ</string>
     <string name="collection_badge_series_plural">%1$d СЕРИАЛОВ</string>
     <string name="collection_badge_series_single">%1$d СЕРИАЛ</string>
+    <string name="collection_progress_popup">%1$d/%2$d просмотрено (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">%1$d/%2$d завершено (100%%)</string>
     <string name="collection_filter_sort_chronological">Хронологический</string>
     <string name="collection_filter_modal_title">Фильтры коллекции</string>
     <string name="collection_filter_empty">Нет элементов, соответствующих выбранным фильтрам</string>
@@ -1414,6 +1416,7 @@
     <string name="trophy_format_lost_reel">Утерянная плёнка</string>
     <string name="trophy_palmares_title">СИНЕФИЛЬСКИЙ ПАЛЬМАРЕС</string>
     <string name="trophy_unlocked_on">Открыто %s</string>
+    <string name="trophy_unlocked_with">Разблокировано фильмом</string>
     <string name="trophy_rarity_pct">Открыто у %s синефилов</string>
     <string name="trophy_to_unlock_tier">ДЛЯ ОТКРЫТИЯ • %s</string>
     <string name="trophy_tier_1">1-Й УРОВЕНЬ</string>

@@ -33,26 +33,41 @@ fun PillProgressBorder(
 
     Canvas(modifier = canvasModifier) {
         val strokeWidthPx = strokeWidth.toPx()
-        val radius = (size.height / 2f) - (strokeWidthPx / 2f)
         val w = size.width
         val h = size.height
 
-        // Create the full pill path
+        if (w < 1f || h < 1f) return@Canvas
+
+        val halfStroke = strokeWidthPx / 2f
+        val radius = (h / 2f) - halfStroke
+        val safeRadius = kotlin.math.min(radius, (w / 2f) - halfStroke).coerceAtLeast(0f)
+
+        // Create the full pill path starting from the leftmost point (middle-left) to match series detail progress
         val fullPath = Path().apply {
-            // Start from middle-top to follow a natural clockwise movement
-            moveTo(radius + strokeWidthPx / 2f, strokeWidthPx / 2f)
-            lineTo(w - radius - strokeWidthPx / 2f, strokeWidthPx / 2f)
+            moveTo(halfStroke, h / 2f)
+            // Left cap top quadrant: sweeps 90° clockwise from 180° up to 270° (top)
             arcTo(
-                rect = Rect(w - 2 * radius - strokeWidthPx / 2f, strokeWidthPx / 2f, w - strokeWidthPx / 2f, h - strokeWidthPx / 2f),
+                rect = Rect(halfStroke, halfStroke, halfStroke + 2 * safeRadius, h - halfStroke),
+                startAngleDegrees = 180f,
+                sweepAngleDegrees = 90f,
+                forceMoveTo = false
+            )
+            // Top straight edge: left to right
+            lineTo(w - halfStroke - safeRadius, halfStroke)
+            // Right cap: sweeps 180° clockwise from -90° (270°) around to 90° (bottom)
+            arcTo(
+                rect = Rect(w - halfStroke - 2 * safeRadius, halfStroke, w - halfStroke, h - halfStroke),
                 startAngleDegrees = -90f,
                 sweepAngleDegrees = 180f,
                 forceMoveTo = false
             )
-            lineTo(radius + strokeWidthPx / 2f, h - strokeWidthPx / 2f)
+            // Bottom straight edge: right to left
+            lineTo(halfStroke + safeRadius, h - halfStroke)
+            // Left cap bottom quadrant: sweeps 90° clockwise from 90° back to 180° (middle-left)
             arcTo(
-                rect = Rect(strokeWidthPx / 2f, strokeWidthPx / 2f, 2 * radius + strokeWidthPx / 2f, h - strokeWidthPx / 2f),
+                rect = Rect(halfStroke, halfStroke, halfStroke + 2 * safeRadius, h - halfStroke),
                 startAngleDegrees = 90f,
-                sweepAngleDegrees = 180f,
+                sweepAngleDegrees = 90f,
                 forceMoveTo = false
             )
             close()
@@ -69,7 +84,7 @@ fun PillProgressBorder(
             pathMeasure.setPath(fullPath, false)
             val pathLength = pathMeasure.length
             val segmentPath = Path()
-            pathMeasure.getSegment(0f, pathLength * progress, segmentPath, true)
+            pathMeasure.getSegment(0f, pathLength * progress.coerceIn(0f, 1f), segmentPath, true)
 
             drawPath(
                 path = segmentPath,

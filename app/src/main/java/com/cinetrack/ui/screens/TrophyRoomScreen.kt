@@ -58,13 +58,20 @@ object TrophyRoomTab : Tab {
             ?: hiltViewModel<TrophyRoomViewModel>()
         val trophyItems by viewModel.trophyItems.collectAsStateWithLifecycle()
 
+        val rootNavigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+
         TrophyRoomScreenContent(
             trophyItems = trophyItems,
             paddingValues = paddingValues,
             hazeState = hazeState,
             targetBadgeId = targetBadgeId,
             onTargetBadgeConsumed = { targetBadgeId = null },
-            onVerifySupporter = { email -> viewModel.verifySupporterEmail(email) }
+            onVerifySupporter = { email -> viewModel.verifySupporterEmail(email) },
+            onMovieClick = { movieId, mediaType ->
+                rootNavigator.push(com.cinetrack.ui.screens.MovieDetailScreen(movieId, mediaType))
+            },
+            onResolveUnlockingMovies = { badgeId -> viewModel.getUnlockingMoviesForBadge(badgeId) },
+            onResolveUnlockingMovie = { badgeId -> viewModel.getUnlockingMovieForBadge(badgeId) }
         )
     }
 }
@@ -103,7 +110,12 @@ class TrophyRoomScreen(private val targetBadgeId: String? = null) : Screen {
             hazeState = hazeState,
             targetBadgeId = currentTargetBadgeId,
             onTargetBadgeConsumed = { currentTargetBadgeId = null },
-            onVerifySupporter = { email -> viewModel.verifySupporterEmail(email) }
+            onVerifySupporter = { email -> viewModel.verifySupporterEmail(email) },
+            onMovieClick = { movieId, mediaType ->
+                navigator.push(com.cinetrack.ui.screens.MovieDetailScreen(movieId, mediaType))
+            },
+            onResolveUnlockingMovies = { badgeId -> viewModel.getUnlockingMoviesForBadge(badgeId) },
+            onResolveUnlockingMovie = { badgeId -> viewModel.getUnlockingMovieForBadge(badgeId) }
         )
     }
 }

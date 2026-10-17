@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import coil.compose.AsyncImage
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.repository.TrophyUpdateNotification
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.ui.components.updates.*
 import com.cinetrack.ui.assets.CustomIcons
@@ -99,7 +100,7 @@ fun UpdatesScreen(
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
     onSocialNotificationClick: ((Movie, String?) -> Unit)? = null,
-    onNavigateToTrophyRoom: (() -> Unit)? = null
+    onNavigateToTrophyRoom: ((String?) -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
@@ -400,7 +401,10 @@ fun UpdatesScreen(
                                                 TrophyNotificationCard(
                                                     notification = notif,
                                                     onDismiss = { viewModel.clearTrophyNotification(notif) },
-                                                    onClick = { onNavigateToTrophyRoom?.invoke() }
+                                                    onClick = {
+                                                        val targetBadgeId = (notif as? TrophyUpdateNotification.SingleTrophy)?.badgeId
+                                                        onNavigateToTrophyRoom?.invoke(targetBadgeId)
+                                                    }
                                                 )
                                             }
                                         }

@@ -15,6 +15,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.rounded.Check
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -300,12 +301,6 @@ fun CollectionDetailScreenContent(
                                     }
                                 } else 0
                             }
-                            val collectionProgress = if (totalCount > 0) (watchedCount.toFloat() / totalCount.toFloat()).coerceIn(0f, 1f) else 0f
-                            val animatedProgress by animateFloatAsState(
-                                targetValue = collectionProgress,
-                                animationSpec = tween(durationMillis = 600),
-                                label = "collectionProgress"
-                            )
 
                             val detailBadgeText = when {
                                 uiState.sortConfig.selectedMedia == "movie" -> {
@@ -326,32 +321,31 @@ fun CollectionDetailScreenContent(
                                 }
                             }
 
-                            Box(
-                                modifier = Modifier
-                                    .clip(CircleShape)
-                                    .hazeGlass(
-                                        state = backdropHazeState,
-                                        shape = CircleShape,
-                                        containerColor = Color.Black.copy(alpha = 0.45f),
-                                        borderColor = Color.Transparent,
-                                        borderWidth = 0.dp
-                                    ),
-                                contentAlignment = Alignment.Center
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp)
                             ) {
-                                PillProgressBorder(
-                                    progress = animatedProgress,
-                                    color = globalAccentColor,
-                                    strokeWidth = 1.5.dp,
-                                    modifier = Modifier.matchParentSize()
-                                )
-                                Text(
-                                    text = detailBadgeText,
-                                    color = Color.White,
+                                com.cinetrack.ui.components.common.CollectionProgressPill(
+                                    watchedCount = watchedCount,
+                                    totalCount = totalCount,
+                                    badgeText = detailBadgeText,
+                                    accentColor = globalAccentColor,
+                                    hazeState = backdropHazeState,
+                                    containerColor = Color.Black.copy(alpha = 0.45f),
                                     fontSize = 12.sp,
-                                    fontWeight = FontWeight.ExtraBold,
-                                    letterSpacing = 0.5.sp,
-                                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                                    horizontalPadding = 12.dp,
+                                    verticalPadding = 6.dp
                                 )
+
+                                if (totalCount > 0 && watchedCount >= totalCount) {
+                                    com.cinetrack.ui.components.common.CollectionRosetteBadge(
+                                        accentColor = globalAccentColor,
+                                        width = 26.dp,
+                                        height = 36.dp,
+                                        starSize = 11.dp,
+                                        contentDescription = stringResource(R.string.action_completed)
+                                    )
+                                }
                             }
 
                             // Expandable Overview

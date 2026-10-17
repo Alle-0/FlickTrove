@@ -269,8 +269,9 @@ fun MainGlobalDialogs(
             onSocialNotificationClick = { movie, commentId ->
                 rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType, openComments = true, targetCommentId = commentId))
             },
-            onNavigateToTrophyRoom = {
+            onNavigateToTrophyRoom = { targetBadgeId ->
                 onUpdatesOverlayClose()
+                com.cinetrack.ui.screens.TrophyRoomTab.targetBadgeId = targetBadgeId
                 tabNavigator.current = com.cinetrack.ui.screens.TrophyRoomTab
             },
             modifier = Modifier.zIndex(80000f)

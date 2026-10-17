@@ -13,8 +13,31 @@ val LocalHazeState = compositionLocalOf<dev.chrisbanes.haze.HazeState?> { null }
 val LocalDeepLinkIntent = staticCompositionLocalOf<MutableState<Intent?>> { error("No intent") }
 // Callback to open the filter modal from inside a tab; passes optional trigger Rect
 val LocalFilterRequest = compositionLocalOf<((Rect?) -> Unit)?> { null }
-val LocalSearchOverlay = compositionLocalOf<((offset: androidx.compose.ui.geometry.Offset?, genreId: Long?, genreName: String?, keywordId: Long?, keywordName: String?) -> Unit)?> { null }
 val LocalSurpriseMeRequest = compositionLocalOf<((Rect?) -> Unit)?> { null }
+
+fun interface SearchOverlayTrigger {
+    fun open(
+        offset: androidx.compose.ui.geometry.Offset?,
+        genreId: Long?,
+        genreName: String?,
+        keywordId: Long?,
+        keywordName: String?,
+        category: String?
+    )
+
+    operator fun invoke(
+        offset: androidx.compose.ui.geometry.Offset? = null,
+        genreId: Long? = null,
+        genreName: String? = null,
+        keywordId: Long? = null,
+        keywordName: String? = null,
+        category: String? = null
+    ) {
+        open(offset, genreId, genreName, keywordId, keywordName, category)
+    }
+}
+
+val LocalSearchOverlay = compositionLocalOf<SearchOverlayTrigger?> { null }
 
 data class FilterModalConfig(
     val triggerBounds: Rect? = null,
@@ -50,7 +73,10 @@ val LocalActiveTrophyFilterConfig = compositionLocalOf<MutableState<TrophyFilter
 data class TrophyDetailModalConfig(
     val item: com.cinetrack.ui.components.badge.TrophyRoomItemUi,
     val onClose: () -> Unit,
-    val onVerifySupporter: (suspend (String) -> com.cinetrack.data.repository.BadgeRepository.SupporterVerificationResult)? = null
+    val onVerifySupporter: (suspend (String) -> com.cinetrack.data.repository.BadgeRepository.SupporterVerificationResult)? = null,
+    val onMovieClick: ((Long, String) -> Unit)? = null,
+    val onResolveUnlockingMovies: (suspend (String) -> List<com.cinetrack.data.model.Movie>)? = null,
+    val onResolveUnlockingMovie: (suspend (String) -> com.cinetrack.data.model.Movie?)? = null
 )
 
 val LocalActiveTrophyDetailConfig = compositionLocalOf<MutableState<TrophyDetailModalConfig?>?> { null }

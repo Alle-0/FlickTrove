@@ -1123,6 +1123,8 @@
     <string name="collection_badge_items_single">%1$d개 항목</string>
     <string name="collection_badge_series_plural">시리즈 %1$d편</string>
     <string name="collection_badge_series_single">시리즈 %1$d편</string>
+    <string name="collection_progress_popup">%1$d/%2$d 시청 완료 (%3$d%%)</string>
+    <string name="collection_progress_popup_completed">%1$d/%2$d 완주 (100%%)</string>
     <string name="collection_filter_sort_chronological">연대순</string>
     <string name="collection_filter_modal_title">컬렉션 필터</string>
     <string name="collection_filter_empty">선택한 필터와 일치하는 항목이 없습니다</string>
@@ -1483,6 +1485,7 @@
     <string name="trophy_format_lost_reel">로스트 릴</string>
     <string name="trophy_palmares_title">시네필 명예의 전당</string>
     <string name="trophy_unlocked_on">%s에 잠금 해제됨</string>
+    <string name="trophy_unlocked_with">잠금 해제 작품</string>
     <string name="trophy_rarity_pct">시네필의 %s가 획득</string>
     <string name="trophy_to_unlock_tier">도전 과제 • %s</string>
     <string name="trophy_tier_1">1단계</string>

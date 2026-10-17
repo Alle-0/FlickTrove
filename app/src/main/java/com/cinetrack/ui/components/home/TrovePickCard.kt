@@ -249,14 +249,19 @@ fun TrovePickCard(
                             .fillMaxHeight(),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Badge "CURATED FOR YOU" ancorato in cima
+                        // Badge "CURATED FOR YOU" ancorato in cima con finitura satin glass
                         Box(
                             modifier = Modifier
                                 .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
                                 .border(
                                     0.5.dp,
-                                    MaterialTheme.colorScheme.primary.copy(alpha = 0.40f),
+                                    Brush.verticalGradient(
+                                        listOf(
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
+                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+                                        )
+                                    ),
                                     CircleShape
                                 )
                                 .padding(horizontal = 9.dp, vertical = 3.5.dp)
@@ -265,7 +270,7 @@ fun TrovePickCard(
                                 text = stringResource(R.string.home_trove_pick_badge).uppercase(),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = 10.5.sp,
-                                fontWeight = FontWeight.Bold,
+                                fontWeight = FontWeight.Black,
                                 letterSpacing = 1.2.sp,
                                 maxLines = 1
                             )
@@ -374,8 +379,17 @@ fun TrovePickCard(
                                     Box(
                                         modifier = Modifier
                                             .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                            .border(0.5.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.40f), CircleShape)
+                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
+                                            .border(
+                                                0.5.dp,
+                                                Brush.verticalGradient(
+                                                    listOf(
+                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.50f),
+                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
+                                                    )
+                                                ),
+                                                CircleShape
+                                            )
                                             .padding(horizontal = 8.dp, vertical = 3.dp)
                                     ) {
                                         Row(

@@ -113,6 +113,11 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         } else {
             hiltViewModel<SettingsViewModel>()
         }
+        val homeViewModel = if (activity != null) {
+            hiltViewModel<HomeViewModel>(activity)
+        } else {
+            hiltViewModel<HomeViewModel>()
+        }
         val isSettingsDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
         val updateInfo by settingsViewModel.updateInfo.collectAsStateWithLifecycle()
         val dismissedUpdateVersion by settingsViewModel.dismissedUpdateVersion.collectAsStateWithLifecycle()
@@ -435,7 +440,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 currentTab = currentTab,
                                 contentHazeState = contentHazeState,
                                 onSearchClick = { offset ->
-                                    searchOverlay?.invoke(offset, null, null, null, null)
+                                    val initialCategory = when {
+                                        currentTab is HomeFeedTab || currentTab is HomeTab -> {
+                                            if (homeViewModel.uiState.value.activeTab == "tv") "tv" else "movie"
+                                        }
+                                        else -> null
+                                    }
+                                    searchOverlay?.invoke(offset = offset, category = initialCategory)
                                 }
                             )
 
@@ -518,7 +529,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             yearPickerButtonBounds = yearPickerButtonBounds,
                             globalHazeState = globalHazeState,
                             onFilterModalDismiss = { isFilterModalVisible = false },
-                            onYearPickerDismiss = { isYearPickerVisible = false }
+                            onYearPickerDismiss = { isYearPickerVisible = false },
+                            rootNavigator = rootNavigator
                         )
 
                         // Global Dialogs & Overlays

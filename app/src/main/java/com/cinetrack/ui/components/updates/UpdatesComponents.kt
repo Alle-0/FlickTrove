@@ -693,29 +693,26 @@ fun TrophyNotificationCard(
         ) {
             when (notification) {
                 is TrophyUpdateNotification.BootstrapSummary -> {
-                    // Miniature Box in stile locandina con coppa dorata
+                    // Emblema coppa dorata circolare
                     Box(
-                        modifier = Modifier
-                            .width(48.dp)
-                            .height(72.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        Color(0xFFFBBF24).copy(alpha = 0.22f),
-                                        Color(0xFFB45309).copy(alpha = 0.08f)
-                                    )
-                                )
-                            )
-                            .border(1.dp, Color(0xFFFBBF24).copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
+                        modifier = Modifier.size(54.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_trophy),
-                            contentDescription = null,
-                            tint = Color(0xFFFBBF24),
-                            modifier = Modifier.size(24.dp)
-                        )
+                        Box(
+                            modifier = Modifier
+                                .size(48.dp)
+                                .clip(CircleShape)
+                                .background(Color(0xFFFBBF24).copy(alpha = 0.16f))
+                                .border(1.dp, Color(0xFFFBBF24).copy(alpha = 0.40f), CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_trophy),
+                                contentDescription = null,
+                                tint = Color(0xFFFBBF24),
+                                modifier = Modifier.size(24.dp)
+                            )
+                        }
                     }
 
                     // Colonna Info
@@ -786,28 +783,16 @@ fun TrophyNotificationCard(
                     val descRes = getBadgeDescriptionRes(notification.badgeId)
                     val displaySubtitle = if (descRes != 0) stringResource(descRes) else notification.subtitle
 
-                    // Miniature Box in stile locandina con emblema del badge
+                    // Emblema circolare del badge (senza sfondo rettangolare)
                     Box(
-                        modifier = Modifier
-                            .width(48.dp)
-                            .height(72.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(
-                                Brush.verticalGradient(
-                                    colors = listOf(
-                                        tierColor.copy(alpha = 0.18f),
-                                        Color(0xFF141416)
-                                    )
-                                )
-                            )
-                            .border(1.dp, tierColor.copy(alpha = 0.30f), RoundedCornerShape(10.dp)),
+                        modifier = Modifier.size(54.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         FlickTroveBadgeEmblem(
                             tier = notification.tier,
                             iconKind = notification.iconKind,
                             isUnlocked = true,
-                            size = 42.dp,
+                            size = 52.dp,
                             enablePeriodicGleam = false
                         )
                     }
