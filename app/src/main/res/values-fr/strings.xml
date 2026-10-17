@@ -1729,7 +1729,7 @@
     <string name="badge_miniseries_desc">Terminez 5 mini-séries complètes d\'une seule saison.</string>
     <string name="badge_folder_deep_title">La Collection Ultime</string>
     <string name="badge_folder_deep_cat">Curation Approfondie</string>
-    <string name="badge_folder_deep_desc">Créez et enrichissez un dossier thématique avec plus de 25 œuvres.</string>
+    <string name="badge_folder_deep_desc">Créez et enrichissez un dossier thématique avec au moins 25 œuvres.</string>
     <string name="badge_time_machine_title">La Machine à Remonter le Temps</string>
     <string name="badge_time_machine_cat">Cinéphilie Temporelle</string>
     <string name="badge_time_machine_desc">Regardez au moins un film dans 7 décennies différentes du 7e art.</string>

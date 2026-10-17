@@ -1729,7 +1729,7 @@
     <string name="badge_miniseries_desc">Завершите просмотр 5 законченных мини-сериалов из одного сезона.</string>
     <string name="badge_folder_deep_title">Главная коллекция</string>
     <string name="badge_folder_deep_cat">Глубокая подборка</string>
-    <string name="badge_folder_deep_desc">Создайте и наполните тематическую папку более чем 25 фильмами.</string>
+    <string name="badge_folder_deep_desc">Создайте и наполните тематическую папку как минимум 25 фильмами.</string>
     <string name="badge_time_machine_title">Машина времени</string>
     <string name="badge_time_machine_cat">Сквозь эпохи</string>
     <string name="badge_time_machine_desc">Посмотрите хотя бы по одному фильму из 7 разных десятилетий истории кино.</string>

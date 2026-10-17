@@ -26,6 +26,7 @@ import javax.inject.Singleton
 class FolderRepository @Inject constructor(
     private val folderDao: FolderDao,
     private val firebaseRemoteDataSource: FirebaseRemoteDataSource,
+    private val badgeRepository: dagger.Lazy<BadgeRepository>,
     @ApplicationContext private val context: Context
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -43,6 +44,7 @@ class FolderRepository @Inject constructor(
         val now = System.currentTimeMillis()
         val updatedEntity = folderEntity.copy(syncStatus = "synced", clientUpdatedAt = now)
         folderDao.insert(updatedEntity)
+        badgeRepository.get().evaluateBadgesAsync()
 
         // --- TRAKT INTEGRATION (Instant Write) ---
         if (folderEntity.id.startsWith("trakt_")) {
@@ -169,6 +171,7 @@ class FolderRepository @Inject constructor(
             try {
                 firebaseRemoteDataSource.deleteFolder(folderId)
                 folderDao.deleteById(folderId)
+                badgeRepository.get().evaluateBadgesAsync()
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
             }
@@ -264,6 +267,7 @@ class FolderRepository @Inject constructor(
         for (folderToDelete in foldersToDelete) {
             folderDao.deleteById(folderToDelete.id)
         }
+        badgeRepository.get().evaluateBadgesAsync()
         android.util.Log.d("FolderRepository", "Successfully synchronized folders with conflict resolution")
     }
 

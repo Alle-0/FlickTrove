@@ -1732,7 +1732,7 @@
     <string name="badge_miniseries_desc">Kompakte, abgeschlossene Geschichten: Du hast 5 Miniserien mit nur einer Staffel abgeschlossen.</string>
     <string name="badge_folder_deep_title">Die ultimative Sammlung</string>
     <string name="badge_folder_deep_cat">KURATIERTE ORDNER</string>
-    <string name="badge_folder_deep_desc">Ein reichhaltiges Archiv: Du hast einen thematischen Ordner mit mehr als 25 Titeln erstellt.</string>
+    <string name="badge_folder_deep_desc">Ein reichhaltiges Archiv: Du hast einen thematischen Ordner mit mindestens 25 Titeln erstellt.</string>
     <string name="badge_time_machine_title">Die Zeitmaschine</string>
     <string name="badge_time_machine_cat">ZEITREISE</string>
     <string name="badge_time_machine_desc">Grenzenlose Filmkultur: Du hast mindestens einen Film aus 7 verschiedenen Jahrzehnten gesehen.</string>

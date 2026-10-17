@@ -1735,7 +1735,7 @@
     <string name="badge_miniseries_desc">完整追完5部单季独立成篇的迷你剧集。</string>
     <string name="badge_folder_deep_title">终极典藏</string>
     <string name="badge_folder_deep_cat">深度策展</string>
-    <string name="badge_folder_deep_desc">创建主题文件夹并精心收录超过25部佳作。</string>
+    <string name="badge_folder_deep_desc">创建主题文件夹并精心收录至少25部佳作。</string>
     <string name="badge_time_machine_title">时光穿梭机</string>
     <string name="badge_time_machine_cat">纵览影史</string>
     <string name="badge_time_machine_desc">跨越时光长河，在电影史7个不同的年代各观赏至少1部电影。</string>

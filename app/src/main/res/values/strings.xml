@@ -1752,7 +1752,7 @@
 
     <string name="badge_folder_deep_title">The Ultimate Collection</string>
     <string name="badge_folder_deep_cat">CURATED FOLDERS</string>
-    <string name="badge_folder_deep_desc">A rich, meticulous archive: you assembled a themed folder with more than 25 titles.</string>
+    <string name="badge_folder_deep_desc">A rich, meticulous archive: you assembled a themed folder with at least 25 titles.</string>
 
     <string name="badge_time_machine_title">The Time Machine</string>
     <string name="badge_time_machine_cat">TIME TRAVEL</string>

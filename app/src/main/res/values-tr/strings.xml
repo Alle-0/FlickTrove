@@ -1735,7 +1735,7 @@
     <string name="badge_miniseries_desc">Tek sezonluk, tamamlanmış 5 mini diziyi bitirin.</string>
     <string name="badge_folder_deep_title">Kapsamlı Koleksiyon</string>
     <string name="badge_folder_deep_cat">Derin Kürasyon</string>
-    <string name="badge_folder_deep_desc">Tematik bir klasör oluşturup içine 25\'ten fazla seçkin yapım ekleyin.</string>
+    <string name="badge_folder_deep_desc">Tematik bir klasör oluşturup içine en az 25 seçkin yapım ekleyin.</string>
     <string name="badge_time_machine_title">Zaman Makinesi</string>
     <string name="badge_time_machine_cat">Kuşaklararası Sinema</string>
     <string name="badge_time_machine_desc">Sinema tarihinin 7 farklı on yılından en az birer film izleyin.</string>

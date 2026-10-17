@@ -1734,7 +1734,7 @@
     <string name="badge_miniseries_desc">Selesaikan 5 serial mini lengkap yang tuntas dalam satu musim.</string>
     <string name="badge_folder_deep_title">Koleksi Terhebat</string>
     <string name="badge_folder_deep_cat">Kurasi Mendalam</string>
-    <string name="badge_folder_deep_desc">Buat dan perkaya folder bertema dengan lebih dari 25 judul pilihan.</string>
+    <string name="badge_folder_deep_desc">Buat dan perkaya folder bertema dengan setidaknya 25 judul pilihan.</string>
     <string name="badge_time_machine_title">Mesin Waktu</string>
     <string name="badge_time_machine_cat">Lintas Era Sinema</string>
     <string name="badge_time_machine_desc">Tonton setidaknya satu film dari masing-masing 7 dekade berbeda dalam sejarah perfilman.</string>

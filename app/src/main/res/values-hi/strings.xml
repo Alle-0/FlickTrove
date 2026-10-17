@@ -1727,7 +1727,7 @@
     <string name="badge_miniseries_desc">एकल-सीज़न वाली 5 संपूर्ण मिनी-सीरीज़ पूरी करें।</string>
     <string name="badge_folder_deep_title">अंतिम संग्रह</string>
     <string name="badge_folder_deep_cat">गहन क्यूरेशन</string>
-    <string name="badge_folder_deep_desc">एक थीम आधारित फ़ोल्डर बनाएं और उसमें 25 से अधिक चुनिंदा शीर्षक जोड़ें।</string>
+    <string name="badge_folder_deep_desc">एक थीम आधारित फ़ोल्डर बनाएं और उसमें कम से कम 25 चुनिंदा शीर्षक जोड़ें।</string>
     <string name="badge_time_machine_title">टाइम मशीन</string>
     <string name="badge_time_machine_cat">युगों की यात्रा</string>
     <string name="badge_time_machine_desc">सिनेमा इतिहास के 7 अलग-अलग दशकों में से प्रत्येक से कम से कम एक फिल्म देखें।</string>

@@ -1727,7 +1727,7 @@
     <string name="badge_miniseries_desc">Conclua 5 minisséries completas de temporada única.</string>
     <string name="badge_folder_deep_title">A Coleção Definitiva</string>
     <string name="badge_folder_deep_cat">Curadoria Profunda</string>
-    <string name="badge_folder_deep_desc">Crie e enriqueça uma pasta temática com mais de 25 títulos selecionados.</string>
+    <string name="badge_folder_deep_desc">Crie e enriqueça uma pasta temática com pelo menos 25 títulos selecionados.</string>
     <string name="badge_time_machine_title">A Máquina do Tempo</string>
     <string name="badge_time_machine_cat">Cinefilia Temporal</string>
     <string name="badge_time_machine_desc">Assista a pelo menos um filme em cada uma de 7 décadas diferentes da história do cinema.</string>

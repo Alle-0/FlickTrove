@@ -1335,7 +1335,7 @@ class BadgeRepository @Inject constructor(
                     show.numberOfSeasons == 1 || (show.seasons?.count { s -> s.seasonNumber > 0 } == 1)
                 }
                 EvaluationResult(
-                    currentProgress = miniseriesCount,
+                    currentProgress = miniseriesCount.coerceAtMost(5),
                     targetThreshold = 5,
                     activeTier = PreviewBadgeTier.MM_35,
                     isUnlocked = miniseriesCount >= 5
@@ -1344,9 +1344,9 @@ class BadgeRepository @Inject constructor(
 
             // 43. Profondità Cartelle: La Collezione Definitiva (almeno 1 cartella con >= 25 titoli)
             "badge_folder_deep" -> {
-                val maxFolderItems = allFolders.maxOfOrNull { it.itemIds.size } ?: 0
+                val maxFolderItems = allFolders.maxOfOrNull { it.itemIds.distinct().size } ?: 0
                 EvaluationResult(
-                    currentProgress = maxFolderItems,
+                    currentProgress = maxFolderItems.coerceAtMost(25),
                     targetThreshold = 25,
                     activeTier = PreviewBadgeTier.MM_35,
                     isUnlocked = maxFolderItems >= 25
