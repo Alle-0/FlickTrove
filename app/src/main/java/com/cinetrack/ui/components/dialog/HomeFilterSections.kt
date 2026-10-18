@@ -525,59 +525,15 @@ fun FilterGenresSection(
                 }
 
                 if (!isAllShown && sortedGenres.size > displayedGenres.size) {
-                    Box(
-                        modifier = Modifier
-                            .bounceClick { showAllGenres = true }
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.filter_show_all).uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
+                    ShowMoreLessToggleChip(
+                        isExpanded = false,
+                        onClick = { showAllGenres = true }
+                    )
                 } else if (isAllShown && sortedGenres.size > 12) {
-                    Box(
-                        modifier = Modifier
-                            .bounceClick { showAllGenres = false }
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.show_less).uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
+                    ShowMoreLessToggleChip(
+                        isExpanded = true,
+                        onClick = { showAllGenres = false }
+                    )
                 }
             }
         }
@@ -798,61 +754,57 @@ fun FilterCountriesSection(
                 }
 
                 if (!isAllShown && allCodes.size > displayedCodes.size) {
-                    Box(
-                        modifier = Modifier
-                            .bounceClick { showAllCountries = true }
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.filter_show_all).uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
+                    ShowMoreLessToggleChip(
+                        isExpanded = false,
+                        onClick = { showAllCountries = true }
+                    )
                 } else if (isAllShown && allCodes.size > 12) {
-                    Box(
-                        modifier = Modifier
-                            .bounceClick { showAllCountries = false }
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.45f))
-                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                            .padding(horizontal = 12.dp, vertical = 8.dp)
-                    ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
-                                contentDescription = null,
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                modifier = Modifier.size(12.dp)
-                            )
-                            Text(
-                                text = stringResource(R.string.show_less).uppercase(),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.ExtraBold,
-                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                            )
-                        }
-                    }
+                    ShowMoreLessToggleChip(
+                        isExpanded = true,
+                        onClick = { showAllCountries = false }
+                    )
                 }
             }
+        }
+    }
+}
+
+@Composable
+private fun ShowMoreLessToggleChip(
+    isExpanded: Boolean,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .bounceClick(onClick = onClick)
+            .clip(CircleShape)
+            .background(Color.Black.copy(alpha = 0.45f))
+            .border(
+                width = 1.dp,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f),
+                shape = CircleShape
+            )
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    ) {
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(4.dp)
+        ) {
+            Icon(
+                imageVector = ImageVector.vectorResource(
+                    id = if (isExpanded) R.drawable.ic_drop_arrow_up else R.drawable.ic_plus
+                ),
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                modifier = Modifier.size(12.dp)
+            )
+            Text(
+                text = (if (isExpanded) stringResource(R.string.show_less) else stringResource(R.string.filter_show_all)).uppercase(),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.ExtraBold,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+            )
         }
     }
 }

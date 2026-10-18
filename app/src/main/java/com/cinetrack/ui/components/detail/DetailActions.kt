@@ -452,6 +452,18 @@ fun DetailActions(
 
                 if (label.isNotEmpty()) {
                     Spacer(modifier = Modifier.width(10.dp))
+                    val isTvSeries = movie.mediaType == "tv"
+                    val tvMeta = remember(movie.id, movie.numberOfEpisodes, movie.seasons, movie.episodeRunTime, movie.runtime) {
+                        if (isTvSeries) {
+                            val totalEpisodes = movie.numberOfEpisodes?.takeIf { it > 0 }
+                                ?: movie.seasons?.filter { it.seasonNumber > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
+                                ?: movie.seasons?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
+                            val avgRuntime = movie.episodeRunTime?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
+                                ?: movie.runtime?.takeIf { it > 0 }
+                            Pair(totalEpisodes, avgRuntime)
+                        } else null
+                    }
+
                     AnimatedContent(
                         targetState = displayWatchState,
                         transitionSpec = {
@@ -478,14 +490,8 @@ fun DetailActions(
                             else -> ""
                         }
 
-                        val isTvSeries = movie.mediaType == "tv"
-                        val tvSubtitle = if (isTvSeries && targetState == WatchState.NONE) {
-                            val totalEpisodes = movie.numberOfEpisodes?.takeIf { it > 0 }
-                                ?: movie.seasons?.filter { it.seasonNumber > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
-                                ?: movie.seasons?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
-                            val avgRuntime = movie.episodeRunTime?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
-                                ?: movie.runtime?.takeIf { it > 0 }
-
+                        val tvSubtitle = if (isTvSeries && targetState == WatchState.NONE && tvMeta != null) {
+                            val (totalEpisodes, avgRuntime) = tvMeta
                             when {
                                 totalEpisodes != null && avgRuntime != null -> {
                                     if (totalEpisodes == 1) {
