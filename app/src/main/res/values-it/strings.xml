@@ -750,6 +750,7 @@
     <string name="filter_active_subgenres">SOTTOGENERI ATTIVI</string>
     <string name="filter_genres">GENERI</string>
     <string name="filter_platforms">PIATTAFORME</string>
+    <string name="filter_countries">PAESI</string>
     <string name="filter_period">PERIODO</string>
     <string name="filter_release_month">MESE DI USCITA</string>
     <string name="filter_future_beyond">Più avanti</string>

@@ -785,6 +785,7 @@
     <string name="filter_active_subgenres">AKTİF ALT TÜRLER</string>
     <string name="filter_genres">TÜRLER</string>
     <string name="filter_platforms">PLATFORMLAR</string>
+    <string name="filter_countries">ÜLKELER</string>
     <string name="filter_period">DÖNEM</string>
     <string name="filter_release_month">ÇIKIŞ AYI</string>
     <string name="filter_future_beyond">Daha Sonra</string>

@@ -90,6 +90,7 @@ data class SortConfig(
     val selectedStatuses: List<String> = emptyList(), // "dropped", "not_started", "watching", "up_to_date"
     val selectedSources: List<String> = emptyList(), // empty = All (CommsUni)
     val selectedLanguages: List<String> = emptyList(), // empty = all
+    val selectedCountries: List<String> = emptyList(), // Filter by production country (ISO 3166-1 alpha-2)
     val selectedSource: String? = null, // Deprecated backwards-compatibility fallback
     val selectedMedia: String? = null, // null = all, "movie", "tv"
     val selectedLanguage: String? = null // Deprecated backwards-compatibility fallback

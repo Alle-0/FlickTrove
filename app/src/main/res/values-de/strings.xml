@@ -707,6 +707,7 @@
     <string name="filter_active_subgenres">AKTIVE SUBGENRES</string>
     <string name="filter_genres">GENRES</string>
     <string name="filter_platforms">PLATTFORMEN</string>
+    <string name="filter_countries">LÄNDER</string>
     <string name="filter_period">ZEITRAUM</string>
     <string name="filter_release_month">VERÖFFENTLICHUNGSMONAT</string>
     <string name="filter_future_beyond">Später</string>

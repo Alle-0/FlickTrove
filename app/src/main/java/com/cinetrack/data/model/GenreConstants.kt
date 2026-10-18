@@ -46,7 +46,10 @@ object GenreConstants {
         Genre(10766, "Soap"),
         Genre(10767, "Talk"),
         Genre(10768, "War & Politics"),
-        Genre(37, "Western")
+        Genre(37, "Western"),
+        Genre(53, "Thriller"),
+        Genre(27, "Horror"),
+        Genre(10749, "Romance")
     )
 
     val ALL_GENRES = (MOVIE_GENRES + TV_GENRES).distinctBy { it.id }
@@ -427,6 +430,22 @@ object GenreConstants {
             lang.startsWith("id") || lang.startsWith("in") -> INDONESIAN_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             lang.startsWith("hi") -> HINDI_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             else -> ENGLISH_NAMES[id] ?: defaultName
+        }
+    }
+
+    /**
+     * Resolves equivalent genre IDs for media filtering.
+     * In TMDB, TV series do not natively feature "Thriller" (53), "Horror" (27), or "Romance" (10749) as standalone TV genres;
+     * they are classified under Crime (80) & Mystery (9648), Sci-Fi/Fantasy (10765) & Mystery, or Drama (18) & Soap (10766).
+     * This mapping bridges cinephile expectations across TV and movies seamlessly.
+     */
+    fun getEffectiveGenreIds(genreId: Long, isTv: Boolean): List<Long> {
+        if (!isTv) return listOf(genreId)
+        return when (genreId) {
+            53L -> listOf(53L, 80L, 9648L)
+            27L -> listOf(27L, 10765L, 9648L)
+            10749L -> listOf(10749L, 18L, 10766L)
+            else -> listOf(genreId)
         }
     }
 }

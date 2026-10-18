@@ -785,6 +785,7 @@
     <string name="filter_active_subgenres">活跃子类型</string>
     <string name="filter_genres">类型</string>
     <string name="filter_platforms">播放平台</string>
+    <string name="filter_countries">国家与地区</string>
     <string name="filter_period">年代区间</string>
     <string name="filter_release_month">上映月份</string>
     <string name="filter_future_beyond">更晚</string>

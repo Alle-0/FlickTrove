@@ -5,6 +5,7 @@ import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.repository.MovieRepository
@@ -241,7 +242,18 @@ class FolderDetailViewModel @Inject constructor(
         var filtered = movies
         
         if (sort.selectedGenres.isNotEmpty()) {
-            filtered = filtered.filter { movie -> movie.genreIds?.any { it in sort.selectedGenres } == true }
+            filtered = filtered.filter { movie ->
+                sort.selectedGenres.any { g ->
+                    val targets = GenreConstants.getEffectiveGenreIds(g, movie.mediaType == "tv")
+                    movie.genreIds?.any { it in targets } == true
+                }
+            }
+        }
+
+        if (sort.selectedCountries.isNotEmpty()) {
+            filtered = filtered.filter { movie ->
+                movie.originCountry?.any { it.uppercase() in sort.selectedCountries } == true
+            }
         }
         
         if (sort.selectedDecades.isNotEmpty()) {

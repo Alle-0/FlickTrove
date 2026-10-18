@@ -1,5 +1,6 @@
 package com.cinetrack.domain
 
+import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
@@ -75,7 +76,13 @@ class GetVistiUiStateUseCase @Inject constructor() {
             val filtered = searchFiltered.filter { movie ->
                 
                 val matchesGenre = prefs.vistiSort.selectedGenres.isEmpty() || 
-                    (movie.genreIds?.any { it in prefs.vistiSort.selectedGenres } ?: false)
+                    prefs.vistiSort.selectedGenres.any { g ->
+                        val targets = GenreConstants.getEffectiveGenreIds(g, movie.mediaType == "tv")
+                        movie.genreIds?.any { it in targets } ?: false
+                    }
+
+                val matchesCountry = prefs.vistiSort.selectedCountries.isEmpty() ||
+                    (movie.originCountry?.any { it.uppercase() in prefs.vistiSort.selectedCountries } ?: false)
                 
                 val matchesDecade = prefs.vistiSort.selectedDecades.isEmpty() || 
                     prefs.vistiSort.selectedDecades.any { decade ->
@@ -99,7 +106,7 @@ class GetVistiUiStateUseCase @Inject constructor() {
                         }
                     }
 
-                matchesGenre && matchesDecade && matchesProvider && matchesStatus
+                matchesGenre && matchesCountry && matchesDecade && matchesProvider && matchesStatus
             }
 
             val sorted: List<Movie> = sortMovies(filtered, prefs.vistiSort, historyMap)

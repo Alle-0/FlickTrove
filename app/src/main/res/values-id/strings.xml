@@ -785,6 +785,7 @@
     <string name="filter_active_subgenres">SUBGENRE AKTIF</string>
     <string name="filter_genres">GENRE</string>
     <string name="filter_platforms">PLATFORM</string>
+    <string name="filter_countries">NEGARA</string>
     <string name="filter_period">PERIODE</string>
     <string name="filter_release_month">BULAN RILIS</string>
     <string name="filter_future_beyond">Mendatang</string>

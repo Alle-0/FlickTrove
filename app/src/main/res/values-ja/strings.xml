@@ -785,6 +785,7 @@
     <string name="filter_active_subgenres">選択中のサブジャンル</string>
     <string name="filter_genres">ジャンル</string>
     <string name="filter_platforms">プラットフォーム</string>
+    <string name="filter_countries">国・地域</string>
     <string name="filter_period">年代・期間</string>
     <string name="filter_release_month">公開月</string>
     <string name="filter_future_beyond">それ以降</string>

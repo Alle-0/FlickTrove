@@ -797,6 +797,7 @@
     <string name="filter_active_subgenres">ACTIVE SUBGENRES</string>
     <string name="filter_genres">GENRES</string>
     <string name="filter_platforms">PLATFORMS</string>
+    <string name="filter_countries">COUNTRIES</string>
     <string name="filter_period">PERIOD</string>
     <string name="filter_release_month">RELEASE MONTH</string>
     <string name="filter_future_beyond">Later</string>

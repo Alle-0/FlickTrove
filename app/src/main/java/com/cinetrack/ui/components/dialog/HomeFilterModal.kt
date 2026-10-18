@@ -369,6 +369,7 @@ fun HomeFilterModal(
                                         localSortConfig.selectedLanguage != null
                                 } else {
                                     localSortConfig.selectedGenres.isNotEmpty() ||
+                                        localSortConfig.selectedCountries.isNotEmpty() ||
                                         localSortConfig.selectedKeywords.isNotEmpty() ||
                                         localSortConfig.selectedProviders.isNotEmpty() ||
                                         localSortConfig.selectedDecades.isNotEmpty() ||
@@ -400,6 +401,7 @@ fun HomeFilterModal(
                                                 } else {
                                                     localSortConfig.copy(
                                                         selectedGenres = emptyList(),
+                                                        selectedCountries = emptyList(),
                                                         selectedKeywords = emptyList(),
                                                         selectedProviders = emptyList(),
                                                         selectedDecades = emptyList(),
@@ -543,6 +545,16 @@ fun HomeFilterModal(
                                     sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "platforms",
                                     onToggle = { expandedSection = if (expandedSection == "platforms") null else "platforms" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
+                            }
+
+                            // --- COUNTRIES SECTION ---
+                            if (!isCommentsFilter && !isCollectionFilter) {
+                                FilterCountriesSection(
+                                    sortConfig = localSortConfig,
+                                    isExpanded = expandedSection == "countries",
+                                    onToggle = { expandedSection = if (expandedSection == "countries") null else "countries" },
                                     onSortConfigChanged = { localSortConfig = it }
                                 )
                             }

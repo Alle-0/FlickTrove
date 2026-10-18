@@ -714,6 +714,7 @@
     <string name="filter_active_subgenres">АКТИВНЫЕ ПОДЖАНРЫ</string>
     <string name="filter_genres">ЖАНРЫ</string>
     <string name="filter_platforms">ПЛАТФОРМЫ</string>
+    <string name="filter_countries">СТРАНЫ</string>
     <string name="filter_period">ПЕРИОД</string>
     <string name="filter_release_month">МЕСЯЦ ВЫХОДА</string>
     <string name="filter_future_beyond">Позже</string>

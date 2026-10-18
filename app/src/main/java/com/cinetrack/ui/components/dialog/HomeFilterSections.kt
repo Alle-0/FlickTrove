@@ -658,3 +658,83 @@ fun FilterPeriodSection(
         }
     }
 }
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun FilterCountriesSection(
+    sortConfig: SortConfig,
+    isExpanded: Boolean,
+    onToggle: () -> Unit,
+    onSortConfigChanged: (SortConfig) -> Unit
+) {
+    var showAllCountries by remember { mutableStateOf(false) }
+    val currentLocale = LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
+
+    ExpandableSection(
+        title = stringResource(R.string.filter_countries),
+        isExpanded = isExpanded,
+        badgeCount = sortConfig.selectedCountries.size,
+        onToggle = onToggle
+    ) {
+        FlowRow(
+            modifier = Modifier.padding(horizontal = 12.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            val allCodes = remember(sortConfig.selectedCountries) {
+                (com.cinetrack.util.CountryUtils.POPULAR_COUNTRIES + sortConfig.selectedCountries).distinct()
+            }
+            val displayedCodes = if (showAllCountries) {
+                allCodes
+            } else {
+                allCodes.filterIndexed { index, code ->
+                    index < 8 || code in sortConfig.selectedCountries
+                }
+            }
+
+            displayedCodes.forEach { code ->
+                val isSelected = code in sortConfig.selectedCountries
+                val flag = com.cinetrack.util.CountryUtils.getFlagEmoji(code)
+                val countryName = com.cinetrack.util.CountryUtils.getLocalizedCountryName(code, currentLocale)
+                FilterChip(
+                    label = "$flag ${countryName.uppercase(currentLocale)}",
+                    isSelected = isSelected,
+                    onClick = {
+                        val newList = if (isSelected) sortConfig.selectedCountries - code
+                        else sortConfig.selectedCountries + code
+                        onSortConfigChanged(sortConfig.copy(selectedCountries = newList))
+                    }
+                )
+            }
+
+            if (!showAllCountries && allCodes.size > displayedCodes.size) {
+                Box(
+                    modifier = Modifier
+                        .bounceClick { showAllCountries = true }
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.45f))
+                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.filter_show_all).uppercase(),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            }
+        }
+    }
+}

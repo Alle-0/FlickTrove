@@ -785,6 +785,7 @@
     <string name="filter_active_subgenres">선택된 서브장르</string>
     <string name="filter_genres">장르</string>
     <string name="filter_platforms">플랫폼</string>
+    <string name="filter_countries">국가</string>
     <string name="filter_period">시대 및 연도</string>
     <string name="filter_release_month">개봉 월</string>
     <string name="filter_future_beyond">그 이후</string>

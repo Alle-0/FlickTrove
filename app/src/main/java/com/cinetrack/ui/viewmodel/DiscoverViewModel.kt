@@ -166,7 +166,7 @@ class DiscoverViewModel @Inject constructor(
                 } else {
                     config.sortType == "created_at" && config.sortDirection == "desc"
                 }
-                val hasCustomFilters = config.selectedGenres.isNotEmpty() || config.selectedProviders.isNotEmpty() || config.selectedDecades.isNotEmpty() || !isDefaultSort
+                val hasCustomFilters = config.selectedGenres.isNotEmpty() || config.selectedProviders.isNotEmpty() || config.selectedCountries.isNotEmpty() || config.selectedDecades.isNotEmpty() || !isDefaultSort
 
                 val fetchedResults = if (hasCustomFilters || genreId != null) {
                     val options = mutableMapOf<String, String>()
@@ -207,12 +207,22 @@ class DiscoverViewModel @Inject constructor(
                     // 3. Genres
                     val combinedGenres = (config.selectedGenres + listOfNotNull(genreId)).distinct()
                     if (combinedGenres.isNotEmpty()) {
-                        options["with_genres"] = combinedGenres.joinToString(",")
+                        if (isTvType) {
+                            val expandedGenres = combinedGenres.flatMap { com.cinetrack.data.model.GenreConstants.getEffectiveGenreIds(it, true) }.distinct()
+                            options["with_genres"] = expandedGenres.joinToString("|")
+                        } else {
+                            options["with_genres"] = combinedGenres.joinToString(",")
+                        }
                     }
 
                     // 4. Providers
                     if (config.selectedProviders.isNotEmpty()) {
                         options["with_watch_providers"] = config.selectedProviders.joinToString("|")
+                    }
+
+                    // 4b. Origin Countries
+                    if (config.selectedCountries.isNotEmpty()) {
+                        options["with_origin_country"] = config.selectedCountries.joinToString("|")
                     }
 
                     // 5. Decades / Release months

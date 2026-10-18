@@ -246,10 +246,4 @@ fun CountryDistributionSection(countryCounts: List<Pair<String, Int>>) {
     }
 }
 
-private fun getFlagEmoji(countryCode: String): String {
-    if (countryCode.length != 2) return "🌍"
-    val code = countryCode.uppercase()
-    val firstLetter = Character.codePointAt(code, 0) - 0x41 + 0x1F1E6
-    val secondLetter = Character.codePointAt(code, 1) - 0x41 + 0x1F1E6
-    return String(Character.toChars(firstLetter)) + String(Character.toChars(secondLetter))
-}
+private fun getFlagEmoji(countryCode: String): String = com.cinetrack.util.CountryUtils.getFlagEmoji(countryCode)

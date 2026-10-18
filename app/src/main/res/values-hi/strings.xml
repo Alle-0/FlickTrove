@@ -712,6 +712,7 @@
     <string name="filter_active_subgenres">सक्रिय उप-शैलियाँ</string>
     <string name="filter_genres">शैलियाँ</string>
     <string name="filter_platforms">प्लेटफ़ॉर्म</string>
+    <string name="filter_countries">देश</string>
     <string name="filter_period">अवधि</string>
     <string name="filter_release_month">रिलीज़ का महीना</string>
     <string name="filter_future_beyond">बाद में</string>

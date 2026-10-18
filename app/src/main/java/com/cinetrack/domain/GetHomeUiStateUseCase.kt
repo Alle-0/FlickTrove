@@ -1,5 +1,6 @@
 package com.cinetrack.domain
 
+import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
@@ -77,7 +78,17 @@ class GetHomeUiStateUseCase @Inject constructor() {
             }
 
             val filtered = searchFiltered
-                .filter { prefs.homeSort.selectedGenres.isEmpty() || it.genreIds?.any { g -> g in prefs.homeSort.selectedGenres } == true }
+                .filter { movie ->
+                    prefs.homeSort.selectedGenres.isEmpty() || 
+                    prefs.homeSort.selectedGenres.any { g ->
+                        val targets = GenreConstants.getEffectiveGenreIds(g, movie.mediaType == "tv")
+                        movie.genreIds?.any { it in targets } == true
+                    }
+                }
+                .filter { movie ->
+                    prefs.homeSort.selectedCountries.isEmpty() ||
+                    (movie.originCountry?.any { it.uppercase() in prefs.homeSort.selectedCountries } == true)
+                }
                 .filter { movie ->
                     prefs.homeSort.selectedDecades.isEmpty() || 
                     prefs.homeSort.selectedDecades.any { decade ->
