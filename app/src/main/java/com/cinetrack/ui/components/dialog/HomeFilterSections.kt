@@ -58,14 +58,16 @@ fun FilterSortSection(
             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val isDiscoverCategory = category.contains("popular") ||
-                category.contains("upcoming") ||
-                category.contains("now_playing") ||
-                category.contains("airing") ||
-                category.contains("trending") ||
-                category.contains("streaming") ||
-                category.contains("on_the_air") ||
-                category == "genre"
+            val isDiscoverCategory = remember(category) {
+                category.contains("popular") ||
+                    category.contains("upcoming") ||
+                    category.contains("now_playing") ||
+                    category.contains("airing") ||
+                    category.contains("trending") ||
+                    category.contains("streaming") ||
+                    category.contains("on_the_air") ||
+                    category == "genre"
+            }
 
             val sortOptions = buildList {
                 if (isCollectionFilter) {
@@ -422,16 +424,18 @@ fun FilterKeywordsSection(
         badgeCount = sortConfig.selectedKeywords.size,
         onToggle = onToggle
     ) {
+        val currentLanguage = LocalConfiguration.current.locales[0]?.language ?: "en"
+        val fallbackLabel = stringResource(R.string.filter_selected_subgenre)
+
         FlowRow(
             modifier = Modifier.padding(horizontal = 12.dp),
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             sortConfig.selectedKeywords.forEach { keywordId ->
-                val currentLanguage = LocalConfiguration.current.locales[0]?.language ?: "en"
                 val dictName = com.cinetrack.data.model.KeywordDictionary.getLocalizedKeywordName(keywordId, currentLanguage)?.uppercase()
                 val suggestedName = suggestedFilters.find { it.id == keywordId }?.name?.uppercase()
-                val keywordName = suggestedName ?: dictName ?: initialKeywordName?.uppercase() ?: stringResource(R.string.filter_selected_subgenre)
+                val keywordName = suggestedName ?: dictName ?: initialKeywordName?.uppercase() ?: fallbackLabel
 
                 FilterChip(
                     label = keywordName,
@@ -465,15 +469,14 @@ fun FilterGenresSection(
         badgeCount = sortConfig.selectedGenres.size,
         onToggle = onToggle
     ) {
-        val isTvExclusive = category.contains("tv") && !category.contains("movie") && !isFolder
-        val isMovieExclusive = category.contains("movie") && !category.contains("tv") && !isFolder && !hasTvSeries
-        val baseGenres = when {
-            isTvExclusive -> GenreConstants.TV_GENRES
-            isMovieExclusive -> GenreConstants.MOVIE_GENRES
-            else -> GenreConstants.ALL_GENRES
-        }
-
-        val sortedGenres = remember(baseGenres, currentLanguage) {
+        val sortedGenres = remember(category, isFolder, hasTvSeries, currentLanguage) {
+            val isTvExclusive = category.contains("tv") && !category.contains("movie") && !isFolder
+            val isMovieExclusive = category.contains("movie") && !category.contains("tv") && !isFolder && !hasTvSeries
+            val baseGenres = when {
+                isTvExclusive -> GenreConstants.TV_GENRES
+                isMovieExclusive -> GenreConstants.MOVIE_GENRES
+                else -> GenreConstants.ALL_GENRES
+            }
             baseGenres.sortedBy { genre ->
                 GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name).lowercase()
             }
@@ -654,9 +657,11 @@ fun FilterPeriodSection(
                 )
             }
         } else {
-            val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
-            val currentDecade = (currentYear / 10) * 10
-            val decades = (currentDecade downTo 1960 step 10).map { it.toString() }
+            val decades = remember {
+                val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
+                val currentDecade = (currentYear / 10) * 10
+                (currentDecade downTo 1960 step 10).map { it.toString() }
+            }
             FlowRow(
                 modifier = Modifier.padding(horizontal = 12.dp),
                 horizontalArrangement = Arrangement.spacedBy(8.dp),
