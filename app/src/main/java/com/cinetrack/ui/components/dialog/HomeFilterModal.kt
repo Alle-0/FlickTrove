@@ -105,7 +105,6 @@ fun HomeFilterModal(
     val maxAllowedHeight = screenHeight - topSafetyPx - bottomSafetyPx
     
     var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
-    var showAllGenres by remember { mutableStateOf(false) }
     
     val minAllowedHeight = with(density) {
         when {
@@ -456,563 +455,109 @@ fun HomeFilterModal(
                         ) {
                             // --- SORT SECTION ---
                             if (showSortBy) {
-                                ExpandableSection(
-                                    title = stringResource(R.string.filter_sort_by),
+                                FilterSortSection(
+                                    category = category,
+                                    isCollectionFilter = isCollectionFilter,
+                                    isCommentsFilter = isCommentsFilter,
+                                    isVisti = isVisti,
+                                    isFolder = isFolder,
+                                    sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "sort",
-                                    showChevron = true,
-                                    isClickable = true,
-                                    onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        val isDiscoverCategory = category.contains("popular") ||
-                                            category.contains("upcoming") ||
-                                            category.contains("now_playing") ||
-                                            category.contains("airing") ||
-                                            category.contains("trending") ||
-                                            category.contains("streaming") ||
-                                            category.contains("on_the_air") ||
-                                            category == "genre"
-
-                                        val sortOptions = buildList {
-                                            if (isCollectionFilter) {
-                                                add(FilterOption("chronological", stringResource(R.string.collection_filter_sort_chronological)))
-                                                add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
-                                            } else if (isCommentsFilter) {
-                                                add(FilterOption("date", stringResource(R.string.comment_sort_date)))
-                                                add(FilterOption("likes", stringResource(R.string.comment_sort_likes)))
-                                            } else if (isDiscoverCategory) {
-                                                if (category.contains("upcoming")) {
-                                                    add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
-                                                    add(FilterOption("created_at", stringResource(R.string.person_popularity).lowercase().replaceFirstChar { it.uppercase() }))
-                                                } else {
-                                                    add(FilterOption("created_at", stringResource(R.string.person_popularity).lowercase().replaceFirstChar { it.uppercase() }))
-                                                    add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
-                                                    add(FilterOption("personal_rating", stringResource(R.string.detail_rating)))
-                                                    add(FilterOption("title", stringResource(R.string.filter_sort_title)))
-                                                }
-                                            } else {
-                                                if (isVisti) {
-                                                    add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))
-                                                    add(FilterOption("first_watched_at", stringResource(R.string.filter_sort_first_watched_at)))
-                                                    add(FilterOption("rewatch_count", stringResource(R.string.filter_sort_rewatch_count)))
-                                                }
-                                                if (isFolder) {
-                                                    add(FilterOption("manual", stringResource(R.string.filter_sort_manual)))
-                                                }
-                                                add(FilterOption("added_at", stringResource(R.string.filter_sort_added_at)))
-                                                add(FilterOption("release_date", stringResource(R.string.filter_sort_release_date)))
-                                                add(FilterOption("title", stringResource(R.string.filter_sort_title)))
-                                                add(FilterOption("personal_rating", stringResource(R.string.filter_sort_personal_rating)))
-                                                add(FilterOption("runtime", stringResource(R.string.filter_sort_runtime)))
-                                                if (category != "movie") {
-                                                    add(FilterOption("series_status", stringResource(R.string.filter_sort_series_status)))
-                                                    add(FilterOption("remaining_episodes", stringResource(R.string.filter_sort_remaining_episodes)))
-                                                }
-                                            }
-                                        }
-
-
-                                        sortOptions.forEach { option ->
-                                            SortOptionItem(
-                                                label = option.label,
-                                                isSelected = localSortConfig.sortType == option.id,
-                                                onInfoClick = if (option.id == "series_status") { { showSeriesStatusInfoDialog = true } } else null,
-                                                onClick = {
-                                                    val newDirection = if (localSortConfig.sortType != option.id && (option.id == "series_status" || option.id == "title")) "asc" else localSortConfig.sortDirection
-                                                    localSortConfig = localSortConfig.copy(sortType = option.id, sortDirection = newDirection)
-                                                }
-                                            )
-                                        }
-                                        
-                                        Spacer(modifier = Modifier.height(16.dp))
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .padding(horizontal = 8.dp),
-                                            horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                        ) {
-                                            DirectionChip(
-                                                label = stringResource(R.string.filter_dir_desc),
-                                                isSelected = localSortConfig.sortDirection == "desc",
-                                                icon = ImageVector.vectorResource(id = R.drawable.ic_right),
-                                                iconRotation = 90f,
-                                                modifier = Modifier.weight(1f),
-                                                onClick = { localSortConfig = localSortConfig.copy(sortDirection = "desc") }
-                                            )
-                                            DirectionChip(
-                                                label = stringResource(R.string.filter_dir_asc),
-                                                isSelected = localSortConfig.sortDirection == "asc",
-                                                icon = ImageVector.vectorResource(id = R.drawable.ic_right),
-                                                iconRotation = -90f,
-                                                modifier = Modifier.weight(1f),
-                                                onClick = { localSortConfig = localSortConfig.copy(sortDirection = "asc") }
-                                            )
-                                        }
-                                    }
-                                }
+                                    onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" },
+                                    onInfoClick = { showSeriesStatusInfoDialog = true },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- SOURCE SECTION (Only for comments) ---
                             if (isCommentsFilter) {
-                                val activeSources = remember(localSortConfig.selectedSources, localSortConfig.selectedSource) {
-                                    (localSortConfig.selectedSources + listOfNotNull(localSortConfig.selectedSource)).toSet()
-                                }
-                                ExpandableSection(
-                                    title = stringResource(R.string.filter_source),
+                                FilterCommentsSourceSection(
+                                    availableSources = availableSources,
+                                    sourceCounts = sourceCounts,
+                                    sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "source",
-                                    showChevron = true,
-                                    isClickable = true,
-                                    badgeCount = activeSources.size,
-                                    onToggle = { expandedSection = if (expandedSection == "source") null else "source" }
-                                ) {
-                                    val sources = remember(availableSources, sourceCounts, activeSources) {
-                                        val rawList = if (availableSources.isNotEmpty()) {
-                                            availableSources
-                                        } else {
-                                            listOf(
-                                                com.cinetrack.data.api.SourceCatalogRow(slug = "flicktrove", displayName = "FlickTrove"),
-                                                com.cinetrack.data.api.SourceCatalogRow(slug = "tvtime", displayName = "TV Time Refugees")
-                                            )
-                                        }
-                                        val filteredList = rawList.filter {
-                                            !it.slug.equals("commsuni.tv", ignoreCase = true) &&
-                                            !it.slug.equals("commsuni", ignoreCase = true) &&
-                                            !(it.displayName?.equals("commsuni.tv", ignoreCase = true) == true)
-                                        }
-                                        val flickTroveItem = filteredList.firstOrNull { it.slug.equals("flicktrove", ignoreCase = true) }
-                                            ?: com.cinetrack.data.api.SourceCatalogRow(slug = "flicktrove", displayName = "FlickTrove")
-                                        val otherItems = filteredList
-                                            .filter { !it.slug.equals("flicktrove", ignoreCase = true) }
-                                            .sortedBy { (it.displayName?.ifBlank { it.slug } ?: it.slug).lowercase() }
-                                        val candidateSources = listOf(flickTroveItem) + otherItems
-
-                                        // Mostra solo le fonti con almeno 1 commento (oppure attualmente selezionate), nascondendo quelle con 0
-                                        if (sourceCounts.isNotEmpty()) {
-                                            candidateSources.filter { source ->
-                                                val count = sourceCounts[source.slug.lowercase().trim()] ?: sourceCounts[source.slug] ?: 0
-                                                count > 0 || source.slug in activeSources
-                                            }
-                                        } else {
-                                            candidateSources
-                                        }
-                                    }
-                                    FlowRow(
-                                        modifier = Modifier.padding(horizontal = 12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        val totalSourceComments = remember(sourceCounts) {
-                                            if (sourceCounts.isNotEmpty()) sourceCounts.values.sum() else null
-                                        }
-                                        FilterChip(
-                                            label = stringResource(R.string.filter_source_all),
-                                            isSelected = activeSources.isEmpty(),
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedSources = emptyList(), selectedSource = null) },
-                                            count = totalSourceComments
-                                        )
-                                        sources.forEach { source ->
-                                            val isSelected = source.slug in activeSources
-                                            val count = sourceCounts[source.slug.lowercase().trim()] ?: sourceCounts[source.slug]
-                                            FilterChip(
-                                                label = source.displayName?.ifBlank { source.slug } ?: source.slug,
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    val newSet = if (isSelected) activeSources - source.slug else activeSources + source.slug
-                                                    localSortConfig = localSortConfig.copy(
-                                                        selectedSources = newSet.toList(),
-                                                        selectedSource = null
-                                                    )
-                                                },
-                                                count = count
-                                            )
-                                        }
-                                    }
-                                }
+                                    onToggle = { expandedSection = if (expandedSection == "source") null else "source" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- LANGUAGE SECTION (Only for comments) ---
                             if (isCommentsFilter) {
-                                val activeLanguages = remember(localSortConfig.selectedLanguages, localSortConfig.selectedLanguage) {
-                                    (localSortConfig.selectedLanguages + listOfNotNull(localSortConfig.selectedLanguage)).toSet()
-                                }
-                                ExpandableSection(
-                                    title = stringResource(R.string.filter_language),
+                                FilterCommentsLanguageSection(
+                                    availableLanguages = availableLanguages,
+                                    languageCounts = languageCounts,
+                                    sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "language",
-                                    showChevron = true,
-                                    isClickable = true,
-                                    badgeCount = activeLanguages.size,
-                                    onToggle = { expandedSection = if (expandedSection == "language") null else "language" }
-                                ) {
-                                    val currentLocale = if (!configuration.locales.isEmpty) configuration.locales[0] else java.util.Locale.getDefault()
-                                    // Mostra solo le lingue con almeno 1 commento (oppure attualmente selezionate), nascondendo quelle con 0
-                                    val visibleLanguageCodes = remember(languageCounts, availableLanguages, activeLanguages) {
-                                        if (languageCounts.isNotEmpty()) {
-                                            val positiveCodes = languageCounts.filter { it.value > 0 }.keys
-                                            (positiveCodes + activeLanguages).map { it.lowercase().trim() }.filter { it.isNotBlank() }.distinct()
-                                        } else {
-                                            availableLanguages.map { it.lowercase().trim() }.filter { it.isNotBlank() }.distinct()
-                                        }
-                                    }
-                                    val allLabel = stringResource(R.string.flow_filter_media_all)
-                                    val languages = remember(currentLocale, visibleLanguageCodes, allLabel) {
-                                        val userLangCode = currentLocale.language.lowercase()
-                                        val mapped = visibleLanguageCodes.map { code ->
-                                            val loc = java.util.Locale.forLanguageTag(code)
-                                            val rawName = loc.getDisplayLanguage(currentLocale)
-                                            val displayName = rawName.replaceFirstChar {
-                                                if (it.isLowerCase()) it.titlecase(currentLocale) else it.toString()
-                                            }.ifBlank { code.uppercase() }
-                                            code to displayName
-                                        }
-                                        val userLangPair = mapped.firstOrNull { it.first == userLangCode }
-                                        val otherLangs = mapped
-                                            .filter { it.first != userLangCode }
-                                            .sortedBy { it.second.lowercase(currentLocale) }
-                                        if (userLangPair != null) {
-                                            listOf(userLangPair) + otherLangs
-                                        } else {
-                                            otherLangs
-                                        }
-                                    }
-                                    FlowRow(
-                                        modifier = Modifier.padding(horizontal = 12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        val totalLanguageComments = remember(languageCounts) {
-                                            if (languageCounts.isNotEmpty()) languageCounts.values.sum() else null
-                                        }
-                                        FilterChip(
-                                            label = allLabel,
-                                            isSelected = activeLanguages.isEmpty(),
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedLanguages = emptyList(), selectedLanguage = null) },
-                                            count = totalLanguageComments
-                                        )
-                                        languages.forEach { (code, label) ->
-                                            val isSelected = code in activeLanguages
-                                            val count = languageCounts[code]
-                                            FilterChip(
-                                                label = label,
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    val newSet = if (isSelected) activeLanguages - code else activeLanguages + code
-                                                    localSortConfig = localSortConfig.copy(
-                                                        selectedLanguages = newSet.toList(),
-                                                        selectedLanguage = null
-                                                    )
-                                                },
-                                                count = count
-                                            )
-                                        }
-                                    }
-                                }
+                                    onToggle = { expandedSection = if (expandedSection == "language") null else "language" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- MEDIA TYPE SECTION (Only for collections with TV series) ---
                             if (isCollectionFilter && hasTvSeries) {
-                                ExpandableSection(
-                                    title = stringResource(R.string.flow_filter_section_media),
+                                FilterMediaTypeSection(
+                                    sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "media",
-                                    showChevron = true,
-                                    isClickable = true,
-                                    badgeCount = if (localSortConfig.selectedMedia != null) 1 else 0,
-                                    onToggle = { expandedSection = if (expandedSection == "media") null else "media" }
-                                ) {
-                                    Column(
-                                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        SortOptionItem(
-                                            label = stringResource(R.string.flow_filter_media_all),
-                                            isSelected = localSortConfig.selectedMedia == null,
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedMedia = null) }
-                                        )
-                                        SortOptionItem(
-                                            label = stringResource(R.string.flow_filter_media_movies),
-                                            isSelected = localSortConfig.selectedMedia == "movie",
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedMedia = "movie") }
-                                        )
-                                        SortOptionItem(
-                                            label = stringResource(R.string.flow_filter_media_tv),
-                                            isSelected = localSortConfig.selectedMedia == "tv",
-                                            onClick = { localSortConfig = localSortConfig.copy(selectedMedia = "tv") }
-                                        )
-                                    }
-                                }
+                                    onToggle = { expandedSection = if (expandedSection == "media") null else "media" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- STATUS SECTION (Only for TV, not for upcoming) ---
                             if (!isCommentsFilter && !isCollectionFilter && category.contains("tv") && !category.contains("upcoming")) {
-                                ExpandableSection(
-                                    title = stringResource(R.string.filter_status),
+                                FilterTvStatusSection(
+                                    isVisti = isVisti,
+                                    sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "status",
-                                    badgeCount = localSortConfig.selectedStatuses.size,
-                                    onToggle = { expandedSection = if (expandedSection == "status") null else "status" }
-                                ) {
-                                    val statuses = if (!isVisti) {
-                                        listOf(
-                                            "watching" to stringResource(R.string.filter_status_watching),
-                                            "not_started" to stringResource(R.string.filter_status_not_started),
-                                            "dropped" to stringResource(R.string.filter_status_dropped)
-                                        )
-                                    } else {
-                                        listOf(
-                                            "up_to_date" to stringResource(R.string.filter_status_up_to_date)
-                                        )
-                                    }
-                                    
-                                    FlowRow(
-                                        modifier = Modifier.padding(horizontal = 12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        statuses.forEach { (statusId, label) ->
-                                            val isSelected = statusId in localSortConfig.selectedStatuses
-                                            FilterChip(
-                                                label = label.uppercase(),
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    val newList = if (isSelected) localSortConfig.selectedStatuses - statusId
-                                                               else localSortConfig.selectedStatuses + statusId
-                                                    localSortConfig = localSortConfig.copy(selectedStatuses = newList)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
+                                    onToggle = { expandedSection = if (expandedSection == "status") null else "status" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- ACTIVE KEYWORDS SECTION ---
                             if (!isCommentsFilter && !isCollectionFilter && localSortConfig.selectedKeywords.isNotEmpty()) {
-                                ExpandableSection(
-                                    title = stringResource(R.string.filter_active_subgenres),
+                                FilterKeywordsSection(
+                                    suggestedFilters = suggestedFilters,
+                                    initialKeywordName = initialKeywordName,
+                                    sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "keywords" || expandedSection == null,
-                                    badgeCount = localSortConfig.selectedKeywords.size,
-                                    onToggle = { expandedSection = if (expandedSection == "keywords") null else "keywords" }
-                                ) {
-                                    FlowRow(
-                                        modifier = Modifier.padding(horizontal = 12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        localSortConfig.selectedKeywords.forEach { keywordId ->
-                                            val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
-                                            val dictName = com.cinetrack.data.model.KeywordDictionary.getLocalizedKeywordName(keywordId, currentLanguage)?.uppercase()
-                                            
-                                            val suggestedName = suggestedFilters.find { it.id == keywordId }?.name?.uppercase()
-                                            
-                                            val keywordName = suggestedName ?: dictName ?: initialKeywordName?.uppercase() ?: stringResource(R.string.filter_selected_subgenre)
-                                                
-                                            FilterChip(
-                                                label = keywordName,
-                                                isSelected = true,
-                                                onClick = {
-                                                    localSortConfig = localSortConfig.copy(selectedKeywords = localSortConfig.selectedKeywords - keywordId)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
+                                    onToggle = { expandedSection = if (expandedSection == "keywords") null else "keywords" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- GENRES SECTION ---
                             if (!isCommentsFilter && !isCollectionFilter) {
-                                ExpandableSection(
-                                title = stringResource(R.string.filter_genres),
-                                isExpanded = expandedSection == "genres",
-                                badgeCount = localSortConfig.selectedGenres.size,
-                                onToggle = { expandedSection = if (expandedSection == "genres") null else "genres" }
-                            ) {
-                                FlowRow(
-                                    modifier = Modifier.padding(horizontal = 12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    val relevantGenres = if (category.contains("tv")) GenreConstants.TV_GENRES else GenreConstants.MOVIE_GENRES
-                                    val displayedGenres = if (showAllGenres) {
-                                        relevantGenres
-                                    } else {
-                                        // Show first 10 genres OR any selected genres
-                                        relevantGenres.filterIndexed { index, genre ->
-                                            index < 10 || genre.id in localSortConfig.selectedGenres
-                                        }
-                                    }
-
-                                    displayedGenres.forEach { genre ->
-                                        val isSelected = genre.id in localSortConfig.selectedGenres
-                                        val currentLanguage = LocalConfiguration.current.locales[0]?.language ?: "en"
-                                        val localizedName = GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name)
-                                        FilterChip(
-                                            label = localizedName.uppercase(),
-                                            isSelected = isSelected,
-                                            onClick = {
-                                                val newList = if (isSelected) localSortConfig.selectedGenres - genre.id
-                                                           else localSortConfig.selectedGenres + genre.id
-                                                localSortConfig = localSortConfig.copy(selectedGenres = newList)
-                                            }
-                                        )
-                                    }
-                                    
-                                    if (!showAllGenres && relevantGenres.size > displayedGenres.size) {
-                                        Box(
-                                            modifier = Modifier
-                                                .bounceClick { showAllGenres = true }
-                                                .clip(CircleShape)
-                                                .background(Color.Black.copy(alpha = 0.45f))
-                                                .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                                                .padding(horizontal = 12.dp, vertical = 8.dp)
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                            ) {
-                                                Icon(
-                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
-                                                    contentDescription = null,
-                                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                                                    modifier = Modifier.size(12.dp)
-                                                )
-                                                Text(
-                                                    text = stringResource(R.string.filter_show_all).uppercase(),
-                                                    fontSize = 11.sp,
-                                                    fontWeight = FontWeight.ExtraBold,
-                                                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                                                )
-                                            }
-                                        }
-                                    }
-                                    }
-                                }
+                                FilterGenresSection(
+                                    category = category,
+                                    sortConfig = localSortConfig,
+                                    isExpanded = expandedSection == "genres",
+                                    onToggle = { expandedSection = if (expandedSection == "genres") null else "genres" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
 
                             // --- PLATFORMS SECTION ---
                             if (!isCommentsFilter && !isCollectionFilter) {
-                                ExpandableSection(
-                                title = stringResource(R.string.filter_platforms),
-                                isExpanded = expandedSection == "platforms",
-                                badgeCount = localSortConfig.selectedProviders.size,
-                                onToggle = { expandedSection = if (expandedSection == "platforms") null else "platforms" }
-                            ) {
-                                val currentLang = configuration.locales[0]?.language?.lowercase() ?: java.util.Locale.getDefault().language.lowercase()
-                                val availableProviders = remember(currentLang) { ProviderConstants.getAvailableProviders(currentLang) }
-                                val providersListState = androidx.compose.foundation.lazy.rememberLazyListState()
-                                LazyRow(
-                                    state = providersListState,
-                                    modifier = Modifier.horizontalFadingEdges(providersListState, leftEdgeWidth = 16.dp, rightEdgeWidth = 16.dp),
-                                    contentPadding = PaddingValues(horizontal = 12.dp),
-                                    horizontalArrangement = Arrangement.spacedBy(16.dp)
-                                ) {
-                                    items(availableProviders, key = { it.providerId }, contentType = { "provider" }) { provider ->
-                                        val isSelected = provider.providerId in localSortConfig.selectedProviders
-                                        ProviderItem(
-                                            name = provider.providerName,
-                                            logoPath = provider.logoPath,
-                                            isSelected = isSelected,
-                                            onClick = {
-                                                val newList = if (isSelected)
-                                                    localSortConfig.selectedProviders - provider.providerId
-                                                else
-                                                    localSortConfig.selectedProviders + provider.providerId
-                                                localSortConfig = localSortConfig.copy(selectedProviders = newList)
-                                            }
-                                        )
-                                    }
-                                }
+                                FilterPlatformsSection(
+                                    sortConfig = localSortConfig,
+                                    isExpanded = expandedSection == "platforms",
+                                    onToggle = { expandedSection = if (expandedSection == "platforms") null else "platforms" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
+                            }
+
+                            // --- DECADES / RELEASE MONTHS SECTION ---
+                            if (!isCommentsFilter && !isCollectionFilter) {
+                                FilterPeriodSection(
+                                    category = category,
+                                    sortConfig = localSortConfig,
+                                    isExpanded = expandedSection == "period",
+                                    onToggle = { expandedSection = if (expandedSection == "period") null else "period" },
+                                    onSortConfigChanged = { localSortConfig = it }
+                                )
                             }
                         }
-
-                        // --- DECADES / RELEASE MONTHS SECTION ---
-                        if (!isCommentsFilter && !isCollectionFilter) {
-                            val isUpcoming = category.contains("upcoming")
-                            val sectionTitle = if (isUpcoming) {
-                                stringResource(R.string.filter_release_month)
-                            } else {
-                                stringResource(R.string.filter_period)
-                            }
-                            ExpandableSection(
-                                title = sectionTitle,
-                                isExpanded = expandedSection == "period",
-                                badgeCount = localSortConfig.selectedDecades.size,
-                                onToggle = { expandedSection = if (expandedSection == "period") null else "period" }
-                            ) {
-                                if (isUpcoming) {
-                                    val currentYearMonth = remember { java.time.YearMonth.now() }
-                                    val currentLocale = configuration.locales[0] ?: java.util.Locale.getDefault()
-                                    val months = remember(currentYearMonth, currentLocale) {
-                                        (0..11).map { offset ->
-                                            val ym = currentYearMonth.plusMonths(offset.toLong())
-                                            val key = String.format(java.util.Locale.US, "%04d-%02d", ym.year, ym.monthValue)
-                                            val rawName = ym.month.getDisplayName(java.time.format.TextStyle.FULL, currentLocale)
-                                            val capitalized = rawName.replaceFirstChar {
-                                                if (it.isLowerCase()) it.titlecase(currentLocale) else it.toString()
-                                            }
-                                            val label = if (ym.year == currentYearMonth.year) {
-                                                capitalized
-                                            } else {
-                                                "$capitalized '${ym.year % 100}"
-                                            }
-                                            key to label
-                                        }
-                                    }
-                                    val beyondLabel = stringResource(R.string.filter_future_beyond)
-
-                                    FlowRow(
-                                        modifier = Modifier.padding(horizontal = 12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        months.forEach { (key, label) ->
-                                            val isSelected = key in localSortConfig.selectedDecades
-                                            FilterChip(
-                                                label = label,
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    val newList = if (isSelected) localSortConfig.selectedDecades - key
-                                                    else localSortConfig.selectedDecades + key
-                                                    localSortConfig = localSortConfig.copy(selectedDecades = newList)
-                                                }
-                                            )
-                                        }
-                                        val isBeyondSelected = "future" in localSortConfig.selectedDecades
-                                        FilterChip(
-                                            label = beyondLabel,
-                                            isSelected = isBeyondSelected,
-                                            onClick = {
-                                                val newList = if (isBeyondSelected) localSortConfig.selectedDecades - "future"
-                                                else localSortConfig.selectedDecades + "future"
-                                                localSortConfig = localSortConfig.copy(selectedDecades = newList)
-                                            }
-                                        )
-                                    }
-                                } else {
-                                    val currentYear = java.util.Calendar.getInstance().get(java.util.Calendar.YEAR)
-                                    val currentDecade = (currentYear / 10) * 10
-                                    val decades = (currentDecade downTo 1960 step 10).map { it.toString() }
-                                    FlowRow(
-                                        modifier = Modifier.padding(horizontal = 12.dp),
-                                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                        verticalArrangement = Arrangement.spacedBy(8.dp)
-                                    ) {
-                                        decades.forEach { decade ->
-                                            val isSelected = decade in localSortConfig.selectedDecades
-                                            FilterChip(
-                                                label = "${decade}s",
-                                                isSelected = isSelected,
-                                                onClick = {
-                                                    val newList = if (isSelected) localSortConfig.selectedDecades - decade
-                                                    else localSortConfig.selectedDecades + decade
-                                                    localSortConfig = localSortConfig.copy(selectedDecades = newList)
-                                                }
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
 
                     Box(
                         modifier = Modifier
