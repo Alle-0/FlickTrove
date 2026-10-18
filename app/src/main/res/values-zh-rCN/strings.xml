@@ -786,6 +786,11 @@
     <string name="filter_genres">类型</string>
     <string name="filter_platforms">播放平台</string>
     <string name="filter_countries">国家与地区</string>
+    <string name="tv_info_episodes_and_duration">%1$d集 • 约%2$d分钟</string>
+    <string name="tv_info_episode_single_and_duration">1集 • 约%1$d分钟</string>
+    <string name="tv_info_episodes_only">%1$d集</string>
+    <string name="tv_info_episode_single">1集</string>
+    <string name="tv_info_duration_approx">每集约%1$d分钟</string>
     <string name="filter_period">年代区间</string>
     <string name="filter_release_month">上映月份</string>
     <string name="filter_future_beyond">更晚</string>

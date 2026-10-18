@@ -715,6 +715,11 @@
     <string name="filter_genres">ЖАНРЫ</string>
     <string name="filter_platforms">ПЛАТФОРМЫ</string>
     <string name="filter_countries">СТРАНЫ</string>
+    <string name="tv_info_episodes_and_duration">%1$d серий • ~%2$d мин</string>
+    <string name="tv_info_episode_single_and_duration">1 серия • ~%1$d мин</string>
+    <string name="tv_info_episodes_only">%1$d серий</string>
+    <string name="tv_info_episode_single">1 серия</string>
+    <string name="tv_info_duration_approx">~%1$d мин на серию</string>
     <string name="filter_period">ПЕРИОД</string>
     <string name="filter_release_month">МЕСЯЦ ВЫХОДА</string>
     <string name="filter_future_beyond">Позже</string>

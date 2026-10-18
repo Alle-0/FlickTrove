@@ -786,6 +786,11 @@
     <string name="filter_genres">ジャンル</string>
     <string name="filter_platforms">プラットフォーム</string>
     <string name="filter_countries">国・地域</string>
+    <string name="tv_info_episodes_and_duration">%1$dエピソード • 約%2$d分</string>
+    <string name="tv_info_episode_single_and_duration">1エピソード • 約%1$d分</string>
+    <string name="tv_info_episodes_only">%1$dエピソード</string>
+    <string name="tv_info_episode_single">1エピソード</string>
+    <string name="tv_info_duration_approx">1話あたり約%1$d分</string>
     <string name="filter_period">年代・期間</string>
     <string name="filter_release_month">公開月</string>
     <string name="filter_future_beyond">それ以降</string>

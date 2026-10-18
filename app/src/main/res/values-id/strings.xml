@@ -786,6 +786,11 @@
     <string name="filter_genres">GENRE</string>
     <string name="filter_platforms">PLATFORM</string>
     <string name="filter_countries">NEGARA</string>
+    <string name="tv_info_episodes_and_duration">%1$d episode • ~%2$d mnt</string>
+    <string name="tv_info_episode_single_and_duration">1 episode • ~%1$d mnt</string>
+    <string name="tv_info_episodes_only">%1$d episode</string>
+    <string name="tv_info_episode_single">1 episode</string>
+    <string name="tv_info_duration_approx">~%1$d mnt per ep</string>
     <string name="filter_period">PERIODE</string>
     <string name="filter_release_month">BULAN RILIS</string>
     <string name="filter_future_beyond">Mendatang</string>

@@ -786,6 +786,11 @@
     <string name="filter_genres">장르</string>
     <string name="filter_platforms">플랫폼</string>
     <string name="filter_countries">국가</string>
+    <string name="tv_info_episodes_and_duration">%1$d개 에피소드 • 약 %2$d분</string>
+    <string name="tv_info_episode_single_and_duration">1개 에피소드 • 약 %1$d분</string>
+    <string name="tv_info_episodes_only">%1$d개 에피소드</string>
+    <string name="tv_info_episode_single">1개 에피소드</string>
+    <string name="tv_info_duration_approx">회당 약 %1$d분</string>
     <string name="filter_period">시대 및 연도</string>
     <string name="filter_release_month">개봉 월</string>
     <string name="filter_future_beyond">그 이후</string>

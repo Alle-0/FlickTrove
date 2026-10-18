@@ -713,6 +713,11 @@
     <string name="filter_genres">शैलियाँ</string>
     <string name="filter_platforms">प्लेटफ़ॉर्म</string>
     <string name="filter_countries">देश</string>
+    <string name="tv_info_episodes_and_duration">%1$d एपिसोड • ~%2$d मिनट</string>
+    <string name="tv_info_episode_single_and_duration">1 एपिसोड • ~%1$d मिनट</string>
+    <string name="tv_info_episodes_only">%1$d एपिसोड</string>
+    <string name="tv_info_episode_single">1 एपिसोड</string>
+    <string name="tv_info_duration_approx">प्रति एपिसोड ~%1$d मिनट</string>
     <string name="filter_period">अवधि</string>
     <string name="filter_release_month">रिलीज़ का महीना</string>
     <string name="filter_future_beyond">बाद में</string>

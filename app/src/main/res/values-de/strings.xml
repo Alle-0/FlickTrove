@@ -708,6 +708,11 @@
     <string name="filter_genres">GENRES</string>
     <string name="filter_platforms">PLATTFORMEN</string>
     <string name="filter_countries">LÄNDER</string>
+    <string name="tv_info_episodes_and_duration">%1$d Episoden • ~%2$d Min.</string>
+    <string name="tv_info_episode_single_and_duration">1 Episode • ~%1$d Min.</string>
+    <string name="tv_info_episodes_only">%1$d Episoden</string>
+    <string name="tv_info_episode_single">1 Episode</string>
+    <string name="tv_info_duration_approx">~%1$d Min. pro Folge</string>
     <string name="filter_period">ZEITRAUM</string>
     <string name="filter_release_month">VERÖFFENTLICHUNGSMONAT</string>
     <string name="filter_future_beyond">Später</string>

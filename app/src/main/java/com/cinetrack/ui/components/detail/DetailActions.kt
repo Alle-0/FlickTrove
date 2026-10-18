@@ -478,6 +478,36 @@ fun DetailActions(
                             else -> ""
                         }
 
+                        val isTvSeries = movie.mediaType == "tv"
+                        val tvSubtitle = if (isTvSeries && targetState == WatchState.NONE) {
+                            val totalEpisodes = movie.numberOfEpisodes?.takeIf { it > 0 }
+                                ?: movie.seasons?.filter { it.seasonNumber > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
+                                ?: movie.seasons?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
+                            val avgRuntime = movie.episodeRunTime?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
+                                ?: movie.runtime?.takeIf { it > 0 }
+
+                            when {
+                                totalEpisodes != null && avgRuntime != null -> {
+                                    if (totalEpisodes == 1) {
+                                        stringResource(R.string.tv_info_episode_single_and_duration, avgRuntime)
+                                    } else {
+                                        stringResource(R.string.tv_info_episodes_and_duration, totalEpisodes, avgRuntime)
+                                    }
+                                }
+                                totalEpisodes != null -> {
+                                    if (totalEpisodes == 1) {
+                                        stringResource(R.string.tv_info_episode_single)
+                                    } else {
+                                        stringResource(R.string.tv_info_episodes_only, totalEpisodes)
+                                    }
+                                }
+                                avgRuntime != null -> {
+                                    stringResource(R.string.tv_info_duration_approx, avgRuntime)
+                                }
+                                else -> null
+                            }
+                        } else null
+
                         Column(
                             horizontalAlignment = Alignment.Start,
                             verticalArrangement = Arrangement.Center
@@ -487,14 +517,25 @@ fun DetailActions(
                                 style = MaterialTheme.typography.labelLarge.copy(
                                     fontWeight = FontWeight.Black,
                                     letterSpacing = 1.1.sp,
-                                    fontSize = if (movie.mediaType == "tv" && targetState != WatchState.NONE) 12.sp else 14.sp
+                                    fontSize = if (isTvSeries && (targetState != WatchState.NONE || tvSubtitle != null)) 12.sp else 14.sp
                                 ),
                                 color = displayColor,
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
                             
-                            if (movie.mediaType == "tv" && targetState != WatchState.NONE && movie.isReleased) {
+                            if (tvSubtitle != null) {
+                                Text(
+                                    text = tvSubtitle.uppercase(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 1.sp
+                                    ),
+                                    color = displayColor.copy(alpha = 0.8f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            } else if (isTvSeries && targetState != WatchState.NONE && movie.isReleased) {
                                 val percentage = (animatedProgress * 100).toInt()
                                 Text(
                                     text = if (percentage == 100) stringResource(R.string.action_completed) else stringResource(R.string.action_percent_watched, percentage),

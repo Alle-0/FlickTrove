@@ -786,6 +786,11 @@
     <string name="filter_genres">TÜRLER</string>
     <string name="filter_platforms">PLATFORMLAR</string>
     <string name="filter_countries">ÜLKELER</string>
+    <string name="tv_info_episodes_and_duration">%1$d bölüm • ~%2$d dk</string>
+    <string name="tv_info_episode_single_and_duration">1 bölüm • ~%1$d dk</string>
+    <string name="tv_info_episodes_only">%1$d bölüm</string>
+    <string name="tv_info_episode_single">1 bölüm</string>
+    <string name="tv_info_duration_approx">bölüm başına ~%1$d dk</string>
     <string name="filter_period">DÖNEM</string>
     <string name="filter_release_month">ÇIKIŞ AYI</string>
     <string name="filter_future_beyond">Daha Sonra</string>
