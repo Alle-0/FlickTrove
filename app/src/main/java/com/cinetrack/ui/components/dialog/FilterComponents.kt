@@ -151,14 +151,20 @@ fun ExpandableSection(
 
             AnimatedVisibility(
                 visible = isExpanded,
-                enter = scaleIn(
-                    initialScale = 0.85f,
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)
-                ) + fadeIn(animationSpec = tween(200)),
-                exit = scaleOut(
-                    targetScale = 0.85f,
-                    animationSpec = spring(stiffness = Spring.StiffnessMedium)
-                ) + fadeOut(animationSpec = tween(150))
+                enter = expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    expandFrom = Alignment.Top
+                ) + fadeIn(animationSpec = tween(220)),
+                exit = shrinkVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut(animationSpec = tween(180))
             ) {
                 Box(modifier = Modifier.padding(bottom = 14.dp)) {
                     content()

@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.dialog
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -463,99 +465,118 @@ fun FilterGenresSection(
         badgeCount = sortConfig.selectedGenres.size,
         onToggle = onToggle
     ) {
-        FlowRow(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val isTvExclusive = category.contains("tv") && !category.contains("movie") && !isFolder
-            val isMovieExclusive = category.contains("movie") && !category.contains("tv") && !isFolder && !hasTvSeries
-            val baseGenres = when {
-                isTvExclusive -> GenreConstants.TV_GENRES
-                isMovieExclusive -> GenreConstants.MOVIE_GENRES
-                else -> GenreConstants.ALL_GENRES
-            }
+        val isTvExclusive = category.contains("tv") && !category.contains("movie") && !isFolder
+        val isMovieExclusive = category.contains("movie") && !category.contains("tv") && !isFolder && !hasTvSeries
+        val baseGenres = when {
+            isTvExclusive -> GenreConstants.TV_GENRES
+            isMovieExclusive -> GenreConstants.MOVIE_GENRES
+            else -> GenreConstants.ALL_GENRES
+        }
 
-            val sortedGenres = remember(baseGenres, currentLanguage) {
-                baseGenres.sortedBy { genre ->
-                    GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name).lowercase()
-                }
+        val sortedGenres = remember(baseGenres, currentLanguage) {
+            baseGenres.sortedBy { genre ->
+                GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name).lowercase()
             }
+        }
 
-            val displayedGenres = if (showAllGenres) {
-                sortedGenres
-            } else {
-                sortedGenres.filterIndexed { index, genre ->
-                    index < 12 || genre.id in sortConfig.selectedGenres
-                }
-            }
-
-            displayedGenres.forEach { genre ->
-                val isSelected = genre.id in sortConfig.selectedGenres
-                val localizedName = GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name)
-                FilterChip(
-                    label = localizedName.uppercase(),
-                    isSelected = isSelected,
-                    onClick = {
-                        val newList = if (isSelected) sortConfig.selectedGenres - genre.id
-                        else sortConfig.selectedGenres + genre.id
-                        onSortConfigChanged(sortConfig.copy(selectedGenres = newList))
-                    }
-                )
-            }
-
-            if (!showAllGenres && sortedGenres.size > displayedGenres.size) {
-                Box(
-                    modifier = Modifier
-                        .bounceClick { showAllGenres = true }
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.45f))
-                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.filter_show_all).uppercase(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
+        AnimatedContent(
+            targetState = showAllGenres,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(280)) togetherWith
+                        fadeOut(animationSpec = tween(180)))
+                    .using(
+                        SizeTransform(clip = true) { _, _ ->
+                            spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        }
+                    )
+            },
+            label = "GenresExpansion"
+        ) { isAllShown ->
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val displayedGenres = if (isAllShown) {
+                    sortedGenres
+                } else {
+                    sortedGenres.filterIndexed { index, genre ->
+                        index < 12 || genre.id in sortConfig.selectedGenres
                     }
                 }
-            } else if (showAllGenres && sortedGenres.size > 12) {
-                Box(
-                    modifier = Modifier
-                        .bounceClick { showAllGenres = false }
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.45f))
-                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                displayedGenres.forEach { genre ->
+                    val isSelected = genre.id in sortConfig.selectedGenres
+                    val localizedName = GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name)
+                    FilterChip(
+                        label = localizedName.uppercase(),
+                        isSelected = isSelected,
+                        onClick = {
+                            val newList = if (isSelected) sortConfig.selectedGenres - genre.id
+                            else sortConfig.selectedGenres + genre.id
+                            onSortConfigChanged(sortConfig.copy(selectedGenres = newList))
+                        }
+                    )
+                }
+
+                if (!isAllShown && sortedGenres.size > displayedGenres.size) {
+                    Box(
+                        modifier = Modifier
+                            .bounceClick { showAllGenres = true }
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.45f))
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.show_less).uppercase(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.filter_show_all).uppercase(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                } else if (isAllShown && sortedGenres.size > 12) {
+                    Box(
+                        modifier = Modifier
+                            .bounceClick { showAllGenres = false }
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.45f))
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.show_less).uppercase(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
                     }
                 }
             }
@@ -720,95 +741,115 @@ fun FilterCountriesSection(
         badgeCount = sortConfig.selectedCountries.size,
         onToggle = onToggle
     ) {
-        FlowRow(
-            modifier = Modifier.padding(horizontal = 12.dp),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
-            verticalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            val allCodes = remember(sortConfig.selectedCountries, availableCountries, currentLocale) {
-                val combined = (com.cinetrack.util.CountryUtils.ALL_CINEMA_COUNTRIES + availableCountries + sortConfig.selectedCountries)
-                    .map { it.uppercase().trim() }
-                    .filter { it.length == 2 }
-                    .distinct()
-                combined.sortedBy { code ->
-                    com.cinetrack.util.CountryUtils.getLocalizedCountryName(code, currentLocale).lowercase(currentLocale)
-                }
+        val allCodes = remember(sortConfig.selectedCountries, availableCountries, currentLocale) {
+            val combined = (com.cinetrack.util.CountryUtils.ALL_CINEMA_COUNTRIES + availableCountries + sortConfig.selectedCountries)
+                .map { it.uppercase().trim() }
+                .filter { it.length == 2 }
+                .distinct()
+            combined.sortedBy { code ->
+                com.cinetrack.util.CountryUtils.getLocalizedCountryName(code, currentLocale).lowercase(currentLocale)
             }
-            val displayedCodes = if (showAllCountries) {
-                allCodes
-            } else {
-                allCodes.filter { code ->
-                    code in com.cinetrack.util.CountryUtils.DEFAULT_POPULAR_COUNTRIES || code in sortConfig.selectedCountries
-                }
-            }
+        }
 
-            displayedCodes.forEach { code ->
-                val isSelected = code in sortConfig.selectedCountries
-                val flag = com.cinetrack.util.CountryUtils.getFlagEmoji(code)
-                val countryName = com.cinetrack.util.CountryUtils.getLocalizedCountryName(code, currentLocale)
-                FilterChip(
-                    label = "$flag ${countryName.uppercase(currentLocale)}",
-                    isSelected = isSelected,
-                    onClick = {
-                        val newList = if (isSelected) sortConfig.selectedCountries - code
-                        else sortConfig.selectedCountries + code
-                        onSortConfigChanged(sortConfig.copy(selectedCountries = newList))
-                    }
-                )
-            }
-
-            if (!showAllCountries && allCodes.size > displayedCodes.size) {
-                Box(
-                    modifier = Modifier
-                        .bounceClick { showAllCountries = true }
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.45f))
-                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.filter_show_all).uppercase(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
+        AnimatedContent(
+            targetState = showAllCountries,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(280)) togetherWith
+                        fadeOut(animationSpec = tween(180)))
+                    .using(
+                        SizeTransform(clip = true) { _, _ ->
+                            spring(
+                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        }
+                    )
+            },
+            label = "CountriesExpansion"
+        ) { isAllShown ->
+            FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 12.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                val displayedCodes = if (isAllShown) {
+                    allCodes
+                } else {
+                    allCodes.filter { code ->
+                        code in com.cinetrack.util.CountryUtils.DEFAULT_POPULAR_COUNTRIES || code in sortConfig.selectedCountries
                     }
                 }
-            } else if (showAllCountries && allCodes.size > 12) {
-                Box(
-                    modifier = Modifier
-                        .bounceClick { showAllCountries = false }
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.45f))
-                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
-                        .padding(horizontal = 12.dp, vertical = 8.dp)
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+
+                displayedCodes.forEach { code ->
+                    val isSelected = code in sortConfig.selectedCountries
+                    val flag = com.cinetrack.util.CountryUtils.getFlagEmoji(code)
+                    val countryName = com.cinetrack.util.CountryUtils.getLocalizedCountryName(code, currentLocale)
+                    FilterChip(
+                        label = "$flag ${countryName.uppercase(currentLocale)}",
+                        isSelected = isSelected,
+                        onClick = {
+                            val newList = if (isSelected) sortConfig.selectedCountries - code
+                            else sortConfig.selectedCountries + code
+                            onSortConfigChanged(sortConfig.copy(selectedCountries = newList))
+                        }
+                    )
+                }
+
+                if (!isAllShown && allCodes.size > displayedCodes.size) {
+                    Box(
+                        modifier = Modifier
+                            .bounceClick { showAllCountries = true }
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.45f))
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
-                            modifier = Modifier.size(12.dp)
-                        )
-                        Text(
-                            text = stringResource(R.string.show_less).uppercase(),
-                            fontSize = 11.sp,
-                            fontWeight = FontWeight.ExtraBold,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.filter_show_all).uppercase(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
+                    }
+                } else if (isAllShown && allCodes.size > 12) {
+                    Box(
+                        modifier = Modifier
+                            .bounceClick { showAllCountries = false }
+                            .clip(CircleShape)
+                            .background(Color.Black.copy(alpha = 0.45f))
+                            .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                            .padding(horizontal = 12.dp, vertical = 8.dp)
+                    ) {
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
+                                contentDescription = null,
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                                modifier = Modifier.size(12.dp)
+                            )
+                            Text(
+                                text = stringResource(R.string.show_less).uppercase(),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                            )
+                        }
                     }
                 }
             }
