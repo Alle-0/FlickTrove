@@ -66,6 +66,9 @@ fun MainModalsContainer(
                 with(screen) { getViewModel<HomeViewModel>() }
             }
             val homeUiState by homeViewModel.uiState.collectAsStateWithLifecycle()
+            val homeCountries = remember(homeUiState.allLocalMovies) {
+                homeUiState.allLocalMovies.flatMap { it.originCountry ?: emptyList() }.distinct()
+            }
             Box(modifier = Modifier.zIndex(70000f)) {
                 HomeFilterModal(
                     isVisible = isFilterModalVisible,
@@ -73,6 +76,7 @@ fun MainModalsContainer(
                     hazeState = globalHazeState,
                     triggerBounds = filterButtonBounds,
                     category = homeUiState.activeTab,
+                    availableCountries = homeCountries,
                     onSortConfigChanged = { newConfig -> homeViewModel.updateSortConfig(newConfig); onFilterModalDismiss() },
                     onDismissRequest = onFilterModalDismiss
                 )
@@ -84,6 +88,9 @@ fun MainModalsContainer(
                 with(screen) { getViewModel<VistiViewModel>() }
             }
             val vistiUiState by vistiViewModel.uiState.collectAsStateWithLifecycle()
+            val vistiCountries = remember(vistiUiState.movies) {
+                vistiUiState.movies.flatMap { it.originCountry ?: emptyList() }.distinct()
+            }
             Box(modifier = Modifier.zIndex(70000f)) {
                 HomeFilterModal(
                     isVisible = isFilterModalVisible,
@@ -92,6 +99,7 @@ fun MainModalsContainer(
                     hazeState = globalHazeState,
                     triggerBounds = filterButtonBounds,
                     category = vistiUiState.activeTab,
+                    availableCountries = vistiCountries,
                     onSortConfigChanged = { newConfig -> vistiViewModel.updateSortConfig(newConfig); onFilterModalDismiss() },
                     onDismissRequest = onFilterModalDismiss
                 )
@@ -147,6 +155,7 @@ fun MainModalsContainer(
                         hazeState = globalHazeState,
                         triggerBounds = filterButtonBounds,
                         category = filterConfig.category,
+                        availableCountries = filterConfig.availableCountries,
                         onSortConfigChanged = { newConfig ->
                             filterConfig.onSortConfigChanged(newConfig)
                             onFilterModalDismiss()

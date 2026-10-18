@@ -186,7 +186,8 @@ fun FolderDetailScreenContent(
                 isFolder = true,
                 category = currentActiveTab,
                 sortConfig = currentSortConfig,
-                onSortConfigChanged = { viewModel.updateSortConfig(it) }
+                onSortConfigChanged = { viewModel.updateSortConfig(it) },
+                availableCountries = successStateForScroll.allMoviesRaw.flatMap { it.originCountry ?: emptyList() }.distinct()
             )
         } else {
             activeFilterConfig.value = null

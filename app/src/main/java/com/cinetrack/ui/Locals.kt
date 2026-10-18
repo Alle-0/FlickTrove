@@ -45,7 +45,8 @@ data class FilterModalConfig(
     val isFolder: Boolean = false,
     val category: String = "movie",
     val sortConfig: com.cinetrack.data.model.SortConfig,
-    val onSortConfigChanged: (com.cinetrack.data.model.SortConfig) -> Unit
+    val onSortConfigChanged: (com.cinetrack.data.model.SortConfig) -> Unit,
+    val availableCountries: List<String> = emptyList()
 )
 
 val LocalActiveFilterConfig = compositionLocalOf<MutableState<FilterModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }

@@ -24,11 +24,36 @@ object CountryUtils {
     }
 
     /**
-     * Prominent cinema & TV producing countries for filter suggestions.
+     * Default popular cinema & TV producing countries displayed initially before expanding.
      */
-    val POPULAR_COUNTRIES = listOf(
-        "US", "GB", "IT", "FR", "JP", "KR", "ES", "DE",
-        "CA", "AU", "IN", "SE", "DK", "NO", "IE", "MX",
-        "BR", "CN", "HK", "PL", "NL", "BE", "NZ", "AR"
+    val DEFAULT_POPULAR_COUNTRIES = listOf(
+        "US", "GB", "IT", "FR", "ES", "DE", "JP", "KR", "CN", "CA", "AU", "IN"
     )
+
+    /**
+     * Comprehensive list of prominent film and television producing nations worldwide.
+     */
+    val ALL_CINEMA_COUNTRIES = listOf(
+        // North America
+        "US", "CA", "MX",
+        // Western / Southern Europe
+        "IT", "FR", "GB", "ES", "DE", "IE", "PT", "NL", "BE", "CH", "AT", "GR",
+        // Nordic Europe
+        "SE", "DK", "NO", "FI", "IS",
+        // Eastern / Central Europe
+        "PL", "CZ", "HU", "RO", "RU", "UA",
+        // East & Southeast Asia
+        "JP", "KR", "CN", "HK", "TW", "IN", "TH", "ID", "PH", "VN", "MY", "SG",
+        // Middle East & Africa
+        "TR", "IR", "IL", "EG", "ZA", "NG", "MA",
+        // Latin America
+        "BR", "AR", "CL", "CO", "PE", "UY",
+        // Oceania
+        "AU", "NZ"
+    ).distinct()
+
+    /**
+     * Backwards-compatible alias for existing callers.
+     */
+    val POPULAR_COUNTRIES = ALL_CINEMA_COUNTRIES
 }

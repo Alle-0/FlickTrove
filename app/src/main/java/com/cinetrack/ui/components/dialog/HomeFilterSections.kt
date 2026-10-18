@@ -450,9 +450,13 @@ fun FilterGenresSection(
     sortConfig: SortConfig,
     isExpanded: Boolean,
     onToggle: () -> Unit,
-    onSortConfigChanged: (SortConfig) -> Unit
+    onSortConfigChanged: (SortConfig) -> Unit,
+    isFolder: Boolean = false,
+    hasTvSeries: Boolean = false
 ) {
     var showAllGenres by remember { mutableStateOf(false) }
+    val currentLanguage = LocalConfiguration.current.locales[0]?.language ?: "en"
+
     ExpandableSection(
         title = stringResource(R.string.filter_genres),
         isExpanded = isExpanded,
@@ -464,18 +468,30 @@ fun FilterGenresSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val relevantGenres = if (category.contains("tv")) GenreConstants.TV_GENRES else GenreConstants.MOVIE_GENRES
+            val isTvExclusive = category.contains("tv") && !category.contains("movie") && !isFolder
+            val isMovieExclusive = category.contains("movie") && !category.contains("tv") && !isFolder && !hasTvSeries
+            val baseGenres = when {
+                isTvExclusive -> GenreConstants.TV_GENRES
+                isMovieExclusive -> GenreConstants.MOVIE_GENRES
+                else -> GenreConstants.ALL_GENRES
+            }
+
+            val sortedGenres = remember(baseGenres, currentLanguage) {
+                baseGenres.sortedBy { genre ->
+                    GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name).lowercase()
+                }
+            }
+
             val displayedGenres = if (showAllGenres) {
-                relevantGenres
+                sortedGenres
             } else {
-                relevantGenres.filterIndexed { index, genre ->
-                    index < 10 || genre.id in sortConfig.selectedGenres
+                sortedGenres.filterIndexed { index, genre ->
+                    index < 12 || genre.id in sortConfig.selectedGenres
                 }
             }
 
             displayedGenres.forEach { genre ->
                 val isSelected = genre.id in sortConfig.selectedGenres
-                val currentLanguage = LocalConfiguration.current.locales[0]?.language ?: "en"
                 val localizedName = GenreConstants.getLocalizedName(genre.id, currentLanguage, genre.name)
                 FilterChip(
                     label = localizedName.uppercase(),
@@ -488,7 +504,7 @@ fun FilterGenresSection(
                 )
             }
 
-            if (!showAllGenres && relevantGenres.size > displayedGenres.size) {
+            if (!showAllGenres && sortedGenres.size > displayedGenres.size) {
                 Box(
                     modifier = Modifier
                         .bounceClick { showAllGenres = true }
@@ -509,6 +525,33 @@ fun FilterGenresSection(
                         )
                         Text(
                             text = stringResource(R.string.filter_show_all).uppercase(),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            } else if (showAllGenres && sortedGenres.size > 12) {
+                Box(
+                    modifier = Modifier
+                        .bounceClick { showAllGenres = false }
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.45f))
+                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.show_less).uppercase(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
@@ -665,7 +708,8 @@ fun FilterCountriesSection(
     sortConfig: SortConfig,
     isExpanded: Boolean,
     onToggle: () -> Unit,
-    onSortConfigChanged: (SortConfig) -> Unit
+    onSortConfigChanged: (SortConfig) -> Unit,
+    availableCountries: List<String> = emptyList()
 ) {
     var showAllCountries by remember { mutableStateOf(false) }
     val currentLocale = LocalConfiguration.current.locales[0] ?: java.util.Locale.getDefault()
@@ -681,14 +725,20 @@ fun FilterCountriesSection(
             horizontalArrangement = Arrangement.spacedBy(8.dp),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
-            val allCodes = remember(sortConfig.selectedCountries) {
-                (com.cinetrack.util.CountryUtils.POPULAR_COUNTRIES + sortConfig.selectedCountries).distinct()
+            val allCodes = remember(sortConfig.selectedCountries, availableCountries, currentLocale) {
+                val combined = (com.cinetrack.util.CountryUtils.ALL_CINEMA_COUNTRIES + availableCountries + sortConfig.selectedCountries)
+                    .map { it.uppercase().trim() }
+                    .filter { it.length == 2 }
+                    .distinct()
+                combined.sortedBy { code ->
+                    com.cinetrack.util.CountryUtils.getLocalizedCountryName(code, currentLocale).lowercase(currentLocale)
+                }
             }
             val displayedCodes = if (showAllCountries) {
                 allCodes
             } else {
-                allCodes.filterIndexed { index, code ->
-                    index < 8 || code in sortConfig.selectedCountries
+                allCodes.filter { code ->
+                    code in com.cinetrack.util.CountryUtils.DEFAULT_POPULAR_COUNTRIES || code in sortConfig.selectedCountries
                 }
             }
 
@@ -728,6 +778,33 @@ fun FilterCountriesSection(
                         )
                         Text(
                             text = stringResource(R.string.filter_show_all).uppercase(),
+                            fontSize = 11.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)
+                        )
+                    }
+                }
+            } else if (showAllCountries && allCodes.size > 12) {
+                Box(
+                    modifier = Modifier
+                        .bounceClick { showAllCountries = false }
+                        .clip(CircleShape)
+                        .background(Color.Black.copy(alpha = 0.45f))
+                        .border(width = 1.dp, color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.15f), shape = CircleShape)
+                        .padding(horizontal = 12.dp, vertical = 8.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_arrow_up),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f),
+                            modifier = Modifier.size(12.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.show_less).uppercase(),
                             fontSize = 11.sp,
                             fontWeight = FontWeight.ExtraBold,
                             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.8f)

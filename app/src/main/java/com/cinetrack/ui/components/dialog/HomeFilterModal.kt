@@ -84,6 +84,7 @@ fun HomeFilterModal(
     isCommentsFilter: Boolean = false,
     availableSources: List<com.cinetrack.data.api.SourceCatalogRow> = emptyList(),
     availableLanguages: List<String> = emptyList(),
+    availableCountries: List<String> = emptyList(),
     sourceCounts: Map<String, Int> = emptyMap(),
     languageCounts: Map<String, Int> = emptyMap(),
     showSortBy: Boolean = true,
@@ -206,6 +207,7 @@ fun HomeFilterModal(
                             "language" -> with(density) { (11 * 44 + 30).dp.toPx().coerceAtMost(maxAllowedHeight * 0.50f) }
                             "media" -> with(density) { (48 * 3 + 30).dp.toPx() }
                             "genres" -> with(density) { 250.dp.toPx() }
+                            "countries" -> with(density) { 200.dp.toPx() }
                             "platforms" -> with(density) { 100.dp.toPx() }
                             "period" -> with(density) { 120.dp.toPx() }
                             "status" -> with(density) { 120.dp.toPx() }
@@ -217,7 +219,7 @@ fun HomeFilterModal(
                                 val sectionCount = when {
                                     isCollectionFilter -> if (hasTvSeries) 2 else 1
                                     isCommentsFilter -> 3
-                                    else -> 4
+                                    else -> 5
                                 }
                                 (54 * sectionCount).dp + // Section headers
                                 expandedHeight.pxToDp(density) +
@@ -535,7 +537,9 @@ fun HomeFilterModal(
                                     sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "genres",
                                     onToggle = { expandedSection = if (expandedSection == "genres") null else "genres" },
-                                    onSortConfigChanged = { localSortConfig = it }
+                                    onSortConfigChanged = { localSortConfig = it },
+                                    isFolder = isFolder,
+                                    hasTvSeries = hasTvSeries
                                 )
                             }
 
@@ -555,7 +559,8 @@ fun HomeFilterModal(
                                     sortConfig = localSortConfig,
                                     isExpanded = expandedSection == "countries",
                                     onToggle = { expandedSection = if (expandedSection == "countries") null else "countries" },
-                                    onSortConfigChanged = { localSortConfig = it }
+                                    onSortConfigChanged = { localSortConfig = it },
+                                    availableCountries = availableCountries
                                 )
                             }
 
