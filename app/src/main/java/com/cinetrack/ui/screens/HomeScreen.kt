@@ -508,38 +508,12 @@ fun HomeScreenContent(
                 ) {
                     // Layout Toggle Button
                     if (uiState.preferences.showLayoutToggle) {
-                        Box(
-                            modifier = Modifier.size(36.dp)
-                        ) {
-                            // Background Layer
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .hazeGlass(
-                                        state = activeHazeState, 
-                                        shape = CircleShape, 
-                                        blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                        useOffscreenStrategy = false
-                                    )
-                            )
-
-                            // Interactive Content Layer
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .bounceClick(scaleDown = 0.92f) { 
-                                        viewModel.updateGridColumns(nextGridColumns(columns))
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = layoutToggleIcon(columns),
-                                    contentDescription = stringResource(id = R.string.home_cd_change_layout),
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                            }
-                        }
+                        com.cinetrack.ui.components.shared.LayoutToggleButton(
+                            columns = columns,
+                            hazeState = activeHazeState,
+                            onToggle = { viewModel.updateGridColumns(nextGridColumns(columns)) },
+                            contentDescription = stringResource(id = R.string.home_cd_change_layout)
+                        )
                     }
 
                     // Filter Button

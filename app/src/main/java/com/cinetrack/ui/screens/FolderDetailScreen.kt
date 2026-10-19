@@ -43,6 +43,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.border
 import androidx.compose.foundation.background
 import com.cinetrack.ui.components.shared.layoutToggleIcon
+import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -651,35 +652,14 @@ fun FolderDetailScreenContent(
                             ) {
                                 // Layout Toggle Button
                                 if (preferences.showLayoutToggle) {
-                                    Box(modifier = Modifier.size(36.dp)) {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .hazeGlass(
-                                                    state = internalHazeState, 
-                                                    shape = CircleShape, 
-                                                    blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                                    useOffscreenStrategy = false
-                                                )
-                                        )
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .bounceClick(scaleDown = 0.92f) {
-                                                    val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
-                                                    viewModel.updateGridColumns(nextGridColumns(columns))
-                                                },
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
-                                            Icon(
-                                                imageVector = layoutToggleIcon(columns),
-                                                contentDescription = stringResource(R.string.folder_detail_change_columns),
-                                                tint = Color.White,
-                                                modifier = Modifier.size(18.dp)
-                                            )
+                                    val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
+                                    LayoutToggleButton(
+                                        columns = columns,
+                                        hazeState = internalHazeState,
+                                        onToggle = {
+                                            viewModel.updateGridColumns(nextGridColumns(columns))
                                         }
-                                    }
+                                    )
                                 }
 
                                 // Circular Filter Button

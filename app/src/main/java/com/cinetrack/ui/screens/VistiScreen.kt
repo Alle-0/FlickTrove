@@ -47,6 +47,7 @@ import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CategoryButton
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.shared.layoutToggleIcon
+import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.components.common.CinematicBackground
@@ -380,33 +381,11 @@ fun VistiScreenContent(
             ) {
                 // Layout Toggle Button
                 if (uiState.preferences.showLayoutToggle) {
-                    Box(modifier = Modifier.size(36.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .hazeGlass(
-                                    state = activeHazeState, 
-                                    shape = CircleShape, 
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                    useOffscreenStrategy = false
-                                )
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .bounceClick(scaleDown = 0.92f) {
-                                    viewModel.updateGridColumns(nextGridColumns(columns))
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = layoutToggleIcon(columns),
-                                contentDescription = stringResource(R.string.folder_detail_change_columns),
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                    }
+                    LayoutToggleButton(
+                        columns = columns,
+                        hazeState = activeHazeState,
+                        onToggle = { viewModel.updateGridColumns(nextGridColumns(columns)) }
+                    )
                 }
 
                 // Circular Filter Button

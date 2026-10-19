@@ -69,6 +69,7 @@ import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.shared.layoutToggleIcon
+import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
@@ -573,30 +574,14 @@ fun RecommendationsScreenContent(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 if (!isFlickMode && uiState.preferences.showLayoutToggle) {
-                    Box(modifier = Modifier.size(36.dp)) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
-                        )
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .bounceClick(scaleDown = 0.92f) {
-                                    val nextColumns = nextGridColumns(uiState.preferences.gridColumns)
-                                    viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextColumns))
-                                }
-                                .border(BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = layoutToggleIcon(uiState.preferences.gridColumns),
-                                contentDescription = stringResource(R.string.folder_detail_change_columns),
-                                tint = Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
+                    LayoutToggleButton(
+                        columns = uiState.preferences.gridColumns,
+                        hazeState = localHazeState,
+                        onToggle = {
+                            val nextColumns = nextGridColumns(uiState.preferences.gridColumns)
+                            viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextColumns))
                         }
-                    }
+                    )
                 }
 
                 Box(modifier = Modifier.size(36.dp)) {
