@@ -229,10 +229,11 @@ class TranslationManager @Inject constructor(
         if (clean.isEmpty()) return@withContext TranslationResult.AlreadyInLanguage
 
         val tgt = resolveTargetLanguageCode(targetLang)
+        val (queryText, urls) = shieldUrls(clean)
 
         // 1. Primary: Google Translate GTX public client with sl=auto (instant, full sentences, zero model download)
         try {
-            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val encodedQuery = java.net.URLEncoder.encode(queryText, StandardCharsets.UTF_8.name())
             val url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=$tgt&dt=t&q=$encodedQuery"
             val request = Request.Builder()
                 .url(url)
@@ -263,11 +264,12 @@ class TranslationManager @Inject constructor(
                         }
                         val rawTranslated = fullTranslation.toString().trim()
                         if (rawTranslated.isNotEmpty()) {
-                            val unescaped = android.text.Html.fromHtml(rawTranslated, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
-                            if (unescaped.equals(clean, ignoreCase = true)) {
+                            val unescaped = unescapeHtmlEntities(rawTranslated)
+                            val finalResult = restoreUrls(unescaped, urls).trim()
+                            if (finalResult.equals(clean, ignoreCase = true)) {
                                 return@withContext TranslationResult.AlreadyInLanguage
                             }
-                            return@withContext TranslationResult.Success(unescaped)
+                            return@withContext TranslationResult.Success(finalResult)
                         }
                     }
                 }
@@ -278,16 +280,19 @@ class TranslationManager @Inject constructor(
 
         // 2. Offline Fallback: ML Kit on-device if models are already downloaded
         try {
-            val detectedSource = identifyLanguage(clean)
+            val detectedSource = identifyLanguage(queryText)
             if (detectedSource != null && (detectedSource.equals(tgt, ignoreCase = true) || detectedSource == targetLang)) {
                 return@withContext TranslationResult.AlreadyInLanguage
             }
             val validSource = toSupportedMlKitLanguage(detectedSource)
             val validTarget = toSupportedMlKitLanguage(targetLang)
             if (validSource != null && validTarget != null && isModelDownloaded(validSource, validTarget)) {
-                val localResult = translateFrom(clean, validSource, validTarget)
-                if (localResult != null && !localResult.trim().equals(clean, ignoreCase = true)) {
-                    return@withContext TranslationResult.Success(localResult)
+                val localResult = translateFrom(queryText, validSource, validTarget)
+                if (localResult != null) {
+                    val finalResult = restoreUrls(localResult, urls).trim()
+                    if (!finalResult.equals(clean, ignoreCase = true)) {
+                        return@withContext TranslationResult.Success(finalResult)
+                    }
                 }
             }
         } catch (e: Exception) {
@@ -296,7 +301,7 @@ class TranslationManager @Inject constructor(
 
         // 3. Secondary Online Fallback: MyMemory Translate API
         try {
-            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val encodedQuery = java.net.URLEncoder.encode(queryText, StandardCharsets.UTF_8.name())
             val url = "https://api.mymemory.translated.net/get?q=$encodedQuery&langpair=auto|$tgt"
             val request = Request.Builder()
                 .url(url)
@@ -311,9 +316,10 @@ class TranslationManager @Inject constructor(
                     val responseData = json.optJSONObject("responseData")
                     val translatedText = responseData?.optString("translatedText")
                     if (!translatedText.isNullOrBlank() && !translatedText.startsWith("MYMEMORY WARNING")) {
-                        val unescaped = android.text.Html.fromHtml(translatedText, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
-                        if (unescaped.isNotEmpty() && !unescaped.equals(clean, ignoreCase = true)) {
-                            return@withContext TranslationResult.Success(unescaped)
+                        val unescaped = unescapeHtmlEntities(translatedText)
+                        val finalResult = restoreUrls(unescaped, urls).trim()
+                        if (finalResult.isNotEmpty() && !finalResult.equals(clean, ignoreCase = true)) {
+                            return@withContext TranslationResult.Success(finalResult)
                         }
                     }
                 }
@@ -367,13 +373,14 @@ class TranslationManager @Inject constructor(
         val clean = text.trim()
         if (clean.isEmpty()) return@withContext null
 
+        val (queryText, urls) = shieldUrls(clean)
         val src = if (sourceLang.isBlank() || sourceLang.equals("auto", ignoreCase = true)) "auto" else mapMlKitToBcp47(sourceLang)
         val tgt = resolveTargetLanguageCode(targetLang)
         if (src == tgt && src != "auto") return@withContext clean
 
         // 1. Primary: Google Translate GTX public client endpoint (fast, accurate, no api key required)
         try {
-            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val encodedQuery = java.net.URLEncoder.encode(queryText, StandardCharsets.UTF_8.name())
             val url = "https://translate.googleapis.com/translate_a/single?client=gtx&sl=$src&tl=$tgt&dt=t&q=$encodedQuery"
             val request = Request.Builder()
                 .url(url)
@@ -396,8 +403,8 @@ class TranslationManager @Inject constructor(
                         }
                         val rawTranslated = fullTranslation.toString().trim()
                         if (rawTranslated.isNotEmpty()) {
-                            val unescaped = android.text.Html.fromHtml(rawTranslated, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
-                            return@withContext unescaped
+                            val unescaped = unescapeHtmlEntities(rawTranslated)
+                            return@withContext restoreUrls(unescaped, urls).trim()
                         }
                     }
                 }
@@ -409,7 +416,7 @@ class TranslationManager @Inject constructor(
         // 2. Secondary fallback: MyMemory Translate API
         try {
             val querySrc = if (src == "auto") "en" else src
-            val encodedQuery = java.net.URLEncoder.encode(clean, StandardCharsets.UTF_8.name())
+            val encodedQuery = java.net.URLEncoder.encode(queryText, StandardCharsets.UTF_8.name())
             val url = "https://api.mymemory.translated.net/get?q=$encodedQuery&langpair=$querySrc|$tgt"
             val request = Request.Builder()
                 .url(url)
@@ -424,9 +431,9 @@ class TranslationManager @Inject constructor(
                     val responseData = json.optJSONObject("responseData")
                     val translatedText = responseData?.optString("translatedText")
                     if (!translatedText.isNullOrBlank()) {
-                        val unescaped = android.text.Html.fromHtml(translatedText, android.text.Html.FROM_HTML_MODE_LEGACY).toString().trim()
+                        val unescaped = unescapeHtmlEntities(translatedText)
                         if (unescaped.isNotEmpty() && !unescaped.startsWith("MYMEMORY WARNING")) {
-                            return@withContext unescaped
+                            return@withContext restoreUrls(unescaped, urls).trim()
                         }
                     }
                 }
@@ -595,6 +602,90 @@ class TranslationManager @Inject constructor(
             }
         }
         return raw.take(2).ifEmpty { "en" }
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // Formatting & URL Preservation Helpers
+    // ─────────────────────────────────────────────────────────────────────────
+
+    private val URL_REGEX = Regex("""https?://[^\s\(\)\[\]<>"']+""")
+    private val HTML_ENTITY_REGEX = Regex("&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);")
+
+    /**
+     * Shields URLs with invariant tokens (e.g. __FT_URL_0__) before sending text to
+     * translation APIs, preventing endpoints from translating or corrupting URL slugs, query params,
+     * or markdown links.
+     */
+    private fun shieldUrls(text: String): Pair<String, List<String>> {
+        val urls = mutableListOf<String>()
+        val shielded = URL_REGEX.replace(text) { matchResult ->
+            var url = matchResult.value
+            var trailingPunctuation = ""
+            while (url.isNotEmpty() && (url.endsWith(".") || url.endsWith(",") || url.endsWith(";") || url.endsWith("!") || url.endsWith("?"))) {
+                trailingPunctuation = url.takeLast(1) + trailingPunctuation
+                url = url.dropLast(1)
+            }
+            val index = urls.size
+            urls.add(url)
+            "__FT_URL_${index}__$trailingPunctuation"
+        }
+        return Pair(shielded, urls)
+    }
+
+    /**
+     * Restores shielded URLs back to their exact original form after translation.
+     */
+    private fun restoreUrls(text: String, urls: List<String>): String {
+        if (urls.isEmpty()) return text
+        var restored = text
+        urls.forEachIndexed { index, originalUrl ->
+            val exact = "__FT_URL_${index}__"
+            restored = restored.replace(exact, originalUrl)
+            // Handle edge-cases where translation engines might inject spaces into token symbols
+            val tolerant = Regex("""__\s*FT_URL_${index}\s*__""")
+            restored = restored.replace(tolerant, originalUrl)
+        }
+        return restored
+    }
+
+    /**
+     * Safely unescapes HTML entities without stripping or collapsing newlines (\n, \n\n).
+     * Unlike Android's `Html.fromHtml()` which parses plain text as an HTML DOM and collapses
+     * all standard newlines and whitespace into single spaces ' ', this function targets only
+     * &...; entity tokens and leaves all whitespace, indentation, and newlines 100% intact.
+     */
+    private fun unescapeHtmlEntities(text: String): String {
+        if (!text.contains('&')) return text
+        return HTML_ENTITY_REGEX.replace(text) { matchResult ->
+            val entity = matchResult.value
+            when {
+                entity.equals("&quot;", ignoreCase = true) -> "\""
+                entity.equals("&apos;", ignoreCase = true) || entity.equals("&#39;", ignoreCase = true) -> "'"
+                entity.equals("&amp;", ignoreCase = true) -> "&"
+                entity.equals("&lt;", ignoreCase = true) -> "<"
+                entity.equals("&gt;", ignoreCase = true) -> ">"
+                entity.equals("&nbsp;", ignoreCase = true) -> " "
+                entity.startsWith("&#x", ignoreCase = true) -> {
+                    runCatching {
+                        val hex = entity.substring(3, entity.length - 1)
+                        val codePoint = hex.toInt(16)
+                        String(Character.toChars(codePoint))
+                    }.getOrDefault(entity)
+                }
+                entity.startsWith("&#") -> {
+                    runCatching {
+                        val dec = entity.substring(2, entity.length - 1)
+                        val codePoint = dec.toInt(10)
+                        String(Character.toChars(codePoint))
+                    }.getOrDefault(entity)
+                }
+                else -> {
+                    runCatching {
+                        android.text.Html.fromHtml(entity, android.text.Html.FROM_HTML_MODE_LEGACY).toString()
+                    }.getOrDefault(entity)
+                }
+            }
+        }
     }
 }
 
