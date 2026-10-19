@@ -431,79 +431,127 @@ fun DetailHeader(
                         )
                     }
 
-                    Spacer(modifier = Modifier.weight(1f))
+                    Spacer(modifier = Modifier.widthIn(min = 8.dp).weight(1f))
 
                     Column(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(end = 12.dp)
+                        modifier = Modifier
+                            .weight(1.5f, fill = false)
+                            .padding(end = 10.dp)
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            val dateStr = movie.releaseDate ?: movie.firstAirDate
-                            val isReleased = movie.isReleased
-                            
-                            val displayedDate = if (!isReleased && !dateStr.isNullOrBlank()) {
-                                if (dateStr.length >= 10) {
-                                    val parts = dateStr.split("-")
-                                    if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else dateStr
-                                } else dateStr
-                            } else {
-                                dateStr?.take(4) ?: "-"
-                            }
-                            
-                            val dateColor = if (!isReleased) accentColor else Color.White.copy(alpha = 0.6f)
+                        val dateStr = movie.releaseDate ?: movie.firstAirDate
+                        val isReleased = movie.isReleased
+                        
+                        val isFullDate = !isReleased && !dateStr.isNullOrBlank() && dateStr.length >= 10
+                        val displayedDate = if (isFullDate) {
+                            val parts = dateStr.split("-")
+                            if (parts.size == 3) "${parts[2]}/${parts[1]}/${parts[0]}" else dateStr
+                        } else {
+                            dateStr?.take(4) ?: "-"
+                        }
+                        
+                        val dateColor = if (!isReleased) accentColor else Color.White.copy(alpha = 0.6f)
 
+                        val runtime = movie.numberOfSeasons?.let { 
+                            if (it > 0) "$it ${if (it > 1) stringResource(R.string.detail_seasons) else stringResource(R.string.detail_season)}" else null 
+                        } ?: movie.runtime?.let {
+                            if (it > 0) {
+                                val h = it / 60
+                                val m = it % 60
+                                if (h > 0) "${h}h ${m}m" else "${m}m"
+                            } else null
+                        } ?: "-"
+
+                        if (isFullDate) {
+                            // When full date is shown (unreleased media): stack vertically to prevent horizontal collision with pills
                             Text(
                                 text = displayedDate,
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontSize = 11.sp,
                                     fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.5.sp
+                                    letterSpacing = 0.8.sp
                                 ),
-                                color = dateColor
+                                color = dateColor,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
-
-                            Box(
-                                modifier = Modifier
-                                    .padding(horizontal = 8.dp)
-                                    .size(3.5.dp)
-                                    .background(Color.White.copy(alpha = 0.3f), CircleShape)
-                            )
-
-                            val runtime = movie.numberOfSeasons?.let { 
-                                if (it > 0) "$it ${if (it > 1) stringResource(R.string.detail_seasons) else stringResource(R.string.detail_season)}" else null 
-                            } ?: movie.runtime?.let {
-                                if (it > 0) {
-                                    val h = it / 60
-                                    val m = it % 60
-                                    if (h > 0) "${h}h ${m}m" else "${m}m"
-                                } else null
-                            } ?: "-"
-
+                            Spacer(modifier = Modifier.height(1.dp))
                             Text(
                                 text = runtime.uppercase(),
                                 style = MaterialTheme.typography.labelMedium.copy(
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.5.sp
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Bold,
+                                    letterSpacing = 0.8.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.6f)
+                                color = Color.White.copy(alpha = 0.65f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
-                        }
+                            if (seriesStatusLabel != null) {
+                                Spacer(modifier = Modifier.height(1.dp))
+                                Text(
+                                    text = seriesStatusLabel.uppercase(),
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 9.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.6.sp
+                                    ),
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+                        } else {
+                            // Standard released media: compact single line with year + runtime/seasons
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Text(
+                                    text = displayedDate,
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.8.sp
+                                    ),
+                                    color = dateColor,
+                                    maxLines = 1
+                                )
 
-                        if (seriesStatusLabel != null) {
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = seriesStatusLabel.uppercase(),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontSize = 9.5.sp,
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.2.sp
-                                ),
-                                color = Color.White.copy(alpha = 0.55f)
-                            )
+                                Box(
+                                    modifier = Modifier
+                                        .padding(horizontal = 6.dp)
+                                        .size(3.dp)
+                                        .background(Color.White.copy(alpha = 0.3f), CircleShape)
+                                )
+
+                                Text(
+                                    text = runtime.uppercase(),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.8.sp
+                                    ),
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
+
+                            if (seriesStatusLabel != null) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = seriesStatusLabel.uppercase(),
+                                    style = MaterialTheme.typography.labelMedium.copy(
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.8.sp
+                                    ),
+                                    color = Color.White.copy(alpha = 0.55f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
