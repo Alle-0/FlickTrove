@@ -639,9 +639,10 @@ fun ContinueWatchingSeriesCard(
                         overflow = TextOverflow.Ellipsis,
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                     )
-                    if (nextInfo.remainingInSeason > 0) {
+                    val remainingEpisodes = if (nextInfo.remainingTotal > 0) nextInfo.remainingTotal else nextInfo.remainingInSeason
+                    if (remainingEpisodes > 0) {
                         Text(
-                            text = stringResource(R.string.lbl_episodes_remaining, nextInfo.remainingInSeason),
+                            text = stringResource(R.string.lbl_episodes_remaining, remainingEpisodes),
                             color = Color.White.copy(alpha = 0.65f),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,

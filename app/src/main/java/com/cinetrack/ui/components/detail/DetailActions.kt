@@ -464,6 +464,10 @@ fun DetailActions(
                         } else null
                     }
 
+                    val watchedEpisodesCount = remember(movie.watchedEpisodes) {
+                        movie.watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
+                    }
+
                     AnimatedContent(
                         targetState = displayWatchState,
                         transitionSpec = {
@@ -543,13 +547,24 @@ fun DetailActions(
                                 )
                             } else if (isTvSeries && targetState != WatchState.NONE && movie.isReleased) {
                                 val percentage = (animatedProgress * 100).toInt()
+                                val totalEpisodes = tvMeta?.first
+                                val progressText = when {
+                                    percentage == 100 -> stringResource(R.string.action_completed)
+                                    totalEpisodes != null && totalEpisodes > 0 -> {
+                                        val safeWatched = minOf(watchedEpisodesCount, totalEpisodes)
+                                        "$safeWatched/$totalEpisodes • $percentage%"
+                                    }
+                                    else -> stringResource(R.string.action_percent_watched, percentage)
+                                }
                                 Text(
-                                    text = if (percentage == 100) stringResource(R.string.action_completed) else stringResource(R.string.action_percent_watched, percentage),
+                                    text = progressText,
                                     style = MaterialTheme.typography.labelSmall.copy(
                                         fontWeight = FontWeight.Bold,
                                         letterSpacing = 1.sp
                                     ),
-                                    color = displayColor.copy(alpha = 0.8f)
+                                    color = displayColor.copy(alpha = 0.8f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }

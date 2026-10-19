@@ -324,9 +324,10 @@ fun MovieListCard(
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp),
                             color = statusColor
                         )
-                        if (isReleased && !isUpToDate && nextInfo.remainingInSeason > 0) {
+                        val remainingEpisodes = if (nextInfo.remainingTotal > 0) nextInfo.remainingTotal else nextInfo.remainingInSeason
+                        if (isReleased && !isUpToDate && remainingEpisodes > 0) {
                             Text(
-                                text = " • ${nextInfo.remainingInSeason}",
+                                text = " • $remainingEpisodes",
                                 style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.sp),
                                 color = Color.White.copy(alpha = 0.55f)
                             )
