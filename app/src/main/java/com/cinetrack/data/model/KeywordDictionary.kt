@@ -184,7 +184,13 @@ object KeywordDictionary {
         "politico corrotto" to 156024L, "campagna elettorale" to 6085L, "sindaco" to 1919L, "abisso marino" to 2769L,
         "attacco di squalo" to 2988L, "balena" to 4676L, "orca" to 155529L, "scienziato pazzo" to 10125L,
         "esperimento segreto" to 270319L, "ingegneria genetica" to 163561L, "fumetti dc" to 849L, "fumetti marvel" to 9715L,
-        "film di mostri" to 210614L, "aula di tribunale" to 33519L, "finta relazione" to 357252L, "da amici ad amanti" to 282988L
+        "film di mostri" to 210614L, "aula di tribunale" to 33519L, "finta relazione" to 357252L, "da amici ad amanti" to 282988L,
+        "alpinismo" to 160177L, "monte everest" to 192779L, "anni 50" to 208611L, "uomo contro natura" to 239821L,
+        "scrivere la storia" to 366059L, "cavallo" to 2673L, "sparatoria" to 10950L, "sparatoria con la polizia" to 193309L,
+        "furto d'arte" to 250043L, "ricongiungimento genitore-figlio" to 258986L, "fratello perduto" to 318607L, "gioioso" to 325832L,
+        "ragazza adolescente" to 10809L, "miniserie" to 11162L, "emarginato sociale" to 171556L, "fanatico" to 173185L,
+        "arrabbiato" to 200918L, "crisi d'identità" to 3394L, "in fuga" to 10562L, "identità personale" to 165601L,
+        "marvel cinematic universe" to 180547L
     )
 
     val englishToTmdbKeywordIds = mapOf(
@@ -370,7 +376,13 @@ object KeywordDictionary {
         "corrupt politician" to 156024L, "election campaign" to 6085L, "mayor" to 1919L, "deep sea" to 2769L,
         "shark attack" to 2988L, "whale" to 4676L, "killer whale" to 155529L, "mad scientist" to 10125L,
         "secret experiment" to 270319L, "genetic engineering" to 163561L, "dc comics" to 849L, "marvel comics" to 9715L,
-        "monster movie" to 210614L, "courtroom" to 33519L, "fake relationship" to 357252L, "friends to lovers" to 282988L
+        "monster movie" to 210614L, "courtroom" to 33519L, "fake relationship" to 357252L, "friends to lovers" to 282988L,
+        "mountaineering" to 160177L, "mount everest" to 192779L, "1950s" to 208611L, "man vs nature" to 239821L,
+        "making history" to 366059L, "horse" to 2673L, "shootout" to 10950L, "police shootout" to 193309L,
+        "art heist" to 250043L, "parent child reunion" to 258986L, "long lost sibling" to 318607L, "joyful" to 325832L,
+        "teenage girl" to 10809L, "miniseries" to 11162L, "social outcast" to 171556L, "zealot" to 173185L,
+        "angry" to 200918L, "identity crisis" to 3394L, "on the run" to 10562L, "self identity" to 165601L,
+        "marvel cinematic universe" to 180547L
     )
 
     fun getDictionaryForLanguage(language: String): Map<String, Long> {
