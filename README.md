@@ -214,6 +214,7 @@ Once the app is launched:
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
+- [ ] **History:** Page with viewing history
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collection on the web.
