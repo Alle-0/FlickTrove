@@ -32,9 +32,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import com.cinetrack.util.buildTmdbImageUrl
-import com.cinetrack.util.ImageType
-import com.cinetrack.util.LocalImageQuality
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.lerp as geometryLerp
@@ -52,8 +49,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
 import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.ui.components.glass.hazeGlass
