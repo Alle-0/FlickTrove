@@ -170,7 +170,7 @@ fun DetailHeader(
     ) {
         val isTvSeries = movie.mediaType == "tv"
         val effectiveStatus = movieStatus?.takeIf { it.isNotBlank() } ?: movie.status
-        val seriesStatusLabel = if (isTvSeries && !effectiveStatus.isNullOrBlank()) {
+        val seriesStatusLabel = if (isTvSeries && movie.isReleased && !effectiveStatus.isNullOrBlank()) {
             when (effectiveStatus) {
                 "Returning Series" -> stringResource(R.string.status_returning_series)
                 "Planned" -> stringResource(R.string.status_planned)
@@ -488,20 +488,6 @@ fun DetailHeader(
                                 maxLines = 1,
                                 overflow = TextOverflow.Ellipsis
                             )
-                            if (seriesStatusLabel != null) {
-                                Spacer(modifier = Modifier.height(1.dp))
-                                Text(
-                                    text = seriesStatusLabel.uppercase(),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = 9.sp,
-                                        fontWeight = FontWeight.Black,
-                                        letterSpacing = 0.6.sp
-                                    ),
-                                    color = Color.White.copy(alpha = 0.5f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
                         } else {
                             // Standard released media: compact single line with year + runtime/seasons
                             Row(
