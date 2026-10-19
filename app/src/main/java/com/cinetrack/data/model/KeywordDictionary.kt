@@ -190,7 +190,15 @@ object KeywordDictionary {
         "furto d'arte" to 250043L, "ricongiungimento genitore-figlio" to 258986L, "fratello perduto" to 318607L, "gioioso" to 325832L,
         "ragazza adolescente" to 10809L, "miniserie" to 11162L, "emarginato sociale" to 171556L, "fanatico" to 173185L,
         "arrabbiato" to 200918L, "crisi d'identità" to 3394L, "in fuga" to 10562L, "identità personale" to 165601L,
-        "marvel cinematic universe" to 180547L
+        "marvel cinematic universe" to 180547L, "manipolazione temporale" to 220800L, "suspense" to 288394L,
+        "urban fantasy" to 298549L, "donghua" to 315535L, "original net animation (ona)" to 323096L,
+        "campo estivo" to 5767L, "prequel" to 9675L, "tratto da un film" to 165317L, "pesce fuor d'acqua" to 11860L,
+        "mafia siciliana" to 155538L, "racket delle estorsioni" to 163107L, "neo-western" to 168713L,
+        "tulsa, oklahoma" to 200552L, "commedia drammatica" to 203322L, "uomo che si è fatto da sé" to 206922L,
+        "famiglia mafiosa" to 211706L, "midwest americano" to 214388L, "midwest" to 156230L, "londra, inghilterra" to 212L,
+        "ambasciatore" to 1704L, "diplomatico" to 4529L, "politico" to 6083L, "donna politica" to 33850L,
+        "lutto" to 159103L, "meditativo" to 197056L, "diplomatico americano" to 197747L, "ex marine" to 34258L,
+        "indagine per omicidio" to 161982L, "coppia di poliziotti" to 167316L, "recluta" to 167921L, "nebraska" to 191008L
     )
 
     val englishToTmdbKeywordIds = mapOf(
@@ -382,7 +390,16 @@ object KeywordDictionary {
         "art heist" to 250043L, "parent child reunion" to 258986L, "long lost sibling" to 318607L, "joyful" to 325832L,
         "teenage girl" to 10809L, "miniseries" to 11162L, "social outcast" to 171556L, "zealot" to 173185L,
         "angry" to 200918L, "identity crisis" to 3394L, "on the run" to 10562L, "self identity" to 165601L,
-        "marvel cinematic universe" to 180547L
+        "marvel cinematic universe" to 180547L, "time-manipulation" to 220800L, "time manipulation" to 220800L,
+        "suspense" to 288394L, "urban fantasy" to 298549L, "donghua" to 315535L,
+        "original net animation (ona)" to 323096L, "original net animation" to 323096L,
+        "summer camp" to 5767L, "prequel" to 9675L, "based on movie" to 165317L, "fish out of water" to 11860L,
+        "sicilian mafia" to 155538L, "protection racket" to 163107L, "neo-western" to 168713L, "tulsa, oklahoma" to 200552L,
+        "dramedy" to 203322L, "self made man" to 206922L, "mob family" to 211706L, "american midwest" to 214388L,
+        "midwest" to 156230L, "london, england" to 212L, "ambassador" to 1704L, "diplomat" to 4529L,
+        "politician" to 6083L, "female politician" to 33850L, "mourning" to 159103L, "meditative" to 197056L,
+        "american diplomat" to 197747L, "ex-marine" to 34258L, "ex marine" to 34258L, "murder investigation" to 161982L,
+        "buddy cop" to 167316L, "trainee" to 167921L, "nebraska" to 191008L
     )
 
     fun getDictionaryForLanguage(language: String): Map<String, Long> {
