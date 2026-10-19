@@ -239,6 +239,20 @@ fun VistiScreenContent(
                     )
                 }
             } else {
+                val stableOnPress: (Movie) -> Unit = remember(onMovieClick) { { m -> onMovieClick(m) } }
+                val stableOnAction: (Movie) -> Unit = remember(viewModel) { { m -> viewModel.toggleWatched(m) } }
+                val stableOnLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember(actionsState) {
+                    { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) }
+                }
+                val stableOnMessage: (String) -> Unit = remember(viewModel) {
+                    { msg -> viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) }
+                }
+                val precomputedFolderColors = remember(uiState.movieFolderColors) {
+                    uiState.movieFolderColors.mapValues { entry ->
+                        entry.value.map { it.toComposeColor() }
+                    }
+                }
+
                 LazyVerticalGrid(
                     columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
                     state = listState,
@@ -256,11 +270,7 @@ fun VistiScreenContent(
                         items = uiState.movies,
                         key = { index, movie: Movie -> movie.id.toString() + movie.mediaType }
                     ) { index, movie ->
-                        val folderColors = remember(movie.id, uiState.movieFolderColors) {
-                            uiState.movieFolderColors["${movie.mediaType}_${movie.id}"]?.map { 
-                                it.toComposeColor()
-                            } ?: emptyList()
-                        }
+                        val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
                         if (columns == 1) {
                             com.cinetrack.ui.components.card.MovieListCard(
                                 movie = movie,
@@ -277,12 +287,10 @@ fun VistiScreenContent(
                                 hazeState = hazeState,
                                 hasAnimatedSet = viewModel.animatedMovieIds,
                                 staggerIndex = index,
-                                onPress = { onMovieClick(movie) },
-                                onAction = { viewModel.toggleWatched(movie) },
-                                onLongPress = { m, pressOffset, cardPos ->
-                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                },
-                                onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                onPress = stableOnPress,
+                                onAction = stableOnAction,
+                                onLongPress = stableOnLongPress,
+                                onMessage = stableOnMessage
                             )
                         } else {
                             MovieCard(
@@ -298,12 +306,10 @@ fun VistiScreenContent(
                                 showFolderBookmarks = uiState.preferences.showFolderBookmarks,
                                 hasAnimatedSet = viewModel.animatedMovieIds,
                                 staggerIndex = index,
-                                onPress = { onMovieClick(movie) },
-                                onAction = { viewModel.toggleWatched(movie) },
-                                onLongPress = { m, pressOffset, cardPos ->
-                                    actionsState.onLongPress(m, pressOffset, cardPos)
-                                },
-                                onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                onPress = stableOnPress,
+                                onAction = stableOnAction,
+                                onLongPress = stableOnLongPress,
+                                onMessage = stableOnMessage
                             )
                         }
                     }

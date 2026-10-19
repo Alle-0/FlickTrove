@@ -299,6 +299,9 @@ fun HomeScreenContent(
                 val stableOnMessage: (String) -> Unit = remember(viewModel) {
                     { msg -> viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) }
                 }
+                val stableOnQuickMarkWatched: (Movie) -> Unit = remember(viewModel) {
+                    { m -> viewModel.markNextEpisodeWatched(m) }
+                }
 
                 val unreleasedTitle = stringResource(id = R.string.home_unreleased)
                 val droppedTitle = stringResource(id = R.string.home_dropped)
@@ -374,7 +377,9 @@ fun HomeScreenContent(
                             val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
 
                             val isTvTab = uiState.activeTab == "tv"
-                            val nextEpisode = if (isTvTab) movie.calculateNextEpisode() else null
+                            val nextEpisode = remember(movie.id, movie.watchedEpisodes, movie.seasons, movie.numberOfEpisodes, isTvTab) {
+                                if (isTvTab) movie.calculateNextEpisode() else null
+                            }
                             if (columns == 1) {
                                 com.cinetrack.ui.components.card.MovieListCard(
                                     movie = movie,
@@ -392,7 +397,7 @@ fun HomeScreenContent(
                                     onAction = stableOnAction,
                                     onLongPress = stableOnLongPress,
                                     onMessage = stableOnMessage,
-                                    onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) { { m -> viewModel.markNextEpisodeWatched(m) } } else null,
+                                    onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) stableOnQuickMarkWatched else null,
                                     precalculatedNextInfo = nextEpisode
                                 )
                             } else if (isTvTab && nextEpisode != null) {
@@ -415,7 +420,7 @@ fun HomeScreenContent(
                                     onPress = stableOnPress,
                                     onLongPress = stableOnLongPress,
                                     onAction = stableOnAction,
-                                    onQuickMarkWatched = { m -> viewModel.markNextEpisodeWatched(m) },
+                                    onQuickMarkWatched = stableOnQuickMarkWatched,
                                     onMessage = stableOnMessage,
                                     precalculatedNextInfo = nextEpisode
                                 )
