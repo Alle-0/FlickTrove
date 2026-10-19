@@ -198,7 +198,9 @@ object KeywordDictionary {
         "famiglia mafiosa" to 211706L, "midwest americano" to 214388L, "midwest" to 156230L, "londra, inghilterra" to 212L,
         "ambasciatore" to 1704L, "diplomatico" to 4529L, "politico" to 6083L, "donna politica" to 33850L,
         "lutto" to 159103L, "meditativo" to 197056L, "diplomatico americano" to 197747L, "ex marine" to 34258L,
-        "indagine per omicidio" to 161982L, "coppia di poliziotti" to 167316L, "recluta" to 167921L, "nebraska" to 191008L
+        "indagine per omicidio" to 161982L, "coppia di poliziotti" to 167316L, "recluta" to 167921L, "nebraska" to 191008L,
+        "guerra tra bande" to 2987L, "gangster" to 3149L, "affare di famiglia" to 5683L, "famiglia criminale" to 33421L,
+        "risolutore" to 212872L, "poliziotto corrotto" to 267608L, "dubbioso" to 325803L, "londra" to 382039L
     )
 
     val englishToTmdbKeywordIds = mapOf(
@@ -399,7 +401,9 @@ object KeywordDictionary {
         "midwest" to 156230L, "london, england" to 212L, "ambassador" to 1704L, "diplomat" to 4529L,
         "politician" to 6083L, "female politician" to 33850L, "mourning" to 159103L, "meditative" to 197056L,
         "american diplomat" to 197747L, "ex-marine" to 34258L, "ex marine" to 34258L, "murder investigation" to 161982L,
-        "buddy cop" to 167316L, "trainee" to 167921L, "nebraska" to 191008L
+        "buddy cop" to 167316L, "trainee" to 167921L, "nebraska" to 191008L,
+        "gang war" to 2987L, "gangster" to 3149L, "family business" to 5683L, "crime family" to 33421L,
+        "fixer" to 212872L, "corrupt cop" to 267608L, "dubious" to 325803L, "london" to 382039L
     )
 
     fun getDictionaryForLanguage(language: String): Map<String, Long> {

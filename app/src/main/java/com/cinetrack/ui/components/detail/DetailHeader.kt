@@ -431,14 +431,12 @@ fun DetailHeader(
                         )
                     }
 
-                    Spacer(modifier = Modifier.widthIn(min = 8.dp).weight(1f))
+                    Spacer(modifier = Modifier.weight(1f))
 
                     Column(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier
-                            .weight(1.5f, fill = false)
-                            .padding(end = 10.dp)
+                        modifier = Modifier.padding(end = 10.dp)
                     ) {
                         val dateStr = movie.releaseDate ?: movie.firstAirDate
                         val isReleased = movie.isReleased
