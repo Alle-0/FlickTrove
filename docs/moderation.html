@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>FlickTrove — Platform Evidence & Verification Gallery</title>
-  <meta name="description" content="Official platform verification, metrics, and engagement audit evidence screenshots for FlickTrove.">
+  <meta name="description"
+    content="Official platform verification, metrics, and engagement audit evidence screenshots for FlickTrove.">
   <meta name="theme-color" content="#0B0F19">
 
   <!-- Favicon -->
@@ -15,10 +17,14 @@
   <!-- Google Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap" rel="stylesheet">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet">
 
   <style>
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -130,6 +136,7 @@
       color: var(--text);
       border-color: var(--border);
     }
+
     .btn:hover {
       background: rgba(255, 255, 255, 0.1);
       border-color: rgba(255, 255, 255, 0.2);
@@ -249,7 +256,7 @@
       display: flex;
       align-items: center;
       gap: 6px;
-      box-shadow: 0 8px 20px rgba(0,0,0,0.4);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
     }
 
     .card-caption {
@@ -343,12 +350,14 @@
       .screenshots-grid {
         grid-template-columns: 1fr;
       }
+
       .gallery-title {
         font-size: 26px;
       }
     }
   </style>
 </head>
+
 <body>
   <div class="ambient-glow"></div>
 
@@ -361,7 +370,10 @@
       </div>
     </a>
     <a href="./index.html" class="btn">
-      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
       App Home
     </a>
   </header>
@@ -373,76 +385,69 @@
       <p class="gallery-subtitle">Click on any screenshot to view in full resolution.</p>
     </div>
 
-    <!-- 
-      =======================================================
-      SCREENSHOTS GALLERY
-      Puoi aggiungere, rimuovere o modificare gli screenshot 
-      qui sotto inserendo i tag <figure> con i tuoi file immagine.
-      =======================================================
-    -->
     <div class="screenshots-grid" id="screenshots-container">
 
       <!-- Screenshot 1: Overview & Top Activity -->
-      <figure class="screenshot-card" onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133039.png', 'Engagement Report &amp; Recent Activity')">
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133039.png', 'Engagement Overview')">
         <div class="img-wrapper">
-          <img src="./assets/evidence/Screenshot 2026-10-20 133039.png" 
-               alt="Engagement Report &amp; Recent Activity" 
-               class="screenshot-img" />
+          <img src="./assets/evidence/Screenshot 2026-10-20 133039.png" alt="Engagement Overview"
+            class="screenshot-img" />
           <div class="zoom-overlay">
             <span class="zoom-pill">🔍 Click to zoom</span>
           </div>
         </div>
         <figcaption class="card-caption">
-          <div class="card-title">Engagement Report &amp; Recent Activity (Oct 19–20)</div>
-          <div class="card-desc">Metrics overview (7 total comments, 1.0 avg/day, 522 ratings in 7 days) and live activity feed with privacy-masked credentials.</div>
+          <div class="card-title">Engagement Overview</div>
+          <div class="card-desc">7-day totals for comments, daily average, and ratings.</div>
         </figcaption>
       </figure>
 
       <!-- Screenshot 2: Feed Scroll 1 -->
-      <figure class="screenshot-card" onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133051.png', 'Activity Feed — Oct 17')">
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133051.png', 'Recent Activity (Part 1)')">
         <div class="img-wrapper">
-          <img src="./assets/evidence/Screenshot 2026-10-20 133051.png" 
-               alt="Activity Feed — Oct 17" 
-               class="screenshot-img" />
+          <img src="./assets/evidence/Screenshot 2026-10-20 133051.png" alt="Recent Activity (Part 1)"
+            class="screenshot-img" />
           <div class="zoom-overlay">
             <span class="zoom-pill">🔍 Click to zoom</span>
           </div>
         </div>
         <figcaption class="card-caption">
-          <div class="card-title">Activity Feed Audit (Oct 17)</div>
-          <div class="card-desc">Discussion comments on Project Hail Mary and chronological rating updates on TRON: Ares, Aquaman 2, Aquaman, and Heartstopper.</div>
+          <div class="card-title">Recent Activity (Part 1)</div>
+          <div class="card-desc">Comments and community rating updates.</div>
         </figcaption>
       </figure>
 
       <!-- Screenshot 3: Feed Scroll 2 -->
-      <figure class="screenshot-card" onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133059.png', 'Activity Feed — Oct 16')">
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133059.png', 'Recent Activity (Part 2)')">
         <div class="img-wrapper">
-          <img src="./assets/evidence/Screenshot 2026-10-20 133059.png" 
-               alt="Activity Feed — Oct 16" 
-               class="screenshot-img" />
+          <img src="./assets/evidence/Screenshot 2026-10-20 133059.png" alt="Recent Activity (Part 2)"
+            class="screenshot-img" />
           <div class="zoom-overlay">
             <span class="zoom-pill">🔍 Click to zoom</span>
           </div>
         </div>
         <figcaption class="card-caption">
-          <div class="card-title">Activity Feed Audit (Oct 16)</div>
-          <div class="card-desc">User comments and reviews on Oldboy and The Furious with timestamp verification and masked reviewer IDs.</div>
+          <div class="card-title">Recent Activity (Part 2)</div>
+          <div class="card-desc">Discussion comments and ratings log.</div>
         </figcaption>
       </figure>
 
       <!-- Screenshot 4: Feed Scroll 3 -->
-      <figure class="screenshot-card" onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133106.png', 'Activity Feed — Oct 14–16')">
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133106.png', 'Recent Activity (Part 3)')">
         <div class="img-wrapper">
-          <img src="./assets/evidence/Screenshot 2026-10-20 133106.png" 
-               alt="Activity Feed — Oct 14–16" 
-               class="screenshot-img" />
+          <img src="./assets/evidence/Screenshot 2026-10-20 133106.png" alt="Recent Activity (Part 3)"
+            class="screenshot-img" />
           <div class="zoom-overlay">
             <span class="zoom-pill">🔍 Click to zoom</span>
           </div>
         </div>
         <figcaption class="card-caption">
-          <div class="card-title">Activity Feed Audit (Oct 14–16)</div>
-          <div class="card-desc">Ratings and community discussion entries covering Barbie franchise films and Scooby-Doo titles across the 7-day audit window.</div>
+          <div class="card-title">Recent Activity (Part 3)</div>
+          <div class="card-desc">Historical activity across the 7-day window.</div>
         </figcaption>
       </figure>
 
@@ -481,4 +486,5 @@
     });
   </script>
 </body>
+
 </html>
