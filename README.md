@@ -214,12 +214,17 @@ Once the app is launched:
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
-- [ ] **History:** Page with viewing history
+- [ ] **Media Server Live Scrobbling (Jellyfin, Plex, Emby):** Real-time automated scrobbling and episode tracking from self-hosted home media servers via serverless cloud webhooks at zero cost.
+- [ ] **Global Watch History Timeline:** 100% offline-first diary of all viewings, rewatches, and TV episode sessions without network calls.
+- [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends on Supabase with custom invite expiration and member revocation.
+- [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
+- [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.
+- [ ] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters, on Streaming, or on Physical Media (4K UHD / Blu-Ray).
+- [ ] **Yearly Cinephile Challenge:** Set annual watch goals with dynamic progress tracking and pacing indicators.
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
-- [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends.
-- [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collection on the web.
-- [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces or releases a new project.
-- [ ] **AI-Powered Cinephile Concierge:** Conversational discovery assistant for contextual mood queries, spoiler-free summaries, and deep film analysis.
+- [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces a new project.
+- [ ] **Calendar Integration (iCal):** Sync upcoming premiere dates and TV air dates directly to your Google or Apple Calendar.
+- [ ] **AI-Powered Cinephile Concierge:** Conversational discovery assistant for contextual mood queries and deep film analysis.
 
 ---
 

@@ -1,6 +1,6 @@
 # Terms of Service (ToS)
 
-**Last Updated:** October 15, 2026
+**Last Updated:** October 21, 2026
 
 Welcome to **FlickTrove**. Please read the following Terms of Service carefully before using our application.
 
@@ -28,10 +28,11 @@ FlickTrove allows users to post comments, write reviews, and upload custom avata
 2. **Symbolic Digital In-App Recognition:** The "Executive Producer" badge, tier, and trophies are purely honorary, decorative, and symbolic recognitions granted within the application. Donations are non-refundable.
 3. **One-Time Claim Binding and Anti-Abuse:** Each donation can be claimed by and bound to only **one** FlickTrove account or device profile (One-Time Claim Binding). Sharing donation receipt emails publicly or attempting to claim someone else's donation without authorization is considered fraudulent abuse of the platform and will result in the immediate revocation of the supporter badge and potential account restriction.
 
-### 6. Suspension of Account and Service
+### 6. Modifications to Service, Features, and Future Pricing Models
 
-The developer reserves the unchallengeable right, without any obligation of prior notice, to modify, suspend, or discontinue, in whole or in part, the features of the App, the cloud services connected to it, or the hosting servers.
-In the event of abuse, violation of these Terms, improper use of third-party APIs, spam, or behaviors deemed harmful to the infrastructure, the developer reserves the right to limit, suspend, or permanently terminate the user's access to the App and delete their account.
+1. **Evolution of Features:** The developer reserves the unchallengeable right, without any obligation of prior notice, to modify, update, add, suspend, or discontinue, in whole or in part, the features of the App, the cloud services connected to it, or the hosting servers.
+2. **Current Free Model & Future Pricing Discretion:** FlickTrove is currently provided as a free, ad-free application. However, the developer explicitly reserves the right, at any time and at their sole discretion, to introduce optional paid tiers, premium subscriptions, or charge fees for certain current or future advanced features (including, but not limited to, live media server webhooks, cloud collaborative folders, multi-device backup relays, or enhanced cloud sync). Any future introduction of commercial tiers or paid features will be clearly communicated within the App or on the official repository, and will not retroactively revoke access to offline, local tracking features unless required by technical limitations or regulatory changes.
+3. **Abuse and Termination:** In the event of abuse, violation of these Terms, improper use of third-party APIs, spam, or behaviors deemed harmful to the infrastructure, the developer reserves the right to limit, suspend, or permanently terminate the user's access to the App and delete their account.
 
 ### 7. Governing Law and Jurisdiction
 
