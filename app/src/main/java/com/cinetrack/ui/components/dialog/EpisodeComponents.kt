@@ -7,8 +7,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DateRange
-import androidx.compose.material.icons.outlined.Star
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -235,7 +233,7 @@ internal fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.DateRange,
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                                     contentDescription = null,
                                     tint = Color.White.copy(alpha = 0.7f),
                                     modifier = Modifier.size(14.dp)
@@ -261,7 +259,7 @@ internal fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Icon(
-                                    imageVector = Icons.Outlined.Star,
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                                     contentDescription = null,
                                     tint = Color(0xFF00E676),
                                     modifier = Modifier.size(14.dp)
