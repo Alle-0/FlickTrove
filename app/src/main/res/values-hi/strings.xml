@@ -922,12 +922,18 @@
     <string name="rating_pg_desc">कुछ सामग्री बच्चों के लिए उपयुक्त नहीं हो सकती है। माता-पिता से "माता-पिता का मार्गदर्शन" देने का आग्रह किया जाता है।</string>
     <string name="rating_pg13_label">माता-पिता को कड़ी चेतावनी</string>
     <string name="rating_pg13_desc">13 वर्ष से कम उम्र के बच्चों के लिए कुछ सामग्री अनुपयुक्त हो सकती है。</string>
+    <string name="rating_vm12_label">12 वर्ष और उससे अधिक के लिए उपयुक्त</string>
     <string name="rating_r_label">प्रतिबंधित</string>
     <string name="rating_r_desc">17 वर्ष से कम उम्र वालों के लिए माता-पिता या वयस्क अभिभावक का साथ होना आवश्यक है।</string>
     <string name="rating_nc17_label">केवल वयस्क</string>
     <string name="rating_nc17_desc">17 वर्ष और उससे कम उम्र वालों को प्रवेश नहीं।</string>
     <string name="rating_tv14_label">माता-पिता को कड़ी चेतावनी</string>
     <string name="rating_tv14_desc">इस कार्यक्रम में कुछ ऐसी सामग्री है जिसे कई माता-पिता 14 वर्ष से कम उम्र के बच्चों के लिए अनुपयुक्त मान सकते हैं।</string>
+    <string name="rating_vm14_label">14 वर्ष से कम के लिए प्रतिबंधित</string>
+    <string name="rating_15_label">15 वर्ष और उससे अधिक के लिए उपयुक्त</string>
+    <string name="rating_15_desc">केवल 15 वर्ष और उससे अधिक आयु के लिए उपयुक्त। इसमें मध्यम हिंसा या परिपक्व विषय हो सकते हैं।</string>
+    <string name="rating_16_label">16 वर्ष और उससे अधिक के लिए उपयुक्त</string>
+    <string name="rating_16_desc">16 वर्ष से कम आयु के बच्चों के लिए उपयुक्त नहीं है। इसमें तीव्र हिंसा या वयस्क विषय हो सकते हैं।</string>
     <string name="rating_tvma_label">केवल वयस्क दर्शक</string>
     <string name="rating_tvma_desc">यह कार्यक्रम विशेष रूप से वयस्कों द्वारा देखे जाने के लिए डिज़ाइन किया गया है और इसलिए 17 वर्ष से कम उम्र के बच्चों के लिए अनुपयुक्त हो सकता है।</string>
     <string name="bottom_bar_to_watch">देखनी हैं</string>
@@ -1658,7 +1664,6 @@
     <string name="badge_watchlist_hoarder_title">अनंत संग्रह</string>
 
     <string name="settings_commsuni_notice">CommsUni (commsuni.tv) के माध्यम से प्रदान की गई सामुदायिक चर्चा और फ़ेडरेटेड टिप्पणियाँ।</string>
-    <string name="detail_rating_it_10">10 वर्ष से कम उम्र के बच्चों के लिए उपयुक्त नहीं।</string>
     <string name="detail_rating_country_gb">British Board of Film Classification (यूके / BBFC)</string>
     <string name="detail_rating_gb_u">सार्वभौमिक (सभी उम्र के लिए उपयुक्त)।</string>
     <string name="detail_rating_gb_pg">माता-पिता का मार्गदर्शन सुझावित (PG)।</string>
@@ -1699,6 +1704,8 @@
     <string name="detail_rating_country_it">फिल्म वर्गीकरण (इटली)</string>
     <string name="detail_rating_it_t">सभी उम्र के लिए (T)।</string>
     <string name="detail_rating_it_6">6 वर्ष से कम उम्र के बच्चों के लिए उपयुक्त नहीं।</string>
+    <string name="detail_rating_it_10">10 वर्ष से कम आयु के बच्चों के लिए उपयुक्त नहीं।</string>
+    <string name="detail_rating_it_12">12 वर्ष से कम आयु के बच्चों के लिए उपयुक्त नहीं।</string>
     <string name="detail_rating_it_14">14 वर्ष और उससे अधिक उम्र के लिए सीमित।</string>
     <string name="detail_rating_it_18">18 वर्ष और उससे अधिक उम्र के लिए सीमित।</string>
     <string name="detail_rating_country_jp">Eirin फिल्म वर्गीकरण (जापान)</string>

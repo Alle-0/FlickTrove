@@ -465,6 +465,8 @@
     <string name="detail_rating_country_it">Film &amp; Dizi (İtalya)</string>
     <string name="detail_rating_it_t">Genel izleyici (Tüm yaşlar girebilir).</string>
     <string name="detail_rating_it_6">6 yaşından küçük çocuklar için uygun değildir.</string>
+    <string name="detail_rating_it_10">10 yaşından küçük çocuklar için uygun değildir.</string>
+    <string name="detail_rating_it_12">12 yaşından küçük çocuklar için uygun değildir.</string>
     <string name="detail_rating_it_14">14 yaş ve üzeri ile sınırlıdır.</string>
     <string name="detail_rating_it_18">18 yaş ve üzeri yetişkinlerle sınırlıdır.</string>
     <string name="detail_rating_country_de">Gönüllü Özdenetim (Almanya / FSK)</string>
@@ -995,12 +997,18 @@
     <string name="rating_pg_desc">Bazı materyaller çocuklar için uygun olmayabilir. Ebeveyn rehberliği tavsiye edilir.</string>
     <string name="rating_pg13_label">EBEVEYNLER ŞİDDETLE UYARILIR</string>
     <string name="rating_pg13_desc">Bazı materyaller 13 yaşından küçük çocuklar için uygun olmayabilir.</string>
+    <string name="rating_vm12_label">12 YAŞ VE ÜZERİ</string>
     <string name="rating_r_label">KISITLI</string>
     <string name="rating_r_desc">17 yaşından küçükler ebeveyn veya yetişkin bir vasi eşliğinde izleyebilir.</string>
     <string name="rating_nc17_label">YALNIZCA YETİŞKİNLER</string>
     <string name="rating_nc17_desc">17 yaş ve altı kabul edilmez.</string>
     <string name="rating_tv14_label">EBEVEYNLER ŞİDDETLE UYARILIR</string>
     <string name="rating_tv14_desc">Bu program, 14 yaş altı çocuklar için uygun olmayabilecek içerikler barındırır.</string>
+    <string name="rating_vm14_label">14 YAŞ ALTI YASAK</string>
+    <string name="rating_15_label">15 YAŞ VE ÜZERİ İÇİN UYGUNDUR</string>
+    <string name="rating_15_desc">15 yaşından küçükler için uygun değildir. Orta düzeyde şiddet veya argo içerebilir.</string>
+    <string name="rating_16_label">16 YAŞ VE ÜZERİ İÇİN UYGUNDUR</string>
+    <string name="rating_16_desc">16 yaşından küçükler için uygun değildir. Yoğun şiddet veya yetişkin temaları içerebilir.</string>
     <string name="rating_tvma_label">YALNIZCA YETİŞKİN İZLEYİCİ</string>
     <string name="rating_tvma_desc">Bu program yetişkinler için tasarlanmıştır ve 17 yaş altı için uygun değildir.</string>
     <string name="bottom_bar_to_watch">İzlenecekler</string>
@@ -1730,7 +1738,6 @@
     <string name="badge_watchlist_hoarder_title">Sonsuz Arşiv</string>
 
     <string name="settings_commsuni_notice">CommsUni (commsuni.tv) üzerinden sağlanan topluluk tartışmaları ve federe yorumlar.</string>
-    <string name="detail_rating_it_10">10 yaş altı için uygun değildir.</string>
     <string name="trophy_unit_decades">on yıl</string>
     <string name="badge_secret_harsh_critic_title">Tavizsiz Eleştirmen</string>
     <string name="badge_secret_harsh_critic_cat">Kayıp Makara #11</string>

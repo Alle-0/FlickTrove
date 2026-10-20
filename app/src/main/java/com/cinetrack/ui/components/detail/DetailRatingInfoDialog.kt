@@ -125,8 +125,9 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("T", Color(0xFF4CAF50), stringResource(R.string.detail_rating_it_t))
                                     RatingLegendItem("6+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_it_6))
                                     RatingLegendItem("10+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_it_10))
-                                    RatingLegendItem("VM14", Color(0xFFFF9800), stringResource(R.string.detail_rating_it_14))
-                                    RatingLegendItem("VM18", Color(0xFFF44336), stringResource(R.string.detail_rating_it_18))
+                                    RatingLegendItem("VM12", Color(0xFFFF9800), stringResource(R.string.detail_rating_it_12))
+                                    RatingLegendItem("VM14", Color(0xFFFF7043), stringResource(R.string.detail_rating_it_14))
+                                    RatingLegendItem("VM18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_it_18))
                                 }
                             }
                             "DE" -> {
@@ -138,10 +139,10 @@ fun DetailRatingInfoDialog(
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     RatingLegendItem("FSK 0", Color(0xFF4CAF50), stringResource(R.string.detail_rating_de_0))
-                                    RatingLegendItem("FSK 6", Color(0xFFFFC107), stringResource(R.string.detail_rating_de_6))
-                                    RatingLegendItem("FSK 12", Color(0xFF8BC34A), stringResource(R.string.detail_rating_de_12))
-                                    RatingLegendItem("FSK 16", Color(0xFFFF9800), stringResource(R.string.detail_rating_de_16))
-                                    RatingLegendItem("FSK 18", Color(0xFFF44336), stringResource(R.string.detail_rating_de_18))
+                                    RatingLegendItem("FSK 6", Color(0xFF8BC34A), stringResource(R.string.detail_rating_de_6))
+                                    RatingLegendItem("FSK 12", Color(0xFFFF9800), stringResource(R.string.detail_rating_de_12))
+                                    RatingLegendItem("FSK 16", Color(0xFFE64A19), stringResource(R.string.detail_rating_de_16))
+                                    RatingLegendItem("FSK 18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_de_18))
                                 }
                             }
                             "FR" -> {
@@ -153,10 +154,10 @@ fun DetailRatingInfoDialog(
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     RatingLegendItem("U", Color(0xFF4CAF50), stringResource(R.string.detail_rating_fr_u))
-                                    RatingLegendItem("10", Color(0xFFFFC107), stringResource(R.string.detail_rating_fr_10))
+                                    RatingLegendItem("10", Color(0xFF8BC34A), stringResource(R.string.detail_rating_fr_10))
                                     RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_fr_12))
-                                    RatingLegendItem("16", Color(0xFFFF5722), stringResource(R.string.detail_rating_fr_16))
-                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_fr_18))
+                                    RatingLegendItem("16", Color(0xFFE64A19), stringResource(R.string.detail_rating_fr_16))
+                                    RatingLegendItem("18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_fr_18))
                                 }
                             }
                             "ES" -> {
@@ -168,10 +169,10 @@ fun DetailRatingInfoDialog(
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     RatingLegendItem("APTA", Color(0xFF4CAF50), stringResource(R.string.detail_rating_es_apta))
-                                    RatingLegendItem("7", Color(0xFFFFC107), stringResource(R.string.detail_rating_es_7))
+                                    RatingLegendItem("7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_es_7))
                                     RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_es_12))
-                                    RatingLegendItem("16", Color(0xFFFF5722), stringResource(R.string.detail_rating_es_16))
-                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_es_18))
+                                    RatingLegendItem("16", Color(0xFFE64A19), stringResource(R.string.detail_rating_es_16))
+                                    RatingLegendItem("18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_es_18))
                                 }
                             }
                             "BR" -> {
@@ -184,10 +185,10 @@ fun DetailRatingInfoDialog(
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     RatingLegendItem("L", Color(0xFF4CAF50), stringResource(R.string.detail_rating_br_l))
                                     RatingLegendItem("10", Color(0xFF8BC34A), stringResource(R.string.detail_rating_br_10))
-                                    RatingLegendItem("12", Color(0xFFFFC107), stringResource(R.string.detail_rating_br_12))
-                                    RatingLegendItem("14", Color(0xFFFF9800), stringResource(R.string.detail_rating_br_14))
-                                    RatingLegendItem("16", Color(0xFFFF5722), stringResource(R.string.detail_rating_br_16))
-                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_br_18))
+                                    RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_br_12))
+                                    RatingLegendItem("14", Color(0xFFFF7043), stringResource(R.string.detail_rating_br_14))
+                                    RatingLegendItem("16", Color(0xFFE64A19), stringResource(R.string.detail_rating_br_16))
+                                    RatingLegendItem("18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_br_18))
                                 }
                             }
                             "RU" -> {
@@ -201,8 +202,8 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("0+", Color(0xFF4CAF50), stringResource(R.string.detail_rating_ru_0))
                                     RatingLegendItem("6+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_ru_6))
                                     RatingLegendItem("12+", Color(0xFFFF9800), stringResource(R.string.detail_rating_ru_12))
-                                    RatingLegendItem("16+", Color(0xFFFF5722), stringResource(R.string.detail_rating_ru_16))
-                                    RatingLegendItem("18+", Color(0xFFF44336), stringResource(R.string.detail_rating_ru_18))
+                                    RatingLegendItem("16+", Color(0xFFE64A19), stringResource(R.string.detail_rating_ru_16))
+                                    RatingLegendItem("18+", Color(0xFFB71C1C), stringResource(R.string.detail_rating_ru_18))
                                 }
                             }
                             "IN" -> {
@@ -231,7 +232,7 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_gb_pg))
                                     RatingLegendItem("12A", Color(0xFFFF9800), stringResource(R.string.detail_rating_gb_12))
                                     RatingLegendItem("15", Color(0xFFFF5722), stringResource(R.string.detail_rating_gb_15))
-                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_gb_18))
+                                    RatingLegendItem("18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_gb_18))
                                 }
                             }
                             "JP" -> {
@@ -245,7 +246,7 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_jp_g))
                                     RatingLegendItem("PG12", Color(0xFFFF9800), stringResource(R.string.detail_rating_jp_pg12))
                                     RatingLegendItem("R15+", Color(0xFFFF5722), stringResource(R.string.detail_rating_jp_r15))
-                                    RatingLegendItem("R18+", Color(0xFFF44336), stringResource(R.string.detail_rating_jp_r18))
+                                    RatingLegendItem("R18+", Color(0xFFB71C1C), stringResource(R.string.detail_rating_jp_r18))
                                 }
                             }
                             "KR" -> {
@@ -259,7 +260,7 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("ALL", Color(0xFF4CAF50), stringResource(R.string.detail_rating_kr_all))
                                     RatingLegendItem("12", Color(0xFFFF9800), stringResource(R.string.detail_rating_kr_12))
                                     RatingLegendItem("15", Color(0xFFFF5722), stringResource(R.string.detail_rating_kr_15))
-                                    RatingLegendItem("18", Color(0xFFF44336), stringResource(R.string.detail_rating_kr_18))
+                                    RatingLegendItem("18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_kr_18))
                                     RatingLegendItem("Restricted", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_kr_restricted))
                                 }
                             }
@@ -274,7 +275,7 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("SU", Color(0xFF4CAF50), stringResource(R.string.detail_rating_id_su))
                                     RatingLegendItem("13+", Color(0xFFFF9800), stringResource(R.string.detail_rating_id_13))
                                     RatingLegendItem("17+", Color(0xFFFF5722), stringResource(R.string.detail_rating_id_17))
-                                    RatingLegendItem("21+", Color(0xFFF44336), stringResource(R.string.detail_rating_id_21))
+                                    RatingLegendItem("21+", Color(0xFFB71C1C), stringResource(R.string.detail_rating_id_21))
                                 }
                             }
                             "TR" -> {
@@ -288,8 +289,24 @@ fun DetailRatingInfoDialog(
                                     RatingLegendItem("Genel", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tr_genel))
                                     RatingLegendItem("7+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tr_7))
                                     RatingLegendItem("13+", Color(0xFFFF9800), stringResource(R.string.detail_rating_tr_13))
-                                    RatingLegendItem("16+", Color(0xFFFF5722), stringResource(R.string.detail_rating_tr_16))
-                                    RatingLegendItem("18+", Color(0xFFF44336), stringResource(R.string.detail_rating_tr_18))
+                                    RatingLegendItem("16+", Color(0xFFE64A19), stringResource(R.string.detail_rating_tr_16))
+                                    RatingLegendItem("18+", Color(0xFFB71C1C), stringResource(R.string.detail_rating_tr_18))
+                                }
+                            }
+                            "SG" -> {
+                                Text(
+                                    "SINGAPORE (IMDA)",
+                                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                    color = Color.White.copy(alpha = 0.5f)
+                                )
+                                Spacer(modifier = Modifier.height(10.dp))
+                                Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
+                                    RatingLegendItem("G", Color(0xFF4CAF50), stringResource(R.string.rating_g_desc))
+                                    RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.rating_pg_desc))
+                                    RatingLegendItem("PG13", Color(0xFFFF9800), stringResource(R.string.rating_pg13_desc))
+                                    RatingLegendItem("NC16", Color(0xFFE64A19), stringResource(R.string.rating_16_desc))
+                                    RatingLegendItem("M18", Color(0xFFD32F2F), stringResource(R.string.rating_tvma_desc))
+                                    RatingLegendItem("R21", Color(0xFFB71C1C), stringResource(R.string.rating_nc17_desc))
                                 }
                             }
                             else -> {
@@ -304,9 +321,9 @@ fun DetailRatingInfoDialog(
                                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                         RatingLegendItem("TV-Y", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvy))
                                         RatingLegendItem("TV-Y7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvy7))
-                                        RatingLegendItem("TV-G", Color(0xFF66BB6A), stringResource(R.string.detail_rating_tvg))
-                                        RatingLegendItem("TV-PG", Color(0xFFFF9800), stringResource(R.string.detail_rating_tvpg))
-                                        RatingLegendItem("TV-14", Color(0xFFF44336), stringResource(R.string.detail_rating_tv14))
+                                        RatingLegendItem("TV-G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvg))
+                                        RatingLegendItem("TV-PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvpg))
+                                        RatingLegendItem("TV-14", Color(0xFFFF7043), stringResource(R.string.detail_rating_tv14))
                                         RatingLegendItem("TV-MA", Color(0xFFD32F2F), stringResource(R.string.detail_rating_tvma))
                                     }
 
@@ -323,7 +340,7 @@ fun DetailRatingInfoDialog(
                                         RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_pg))
                                         RatingLegendItem("PG-13", Color(0xFFFF9800), stringResource(R.string.detail_rating_pg13))
                                         RatingLegendItem("R", Color(0xFFF44336), stringResource(R.string.detail_rating_r))
-                                        RatingLegendItem("NC-17", Color(0xFFD32F2F), stringResource(R.string.detail_rating_nc17))
+                                        RatingLegendItem("NC-17", Color(0xFFB71C1C), stringResource(R.string.detail_rating_nc17))
                                         RatingLegendItem("NR", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_nr))
                                     }
                                 } else {
@@ -338,7 +355,7 @@ fun DetailRatingInfoDialog(
                                         RatingLegendItem("PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_pg))
                                         RatingLegendItem("PG-13", Color(0xFFFF9800), stringResource(R.string.detail_rating_pg13))
                                         RatingLegendItem("R", Color(0xFFF44336), stringResource(R.string.detail_rating_r))
-                                        RatingLegendItem("NC-17", Color(0xFFD32F2F), stringResource(R.string.detail_rating_nc17))
+                                        RatingLegendItem("NC-17", Color(0xFFB71C1C), stringResource(R.string.detail_rating_nc17))
                                         RatingLegendItem("NR", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_nr))
                                     }
 
@@ -353,9 +370,9 @@ fun DetailRatingInfoDialog(
                                     Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                         RatingLegendItem("TV-Y", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvy))
                                         RatingLegendItem("TV-Y7", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvy7))
-                                        RatingLegendItem("TV-G", Color(0xFF66BB6A), stringResource(R.string.detail_rating_tvg))
-                                        RatingLegendItem("TV-PG", Color(0xFFFF9800), stringResource(R.string.detail_rating_tvpg))
-                                        RatingLegendItem("TV-14", Color(0xFFF44336), stringResource(R.string.detail_rating_tv14))
+                                        RatingLegendItem("TV-G", Color(0xFF4CAF50), stringResource(R.string.detail_rating_tvg))
+                                        RatingLegendItem("TV-PG", Color(0xFF8BC34A), stringResource(R.string.detail_rating_tvpg))
+                                        RatingLegendItem("TV-14", Color(0xFFFF7043), stringResource(R.string.detail_rating_tv14))
                                         RatingLegendItem("TV-MA", Color(0xFFD32F2F), stringResource(R.string.detail_rating_tvma))
                                     }
                                 }

@@ -924,12 +924,18 @@
     <string name="rating_pg_desc">Algum material pode não ser adequado para crianças. Recomenda-se "orientação parental".</string>
     <string name="rating_pg13_label">PAIS FORTEMENTE ADVERTIDOS</string>
     <string name="rating_pg13_desc">Algum material pode ser inadequado para menores de 13 anos.</string>
+    <string name="rating_vm12_label">NÃO RECOMENDADO PARA MENORES DE 12</string>
     <string name="rating_r_label">RESTRITO</string>
     <string name="rating_r_desc">Menores de 17 anos requerem a companhia de um dos pais ou responsável adulto.</string>
     <string name="rating_nc17_label">APENAS PARA ADULTOS</string>
     <string name="rating_nc17_desc">Proibido para menores de 17 anos.</string>
     <string name="rating_tv14_label">PAIS FORTEMENTE ADVERTIDOS</string>
     <string name="rating_tv14_desc">Este programa contém algum material que muitos pais considerariam inadequado para menores de 14 anos.</string>
+    <string name="rating_vm14_label">PROIBIDO PARA MENORES DE 14</string>
+    <string name="rating_15_label">NÃO RECOMENDADO PARA MENORES DE 15</string>
+    <string name="rating_15_desc">Adequado para maiores de 15 anos. Pode conter violência moderada, linguagem imprópria ou temas maduros.</string>
+    <string name="rating_16_label">NÃO RECOMENDADO PARA MENORES DE 16</string>
+    <string name="rating_16_desc">Não recomendado para menores de 16 anos. Pode conter violência intensa, linguagem imprópria ou temas adultos.</string>
     <string name="rating_tvma_label">APENAS PÚBLICO ADULTO</string>
     <string name="rating_tvma_desc">Este programa foi feito especificamente para ser visto por adultos e, portanto, pode ser inadequado para menores de 17 anos.</string>
     <string name="bottom_bar_to_watch">Para Assistir</string>
@@ -1660,7 +1666,6 @@
     <string name="badge_watchlist_hoarder_title">O Arquivo Infinito</string>
 
     <string name="settings_commsuni_notice">Discussões da comunidade e comentários federados fornecidos via CommsUni (commsuni.tv).</string>
-    <string name="detail_rating_it_10">Não recomendado para menores de 10 anos.</string>
     <string name="detail_rating_country_gb">British Board of Film Classification (Reino Unido / BBFC)</string>
     <string name="detail_rating_gb_u">Universal (Livre para todas as idades).</string>
     <string name="detail_rating_gb_pg">Orientação parental sugerida (PG).</string>
@@ -1699,6 +1704,8 @@
     <string name="detail_rating_country_it">Classificação Cinematográfica (Itália)</string>
     <string name="detail_rating_it_t">Todos os públicos (T).</string>
     <string name="detail_rating_it_6">Não adequado para menores de 6 anos.</string>
+    <string name="detail_rating_it_10">Não recomendado para menores de 10 anos.</string>
+    <string name="detail_rating_it_12">Não recomendado para menores de 12 anos.</string>
     <string name="detail_rating_it_14">Restrito a maiores de 14 anos.</string>
     <string name="detail_rating_it_18">Restrito a maiores de 18 anos.</string>
     <string name="detail_rating_country_jp">Classificação Eirin (Japão)</string>

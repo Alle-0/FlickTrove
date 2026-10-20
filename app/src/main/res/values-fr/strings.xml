@@ -917,12 +917,18 @@
     <string name="rating_pg_desc">Certains contenus peuvent ne pas convenir aux enfants. Les parents sont invités à accompagner le visionnage.</string>
     <string name="rating_pg13_label">AVERTISSEMENT STRICT AUX PARENTS</string>
     <string name="rating_pg13_desc">Certains contenus peuvent être inappropriés pour les enfants de moins de 13 ans.</string>
+    <string name="rating_vm12_label">DÉCONSEILLÉ MOINS DE 12 ANS</string>
     <string name="rating_r_label">ACCÈS RESTREINT</string>
     <string name="rating_r_desc">Les moins de 17 ans doivent être accompagnés d\'un parent ou d\'un tuteur adulte.</string>
     <string name="rating_nc17_label">RÉSERVÉ AUX ADULTES</string>
     <string name="rating_nc17_desc">Interdit aux 17 ans et moins.</string>
     <string name="rating_tv14_label">AVERTISSEMENT STRICT AUX PARENTS</string>
     <string name="rating_tv14_desc">Ce programme contient des éléments que de nombreux parents jugeraient inadaptés aux enfants de moins de 14 ans.</string>
+    <string name="rating_vm14_label">INTERDIT MOINS DE 14 ANS</string>
+    <string name="rating_15_label">DÉCONSEILLÉ AUX MOINS DE 15 ANS</string>
+    <string name="rating_15_desc">Ce contenu est destiné aux spectateurs de 15 ans et plus. Peut contenir de la violence modérée ou un langage grossier.</string>
+    <string name="rating_16_label">INTERDIT AUX MOINS DE 16 ANS</string>
+    <string name="rating_16_desc">Interdit ou déconseillé aux moins de 16 ans. Peut comporter des scènes de violence soutenue ou un langage vulgaire.</string>
     <string name="rating_tvma_label">RÉSERVÉ À UN PUBLIC ADULTE</string>
     <string name="rating_tvma_desc">Ce programme est spécialement conçu pour un public adulte et peut donc ne pas convenir aux moins de 17 ans.</string>
     <string name="bottom_bar_to_watch">À voir</string>
@@ -1661,7 +1667,6 @@
     <string name="badge_watchlist_hoarder_title">L\'Archive Infinie</string>
 
     <string name="settings_commsuni_notice">Discussions de la communauté et commentaires fédérés fournis via CommsUni (commsuni.tv).</string>
-    <string name="detail_rating_it_10">Déconseillé aux moins de 10 ans.</string>
     <string name="detail_rating_country_gb">British Board of Film Classification (Royaume-Uni / BBFC)</string>
     <string name="detail_rating_gb_u">Universel (Adapté à tous les âges).</string>
     <string name="detail_rating_gb_pg">Accord parental recommandé (PG).</string>
@@ -1701,6 +1706,8 @@
     <string name="detail_rating_country_it">Classification Cinématographique (Italie)</string>
     <string name="detail_rating_it_t">Tous publics (T).</string>
     <string name="detail_rating_it_6">Déconseillé aux moins de 6 ans.</string>
+    <string name="detail_rating_it_10">Déconseillé aux moins de 10 ans.</string>
+    <string name="detail_rating_it_12">Déconseillé aux moins de 12 ans.</string>
     <string name="detail_rating_it_14">Interdit aux moins de 14 ans.</string>
     <string name="detail_rating_it_18">Interdit aux moins de 18 ans.</string>
     <string name="detail_rating_country_jp">Classification Eirin (Japon)</string>

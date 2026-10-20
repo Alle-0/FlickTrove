@@ -465,6 +465,8 @@
     <string name="detail_rating_country_it">影视分级（意大利）</string>
     <string name="detail_rating_it_t">全年龄（所有人均可观看）。</string>
     <string name="detail_rating_it_6">不适合 6 岁以下儿童。</string>
+    <string name="detail_rating_it_10">不建议10岁以下儿童观看。</string>
+    <string name="detail_rating_it_12">不建议12岁以下儿童观看。</string>
     <string name="detail_rating_it_14">仅限 14 岁及以上观众。</string>
     <string name="detail_rating_it_18">仅限 18 岁及以上成人。</string>
     <string name="detail_rating_country_de">影视自律审查（德国 / FSK）</string>
@@ -995,12 +997,18 @@
     <string name="rating_pg_desc">部分内容可能不适合儿童观看。建议家长提供指导。</string>
     <string name="rating_pg13_label">特别警示级</string>
     <string name="rating_pg13_desc">部分内容可能不适合 13 岁以下儿童。</string>
+    <string name="rating_vm12_label">12岁以上适看</string>
     <string name="rating_r_label">限制级</string>
     <string name="rating_r_desc">17 岁以下观众需由父母或成年监护人陪同。</string>
     <string name="rating_nc17_label">成人限定</string>
     <string name="rating_nc17_desc">17 岁及以下观众禁止入场。</string>
     <string name="rating_tv14_label">家长特别警告级</string>
     <string name="rating_tv14_desc">含有许多家长认为不适合 14 岁以下儿童的内容。</string>
+    <string name="rating_vm14_label">14岁以下禁看</string>
+    <string name="rating_15_label">15岁以上辅导级</string>
+    <string name="rating_15_desc">适合15岁及以上观众观看。可能包含中度暴力、粗俗语言或成人主题。</string>
+    <string name="rating_16_label">16岁以上限制级</string>
+    <string name="rating_16_desc">未满16岁不宜观看。可能包含较强烈的暴力、粗俗语言或成人内容。</string>
     <string name="rating_tvma_label">仅限成年受众</string>
     <string name="rating_tvma_desc">专为成年观众制作，可能极不适合 17 岁以下人群。</string>
     <string name="bottom_bar_to_watch">想看</string>
@@ -1730,7 +1738,6 @@
     <string name="badge_watchlist_hoarder_title">无限档案室</string>
 
     <string name="settings_commsuni_notice">通过 CommsUni (commsuni.tv) 提供的社区讨论与联合评论。</string>
-    <string name="detail_rating_it_10">不建议10岁以下儿童观看。</string>
     <string name="trophy_unit_decades">個年代</string>
     <string name="badge_secret_harsh_critic_title">特立獨行的影評人</string>
     <string name="badge_secret_harsh_critic_cat">失落膠卷 #11</string>

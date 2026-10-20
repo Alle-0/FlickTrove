@@ -917,12 +917,18 @@
     <string name="rating_pg_desc">Einige Inhalte sind möglicherweise nicht für Kinder geeignet. Eltern wird Begleitung empfohlen.</string>
     <string name="rating_pg13_label">DRINGENDE WARNUNG AN ELTERN</string>
     <string name="rating_pg13_desc">Einige Inhalte sind möglicherweise für Kinder unter 13 Jahren ungeeignet.</string>
+    <string name="rating_vm12_label">AB 12 JAHREN</string>
     <string name="rating_r_label">EINGESCHRÄNKT</string>
     <string name="rating_r_desc">Unter 17 erfordert Begleitung eines Elternteils oder Erziehungsberechtigten.</string>
     <string name="rating_nc17_label">NUR FÜR ERWACHSENE</string>
     <string name="rating_nc17_desc">Keine Personen unter 17 Jahren zugelassen.</string>
     <string name="rating_tv14_label">DRINGENDE WARNUNG AN ELTERN</string>
     <string name="rating_tv14_desc">Diese Sendung enthält Inhalte, die viele Eltern für Kinder unter 14 Jahren als ungeeignet empfinden würden.</string>
+    <string name="rating_vm14_label">AB 14 JAHREN</string>
+    <string name="rating_15_label">AB 15 JAHREN</string>
+    <string name="rating_15_desc">Für Jugendliche unter 15 Jahren nicht geeignet. Kann moderate Gewalt oder stärkere Sprache enthalten.</string>
+    <string name="rating_16_label">AB 16 JAHREN</string>
+    <string name="rating_16_desc">Freigegeben ab 16 Jahren. Kann stärkere Gewaltdarstellungen oder vulgäre Sprache enthalten.</string>
     <string name="rating_tvma_label">NUR FÜR ERWACHSENES PUBLIKUM</string>
     <string name="rating_tvma_desc">Diese Sendung ist speziell für Erwachsene konzipiert und daher für Kinder unter 17 Jahren möglicherweise ungeeignet.</string>
     <string name="bottom_bar_to_watch">Merkliste</string>
@@ -1662,7 +1668,6 @@
     <string name="badge_watchlist_hoarder_title">Das endlose Archiv</string>
 
     <string name="settings_commsuni_notice">Community-Diskussionen und föderierte Kommentare über CommsUni (commsuni.tv).</string>
-    <string name="detail_rating_it_10">Nicht geeignet für Kinder unter 10 Jahren.</string>
     <string name="detail_rating_country_gb">British Board of Film Classification (Großbritannien / BBFC)</string>
     <string name="detail_rating_gb_u">Universal (Freigegeben für alle Altersstufen).</string>
     <string name="detail_rating_gb_pg">Elterliche Begleitung empfohlen (PG).</string>
@@ -1702,6 +1707,8 @@
     <string name="detail_rating_country_it">Filmeinstufung (Italien)</string>
     <string name="detail_rating_it_t">Für alle Altersgruppen (T).</string>
     <string name="detail_rating_it_6">Nicht geeignet unter 6 Jahren.</string>
+    <string name="detail_rating_it_10">Nicht geeignet für Kinder unter 10 Jahren.</string>
+    <string name="detail_rating_it_12">Nicht geeignet für Kinder unter 12 Jahren.</string>
     <string name="detail_rating_it_14">Zutritt ab 14 Jahren.</string>
     <string name="detail_rating_it_18">Zutritt ab 18 Jahren.</string>
     <string name="detail_rating_country_jp">Eirin Filmeinstufung (Japan)</string>

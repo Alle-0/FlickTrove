@@ -924,12 +924,18 @@
     <string name="rating_pg_desc">Некоторые материалы могут не подходить для детей. Родителям настоятельно рекомендуется обеспечить "родительский контроль".</string>
     <string name="rating_pg13_label">ДЕТЯМ ДО 13 ЛЕТ ПРОСМОТР НЕ ЖЕЛАТЕЛЕН</string>
     <string name="rating_pg13_desc">Некоторые материалы могут быть неподходящими для детей младше 13 лет.</string>
+    <string name="rating_vm12_label">ДЕТЯМ ДО 12 ЛЕТ НЕ РЕКОМЕНДУЕТСЯ</string>
     <string name="rating_r_label">ЛИЦАМ ДО 17 ЛЕТ ОБЯЗАТЕЛЬНО ПРИСУТСТВИЕ ВЗРОСЛОГО</string>
     <string name="rating_r_desc">Лицам до 17 лет требуется сопровождение родителя или взрослого опекуна.</string>
     <string name="rating_nc17_label">ТОЛЬКО ДЛЯ ВЗРОСЛЫХ</string>
     <string name="rating_nc17_desc">Лицам младше 18 лет просмотр запрещен.</string>
     <string name="rating_tv14_label">ДЕТЯМ ДО 14 ЛЕТ ПРОСМОТР НЕ ЖЕЛАТЕЛЕН</string>
     <string name="rating_tv14_desc">Эта программа содержит некоторые материалы, которые многие родители сочтут неподходящими для детей младше 14 лет.</string>
+    <string name="rating_vm14_label">ЗАПРЕЩЕНО ДО 14 ЛЕТ</string>
+    <string name="rating_15_label">ДЕТЯМ ДО 15 ЛЕТ НЕ РЕКОМЕНДУЕТСЯ</string>
+    <string name="rating_15_desc">Подходит для зрителей от 15 лет и старше. Может содержать умеренное насилие или ненормативную лексику.</string>
+    <string name="rating_16_label">ДЕТЯМ ДО 16 ЛЕТ ПРОСМОТР ЗАПРЕЩЕН</string>
+    <string name="rating_16_desc">Для зрителей от 16 лет и старше. Может содержать сцены насилия, ненормативную лексику или взрослые темы.</string>
     <string name="rating_tvma_label">ТОЛЬКО ДЛЯ ВЗРОСЛОЙ АУДИТОРИИ</string>
     <string name="rating_tvma_desc">Эта программа специально создана для просмотра взрослыми и поэтому может быть неподходящей для детей младше 17 лет.</string>
     <string name="bottom_bar_to_watch">Буду смотреть</string>
@@ -1661,7 +1667,6 @@
     <string name="badge_watchlist_hoarder_title">Бесконечный архив</string>
 
     <string name="settings_commsuni_notice">Обсуждения сообщества и федеративные комментарии через CommsUni (commsuni.tv).</string>
-    <string name="detail_rating_it_10">Не рекомендуется для детей до 10 лет.</string>
     <string name="detail_rating_country_gb">British Board of Film Classification (Великобритания / BBFC)</string>
     <string name="detail_rating_gb_u">Универсальный (Для всех возрастов).</string>
     <string name="detail_rating_gb_pg">Рекомендуется присутствие родителей (PG).</string>
@@ -1701,6 +1706,8 @@
     <string name="detail_rating_country_it">Классификация фильмов (Италия)</string>
     <string name="detail_rating_it_t">Для всех возрастов (T).</string>
     <string name="detail_rating_it_6">Не подходит для детей до 6 лет.</string>
+    <string name="detail_rating_it_10">Не рекомендуется для детей до 10 лет.</string>
+    <string name="detail_rating_it_12">Не рекомендуется для детей до 12 лет.</string>
     <string name="detail_rating_it_14">Только с 14 лет.</string>
     <string name="detail_rating_it_18">Только с 18 лет.</string>
     <string name="detail_rating_country_jp">Классификация Eirin (Япония)</string>

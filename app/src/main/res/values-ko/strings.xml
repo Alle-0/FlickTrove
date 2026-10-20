@@ -465,6 +465,8 @@
     <string name="detail_rating_country_it">영화 및 TV (이탈리아)</string>
     <string name="detail_rating_it_t">전체관람가.</string>
     <string name="detail_rating_it_6">6세 미만 어린이 부적절.</string>
+    <string name="detail_rating_it_10">10세 미만 어린이에게 권장하지 않음.</string>
+    <string name="detail_rating_it_12">12세 미만 어린이에게 권장하지 않음.</string>
     <string name="detail_rating_it_14">14세 이상 관람가.</string>
     <string name="detail_rating_it_18">18세 이상 관람가.</string>
     <string name="detail_rating_country_de">독일 자율 등급 (FSK)</string>
@@ -995,12 +997,18 @@
     <string name="rating_pg_desc">일부 장면이 어린이에게 부적절할 수 있어 보호자의 지도가 권장됩니다.</string>
     <string name="rating_pg13_label">13세 이상 권고</string>
     <string name="rating_pg13_desc">13세 미만 어린이에게 부적절한 장면이 일부 포함될 수 있습니다.</string>
+    <string name="rating_vm12_label">12세 이상 관람가</string>
     <string name="rating_r_label">제한 관람가</string>
     <string name="rating_r_desc">17세 미만 청소년은 부모 또는 성인 보호자 동반 시에만 관람 가능합니다.</string>
     <string name="rating_nc17_label">성인 전용</string>
     <string name="rating_nc17_desc">17세 이하 미성년자는 입장할 수 없습니다.</string>
     <string name="rating_tv14_label">14세 이상 시청 권고</string>
     <string name="rating_tv14_desc">14세 미만 어린이에게 부적절한 내용이 포함되어 있습니다.</string>
+    <string name="rating_vm14_label">14세 미만 관람불가</string>
+    <string name="rating_15_label">15세 이상 관람가</string>
+    <string name="rating_15_desc">15세 미만의 자는 관람할 수 없습니다. 다소 높은 수위의 폭력성, 언어 또는 주제가 포함될 수 있습니다.</string>
+    <string name="rating_16_label">16세 이상 관람가</string>
+    <string name="rating_16_desc">16세 미만은 관람할 수 없거나 보호자 동반이 필요합니다. 수위 높은 폭력성이나 언어가 포함될 수 있습니다.</string>
     <string name="rating_tvma_label">성인 전용 (TV-MA)</string>
     <string name="rating_tvma_desc">성인 시청자를 대상으로 제작되어 17세 이하 청소년에게는 부적절합니다.</string>
     <string name="bottom_bar_to_watch">볼 작품</string>
@@ -1730,7 +1738,6 @@
     <string name="badge_watchlist_hoarder_title">무한의 아카이브</string>
 
     <string name="settings_commsuni_notice">CommsUni(commsuni.tv)를 통해 제공되는 커뮤니티 토론 및 연합 댓글.</string>
-    <string name="detail_rating_it_10">10세 미만 어린이에게 권장하지 않음.</string>
     <string name="trophy_unit_decades">년대</string>
     <string name="badge_secret_harsh_critic_title">타협 없는 비평가</string>
     <string name="badge_secret_harsh_critic_cat">잃어버린 릴 #11</string>

@@ -80,7 +80,7 @@ object ParentsGuideResolver {
                     SeverityLevel.MILD
                 )
             }
-            cleanCert in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM14", "15", "UA") -> {
+            cleanCert in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM12", "VM14", "15", "15+", "UA") -> {
                 Tuple5(
                     SeverityLevel.MILD,
                     SeverityLevel.MODERATE,
@@ -89,7 +89,7 @@ object ParentsGuideResolver {
                     SeverityLevel.MODERATE
                 )
             }
-            cleanCert in listOf("R", "TV-MA", "16", "16+", "FSK 16", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> {
+            cleanCert in listOf("R", "TV-MA", "16", "16+", "NC16", "NC-16", "VM16", "FSK 16", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "M18", "R21", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> {
                 Tuple5(
                     SeverityLevel.MODERATE,
                     SeverityLevel.SEVERE,

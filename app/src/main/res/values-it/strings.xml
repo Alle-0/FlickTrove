@@ -440,7 +440,7 @@
     <string name="detail_rating_tvg">Per tutto il pubblico.</string>
     <string name="detail_rating_tvpg">Supervisione genitoriale consigliata.</string>
     <string name="detail_rating_tv14">Sconsigliato ai minori di 14 anni.</string>
-    <string name="detail_rating_tvma">Solo per adulti (18+).</string>
+    <string name="detail_rating_tvma">Contenuto per soli adulti (17+).</string>
     <string name="detail_rating_view_guide">Vedi dettagli contenuti</string>
     <string name="detail_parents_guide_title">Guida genitori</string>
     <string name="guide_severity_none">Nessuno</string>
@@ -456,6 +456,7 @@
     <string name="detail_rating_it_t">Per tutti (Nessuna limitazione d\'età).</string>
     <string name="detail_rating_it_6">Non adatto ai minori di 6 anni.</string>
     <string name="detail_rating_it_10">Non adatto ai minori di 10 anni.</string>
+    <string name="detail_rating_it_12">Non adatto ai minori di 12 anni.</string>
     <string name="detail_rating_it_14">Vietato ai minori di 14 anni.</string>
     <string name="detail_rating_it_18">Vietato ai minori di 18 anni.</string>
     <string name="detail_rating_country_jp">Classificazione Film Eirin (Giappone)</string>
@@ -966,10 +967,16 @@
     <string name="rating_pg_desc">Alcune scene potrebbero non essere adatte ai bambini. Si consiglia la presenza di un genitore per spiegare eventuali temi.</string>
     <string name="rating_pg13_label">SCONSIGLIATO SOTTO I 13</string>
     <string name="rating_pg13_desc">Alcuni contenuti potrebbero essere inappropriati per minori di 13 anni. Richiede cautela da parte dei genitori.</string>
+    <string name="rating_vm12_label">NON ADATTO SOTTO I 12</string>
     <string name="rating_r_desc">Richiede l\'accompagnamento di un adulto. Contiene temi maturi, linguaggio forte, violenza o nudità.</string>
     <string name="rating_nc17_desc">Contenuto esclusivamente per un pubblico adulto. Assolutamente vietato l\'ingresso ai minori.</string>
     <string name="rating_tv14_label">SCONSIGLIATO SOTTO I 14</string>
     <string name="rating_tv14_desc">Questo programma contiene materiale che molti genitori potrebbero trovare inappropriato per bambini sotto i 14 anni.</string>
+    <string name="rating_vm14_label">VIETATO AI MINORI DI 14</string>
+    <string name="rating_15_label">SCONSIGLIATO SOTTO I 15</string>
+    <string name="rating_15_desc">Contenuto adatto a un pubblico di almeno 15 anni. Può contenere violenza moderata, linguaggio forte o temi maturi.</string>
+    <string name="rating_16_label">VIETATO SOTTO I 16</string>
+    <string name="rating_16_desc">Non adatto o vietato ai minori di 16 anni. Può contenere violenza marcata, linguaggio forte o temi complessi.</string>
     <string name="rating_tvma_label">CONTENUTO PER ADULTI</string>
     <string name="rating_tvma_desc">Programma specificamente progettato per essere visionato da adulti e potrebbe essere inappropriato per minori di 17 anni.</string>
     <string name="bottom_bar_to_watch">Da vedere</string>
@@ -1359,7 +1366,7 @@
     <string name="settings_start_migration">Avvia Importazione</string>
     <string name="auth_login">Accedi</string>
     <string name="auth_create_account">Crea Account</string>
-    <string name="rating_r_label">VM 14</string>
+    <string name="rating_r_label">ACCESSO LIMITATO (17+)</string>
     <string name="rating_nc17_label">SOLO ADULTI</string>
     <string name="person_offline_bio">I dati biografici completi e la filmografia estesa non sono disponibili in modalità offline.\nI titoli presenti nella tua libreria locale sono mostrati di seguito.</string>
     <string name="account_remove_avatar">Rimuovi Avatar</string>

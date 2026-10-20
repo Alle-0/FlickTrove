@@ -465,6 +465,8 @@
     <string name="detail_rating_country_it">Film &amp; TV (Italia)</string>
     <string name="detail_rating_it_t">Penonton umum (Semua umur diperbolehkan).</string>
     <string name="detail_rating_it_6">Tidak cocok untuk anak di bawah usia 6 tahun.</string>
+    <string name="detail_rating_it_10">Tidak cocok untuk anak di bawah usia 10 tahun.</string>
+    <string name="detail_rating_it_12">Tidak cocok untuk anak di bawah usia 12 tahun.</string>
     <string name="detail_rating_it_14">Terbatas untuk usia 14 tahun ke atas.</string>
     <string name="detail_rating_it_18">Terbatas untuk dewasa usia 18 tahun ke atas.</string>
     <string name="detail_rating_country_de">Freiwillige Selbstkontrolle (Jerman / FSK)</string>
@@ -995,12 +997,18 @@
     <string name="rating_pg_desc">Beberapa materi mungkin tidak cocok untuk anak-anak. Orang tua diimbau memberikan panduan.</string>
     <string name="rating_pg13_label">PERINGATAN KERAS BAGI ORANG TUA</string>
     <string name="rating_pg13_desc">Beberapa materi mungkin tidak sesuai untuk anak di bawah usia 13 tahun.</string>
+    <string name="rating_vm12_label">TIDAK COCOK UNTUK DI BAWAH 12 TAHUN</string>
     <string name="rating_r_label">TERBATAS</string>
     <string name="rating_r_desc">Di bawah 17 tahun memerlukan pendampingan orang tua atau wali dewasa.</string>
     <string name="rating_nc17_label">KHUSUS DEWASA</string>
     <string name="rating_nc17_desc">Usia 17 tahun ke bawah tidak diperbolehkan menonton.</string>
     <string name="rating_tv14_label">PERINGATAN KERAS BAGI ORANG TUA</string>
     <string name="rating_tv14_desc">Program ini berisi beberapa materi yang mungkin dianggap tidak cocok oleh banyak orang tua untuk anak di bawah 14 tahun.</string>
+    <string name="rating_vm14_label">DILARANG DI BAWAH 14 TAHUN</string>
+    <string name="rating_15_label">TIDAK COCOK UNTUK DI BAWAH 15 TAHUN</string>
+    <string name="rating_15_desc">Hanya cocok untuk usia 15 tahun ke atas. Mungkin mengandung kekerasan sedang atau bahasa kasar.</string>
+    <string name="rating_16_label">TIDAK COCOK UNTUK DI BAWAH 16 TAHUN</string>
+    <string name="rating_16_desc">Hanya cocok untuk usia 16 tahun ke atas. Mengandung kekerasan atau konten dewasa.</string>
     <string name="rating_tvma_label">HANYA PENONTON DEWASA</string>
     <string name="rating_tvma_desc">Program ini dirancang khusus untuk dilihat oleh orang dewasa dan oleh karena itu mungkin tidak cocok untuk anak di bawah 17 tahun.</string>
     <string name="bottom_bar_to_watch">Ingin ditonton</string>
@@ -1729,7 +1737,6 @@
     <string name="badge_watchlist_hoarder_title">Arsip Tak Terbatas</string>
 
     <string name="settings_commsuni_notice">Diskusi komunitas dan komentar terfederasi disediakan melalui CommsUni (commsuni.tv).</string>
-    <string name="detail_rating_it_10">Tidak cocok untuk anak di bawah usia 10 tahun.</string>
     <string name="trophy_unit_decades">dekade</string>
     <string name="badge_secret_harsh_critic_title">Kritikus Tanpa Kompromi</string>
     <string name="badge_secret_harsh_critic_cat">Gulungan Hilang #11</string>

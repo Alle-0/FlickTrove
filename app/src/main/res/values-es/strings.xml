@@ -918,12 +918,18 @@
     <string name="rating_pg_desc">Algunos contenidos pueden no ser adecuados para niños. Se aconseja orientación paterna.</string>
     <string name="rating_pg13_label">GUÍA PATERNA ESTRICTA</string>
     <string name="rating_pg13_desc">Algunos contenidos pueden ser inapropiados para niños menores de 13 años.</string>
+    <string name="rating_vm12_label">NO RECOMENDADO MENORES DE 12</string>
     <string name="rating_r_label">RESTRINGIDO</string>
     <string name="rating_r_desc">Menores de 17 años requieren ir acompañados por un padre o tutor adulto.</string>
     <string name="rating_nc17_label">SOLO ADULTOS</string>
     <string name="rating_nc17_desc">No se admite a nadie de 17 años o menos.</string>
     <string name="rating_tv14_label">GUÍA PATERNA ESTRICTA</string>
     <string name="rating_tv14_desc">Este programa contiene material que muchos padres considerarían inadecuado para niños menores de 14 años.</string>
+    <string name="rating_vm14_label">PROHIBIDO MENORES DE 14</string>
+    <string name="rating_15_label">NO RECOMENDADO PARA MENORES DE 15</string>
+    <string name="rating_15_desc">Adecuado para mayores de 15 años. Puede contener violencia moderada, lenguaje fuerte o temas maduros.</string>
+    <string name="rating_16_label">NO RECOMENDADO PARA MENORES DE 16</string>
+    <string name="rating_16_desc">No recomendado para menores de 16 años. Puede contener violencia intensa, lenguaje fuerte o temas adultos.</string>
     <string name="rating_tvma_label">SOLO PARA PÚBLICO ADULTO</string>
     <string name="rating_tvma_desc">Este programa está diseñado específicamente para ser visto por adultos y por lo tanto puede no ser adecuado para menores de 17 años.</string>
     <string name="bottom_bar_to_watch">Por ver</string>
@@ -1663,8 +1669,6 @@
     <string name="badge_watchlist_hoarder_cat">WATCHLIST</string>
     <string name="badge_watchlist_hoarder_desc">Más de 50 títulos acumulados en tu lista de pendientes.</string>
     <string name="badge_watchlist_hoarder_title">El Archivo Infinito</string>
-
-    <string name="detail_rating_it_10">No recomendada para menores de 10 años.</string>
     <string name="detail_rating_country_gb">British Board of Film Classification (Reino Unido / BBFC)</string>
     <string name="detail_rating_gb_u">Universal (Apta para todos los públicos).</string>
     <string name="detail_rating_gb_pg">Guía paternal sugerida (PG).</string>
@@ -1704,6 +1708,8 @@
     <string name="detail_rating_country_it">Clasificación Cinematográfica (Italia)</string>
     <string name="detail_rating_it_t">Para todos los públicos (T).</string>
     <string name="detail_rating_it_6">No adecuada para menores de 6 años.</string>
+    <string name="detail_rating_it_10">No recomendada para menores de 10 años.</string>
+    <string name="detail_rating_it_12">No recomendada para menores de 12 años.</string>
     <string name="detail_rating_it_14">Restringida a mayores de 14 años.</string>
     <string name="detail_rating_it_18">Restringida a mayores de 18 años.</string>
     <string name="detail_rating_country_jp">Clasificación Eirin (Japón)</string>

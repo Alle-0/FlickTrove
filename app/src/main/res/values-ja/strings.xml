@@ -465,6 +465,8 @@
     <string name="detail_rating_country_it">映画＆TV (イタリア)</string>
     <string name="detail_rating_it_t">全年齢対象。</string>
     <string name="detail_rating_it_6">6歳未満の子供には不適切。</string>
+    <string name="detail_rating_it_10">10歳未満の鑑賞には不適。</string>
+    <string name="detail_rating_it_12">12歳未満の子供には不適切。</string>
     <string name="detail_rating_it_14">14歳未満禁止。</string>
     <string name="detail_rating_it_18">18歳未満禁止。</string>
     <string name="detail_rating_country_de">自主規制機関 (ドイツ / FSK)</string>
@@ -995,12 +997,18 @@
     <string name="rating_pg_desc">一部子供に不適切な描写が含まれる場合があります。</string>
     <string name="rating_pg13_label">13歳未満配慮</string>
     <string name="rating_pg13_desc">13歳未満の子供には不適切な描写が含まれる可能性があります。</string>
+    <string name="rating_vm12_label">12歳未満不適</string>
     <string name="rating_r_label">R指定（制限付き）</string>
     <string name="rating_r_desc">17歳未満の鑑賞には保護者の同伴が必要です。</string>
     <string name="rating_nc17_label">成人向け（NC-17）</string>
     <string name="rating_nc17_desc">17歳以下は鑑賞できません。</string>
     <string name="rating_tv14_label">14歳未満配慮</string>
     <string name="rating_tv14_desc">14歳未満の子供には不適切とされる描写が含まれています。</string>
+    <string name="rating_vm14_label">14歳未満禁止</string>
+    <string name="rating_15_label">15歳以上対象</string>
+    <string name="rating_15_desc">15歳以上の方が対象です。適度な暴力描写や刺激的な表現が含まれる場合があります。</string>
+    <string name="rating_16_label">16歳以上対象</string>
+    <string name="rating_16_desc">16歳未満の鑑賞には適していません。刺激の強い暴力描写や成人向け表現が含まれる場合があります。</string>
     <string name="rating_tvma_label">成人向け（TV-MA）</string>
     <string name="rating_tvma_desc">成人の視聴を想定して制作されており、17歳以下には不適切です。</string>
     <string name="bottom_bar_to_watch">見たい</string>
@@ -1730,7 +1738,6 @@
     <string name="badge_watchlist_hoarder_title">無限のアーカイブ</string>
 
     <string name="settings_commsuni_notice">CommsUni（commsuni.tv）を介して提供されるコミュニティの議論と連合コメント。</string>
-    <string name="detail_rating_it_10">10歳未満の鑑賞には不適。</string>
     <string name="trophy_unit_decades">年代</string>
     <string name="badge_secret_harsh_critic_title">妥協なき批評家</string>
     <string name="badge_secret_harsh_critic_cat">失われたフィルム #11</string>
