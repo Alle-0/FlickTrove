@@ -106,3 +106,4 @@ screenshot*.png
 *.bak
 scratch/
 .markdownlint.json
+*PLAN.md
