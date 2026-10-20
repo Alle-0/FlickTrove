@@ -102,6 +102,7 @@ partner_api/
 partner-api/
 .hintrc
 screenshot*.png
+!docs/assets/evidence/*
 *.bak
 scratch/
 .markdownlint.json
