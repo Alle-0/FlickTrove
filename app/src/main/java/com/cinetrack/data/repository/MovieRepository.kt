@@ -719,10 +719,10 @@ class MovieRepository @Inject constructor(
             onProgress?.invoke(SyncProgress(message, progress))
         }
 
-        // Rate limiting cooldown guard (5 minutes)
+        // Cooldown anti-concorrenza (15 secondi per evitare doppie chiamate da ViewModel simultanei)
         val lastSync = preferenceRepository.userPreferencesFlow.first().lastSyncTimestamp
-        if (!force && System.currentTimeMillis() - lastSync < 300_000L) {
-            android.util.Log.d("MovieRepository", "Firebase Sync skipped - last sync was less than 5 minutes ago.")
+        if (!force && System.currentTimeMillis() - lastSync < 15_000L) {
+            android.util.Log.d("MovieRepository", "Firebase Sync skipped - last sync was less than 15 seconds ago.")
             emit(UiText.StringResource(R.string.sync_msg_cached), 1f)
             return@withContext
         }
@@ -735,69 +735,34 @@ class MovieRepository @Inject constructor(
                 pushPendingChanges()
             }
 
-            // 1. Pull & Reconcile Favorites
-            android.util.Log.d("MovieRepository", "Starting Firebase Sync - Fetching Favorites...")
+            // 1. Pull & Reconcile Favorites (Delta Sync con Tombstones)
+            android.util.Log.d("MovieRepository", "Starting Firebase Delta Sync (since: $lastSync)...")
             emit(UiText.StringResource(R.string.sync_msg_fetching_favorites), null)
-            val remoteFavorites = firebaseRemoteDataSource.fetchAllFavorites()
-            android.util.Log.d("MovieRepository", "Fetched ${remoteFavorites.size} favorites from Firebase")
+            val deltaMovies = firebaseRemoteDataSource.fetchFavoritesDelta(lastSync)
+            android.util.Log.d("MovieRepository", "Fetched ${deltaMovies.size} delta favorites from Firebase")
             
-            emit(UiText.StringResource(R.string.sync_msg_syncing_favorites), 0.35f)
-            val localFavoritesList = favoriteDao.getAll()
-            val localFavorites = localFavoritesList.associateBy { "${it.mediaType}_${it.id}" }
-            val remoteFavoritesMap = remoteFavorites.associateBy { "${it.mediaType}_${it.id}" }
-            
-            val moviesToInsert = mutableListOf<Movie>()
-            val moviesToDelete = mutableListOf<Movie>()
-            
-            for (remoteMovie in remoteFavorites) {
-                val key = "${remoteMovie.mediaType}_${remoteMovie.id}"
-                val local = localFavorites[key]
-                if (local == null) {
-                    moviesToInsert.add(remoteMovie.copy(syncStatus = "synced"))
-                } else {
-                    if (remoteMovie.clientUpdatedAt >= local.clientUpdatedAt) {
-                        moviesToInsert.add(remoteMovie.copy(syncStatus = "synced"))
-                    } else {
-                        if (local.syncStatus == "synced") {
-                            favoriteDao.updateSyncStatus(local.id, local.mediaType, "pending")
-                        }
+            if (deltaMovies.isNotEmpty()) {
+                emit(UiText.StringResource(R.string.sync_msg_syncing_favorites), 0.35f)
+                val (tombstones, modified) = deltaMovies.partition { it.syncStatus == "deleted" }
+                
+                // 1. Epurazione fisica dei record cancellati su altri dispositivi (Tombstones)
+                for (tombstone in tombstones) {
+                    favoriteDao.deleteById(tombstone.id, tombstone.mediaType)
+                }
+                
+                // 2. Inserimento / Aggiornamento dei record modificati
+                if (modified.isNotEmpty()) {
+                    val chunks = modified.chunked(50)
+                    chunks.forEachIndexed { index, chunk ->
+                        favoriteDao.insertAll(chunk.map { it.copy(syncStatus = "synced") })
+                        val portion = (index + 1).toFloat() / chunks.size.toFloat()
+                        val progress = 0.35f + (0.55f - 0.35f) * portion
+                        val currentCount = (index + 1) * chunk.size
+                        emit(UiText.StringResource(R.string.sync_msg_saving_favorites, currentCount, modified.size), progress)
                     }
                 }
             }
-            
-            for ((key, localMovie) in localFavorites) {
-                if (!remoteFavoritesMap.containsKey(key)) {
-                    val hasUserContent = !localMovie.personalNote.isNullOrBlank() ||
-                        (localMovie.personalRating ?: 0.0) > 0.0 ||
-                        localMovie.favorite ||
-                        localMovie.watched ||
-                        localMovie.reminder
-                    if (hasUserContent) {
-                        // Protect user data from being wiped: keep locally and mark pending sync so it uploads to remote
-                        if (localMovie.syncStatus == "synced") {
-                            favoriteDao.updateSyncStatus(localMovie.id, localMovie.mediaType, "pending")
-                        }
-                    } else if (localMovie.syncStatus == "synced") {
-                        moviesToDelete.add(localMovie)
-                    }
-                }
-            }
-            
-            if (moviesToInsert.isNotEmpty()) {
-                val chunks = moviesToInsert.chunked(50)
-                chunks.forEachIndexed { index, chunk ->
-                    favoriteDao.insertAll(chunk)
-                    val portion = (index + 1).toFloat() / chunks.size.toFloat()
-                    val progress = 0.35f + (0.55f - 0.35f) * portion
-                    val currentCount = (index + 1) * chunk.size
-                    emit(UiText.StringResource(R.string.sync_msg_saving_favorites, currentCount, moviesToInsert.size), progress)
-                }
-            }
-            
-            for (movieToDelete in moviesToDelete) {
-                favoriteDao.deleteById(movieToDelete.id, movieToDelete.mediaType)
-            }
-            android.util.Log.d("MovieRepository", "Successfully synchronized favorites with conflict resolution")
+            android.util.Log.d("MovieRepository", "Successfully synchronized favorites via Delta Sync")
 
             // 2. Pull & Reconcile Folders
             emit(UiText.StringResource(R.string.sync_msg_fetching_folders), null)

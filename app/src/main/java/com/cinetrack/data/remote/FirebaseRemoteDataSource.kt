@@ -7,8 +7,10 @@ import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.FieldPath
+import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.firestore.Source
+import com.google.firebase.Timestamp
 import kotlinx.coroutines.tasks.await
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
@@ -84,15 +86,59 @@ class FirebaseRemoteDataSource @Inject constructor(
     suspend fun deleteMovie(movieId: Long, mediaType: String) {
         val uid = userId ?: return
         val docId = "${mediaType}_${movieId}"
+        val now = System.currentTimeMillis()
         try {
             kotlinx.coroutines.withTimeoutOrNull(6_000L) {
-                getFavoritesCollection(uid).document(docId)
-                    .delete()
-                    .await()
+                getFavoritesCollection(uid).document(docId).set(
+                    mapOf(
+                        "id" to movieId,
+                        "mediaType" to mediaType,
+                        "sync_status" to "deleted",
+                        "client_updated_at" to now,
+                        "updatedAt" to FieldValue.serverTimestamp()
+                    ),
+                    SetOptions.merge()
+                ).await()
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error deleting movie $docId: ${e.message}", e)
+            android.util.Log.e("FirebaseRemoteDataSource", "Error soft-deleting movie $docId: ${e.message}", e)
         }
+    }
+
+    suspend fun softDeleteFavorite(movieId: Long, mediaType: String) = deleteMovie(movieId, mediaType)
+
+    suspend fun fetchFavoritesDelta(sinceTimestamp: Long): List<Movie> {
+        val uid = userId ?: return emptyList()
+        // Se è il primo avvio assoluto o cache azzerata, usa il fetch paginato sicuro
+        if (sinceTimestamp <= 0L) {
+            return fetchAllFavorites()
+        }
+
+        val list = mutableListOf<Movie>()
+        try {
+            // Interroga per client_updated_at coerente con il modello Movie
+            val query = getFavoritesCollection(uid)
+                .whereGreaterThan("client_updated_at", sinceTimestamp)
+
+            val snapshot = kotlinx.coroutines.withTimeoutOrNull(15_000L) {
+                query.get(Source.SERVER).await()
+            }
+            if (snapshot != null) {
+                for (doc in snapshot.documents) {
+                    try {
+                        val movie = doc.toObject(Movie::class.java)
+                        if (movie != null) {
+                            list.add(movie)
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("FirebaseRemoteDataSource", "Error deserializing delta movie document ${doc.id}: ${e.message}", e)
+                    }
+                }
+            }
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error during delta fetch of favorites: ${e.message}", e)
+        }
+        return list
     }
 
     suspend fun fetchAllFavorites(): List<Movie> {
