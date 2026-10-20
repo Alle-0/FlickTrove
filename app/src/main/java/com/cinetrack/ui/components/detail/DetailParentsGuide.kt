@@ -63,72 +63,20 @@ object ParentsGuideResolver {
     fun resolve(certification: String?, countryCode: String?): ParentsGuideData? {
         if (certification.isNullOrBlank()) return null
         val cleanCert = certification.trim().uppercase(Locale.ROOT)
-        
-        // Se il rating è per tutti (G, T, 0+, ecc.), tutte le categorie sarebbero "Nessuno".
-        // In questo caso preferiamo nascondere completamente la Guida Genitori.
-        if (cleanCert in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ")) {
-            return null
-        }
-
-        val (sex, violence, profanity, drugs, frightening) = when {
-            cleanCert in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+") -> {
-                Tuple5(
-                    SeverityLevel.NONE,
-                    SeverityLevel.MODERATE,
-                    SeverityLevel.MILD,
-                    SeverityLevel.NONE,
-                    SeverityLevel.MILD
-                )
-            }
-            cleanCert in listOf("PG-13", "PG12", "PG-12", "TV-14", "12", "12+", "12A", "FSK 12", "13+", "13A", "14", "14+", "VM12", "VM14", "15", "15+", "UA") -> {
-                Tuple5(
-                    SeverityLevel.MILD,
-                    SeverityLevel.MODERATE,
-                    SeverityLevel.MODERATE,
-                    SeverityLevel.MILD,
-                    SeverityLevel.MODERATE
-                )
-            }
-            cleanCert in listOf("R", "TV-MA", "16", "16+", "NC16", "NC-16", "VM16", "FSK 16", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "M18", "R21", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> {
-                Tuple5(
-                    SeverityLevel.MODERATE,
-                    SeverityLevel.SEVERE,
-                    SeverityLevel.SEVERE,
-                    SeverityLevel.MODERATE,
-                    SeverityLevel.SEVERE
-                )
-            }
-            else -> {
-                Tuple5(
-                    SeverityLevel.MILD,
-                    SeverityLevel.MILD,
-                    SeverityLevel.MILD,
-                    SeverityLevel.NONE,
-                    SeverityLevel.MILD
-                )
-            }
-        }
+        val profile = AgeRatingResolver.resolveParentsGuideSeverity(cleanCert) ?: return null
 
         val categories = listOf(
-            ParentsGuideCategory(R.string.guide_cat_sex, GuideCategoryType.SEX_NUDITY, iconRes = R.drawable.ic_heart, level = sex),
-            ParentsGuideCategory(R.string.guide_cat_violence, GuideCategoryType.VIOLENCE_GORE, iconRes = R.drawable.ic_parents_swords, level = violence),
-            ParentsGuideCategory(R.string.guide_cat_profanity, GuideCategoryType.PROFANITY, iconRes = R.drawable.ic_comment, level = profanity),
-            ParentsGuideCategory(R.string.guide_cat_alcohol, GuideCategoryType.ALCOHOL_DRUGS, iconRes = R.drawable.ic_parents_wine, level = drugs),
-            ParentsGuideCategory(R.string.guide_cat_frightening, GuideCategoryType.FRIGHTENING, iconRes = R.drawable.ic_vibe_scary, level = frightening)
+            ParentsGuideCategory(R.string.guide_cat_sex, GuideCategoryType.SEX_NUDITY, iconRes = R.drawable.ic_heart, level = profile.sex),
+            ParentsGuideCategory(R.string.guide_cat_violence, GuideCategoryType.VIOLENCE_GORE, iconRes = R.drawable.ic_parents_swords, level = profile.violence),
+            ParentsGuideCategory(R.string.guide_cat_profanity, GuideCategoryType.PROFANITY, iconRes = R.drawable.ic_comment, level = profile.profanity),
+            ParentsGuideCategory(R.string.guide_cat_alcohol, GuideCategoryType.ALCOHOL_DRUGS, iconRes = R.drawable.ic_parents_wine, level = profile.drugs),
+            ParentsGuideCategory(R.string.guide_cat_frightening, GuideCategoryType.FRIGHTENING, iconRes = R.drawable.ic_vibe_scary, level = profile.frightening)
         )
 
         return ParentsGuideData(
             categories = categories
         )
     }
-
-    private data class Tuple5(
-        val sex: SeverityLevel,
-        val violence: SeverityLevel,
-        val profanity: SeverityLevel,
-        val drugs: SeverityLevel,
-        val frightening: SeverityLevel
-    )
 }
 
 @Composable

@@ -39,7 +39,7 @@ internal fun HeaderParentsGuideSection(
 
         val cleanCert = certification?.trim()?.uppercase(Locale.ROOT)?.takeIf { it.isNotBlank() } ?: "NR"
         val ratingInfo = remember(cleanCert) { resolveHeaderRatingInfo(cleanCert) }
-        val certColor = remember(cleanCert) { getCertificationColor(cleanCert) }
+        val certColor = ratingInfo.color
 
         // Line 1: Rated Detail Card for this specific film/series
         Row(

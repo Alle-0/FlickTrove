@@ -122,12 +122,12 @@ fun DetailRatingInfoDialog(
                                 )
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
-                                    RatingLegendItem("T", Color(0xFF4CAF50), stringResource(R.string.detail_rating_it_t))
-                                    RatingLegendItem("6+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_it_6))
-                                    RatingLegendItem("10+", Color(0xFF8BC34A), stringResource(R.string.detail_rating_it_10))
-                                    RatingLegendItem("VM12", Color(0xFFFF9800), stringResource(R.string.detail_rating_it_12))
-                                    RatingLegendItem("VM14", Color(0xFFFF7043), stringResource(R.string.detail_rating_it_14))
-                                    RatingLegendItem("VM18", Color(0xFFB71C1C), stringResource(R.string.detail_rating_it_18))
+                                    RatingLegendItem("T", stringResource(R.string.detail_rating_it_t))
+                                    RatingLegendItem("6+", stringResource(R.string.detail_rating_it_6))
+                                    RatingLegendItem("10+", stringResource(R.string.detail_rating_it_10))
+                                    RatingLegendItem("VM12", stringResource(R.string.detail_rating_it_12))
+                                    RatingLegendItem("VM14", stringResource(R.string.detail_rating_it_14))
+                                    RatingLegendItem("VM18", stringResource(R.string.detail_rating_it_18))
                                 }
                             }
                             "DE" -> {
@@ -433,6 +433,11 @@ fun DetailRatingInfoDialog(
             }
         }
     }
+}
+
+@Composable
+private fun RatingLegendItem(cert: String, desc: String) {
+    RatingLegendItem(cert = cert, color = getCertificationColor(cert), desc = desc)
 }
 
 @Composable

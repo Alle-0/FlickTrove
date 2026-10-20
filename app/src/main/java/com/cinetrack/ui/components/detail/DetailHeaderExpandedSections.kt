@@ -44,61 +44,6 @@ enum class DetailHeaderExpandedSection {
     TECHNICAL
 }
 
-internal data class HeaderRatingInfo(
-    val code: String,
-    val labelRes: Int,
-    val descriptionRes: Int,
-    val color: Color
-)
-
-internal fun getCertificationColor(cleanCert: String): Color {
-    return when (cleanCert) {
-        in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") -> Color(0xFF4CAF50)
-        in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+", "UA") -> Color(0xFF8BC34A)
-        in listOf("PG-13", "PG12", "PG-12", "12", "12+", "12A", "FSK 12", "13+", "13A", "VM12") -> Color(0xFFFF9800)
-        in listOf("TV-14", "14", "14+", "VM14") -> Color(0xFFFF7043)
-        in listOf("15", "15+") -> Color(0xFFFF5722)
-        in listOf("16", "16+", "NC16", "NC-16", "VM16", "FSK 16") -> Color(0xFFE64A19)
-        in listOf("R", "TV-MA", "17+", "18", "18+", "19", "21+", "VM18", "FSK 18", "NC-17", "M18", "R21", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") -> Color(0xFFF44336)
-        else -> Color.White
-    }
-}
-
-internal fun resolveHeaderRatingInfo(certification: String?): HeaderRatingInfo {
-    if (certification.isNullOrBlank()) {
-        return HeaderRatingInfo("NR", R.string.rated_guide_title, R.string.rated_guide_help, Color.White)
-    }
-    val clean = certification.trim().uppercase(Locale.ROOT)
-    return when {
-        clean in listOf("G", "TV-G", "TV-Y", "U", "T", "0", "FSK 0", "L", "APTA", "0+", "ALL", "SU", "GENEL", "GENEL İZLEYİCİ") ->
-            HeaderRatingInfo(certification, R.string.rating_g_label, R.string.rating_g_desc, Color(0xFF4CAF50))
-        clean in listOf("PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+", "UA") ->
-            HeaderRatingInfo(certification, R.string.rating_pg_label, R.string.rating_pg_desc, Color(0xFF8BC34A))
-        clean in listOf("PG-13", "PG12", "PG-12", "12", "12+", "12A", "FSK 12", "13+", "13A") ->
-            HeaderRatingInfo(certification, R.string.rating_pg13_label, R.string.rating_pg13_desc, Color(0xFFFF9800))
-        clean in listOf("VM12") ->
-            HeaderRatingInfo(certification, R.string.rating_vm12_label, R.string.detail_rating_it_12, Color(0xFFFF9800))
-        clean in listOf("VM14") ->
-            HeaderRatingInfo(certification, R.string.rating_vm14_label, R.string.detail_rating_it_14, Color(0xFFFF7043))
-        clean in listOf("TV-14", "14", "14+") ->
-            HeaderRatingInfo(certification, R.string.rating_tv14_label, R.string.rating_tv14_desc, Color(0xFFFF7043))
-        clean in listOf("15", "15+") ->
-            HeaderRatingInfo(certification, R.string.rating_15_label, R.string.rating_15_desc, Color(0xFFFF5722))
-        clean in listOf("16", "16+", "NC16", "NC-16", "VM16", "FSK 16") ->
-            HeaderRatingInfo(certification, R.string.rating_16_label, R.string.rating_16_desc, Color(0xFFE64A19))
-        clean in listOf("TV-MA") ->
-            HeaderRatingInfo(certification, R.string.rating_tvma_label, R.string.rating_tvma_desc, Color(0xFFD32F2F))
-        clean in listOf("VM18") ->
-            HeaderRatingInfo(certification, R.string.rating_nc17_label, R.string.detail_rating_it_18, Color(0xFFB71C1C))
-        clean in listOf("NC-17", "18", "18+", "19", "21+", "FSK 18", "M18", "R21") ->
-            HeaderRatingInfo(certification, R.string.rating_nc17_label, R.string.rating_nc17_desc, Color(0xFFB71C1C))
-        clean in listOf("R", "17+", "A", "R15+", "R-15", "R15", "R18+", "R-18", "R18", "RESTRICTED") ->
-            HeaderRatingInfo(certification, R.string.rating_r_label, R.string.rating_r_desc, Color(0xFFF44336))
-        else ->
-            HeaderRatingInfo(certification, R.string.rated_guide_title, R.string.rated_guide_help, Color.White)
-    }
-}
-
 
 @Composable
 fun RatingPill(
