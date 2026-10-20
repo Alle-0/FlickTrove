@@ -243,7 +243,11 @@ class SimklSyncWorker @AssistedInject constructor(
                         compositeIds.add("${itemType}_${itemTmdbId}")
 
                         // Se il titolo non esiste in locale, scarichiamo i dettagli base da TMDB con rate-limiting difensivo
-                        if (movieRepository.getMovie(itemTmdbId, itemType) == null) {
+                        val localItem = movieRepository.getMovieIncludingDeleted(itemTmdbId, itemType)
+                        if (localItem != null && (localItem.syncStatus == "pending_delete" || localItem.syncStatus == "deleted")) {
+                            continue
+                        }
+                        if (localItem == null) {
                             try {
                                 val tmdbResponse = if (itemType == "movie") {
                                     tmdbService.getMovieBasicDetails(itemTmdbId)
@@ -406,8 +410,8 @@ class SimklSyncWorker @AssistedInject constructor(
             val local = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
 
             // Anti-resurrection guard: never re-insert or re-update items the user explicitly deleted
-            if (local != null && local.syncStatus == "pending_delete") {
-                android.util.Log.d("SimklSyncWorker", "SYNC: Item $tmdbId è pending_delete, skip resurrezione.")
+            if (local != null && (local.syncStatus == "pending_delete" || local.syncStatus == "deleted")) {
+                android.util.Log.d("SimklSyncWorker", "SYNC: Item $tmdbId è ${local.syncStatus}, skip resurrezione.")
                 continue
             }
             

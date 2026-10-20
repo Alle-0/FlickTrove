@@ -154,7 +154,11 @@ class TraktSyncWorker @AssistedInject constructor(
                 // Le analizzeremo nella Fase 1b contando matematicamente gli episodi.
                 if (mediaType == "tv") continue
 
-                val localMovie = movieRepository.getMovie(tmdbId, mediaType)                
+                val localMovie = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
+                if (localMovie != null && (localMovie.syncStatus == "pending_delete" || localMovie.syncStatus == "deleted")) {
+                    android.util.Log.d("TraktSyncWorker", "SYNC: Film $tmdbId è ${localMovie.syncStatus}, skip resurrezione.")
+                    continue
+                }
                 if (localMovie != null) {
                     var currentMovie = localMovie
                     if (currentMovie.posterPath.isNullOrEmpty()) {
@@ -319,8 +323,8 @@ class TraktSyncWorker @AssistedInject constructor(
                     val local = movieRepository.getMovieIncludingDeleted(showTmdbId, "tv")
 
                     // Anti-resurrection guard: if the user explicitly deleted this show, never re-insert it
-                    if (local != null && local.syncStatus == "pending_delete") {
-                        android.util.Log.d("TraktSyncWorker", "SYNC: Show '$showTitle' è pending_delete, skip resurrezione.")
+                    if (local != null && (local.syncStatus == "pending_delete" || local.syncStatus == "deleted")) {
+                        android.util.Log.d("TraktSyncWorker", "SYNC: Show '$showTitle' è ${local.syncStatus}, skip resurrezione.")
                         return
                     }
 
@@ -603,7 +607,11 @@ class TraktSyncWorker @AssistedInject constructor(
                     for (item in ratedMovies + ratedShows) {
                         val tmdbId    = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: continue
                         val mediaType = if (item.type == "movie") "movie" else "tv"
-                        val local     = movieRepository.getMovie(tmdbId, mediaType)
+                        val local = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
+                        if (local != null && (local.syncStatus == "pending_delete" || local.syncStatus == "deleted")) {
+                            android.util.Log.d("TraktSyncWorker", "SYNC: Rating $tmdbId è ${local.syncStatus}, skip resurrezione.")
+                            continue
+                        }
                         
                         if (local != null) {
                             // Merge rule: remote wins; conserva locale se remote è assente
@@ -789,7 +797,11 @@ class TraktSyncWorker @AssistedInject constructor(
                         if (tmdbId == null || tmdbId <= 0L) continue
 
                         remoteWatchlistIds.add(Pair(tmdbId, mediaType))
-                        val local = movieRepository.getMovie(tmdbId, mediaType)
+                        val local = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
+                        if (local != null && (local.syncStatus == "pending_delete" || local.syncStatus == "deleted")) {
+                            android.util.Log.d("TraktSyncWorker", "SYNC: Watchlist $tmdbId è ${local.syncStatus}, skip resurrezione.")
+                            continue
+                        }
                         
                         if (local != null) {
                             if (!local.favorite || local.watched) {
