@@ -16,6 +16,7 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,6 +24,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
+import androidx.compose.runtime.saveable.rememberSaveable
 import com.cinetrack.ui.components.common.LocalSymbiontPullState
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.positionInWindow
@@ -464,7 +466,7 @@ fun HomeFeedScreenContent(
                         com.cinetrack.data.model.HomeFeedSectionConstants.WATCHLIST -> {
                             // 1. DALLA TUA WATCHLIST
                             if (uiState.preferences.showHomeWatchlist && watchlistList.isNotEmpty()) {
-                                item(key = "section_watchlist") {
+                                item(key = "section_watchlist_${if (isTv) "tv" else "movie"}") {
                                     HomePosterRow(
                                         title = stringResource(R.string.home_section_watchlist),
                                         movies = watchlistList,
@@ -482,7 +484,7 @@ fun HomeFeedScreenContent(
                                         onLongPress = stableOnLongPress,
                                         onAction = stableOnAction,
                                         onMessage = stableOnMessage,
-                                        keyPrefix = "wl"
+                                        keyPrefix = "wl_${if (isTv) "tv" else "movie"}"
                                     )
                                 }
                             }
@@ -492,7 +494,7 @@ fun HomeFeedScreenContent(
                             // 4. THE TROVE'S PICK + CONSIGLIATI (se disponibili)
                             if (recommendedList.isNotEmpty()) {
                                 val trovePick = recommendedList.first()
-                                item(key = "section_trove_pick") {
+                                item(key = "section_trove_pick_${if (isTv) "tv" else "movie"}") {
                                     AnimatedHomeSection {
                                         TrovePickCard(
                                             movie = trovePick,
@@ -503,7 +505,7 @@ fun HomeFeedScreenContent(
                                 }
                                 // Se ci sono altri consigliati, mostra una riga con il resto
                                 if (recommendedList.size > 1) {
-                                    item(key = "section_trove_pick_rest") {
+                                    item(key = "section_trove_pick_rest_${if (isTv) "tv" else "movie"}") {
                                         val restRecommended = remember(recommendedList) { recommendedList.drop(1) }
                                         HomePosterRow(
                                             title = stringResource(R.string.home_section_recommended),
@@ -521,7 +523,7 @@ fun HomeFeedScreenContent(
                                             onLongPress = stableOnLongPress,
                                             onAction = stableOnAction,
                                             onMessage = stableOnMessage,
-                                            keyPrefix = "rec"
+                                            keyPrefix = "rec_${if (isTv) "tv" else "movie"}"
                                         )
                                     }
                                 }
@@ -534,7 +536,7 @@ fun HomeFeedScreenContent(
                             if (uiState.preferences.showHomeBecauseYouWatched && becauseYouWatchedData != null && becauseYouWatchedData.second.isNotEmpty()) {
                                 val seedMovie = becauseYouWatchedData.first
                                 val recs = becauseYouWatchedData.second
-                                item(key = "section_because_you_watched") {
+                                item(key = "section_because_you_watched_${if (isTv) "tv" else "movie"}") {
                                     HomePosterRow(
                                         title = stringResource(R.string.home_section_because_you_watched, seedMovie.displayName),
                                         movies = recs,
@@ -549,7 +551,7 @@ fun HomeFeedScreenContent(
                                         onLongPress = stableOnLongPress,
                                         onAction = stableOnAction,
                                         onMessage = stableOnMessage,
-                                        keyPrefix = "byw"
+                                        keyPrefix = "byw_${if (isTv) "tv" else "movie"}"
                                     )
                                 }
                             }
@@ -558,13 +560,17 @@ fun HomeFeedScreenContent(
                         com.cinetrack.data.model.HomeFeedSectionConstants.TOP_10 -> {
                             // 6. TOP 10 FLICKTROVE
                             if (top10List.isNotEmpty()) {
-                                item(key = "section_top_10") {
+                                item(key = "section_top_10_${if (isTv) "tv" else "movie"}") {
                                     AnimatedHomeSection {
                                         Column {
                                             HomeSectionTitle(stringResource(R.string.home_section_top_10))
                                             
                                             val top10Limited = remember(top10List) { top10List.take(10) }
+                                            val top10RowState = rememberSaveable(if (isTv) "tv" else "movie", saver = LazyListState.Saver) {
+                                                LazyListState()
+                                            }
                                             LazyRow(
+                                                state = top10RowState,
                                                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                                                 horizontalArrangement = Arrangement.spacedBy(12.dp)
                                             ) {
@@ -601,7 +607,7 @@ fun HomeFeedScreenContent(
                         com.cinetrack.data.model.HomeFeedSectionConstants.POPULAR -> {
                             // 2. POPOLARI (2:3 Posters)
                             if (popularList.isNotEmpty()) {
-                                item(key = "section_popular") {
+                                item(key = "section_popular_${if (isTv) "tv" else "movie"}") {
                                     HomePosterRow(
                                         title = stringResource(R.string.home_section_popular),
                                         movies = popularList,
@@ -624,7 +630,7 @@ fun HomeFeedScreenContent(
                                         onLongPress = stableOnLongPress,
                                         onAction = stableOnAction,
                                         onMessage = stableOnMessage,
-                                        keyPrefix = "pop"
+                                        keyPrefix = "pop_${if (isTv) "tv" else "movie"}"
                                     )
                                 }
                             }
@@ -633,7 +639,7 @@ fun HomeFeedScreenContent(
                         com.cinetrack.data.model.HomeFeedSectionConstants.NOW_PLAYING -> {
                             // 2. NOW IN THEATERS / NOW STREAMING (2:3 Posters)
                             if (nowPlayingList.isNotEmpty()) {
-                                item(key = "section_now_playing") {
+                                item(key = "section_now_playing_${if (isTv) "tv" else "movie"}") {
                                     HomePosterRow(
                                         title = stringResource(if (isTv) R.string.home_section_now_streaming else R.string.home_section_now_in_theaters),
                                         movies = nowPlayingList,
@@ -656,7 +662,7 @@ fun HomeFeedScreenContent(
                                         onLongPress = stableOnLongPress,
                                         onAction = stableOnAction,
                                         onMessage = stableOnMessage,
-                                        keyPrefix = "now"
+                                        keyPrefix = "now_${if (isTv) "tv" else "movie"}"
                                     )
                                 }
                             }
@@ -665,7 +671,7 @@ fun HomeFeedScreenContent(
                         com.cinetrack.data.model.HomeFeedSectionConstants.UPCOMING -> {
                             // 3. IN USCITA (2:3 Posters)
                             if (upcomingList.isNotEmpty()) {
-                                item(key = "section_upcoming") {
+                                item(key = "section_upcoming_${if (isTv) "tv" else "movie"}") {
                                     HomePosterRow(
                                         title = stringResource(R.string.home_section_upcoming),
                                         movies = upcomingList,
@@ -688,7 +694,7 @@ fun HomeFeedScreenContent(
                                         onLongPress = stableOnLongPress,
                                         onAction = stableOnAction,
                                         onMessage = stableOnMessage,
-                                        keyPrefix = "upc"
+                                        keyPrefix = "upc_${if (isTv) "tv" else "movie"}"
                                     )
                                 }
                             }

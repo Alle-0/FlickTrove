@@ -102,10 +102,10 @@ fun RatingPill(
     Box(
         modifier = modifier
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .defaultMinSize(minWidth = 80.dp, minHeight = 36.dp)
+            .defaultMinSize(minWidth = 66.dp, minHeight = 36.dp)
             .clip(pillShape)
             .background(accentColor, pillShape)
-            .padding(horizontal = 14.dp),
+            .padding(horizontal = 7.dp),
         contentAlignment = Alignment.Center
     ) {
         // Main Rating
@@ -145,10 +145,12 @@ fun RatingPill(
         // Help Text - Moved further down
         Text(
             text = if (expansion > 0.5f) stringResource(R.string.detail_tap_for_less) else stringResource(R.string.detail_tap_for_more),
-            fontSize = 7.sp,
+            fontSize = 6.8.sp,
             lineHeight = 7.sp,
             fontWeight = FontWeight.Black,
             color = pillContentColor.copy(alpha = 0.4f),
+            maxLines = 1,
+            softWrap = false,
             modifier = Modifier
                 .graphicsLayer {
                     // Precise offset

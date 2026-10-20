@@ -45,13 +45,13 @@ fun MainDeepLinkHandler(
 
             if (isHttpsAppLink) {
                 val type = uri.getQueryParameter("type") ?: "movie"
-                val id   = uri.getQueryParameter("id")?.toLongOrNull()
+                val idStr = uri.getQueryParameter("id")
                 
-                if (id != null) {
+                if (!idStr.isNullOrBlank()) {
                     when (type) {
-                        "person" -> rootNavigator.push(PersonDetailScreen(id, null))
-                        "collection" -> rootNavigator.push(CollectionDetailScreen(id.toString(), null))
-                        else -> rootNavigator.push(MovieDetailScreen(id, type))
+                        "person" -> idStr.toLongOrNull()?.let { rootNavigator.push(PersonDetailScreen(it, null)) }
+                        "collection" -> rootNavigator.push(CollectionDetailScreen(idStr, null))
+                        else -> idStr.toLongOrNull()?.let { rootNavigator.push(MovieDetailScreen(it, type)) }
                     }
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
@@ -71,18 +71,18 @@ fun MainDeepLinkHandler(
             } else if (isCustomScheme) {
                 val pathSegments = uri.pathSegments
                 val typeFromPath = if (pathSegments.size >= 2) pathSegments[0] else null
-                val idFromPath = if (pathSegments.size >= 2) pathSegments[1].toLongOrNull() else null
+                val idStrFromPath = if (pathSegments.size >= 2) pathSegments[1] else null
 
                 val type = uri.getQueryParameter("type") ?: typeFromPath ?: "movie"
-                val id = uri.getQueryParameter("id")?.toLongOrNull() ?: idFromPath
+                val idStr = uri.getQueryParameter("id") ?: idStrFromPath
                 val openComments = uri.getQueryParameter("openComments")?.toBoolean() ?: false
                 val targetCommentId = uri.getQueryParameter("commentId")
 
-                if (id != null) {
+                if (!idStr.isNullOrBlank()) {
                     when (type) {
-                        "person" -> rootNavigator.push(PersonDetailScreen(id, null))
-                        "collection" -> rootNavigator.push(CollectionDetailScreen(id.toString(), null))
-                        else -> rootNavigator.push(MovieDetailScreen(id, type, openComments = openComments, targetCommentId = targetCommentId))
+                        "person" -> idStr.toLongOrNull()?.let { rootNavigator.push(PersonDetailScreen(it, null)) }
+                        "collection" -> rootNavigator.push(CollectionDetailScreen(idStr, null))
+                        else -> idStr.toLongOrNull()?.let { rootNavigator.push(MovieDetailScreen(it, type, openComments = openComments, targetCommentId = targetCommentId)) }
                     }
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "search") {

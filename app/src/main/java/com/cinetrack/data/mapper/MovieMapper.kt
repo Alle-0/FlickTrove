@@ -10,9 +10,19 @@ import java.util.Locale
 object MovieMapper {
     fun mapResponseToMovie(response: MovieDetailResponse, type: String): Movie {
         val effectiveRuntime = if (type == "tv") {
-            response.episodeRunTime?.firstOrNull() ?: response.runtime
+            response.episodeRunTime?.filter { it > 0 }?.firstOrNull()
+                ?: response.lastEpisodeToAir?.runtime?.takeIf { it > 0 }
+                ?: response.nextEpisodeToAir?.runtime?.takeIf { it > 0 }
+                ?: response.runtime?.takeIf { it > 0 }
         } else {
             response.runtime
+        }
+        val effectiveEpisodeRunTime = if (type == "tv") {
+            response.episodeRunTime?.filter { it > 0 }?.takeIf { it.isNotEmpty() }
+                ?: response.lastEpisodeToAir?.runtime?.takeIf { it > 0 }?.let { listOf(it) }
+                ?: response.nextEpisodeToAir?.runtime?.takeIf { it > 0 }?.let { listOf(it) }
+        } else {
+            response.episodeRunTime
         }
         
         // Get the device's actual country code (e.g. IT, FR, DE, GB). 
@@ -65,7 +75,7 @@ object MovieMapper {
             releaseDate = regionalReleaseDate,
             firstAirDate = response.firstAirDate,
             runtime = effectiveRuntime,
-            episodeRunTime = response.episodeRunTime,
+            episodeRunTime = effectiveEpisodeRunTime,
             revenue = response.revenue,
             budget = response.budget,
             tagline = response.tagline,

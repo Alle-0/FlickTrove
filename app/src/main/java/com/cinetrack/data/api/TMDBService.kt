@@ -11,7 +11,8 @@ interface TMDBService {
         @Path("id") id: Long,
 
         @Query(value = "append_to_response", encoded = true) appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,release_dates,keywords,images",
-        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
+        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null",
+        @Query(value = "include_video_language", encoded = true) includeVideoLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
     @GET("tv/{id}")
@@ -19,7 +20,8 @@ interface TMDBService {
         @Path("id") id: Long,
 
         @Query(value = "append_to_response", encoded = true) appendToResponse: String = "credits,videos,recommendations,external_ids,watch/providers,content_ratings,keywords,images",
-        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null"
+        @Query(value = "include_image_language", encoded = true) includeImageLanguage: String = "it,en,null",
+        @Query(value = "include_video_language", encoded = true) includeVideoLanguage: String = "it,en,null"
     ): MovieDetailResponse
 
     // Lightweight fetch for Trakt Sync

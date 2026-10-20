@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,14 +13,16 @@
   <meta property="og:type" content="website">
   <meta property="og:site_name" content="FlickTrove">
   <meta property="og:title" content="FlickTrove — Cinema & TV Show Tracker">
-  <meta property="og:description" content="Open this content in FlickTrove, the premium cinema & TV show tracker for Android.">
+  <meta property="og:description"
+    content="Open this content in FlickTrove, the premium cinema & TV show tracker for Android.">
   <meta property="og:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
   <meta property="og:image:type" content="image/png">
   <meta property="og:image:width" content="512">
   <meta property="og:image:height" content="512">
   <meta name="twitter:card" content="summary">
   <meta name="twitter:title" content="FlickTrove — Cinema & TV Show Tracker">
-  <meta name="twitter:description" content="Open this content in FlickTrove, the premium cinema & TV show tracker for Android.">
+  <meta name="twitter:description"
+    content="Open this content in FlickTrove, the premium cinema & TV show tracker for Android.">
   <meta name="twitter:image" content="https://alle-0.github.io/FlickTrove/assets/icon-512.png">
 
   <!-- Favicon -->
@@ -29,59 +32,115 @@
 
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap"
+    rel="stylesheet">
 
   <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
 
     :root {
       --accent: #2DD4BF;
-      --accent-dim: rgba(45, 212, 191, 0.15);
+      --accent-secondary: #0D9488;
+      --accent-gradient: linear-gradient(135deg, var(--accent), var(--accent-secondary));
+      --accent-dim: rgba(45, 212, 191, 0.16);
+      --accent-glow: rgba(45, 212, 191, 0.35);
+      --accent-border: rgba(45, 212, 191, 0.28);
+      --type-badge-bg: rgba(45, 212, 191, 0.16);
       --bg: #0B0F19;
-      --surface: rgba(255,255,255,0.04);
-      --surface-hover: rgba(255,255,255,0.07);
-      --border: rgba(255,255,255,0.08);
+      --surface: rgba(16, 22, 34, 0.72);
+      --surface-hover: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.09);
       --text: #FFFFFF;
-      --text-dim: rgba(255,255,255,0.5);
-      --text-muted: rgba(255,255,255,0.3);
-      --radius: 20px;
-      --radius-sm: 12px;
+      --text-dim: rgba(255, 255, 255, 0.65);
+      --text-muted: rgba(255, 255, 255, 0.38);
+      --radius: 24px;
+      --radius-sm: 14px;
     }
 
-    html, body {
+    html,
+    body {
       min-height: 100vh;
       background: var(--bg);
       color: var(--text);
       font-family: 'Inter', system-ui, -apple-system, sans-serif;
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
+      position: relative;
     }
 
-    /* Animated gradient orbs */
+    /* Ambient backdrop with smooth dynamic poster reflection */
+    .ambient-backdrop {
+      position: fixed;
+      inset: -60px;
+      background-size: cover;
+      background-position: center 25%;
+      filter: blur(80px) saturate(180%) brightness(0.4);
+      opacity: 0;
+      transform: scale(1.15);
+      transition: opacity 1.2s cubic-bezier(0.16, 1, 0.3, 1), transform 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    .ambient-backdrop.loaded {
+      opacity: 0.55;
+      transform: scale(1.04);
+    }
+
+    .ambient-overlay {
+      position: fixed;
+      inset: 0;
+      background: radial-gradient(circle at 50% 35%, rgba(11, 15, 25, 0.25) 0%, rgba(11, 15, 25, 0.85) 70%, #0B0F19 100%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Animated gradient orbs responsive to extracted palette */
     .bg-orb {
       position: fixed;
       border-radius: 50%;
-      filter: blur(120px);
-      opacity: 0.25;
+      filter: blur(110px);
+      opacity: 0.32;
       pointer-events: none;
       z-index: 0;
-      animation: float 8s ease-in-out infinite;
+      animation: float 10s ease-in-out infinite;
+      transition: background 1s cubic-bezier(0.16, 1, 0.3, 1), transform 1s cubic-bezier(0.16, 1, 0.3, 1);
     }
+
     .bg-orb-1 {
-      width: 500px; height: 500px;
-      background: radial-gradient(circle, #2DD4BF, transparent);
-      top: -150px; left: -150px;
+      width: 520px;
+      height: 520px;
+      background: radial-gradient(circle, var(--accent), transparent 70%);
+      top: -140px;
+      left: -120px;
       animation-delay: 0s;
     }
+
     .bg-orb-2 {
-      width: 400px; height: 400px;
-      background: radial-gradient(circle, #6366f1, transparent);
-      bottom: -100px; right: -100px;
-      animation-delay: -4s;
+      width: 440px;
+      height: 440px;
+      background: radial-gradient(circle, var(--accent-secondary), transparent 70%);
+      bottom: -100px;
+      right: -100px;
+      animation-delay: -5s;
     }
+
     @keyframes float {
-      0%, 100% { transform: translateY(0px) scale(1); }
-      50% { transform: translateY(-30px) scale(1.05); }
+
+      0%,
+      100% {
+        transform: translateY(0px) scale(1);
+      }
+
+      50% {
+        transform: translateY(-30px) scale(1.06);
+      }
     }
 
     .page {
@@ -92,7 +151,7 @@
       flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 24px;
+      padding: 32px 20px;
       gap: 32px;
     }
 
@@ -100,142 +159,230 @@
     .brand {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       text-decoration: none;
-    }
-    .brand-logo {
-      width: 36px; height: 36px;
-      border-radius: 10px;
-    }
-    .brand-name {
-      font-size: 18px;
-      font-weight: 700;
-      color: var(--text);
-      letter-spacing: -0.3px;
+      padding: 6px 14px;
+      border-radius: 100px;
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.06);
+      -webkit-backdrop-filter: blur(12px);
+      backdrop-filter: blur(12px);
+      transition: background 0.2s, transform 0.2s;
     }
 
-    /* Main card */
+    .brand:hover {
+      background: rgba(255, 255, 255, 0.08);
+      transform: translateY(-1px);
+    }
+
+    .brand-logo {
+      width: 28px;
+      height: 28px;
+      border-radius: 8px;
+    }
+
+    .brand-name {
+      font-size: 16px;
+      font-weight: 700;
+      color: var(--text);
+      letter-spacing: -0.2px;
+    }
+
+    /* Main card with dynamic glow */
     .card {
       width: 100%;
       max-width: 420px;
       background: var(--surface);
-      border: 1px solid var(--border);
+      border: 1px solid var(--accent-border);
       border-radius: var(--radius);
       overflow: hidden;
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      box-shadow: 0 32px 64px rgba(0,0,0,0.4), 0 0 0 1px var(--border);
-      animation: slideUp 0.5s cubic-bezier(0.16,1,0.3,1) both;
-    }
-    @keyframes slideUp {
-      from { opacity: 0; transform: translateY(24px); }
-      to   { opacity: 1; transform: translateY(0); }
+      -webkit-backdrop-filter: blur(28px);
+      backdrop-filter: blur(28px);
+      box-shadow: 0 32px 64px rgba(0, 0, 0, 0.55), 0 0 60px var(--accent-glow);
+      animation: slideUp 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+      transition: border-color 0.8s cubic-bezier(0.16, 1, 0.3, 1), box-shadow 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
-    /* Poster area */
+    @keyframes slideUp {
+      from {
+        opacity: 0;
+        transform: translateY(28px);
+      }
+
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    /* Poster area with reflection shine */
     .poster-container {
       position: relative;
       width: 100%;
       aspect-ratio: 16/9;
-      background: linear-gradient(135deg, #1a1f2e, #0d1117);
+      background: linear-gradient(135deg, #131826, #090D15);
       overflow: hidden;
     }
+
     .poster-img {
-      width: 100%; height: 100%;
+      width: 100%;
+      height: 100%;
       object-fit: cover;
       display: none;
+      transform: scale(1.05);
+      transition: transform 1.2s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.6s ease;
     }
-    .poster-img.loaded { display: block; }
+
+    .poster-img.loaded {
+      display: block;
+      transform: scale(1);
+    }
+
+    .poster-shine {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg, rgba(255, 255, 255, 0.14) 0%, rgba(255, 255, 255, 0) 45%);
+      pointer-events: none;
+      z-index: 1;
+    }
+
     .poster-placeholder {
-      position: absolute; inset: 0;
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      position: absolute;
+      inset: 0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
       gap: 12px;
       color: var(--text-muted);
     }
-    .poster-placeholder svg { opacity: 0.4; }
+
+    .poster-placeholder svg {
+      opacity: 0.4;
+    }
+
     .poster-gradient {
       position: absolute;
-      bottom: 0; left: 0; right: 0;
-      height: 60%;
-      background: linear-gradient(to top, var(--bg), transparent);
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 65%;
+      background: linear-gradient(to top, rgba(16, 22, 34, 0.98), transparent);
+      z-index: 2;
     }
 
     /* Badge type */
     .type-badge {
       position: absolute;
-      top: 14px; left: 14px;
-      background: rgba(0,0,0,0.6);
-      border: 1px solid var(--border);
-      backdrop-filter: blur(10px);
-      border-radius: 8px;
-      padding: 4px 10px;
+      top: 14px;
+      left: 14px;
+      background: var(--type-badge-bg);
+      border: 1px solid var(--accent-border);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      border-radius: 100px;
+      padding: 4px 12px;
       font-size: 11px;
-      font-weight: 600;
+      font-weight: 700;
       color: var(--accent);
-      letter-spacing: 0.5px;
+      letter-spacing: 0.6px;
       text-transform: uppercase;
+      z-index: 3;
+      transition: all 0.8s cubic-bezier(0.16, 1, 0.3, 1);
     }
 
     /* Card body */
     .card-body {
-      padding: 20px 24px 24px;
+      position: relative;
+      padding: 22px 24px 26px;
+      z-index: 3;
     }
+
     .content-title {
-      font-size: 22px;
+      font-size: 23px;
       font-weight: 800;
-      line-height: 1.2;
+      line-height: 1.25;
       letter-spacing: -0.4px;
       color: var(--text);
       min-height: 28px;
       margin-bottom: 6px;
+      text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
     }
+
     .content-meta {
       font-size: 13px;
       color: var(--text-dim);
       min-height: 18px;
-      margin-bottom: 20px;
+      margin-bottom: 22px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
     }
 
     /* Skeleton loading */
     .skeleton {
       background: linear-gradient(90deg,
-        rgba(255,255,255,0.05) 25%,
-        rgba(255,255,255,0.1) 50%,
-        rgba(255,255,255,0.05) 75%
-      );
+          rgba(255, 255, 255, 0.05) 25%,
+          rgba(255, 255, 255, 0.12) 50%,
+          rgba(255, 255, 255, 0.05) 75%);
       background-size: 200% 100%;
       animation: shimmer 1.5s infinite;
-      border-radius: 6px;
+      border-radius: 8px;
     }
-    @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+    @keyframes shimmer {
+      0% {
+        background-position: 200% 0;
+      }
+
+      100% {
+        background-position: -200% 0;
+      }
+    }
 
     /* CTA buttons */
     .cta-group {
       display: flex;
       flex-direction: column;
-      gap: 10px;
+      gap: 12px;
     }
 
     .btn-primary {
+      position: relative;
       display: flex;
       align-items: center;
       justify-content: center;
       gap: 10px;
-      background: linear-gradient(135deg, var(--accent), #14b8a6);
-      color: #0B0F19;
+      background: var(--accent-gradient);
+      color: #070B12;
       font-size: 15px;
       font-weight: 700;
-      padding: 14px 20px;
+      padding: 15px 22px;
       border-radius: var(--radius-sm);
       text-decoration: none;
       border: none;
       cursor: pointer;
-      transition: opacity 0.2s, transform 0.15s;
+      transition: transform 0.2s, box-shadow 0.25s, opacity 0.2s;
       letter-spacing: -0.2px;
+      box-shadow: 0 4px 20px var(--accent-glow);
     }
-    .btn-primary:hover { opacity: 0.9; transform: translateY(-1px); }
-    .btn-primary:active { transform: translateY(0); }
+
+    .btn-primary svg {
+      transition: transform 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 28px var(--accent-glow);
+    }
+
+    .btn-primary:hover svg {
+      transform: translateX(3px);
+    }
+
+    .btn-primary:active {
+      transform: translateY(0);
+    }
 
     .btn-secondary {
       display: flex;
@@ -246,24 +393,32 @@
       color: var(--text-dim);
       font-size: 13px;
       font-weight: 500;
-      padding: 11px 20px;
+      padding: 12px 20px;
       border-radius: var(--radius-sm);
       text-decoration: none;
       border: 1px solid var(--border);
       cursor: pointer;
-      transition: background 0.2s, color 0.2s;
+      transition: background 0.2s, color 0.2s, border-color 0.2s;
     }
-    .btn-secondary:hover { background: rgba(255,255,255,0.08); color: var(--text); }
+
+    .btn-secondary:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: var(--text);
+      border-color: rgba(255, 255, 255, 0.18);
+    }
 
     /* Divider */
     .divider {
       display: flex;
       align-items: center;
-      gap: 10px;
+      gap: 12px;
       color: var(--text-muted);
       font-size: 12px;
+      text-transform: lowercase;
     }
-    .divider::before, .divider::after {
+
+    .divider::before,
+    .divider::after {
       content: '';
       flex: 1;
       height: 1px;
@@ -275,236 +430,620 @@
       font-size: 12px;
       color: var(--text-muted);
       text-align: center;
-      line-height: 1.5;
+      line-height: 1.6;
+      max-width: 380px;
     }
-    .footnote a { color: var(--accent); text-decoration: none; }
-    .footnote a:hover { text-decoration: underline; }
+
+    .footnote a {
+      color: var(--accent);
+      text-decoration: none;
+      transition: color 0.2s;
+    }
+
+    .footnote a:hover {
+      text-decoration: underline;
+    }
 
     /* Error state */
-    .error-state { display: none; }
-    .error-state.visible { display: block; }
+    .error-state {
+      display: none;
+    }
+
+    .error-state.visible {
+      display: block;
+    }
   </style>
 </head>
+
 <body>
 
-<div class="bg-orb bg-orb-1"></div>
-<div class="bg-orb bg-orb-2"></div>
+  <div class="ambient-backdrop" id="ambient-backdrop"></div>
+  <div class="ambient-overlay"></div>
+  <div class="bg-orb bg-orb-1" id="orb-1"></div>
+  <div class="bg-orb bg-orb-2" id="orb-2"></div>
 
-<div class="page">
+  <div class="page">
 
-  <a class="brand" href="https://alle-0.github.io/FlickTrove/">
-    <img class="brand-logo" src="https://alle-0.github.io/FlickTrove/assets/Icon.svg" alt="FlickTrove" onerror="this.style.display='none'">
-    <span class="brand-name">FlickTrove</span>
-  </a>
+    <a class="brand" href="https://alle-0.github.io/FlickTrove/">
+      <img class="brand-logo" src="https://alle-0.github.io/FlickTrove/assets/Icon.svg" alt="FlickTrove"
+        onerror="this.style.display='none'">
+      <span class="brand-name">FlickTrove</span>
+    </a>
 
-  <div class="card" id="main-card">
-    <!-- Poster -->
-    <div class="poster-container">
-      <img class="poster-img" id="poster-img" alt="Poster">
-      <div class="poster-placeholder" id="poster-placeholder">
-        <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
-          <rect x="2" y="3" width="20" height="14" rx="2"/><path d="M8 21h8M12 17v4"/>
-        </svg>
+    <div class="card" id="main-card">
+      <!-- Poster -->
+      <div class="poster-container">
+        <div class="poster-shine"></div>
+        <img class="poster-img" id="poster-img" alt="Poster">
+        <div class="poster-placeholder" id="poster-placeholder">
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.2">
+            <rect x="2" y="3" width="20" height="14" rx="2" />
+            <path d="M8 21h8M12 17v4" />
+          </svg>
+        </div>
+        <div class="poster-gradient"></div>
+        <div class="type-badge" id="type-badge">Movie</div>
       </div>
-      <div class="poster-gradient"></div>
-      <div class="type-badge" id="type-badge">Movie</div>
+
+      <!-- Body -->
+      <div class="card-body">
+        <div class="content-title skeleton" id="content-title" style="width:80%; height:28px;">&nbsp;</div>
+        <div class="content-meta skeleton" id="content-meta" style="width:50%; height:16px; margin-bottom:20px;">&nbsp;
+        </div>
+
+        <div class="cta-group">
+          <a id="btn-open-app" class="btn-primary" href="#" style="display:none;">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+              stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+            <span id="txt-open-app">Open in FlickTrove</span>
+          </a>
+
+          <div class="divider" id="divider" style="display:none;">or</div>
+
+          <a id="btn-play-store" href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-secondary"
+            target="_blank" rel="noopener">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
+              <path
+                d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z" />
+            </svg>
+            <span id="txt-download">Download from GitHub</span>
+          </a>
+        </div>
+      </div>
     </div>
 
-    <!-- Body -->
-    <div class="card-body">
-      <div class="content-title skeleton" id="content-title" style="width:80%; height:28px;">&nbsp;</div>
-      <div class="content-meta skeleton" id="content-meta" style="width:50%; height:16px; margin-bottom:20px;">&nbsp;</div>
+    <p class="footnote" id="footnote">
+      Don't have the app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank"
+        rel="noopener">Download it free from GitHub Releases</a>.<br>
+      You might need to enable <em>"Install from unknown sources"</em> in your Android settings.<br>
+      <a href="https://alle-0.github.io/FlickTrove/">Discover FlickTrove →</a>
+    </p>
 
-      <div class="cta-group">
-        <a id="btn-open-app" class="btn-primary" href="#" style="display:none;">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M5 12h14M12 5l7 7-7 7"/>
-          </svg>
-          <span id="txt-open-app">Open in FlickTrove</span>
-        </a>
-
-        <div class="divider" id="divider" style="display:none;">or</div>
-
-        <a id="btn-play-store"
-           href="https://github.com/Alle-0/FlickTrove/releases/latest"
-           class="btn-secondary"
-           target="_blank" rel="noopener">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-            <path d="M12 0C5.37 0 0 5.37 0 12c0 5.31 3.435 9.795 8.205 11.385.6.105.825-.255.825-.57 0-.285-.015-1.23-.015-2.235-3.015.555-3.795-.735-4.035-1.41-.135-.345-.72-1.41-1.23-1.695-.42-.225-1.02-.78-.015-.795.945-.015 1.62.87 1.845 1.23 1.08 1.815 2.805 1.305 3.495.99.105-.78.42-1.305.765-1.605-2.67-.3-5.46-1.335-5.46-5.925 0-1.305.465-2.385 1.23-3.225-.12-.3-.54-1.53.12-3.18 0 0 1.005-.315 3.3 1.23.96-.27 1.98-.405 3-.405s2.04.135 3 .405c2.295-1.56 3.3-1.23 3.3-1.23.66 1.65.24 2.88.12 3.18.765.84 1.23 1.905 1.23 3.225 0 4.605-2.805 5.625-5.475 5.925.435.375.81 1.095.81 2.22 0 1.605-.015 2.895-.015 3.3 0 .315.225.69.825.57A12.02 12.02 0 0 0 24 12c0-6.63-5.37-12-12-12z"/>
-          </svg>
-          <span id="txt-download">Download from GitHub</span>
-        </a>
-      </div>
-    </div>
   </div>
 
-  <p class="footnote" id="footnote">
-    Don't have the app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Download it free from GitHub Releases</a>.<br>
-    You might need to enable <em>"Install from unknown sources"</em> in your Android settings.<br>
-    <a href="https://alle-0.github.io/FlickTrove/">Discover FlickTrove →</a>
-  </p>
+  <script>
+    const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
+    const TMDB_API_BASE = 'https://api.themoviedb.org/3';
+    // Public read-only TMDB token (no secret needed for public data)
+    const TMDB_READ_TOKEN = '';
 
-</div>
+    // --- Parse query params ---
+    const params = new URLSearchParams(window.location.search);
+    const type = params.get('type') || 'movie';  // movie | tv | person
+    const id = params.get('id');
+    const t = params.get('t');
+    const p = params.get('p');
 
-<script>
-  const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
-  const TMDB_API_BASE   = 'https://api.themoviedb.org/3';
-  // Public read-only TMDB token (no secret needed for public data)
-  const TMDB_READ_TOKEN = '';
+    // --- Elements ---
+    const titleEl = document.getElementById('content-title');
+    const metaEl = document.getElementById('content-meta');
+    const posterImg = document.getElementById('poster-img');
+    const posterPh = document.getElementById('poster-placeholder');
+    const typeBadge = document.getElementById('type-badge');
+    const btnOpenApp = document.getElementById('btn-open-app');
+    const divider = document.getElementById('divider');
+    const ambientBackdrop = document.getElementById('ambient-backdrop');
 
-  // --- Parse query params ---
-  const params  = new URLSearchParams(window.location.search);
-  const type    = params.get('type') || 'movie';  // movie | tv | person
-  const id      = params.get('id');
-  const t       = params.get('t');
-  const p       = params.get('p');
+    // --- Multi-language I18n (13 Languages) ---
+    const rawLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
+    const langKey = rawLang.startsWith('zh-tw') || rawLang.startsWith('zh-hk') || rawLang.startsWith('zh-hant')
+      ? 'zh-tw'
+      : (rawLang.startsWith('zh') ? 'zh' : (rawLang.startsWith('in') ? 'id' : rawLang.slice(0, 2)));
 
-  // --- Elements ---
-  const titleEl     = document.getElementById('content-title');
-  const metaEl      = document.getElementById('content-meta');
-  const posterImg   = document.getElementById('poster-img');
-  const posterPh    = document.getElementById('poster-placeholder');
-  const typeBadge   = document.getElementById('type-badge');
-  const btnOpenApp  = document.getElementById('btn-open-app');
-  const divider     = document.getElementById('divider');
-  
-  // --- I18n ---
-  const userLang = navigator.language || navigator.userLanguage || 'en';
-  const isIt = userLang.toLowerCase().startsWith('it');
-  
-  const i18n = {
-    type_movie: isIt ? 'Film' : 'Movie',
-    type_tv: isIt ? 'Serie TV' : 'TV Show',
-    type_person: isIt ? 'Persona' : 'Person',
-    type_collection: isIt ? 'Collezione' : 'Collection',
-    type_fallback: isIt ? 'Contenuto' : 'Content',
-    open_app: isIt ? 'Apri in FlickTrove' : 'Open in FlickTrove',
-    or: isIt ? 'oppure' : 'or',
-    download: isIt ? 'Scarica da GitHub' : 'Download from GitHub',
-    footnote: isIt 
-      ? `Non hai l'app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Scaricala gratis da GitHub Releases</a>.<br>Potrebbe essere necessario abilitare <em>"Installa da origini sconosciute"</em> nelle impostazioni Android.<br><a href="https://alle-0.github.io/FlickTrove/">Scopri FlickTrove →</a>`
-      : `Don't have the app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Download it free from GitHub Releases</a>.<br>You might need to enable <em>"Install from unknown sources"</em> in your Android settings.<br><a href="https://alle-0.github.io/FlickTrove/">Discover FlickTrove →</a>`,
-    fallback_title: isIt ? 'Contenuto FlickTrove' : 'FlickTrove Content',
-    invalid_link: isIt ? 'Link non valido' : 'Invalid link',
-    collection_parts: isIt ? 'film nella collezione' : 'movies in the collection',
-    fallback_meta: isIt ? "Apri nell'app per vedere i dettagli" : "Open in app to see details",
-    tmdb_lang: isIt ? 'it-IT' : 'en-US'
-  };
-  
-  document.getElementById('txt-open-app').textContent = i18n.open_app;
-  document.getElementById('divider').textContent = i18n.or;
-  document.getElementById('txt-download').textContent = i18n.download;
-  document.getElementById('footnote').innerHTML = i18n.footnote;
+    const translations = {
+      en: {
+        type_movie: 'Movie',
+        type_tv: 'TV Show',
+        type_person: 'Person',
+        type_collection: 'Collection',
+        type_fallback: 'Content',
+        open_app: 'Open in FlickTrove',
+        or: 'or',
+        download: 'Download from GitHub',
+        footnote: `Don't have the app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Download it free from GitHub Releases</a>.<br>You might need to enable <em>"Install from unknown sources"</em> in your Android settings.<br><a href="https://alle-0.github.io/FlickTrove/">Discover FlickTrove →</a>`,
+        fallback_title: 'FlickTrove Content',
+        invalid_link: 'Invalid link',
+        collection_parts: 'items in the collection',
+        fallback_meta: 'Open in app to see details',
+        tmdb_lang: 'en-US'
+      },
+      it: {
+        type_movie: 'Film',
+        type_tv: 'Serie TV',
+        type_person: 'Persona',
+        type_collection: 'Saga / Collezione',
+        type_fallback: 'Contenuto',
+        open_app: 'Apri in FlickTrove',
+        or: 'oppure',
+        download: 'Scarica da GitHub',
+        footnote: `Non hai l'app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Scaricala gratis da GitHub Releases</a>.<br>Potrebbe essere necessario abilitare <em>"Installa da origini sconosciute"</em> nelle impostazioni Android.<br><a href="https://alle-0.github.io/FlickTrove/">Scopri FlickTrove →</a>`,
+        fallback_title: 'Contenuto FlickTrove',
+        invalid_link: 'Link non valido',
+        collection_parts: 'titoli nella saga',
+        fallback_meta: "Apri nell'app per vedere i dettagli",
+        tmdb_lang: 'it-IT'
+      },
+      hi: {
+        type_movie: 'फ़िल्म',
+        type_tv: 'टीवी सीरीज़',
+        type_person: 'व्यक्ति',
+        type_collection: 'गाथा / संग्रह',
+        type_fallback: 'सामग्री',
+        open_app: 'FlickTrove में खोलें',
+        or: 'या',
+        download: 'GitHub से डाउनलोड करें',
+        footnote: `ऐप नहीं है? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">GitHub Releases से मुफ़्त डाउनलोड करें</a>।<br>Android सेटिंग्स में <em>"अज्ञात स्रोतों से इंस्टॉल करें"</em> सक्षम करना पड़ सकता है।<br><a href="https://alle-0.github.io/FlickTrove/">FlickTrove देखें →</a>`,
+        fallback_title: 'FlickTrove सामग्री',
+        invalid_link: 'अमान्य लिंक',
+        collection_parts: 'शीर्षक संग्रह में',
+        fallback_meta: 'विवरण देखने के लिए ऐप में खोलें',
+        tmdb_lang: 'hi-IN'
+      },
+      ja: {
+        type_movie: '映画',
+        type_tv: 'TVシリーズ',
+        type_person: '人物',
+        type_collection: 'コレクション / サーガ',
+        type_fallback: 'コンテンツ',
+        open_app: 'FlickTroveで開く',
+        or: 'または',
+        download: 'GitHubからダウンロード',
+        footnote: `アプリをお持ちでないですか？ <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">GitHub Releasesから無料でダウンロード</a>。<br>Android設定で<em>「提供元不明のアプリのインストール」</em>を許可する必要がある場合があります。<br><a href="https://alle-0.github.io/FlickTrove/">FlickTroveを見る →</a>`,
+        fallback_title: 'FlickTrove コンテンツ',
+        invalid_link: '無効なリンク',
+        collection_parts: '作品（コレクション内）',
+        fallback_meta: 'アプリを開いて詳細を見る',
+        tmdb_lang: 'ja-JP'
+      },
+      ko: {
+        type_movie: '영화',
+        type_tv: 'TV 시리즈',
+        type_person: '인물',
+        type_collection: '컬렉션 / 사가',
+        type_fallback: '콘텐츠',
+        open_app: 'FlickTrove에서 열기',
+        or: '또는',
+        download: 'GitHub에서 다운로드',
+        footnote: `앱이 없으신가요? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">GitHub Releases에서 무료로 다운로드</a>하세요.<br>Android 설정에서 <em>"출처를 알 수 없는 앱 설치"</em>를 허용해야 할 수 있습니다.<br><a href="https://alle-0.github.io/FlickTrove/">FlickTrove 둘러보기 →</a>`,
+        fallback_title: 'FlickTrove 콘텐츠',
+        invalid_link: '잘못된 링크',
+        collection_parts: '개 작품 수록',
+        fallback_meta: '앱을 열어 세부 정보 확인',
+        tmdb_lang: 'ko-KR'
+      },
+      zh: {
+        type_movie: '电影',
+        type_tv: '电视剧',
+        type_person: '人物',
+        type_collection: '系列 / 专题',
+        type_fallback: '内容',
+        open_app: '在 FlickTrove 中打开',
+        or: '或',
+        download: '从 GitHub 下载',
+        footnote: `还没有应用？ <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">从 GitHub Releases 免费下载</a>。<br>您可能需要在 Android 设置中开启<em>“安装未知应用”</em>权限。<br><a href="https://alle-0.github.io/FlickTrove/">探索 FlickTrove →</a>`,
+        fallback_title: 'FlickTrove 内容',
+        invalid_link: '无效链接',
+        collection_parts: '部作品',
+        fallback_meta: '在应用中查看完整详情',
+        tmdb_lang: 'zh-CN'
+      },
+      'zh-tw': {
+        type_movie: '電影',
+        type_tv: '電視劇',
+        type_person: '人物',
+        type_collection: '系列 / 專題',
+        type_fallback: '內容',
+        open_app: '在 FlickTrove 中開啟',
+        or: '或',
+        download: '從 GitHub 下載',
+        footnote: `還沒有應用？ <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">從 GitHub Releases 免費下載</a>。<br>您可能需要在 Android 設定中允許<em>「安裝未知應用」</em>。<br><a href="https://alle-0.github.io/FlickTrove/">探索 FlickTrove →</a>`,
+        fallback_title: 'FlickTrove 內容',
+        invalid_link: '無效連結',
+        collection_parts: '部作品',
+        fallback_meta: '在應用中查看詳細資訊',
+        tmdb_lang: 'zh-TW'
+      },
+      id: {
+        type_movie: 'Film',
+        type_tv: 'Serial TV',
+        type_person: 'Orang',
+        type_collection: 'Koleksi / Saga',
+        type_fallback: 'Konten',
+        open_app: 'Buka di FlickTrove',
+        or: 'atau',
+        download: 'Unduh dari GitHub',
+        footnote: `Belum punya aplikasinya? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Unduh gratis dari GitHub Releases</a>.<br>Anda mungkin perlu mengaktifkan <em>"Pasang dari sumber tidak dikenal"</em> di pengaturan Android.<br><a href="https://alle-0.github.io/FlickTrove/">Jelajahi FlickTrove →</a>`,
+        fallback_title: 'Konten FlickTrove',
+        invalid_link: 'Tautan tidak valid',
+        collection_parts: 'judul dalam koleksi',
+        fallback_meta: 'Buka di aplikasi untuk detail lengkap',
+        tmdb_lang: 'id-ID'
+      },
+      tr: {
+        type_movie: 'Film',
+        type_tv: 'Dizi',
+        type_person: 'Kişi',
+        type_collection: 'Koleksiyon / Seri',
+        type_fallback: 'İçerik',
+        open_app: "FlickTrove'da Aç",
+        or: 'veya',
+        download: "GitHub'dan İndir",
+        footnote: `Uygulamanız yok mu? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">GitHub Releases üzerinden ücretsiz indirin</a>.<br>Android ayarlarınızda <em>"Bilinmeyen kaynaklardan yükle"</em> seçeneğini açmanız gerekebilir.<br><a href="https://alle-0.github.io/FlickTrove/">FlickTrove'u Keşfedin →</a>`,
+        fallback_title: 'FlickTrove İçeriği',
+        invalid_link: 'Geçersiz bağlantı',
+        collection_parts: 'seri içindeki yapım',
+        fallback_meta: 'Ayrıntıları görmek için uygulamada açın',
+        tmdb_lang: 'tr-TR'
+      },
+      es: {
+        type_movie: 'Película',
+        type_tv: 'Serie TV',
+        type_person: 'Persona',
+        type_collection: 'Colección / Saga',
+        type_fallback: 'Contenido',
+        open_app: 'Abrir en FlickTrove',
+        or: 'o',
+        download: 'Descargar de GitHub',
+        footnote: `¿No tienes la app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Descárgala gratis en GitHub Releases</a>.<br>Es posible que debas activar <em>"Instalar aplicaciones desconocidas"</em> en Android.<br><a href="https://alle-0.github.io/FlickTrove/">Descubre FlickTrove →</a>`,
+        fallback_title: 'Contenido de FlickTrove',
+        invalid_link: 'Enlace no válido',
+        collection_parts: 'títulos en la saga',
+        fallback_meta: 'Abre la app para ver los detalles',
+        tmdb_lang: 'es-ES'
+      },
+      fr: {
+        type_movie: 'Film',
+        type_tv: 'Série TV',
+        type_person: 'Personne',
+        type_collection: 'Collection / Saga',
+        type_fallback: 'Contenu',
+        open_app: 'Ouvrir dans FlickTrove',
+        or: 'ou',
+        download: 'Télécharger sur GitHub',
+        footnote: `Vous n'avez pas l'application ? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Téléchargez-la gratuitement sur GitHub Releases</a>.<br>Vous devrez peut-être autoriser <em>"Sources inconnues"</em> dans Android.<br><a href="https://alle-0.github.io/FlickTrove/">Découvrir FlickTrove →</a>`,
+        fallback_title: 'Contenu FlickTrove',
+        invalid_link: 'Lien invalide',
+        collection_parts: 'titres dans la saga',
+        fallback_meta: "Ouvrez l'application pour voir les détails",
+        tmdb_lang: 'fr-FR'
+      },
+      de: {
+        type_movie: 'Film',
+        type_tv: 'Serie',
+        type_person: 'Person',
+        type_collection: 'Sammlung / Reihe',
+        type_fallback: 'Inhalt',
+        open_app: 'In FlickTrove öffnen',
+        or: 'oder',
+        download: 'Von GitHub herunterladen',
+        footnote: `App noch nicht installiert? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Kostenlos auf GitHub Releases herunterladen</a>.<br>Möglicherweise musst du <em>"Unbekannte Quellen"</em> in Android aktivieren.<br><a href="https://alle-0.github.io/FlickTrove/">FlickTrove entdecken →</a>`,
+        fallback_title: 'FlickTrove Inhalt',
+        invalid_link: 'Ungültiger Link',
+        collection_parts: 'Titel in der Reihe',
+        fallback_meta: 'In der App öffnen für Details',
+        tmdb_lang: 'de-DE'
+      },
+      pt: {
+        type_movie: 'Filme',
+        type_tv: 'Série',
+        type_person: 'Pessoa',
+        type_collection: 'Coleção / Saga',
+        type_fallback: 'Conteúdo',
+        open_app: 'Abrir no FlickTrove',
+        or: 'ou',
+        download: 'Baixar do GitHub',
+        footnote: `Ainda não tem o app? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Baixe grátis pelo GitHub Releases</a>.<br>Pode ser necessário ativar <em>"Instalar apps desconhecidos"</em> no Android.<br><a href="https://alle-0.github.io/FlickTrove/">Conheça o FlickTrove →</a>`,
+        fallback_title: 'Conteúdo FlickTrove',
+        invalid_link: 'Link inválido',
+        collection_parts: 'títulos na saga',
+        fallback_meta: 'Abra no app para ver os detalhes',
+        tmdb_lang: 'pt-BR'
+      },
+      ru: {
+        type_movie: 'Фильм',
+        type_tv: 'Сериал',
+        type_person: 'Персона',
+        type_collection: 'Коллекция / Сага',
+        type_fallback: 'Контент',
+        open_app: 'Открыть в FlickTrove',
+        or: 'или',
+        download: 'Скачать с GitHub',
+        footnote: `Нет приложения? <a href="https://github.com/Alle-0/FlickTrove/releases/latest" target="_blank" rel="noopener">Скачайте бесплатно с GitHub Releases</a>.<br>Возможно, потребуется включить <em>"Установку из неизвестных источников"</em> в Android.<br><a href="https://alle-0.github.io/FlickTrove/">Узнать о FlickTrove →</a>`,
+        fallback_title: 'Контент FlickTrove',
+        invalid_link: 'Недействительная ссылка',
+        collection_parts: 'наименований в саге',
+        fallback_meta: 'Откройте в приложении для подробностей',
+        tmdb_lang: 'ru-RU'
+      }
+    };
 
-  // --- Type label ---
-  const typeLabels = { movie: i18n.type_movie, tv: i18n.type_tv, person: i18n.type_person, collection: i18n.type_collection };
-  typeBadge.textContent = typeLabels[type] || i18n.type_fallback;
+    const i18n = translations[langKey] || translations.en;
 
-  // --- Deep link intent URL (custom scheme, still works if app is installed) ---
-  if (id) {
-    const scheme = `flicktrove://media/${type}/${id}`;
-    btnOpenApp.href = scheme;
-    btnOpenApp.style.display = 'flex';
-    divider.style.display = 'flex';
-  }
+    document.getElementById('txt-open-app').textContent = i18n.open_app;
+    document.getElementById('divider').textContent = i18n.or;
+    document.getElementById('txt-download').textContent = i18n.download;
+    document.getElementById('footnote').innerHTML = i18n.footnote;
 
-  // --- Fetch metadata from TMDB (public API, no key needed for basic info) ---
-  async function fetchTmdb() {
-    if (!id) { showFallback(i18n.invalid_link); return; }
+    // --- Type label ---
+    const typeLabels = { movie: i18n.type_movie, tv: i18n.type_tv, person: i18n.type_person, collection: i18n.type_collection };
+    typeBadge.textContent = typeLabels[type] || i18n.type_fallback;
 
-    if (t) {
-      titleEl.textContent  = t;
-      titleEl.classList.remove('skeleton');
-      titleEl.style.width  = '';
-      titleEl.style.height = '';
-      document.title = `${t} — FlickTrove`;
-      
-      metaEl.textContent   = i18n.fallback_meta;
-      metaEl.classList.remove('skeleton');
-      metaEl.style.width  = '';
-      metaEl.style.height = '';
+    // --- Platform detection & Deep linking ---
+    const userAgent = navigator.userAgent || '';
+    const isAndroid = /android/i.test(userAgent);
+
+    if (id) {
+      const encodedId = encodeURIComponent(id);
+      const customScheme = `flicktrove://media/${type}/${encodedId}`;
+      const androidIntentUri = `intent://media/${type}/${encodedId}#Intent;scheme=flicktrove;package=com.cinetrack;end`;
+      const targetUri = isAndroid ? androidIntentUri : customScheme;
+
+      btnOpenApp.href = targetUri;
+      btnOpenApp.style.display = 'flex';
+      divider.style.display = 'flex';
+
+      // Auto-launch attempt on Android browser (will safely stay on page if not installed)
+      if (isAndroid) {
+        setTimeout(() => {
+          try {
+            window.location.href = targetUri;
+          } catch (e) {
+            // Fallback ignored
+          }
+        }, 400);
+      }
     }
-    
-    if (p) {
-      posterImg.src = `${TMDB_IMAGE_BASE}w500${p}`;
+
+    // --- Dynamic Color Extraction from Poster ---
+    function hslToRgb(h, s, l) {
+      const c = (1 - Math.abs(2 * l - 1)) * s;
+      const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+      const m = l - c / 2;
+      let r = 0, g = 0, b = 0;
+      if (h >= 0 && h < 60) { r = c; g = x; b = 0; }
+      else if (h >= 60 && h < 120) { r = x; g = c; b = 0; }
+      else if (h >= 120 && h < 180) { r = 0; g = c; b = x; }
+      else if (h >= 180 && h < 240) { r = 0; g = x; b = c; }
+      else if (h >= 240 && h < 300) { r = x; g = 0; b = c; }
+      else { r = c; g = 0; b = x; }
+      return {
+        r: Math.round((r + m) * 255),
+        g: Math.round((g + m) * 255),
+        b: Math.round((b + m) * 255)
+      };
+    }
+
+    function applyDynamicPalette(c) {
+      // Harmonic secondary color with soft hue rotation (+26 deg)
+      const h2 = (c.h + 26) % 360;
+      const s2 = Math.min(1, c.s * 1.05);
+      const l2 = Math.max(0.35, Math.min(0.65, c.l * 0.9));
+      const c2 = hslToRgb(h2, s2, l2);
+
+      const r = c.r, g = c.g, b = c.b;
+      const root = document.documentElement;
+
+      root.style.setProperty('--accent', `rgb(${r}, ${g}, ${b})`);
+      root.style.setProperty('--accent-secondary', `rgb(${c2.r}, ${c2.g}, ${c2.b})`);
+      root.style.setProperty('--accent-gradient', `linear-gradient(135deg, rgb(${r}, ${g}, ${b}), rgb(${c2.r}, ${c2.g}, ${c2.b}))`);
+      root.style.setProperty('--accent-dim', `rgba(${r}, ${g}, ${b}, 0.18)`);
+      root.style.setProperty('--accent-glow', `rgba(${r}, ${g}, ${b}, 0.38)`);
+      root.style.setProperty('--accent-border', `rgba(${r}, ${g}, ${b}, 0.32)`);
+      root.style.setProperty('--type-badge-bg', `rgba(${r}, ${g}, ${b}, 0.22)`);
+
+      // Update mobile Android browser status bar theme color
+      const metaTheme = document.querySelector('meta[name="theme-color"]');
+      if (metaTheme) {
+        const darkR = Math.round(r * 0.12 + 10);
+        const darkG = Math.round(g * 0.12 + 14);
+        const darkB = Math.round(b * 0.12 + 22);
+        metaTheme.setAttribute('content', `rgb(${darkR}, ${darkG}, ${darkB})`);
+      }
+    }
+
+    function extractPaletteAndStyle(img) {
+      try {
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d', { willReadFrequently: true });
+        if (!ctx) return;
+
+        const size = 48;
+        canvas.width = size;
+        canvas.height = size;
+        ctx.drawImage(img, 0, 0, size, size);
+        const imgData = ctx.getImageData(0, 0, size, size).data;
+
+        let bestColor = null;
+        let maxScore = -1;
+        let sumR = 0, sumG = 0, sumB = 0, validCount = 0;
+
+        for (let i = 0; i < imgData.length; i += 4) {
+          const r = imgData[i];
+          const g = imgData[i + 1];
+          const b = imgData[i + 2];
+          const a = imgData[i + 3];
+
+          if (a < 128) continue;
+
+          // RGB -> HSL
+          const rn = r / 255, gn = g / 255, bn = b / 255;
+          const max = Math.max(rn, gn, bn), min = Math.min(rn, gn, bn);
+          const l = (max + min) / 2;
+          const d = max - min;
+          const s = d === 0 ? 0 : (l > 0.5 ? d / (2 - max - min) : d / (max + min));
+
+          sumR += r; sumG += g; sumB += b;
+          validCount++;
+
+          // Skip overly dark, washed-out or pure white pixels
+          if (l < 0.16 || l > 0.88 || s < 0.18) continue;
+
+          // Hue in degrees
+          let h = 0;
+          if (d !== 0) {
+            switch (max) {
+              case rn: h = ((gn - bn) / d + (gn < bn ? 6 : 0)) * 60; break;
+              case gn: h = ((bn - rn) / d + 2) * 60; break;
+              case bn: h = ((rn - gn) / d + 4) * 60; break;
+            }
+          }
+
+          // Aesthetic cinematic vibrance score
+          const score = (s * 2.6) + (1 - Math.abs(l - 0.52) * 1.8);
+          if (score > maxScore) {
+            maxScore = score;
+            bestColor = { r, g, b, h, s, l };
+          }
+        }
+
+        if (!bestColor && validCount > 0) {
+          const rAvg = Math.round(sumR / validCount);
+          const gAvg = Math.round(sumG / validCount);
+          const bAvg = Math.round(sumB / validCount);
+          bestColor = { r: rAvg, g: gAvg, b: bAvg, h: 174, s: 0.65, l: 0.5 };
+        }
+
+        if (bestColor) {
+          applyDynamicPalette(bestColor);
+        }
+      } catch (e) {
+        // Safe fallback if cross-origin canvas security triggers
+      }
+    }
+
+    function setPoster(fullUrl) {
+      posterImg.crossOrigin = 'anonymous';
+      posterImg.src = fullUrl;
+
+      if (ambientBackdrop) {
+        ambientBackdrop.style.backgroundImage = `url("${fullUrl}")`;
+        ambientBackdrop.classList.add('loaded');
+      }
+
       posterImg.onload = () => {
         posterImg.classList.add('loaded');
         posterPh.style.display = 'none';
+        extractPaletteAndStyle(posterImg);
       };
       posterImg.onerror = () => { /* keep placeholder */ };
     }
-    
-    // If we have enough data from the URL, skip TMDB API to avoid 401 Unauthorized (since TMDB_READ_TOKEN is empty)
-    if (t && p) {
-       return;
-    }
 
-    try {
-      let endpoint = '';
-      if (type === 'movie')  endpoint = `/movie/${id}?language=${i18n.tmdb_lang}`;
-      if (type === 'tv')     endpoint = `/tv/${id}?language=${i18n.tmdb_lang}`;
-      if (type === 'person') endpoint = `/person/${id}?language=${i18n.tmdb_lang}`;
-      if (type === 'collection') endpoint = `/collection/${id}?language=${i18n.tmdb_lang}`;
+    // --- Fetch metadata from TMDB or URL params ---
+    async function fetchTmdb() {
+      if (!id) { showFallback(i18n.invalid_link); return; }
 
-      // Try TMDB without auth (public endpoints return limited data but title is available)
-      const res = await fetch(`${TMDB_API_BASE}${endpoint}`, {
-        headers: TMDB_READ_TOKEN
-          ? { 'Authorization': `Bearer ${TMDB_READ_TOKEN}` }
-          : {}
-      });
+      if (t) {
+        titleEl.textContent = t;
+        titleEl.classList.remove('skeleton');
+        titleEl.style.width = '';
+        titleEl.style.height = '';
+        document.title = `${t} — FlickTrove`;
 
-      if (!res.ok) { showFallback(); return; }
-      const data = await res.json();
-
-      // Title
-      const title = data.title || data.name || i18n.fallback_title;
-      titleEl.textContent  = title;
-      titleEl.classList.remove('skeleton');
-      titleEl.style.width  = '';
-      titleEl.style.height = '';
-
-      // Meta (year + genres or known_for or collection parts)
-      let metaText = '';
-      if (data.release_date) metaText = data.release_date.slice(0,4);
-      if (data.first_air_date) metaText = data.first_air_date.slice(0,4);
-      if (data.genres?.length) metaText += (metaText ? ' · ' : '') + data.genres.slice(0,2).map(g => g.name).join(', ');
-      if (data.known_for_department) metaText = data.known_for_department;
-      if (type === 'collection' && data.parts?.length) metaText = `${data.parts.length} ${i18n.collection_parts}`;
-      metaEl.textContent = metaText;
-      metaEl.classList.remove('skeleton');
-      metaEl.style.width  = '';
-      metaEl.style.height = '';
-
-      // Poster
-      const posterPath = data.poster_path || data.profile_path;
-      if (posterPath) {
-        posterImg.src = `${TMDB_IMAGE_BASE}w500${posterPath}`;
-        posterImg.onload = () => {
-          posterImg.classList.add('loaded');
-          posterPh.style.display = 'none';
-        };
-        posterImg.onerror = () => { /* keep placeholder */ };
+        metaEl.textContent = i18n.fallback_meta;
+        metaEl.classList.remove('skeleton');
+        metaEl.style.width = '';
+        metaEl.style.height = '';
       }
 
-      // Update page title + OG
-      document.title = `${title} — FlickTrove`;
+      if (p) {
+        const fullPoster = p.startsWith('http') ? p : `${TMDB_IMAGE_BASE}w500${p}`;
+        setPoster(fullPoster);
+      }
 
-    } catch (e) {
-      showFallback();
+      // If we have enough data from URL, or if this is a non-numeric editorial collection (Firestore)
+      const isNonNumericId = !/^\d+$/.test(id);
+      if ((t && p) || isNonNumericId) {
+        if (!t && isNonNumericId) {
+          titleEl.textContent = id.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+          titleEl.classList.remove('skeleton');
+          titleEl.style.width = titleEl.style.height = '';
+        }
+        return;
+      }
+
+      try {
+        let endpoint = '';
+        if (type === 'movie') endpoint = `/movie/${id}?language=${i18n.tmdb_lang}`;
+        if (type === 'tv') endpoint = `/tv/${id}?language=${i18n.tmdb_lang}`;
+        if (type === 'person') endpoint = `/person/${id}?language=${i18n.tmdb_lang}`;
+        if (type === 'collection') endpoint = `/collection/${id}?language=${i18n.tmdb_lang}`;
+
+        const res = await fetch(`${TMDB_API_BASE}${endpoint}`, {
+          headers: TMDB_READ_TOKEN
+            ? { 'Authorization': `Bearer ${TMDB_READ_TOKEN}` }
+            : {}
+        });
+
+        if (!res.ok) { showFallback(); return; }
+        const data = await res.json();
+
+        // Title
+        const title = data.title || data.name || i18n.fallback_title;
+        titleEl.textContent = title;
+        titleEl.classList.remove('skeleton');
+        titleEl.style.width = '';
+        titleEl.style.height = '';
+
+        // Meta (year + genres or known_for or collection parts)
+        let metaText = '';
+        if (data.release_date) metaText = data.release_date.slice(0, 4);
+        if (data.first_air_date) metaText = data.first_air_date.slice(0, 4);
+        if (data.genres?.length) metaText += (metaText ? ' · ' : '') + data.genres.slice(0, 2).map(g => g.name).join(', ');
+        if (data.known_for_department) metaText = data.known_for_department;
+        if (type === 'collection' && data.parts?.length) metaText = `${data.parts.length} ${i18n.collection_parts}`;
+        metaEl.textContent = metaText;
+        metaEl.classList.remove('skeleton');
+        metaEl.style.width = '';
+        metaEl.style.height = '';
+
+        // Poster
+        const posterPath = data.poster_path || data.profile_path;
+        if (posterPath) {
+          setPoster(`${TMDB_IMAGE_BASE}w500${posterPath}`);
+        }
+
+        // Update page title + OG
+        document.title = `${title} — FlickTrove`;
+
+      } catch (e) {
+        showFallback();
+      }
     }
-  }
 
-  function showFallback(msg) {
-    titleEl.textContent  = i18n.fallback_title;
-    titleEl.classList.remove('skeleton');
-    metaEl.textContent   = msg || i18n.fallback_meta;
-    metaEl.classList.remove('skeleton');
-    titleEl.style.width = metaEl.style.width = '';
-    titleEl.style.height = metaEl.style.height = '';
-  }
+    function showFallback(msg) {
+      titleEl.textContent = i18n.fallback_title;
+      titleEl.classList.remove('skeleton');
+      metaEl.textContent = msg || i18n.fallback_meta;
+      metaEl.classList.remove('skeleton');
+      titleEl.style.width = metaEl.style.width = '';
+      titleEl.style.height = metaEl.style.height = '';
+    }
 
-  fetchTmdb();
-</script>
+    fetchTmdb();
+  </script>
 
 </body>
+
 </html>

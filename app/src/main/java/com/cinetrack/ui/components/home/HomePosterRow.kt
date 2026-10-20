@@ -1,8 +1,10 @@
 package com.cinetrack.ui.components.home
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
@@ -39,7 +41,11 @@ fun HomePosterRow(
             HomeSectionTitle(title = title, onClick = onTitleClick)
 
             val displayList = if (maxDisplayCount != null) movies.take(maxDisplayCount) else movies
+            val rowState = rememberSaveable(keyPrefix, saver = LazyListState.Saver) {
+                LazyListState()
+            }
             LazyRow(
+                state = rowState,
                 contentPadding = PaddingValues(horizontal = 16.dp, vertical = 10.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {

@@ -73,6 +73,11 @@ object NetworkModule {
                     val imageLanguage = "$resolvedLanguage,en,null"
                     urlBuilder.setEncodedQueryParameter("include_image_language", imageLanguage)
                 }
+
+                if (original.url.queryParameter("include_video_language") != null) {
+                    val videoLanguage = "$resolvedLanguage,en,null"
+                    urlBuilder.setEncodedQueryParameter("include_video_language", videoLanguage)
+                }
                 
                 val url = urlBuilder.build()
                 val request = original.newBuilder().url(url).build()

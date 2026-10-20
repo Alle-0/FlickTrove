@@ -533,8 +533,11 @@ fun CollectionDetailScreenContent(
                         val overviewSnippet = uiState.collection?.overview?.takeIf { it.isNotBlank() }?.let { overview ->
                             if (overview.length > 200) overview.take(197) + "..." else overview
                         }
-                        val colId = uiState.collection?.id
-                        val link = if (colId != null) "https://alle-0.github.io/FlickTrove/open.html?type=collection&id=$colId" else ""
+                        val colId = uiState.collectionId.ifBlank { uiState.collection?.id?.toString() ?: "" }
+                        val titleParam = android.net.Uri.encode(collectionName)
+                        val posterPath = uiState.collection?.posterPath ?: uiState.collection?.backdropPath
+                        val posterParam = posterPath?.let { "&p=${android.net.Uri.encode(it)}" } ?: ""
+                        val link = if (colId.isNotBlank()) "https://alle-0.github.io/FlickTrove/open.html?type=collection&id=$colId&t=$titleParam$posterParam" else ""
                         val body = if (overviewSnippet != null) "$overviewSnippet\n\n$link" else link
                         val shareText = context.getString(R.string.detail_share_text, collectionName, body)
                         putExtra(android.content.Intent.EXTRA_TEXT, shareText)

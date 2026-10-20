@@ -640,8 +640,15 @@ fun ContinueWatchingSeriesCard(
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                     )
                     if (nextInfo.remainingInSeason > 0) {
+                        val remainingSeason = nextInfo.remainingInSeason
+                        val remainingTotal = nextInfo.remainingTotal
+                        val remainingText = if (remainingTotal > remainingSeason) {
+                            "${stringResource(R.string.lbl_episodes_remaining, remainingSeason)} ($remainingTotal tot)"
+                        } else {
+                            stringResource(R.string.lbl_episodes_remaining, remainingSeason)
+                        }
                         Text(
-                            text = stringResource(R.string.lbl_episodes_remaining, nextInfo.remainingInSeason),
+                            text = remainingText,
                             color = Color.White.copy(alpha = 0.65f),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,

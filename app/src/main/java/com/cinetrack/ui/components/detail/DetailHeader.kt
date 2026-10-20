@@ -436,7 +436,7 @@ fun DetailHeader(
                     Column(
                         horizontalAlignment = Alignment.End,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(end = 10.dp)
+                        modifier = Modifier.padding(end = 4.dp)
                     ) {
                         val dateStr = movie.releaseDate ?: movie.firstAirDate
                         val isReleased = movie.isReleased
@@ -494,9 +494,9 @@ fun DetailHeader(
                                 Text(
                                     text = displayedDate,
                                     style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 11.sp,
+                                        fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Black,
-                                        letterSpacing = 0.8.sp
+                                        letterSpacing = 0.5.sp
                                     ),
                                     color = dateColor,
                                     maxLines = 1
@@ -504,7 +504,7 @@ fun DetailHeader(
 
                                 Box(
                                     modifier = Modifier
-                                        .padding(horizontal = 6.dp)
+                                        .padding(horizontal = 4.dp)
                                         .size(3.dp)
                                         .background(Color.White.copy(alpha = 0.3f), CircleShape)
                                 )
@@ -512,12 +512,13 @@ fun DetailHeader(
                                 Text(
                                     text = runtime.uppercase(),
                                     style = MaterialTheme.typography.labelMedium.copy(
-                                        fontSize = 11.sp,
+                                        fontSize = 10.5.sp,
                                         fontWeight = FontWeight.Black,
-                                        letterSpacing = 0.8.sp
+                                        letterSpacing = 0.5.sp
                                     ),
                                     color = Color.White.copy(alpha = 0.6f),
                                     maxLines = 1,
+                                    softWrap = false,
                                     overflow = TextOverflow.Ellipsis
                                 )
                             }

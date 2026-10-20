@@ -460,6 +460,7 @@ fun DetailActions(
                                 ?: movie.seasons?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
                             val avgRuntime = movie.episodeRunTime?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
                                 ?: movie.runtime?.takeIf { it > 0 }
+                                ?: movie.seasons?.flatMap { it.episodes ?: emptyList() }?.mapNotNull { it.runtime?.takeIf { r -> r > 0 } }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
                             Pair(totalEpisodes, avgRuntime)
                         } else null
                     }

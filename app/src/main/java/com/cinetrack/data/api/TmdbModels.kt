@@ -320,7 +320,8 @@ data class Video(
     val key: String = "",
     val name: String = "",
     val site: String = "",
-    val type: String = ""
+    val type: String = "",
+    @SerialName("iso_639_1") val iso6391: String? = null
 )
 
 @Serializable

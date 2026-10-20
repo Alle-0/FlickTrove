@@ -501,7 +501,9 @@ fun PersonDetailScreenContent(
                             val bioSnippet = uiState.person?.biography?.takeIf { it.isNotBlank() }?.let { bio ->
                                 if (bio.length > 200) bio.take(197) + "..." else bio
                             }
-                            val link = "https://alle-0.github.io/FlickTrove/open.html?type=person&id=${uiState.personId}"
+                            val titleParam = android.net.Uri.encode(personName)
+                            val posterParam = uiState.person?.profilePath?.let { "&p=${android.net.Uri.encode(it)}" } ?: ""
+                            val link = "https://alle-0.github.io/FlickTrove/open.html?type=person&id=${uiState.personId}&t=$titleParam$posterParam"
                             val body = if (bioSnippet != null) "$bioSnippet\n\n$link" else link
                             val shareText = context.getString(R.string.detail_share_text, displayName, body)
                             putExtra(android.content.Intent.EXTRA_TEXT, shareText)

@@ -189,10 +189,24 @@ class DetailUiStateMapper @Inject constructor(
             streamingProviders = (metadata.watchProviders?.results?.get(watchRegion)?.flatrate?.distinctBy { it.providerId } ?: emptyList()).toImmutableList(),
             buyRentProviders = ((metadata.watchProviders?.results?.get(watchRegion)?.buy ?: emptyList()) + 
                                (metadata.watchProviders?.results?.get(watchRegion)?.rent ?: emptyList())).distinctBy { it.providerId }.toImmutableList(),
-            trailers = (metadata.videos?.results?.let { videos -> 
-                videos.filter { v -> v.site == "YouTube" && v.type == "Trailer" }.map { v -> v.key }.distinct()
-            } ?: emptyList()).toImmutableList(),
-            videos = (metadata.videos?.results?.filter { v -> v.site == "YouTube" || v.site == "Vimeo" } ?: emptyList()).toImmutableList(),
+            trailers = run {
+                val userLang = java.util.Locale.getDefault().language
+                val sorted = (metadata.videos?.results?.filter { v -> v.site == "YouTube" && v.type == "Trailer" } ?: emptyList())
+                    .sortedWith(
+                        compareByDescending<com.cinetrack.data.api.Video> { it.iso6391 == userLang }
+                            .thenByDescending { it.iso6391 == "en" }
+                    )
+                sorted.map { it.key }.distinct().toImmutableList()
+            },
+            videos = run {
+                val userLang = java.util.Locale.getDefault().language
+                (metadata.videos?.results?.filter { v -> v.site == "YouTube" || v.site == "Vimeo" } ?: emptyList())
+                    .sortedWith(
+                        compareByDescending<com.cinetrack.data.api.Video> { it.iso6391 == userLang }
+                            .thenByDescending { it.type == "Trailer" }
+                            .thenByDescending { it.iso6391 == "en" }
+                    ).toImmutableList()
+            },
             recommendations = (metadata.recommendations?.results?.mapNotNull { rec ->
                 if (hideSaved) {
                     val isSaved = localMovies.any { it.id == rec.id && it.mediaType == mediaType }
