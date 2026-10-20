@@ -107,3 +107,4 @@ screenshot*.png
 scratch/
 .markdownlint.json
 *PLAN.md
+/plans/
