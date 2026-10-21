@@ -293,11 +293,13 @@ class FirebaseRemoteDataSource @Inject constructor(
                     firestore.runBatch { batch ->
                         for (entry in chunk) {
                             val safeWatchedAt = entry.watchedAt.replace("/", "-")
-                            val docId = "${entry.movieId}_${safeWatchedAt}"
+                            val docId = if (entry.mediaType == "tv") "tv_${entry.movieId}_${safeWatchedAt}" else "${entry.movieId}_${safeWatchedAt}"
                             val docRef = collection.document(docId)
                             val map = mapOf(
                                 "id" to entry.id,
                                 "movieId" to entry.movieId,
+                                "mediaType" to entry.mediaType,
+                                "media_type" to entry.mediaType,
                                 "watchedAt" to entry.watchedAt,
                                 "isRewatch" to entry.isRewatch,
                                 "syncStatus" to entry.syncStatus,
@@ -331,6 +333,9 @@ class FirebaseRemoteDataSource @Inject constructor(
             val snapshot = query.get(Source.SERVER).await()
             for (doc in snapshot.documents) {
                 val movieId = doc.getLong("movieId") ?: 0L
+                val mediaType = doc.getString("mediaType")
+                    ?: doc.getString("media_type")
+                    ?: if (doc.getString("historicalEpisodes") != null || doc.id.startsWith("tv_")) "tv" else "movie"
                 val watchedAt = doc.getString("watchedAt") ?: ""
                 val isRewatch = doc.getBoolean("isRewatch") ?: false
                 val syncStatus = doc.getString("sync_status") ?: doc.getString("syncStatus") ?: "synced"
@@ -340,6 +345,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                         WatchHistoryEntity(
                             id = 0,
                             movieId = movieId,
+                            mediaType = mediaType,
                             watchedAt = watchedAt,
                             isRewatch = isRewatch,
                             syncStatus = syncStatus,
@@ -364,14 +370,16 @@ class FirebaseRemoteDataSource @Inject constructor(
     /**
      * Soft delete a single Watch History entry using Tombstone
      */
-    suspend fun softDeleteWatchHistory(movieId: Long, watchedAt: String) {
+    suspend fun softDeleteWatchHistory(movieId: Long, watchedAt: String, mediaType: String = "movie") {
         val uid = userId ?: return
         val safeWatchedAt = watchedAt.replace("/", "-")
-        val docId = "${movieId}_${safeWatchedAt}"
+        val docId = if (mediaType == "tv") "tv_${movieId}_${safeWatchedAt}" else "${movieId}_${safeWatchedAt}"
         val now = System.currentTimeMillis()
         try {
             val tombstone = mapOf(
                 "movieId" to movieId,
+                "mediaType" to mediaType,
+                "media_type" to mediaType,
                 "watchedAt" to watchedAt,
                 "syncStatus" to "deleted",
                 "sync_status" to "deleted",
@@ -383,8 +391,8 @@ class FirebaseRemoteDataSource @Inject constructor(
         }
     }
 
-    suspend fun deleteWatchHistory(movieId: Long, watchedAt: String) {
-        softDeleteWatchHistory(movieId, watchedAt)
+    suspend fun deleteWatchHistory(movieId: Long, watchedAt: String, mediaType: String = "movie") {
+        softDeleteWatchHistory(movieId, watchedAt, mediaType)
     }
 
     /**
@@ -401,10 +409,12 @@ class FirebaseRemoteDataSource @Inject constructor(
                     firestore.runBatch { batch ->
                         for (entry in chunk) {
                             val safeWatchedAt = entry.watchedAt.replace("/", "-")
-                            val docId = "${entry.movieId}_${safeWatchedAt}"
+                            val docId = if (entry.mediaType == "tv") "tv_${entry.movieId}_${safeWatchedAt}" else "${entry.movieId}_${safeWatchedAt}"
                             val docRef = collection.document(docId)
                             val tombstone = mapOf(
                                 "movieId" to entry.movieId,
+                                "mediaType" to entry.mediaType,
+                                "media_type" to entry.mediaType,
                                 "watchedAt" to entry.watchedAt,
                                 "syncStatus" to "deleted",
                                 "sync_status" to "deleted",

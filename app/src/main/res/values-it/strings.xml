@@ -1138,6 +1138,7 @@
     <string name="account_error_name_short">Il nome deve avere almeno 3 caratteri.</string>
     <string name="account_error_name_long">Il nome non può superare 20 caratteri.</string>
     <string name="account_error_name_profanity">Nome non valido.</string>
+    <string name="account_error_name_reserved">Questo nome utente contiene parole riservate.</string>
     <string name="account_error_name_taken">Nome già in uso.</string>
     <string name="account_error_checking_name">Errore nel controllo del nome.</string>
     <string name="general_stats">STATISTICHE GENERALI</string>
@@ -1833,8 +1834,48 @@
     <string name="trophy_producer_verify_not_found">Nessuna donazione trovata per questa email. Possono essere necessari un paio di minuti per la registrazione del pagamento.</string>
     <string name="trophy_producer_verify_invalid_email">Inserisci un indirizzo email valido.</string>
     <string name="trophy_producer_verify_already_claimed">Questa donazione è già stata riscattata da un altro account.</string>
-    <string name="trophy_producer_verify_error">Errore di connessione durante la verifica. Riprova tra poco.</string>
     <string name="collection_progress_popup">%1$d/%2$d visti (%3$d%%)</string>
     <string name="collection_progress_popup_completed">%1$d/%2$d completati (100%%)</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Diario</string>
+    <string name="history_screen_subtitle">Il tuo percorso cinefilo</string>
+    <string name="history_view_timeline">Timeline</string>
+    <string name="history_view_calendar">Calendario</string>
+    <string name="history_filter_all">Tutti</string>
+    <string name="history_filter_movies">Film</string>
+    <string name="history_filter_tv">Serie TV</string>
+    <string name="history_filter_rewatches">Rewatch</string>
+    <string name="history_filter_with_notes">Con Note</string>
+    <string name="history_stat_movies">%1$d Film</string>
+    <string name="history_stat_tv">%1$d Serie</string>
+    <string name="history_stat_rewatches">%1$d Rewatch</string>
+    <string name="history_stat_notes">%1$d Note</string>
+    <string name="history_stat_hours">%1$d ore</string>
+    <string name="history_delete_session_title">Rimuovi Visione</string>
+    <string name="history_delete_session_confirm">Sei sicuro di voler rimuovere questa sessione di visione dal tuo diario?</string>
+    <string name="history_edit_date_title">Modifica Data di Visione</string>
+    <string name="history_no_entries_filter">Nessun elemento trovato per questo filtro.</string>
+    <string name="history_no_entries_calendar">Nessun film visto in questa data.</string>
+    <string name="history_account_card_title">Diario &amp; Cronologia</string>
+    <string name="history_account_card_subtitle">Rivivi il tuo percorso cinematografico</string>
+    <string name="history_rewatch_badge">Rewatch #%1$d</string>
+    <string name="history_first_watch_badge">Prima Visione</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d visti</string>
+    <string name="history_calendar_select_prompt">Tocca un giorno per visualizzare le visioni</string>
+    <string name="history_calendar_entries_on_date">Visioni del %1$s</string>
+    <string name="history_filter_media_type">TIPO MEDIA</string>
+    <string name="history_filter_viewing_type">TIPO VISIONE</string>
+    <string name="history_filter_notes">NOTE</string>
+    <string name="history_filter_all_viewings">Tutte le visioni</string>
+    <string name="history_filter_rewatches_only">Solo rewatch</string>
+    <string name="history_filter_first_watches_only">Solo prime visioni</string>
+    <string name="history_filter_all_notes">Tutti</string>
+    <string name="history_filter_with_notes_only">Solo con note</string>
+    <string name="history_sort_recent">Data più recente (Predefinito)</string>
+    <string name="history_sort_oldest">Data meno recente</string>
+    <string name="history_sort_title">Titolo (A - Z)</string>
+    <string name="history_sort_rating">Voto personale</string>
 </resources>
 

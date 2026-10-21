@@ -136,6 +136,9 @@ object AccountTab : Tab {
         val trophyRoomViewModel = hiltViewModel<com.cinetrack.ui.viewmodel.TrophyRoomViewModel>()
         val trophyItems by trophyRoomViewModel.trophyItems.collectAsStateWithLifecycle()
 
+        val historyViewModel = hiltViewModel<com.cinetrack.ui.history.HistoryViewModel>()
+        val historyUiState by historyViewModel.uiState.collectAsStateWithLifecycle()
+
         val context = androidx.compose.ui.platform.LocalContext.current
         var currentContext = context
         while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
@@ -460,6 +463,7 @@ object AccountTab : Tab {
                         modifier = Modifier.padding(horizontal = 24.dp),
                         verticalArrangement = Arrangement.spacedBy(16.dp)
                     ) {
+                        val isDiaryInDashboardOrder = "diary" in dashboardCardOrder || "history" in dashboardCardOrder
                         dashboardCardOrder.forEach { cardKey ->
                             when (cardKey) {
                                 "stats" -> {
@@ -509,7 +513,30 @@ object AccountTab : Tab {
                                         )
                                     }
                                 }
+                                "diary", "history" -> {
+                                    com.cinetrack.ui.components.account.HistoryDiaryCard(
+                                        hazeState = backgroundHazeState,
+                                        backgroundLuminance = rawLuminance,
+                                        recentEntries = historyUiState.allEntries.take(3),
+                                        totalCount = historyUiState.allEntries.size,
+                                        onClick = {
+                                            parentNavigator.push(com.cinetrack.ui.screens.HistoryScreen())
+                                        }
+                                    )
+                                }
                             }
+                        }
+
+                        if (!isDiaryInDashboardOrder) {
+                            com.cinetrack.ui.components.account.HistoryDiaryCard(
+                                hazeState = backgroundHazeState,
+                                backgroundLuminance = rawLuminance,
+                                recentEntries = historyUiState.allEntries.take(3),
+                                totalCount = historyUiState.allEntries.size,
+                                onClick = {
+                                    parentNavigator.push(com.cinetrack.ui.screens.HistoryScreen())
+                                }
+                            )
                         }
                     }
                     

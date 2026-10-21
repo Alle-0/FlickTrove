@@ -1090,6 +1090,7 @@
     <string name="account_error_name_short">नाम कम से कम 3 अक्षरों का होना चाहिए।</string>
     <string name="account_error_name_long">नाम 20 अक्षरों से अधिक नहीं हो सकता।</string>
     <string name="account_error_name_profanity">अमान्य नाम।</string>
+    <string name="account_error_name_reserved">इस उपयोगकर्ता नाम में आरक्षित शब्द शामिल हैं।</string>
     <string name="account_error_name_taken">नाम पहले ही लिया जा चुका है।</string>
     <string name="account_error_checking_name">नाम जांचने में त्रुटि।</string>
     <string name="account_remove_avatar">अवतार हटाएँ</string>
@@ -1820,6 +1821,47 @@
     <string name="trophy_producer_verify_invalid_email">कृपया एक मान्य ईमेल पता दर्ज करें।</string>
     <string name="trophy_producer_verify_already_claimed">यह दान पहले ही किसी अन्य खाते द्वारा क्लेम किया जा चुका है।</string>
     <string name="trophy_producer_verify_error">सत्यापन के दौरान कनेक्शन त्रुटि। कृपया थोड़ी देर बाद पुनः प्रयास करें।</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">डायरी</string>
+    <string name="history_screen_subtitle">आपकी सिनेमाई यात्रा</string>
+    <string name="history_view_timeline">टाइमलाइन</string>
+    <string name="history_view_calendar">कैलेंडर</string>
+    <string name="history_filter_all">सभी</string>
+    <string name="history_filter_movies">फ़िल्में</string>
+    <string name="history_filter_tv">सीरीज़</string>
+    <string name="history_filter_rewatches">दोबारा देखी गईं</string>
+    <string name="history_filter_with_notes">नोट्स सहित</string>
+    <string name="history_stat_movies">%1$d फ़िल्में</string>
+    <string name="history_stat_tv">%1$d सीरीज़</string>
+    <string name="history_stat_rewatches">%1$d दोबारा देखीं</string>
+    <string name="history_stat_notes">%1$d नोट्स</string>
+    <string name="history_stat_hours">%1$d घंटे</string>
+    <string name="history_delete_session_title">सत्र हटाएं</string>
+    <string name="history_delete_session_confirm">क्या आप वाकई इस देखने के सत्र को अपनी डायरी से हटाना चाहते हैं?</string>
+    <string name="history_edit_date_title">देखने की तारीख बदलें</string>
+    <string name="history_no_entries_filter">इस फ़िल्टर के लिए कोई प्रविष्टि नहीं मिली।</string>
+    <string name="history_no_entries_calendar">इस दिन कोई फ़िल्म नहीं देखी गई।</string>
+    <string name="history_account_card_title">डायरी और इतिहास</string>
+    <string name="history_account_card_subtitle">अपनी सिनेमाई यादें ताज़ा करें</string>
+    <string name="history_rewatch_badge">दोबारा देखा #%1$d</string>
+    <string name="history_first_watch_badge">पहली बार देखा</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d देखी गईं</string>
+    <string name="history_calendar_select_prompt">सत्र देखने के लिए एक दिन चुनें</string>
+    <string name="history_calendar_entries_on_date">%1$s पर देखे गए</string>
+    <string name="history_filter_media_type">मीडिया प्रकार</string>
+    <string name="history_filter_viewing_type">देखने का प्रकार</string>
+    <string name="history_filter_notes">नोट्स</string>
+    <string name="history_filter_all_viewings">सभी दृश्य</string>
+    <string name="history_filter_rewatches_only">केवल दोबारा देखे गए</string>
+    <string name="history_filter_first_watches_only">केवल पहली बार देखे गए</string>
+    <string name="history_filter_all_notes">सभी</string>
+    <string name="history_filter_with_notes_only">केवल नोट्स के साथ</string>
+    <string name="history_sort_recent">नवीनतम (डिफ़ॉल्ट)</string>
+    <string name="history_sort_oldest">सबसे पुराना</string>
+    <string name="history_sort_title">शीर्षक (A - Z)</string>
+    <string name="history_sort_rating">व्यक्तिगत रेटिंग</string>
 </resources>
 
 

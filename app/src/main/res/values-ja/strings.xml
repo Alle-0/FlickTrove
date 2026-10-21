@@ -1173,6 +1173,7 @@
     <string name="account_error_name_short">名前は3文字以上で入力してください。</string>
     <string name="account_error_name_long">名前は20文字以内で入力してください。</string>
     <string name="account_error_name_profanity">無効な名前です。</string>
+    <string name="account_error_name_reserved">このユーザー名には予約語が含まれています。</string>
     <string name="account_error_name_taken">この名前は既に使用されています。</string>
     <string name="account_error_checking_name">名前の確認中にエラーが発生しました。</string>
     <string name="account_remove_avatar">アバターを削除</string>
@@ -1828,4 +1829,45 @@
     <string name="trophy_producer_verify_invalid_email">有効なメールアドレスを入力してください。</string>
     <string name="trophy_producer_verify_already_claimed">この寄付はすでに別のアカウントによって引き換えられています。</string>
     <string name="trophy_producer_verify_error">確認中に接続エラーが発生しました。しばらくしてからもう一度お試しください。</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">鑑賞日記</string>
+    <string name="history_screen_subtitle">あなたのシネマの軌跡</string>
+    <string name="history_view_timeline">タイムライン</string>
+    <string name="history_view_calendar">カレンダー</string>
+    <string name="history_filter_all">すべて</string>
+    <string name="history_filter_movies">映画</string>
+    <string name="history_filter_tv">ドラマ</string>
+    <string name="history_filter_rewatches">再鑑賞</string>
+    <string name="history_filter_with_notes">メモ付き</string>
+    <string name="history_stat_movies">%1$d 映画</string>
+    <string name="history_stat_tv">%1$d シリーズ</string>
+    <string name="history_stat_rewatches">%1$d 再鑑賞</string>
+    <string name="history_stat_notes">%1$d メモ</string>
+    <string name="history_stat_hours">%1$d 時間</string>
+    <string name="history_delete_session_title">記録を削除</string>
+    <string name="history_delete_session_confirm">この鑑賞記録を日記から削除してもよろしいですか？</string>
+    <string name="history_edit_date_title">鑑賞日を変更</string>
+    <string name="history_no_entries_filter">条件に一致する作品はありません。</string>
+    <string name="history_no_entries_calendar">この日に鑑賞した作品はありません。</string>
+    <string name="history_account_card_title">鑑賞日記と履歴</string>
+    <string name="history_account_card_subtitle">映画体験の軌跡を振り返る</string>
+    <string name="history_rewatch_badge">再鑑賞 #%1$d</string>
+    <string name="history_first_watch_badge">初鑑賞</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d 本鑑賞</string>
+    <string name="history_calendar_select_prompt">日付を選択して記録を表示</string>
+    <string name="history_calendar_entries_on_date">%1$s の鑑賞記録</string>
+    <string name="history_filter_media_type">メディアタイプ</string>
+    <string name="history_filter_viewing_type">鑑賞タイプ</string>
+    <string name="history_filter_notes">メモ</string>
+    <string name="history_filter_all_viewings">すべての記録</string>
+    <string name="history_filter_rewatches_only">再鑑賞のみ</string>
+    <string name="history_filter_first_watches_only">初鑑賞のみ</string>
+    <string name="history_filter_all_notes">すべて</string>
+    <string name="history_filter_with_notes_only">メモありのみ</string>
+    <string name="history_sort_recent">新しい順（デフォルト）</string>
+    <string name="history_sort_oldest">古い順</string>
+    <string name="history_sort_title">タイトル順（A - Z）</string>
+    <string name="history_sort_rating">個人評価順</string>
 </resources>

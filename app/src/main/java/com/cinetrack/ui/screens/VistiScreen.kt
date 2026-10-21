@@ -1,6 +1,7 @@
 package com.cinetrack.ui.screens
 
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.painterResource
 
 import com.cinetrack.R
 
@@ -118,6 +119,9 @@ object VistiTab : Tab {
             onActionModalVisibilityChanged = { isActionModalVisible = it },
             onMovieClick = { movie -> 
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
+            },
+            onOpenHistory = {
+                navigator.push(HistoryScreen())
             }
         )
         
@@ -133,7 +137,8 @@ fun VistiScreenContent(
     isFilterVisible: Boolean = false,
     onToggleFilter: (Boolean, Rect?) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {},
-    onActionModalVisibilityChanged: (Boolean) -> Unit = {}
+    onActionModalVisibilityChanged: (Boolean) -> Unit = {},
+    onOpenHistory: () -> Unit = {}
 ) {
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
@@ -379,6 +384,30 @@ fun VistiScreenContent(
                 modifier = Modifier.align(Alignment.CenterEnd),
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
+                // History / Diary Button
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .clip(RoundedCornerShape(50))
+                        .hazeGlass(
+                            state = activeHazeState,
+                            shape = RoundedCornerShape(50),
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = false
+                        )
+                        .bounceClick(scaleDown = 0.92f) {
+                            onOpenHistory()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_calendario),
+                        contentDescription = stringResource(R.string.history_screen_title),
+                        tint = Color.White.copy(alpha = 0.85f),
+                        modifier = Modifier.size(17.dp)
+                    )
+                }
+
                 // Layout Toggle Button
                 if (uiState.preferences.showLayoutToggle) {
                     LayoutToggleButton(

@@ -1173,6 +1173,7 @@
     <string name="account_error_name_short">İsim en az 3 karakter olmalıdır.</string>
     <string name="account_error_name_long">İsim 20 karakteri geçemez.</string>
     <string name="account_error_name_profanity">Geçersiz isim.</string>
+    <string name="account_error_name_reserved">Bu kullanıcı adı ayrılmış kelimeler içeriyor.</string>
     <string name="account_error_name_taken">Bu isim zaten alınmış.</string>
     <string name="account_error_checking_name">İsim kontrol edilirken hata oluştu.</string>
     <string name="account_remove_avatar">Avatarı Kaldır</string>
@@ -1828,4 +1829,45 @@
     <string name="trophy_producer_verify_invalid_email">Lütfen geçerli bir e-posta adresi girin.</string>
     <string name="trophy_producer_verify_already_claimed">Bu bağış zaten başka bir hesap tarafından talep edilmiş.</string>
     <string name="trophy_producer_verify_error">Doğrulama sırasında bağlantı hatası oluştu. Lütfen birazdan tekrar deneyin.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Günlük</string>
+    <string name="history_screen_subtitle">Sinefil yolculuğun</string>
+    <string name="history_view_timeline">Zaman Tüneli</string>
+    <string name="history_view_calendar">Takvim</string>
+    <string name="history_filter_all">Tümü</string>
+    <string name="history_filter_movies">Filmler</string>
+    <string name="history_filter_tv">Diziler</string>
+    <string name="history_filter_rewatches">Yeniden İzlenenler</string>
+    <string name="history_filter_with_notes">Notlular</string>
+    <string name="history_stat_movies">%1$d Film</string>
+    <string name="history_stat_tv">%1$d Dizi</string>
+    <string name="history_stat_rewatches">%1$d Yeniden İzleme</string>
+    <string name="history_stat_notes">%1$d Not</string>
+    <string name="history_stat_hours">%1$d sa</string>
+    <string name="history_delete_session_title">İzlemeyi Kaldır</string>
+    <string name="history_delete_session_confirm">Bu izleme oturumunu günlüğünüzden kaldırmak istediğinizden emin misiniz?</string>
+    <string name="history_edit_date_title">İzleme Tarihini Düzenle</string>
+    <string name="history_no_entries_filter">Bu filtreye uygun kayıt bulunamadı.</string>
+    <string name="history_no_entries_calendar">Bu tarihte izlenen film yok.</string>
+    <string name="history_account_card_title">Günlük ve Geçmiş</string>
+    <string name="history_account_card_subtitle">Sinema yolculuğunu yeniden yaşa</string>
+    <string name="history_rewatch_badge">Tekrar İzleme #%1$d</string>
+    <string name="history_first_watch_badge">İlk İzleme</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d izlendi</string>
+    <string name="history_calendar_select_prompt">İzlemeleri görüntülemek için bir gün seçin</string>
+    <string name="history_calendar_entries_on_date">%1$s tarihindeki izlemeler</string>
+    <string name="history_filter_media_type">MEDYA TÜRÜ</string>
+    <string name="history_filter_viewing_type">İZLEME TÜRÜ</string>
+    <string name="history_filter_notes">NOTLAR</string>
+    <string name="history_filter_all_viewings">Tüm izlemeler</string>
+    <string name="history_filter_rewatches_only">Yalnızca tekrar izlemeler</string>
+    <string name="history_filter_first_watches_only">Yalnızca ilk izlemeler</string>
+    <string name="history_filter_all_notes">Tümü</string>
+    <string name="history_filter_with_notes_only">Yalnızca not içerenler</string>
+    <string name="history_sort_recent">En yeni (Varsayılan)</string>
+    <string name="history_sort_oldest">En eski</string>
+    <string name="history_sort_title">Başlık (A - Z)</string>
+    <string name="history_sort_rating">Kişisel puan</string>
 </resources>

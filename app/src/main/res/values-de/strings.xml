@@ -1088,6 +1088,7 @@
     <string name="account_error_name_short">Der Name muss mindestens 3 Zeichen lang sein.</string>
     <string name="account_error_name_long">Der Name darf 20 Zeichen nicht überschreiten.</string>
     <string name="account_error_name_profanity">Ungültiger Name.</string>
+    <string name="account_error_name_reserved">Dieser Benutzername enthält reservierte Wörter.</string>
     <string name="account_error_name_taken">Name bereits vergeben.</string>
     <string name="account_error_checking_name">Fehler beim Überprüfen des Namens.</string>
     <string name="account_remove_avatar">Avatar entfernen</string>
@@ -1825,5 +1826,46 @@
     <string name="trophy_producer_verify_invalid_email">Bitte gib eine gültige E-Mail-Adresse ein.</string>
     <string name="trophy_producer_verify_already_claimed">Diese Spende wurde bereits von einem anderen Konto eingelöst.</string>
     <string name="trophy_producer_verify_error">Verbindungsfehler bei der Überprüfung. Bitte versuche es gleich erneut.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Tagebuch</string>
+    <string name="history_screen_subtitle">Deine cineastische Reise</string>
+    <string name="history_view_timeline">Zeitleiste</string>
+    <string name="history_view_calendar">Kalender</string>
+    <string name="history_filter_all">Alle</string>
+    <string name="history_filter_movies">Filme</string>
+    <string name="history_filter_tv">Serien</string>
+    <string name="history_filter_rewatches">Rewatches</string>
+    <string name="history_filter_with_notes">Mit Notizen</string>
+    <string name="history_stat_movies">%1$d Filme</string>
+    <string name="history_stat_tv">%1$d Serien</string>
+    <string name="history_stat_rewatches">%1$d Rewatches</string>
+    <string name="history_stat_notes">%1$d Notizen</string>
+    <string name="history_stat_hours">%1$d Std.</string>
+    <string name="history_delete_session_title">Sitzung entfernen</string>
+    <string name="history_delete_session_confirm">Möchtest du diesen Eintrag wirklich aus deinem Tagebuch entfernen?</string>
+    <string name="history_edit_date_title">Sendedatum bearbeiten</string>
+    <string name="history_no_entries_filter">Keine Einträge für diesen Filter gefunden.</string>
+    <string name="history_no_entries_calendar">An diesem Tag wurden keine Filme gesehen.</string>
+    <string name="history_account_card_title">Tagebuch &amp; Verlauf</string>
+    <string name="history_account_card_subtitle">Erlebe deine Filmreise noch einmal</string>
+    <string name="history_rewatch_badge">Rewatch #%1$d</string>
+    <string name="history_first_watch_badge">Erste Sichtung</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d gesehen</string>
+    <string name="history_calendar_select_prompt">Wähle einen Tag aus, um deine Sichtungen anzuzeigen</string>
+    <string name="history_calendar_entries_on_date">Sichtungen am %1$s</string>
+    <string name="history_filter_media_type">MEDIENTYP</string>
+    <string name="history_filter_viewing_type">SICHTUNGSTYP</string>
+    <string name="history_filter_notes">NOTIZEN</string>
+    <string name="history_filter_all_viewings">Alle Sichtungen</string>
+    <string name="history_filter_rewatches_only">Nur Rewatches</string>
+    <string name="history_filter_first_watches_only">Nur Erstsichtungen</string>
+    <string name="history_filter_all_notes">Alle</string>
+    <string name="history_filter_with_notes_only">Nur mit Notizen</string>
+    <string name="history_sort_recent">Neueste zuerst (Standard)</string>
+    <string name="history_sort_oldest">Älteste zuerst</string>
+    <string name="history_sort_title">Titel (A - Z)</string>
+    <string name="history_sort_rating">Eigene Bewertung</string>
 </resources>
 

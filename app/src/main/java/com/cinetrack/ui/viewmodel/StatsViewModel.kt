@@ -115,7 +115,7 @@ class StatsViewModel @Inject constructor(
         val watchedMovies = movies.filter { movie -> 
             movie.watched || 
             (movie.mediaType == "tv" && (movie.dropped || !movie.watchedEpisodes.isNullOrEmpty())) ||
-            watchHistory.any { it.movieId == movie.id }
+            watchHistory.any { it.movieId == movie.id && it.mediaType == movie.mediaType }
         }
         
         // Build the list of years from watchedAt (movies) and watch_history.
@@ -221,7 +221,7 @@ class StatsViewModel @Inject constructor(
         val watchedMoviesUnique = watched.filter { it.mediaType != "tv" }
         val watchedMovies = if (filteredHistory != null) {
             watchedMoviesUnique.flatMap { movie ->
-                val historyCount = filteredHistory.count { it.movieId == movie.id }
+                val historyCount = filteredHistory.count { it.movieId == movie.id && it.mediaType == movie.mediaType }
                 val totalCount = maxOf(1, historyCount)
                 List(totalCount) { movie }
             }
@@ -232,9 +232,9 @@ class StatsViewModel @Inject constructor(
         val watchedTVUnique = watched.filter { it.mediaType == "tv" }
         val watchedTV = if (filteredHistory != null) {
             watchedTVUnique.flatMap { m ->
-                val rewatchesInPeriod = filteredHistory.filter { it.movieId == m.id && it.isRewatch }
-                val firstWatchInPeriod = filteredHistory.any { it.movieId == m.id && !it.isRewatch }
-                val totalHistoryCount = allHistory.count { it.movieId == m.id }
+                val rewatchesInPeriod = filteredHistory.filter { it.movieId == m.id && it.mediaType == m.mediaType && it.isRewatch }
+                val firstWatchInPeriod = filteredHistory.any { it.movieId == m.id && it.mediaType == m.mediaType && !it.isRewatch }
+                val totalHistoryCount = allHistory.count { it.movieId == m.id && it.mediaType == m.mediaType }
                 
                 val result = mutableListOf<Movie>()
                 

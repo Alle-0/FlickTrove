@@ -8,14 +8,19 @@ import kotlinx.serialization.Serializable
 @Serializable
 @Entity(
     tableName = "watch_history",
-    indices = [Index("movieId"), Index(value = ["movieId", "watchedAt"], unique = true)]
+    indices = [
+        Index("movieId"),
+        Index(value = ["movieId", "mediaType", "watchedAt"], unique = true)
+    ]
 )
 data class WatchHistoryEntity(
     @PrimaryKey(autoGenerate = true)
     val id: Long = 0,
     val movieId: Long,
+    val mediaType: String = "movie",
     val watchedAt: String, // ISO-8601 string representation of the watch date
     val isRewatch: Boolean = false, // false if first watch, true if subsequent rewatch
     val syncStatus: String = "pending", // can be "pending", "synced", or "deleted"
     val historicalEpisodes: String? = null // JSON map of watchedEpisodes snapshot
 )
+

@@ -81,7 +81,7 @@ FlickTrove is not just a tracker, it's a personal cinema companion and media lib
 - 🥇 **Top 10 FlickTrove**: Custom ranking algorithm surfacing the 10 most popular titles among users, refreshed every 30 days.
 - 📈 **Box Office Insights**: Real-time domestic and international box office rankings, Weekend Top 10 grosses, and all-time box office records.
 - 🏛️ **Trophy Room & Cinephile Gamification**: 51 unique achievements and progressive milestones across historical film stock formats (*Super 8*, *16mm*, *35mm*, *70mm*, *The Final Cut*) and 12 secret *Lost Reels*. Features 100% offline-first async evaluation, real-time floating unlock banners (`TrophyUnlockBanner`), global community rarity stats (24h TTL cache), and server-validated Patron tier.
-- ⏱️ **Watch History & Multi-Rewatch Journal**: Dedicated watch history bottom sheet to log multiple viewings, customize watch dates, manage rewatches, and track cumulative viewing times across your cinephile journey.
+- ⏱️ **Cinephile Watch Diary (Timeline & Calendar Views)**: Dedicated 100% offline-first global diary tracking every viewing, rewatch, and TV episode session with zero network calls. Features dual view modes: a fluid chronological filmstrip timeline with monthly sticky headers and personal note callouts (`personalNote`), plus an interactive 7-column monthly calendar grid displaying poster thumbnails inside day cells, day detail sheets, and Anti-Tenet chronological rewatch calculation.
 - 💖 **Vibes & Mood Journaling**: Tag titles with emotional *"Vibe"* stickers, personal star ratings (1-10 with half-star precision), and private review diaries via the interactive Peek-a-Boo Check-In Drawer.
 - 🎭 **Cinematic Sagas & Franchises**: Dedicated timelines for major movie franchises (Marvel MCU, Star Wars, Harry Potter, Middle-earth, etc.) tracking your completion percentage, progress pill, and total saga runtime.
 - 📁 **Custom Folders & Curated Collections**: Create bespoke folders with custom hex colors via an interactive Color Wheel, rich descriptions, and flexible sorting. Organize themed marathons, personal rankings, or watchlists your way.
@@ -90,7 +90,7 @@ FlickTrove is not just a tracker, it's a personal cinema companion and media lib
 - 🎬 **Episodic TV Tracking**: Full TV series lifecycle management. Spunta episodes and seasons, track next upcoming air dates, monitor *"In pari"* (up-to-date) completion status, and preserve your watched episode history even when dropping or pausing shows.
 - ☁️ **Cloud & Live Sync**: Native Firebase Firestore backup alongside seamless, two-way background synchronization with **Trakt.tv** and **SIMKL** (OAuth 2.0 with PKCE) for watch history, personal ratings, watchlist, and custom folders via Android WorkManager.
 - 📴 **Offline-First Architecture**: Access your entire library, update watch states, rate titles, and take personal notes without an internet connection, backed by a solid local Room database.
-- 🌍 **13+ Languages & Regional Age Ratings**: Full app-wide native localization supporting 13 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇮🇩 🇹🇷) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC).
+- 🌍 **15 Languages & Regional Age Ratings**: Full app-wide native localization supporting 15 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇹🇼 🇮🇩 🇹🇷) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC).
 - 🍿 **Streaming Providers & Trailers**: Discover where to stream, buy, or rent any title in your country, powered by JustWatch data via TMDB, alongside high-definition in-app YouTube trailers.
 - 📅 **Release Reminders & Notifications**: Never miss theatrical premieres or streaming releases with local calendar notifications and customizable alert schedules.
 - 📰 **Film Magazine & Editorial Collections**: Dedicated news section featuring articles from top film publications alongside curated editorial spotlight collections.
@@ -206,7 +206,7 @@ Once the app is launched:
 2. Use the search bar or natural language keywords to find movies, TV series, actors, and directors.
 3. Mark titles as "To Watch" (Watchlist), "Watched", or organize them into bespoke custom folders.
 4. Log multiple viewings, customize watch dates, assign emotional *"Vibes"*, and record private diary notes.
-5. Explore your viewing journey in the **Stats** tab, use **Surprise Me** when indecisive, and check your unlocked achievements in the **Trophy Room**.
+5. Relive your cinematic journey in the **Diary** (Timeline & Calendar views), explore your viewing stats in the **Stats** tab, use **Surprise Me** when indecisive, and showcase your unlocked achievements in the **Trophy Room**.
 
 ---
 
@@ -215,7 +215,7 @@ Once the app is launched:
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
 - [ ] **Media Server Live Scrobbling (Jellyfin, Plex, Emby):** Real-time automated scrobbling and episode tracking from self-hosted home media servers via serverless cloud webhooks at zero cost.
-- [ ] **Global Watch History Timeline:** 100% offline-first diary of all viewings, rewatches, and TV episode sessions without network calls.
+- [x] **Global Watch History Timeline & Cinephile Diary:** 100% offline-first diary of all viewings, rewatches, and TV episode sessions without network calls, featuring dual Timeline and Calendar views with Anti-Tenet rewatch counts.
 - [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends on Supabase with custom invite expiration and member revocation.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.

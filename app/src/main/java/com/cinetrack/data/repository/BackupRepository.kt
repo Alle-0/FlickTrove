@@ -426,6 +426,7 @@ class BackupRepository @Inject constructor(
                     watchHistoryDao.insert(
                         WatchHistoryEntity(
                             movieId = incoming.id,
+                            mediaType = incoming.mediaType,
                             watchedAt = date,
                             isRewatch = index > 0
                         )
@@ -496,7 +497,7 @@ class BackupRepository @Inject constructor(
                 favoriteDao.insert(updated)
                 
                 // Insert into WatchHistoryDao
-                val existingHistory = watchHistoryDao.getWatchHistoryForMovie(updated.id)
+                val existingHistory = watchHistoryDao.getWatchHistoryForMovie(updated.id, updated.mediaType)
                 val existingDates = existingHistory.map { it.watchedAt }.toSet()
                 
                 val watchDatesToInsert = incoming.extractedWatchDates.toMutableSet()
@@ -507,11 +508,12 @@ class BackupRepository @Inject constructor(
                 if (newDates.isNotEmpty()) {
                     val allDates = (existingDates + newDates).sorted()
                     // Rebuild history to maintain proper isRewatch flags
-                    watchHistoryDao.deleteByMovieId(updated.id)
+                    watchHistoryDao.deleteByMovieId(updated.id, updated.mediaType)
                     allDates.forEachIndexed { index, date ->
                         watchHistoryDao.insert(
                             WatchHistoryEntity(
                                 movieId = updated.id,
+                                mediaType = updated.mediaType,
                                 watchedAt = date,
                                 isRewatch = index > 0
                             )

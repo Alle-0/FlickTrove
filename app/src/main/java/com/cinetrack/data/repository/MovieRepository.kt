@@ -1818,14 +1818,17 @@ class MovieRepository @Inject constructor(
         }
     }
     // --- Watch History (Delegated to WatchHistoryRepository) ---
-    suspend fun getWatchHistoryForMovie(movieId: Long) = watchHistoryRepository.getWatchHistoryForMovie(movieId)
-    fun getWatchHistoryForMovieFlow(movieId: Long) = watchHistoryRepository.getWatchHistoryForMovieFlow(movieId)
+    fun getGlobalTimelineFlow() = watchHistoryRepository.getGlobalTimelineFlow()
+    suspend fun updateWatchDate(id: Long, newWatchedAt: String) = watchHistoryRepository.updateWatchDate(id, newWatchedAt)
+    suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.getWatchHistoryForMovie(movieId, mediaType)
+    fun getWatchHistoryForMovieFlow(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.getWatchHistoryForMovieFlow(movieId, mediaType)
     fun getAllWatchHistoryFlow() = watchHistoryRepository.getAllWatchHistoryFlow()
     suspend fun getAllWatchHistory() = watchHistoryRepository.getAllWatchHistory()
     suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.insertWatchHistory(history)
     suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.updateWatchHistory(history)
     suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.deleteWatchHistory(history)
-    suspend fun deleteWatchHistoryByMovieId(movieId: Long) = watchHistoryRepository.deleteWatchHistoryByMovieId(movieId)
+    suspend fun deleteWatchHistoryByMovieId(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.deleteWatchHistoryByMovieId(movieId, mediaType)
+    suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.purgeHistoryForMovie(movieId, mediaType)
     suspend fun countDuplicateRewatches(): Int = watchHistoryRepository.countDuplicateRewatches()
     suspend fun cleanupAllRewatches(): Int = watchHistoryRepository.cleanupAllRewatches()
 

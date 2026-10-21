@@ -1095,6 +1095,7 @@
     <string name="account_error_name_short">Имя должно содержать не менее 3 символов.</string>
     <string name="account_error_name_long">Имя не может превышать 20 символов.</string>
     <string name="account_error_name_profanity">Недопустимое имя.</string>
+    <string name="account_error_name_reserved">Это имя пользователя содержит зарезервированные слова.</string>
     <string name="account_error_name_taken">Имя уже занято.</string>
     <string name="account_error_checking_name">Ошибка при проверке имени.</string>
     <string name="account_remove_avatar">Удалить аватар</string>
@@ -1822,5 +1823,46 @@
     <string name="trophy_producer_verify_invalid_email">Пожалуйста, введите корректный адрес электронной почты.</string>
     <string name="trophy_producer_verify_already_claimed">Это пожертвование уже активировано другим аккаунтом.</string>
     <string name="trophy_producer_verify_error">Ошибка подключения при проверке. Пожалуйста, повторите попытку позже.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Дневник</string>
+    <string name="history_screen_subtitle">Ваш киноманский путь</string>
+    <string name="history_view_timeline">Хроника</string>
+    <string name="history_view_calendar">Календарь</string>
+    <string name="history_filter_all">Все</string>
+    <string name="history_filter_movies">Фильмы</string>
+    <string name="history_filter_tv">Сериалы</string>
+    <string name="history_filter_rewatches">Пересмотры</string>
+    <string name="history_filter_with_notes">С заметками</string>
+    <string name="history_stat_movies">%1$d фильмов</string>
+    <string name="history_stat_tv">%1$d сериалов</string>
+    <string name="history_stat_rewatches">%1$d пересмотров</string>
+    <string name="history_stat_notes">%1$d заметок</string>
+    <string name="history_stat_hours">%1$d ч</string>
+    <string name="history_delete_session_title">Удалить просмотр</string>
+    <string name="history_delete_session_confirm">Вы действительно хотите удалить эту запись из дневника?</string>
+    <string name="history_edit_date_title">Изменить дату просмотра</string>
+    <string name="history_no_entries_filter">По выбранному фильтру ничего не найдено.</string>
+    <string name="history_no_entries_calendar">В этот день не было просмотрено фильмов.</string>
+    <string name="history_account_card_title">Дневник и история</string>
+    <string name="history_account_card_subtitle">Освежите воспоминания о фильмах</string>
+    <string name="history_rewatch_badge">Пересмотр #%1$d</string>
+    <string name="history_first_watch_badge">Первый просмотр</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d просмотрено</string>
+    <string name="history_calendar_select_prompt">Выберите день, чтобы просмотреть просмотры</string>
+    <string name="history_calendar_entries_on_date">Просмотры за %1$s</string>
+    <string name="history_filter_media_type">ТИП МЕДИА</string>
+    <string name="history_filter_viewing_type">ТИП ПРОСМОТРА</string>
+    <string name="history_filter_notes">ЗАМЕТКИ</string>
+    <string name="history_filter_all_viewings">Все просмотры</string>
+    <string name="history_filter_rewatches_only">Только повторные</string>
+    <string name="history_filter_first_watches_only">Только первые просмотры</string>
+    <string name="history_filter_all_notes">Все</string>
+    <string name="history_filter_with_notes_only">Только с заметками</string>
+    <string name="history_sort_recent">Сначала новые (По умолчанию)</string>
+    <string name="history_sort_oldest">Сначала старые</string>
+    <string name="history_sort_title">По названию (А - Я)</string>
+    <string name="history_sort_rating">Личная оценка</string>
 </resources>
 

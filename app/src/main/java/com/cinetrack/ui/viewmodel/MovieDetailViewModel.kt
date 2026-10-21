@@ -257,11 +257,12 @@ class MovieDetailViewModel @Inject constructor(
                 // Backfill for older movies marked as watched before the history feature
                 val local = repository.getMovie(movieId, mediaType)
                 if (local != null && local.watched && !local.watchedAt.isNullOrBlank()) {
-                    val currentHistory = repository.getWatchHistoryForMovie(movieId)
+                    val currentHistory = repository.getWatchHistoryForMovie(movieId, mediaType)
                     if (currentHistory.none { !it.isRewatch }) {
                         repository.insertWatchHistory(
                             com.cinetrack.data.local.entities.WatchHistoryEntity(
                                 movieId = movieId,
+                                mediaType = mediaType,
                                 watchedAt = local.watchedAt!!,
                                 isRewatch = false
                             )
@@ -269,7 +270,7 @@ class MovieDetailViewModel @Inject constructor(
                     }
                 }
 
-                repository.getWatchHistoryForMovieFlow(movieId).collect { history ->
+                repository.getWatchHistoryForMovieFlow(movieId, mediaType).collect { history ->
                     _watchHistory.value = history
                 }
             }
@@ -865,12 +866,13 @@ class MovieDetailViewModel @Inject constructor(
         if (movie.mediaType != "tv") return
         val watchedCount = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
         if (watchedCount > 0 || movie.watched) {
-            val currentHistory = repository.getWatchHistoryForMovie(movie.id)
+            val currentHistory = repository.getWatchHistoryForMovie(movie.id, movie.mediaType)
             if (currentHistory.none { !it.isRewatch }) {
                 val watchDateStr = customDate?.toString() ?: java.time.Instant.now().toString()
                 repository.insertWatchHistory(
                     com.cinetrack.data.local.entities.WatchHistoryEntity(
                         movieId = movie.id,
+                        mediaType = movie.mediaType,
                         watchedAt = watchDateStr,
                         isRewatch = false
                     )
@@ -892,7 +894,7 @@ class MovieDetailViewModel @Inject constructor(
         if (movieId == 0L) return
         viewModelScope.launch {
             try {
-                val allHistory = repository.getWatchHistoryForMovie(movieId)
+                val allHistory = repository.getWatchHistoryForMovie(movieId, mediaType)
                 val rewatchCount = allHistory.count { it.isRewatch }
                 
                 if (rewatchCount >= 99) {
@@ -919,6 +921,7 @@ class MovieDetailViewModel @Inject constructor(
                 repository.insertWatchHistory(
                     com.cinetrack.data.local.entities.WatchHistoryEntity(
                         movieId = movieId,
+                        mediaType = mediaType,
                         watchedAt = watchedDate,
                         isRewatch = true,
                         historicalEpisodes = historicalEpisodesJson
@@ -1109,6 +1112,7 @@ class MovieDetailViewModel @Inject constructor(
                             repository.insertWatchHistory(
                                 com.cinetrack.data.local.entities.WatchHistoryEntity(
                                     movieId = previousMovie.id,
+                                    mediaType = previousMovie.mediaType,
                                     watchedAt = watchDateStr,
                                     isRewatch = false
                                 )

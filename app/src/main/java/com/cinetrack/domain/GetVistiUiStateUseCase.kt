@@ -40,7 +40,7 @@ class GetVistiUiStateUseCase @Inject constructor() {
             val tab = flows[4] as String
             val historyList = flows[5] as List<com.cinetrack.data.local.entities.WatchHistoryEntity>
             
-            val historyMap = historyList.groupBy { it.movieId }
+            val historyMap = historyList.groupBy { "${it.mediaType}_${it.movieId}" }
 
             val watchedMovies = movies.filter { movie ->
                 if (movie.mediaType == "tv") {
@@ -138,15 +138,15 @@ class GetVistiUiStateUseCase @Inject constructor() {
     private fun sortMovies(
         movies: List<Movie>, 
         sort: SortConfig,
-        historyMap: Map<Long, List<com.cinetrack.data.local.entities.WatchHistoryEntity>>
+        historyMap: Map<String, List<com.cinetrack.data.local.entities.WatchHistoryEntity>>
     ): List<Movie> {
         val isDesc = sort.sortDirection == "desc"
         return when (sort.sortType) {
             "first_watched_at" -> {
                 if (isDesc) {
-                    movies.sortedWith(compareByDescending<Movie> { m -> historyMap[m.id]?.minOfOrNull { it.watchedAt } ?: m.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+                    movies.sortedWith(compareByDescending<Movie> { m -> historyMap["${m.mediaType}_${m.id}"]?.minOfOrNull { it.watchedAt } ?: m.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 } else {
-                    movies.sortedWith(compareBy<Movie> { m -> historyMap[m.id]?.minOfOrNull { it.watchedAt } ?: m.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+                    movies.sortedWith(compareBy<Movie> { m -> historyMap["${m.mediaType}_${m.id}"]?.minOfOrNull { it.watchedAt } ?: m.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
                 }
             }
             "last_watched_at", "watched_at" -> {
@@ -158,9 +158,9 @@ class GetVistiUiStateUseCase @Inject constructor() {
             }
             "rewatch_count" -> {
                 if (isDesc) {
-                    movies.sortedWith(compareByDescending<Movie> { m -> historyMap[m.id]?.count { it.isRewatch } ?: 0 }.thenByDescending<Movie> { it.watchedAt }.thenBy { it.id })
+                    movies.sortedWith(compareByDescending<Movie> { m -> historyMap["${m.mediaType}_${m.id}"]?.count { it.isRewatch } ?: 0 }.thenByDescending<Movie> { it.watchedAt }.thenBy { it.id })
                 } else {
-                    movies.sortedWith(compareBy<Movie> { m -> historyMap[m.id]?.count { it.isRewatch } ?: 0 }.thenByDescending<Movie> { it.watchedAt }.thenBy { it.id })
+                    movies.sortedWith(compareBy<Movie> { m -> historyMap["${m.mediaType}_${m.id}"]?.count { it.isRewatch } ?: 0 }.thenByDescending<Movie> { it.watchedAt }.thenBy { it.id })
                 }
             }
             "release_date" -> {

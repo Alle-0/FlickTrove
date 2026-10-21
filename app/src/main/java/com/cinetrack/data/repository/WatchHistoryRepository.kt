@@ -13,11 +13,17 @@ class WatchHistoryRepository @Inject constructor(
     private val watchHistoryDao: WatchHistoryDao,
     private val firebaseRemoteDataSource: FirebaseRemoteDataSource
 ) {
-    suspend fun getWatchHistoryForMovie(movieId: Long): List<WatchHistoryEntity> =
-        watchHistoryDao.getWatchHistoryForMovie(movieId)
+    fun getGlobalTimelineFlow(): Flow<List<com.cinetrack.data.local.dao.RawTimelineRecord>> =
+        watchHistoryDao.getGlobalTimelineFlow()
 
-    fun getWatchHistoryForMovieFlow(movieId: Long): Flow<List<WatchHistoryEntity>> =
-        watchHistoryDao.getWatchHistoryForMovieFlow(movieId)
+    suspend fun updateWatchDate(id: Long, newWatchedAt: String) =
+        watchHistoryDao.updateWatchDate(id, newWatchedAt)
+
+    suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String = "movie"): List<WatchHistoryEntity> =
+        watchHistoryDao.getWatchHistoryForMovie(movieId, mediaType)
+
+    fun getWatchHistoryForMovieFlow(movieId: Long, mediaType: String = "movie"): Flow<List<WatchHistoryEntity>> =
+        watchHistoryDao.getWatchHistoryForMovieFlow(movieId, mediaType)
 
     fun getAllWatchHistoryFlow(): Flow<List<WatchHistoryEntity>> =
         watchHistoryDao.getAllWatchHistoryFlow()
@@ -34,18 +40,18 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun deleteWatchHistory(history: WatchHistoryEntity) =
         watchHistoryDao.markDeleted(history.id)
 
-    suspend fun deleteWatchHistoryByMovieId(movieId: Long) =
-        watchHistoryDao.deleteByMovieId(movieId)
+    suspend fun deleteWatchHistoryByMovieId(movieId: Long, mediaType: String = "movie") =
+        watchHistoryDao.deleteByMovieId(movieId, mediaType)
 
-    suspend fun purgeHistoryForMovie(movieId: Long) {
-        watchHistoryDao.deleteByMovieId(movieId)
-        watchHistoryDao.purgeHistoryForMovie(movieId)
+    suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String = "movie") {
+        watchHistoryDao.deleteByMovieId(movieId, mediaType)
+        watchHistoryDao.purgeHistoryForMovie(movieId, mediaType)
     }
 
     suspend fun countDuplicateRewatches(): Int {
         val allHistory = watchHistoryDao.getAllWatchHistory()
         var duplicateCount = 0
-        val byMovie = allHistory.groupBy { it.movieId }
+        val byMovie = allHistory.groupBy { "${it.mediaType}_${it.movieId}" }
         for ((_, entries) in byMovie) {
             if (entries.size > 1) {
                 duplicateCount += (entries.size - 1)
@@ -59,7 +65,7 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun cleanupAllRewatches(): Int {
         val allHistory = watchHistoryDao.getAllWatchHistory()
         val toDelete = mutableListOf<WatchHistoryEntity>()
-        val byMovie = allHistory.groupBy { it.movieId }
+        val byMovie = allHistory.groupBy { "${it.mediaType}_${it.movieId}" }
         for ((_, entries) in byMovie) {
             if (entries.size > 1) {
                 // Keep the oldest watch (first watch event)
@@ -130,8 +136,8 @@ class WatchHistoryRepository @Inject constructor(
         if (remoteHistory.isEmpty()) return
 
         val localHistoryList = watchHistoryDao.getAllWatchHistory()
-        // Key: "movieId_watchedAt" — unique identity for a watch event
-        val localHistory = localHistoryList.associateBy { "${it.movieId}_${it.watchedAt}" }
+        // Key: "mediaType_movieId_watchedAt" — composite unique identity for a watch event
+        val localHistory = localHistoryList.associateBy { "${it.mediaType}_${it.movieId}_${it.watchedAt}" }
 
         val historyToInsert = mutableListOf<WatchHistoryEntity>()
         val historyToDeleteLocally = mutableListOf<WatchHistoryEntity>()
@@ -139,11 +145,11 @@ class WatchHistoryRepository @Inject constructor(
         // Cache pending-delete set once to avoid N+1 queries inside the loop
         val pendingDeleteKeys = watchHistoryDao.getPendingSync()
             .filter { it.syncStatus == "deleted" }
-            .map { "${it.movieId}_${it.watchedAt}" }
+            .map { "${it.mediaType}_${it.movieId}_${it.watchedAt}" }
             .toHashSet()
 
         for (remoteEntry in remoteHistory) {
-            val key = "${remoteEntry.movieId}_${remoteEntry.watchedAt}"
+            val key = "${remoteEntry.mediaType}_${remoteEntry.movieId}_${remoteEntry.watchedAt}"
             val local = localHistory[key]
 
             if (remoteEntry.syncStatus == "deleted") {

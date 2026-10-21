@@ -1173,6 +1173,7 @@
     <string name="account_error_name_short">Nama harus minimal 3 karakter.</string>
     <string name="account_error_name_long">Nama tidak boleh melebihi 20 karakter.</string>
     <string name="account_error_name_profanity">Nama tidak valid.</string>
+    <string name="account_error_name_reserved">Nama pengguna ini berisi kata-kata yang dicadangkan.</string>
     <string name="account_error_name_taken">Nama sudah digunakan.</string>
     <string name="account_error_checking_name">Gagal memeriksa ketersediaan nama.</string>
     <string name="account_remove_avatar">Hapus Avatar</string>
@@ -1827,4 +1828,45 @@
     <string name="trophy_producer_verify_invalid_email">Silakan masukkan alamat email yang valid.</string>
     <string name="trophy_producer_verify_already_claimed">Donasi ini sudah diklaim oleh akun lain.</string>
     <string name="trophy_producer_verify_error">Terjadi kesalahan koneksi saat memverifikasi. Silakan coba lagi sebentar lagi.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Buku Harian</string>
+    <string name="history_screen_subtitle">Perjalanan sinema Anda</string>
+    <string name="history_view_timeline">Linimasa</string>
+    <string name="history_view_calendar">Kalender</string>
+    <string name="history_filter_all">Semua</string>
+    <string name="history_filter_movies">Film</string>
+    <string name="history_filter_tv">Serial TV</string>
+    <string name="history_filter_rewatches">Tonton Ulang</string>
+    <string name="history_filter_with_notes">Dengan Catatan</string>
+    <string name="history_stat_movies">%1$d Film</string>
+    <string name="history_stat_tv">%1$d Serial</string>
+    <string name="history_stat_rewatches">%1$d Tonton Ulang</string>
+    <string name="history_stat_notes">%1$d Catatan</string>
+    <string name="history_stat_hours">%1$d jam</string>
+    <string name="history_delete_session_title">Hapus Sesi Tonton</string>
+    <string name="history_delete_session_confirm">Apakah Anda yakin ingin menghapus sesi menonton ini dari buku harian Anda?</string>
+    <string name="history_edit_date_title">Ubah Tanggal Tonton</string>
+    <string name="history_no_entries_filter">Tidak ada item yang ditemukan untuk filter ini.</string>
+    <string name="history_no_entries_calendar">Tidak ada film yang ditonton pada hari ini.</string>
+    <string name="history_account_card_title">Buku Harian &amp; Riwayat</string>
+    <string name="history_account_card_subtitle">Nostalgia perjalanan sinematik Anda</string>
+    <string name="history_rewatch_badge">Tonton Ulang #%1$d</string>
+    <string name="history_first_watch_badge">Tonton Pertama</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d ditonton</string>
+    <string name="history_calendar_select_prompt">Pilih hari untuk melihat riwayat tontonan</string>
+    <string name="history_calendar_entries_on_date">Tontonan pada %1$s</string>
+    <string name="history_filter_media_type">TIPE MEDIA</string>
+    <string name="history_filter_viewing_type">TIPE TONTONAN</string>
+    <string name="history_filter_notes">CATATAN</string>
+    <string name="history_filter_all_viewings">Semua tontonan</string>
+    <string name="history_filter_rewatches_only">Hanya tonton ulang</string>
+    <string name="history_filter_first_watches_only">Hanya tontonan pertama</string>
+    <string name="history_filter_all_notes">Semua</string>
+    <string name="history_filter_with_notes_only">Hanya dengan catatan</string>
+    <string name="history_sort_recent">Terbaru (Default)</string>
+    <string name="history_sort_oldest">Terlama</string>
+    <string name="history_sort_title">Judul (A - Z)</string>
+    <string name="history_sort_rating">Rating pribadi</string>
 </resources>

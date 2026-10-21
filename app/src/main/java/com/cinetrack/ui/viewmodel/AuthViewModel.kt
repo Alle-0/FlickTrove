@@ -172,6 +172,8 @@ class AuthViewModel @Inject constructor(
 
     suspend fun isUsernameAvailable(username: String, forUid: String? = null): Boolean {
         if (username.isBlank() || username.length < 3) return false
+        if (emailValidatorUseCase.containsReservedWords(username)) return false
+        if (emailValidatorUseCase.containsOffensiveWords(username)) return false
         return try {
             val document = Firebase.firestore.collection("usernames").document(username.lowercase()).get().await()
             if (!document.exists()) {
@@ -188,7 +190,9 @@ class AuthViewModel @Inject constructor(
 
     suspend fun generateUniqueUsername(baseName: String, forUid: String? = null): String {
         var currentName = baseName.replace(Regex("[^a-zA-Z0-9_]"), "")
-        if (currentName.length < 3) currentName = "User" + (100..999).random()
+        if (currentName.length < 3 || emailValidatorUseCase.containsReservedWords(currentName) || emailValidatorUseCase.containsOffensiveWords(currentName)) {
+            currentName = "User" + (100..999).random()
+        }
         if (currentName.length > 15) currentName = currentName.substring(0, 15)
         
         var isAvailable = isUsernameAvailable(currentName, forUid)
@@ -199,7 +203,10 @@ class AuthViewModel @Inject constructor(
             finalName = currentName.take(20 - suffix.length) + suffix
             isAvailable = isUsernameAvailable(finalName, forUid)
             count++
-            if (count > 10) break
+            if (count > 10) {
+                finalName = "User_${System.currentTimeMillis() % 100000}"
+                break
+            }
         }
         return finalName
     }

@@ -1088,6 +1088,7 @@
     <string name="account_error_name_short">Le nom doit comporter au moins 3 caractères.</string>
     <string name="account_error_name_long">Le nom ne peut pas dépasser 20 caractères.</string>
     <string name="account_error_name_profanity">Nom non valide.</string>
+    <string name="account_error_name_reserved">Ce nom d\'utilisateur contient des termes réservés.</string>
     <string name="account_error_name_taken">Nom déjà pris.</string>
     <string name="account_error_checking_name">Erreur lors de la vérification du nom.</string>
     <string name="account_remove_avatar">Supprimer l\'avatar</string>
@@ -1822,5 +1823,46 @@
     <string name="trophy_producer_verify_invalid_email">Veuillez saisir une adresse e-mail valide.</string>
     <string name="trophy_producer_verify_already_claimed">Ce don a déjà été réclamé par un autre compte.</string>
     <string name="trophy_producer_verify_error">Erreur de connexion lors de la vérification. Veuillez réessayer dans un instant.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Journal</string>
+    <string name="history_screen_subtitle">Votre parcours cinéphile</string>
+    <string name="history_view_timeline">Chronologie</string>
+    <string name="history_view_calendar">Calendrier</string>
+    <string name="history_filter_all">Tous</string>
+    <string name="history_filter_movies">Films</string>
+    <string name="history_filter_tv">Séries</string>
+    <string name="history_filter_rewatches">Visionnages répétés</string>
+    <string name="history_filter_with_notes">Avec notes</string>
+    <string name="history_stat_movies">%1$d Films</string>
+    <string name="history_stat_tv">%1$d Séries</string>
+    <string name="history_stat_rewatches">%1$d Revus</string>
+    <string name="history_stat_notes">%1$d Notes</string>
+    <string name="history_stat_hours">%1$d h</string>
+    <string name="history_delete_session_title">Supprimer le visionnage</string>
+    <string name="history_delete_session_confirm">Voulez-vous vraiment supprimer ce visionnage de votre journal ?</string>
+    <string name="history_edit_date_title">Modifier la date de visionnage</string>
+    <string name="history_no_entries_filter">Aucune entrée trouvée pour ce filtre.</string>
+    <string name="history_no_entries_calendar">Aucun film visionné ce jour-là.</string>
+    <string name="history_account_card_title">Journal &amp; Historique</string>
+    <string name="history_account_card_subtitle">Revivez votre parcours cinématographique</string>
+    <string name="history_rewatch_badge">Revu #%1$d</string>
+    <string name="history_first_watch_badge">Premier visionnage</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d vus</string>
+    <string name="history_calendar_select_prompt">Touchez un jour pour voir vos visionnages</string>
+    <string name="history_calendar_entries_on_date">Visionnages du %1$s</string>
+    <string name="history_filter_media_type">TYPE DE MÉDIA</string>
+    <string name="history_filter_viewing_type">TYPE DE VISIONNAGE</string>
+    <string name="history_filter_notes">NOTES</string>
+    <string name="history_filter_all_viewings">Tous les visionnages</string>
+    <string name="history_filter_rewatches_only">Uniquement les rewatchs</string>
+    <string name="history_filter_first_watches_only">Premiers visionnages seulement</string>
+    <string name="history_filter_all_notes">Tous</string>
+    <string name="history_filter_with_notes_only">Avec notes uniquement</string>
+    <string name="history_sort_recent">Plus récent (Par défaut)</string>
+    <string name="history_sort_oldest">Plus ancien</string>
+    <string name="history_sort_title">Titre (A - Z)</string>
+    <string name="history_sort_rating">Note personnelle</string>
 </resources>
 

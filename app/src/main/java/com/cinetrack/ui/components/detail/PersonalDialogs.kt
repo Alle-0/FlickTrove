@@ -8,6 +8,9 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.verticalScroll
+import com.cinetrack.ui.utils.MarkdownVisualTransformation
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Delete
@@ -263,7 +266,8 @@ fun NoteEditorBox(
             val matches = data?.getStringArrayListExtra(RecognizerIntent.EXTRA_RESULTS)
             if (!matches.isNullOrEmpty()) {
                 val spokenText = matches[0]
-                note = if (note.isEmpty()) spokenText else "$note $spokenText"
+                val combined = if (note.isEmpty()) spokenText else "$note $spokenText"
+                note = combined.take(5000)
             }
         }
     }
@@ -304,16 +308,23 @@ fun NoteEditorBox(
                 .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
                 .padding(16.dp)
         ) {
+            val scrollState = rememberScrollState()
+
             BasicTextField(
                 value = note,
-                onValueChange = { note = it },
+                onValueChange = { if (it.length <= 5000) note = it },
                 textStyle = TextStyle(
                     color = Color.White,
                     fontSize = 15.sp,
                     fontWeight = FontWeight.Medium
                 ),
                 cursorBrush = SolidColor(accentColor),
-                modifier = Modifier.fillMaxWidth().wrapContentHeight().padding(bottom = 8.dp),
+                visualTransformation = remember { MarkdownVisualTransformation() },
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(min = 120.dp, max = 220.dp)
+                    .verticalScroll(scrollState)
+                    .padding(bottom = 8.dp),
                 decorationBox = { innerTextField ->
                     if (note.isEmpty()) {
                         Text(
@@ -326,31 +337,45 @@ fun NoteEditorBox(
                 }
             )
             
-            // Bottom bar for Dictation and Audio Recording
+            // Bottom bar for Dictation, Character Counter and Audio Recording
             Row(
-                modifier = Modifier.fillMaxWidth().padding(top = 12.dp),
+                modifier = Modifier.fillMaxWidth().padding(top = 10.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                // Speech to Text button
-                Box(
-                    modifier = Modifier
-                        .size(36.dp)
-                        .bounceClick {
-                            val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
-                                putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
-                            }
-                            speechLauncher.launch(intent)
-                        }
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.1f)),
-                    contentAlignment = Alignment.Center
+                // Speech to Text button + Discrete Character Counter
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Mic,
-                        contentDescription = "Detta nota",
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .bounceClick {
+                                val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
+                                    putExtra(RecognizerIntent.EXTRA_LANGUAGE_MODEL, RecognizerIntent.LANGUAGE_MODEL_FREE_FORM)
+                                }
+                                speechLauncher.launch(intent)
+                            }
+                            .clip(RoundedCornerShape(50))
+                            .background(Color.White.copy(alpha = 0.1f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Mic,
+                            contentDescription = "Detta nota",
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+
+                    Text(
+                        text = "${note.length}/5000",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontSize = 10.sp,
+                            color = if (note.length >= 4900) MaterialTheme.colorScheme.error else Color.White.copy(alpha = 0.35f),
+                            fontWeight = FontWeight.Medium
+                        )
                     )
                 }
 

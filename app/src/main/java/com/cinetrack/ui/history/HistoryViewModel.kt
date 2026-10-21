@@ -1,0 +1,317 @@
+package com.cinetrack.ui.history
+
+import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
+import com.cinetrack.data.local.dao.RawTimelineRecord
+import com.cinetrack.data.repository.BadgeRepository
+import com.cinetrack.data.repository.WatchHistoryRepository
+import com.cinetrack.ui.history.model.*
+import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.combine
+import kotlinx.coroutines.flow.flowOn
+import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
+import kotlinx.serialization.json.Json
+import java.time.Instant
+import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.LocalTime
+import java.time.YearMonth
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.util.Locale
+import javax.inject.Inject
+
+@HiltViewModel
+class HistoryViewModel @Inject constructor(
+    private val watchHistoryRepository: WatchHistoryRepository,
+    private val badgeRepository: BadgeRepository
+) : ViewModel() {
+
+    private val _viewMode = MutableStateFlow(ViewMode.TIMELINE)
+    private val _filterConfig = MutableStateFlow(HistoryFilterConfig())
+    private val _selectedCalendarMonth = MutableStateFlow(YearMonth.now())
+    private val _selectedCalendarDate = MutableStateFlow<LocalDate?>(null)
+    private val _isFilterModalOpen = MutableStateFlow(false)
+
+    private val rawTimelineFlow = watchHistoryRepository.getGlobalTimelineFlow()
+
+    private data class CalendarFilterTuple(
+        val filterConfig: HistoryFilterConfig,
+        val month: YearMonth,
+        val selectedDate: LocalDate?,
+        val isModalOpen: Boolean
+    )
+
+    private val calendarFilterFlow = combine(
+        _filterConfig,
+        _selectedCalendarMonth,
+        _selectedCalendarDate,
+        _isFilterModalOpen
+    ) { filterConfig, month, selectedDate, isModalOpen ->
+        CalendarFilterTuple(filterConfig, month, selectedDate, isModalOpen)
+    }
+
+    val uiState: StateFlow<HistoryUiState> = combine(
+        rawTimelineFlow,
+        _viewMode,
+        calendarFilterFlow
+    ) { rawRecords, viewMode, cfTuple ->
+        val filterConfig = cfTuple.filterConfig
+        val calendarMonth = cfTuple.month
+        val selectedDate = cfTuple.selectedDate
+        val isFilterModalOpen = cfTuple.isModalOpen
+
+        // Anti-Tenet Rewatch Calculation (Chronological traversal from oldest to newest)
+        val rewatchCounters = mutableMapOf<String, Int>()
+        val rewatchMap = HashMap<Long, Int>(rawRecords.size)
+
+        for (i in rawRecords.indices.reversed()) {
+            val rec = rawRecords[i]
+            if (rec.isRewatch) {
+                val compositeKey = "${rec.mediaType}_${rec.movieId}"
+                val nextCount = (rewatchCounters[compositeKey] ?: 0) + 1
+                rewatchCounters[compositeKey] = nextCount
+                rewatchMap[rec.historyId] = nextCount
+            }
+        }
+
+        val entries = rawRecords.map { rec ->
+            val (parsedDate, parsedTime) = parseWatchedAt(rec.watchedAt)
+            val hasExplicitTime = parsedTime != null && !(parsedTime.hour == 0 && parsedTime.minute == 0 && parsedTime.second == 0)
+
+            val displayDate = try {
+                parsedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
+            } catch (e: Exception) {
+                rec.watchedAt.take(10)
+            }
+
+            val displayTime = if (hasExplicitTime) {
+                try {
+                    parsedTime.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+
+            val episodeInfo = if (rec.mediaType == "tv") {
+                formatTvEpisodes(rec.historicalEpisodes, rec.currentEpisodes)
+            } else null
+
+            WatchTimelineEntry(
+                historyId = rec.historyId,
+                movieId = rec.movieId,
+                mediaType = rec.mediaType,
+                title = rec.title,
+                posterPath = rec.posterPath,
+                watchedAt = rec.watchedAt,
+                parsedDate = parsedDate,
+                formattedDisplayDate = displayDate,
+                formattedDisplayTime = displayTime,
+                isRewatch = rec.isRewatch,
+                rewatchNumber = rewatchMap[rec.historyId] ?: 0,
+                personalRating = rec.personalRating,
+                personalNote = rec.personalNote?.takeIf { it.isNotBlank() },
+                runtimeMinutes = rec.runtimeMinutes,
+                episodeInfo = episodeInfo,
+                isTvShow = rec.mediaType == "tv"
+            )
+        }
+
+        // Apply filters: Media, Viewing, Notes
+        val filteredByCriteria = entries.filter { entry ->
+            val matchesMedia = when (filterConfig.mediaTypeFilter) {
+                HistoryMediaTypeFilter.ALL -> true
+                HistoryMediaTypeFilter.MOVIES -> !entry.isTvShow
+                HistoryMediaTypeFilter.TV -> entry.isTvShow
+            }
+            val matchesViewing = when (filterConfig.viewingTypeFilter) {
+                HistoryViewingTypeFilter.ALL -> true
+                HistoryViewingTypeFilter.FIRST_WATCH_ONLY -> !entry.isRewatch
+                HistoryViewingTypeFilter.REWATCH_ONLY -> entry.isRewatch
+            }
+            val matchesNotes = if (filterConfig.withNotesOnly) !entry.personalNote.isNullOrBlank() else true
+
+            matchesMedia && matchesViewing && matchesNotes
+        }
+
+        // Apply sort
+        val sortedEntries = when (filterConfig.sortOption) {
+            HistorySortOption.DATE_DESC -> filteredByCriteria
+            HistorySortOption.DATE_ASC -> filteredByCriteria.reversed()
+            HistorySortOption.TITLE_ASC -> filteredByCriteria.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
+            HistorySortOption.RATING_DESC -> filteredByCriteria.sortedWith(
+                compareByDescending<WatchTimelineEntry> { it.personalRating ?: 0.0 }
+                    .thenByDescending { it.watchedAt }
+            )
+        }
+
+        // Precompute calendar entries grouped by date O(1)
+        val calendarMap = filteredByCriteria.groupBy { it.parsedDate }
+
+        val totalMovies = entries.count { !it.isTvShow }
+        val totalTv = entries.count { it.isTvShow }
+        val totalRewatch = entries.count { it.isRewatch }
+        val totalNotes = entries.count { !it.personalNote.isNullOrBlank() }
+        val totalMinutes = entries.sumOf { it.runtimeMinutes.toLong() }
+
+        HistoryUiState(
+            allEntries = entries,
+            filteredEntries = sortedEntries,
+            calendarEntriesByDate = calendarMap,
+            selectedViewMode = viewMode,
+            activeFilter = HistoryFilter.ALL,
+            filterConfig = filterConfig,
+            selectedCalendarMonth = calendarMonth,
+            selectedCalendarDate = selectedDate,
+            isFilterModalOpen = isFilterModalOpen,
+            totalMoviesCount = totalMovies,
+            totalTvCount = totalTv,
+            totalRewatchCount = totalRewatch,
+            totalNotesCount = totalNotes,
+            totalRuntimeMinutes = totalMinutes,
+            isLoading = false
+        )
+    }.flowOn(Dispatchers.Default)
+    .stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = HistoryUiState()
+    )
+
+    fun setViewMode(mode: ViewMode) {
+        _viewMode.value = mode
+    }
+
+    fun setFilterConfig(config: HistoryFilterConfig) {
+        _filterConfig.value = config
+    }
+
+    fun resetFilterConfig() {
+        _filterConfig.value = HistoryFilterConfig()
+    }
+
+    fun openFilterModal() {
+        _isFilterModalOpen.value = true
+    }
+
+    fun dismissFilterModal() {
+        _isFilterModalOpen.value = false
+    }
+
+    fun setSelectedCalendarDate(date: LocalDate?) {
+        _selectedCalendarDate.value = date
+    }
+
+    fun setFilter(filter: HistoryFilter) {
+        _filterConfig.value = when (filter) {
+            HistoryFilter.ALL -> HistoryFilterConfig()
+            HistoryFilter.MOVIES -> HistoryFilterConfig(mediaTypeFilter = HistoryMediaTypeFilter.MOVIES)
+            HistoryFilter.TV_SHOWS -> HistoryFilterConfig(mediaTypeFilter = HistoryMediaTypeFilter.TV)
+            HistoryFilter.REWATCHES -> HistoryFilterConfig(viewingTypeFilter = HistoryViewingTypeFilter.REWATCH_ONLY)
+            HistoryFilter.WITH_NOTES -> HistoryFilterConfig(withNotesOnly = true)
+        }
+    }
+
+    fun setCalendarMonth(month: YearMonth) {
+        _selectedCalendarMonth.value = month
+    }
+
+    fun nextMonth() {
+        _selectedCalendarMonth.value = _selectedCalendarMonth.value.plusMonths(1)
+    }
+
+    fun previousMonth() {
+        _selectedCalendarMonth.value = _selectedCalendarMonth.value.minusMonths(1)
+    }
+
+    fun resetToCurrentMonth() {
+        _selectedCalendarMonth.value = YearMonth.now()
+    }
+
+    fun deleteWatchSession(historyId: Long) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val allHistory = watchHistoryRepository.getAllWatchHistory()
+            val entry = allHistory.find { it.id == historyId }
+            if (entry != null) {
+                watchHistoryRepository.deleteWatchHistory(entry)
+                watchHistoryRepository.pushPendingWatchHistory()
+                badgeRepository.evaluateBadgesAsync()
+            }
+        }
+    }
+
+    fun updateWatchDate(historyId: Long, newWatchedAtIso: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            watchHistoryRepository.updateWatchDate(historyId, newWatchedAtIso)
+            watchHistoryRepository.pushPendingWatchHistory()
+            badgeRepository.evaluateBadgesAsync()
+        }
+    }
+
+    companion object {
+        fun parseWatchedAt(raw: String): Pair<LocalDate, LocalTime?> {
+            return try {
+                if (raw.contains("T")) {
+                    try {
+                        val instant = Instant.parse(raw)
+                        val zdt = instant.atZone(ZoneId.systemDefault())
+                        zdt.toLocalDate() to zdt.toLocalTime()
+                    } catch (e: Exception) {
+                        val ldt = LocalDateTime.parse(raw.take(19))
+                        ldt.toLocalDate() to ldt.toLocalTime()
+                    }
+                } else if (raw.length >= 10) {
+                    LocalDate.parse(raw.take(10)) to null
+                } else {
+                    LocalDate.now() to null
+                }
+            } catch (e: Exception) {
+                LocalDate.now() to null
+            }
+        }
+
+        private fun formatTvEpisodes(
+            historicalEpisodes: String?,
+            currentEpisodes: Map<String, List<Int>>?
+        ): String? {
+            if (!historicalEpisodes.isNullOrBlank()) {
+                try {
+                    val map = Json.decodeFromString<Map<String, List<Int>>>(historicalEpisodes)
+                    val seasonKeys = map.keys.filter { it != "0" }.sortedBy { it.toIntOrNull() ?: 0 }
+                    if (seasonKeys.isNotEmpty()) {
+                        val totalEps = map.values.sumOf { it.size }
+                        return if (seasonKeys.size == 1) {
+                            val seasonNum = seasonKeys.first()
+                            val eps = map[seasonNum]?.sorted().orEmpty()
+                            if (eps.isNotEmpty() && eps.size > 1 && eps.last() - eps.first() + 1 == eps.size) {
+                                "S$seasonNum • Ep ${eps.first()}-${eps.last()}"
+                            } else if (eps.size == 1) {
+                                "S$seasonNum • Ep ${eps.first()}"
+                            } else {
+                                "S$seasonNum • $totalEps ep"
+                            }
+                        } else {
+                            "$totalEps ep (${seasonKeys.size} stagioni)"
+                        }
+                    }
+                } catch (e: Exception) {
+                    // ignore json error
+                }
+            }
+
+            if (!currentEpisodes.isNullOrEmpty()) {
+                val totalEps = currentEpisodes.filter { it.key != "0" }.values.sumOf { it.size }
+                if (totalEps > 0) {
+                    return "$totalEps ep"
+                }
+            }
+
+            return null
+        }
+    }
+}

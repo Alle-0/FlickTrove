@@ -1173,6 +1173,7 @@
     <string name="account_error_name_short">昵称长度必须至少为 3 个字符。</string>
     <string name="account_error_name_long">昵称长度不能超过 20 个字符。</string>
     <string name="account_error_name_profanity">昵称格式不合规。</string>
+    <string name="account_error_name_reserved">此用户名包含系统保留词。</string>
     <string name="account_error_name_taken">昵称已被占用。</string>
     <string name="account_error_checking_name">验证昵称时出错。</string>
     <string name="account_remove_avatar">移除头像</string>
@@ -1828,4 +1829,45 @@
     <string name="trophy_producer_verify_invalid_email">請輸入有效的電子郵件地址。</string>
     <string name="trophy_producer_verify_already_claimed">此贊助已被其他帳號兌換。</string>
     <string name="trophy_producer_verify_error">驗證時發生網路連線錯誤，請稍後再試。</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">觀影日記</string>
+    <string name="history_screen_subtitle">您的影迷歷程</string>
+    <string name="history_view_timeline">時間線</string>
+    <string name="history_view_calendar">日曆</string>
+    <string name="history_filter_all">全部</string>
+    <string name="history_filter_movies">電影</string>
+    <string name="history_filter_tv">影集</string>
+    <string name="history_filter_rewatches">二刷/重溫</string>
+    <string name="history_filter_with_notes">附筆記</string>
+    <string name="history_stat_movies">%1$d 部電影</string>
+    <string name="history_stat_tv">%1$d 部影集</string>
+    <string name="history_stat_rewatches">%1$d 次重溫</string>
+    <string name="history_stat_notes">%1$d 篇筆記</string>
+    <string name="history_stat_hours">%1$d 小時</string>
+    <string name="history_delete_session_title">刪除觀影紀錄</string>
+    <string name="history_delete_session_confirm">您確定要從日記中刪除此條觀影紀錄嗎？</string>
+    <string name="history_edit_date_title">修改觀影日期</string>
+    <string name="history_no_entries_filter">在此篩選條件下未找到任何紀錄。</string>
+    <string name="history_no_entries_calendar">當天沒有觀看任何作品。</string>
+    <string name="history_account_card_title">觀影日記與歷史</string>
+    <string name="history_account_card_subtitle">重溫您的光影歲月</string>
+    <string name="history_rewatch_badge">重溫 #%1$d</string>
+    <string name="history_first_watch_badge">首次觀看</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">觀看 %1$d 部</string>
+    <string name="history_calendar_select_prompt">選擇日期查看觀影紀錄</string>
+    <string name="history_calendar_entries_on_date">%1$s 的觀影紀錄</string>
+    <string name="history_filter_media_type">媒體類型</string>
+    <string name="history_filter_viewing_type">觀看類型</string>
+    <string name="history_filter_notes">筆記</string>
+    <string name="history_filter_all_viewings">全部紀錄</string>
+    <string name="history_filter_rewatches_only">僅重溫</string>
+    <string name="history_filter_first_watches_only">僅首看</string>
+    <string name="history_filter_all_notes">全部</string>
+    <string name="history_filter_with_notes_only">僅含筆記</string>
+    <string name="history_sort_recent">最近日期（預設）</string>
+    <string name="history_sort_oldest">最早日期</string>
+    <string name="history_sort_title">片名（A - Z）</string>
+    <string name="history_sort_rating">個人評分</string>
 </resources>

@@ -1173,6 +1173,7 @@
     <string name="account_error_name_short">닉네임은 최소 3자 이상이어야 합니다.</string>
     <string name="account_error_name_long">닉네임은 20자를 초과할 수 없습니다.</string>
     <string name="account_error_name_profanity">사용할 수 없는 닉네임입니다.</string>
+    <string name="account_error_name_reserved">이 사용자 이름에는 예약어가 포함되어 있습니다.</string>
     <string name="account_error_name_taken">이미 사용 중인 닉네임입니다.</string>
     <string name="account_error_checking_name">닉네임 확인 중 오류 발생.</string>
     <string name="account_remove_avatar">아바타 삭제</string>
@@ -1828,4 +1829,45 @@
     <string name="trophy_producer_verify_invalid_email">유효한 이메일 주소를 입력해 주세요.</string>
     <string name="trophy_producer_verify_already_claimed">이 후원은 이미 다른 계정에서 등록되었습니다.</string>
     <string name="trophy_producer_verify_error">확인 중 연결 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">관람 다이어리</string>
+    <string name="history_screen_subtitle">나만의 시네마 여정</string>
+    <string name="history_view_timeline">타임라인</string>
+    <string name="history_view_calendar">캘린더</string>
+    <string name="history_filter_all">전체</string>
+    <string name="history_filter_movies">영화</string>
+    <string name="history_filter_tv">시리즈</string>
+    <string name="history_filter_rewatches">N차 관람</string>
+    <string name="history_filter_with_notes">메모 포함</string>
+    <string name="history_stat_movies">%1$d편의 영화</string>
+    <string name="history_stat_tv">%1$d편의 시리즈</string>
+    <string name="history_stat_rewatches">%1$d회 N차 관람</string>
+    <string name="history_stat_notes">%1$d개 메모</string>
+    <string name="history_stat_hours">%1$d시간</string>
+    <string name="history_delete_session_title">기록 삭제</string>
+    <string name="history_delete_session_confirm">이 관람 기록을 다이어리에서 삭제하시겠습니까?</string>
+    <string name="history_edit_date_title">관람일 수정</string>
+    <string name="history_no_entries_filter">선택한 필터와 일치하는 항목이 없습니다.</string>
+    <string name="history_no_entries_calendar">이 날짜에 시청한 영화가 없습니다.</string>
+    <string name="history_account_card_title">다이어리 &amp; 히스토리</string>
+    <string name="history_account_card_subtitle">영화와 함께한 순간들을 돌아보세요</string>
+    <string name="history_rewatch_badge">N차 관람 #%1$d</string>
+    <string name="history_first_watch_badge">첫 관람</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d편 시청</string>
+    <string name="history_calendar_select_prompt">기록을 볼 날짜를 선택하세요</string>
+    <string name="history_calendar_entries_on_date">%1$s 시청 기록</string>
+    <string name="history_filter_media_type">미디어 유형</string>
+    <string name="history_filter_viewing_type">시청 유형</string>
+    <string name="history_filter_notes">메모</string>
+    <string name="history_filter_all_viewings">전체 시청 기록</string>
+    <string name="history_filter_rewatches_only">N차 관람만</string>
+    <string name="history_filter_first_watches_only">첫 관람만</string>
+    <string name="history_filter_all_notes">전체</string>
+    <string name="history_filter_with_notes_only">메모 있는 항목만</string>
+    <string name="history_sort_recent">최신순 (기본값)</string>
+    <string name="history_sort_oldest">오래된순</string>
+    <string name="history_sort_title">제목순 (A - Z)</string>
+    <string name="history_sort_rating">내 평점순</string>
 </resources>

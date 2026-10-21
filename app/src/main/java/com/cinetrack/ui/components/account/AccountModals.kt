@@ -179,6 +179,8 @@ fun AccountModals(
         }
     }
     
+    val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
+
     LaunchedEffect(nameInput) {
         if (nameInput.isBlank() || nameInput == currentDisplayName) {
             nameAvailable = null
@@ -186,6 +188,16 @@ fun AccountModals(
         }
         if (nameInput.length < 3) {
             nameAvailable = null
+            return@LaunchedEffect
+        }
+        if (validator.containsReservedWords(nameInput)) {
+            nameAvailable = false
+            nameError = context.getString(R.string.account_error_name_reserved)
+            return@LaunchedEffect
+        }
+        if (validator.containsOffensiveWords(nameInput)) {
+            nameAvailable = false
+            nameError = context.getString(R.string.account_error_name_profanity)
             return@LaunchedEffect
         }
         
@@ -205,8 +217,6 @@ fun AccountModals(
         }
         isCheckingNameLive = false
     }
-    
-    val validator = remember { com.cinetrack.domain.EmailValidatorUseCase() }
 
     val currentMaxWidth = when (editProfileSubScreen) {
         EditProfileSubScreen.MENU -> 340.dp
@@ -428,6 +438,8 @@ fun AccountModals(
                                         nameInput = filtered
                                         if (filtered.isNotEmpty() && filtered.length < 3) {
                                             nameError = context.getString(R.string.account_error_name_short)
+                                        } else if (validator.containsReservedWords(filtered)) {
+                                            nameError = context.getString(R.string.account_error_name_reserved)
                                         } else if (validator.containsOffensiveWords(filtered)) {
                                             nameError = context.getString(R.string.account_error_name_profanity)
                                         } else {
@@ -507,6 +519,14 @@ fun AccountModals(
                                             scope.launch {
                                                 snackbarHostState.showSnackbar(context.getString(R.string.account_error_max_name_changes))
                                             }
+                                            return@bounceClick
+                                        }
+                                        if (validator.containsReservedWords(nameInput)) {
+                                            nameError = context.getString(R.string.account_error_name_reserved)
+                                            return@bounceClick
+                                        }
+                                        if (validator.containsOffensiveWords(nameInput)) {
+                                            nameError = context.getString(R.string.account_error_name_profanity)
                                             return@bounceClick
                                         }
                                         isCheckingName = true

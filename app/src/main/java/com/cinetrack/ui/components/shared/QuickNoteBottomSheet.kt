@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.shared
 
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.utils.MarkdownVisualTransformation
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
@@ -130,7 +131,7 @@ fun QuickNoteModal(
             if (!matches.isNullOrEmpty()) {
                 val spokenText = matches[0]
                 val prefix = if (note.isNotEmpty()) "$note " else ""
-                note = prefix + spokenText
+                note = (prefix + spokenText).take(5000)
             }
         }
     }
@@ -194,10 +195,11 @@ fun QuickNoteModal(
 
             OutlinedTextField(
                 value = note,
-                onValueChange = { if (it.length <= 1000) note = it },
+                onValueChange = { if (it.length <= 5000) note = it },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .heightIn(min = 140.dp),
+                    .heightIn(min = 140.dp, max = 220.dp),
+                visualTransformation = remember { MarkdownVisualTransformation() },
                 placeholder = {
                     Text(
                         stringResource(R.string.quick_note_hint),
@@ -219,9 +221,9 @@ fun QuickNoteModal(
             )
 
             Text(
-                text = "${note.length}/1000",
+                text = "${note.length}/5000",
                 style = MaterialTheme.typography.labelSmall,
-                color = if (note.length >= 1000) Color.Red else Color.White.copy(alpha = 0.2f),
+                color = if (note.length >= 4900) Color.Red else Color.White.copy(alpha = 0.35f),
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(top = 8.dp),

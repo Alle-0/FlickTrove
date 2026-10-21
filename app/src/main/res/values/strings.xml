@@ -1190,6 +1190,7 @@
     <string name="account_error_name_short">Name must be at least 3 characters.</string>
     <string name="account_error_name_long">Name cannot exceed 20 characters.</string>
     <string name="account_error_name_profanity">Invalid name.</string>
+    <string name="account_error_name_reserved">This username contains reserved words.</string>
     <string name="account_error_name_taken">Name already taken.</string>
     <string name="account_error_checking_name">Error checking name.</string>
     <string name="account_remove_avatar">Remove Avatar</string>
@@ -1835,5 +1836,46 @@
     <string name="trophy_producer_verify_invalid_email">Please enter a valid email address.</string>
     <string name="trophy_producer_verify_already_claimed">This donation has already been claimed by another account.</string>
     <string name="trophy_producer_verify_error">Connection error while verifying. Please try again shortly.</string>
+
+    <!-- Watch Diary & History -->
+    <string name="history_screen_title">Diary</string>
+    <string name="history_screen_subtitle">Your cinephile journey</string>
+    <string name="history_view_timeline">Timeline</string>
+    <string name="history_view_calendar">Calendar</string>
+    <string name="history_filter_all">All</string>
+    <string name="history_filter_movies">Movies</string>
+    <string name="history_filter_tv">TV Shows</string>
+    <string name="history_filter_rewatches">Rewatches</string>
+    <string name="history_filter_with_notes">With Notes</string>
+    <string name="history_stat_movies">%1$d Movies</string>
+    <string name="history_stat_tv">%1$d Series</string>
+    <string name="history_stat_rewatches">%1$d Rewatches</string>
+    <string name="history_stat_notes">%1$d Notes</string>
+    <string name="history_stat_hours">%1$d hrs</string>
+    <string name="history_delete_session_title">Remove Watch Session</string>
+    <string name="history_delete_session_confirm">Are you sure you want to remove this watch session from your diary?</string>
+    <string name="history_edit_date_title">Edit Watch Date</string>
+    <string name="history_no_entries_filter">No entries found for this filter.</string>
+    <string name="history_no_entries_calendar">No movies watched on this day.</string>
+    <string name="history_account_card_title">Diary &amp; History</string>
+    <string name="history_account_card_subtitle">Relive your cinematic journey</string>
+    <string name="history_rewatch_badge">Rewatch #%1$d</string>
+    <string name="history_first_watch_badge">First Watch</string>
+    <string name="history_multi_watch_count">+%1$d</string>
+    <string name="history_calendar_day_summary">%1$d watched</string>
+    <string name="history_calendar_select_prompt">Select a day to view sessions</string>
+    <string name="history_calendar_entries_on_date">Viewings on %1$s</string>
+    <string name="history_filter_media_type">MEDIA TYPE</string>
+    <string name="history_filter_viewing_type">VIEWING TYPE</string>
+    <string name="history_filter_notes">NOTES</string>
+    <string name="history_filter_all_viewings">All Viewings</string>
+    <string name="history_filter_rewatches_only">Rewatches Only</string>
+    <string name="history_filter_first_watches_only">First Viewings Only</string>
+    <string name="history_filter_all_notes">All</string>
+    <string name="history_filter_with_notes_only">With Notes Only</string>
+    <string name="history_sort_recent">Most Recent (Default)</string>
+    <string name="history_sort_oldest">Oldest First</string>
+    <string name="history_sort_title">Title (A - Z)</string>
+    <string name="history_sort_rating">Personal Rating</string>
 </resources>
 
