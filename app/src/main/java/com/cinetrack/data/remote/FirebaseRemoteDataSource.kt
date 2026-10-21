@@ -747,7 +747,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                                 .document(weekId)
                                 .collection("movies")
                                 .orderBy("view_count", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                                .limit(15)
+                                .limit(50)
                                 .get()
                                 .await()
                         } catch (e: Exception) {
