@@ -2,9 +2,17 @@ package com.cinetrack.ui.screens
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -13,10 +21,20 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -46,9 +64,11 @@ import com.cinetrack.ui.history.components.HistoryTimelineView
 import com.cinetrack.ui.history.model.ViewMode
 import com.cinetrack.ui.history.model.WatchTimelineEntry
 import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import kotlinx.coroutines.launch
 import java.time.LocalDate
 import java.time.ZoneId
 
@@ -398,6 +418,84 @@ fun HistoryViewSwitcher(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
+    val density = LocalDensity.current
+
+    val selectedIndex = if (isTimeline) 0 else 1
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val activeContentColor = ColorUtils.contentColorForAccent(primaryColor)
+
+    val tabWidthDp = 30.dp
+    val tabHeightDp = 28.dp
+    val paddingDp = 2.dp
+
+    val tabWidthPx = with(density) { tabWidthDp.toPx() }
+    val tabHeightPx = with(density) { tabHeightDp.toPx() }
+    val paddingPx = with(density) { paddingDp.toPx() }
+
+    val normalWidthPx = tabWidthPx - (paddingPx * 2f)
+    val pillHeightPx = tabHeightPx - (paddingPx * 2f)
+
+    val initialLeft = selectedIndex * tabWidthPx + paddingPx
+    val initialRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+
+    val animLeft = remember { Animatable(initialLeft) }
+    val animRight = remember { Animatable(initialRight) }
+
+    var isDragging by remember { mutableStateOf(false) }
+    var previousIndex by remember { mutableStateOf(selectedIndex) }
+
+    // Tab change animation: Asymmetric spring physics (Leading edge stretches, trailing edge catches up)
+    LaunchedEffect(selectedIndex, tabWidthPx) {
+        val targetLeft = selectedIndex * tabWidthPx + paddingPx
+        val targetRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+
+        val isTabChangedByClick = previousIndex != selectedIndex && !isDragging
+        previousIndex = selectedIndex
+
+        if (targetLeft > animLeft.value) {
+            // Moving right: Right edge leads (fast spring), Left edge trails (softer spring) -> jelly stretch
+            val jobRight = launch {
+                animRight.animateTo(
+                    targetValue = targetRight,
+                    animationSpec = spring(stiffness = 650f, dampingRatio = 0.65f)
+                )
+            }
+            val jobLeft = launch {
+                animLeft.animateTo(
+                    targetValue = targetLeft,
+                    animationSpec = spring(stiffness = 450f, dampingRatio = 0.68f)
+                )
+            }
+            jobRight.join()
+            jobLeft.join()
+        } else if (targetLeft < animLeft.value) {
+            // Moving left: Left edge leads (fast spring), Right edge trails (softer spring) -> jelly stretch
+            val jobLeft = launch {
+                animLeft.animateTo(
+                    targetValue = targetLeft,
+                    animationSpec = spring(stiffness = 650f, dampingRatio = 0.65f)
+                )
+            }
+            val jobRight = launch {
+                animRight.animateTo(
+                    targetValue = targetRight,
+                    animationSpec = spring(stiffness = 450f, dampingRatio = 0.68f)
+                )
+            }
+            jobLeft.join()
+            jobRight.join()
+        }
+    }
+
+    val dragScale by animateFloatAsState(
+        targetValue = if (isDragging) 1.08f else 1f,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "dragScale"
+    )
+
+    val pillPath = remember { Path() }
+
     Surface(
         shape = RoundedCornerShape(14.dp),
         color = Color.White.copy(alpha = 0.08f),
@@ -407,52 +505,238 @@ fun HistoryViewSwitcher(
         ),
         modifier = modifier
     ) {
-        Row(
-            modifier = Modifier.padding(2.dp),
-            horizontalArrangement = Arrangement.spacedBy(2.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            HistoryViewModeButton(
-                icon = ImageVector.vectorResource(id = R.drawable.ic_lista),
-                isSelected = isTimeline,
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onSelectMode(ViewMode.TIMELINE)
-                }
-            )
-            HistoryViewModeButton(
-                icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                isSelected = !isTimeline,
-                onClick = {
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                    onSelectMode(ViewMode.CALENDAR)
-                }
-            )
-        }
-    }
-}
+        Box(
+            modifier = Modifier
+                .width(tabWidthDp * 2)
+                .height(tabHeightDp)
+                .pointerInput(selectedIndex, tabWidthPx) {
+                    var isDragActiveOnPill = false
+                    val touchMargin = 6.dp.toPx()
+                    var dragTargetLeft = 0f
+                    var dragTargetRight = 0f
 
-@Composable
-fun HistoryViewModeButton(
-    icon: ImageVector,
-    isSelected: Boolean,
-    onClick: () -> Unit
-) {
-    Box(
-        modifier = Modifier
-            .size(28.dp)
-            .bounceClick(scaleDown = 0.88f, onClick = onClick)
-            .clip(RoundedCornerShape(10.dp))
-            .background(
-                if (isSelected) MaterialTheme.colorScheme.primary else Color.Transparent
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = null,
-            tint = if (isSelected) Color.Black else Color.White.copy(alpha = 0.6f),
-            modifier = Modifier.size(16.dp)
-        )
+                    detectDragGestures(
+                        onDragStart = { startOffset ->
+                            val currentLeft = animLeft.value
+                            val currentRight = animRight.value
+                            if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
+                                isDragActiveOnPill = true
+                                isDragging = true
+                                dragTargetLeft = currentLeft
+                                dragTargetRight = currentRight
+                                coroutineScope.launch {
+                                    launch { animLeft.stop() }
+                                    launch { animRight.stop() }
+                                }
+                            } else {
+                                isDragActiveOnPill = false
+                            }
+                        },
+                        onDragEnd = {
+                            if (!isDragActiveOnPill) return@detectDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+
+                            val currentCenter = (animLeft.value + animRight.value) / 2f
+                            val targetIndex = (currentCenter / tabWidthPx).toInt().coerceIn(0, 1)
+
+                            if (targetIndex != selectedIndex) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onSelectMode(if (targetIndex == 0) ViewMode.TIMELINE else ViewMode.CALENDAR)
+                            } else {
+                                val targetLeft = selectedIndex * tabWidthPx + paddingPx
+                                val targetRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+                                coroutineScope.launch {
+                                    launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                    launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                }
+                            }
+                        },
+                        onDragCancel = {
+                            if (!isDragActiveOnPill) return@detectDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val targetLeft = selectedIndex * tabWidthPx + paddingPx
+                            val targetRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+                            coroutineScope.launch {
+                                launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                            }
+                        }
+                    ) { change, dragAmount ->
+                        if (!isDragActiveOnPill) return@detectDragGestures
+                        change.consume()
+
+                        val dragX = dragAmount.x
+                        dragTargetLeft += dragX
+                        dragTargetRight += dragX
+
+                        coroutineScope.launch {
+                            val maxRight = 2f * tabWidthPx - paddingPx
+                            val maxLeft = maxRight - normalWidthPx
+
+                            var targetLeft = dragTargetLeft
+                            var targetRight = dragTargetRight
+
+                            // Soft elastic edge squish
+                            if (dragTargetLeft < paddingPx) {
+                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(normalWidthPx * 0.5f)
+                                targetLeft = paddingPx - (overscroll * 0.2f)
+                                targetRight = (paddingPx + normalWidthPx) - overscroll * 0.1f
+                            } else if (dragTargetRight > maxRight) {
+                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(normalWidthPx * 0.5f)
+                                targetRight = maxRight + (overscroll * 0.2f)
+                                targetLeft = maxLeft + overscroll * 0.1f
+                            }
+
+                            val leftStiffness = if (dragX > 0) 300f else 750f
+                            val rightStiffness = if (dragX > 0) 750f else 300f
+
+                            launch { animLeft.animateTo(targetLeft, spring(stiffness = leftStiffness, dampingRatio = 0.65f)) }
+                            launch { animRight.animateTo(targetRight, spring(stiffness = rightStiffness, dampingRatio = 0.65f)) }
+                        }
+                    }
+                }
+        ) {
+            // 1. Base Inactive Layer: Icons in soft muted white
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                // Tab 0: Timeline
+                Box(
+                    modifier = Modifier
+                        .width(tabWidthDp)
+                        .height(tabHeightDp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            if (selectedIndex != 0) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onSelectMode(ViewMode.TIMELINE)
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_lista),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.55f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+
+                // Tab 1: Calendar
+                Box(
+                    modifier = Modifier
+                        .width(tabWidthDp)
+                        .height(tabHeightDp)
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            if (selectedIndex != 1) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                onSelectMode(ViewMode.CALENDAR)
+                            }
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.55f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            // 2. Sliding Indicator Pill + 3. Active Masked Layer (Dual-layer clipPath morphing)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .drawBehind {
+                        val currentLeft = animLeft.value
+                        val currentRight = animRight.value
+                        val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                        val centerXPx = (currentLeft + currentRight) / 2f
+
+                        val scaledWidth = (currentWidth * dragScale).coerceAtLeast(1f)
+                        val pillLeft = centerXPx - (scaledWidth / 2f)
+                        val pillTop = paddingPx
+                        val cornerRadius = pillHeightPx / 2f
+
+                        drawRoundRect(
+                            color = primaryColor,
+                            topLeft = Offset(pillLeft, pillTop),
+                            size = Size(scaledWidth, pillHeightPx),
+                            cornerRadius = CornerRadius(cornerRadius, cornerRadius)
+                        )
+                    }
+                    .drawWithContent {
+                        val currentLeft = animLeft.value
+                        val currentRight = animRight.value
+                        val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                        val centerXPx = (currentLeft + currentRight) / 2f
+
+                        val scaledWidth = (currentWidth * dragScale).coerceAtLeast(1f)
+                        val pillLeft = centerXPx - (scaledWidth / 2f)
+                        val pillTop = paddingPx
+                        val cornerRadius = pillHeightPx / 2f
+
+                        pillPath.reset()
+                        pillPath.addRoundRect(
+                            RoundRect(
+                                left = pillLeft,
+                                top = pillTop,
+                                right = pillLeft + scaledWidth,
+                                bottom = pillTop + pillHeightPx,
+                                radiusX = cornerRadius,
+                                radiusY = cornerRadius
+                            )
+                        )
+
+                        // Mask: Only the portion of the icon under the indicator pill is rendered in active color!
+                        clipPath(pillPath) {
+                            this@drawWithContent.drawContent()
+                        }
+                    }
+            ) {
+                // Active Icons Layer: Rendered in active high-contrast color (masked by clipPath)
+                Row(
+                    modifier = Modifier.fillMaxSize(),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .width(tabWidthDp)
+                            .height(tabHeightDp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_lista),
+                            contentDescription = null,
+                            tint = activeContentColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .width(tabWidthDp)
+                            .height(tabHeightDp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                            contentDescription = null,
+                            tint = activeContentColor,
+                            modifier = Modifier.size(16.dp)
+                        )
+                    }
+                }
+            }
+        }
     }
 }
