@@ -42,7 +42,7 @@ class UpdateEpisodesUseCase @Inject constructor() {
                     favorite = false,
                     reminder = false,
                     newEpisodesFound = 0,
-                    watchedAt = movie.watchedAt ?: now
+                    watchedAt = if (!movie.watched) now else (movie.watchedAt ?: now)
                 )
             } else {
                 nextMovie.copy(
@@ -83,7 +83,7 @@ class UpdateEpisodesUseCase @Inject constructor() {
                     favorite = false,
                     reminder = false,
                     newEpisodesFound = 0,
-                    watchedAt = movie.watchedAt ?: now
+                    watchedAt = if (!movie.watched) now else (movie.watchedAt ?: now)
                 )
             } else {
                 nextMovie.copy(
@@ -149,7 +149,7 @@ class UpdateEpisodesUseCase @Inject constructor() {
                     watched = true,
                     favorite = false,
                     reminder = false,
-                    watchedAt = movie.watchedAt ?: now
+                    watchedAt = if (!movie.watched) now else (movie.watchedAt ?: now)
                 )
             } else {
                 nextMovie.copy(

@@ -15,7 +15,6 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -278,42 +277,26 @@ class HistoryViewModel @Inject constructor(
             }
         }
 
+        // Single source of truth for episode display in History: always currentEpisodes
+        // (f.watched_episodes). historicalEpisodes is a pre-rewatch snapshot saved *before*
+        // watchedEpisodes is reset to emptyMap(), so it never reflects the actual episodes
+        // watched in a given rewatch session and must NOT be used for display.
         private fun formatTvEpisodes(
-            historicalEpisodes: String?,
+            @Suppress("UNUSED_PARAMETER") historicalEpisodes: String?,
             currentEpisodes: Map<String, List<Int>>?
         ): String? {
-            if (!historicalEpisodes.isNullOrBlank()) {
-                try {
-                    val map = Json.decodeFromString<Map<String, List<Int>>>(historicalEpisodes)
-                    val seasonKeys = map.keys.filter { it != "0" }.sortedBy { it.toIntOrNull() ?: 0 }
-                    if (seasonKeys.isNotEmpty()) {
-                        val totalEps = map.values.sumOf { it.size }
-                        return if (seasonKeys.size == 1) {
-                            val seasonNum = seasonKeys.first()
-                            val eps = map[seasonNum]?.sorted().orEmpty()
-                            if (eps.isNotEmpty() && eps.size > 1 && eps.last() - eps.first() + 1 == eps.size) {
-                                "S$seasonNum • Ep ${eps.first()}-${eps.last()}"
-                            } else if (eps.size == 1) {
-                                "S$seasonNum • Ep ${eps.first()}"
-                            } else {
-                                "S$seasonNum • $totalEps ep"
-                            }
-                        } else {
-                            "$totalEps ep (${seasonKeys.size} stagioni)"
-                        }
-                    }
-                } catch (e: Exception) {
-                    // ignore json error
-                }
-            }
-
             if (!currentEpisodes.isNullOrEmpty()) {
-                val totalEps = currentEpisodes.filter { it.key != "0" }.values.sumOf { it.size }
+                val validMap = currentEpisodes.filter { it.key != "0" }
+                val totalEps = validMap.values.sumOf { it.size }
                 if (totalEps > 0) {
-                    return "$totalEps ep"
+                    val seasonKeys = validMap.keys.sortedBy { it.toIntOrNull() ?: 0 }
+                    return if (seasonKeys.size == 1) {
+                        "S${seasonKeys.first()} • $totalEps ep"
+                    } else {
+                        "$totalEps ep"
+                    }
                 }
             }
-
             return null
         }
     }

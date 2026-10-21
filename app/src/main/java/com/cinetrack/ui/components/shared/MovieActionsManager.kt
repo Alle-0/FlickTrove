@@ -78,6 +78,12 @@ class MovieActionsManager {
         showActionsPopup = false
     }
 
+    var onEditWatchDateCallback by mutableStateOf<(() -> Unit)?>(null)
+        private set
+
+    var onDeleteWatchSessionCallback by mutableStateOf<(() -> Unit)?>(null)
+        private set
+
     fun openFolders(movie: Movie) {
         activeMovie = movie
         showFolderDialog = true
@@ -94,7 +100,9 @@ class MovieActionsManager {
         movie: Movie, 
         pressOffset: Offset, 
         cardPosition: Offset, 
-        cardSize: Size = popupCardSize
+        cardSize: Size = popupCardSize,
+        onEditWatchDate: (() -> Unit)? = null,
+        onDeleteWatchSession: (() -> Unit)? = null
     ) {
         activeMovie = movie
         popupPressOffset = pressOffset
@@ -102,6 +110,8 @@ class MovieActionsManager {
         if (cardSize.width > 0 && cardSize.height > 0) {
             popupCardSize = cardSize
         }
+        onEditWatchDateCallback = onEditWatchDate
+        onDeleteWatchSessionCallback = onDeleteWatchSession
         showActionsPopup = true
     }
 
@@ -141,6 +151,8 @@ class MovieActionsManager {
         showNotesDialog = false
         showFolderDialog = false
         showActionsPopup = false
+        onEditWatchDateCallback = null
+        onDeleteWatchSessionCallback = null
     }
     
     fun clearActiveMovie() {

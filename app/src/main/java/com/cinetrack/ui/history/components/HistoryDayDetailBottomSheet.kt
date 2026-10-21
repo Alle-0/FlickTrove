@@ -124,7 +124,8 @@ fun HistoryDayDetailBottomSheet(
                             onMovieClick(entry.movieId, entry.mediaType)
                         },
                         onEditDate = { onEditDate(entry) },
-                        onDeleteSession = { onDeleteSession(entry) }
+                        onDeleteSession = { onDeleteSession(entry) },
+                        hazeState = hazeState
                     )
                 }
             }

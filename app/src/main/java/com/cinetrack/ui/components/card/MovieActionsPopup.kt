@@ -75,7 +75,9 @@ fun MovieMenuItem(
             color = if (isDestructive) Color(0xFFE57373) else Color.White.copy(alpha = 0.95f),
             fontSize = 12.5.sp,
             fontWeight = FontWeight.Bold,
-            letterSpacing = 0.1.sp
+            letterSpacing = 0.1.sp,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis
         )
     }
 }
@@ -94,7 +96,9 @@ fun MovieActionsPopup(
     onShare: (Movie) -> Unit,
     onDelete: ((Movie) -> Unit)? = null,
     isSaved: Boolean = false,
-    canDelete: Boolean = isSaved && onDelete != null
+    canDelete: Boolean = isSaved && onDelete != null,
+    onEditDate: (() -> Unit)? = null,
+    deleteLabel: String? = null
 ) {
     // Use MutableTransitionState to precisely track the AnimatedVisibility lifecycle
     val transitionState = remember { 
@@ -134,8 +138,8 @@ fun MovieActionsPopup(
                             .bounceClick(scaleDown = 1f, onClick = onDismiss)
                     )
 
-                    val menuWidth = 180.dp
-                    val menuHeight = 260.dp
+                    val menuWidth = if (onEditDate != null) 205.dp else 180.dp
+                    val menuHeight = if (onEditDate != null) 305.dp else 260.dp
                     
                     val menuWidthPx = with(density) { menuWidth.toPx() }
                     val menuHeightPx = with(density) { menuHeight.toPx() }
@@ -166,7 +170,7 @@ fun MovieActionsPopup(
                     Column(
                         modifier = Modifier
                             .offset { IntOffset(xPos.toInt(), yPos.toInt()) }
-                            .width(170.dp)
+                            .width(if (onEditDate != null) 195.dp else 170.dp)
                             .hazeGlass(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp)
@@ -200,13 +204,25 @@ fun MovieActionsPopup(
                         }
                         
                         Spacer(modifier = Modifier.height(4.dp))
+                        val accentColor = MaterialTheme.colorScheme.primary
+
+                        if (onEditDate != null) {
+                            MovieMenuItem(
+                                text = stringResource(R.string.history_edit_date_title),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                                iconColor = accentColor,
+                                modifier = Modifier.animateEnterExit(
+                                    enter = slideInVertically(tween(300, delayMillis = 20)) { it / 2 } + fadeIn(tween(300, delayMillis = 20))
+                                ),
+                                onClick = { onDismiss(); onEditDate() }
+                            )
+                        }
+
                         val canRate = if (movie.mediaType == "tv") {
                             movie.watched || (movie.watchedEpisodes?.values?.any { it.isNotEmpty() } == true)
                         } else {
                             movie.watched
                         }
-                        
-                        val accentColor = MaterialTheme.colorScheme.primary
 
                         if (canRate) {
                             MovieMenuItem(
@@ -261,7 +277,7 @@ fun MovieActionsPopup(
                             Spacer(modifier = Modifier.height(4.dp))
                             
                             MovieMenuItem(
-                                text = stringResource(R.string.card_remove),
+                                text = deleteLabel ?: stringResource(R.string.card_remove),
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                 iconColor = Color(0xFFE57373),
                                 isDestructive = true,

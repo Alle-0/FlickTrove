@@ -3,6 +3,7 @@ package com.cinetrack.ui.history.components
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -20,10 +21,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
-import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.history.model.WatchTimelineEntry
-import com.cinetrack.ui.theme.HazeStyles
-import dev.chrisbanes.haze.HazeState
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -35,9 +33,10 @@ fun HistoryTimelineView(
     onMovieClick: (movieId: Long, mediaType: String) -> Unit,
     onEditDate: (entry: WatchTimelineEntry) -> Unit,
     onDeleteSession: (entry: WatchTimelineEntry) -> Unit,
+    topBarClearance: androidx.compose.ui.unit.Dp = 0.dp,
+    hazeState: dev.chrisbanes.haze.HazeState? = null,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
-    hazeState: HazeState? = null
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 ) {
     if (entries.isEmpty()) {
         Box(
@@ -61,44 +60,97 @@ fun HistoryTimelineView(
         entries.groupBy { YearMonth.from(it.parsedDate) }
     }
 
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(10.dp)
+    // Wrap in a Box offset by topBarClearance so that sticky headers pin to a position
+    // visually below the GlassyTopBar, without needing per-header padding.
+    Box(
+        modifier = modifier.fillMaxSize()
     ) {
-        groupedByMonth.forEach { (yearMonth, monthEntries) ->
-            // Sticky floating pill for each Month
-            stickyHeader(key = "month_${yearMonth}") {
-                MonthSectionHeader(
-                    yearMonth = yearMonth,
-                    count = monthEntries.size,
-                    hazeState = hazeState
-                )
-            }
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(0.dp)
+        ) {
+            groupedByMonth.forEach { (yearMonth, monthEntries) ->
+                // Clean month timeline pill header (scrolls naturally with cards)
+                item(key = "month_${yearMonth}") {
+                    MonthTimelineHeader(
+                        yearMonth = yearMonth,
+                        count = monthEntries.size
+                    )
+                }
 
-            // Entries for this month
-            items(
-                items = monthEntries,
-                key = { "timeline_entry_${it.historyId}" }
-            ) { entry ->
-                HistoryCard(
-                    entry = entry,
-                    isCalendarDayMode = false,
-                    onClick = { onMovieClick(entry.movieId, entry.mediaType) },
-                    onEditDate = { onEditDate(entry) },
-                    onDeleteSession = { onDeleteSession(entry) },
-                    modifier = Modifier.animateItem()
-                )
+                // Entries for this month with seamless lateral timeline track
+                items(
+                    items = monthEntries,
+                    key = { "timeline_entry_${it.historyId}" }
+                ) { entry ->
+                    val sessionColor = if (entry.isTvShow) {
+                        MaterialTheme.colorScheme.primary
+                    } else {
+                        MaterialTheme.colorScheme.secondary
+                    }
+
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(IntrinsicSize.Min)
+                            .animateItem(),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        // Lateral Timeline Track & Node
+                        Box(
+                            modifier = Modifier
+                                .width(22.dp)
+                                .fillMaxHeight(),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            // Seamless continuous vertical track line
+                            Box(
+                                modifier = Modifier
+                                    .width(2.dp)
+                                    .fillMaxHeight()
+                                    .background(Color.White.copy(alpha = 0.12f))
+                            )
+
+                            // Card session dot node
+                            Box(
+                                modifier = Modifier
+                                    .size(8.dp)
+                                    .clip(CircleShape)
+                                    .background(sessionColor)
+                                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+                            )
+                        }
+
+                        Spacer(modifier = Modifier.width(10.dp))
+
+                        // History Card with padded vertical breathing room
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .padding(vertical = 5.dp)
+                        ) {
+                            HistoryCard(
+                                entry = entry,
+                                isCalendarDayMode = false,
+                                onClick = { onMovieClick(entry.movieId, entry.mediaType) },
+                                onEditDate = { onEditDate(entry) },
+                                onDeleteSession = { onDeleteSession(entry) },
+                                hazeState = hazeState,
+                                modifier = Modifier.fillMaxWidth()
+                            )
+                        }
+                    }
+                }
             }
         }
     }
 }
 
 @Composable
-private fun MonthSectionHeader(
+private fun MonthTimelineHeader(
     yearMonth: YearMonth,
     count: Int,
-    hazeState: HazeState?,
     modifier: Modifier = Modifier
 ) {
     val monthTitle = remember(yearMonth) {
@@ -111,61 +163,84 @@ private fun MonthSectionHeader(
         }
     }
 
-    Box(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .padding(top = 4.dp, bottom = 6.dp),
-        contentAlignment = Alignment.Center
+            .height(IntrinsicSize.Min)
+            .padding(vertical = 6.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Row(
+        // Lateral timeline node for Month
+        Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .hazeGlass(
-                    state = hazeState,
-                    shape = CircleShape,
-                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                    containerColor = Color(0xFF101418).copy(alpha = 0.70f),
-                    borderColor = Color.White.copy(alpha = 0.14f),
-                    borderWidth = 0.8.dp
+                .width(22.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            // Continuous vertical line behind node
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(Color.White.copy(alpha = 0.12f))
+            )
+
+            // Month Milestone Node
+            Box(
+                modifier = Modifier
+                    .size(13.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primary)
+                    .border(2.dp, Color(0xFF0D0F14), CircleShape)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        // Month Pill Capsule
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(end = 4.dp)
+                .clip(CircleShape)
+                .background(Color(0xFF14171E))
+                .border(
+                    width = 0.8.dp,
+                    color = Color.White.copy(alpha = 0.14f),
+                    shape = CircleShape
                 )
-                .padding(horizontal = 16.dp, vertical = 9.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
+                .padding(horizontal = 16.dp, vertical = 9.dp)
         ) {
             Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(MaterialTheme.colorScheme.primary)
-                )
                 Text(
                     text = monthTitle,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        fontSize = 15.sp
+                        fontSize = 14.5.sp,
+                        letterSpacing = 0.2.sp
                     )
                 )
-            }
 
-            Surface(
-                shape = CircleShape,
-                color = Color.White.copy(alpha = 0.10f),
-                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.16f))
-            ) {
-                Text(
-                    text = "$count",
-                    style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.85f),
-                        fontSize = 12.sp
-                    ),
-                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 2.5.dp)
-                )
+                Surface(
+                    shape = CircleShape,
+                    color = Color.White.copy(alpha = 0.10f),
+                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.18f))
+                ) {
+                    Text(
+                        text = "$count",
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White.copy(alpha = 0.90f),
+                            fontSize = 11.5.sp
+                        ),
+                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    )
+                }
             }
         }
     }

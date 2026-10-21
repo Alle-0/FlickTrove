@@ -41,6 +41,7 @@ import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.history.HistoryViewModel
 import com.cinetrack.ui.history.components.HistoryCalendarView
 import com.cinetrack.ui.history.components.HistoryFilterModal
+import com.cinetrack.ui.history.components.HistoryTimelineSkeleton
 import com.cinetrack.ui.history.components.HistoryTimelineView
 import com.cinetrack.ui.history.model.ViewMode
 import com.cinetrack.ui.history.model.WatchTimelineEntry
@@ -117,7 +118,18 @@ fun HistoryScreenContent(
     showTopBar: Boolean = false,
     onBackPress: (() -> Unit)? = null
 ) {
-    val viewModel = hiltViewModel<HistoryViewModel>()
+    val context = androidx.compose.ui.platform.LocalContext.current
+    var currentContext = context
+    while (currentContext is android.content.ContextWrapper && currentContext !is androidx.activity.ComponentActivity) {
+        currentContext = currentContext.baseContext
+    }
+    val activity = currentContext as? androidx.activity.ComponentActivity
+
+    val viewModel = if (activity != null) {
+        androidx.hilt.navigation.compose.hiltViewModel<HistoryViewModel>(activity)
+    } else {
+        androidx.hilt.navigation.compose.hiltViewModel<HistoryViewModel>()
+    }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val internalHazeState = hazeState ?: remember { HazeState() }
 
@@ -127,9 +139,8 @@ fun HistoryScreenContent(
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
     val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
-    val topBarClearance = maxOf(statusBarTop, cutoutTop) + 56.dp
-    val bottomClearance = paddingValues.calculateBottomPadding() + 24.dp
+    val topBarClearance = statusBarTop + 46.dp + 8.dp
+    val bottomClearance = paddingValues.calculateBottomPadding() + 100.dp
 
     Box(modifier = Modifier.fillMaxSize()) {
         // Authentic FlickTrove cinematic dark background
@@ -144,60 +155,74 @@ fun HistoryScreenContent(
                     style = HazeStyles.PremiumDark
                 )
         ) {
-            AnimatedContent(
-                targetState = uiState.selectedViewMode,
-                transitionSpec = {
-                    fadeIn(animationSpec = tween(240)) togetherWith fadeOut(animationSpec = tween(180))
-                },
-                label = "HistoryViewModeTransition"
-            ) { mode ->
-                when (mode) {
-                    ViewMode.TIMELINE -> {
-                        HistoryTimelineView(
-                            entries = uiState.filteredEntries,
-                            onMovieClick = onMovieClick,
-                            onEditDate = { entry ->
-                                editingEntry = entry
-                                showDatePicker = true
-                            },
-                            onDeleteSession = { entry ->
-                                entryToDelete = entry
-                            },
-                            hazeState = internalHazeState,
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = 8.dp,
-                                bottom = bottomClearance
-                            ),
-                            modifier = Modifier.padding(top = topBarClearance)
-                        )
-                    }
-                    ViewMode.CALENDAR -> {
-                        HistoryCalendarView(
-                            calendarMonth = uiState.selectedCalendarMonth,
-                            calendarEntriesByDate = uiState.calendarEntriesByDate,
-                            selectedDate = uiState.selectedCalendarDate,
-                            onDateSelected = { viewModel.setSelectedCalendarDate(it) },
-                            onPreviousMonth = { viewModel.previousMonth() },
-                            onNextMonth = { viewModel.nextMonth() },
-                            onMonthChanged = { viewModel.setCalendarMonth(it) },
-                            onMovieClick = onMovieClick,
-                            onEditDate = { entry ->
-                                editingEntry = entry
-                                showDatePicker = true
-                            },
-                            onDeleteSession = { entry ->
-                                entryToDelete = entry
-                            },
-                            hazeState = internalHazeState,
-                            contentPadding = PaddingValues(
-                                start = 16.dp,
-                                end = 16.dp,
-                                top = topBarClearance + 8.dp,
-                                bottom = bottomClearance
+            if (uiState.isLoading) {
+                HistoryTimelineSkeleton(
+                    topBarClearance = topBarClearance,
+                    contentPadding = PaddingValues(
+                        start = 16.dp,
+                        end = 16.dp,
+                        top = topBarClearance + 6.dp,
+                        bottom = bottomClearance
+                    ),
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                AnimatedContent(
+                    targetState = uiState.selectedViewMode,
+                    transitionSpec = {
+                        fadeIn(animationSpec = tween(240)) togetherWith fadeOut(animationSpec = tween(180))
+                    },
+                    label = "HistoryViewModeTransition"
+                ) { mode ->
+                    when (mode) {
+                        ViewMode.TIMELINE -> {
+                            HistoryTimelineView(
+                                entries = uiState.filteredEntries,
+                                onMovieClick = onMovieClick,
+                                onEditDate = { entry ->
+                                    editingEntry = entry
+                                    showDatePicker = true
+                                },
+                                onDeleteSession = { entry ->
+                                    entryToDelete = entry
+                                },
+                                topBarClearance = topBarClearance,
+                                hazeState = internalHazeState,
+                                contentPadding = PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = topBarClearance + 8.dp,
+                                    bottom = bottomClearance
+                                ),
+                                modifier = Modifier.fillMaxSize()
                             )
-                        )
+                        }
+                        ViewMode.CALENDAR -> {
+                            HistoryCalendarView(
+                                calendarMonth = uiState.selectedCalendarMonth,
+                                calendarEntriesByDate = uiState.calendarEntriesByDate,
+                                selectedDate = uiState.selectedCalendarDate,
+                                onDateSelected = { viewModel.setSelectedCalendarDate(it) },
+                                onPreviousMonth = { viewModel.previousMonth() },
+                                onNextMonth = { viewModel.nextMonth() },
+                                onMonthChanged = { viewModel.setCalendarMonth(it) },
+                                onMovieClick = onMovieClick,
+                                onEditDate = { entry ->
+                                    editingEntry = entry
+                                    showDatePicker = true
+                                },
+                                onDeleteSession = { entry ->
+                                    entryToDelete = entry
+                                },
+                                hazeState = internalHazeState,
+                                contentPadding = PaddingValues(
+                                    start = 16.dp,
+                                    end = 16.dp,
+                                    top = topBarClearance + 8.dp,
+                                    bottom = bottomClearance
+                                )
+                            )
+                        }
                     }
                 }
             }

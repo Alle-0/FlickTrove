@@ -114,6 +114,7 @@ fun HistoryCalendarView(
                             onClick = { onMovieClick(entry.movieId, entry.mediaType) },
                             onEditDate = { onEditDate(entry) },
                             onDeleteSession = { onDeleteSession(entry) },
+                            hazeState = hazeState,
                             modifier = Modifier.animateItem()
                         )
                     }

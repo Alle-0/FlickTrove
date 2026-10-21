@@ -43,7 +43,7 @@ fun GlobalMovieActions(
         // 1. Actions Popup
         if (manager.showActionsPopup && manager.activeMovie != null) {
             val isSaved = movie.favorite || movie.watched || movie.reminder || (movie.personalRating ?: 0.0) > 0.0 || !movie.personalNote.isNullOrEmpty() || manager.foldersList.any { manager.isItemInFolderCallback(movie, it.id) }
-            val canDelete = isSaved && (manager.onDeleteCallback != null)
+            val canDelete = (isSaved && manager.onDeleteCallback != null) || manager.onDeleteWatchSessionCallback != null
             MovieActionsPopup(
                 movie = movie,
                 showMenu = true,
@@ -51,6 +51,7 @@ fun GlobalMovieActions(
                 pressOffset = manager.popupPressOffset,
                 cardPosition = manager.popupCardPosition,
                 hazeState = hazeState,
+                onEditDate = manager.onEditWatchDateCallback,
                 onQuickVote = { manager.openRating(it) },
                 onQuickNote = { manager.openNotes(it) },
                 onFolders = { manager.openFolders(it) },
@@ -70,11 +71,20 @@ fun GlobalMovieActions(
                     context.startActivity(shareIntent)
                     manager.closeAll()
                 },
-                onDelete = if (canDelete) {
+                onDelete = if (manager.onDeleteWatchSessionCallback != null) {
+                    {
+                        val callback = manager.onDeleteWatchSessionCallback
+                        manager.closeAll()
+                        callback?.invoke()
+                    }
+                } else if (canDelete) {
                     { manager.startCardExplosion(it) }
                 } else null,
                 isSaved = isSaved,
-                canDelete = canDelete
+                canDelete = canDelete,
+                deleteLabel = if (manager.onDeleteWatchSessionCallback != null) {
+                    context.getString(R.string.history_delete_session_title)
+                } else null
             )
         }
 

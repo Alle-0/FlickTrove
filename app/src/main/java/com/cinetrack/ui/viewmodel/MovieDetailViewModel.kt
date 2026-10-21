@@ -825,9 +825,13 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             movieUpdateMutex.withLock {
                 val currentMovie = repository.getMovie(movie.id, movie.mediaType) ?: movie
+                val oldWatchedCount = currentMovie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
                 val updated = updateEpisodesUseCase.batchUpdate(currentMovie, castedMap).copy(dropped = false)
+                val newWatchedCount = updated.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+                val isAdding = newWatchedCount > oldWatchedCount
+
                 repository.saveMovie(updated)
-                ensureFirstViewingCreated(updated)
+                ensureFirstViewingCreated(updated, isProgressAdvancing = isAdding)
                 badgeRepository.evaluateBadgesAsync()
             }
         }
@@ -862,21 +866,46 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private suspend fun ensureFirstViewingCreated(movie: Movie, customDate: java.time.Instant? = null) {
+    private suspend fun ensureFirstViewingCreated(
+        movie: Movie, 
+        customDate: java.time.Instant? = null,
+        isProgressAdvancing: Boolean = false
+    ) {
         if (movie.mediaType != "tv") return
         val watchedCount = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
         if (watchedCount > 0 || movie.watched) {
             val currentHistory = repository.getWatchHistoryForMovie(movie.id, movie.mediaType)
-            if (currentHistory.none { !it.isRewatch }) {
-                val watchDateStr = customDate?.toString() ?: java.time.Instant.now().toString()
+            val activeSession = if (currentHistory.any { it.isRewatch }) {
+                currentHistory.filter { it.isRewatch }.maxByOrNull { it.watchedAt }
+            } else {
+                currentHistory.find { !it.isRewatch }
+            }
+            val nowStr = customDate?.toString() ?: java.time.Instant.now().toString()
+            if (activeSession == null) {
                 repository.insertWatchHistory(
                     com.cinetrack.data.local.entities.WatchHistoryEntity(
                         movieId = movie.id,
                         mediaType = movie.mediaType,
-                        watchedAt = watchDateStr,
+                        watchedAt = nowStr,
                         isRewatch = false
                     )
                 )
+                if (movie.watchedAt != nowStr) {
+                    repository.saveMovie(movie.copy(watchedAt = nowStr, clientUpdatedAt = System.currentTimeMillis()))
+                }
+            } else if (isProgressAdvancing) {
+                var targetIso = nowStr
+                var counter = 1
+                while (currentHistory.any { it.id != activeSession.id && it.watchedAt == targetIso }) {
+                    val instant = java.time.Instant.parse(nowStr).plusSeconds(counter.toLong())
+                    targetIso = instant.toString()
+                    counter++
+                }
+                repository.updateWatchHistory(activeSession.copy(watchedAt = targetIso))
+                val latestHistory = repository.getWatchHistoryForMovie(movie.id, movie.mediaType).maxByOrNull { it.watchedAt }
+                if (latestHistory != null && movie.watchedAt != latestHistory.watchedAt) {
+                    repository.saveMovie(movie.copy(watchedAt = latestHistory.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+                }
             }
         }
     }
@@ -1056,7 +1085,7 @@ class MovieDetailViewModel @Inject constructor(
                 cycleMovieStatusUseCase(current)
                 val updated = repository.getMovie(movie.id, targetMediaType)
                 if (updated != null) {
-                    ensureFirstViewingCreated(updated)
+                    ensureFirstViewingCreated(updated, isProgressAdvancing = true)
                 }
             }
         }
@@ -1123,7 +1152,7 @@ class MovieDetailViewModel @Inject constructor(
                 }
                 repository.saveMovie(updated)
                 if (watchState == WatchState.WATCHED && mediaType == "tv") {
-                    ensureFirstViewingCreated(updated, customWatchDate)
+                    ensureFirstViewingCreated(updated, customWatchDate, isProgressAdvancing = true)
                 }
                 badgeRepository.evaluateBadgesAsync()
             }
@@ -1167,7 +1196,8 @@ class MovieDetailViewModel @Inject constructor(
                 val currentWatchedMap = currentMovie.watchedEpisodes?.toMutableMap() ?: mutableMapOf()
                 val currentWatchedList = currentWatchedMap[seasonNumber.toString()]?.toMutableList() ?: mutableListOf()
                 
-                if (currentWatchedList.contains(episodeNumber)) {
+                val isAdding = !currentWatchedList.contains(episodeNumber)
+                if (!isAdding) {
                     currentWatchedList.remove(episodeNumber)
                 } else {
                     currentWatchedList.add(episodeNumber)
@@ -1175,7 +1205,7 @@ class MovieDetailViewModel @Inject constructor(
                 
                 val updated = updateEpisodesUseCase(currentMovie, seasonNumber, currentWatchedList).copy(dropped = false)
                 repository.saveMovie(updated)
-                ensureFirstViewingCreated(updated)
+                ensureFirstViewingCreated(updated, isProgressAdvancing = isAdding)
                 badgeRepository.evaluateBadgesAsync()
             }
         }
@@ -1188,7 +1218,8 @@ class MovieDetailViewModel @Inject constructor(
                 val currentMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
                 val currentWatchedList = currentMovie.watchedEpisodes?.get(seasonNumber.toString()) ?: emptyList()
                 
-                val newEpisodes = if (currentWatchedList.size >= allEpisodeNumbers.size) {
+                val isAdding = currentWatchedList.size < allEpisodeNumbers.size
+                val newEpisodes = if (!isAdding) {
                     emptyList<Int>()
                 } else {
                     allEpisodeNumbers
@@ -1196,7 +1227,7 @@ class MovieDetailViewModel @Inject constructor(
 
                 val updated = updateEpisodesUseCase(currentMovie, seasonNumber, newEpisodes).copy(dropped = false)
                 repository.saveMovie(updated)
-                ensureFirstViewingCreated(updated)
+                ensureFirstViewingCreated(updated, isProgressAdvancing = isAdding)
                 badgeRepository.evaluateBadgesAsync()
             }
         }
