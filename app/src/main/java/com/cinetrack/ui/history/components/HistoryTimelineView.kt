@@ -14,6 +14,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -170,11 +171,13 @@ private fun MonthTimelineHeader(
         }
     }
 
+    val accentColor = MaterialTheme.colorScheme.primary
+
     Row(
         modifier = modifier
             .fillMaxWidth()
             .height(IntrinsicSize.Min)
-            .padding(vertical = 6.dp),
+            .padding(vertical = 8.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
         // Lateral timeline node for Month
@@ -189,23 +192,35 @@ private fun MonthTimelineHeader(
                 modifier = Modifier
                     .size(13.dp)
                     .clip(CircleShape)
-                    .background(MaterialTheme.colorScheme.primary)
+                    .background(accentColor)
                     .border(2.dp, Color(0xFF0D0F14), CircleShape)
             )
         }
 
         Spacer(modifier = Modifier.width(10.dp))
 
-        // Month Pill Capsule
+        // Month Pill Capsule Infused with Accent Colors
         Box(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 4.dp)
                 .clip(CircleShape)
-                .background(Color(0xFF14171E))
+                .background(
+                    Brush.horizontalGradient(
+                        colors = listOf(
+                            accentColor.copy(alpha = 0.22f),
+                            accentColor.copy(alpha = 0.08f)
+                        )
+                    )
+                )
                 .border(
-                    width = 0.8.dp,
-                    color = Color.White.copy(alpha = 0.14f),
+                    width = 1.dp,
+                    brush = Brush.horizontalGradient(
+                        colors = listOf(
+                            accentColor.copy(alpha = 0.65f),
+                            accentColor.copy(alpha = 0.25f)
+                        )
+                    ),
                     shape = CircleShape
                 )
                 .padding(horizontal = 16.dp, vertical = 9.dp)
@@ -218,26 +233,26 @@ private fun MonthTimelineHeader(
                 Text(
                     text = monthTitle,
                     style = MaterialTheme.typography.titleMedium.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White,
+                        fontWeight = FontWeight.ExtraBold,
+                        color = accentColor,
                         fontSize = 14.5.sp,
-                        letterSpacing = 0.2.sp
+                        letterSpacing = 0.3.sp
                     )
                 )
 
                 Surface(
                     shape = CircleShape,
-                    color = Color.White.copy(alpha = 0.10f),
-                    border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.18f))
+                    color = accentColor.copy(alpha = 0.22f),
+                    border = BorderStroke(0.8.dp, accentColor.copy(alpha = 0.50f))
                 ) {
                     Text(
                         text = "$count",
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
-                            color = Color.White.copy(alpha = 0.90f),
+                            color = accentColor,
                             fontSize = 11.5.sp
                         ),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 2.5.dp)
                     )
                 }
             }
