@@ -204,6 +204,8 @@
     <string name="settings_show_general_stats_desc">계정 대시보드에 일반 통계 카드를 표시합니다.</string>
     <string name="settings_show_trophies">트로피 룸 카드</string>
     <string name="settings_show_trophies_desc">계정 대시보드에 트로피 룸 카드를 표시합니다.</string>
+    <string name="settings_show_diary">다이어리 카드</string>
+    <string name="settings_show_diary_desc">계정 대시보드에 다이어리 카드를 표시합니다.</string>
     <string name="settings_language">앱 언어</string>
     <string name="settings_language_desc">앱을 재시작하면 변경 사항이 적용됩니다</string>
     <string name="settings_language_system">시스템 기본값</string>
@@ -1870,4 +1872,6 @@
     <string name="history_sort_oldest">오래된순</string>
     <string name="history_sort_title">제목순 (A - Z)</string>
     <string name="history_sort_rating">내 평점순</string>
+    <string name="history_media_movie">영화</string>
+    <string name="history_media_series">시리즈</string>
 </resources>

@@ -204,6 +204,8 @@
     <string name="settings_show_general_stats_desc">在个人中心主页显示“常规统计”卡片。</string>
     <string name="settings_show_trophies">“陈列室”卡片</string>
     <string name="settings_show_trophies_desc">在个人中心主页显示“陈列室”卡片。</string>
+    <string name="settings_show_diary">“观影日记”卡片</string>
+    <string name="settings_show_diary_desc">在个人中心主页显示“观影日记”卡片。</string>
     <string name="settings_language">应用语言</string>
     <string name="settings_language_desc">重启应用后生效</string>
     <string name="settings_language_system">跟随系统</string>
@@ -1870,4 +1872,6 @@
     <string name="history_sort_oldest">最早日期</string>
     <string name="history_sort_title">片名（A - Z）</string>
     <string name="history_sort_rating">个人评分</string>
+    <string name="history_media_movie">电影</string>
+    <string name="history_media_series">剧集</string>
 </resources>

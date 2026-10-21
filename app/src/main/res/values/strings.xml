@@ -204,6 +204,8 @@
     <string name="settings_show_general_stats_desc">Shows the General Stats card on your profile dashboard.</string>
     <string name="settings_show_trophies">Trophy Room Card</string>
     <string name="settings_show_trophies_desc">Shows the Trophy Room card on your profile dashboard.</string>
+    <string name="settings_show_diary">Diary Card</string>
+    <string name="settings_show_diary_desc">Shows the Diary card on your profile dashboard.</string>
     <string name="settings_language">App Language</string>
     <string name="settings_language_desc">Changes will apply on restart</string>
     <string name="settings_language_system">System</string>
@@ -1449,7 +1451,7 @@
     <string name="box_office_error">Unable to load Box Office data. Pull down to retry.</string>
     <string name="box_office_filter_all_years">All Years</string>
     <string name="box_office_banner_subtitle">Weekend &amp; All-Time Rankings</string>
-    
+
     <!-- Flow Filter Strings -->
     <string name="flow_filter_sort_recent">Recent Check-in</string>
     <string name="flow_filter_sort_watch_date">Watch Date</string>
@@ -1877,5 +1879,7 @@
     <string name="history_sort_oldest">Oldest First</string>
     <string name="history_sort_title">Title (A - Z)</string>
     <string name="history_sort_rating">Personal Rating</string>
+    <string name="history_media_movie">Movie</string>
+    <string name="history_media_series">Series</string>
 </resources>
 

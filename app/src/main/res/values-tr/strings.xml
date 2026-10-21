@@ -204,6 +204,8 @@
     <string name="settings_show_general_stats_desc">Profil panelinizde Genel İstatistikler kartını gösterir.</string>
     <string name="settings_show_trophies">Kupa Odası Kartı</string>
     <string name="settings_show_trophies_desc">Profil panelinizde Kupa Odası kartını gösterir.</string>
+    <string name="settings_show_diary">Günlük Kartı</string>
+    <string name="settings_show_diary_desc">Profil panelinizde Günlük kartını gösterir.</string>
     <string name="settings_language">Uygulama Dili</string>
     <string name="settings_language_desc">Değişiklikler yeniden başlatıldığında uygulanacaktır</string>
     <string name="settings_language_system">Sistem</string>
@@ -1870,4 +1872,6 @@
     <string name="history_sort_oldest">En eski</string>
     <string name="history_sort_title">Başlık (A - Z)</string>
     <string name="history_sort_rating">Kişisel puan</string>
+    <string name="history_media_movie">Film</string>
+    <string name="history_media_series">Dizi</string>
 </resources>

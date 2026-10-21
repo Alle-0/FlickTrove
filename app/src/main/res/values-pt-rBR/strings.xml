@@ -200,6 +200,8 @@
     <string name="settings_show_general_stats_desc">Mostra o cartão de Estatísticas Gerais no painel do seu perfil.</string>
     <string name="settings_show_trophies">Cartão Sala de Troféus</string>
     <string name="settings_show_trophies_desc">Mostra o cartão da Sala de Troféus no painel do seu perfil.</string>
+    <string name="settings_show_diary">Cartão Diário</string>
+    <string name="settings_show_diary_desc">Mostra o cartão Diário no painel do seu perfil.</string>
     <string name="settings_language">Idioma do Aplicativo</string>
     <string name="settings_language_desc">As alterações serão aplicadas ao reiniciar</string>
     <string name="settings_language_system">Sistema</string>
@@ -1862,6 +1864,8 @@
     <string name="history_sort_oldest">Mais antigo</string>
     <string name="history_sort_title">Título (A - Z)</string>
     <string name="history_sort_rating">Nota pessoal</string>
+    <string name="history_media_movie">Filme</string>
+    <string name="history_media_series">Série</string>
 </resources>
 
 

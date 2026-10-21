@@ -204,6 +204,8 @@
     <string name="settings_show_general_stats_desc">アカウントダッシュボードに「一般統計」カードを表示します。</string>
     <string name="settings_show_trophies">トロフィールームカード</string>
     <string name="settings_show_trophies_desc">アカウントダッシュボードに「トロフィールーム」カードを表示します。</string>
+    <string name="settings_show_diary">鑑賞日記カード</string>
+    <string name="settings_show_diary_desc">アカウントダッシュボードに「鑑賞日記」カードを表示します。</string>
     <string name="settings_language">アプリの言語</string>
     <string name="settings_language_desc">再起動後に変更が適用されます</string>
     <string name="settings_language_system">システム</string>
@@ -1870,4 +1872,6 @@
     <string name="history_sort_oldest">古い順</string>
     <string name="history_sort_title">タイトル順（A - Z）</string>
     <string name="history_sort_rating">個人評価順</string>
+    <string name="history_media_movie">映画</string>
+    <string name="history_media_series">シリーズ</string>
 </resources>

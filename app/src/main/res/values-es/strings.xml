@@ -1284,6 +1284,8 @@
     <string name="settings_show_general_stats_desc">Muestra la tarjeta de estadísticas generales en el panel de tu perfil.</string>
     <string name="settings_show_trophies">Tarjeta Sala de Trofeos</string>
     <string name="settings_show_trophies_desc">Muestra la tarjeta de la Sala de Trofeos en el panel de tu perfil.</string>
+    <string name="settings_show_diary">Tarjeta Diario</string>
+    <string name="settings_show_diary_desc">Muestra la tarjeta Diario en el panel de tu perfil.</string>
     <string name="stats_map_no_movies">Sin películas</string>
     <string name="stats_map_movies">%1$d películas</string>
     <string name="feedback_roadmap_note">¿Tienes una idea compleja o quieres discutir la hoja de ruta? ¡Únete a r/FlickTrove o abre un Issue en GitHub!</string>
@@ -1866,5 +1868,7 @@
     <string name="history_sort_oldest">Más antiguo</string>
     <string name="history_sort_title">Título (A - Z)</string>
     <string name="history_sort_rating">Calificación personal</string>
+    <string name="history_media_movie">Película</string>
+    <string name="history_media_series">Serie</string>
 </resources>
 

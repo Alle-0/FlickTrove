@@ -61,6 +61,7 @@ fun DashboardSettingsDialog(
     val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
     val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
     val showTrophies by settingsViewModel.showTrophies.collectAsStateWithLifecycle()
+    val showDiary by settingsViewModel.showDiary.collectAsStateWithLifecycle()
     val dashboardCardOrder by settingsViewModel.dashboardCardOrder.collectAsStateWithLifecycle()
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
     val context = LocalContext.current
@@ -141,7 +142,7 @@ fun DashboardSettingsDialog(
                             if (vibrationEnabled) {
                                 VibrationHelper.vibrateClick(context)
                             }
-                            val defaultOrder = listOf("stats", "folders", "trophies", "flow")
+                            val defaultOrder = listOf("stats", "folders", "trophies", "flow", "diary")
                             localOrder = defaultOrder
                             dropTrigger++
                             settingsViewModel.updateDashboardCardOrder(defaultOrder)
@@ -230,6 +231,12 @@ fun DashboardSettingsDialog(
                             R.string.settings_show_trophies_desc,
                             showTrophies
                         ) { settingsViewModel.toggleShowTrophies(it) }
+                        "diary", "history" -> DashboardSettingItem(
+                            R.drawable.ic_calendario,
+                            R.string.settings_show_diary,
+                            R.string.settings_show_diary_desc,
+                            showDiary
+                        ) { settingsViewModel.toggleShowDiary(it) }
                         else -> DashboardSettingItem(
                             R.drawable.ic_stat,
                             R.string.settings_show_general_stats,

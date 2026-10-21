@@ -985,6 +985,10 @@ class MovieRepository @Inject constructor(
                     "defaultStartMedia" to prefs.defaultStartMedia,
                     "showMyFolders" to prefs.showMyFolders,
                     "showYourFlow" to prefs.showYourFlow,
+                    "showGeneralStats" to prefs.showGeneralStats,
+                    "showTrophies" to prefs.showTrophies,
+                    "showDiary" to prefs.showDiary,
+                    "dashboardCardOrder" to prefs.dashboardCardOrder,
                     "titleTextSizeMultiplier" to prefs.titleTextSizeMultiplier.toDouble(),
                     "imageQuality" to prefs.imageQuality,
                     "homeSort" to mapOf(

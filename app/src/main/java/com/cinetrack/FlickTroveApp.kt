@@ -224,15 +224,15 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             val isTargetSearch = targetState is com.cinetrack.ui.screens.SearchScreen
                                             val isInitialSearch = initialState is com.cinetrack.ui.screens.SearchScreen
                                             val isInitialSplash = initialState is com.cinetrack.ui.screens.SplashScreen
-                                            val isTargetTrophy = targetState is com.cinetrack.ui.screens.TrophyRoomScreen
-                                            val isInitialTrophy = initialState is com.cinetrack.ui.screens.TrophyRoomScreen
+                                            val isTargetHorizontal = targetState is com.cinetrack.ui.screens.TrophyRoomScreen || targetState is com.cinetrack.ui.screens.HistoryScreen
+                                            val isInitialHorizontal = initialState is com.cinetrack.ui.screens.TrophyRoomScreen || initialState is com.cinetrack.ui.screens.HistoryScreen
                                             
                                             val enter = if (isPop || isReplace || isInitialSplash) {
                                                 androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(500))
                                             } else {
                                                 if (isTargetSearch) {
                                                     androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
-                                                } else if (isTargetTrophy) {
+                                                } else if (isTargetHorizontal) {
                                                     androidx.compose.animation.slideInHorizontally(
                                                         initialOffsetX = { it },
                                                         animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
@@ -248,7 +248,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             val exit = if (isPop) {
                                                 if (isInitialSearch) {
                                                     androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
-                                                } else if (isInitialTrophy) {
+                                                } else if (isInitialHorizontal) {
                                                     androidx.compose.animation.slideOutHorizontally(
                                                         targetOffsetX = { it },
                                                         animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)

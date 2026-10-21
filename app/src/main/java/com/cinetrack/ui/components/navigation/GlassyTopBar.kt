@@ -83,7 +83,8 @@ fun GlassyTopBar(
     onEditBackdropBoundsChanged: ((Rect) -> Unit)? = null,
     onSettingsClick: ((Offset) -> Unit)? = null,
     isStatsRewatchesEnabled: Boolean? = null,
-    onStatsRewatchToggle: ((Boolean) -> Unit)? = null
+    onStatsRewatchToggle: ((Boolean) -> Unit)? = null,
+    customActions: (@Composable () -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
     val context = LocalContext.current
@@ -129,10 +130,15 @@ fun GlassyTopBar(
                 .height(46.dp)
                 .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
         ) {
+            val titleHorizontalPadding = when {
+                customActions != null -> 120.dp
+                isStatsRewatchesEnabled != null -> 96.dp
+                else -> 56.dp
+            }
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = if (isStatsRewatchesEnabled != null) 100.dp else 56.dp), // Leaves space for the text pill
+                    .padding(horizontal = titleHorizontalPadding),
                 contentAlignment = Alignment.Center
             ) {
                 // Text is swapped while invisible, so the layout never changes size.
@@ -348,6 +354,13 @@ fun GlassyTopBar(
                     }
                 }
 
+                if (customActions != null) {
+                    customActions()
+                    if (onFilterClick != null) {
+                        Spacer(modifier = Modifier.width(8.dp))
+                    }
+                }
+
                 val filterButtonBounds = remember { arrayOf<Rect?>(null) }
                 AnimatedVisibility(
                     visible = onFilterClick != null,
@@ -357,10 +370,6 @@ fun GlassyTopBar(
                     Box(
                         modifier = Modifier
                             .size(32.dp)
-                            .then(
-                                if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(50))
-                                else Modifier
-                            )
                             .onGloballyPositioned { coords ->
                                 val position = coords.positionInRoot()
                                 filterButtonBounds[0] = Rect(
@@ -373,6 +382,10 @@ fun GlassyTopBar(
                             .bounceClick(
                                 enabled = !isDimmed,
                                 onClick = { filterButtonBounds[0]?.let { onFilterClick?.invoke(it) } }
+                            )
+                            .then(
+                                if (hasActiveFilters) Modifier.border(BorderStroke(1.5.dp, MaterialTheme.colorScheme.primary), RoundedCornerShape(50))
+                                else Modifier
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -603,7 +616,7 @@ fun GlassyTopBar(
                     }
                 }
 
-                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null && onFolderOptionsClick == null && onStatsRewatchToggle == null && onSettingsClick == null) {
+                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null && onFolderOptionsClick == null && onStatsRewatchToggle == null && onSettingsClick == null && customActions == null) {
                     Spacer(modifier = Modifier.size(48.dp))
                 }
             }

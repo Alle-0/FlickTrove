@@ -21,7 +21,9 @@ data class RawTimelineRecord(
     val personalNote: String?,
     val runtimeMinutes: Int,
     val historicalEpisodes: String?,
-    val currentEpisodes: Map<String, List<Int>>?
+    val currentEpisodes: Map<String, List<Int>>?,
+    val releaseDate: String?,
+    val firstAirDate: String?
 )
 
 @Dao
@@ -38,7 +40,9 @@ interface WatchHistoryDao {
                f.personal_note AS personalNote,
                COALESCE(f.runtime, 0) AS runtimeMinutes,
                h.historicalEpisodes, 
-               f.watched_episodes AS currentEpisodes
+               f.watched_episodes AS currentEpisodes,
+               f.release_date AS releaseDate,
+               f.first_air_date AS firstAirDate
         FROM watch_history h
         INNER JOIN favorites f ON h.movieId = f.id AND h.mediaType = f.media_type
         WHERE f.sync_status != 'pending_delete' AND f.sync_status != 'deleted' AND h.syncStatus != 'deleted'

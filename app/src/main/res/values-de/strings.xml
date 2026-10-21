@@ -1280,6 +1280,8 @@
     <string name="settings_show_general_stats_desc">Zeigt die Karte mit allgemeinen Statistiken auf Ihrem Profil-Dashboard an.</string>
     <string name="settings_show_trophies">Trophäenraum-Karte</string>
     <string name="settings_show_trophies_desc">Zeigt die Trophäenraum-Karte in Ihrem Profil-Dashboard an.</string>
+    <string name="settings_show_diary">Tagebuch-Karte</string>
+    <string name="settings_show_diary_desc">Zeigt die Tagebuch-Karte in Ihrem Profil-Dashboard an.</string>
     <string name="stats_map_no_movies">Keine Filme</string>
     <string name="stats_map_movies">%1$d Filme</string>
     <string name="feedback_roadmap_note">Haben Sie eine komplexe Idee oder möchten Sie die Roadmap diskutieren? Treten Sie r/FlickTrove bei oder eröffnen Sie ein Issue auf GitHub!</string>
@@ -1867,5 +1869,7 @@
     <string name="history_sort_oldest">Älteste zuerst</string>
     <string name="history_sort_title">Titel (A - Z)</string>
     <string name="history_sort_rating">Eigene Bewertung</string>
+    <string name="history_media_movie">Film</string>
+    <string name="history_media_series">Serie</string>
 </resources>
 

@@ -204,6 +204,8 @@
     <string name="settings_show_general_stats_desc">Menampilkan kartu Statistik Umum di dasbor profil Anda.</string>
     <string name="settings_show_trophies">Kartu Ruang Trofi</string>
     <string name="settings_show_trophies_desc">Menampilkan kartu Ruang Trofi di dasbor profil Anda.</string>
+    <string name="settings_show_diary">Kartu Buku Harian</string>
+    <string name="settings_show_diary_desc">Menampilkan kartu Buku Harian di dasbor profil Anda.</string>
     <string name="settings_language">Bahasa Aplikasi</string>
     <string name="settings_language_desc">Perubahan akan diterapkan setelah memulai ulang</string>
     <string name="settings_language_system">Sistem</string>
@@ -1869,4 +1871,6 @@
     <string name="history_sort_oldest">Terlama</string>
     <string name="history_sort_title">Judul (A - Z)</string>
     <string name="history_sort_rating">Rating pribadi</string>
+    <string name="history_media_movie">Film</string>
+    <string name="history_media_series">Serial</string>
 </resources>

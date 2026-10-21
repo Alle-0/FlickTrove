@@ -1,21 +1,18 @@
 package com.cinetrack.ui.history.components
 
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.SearchOff
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -23,7 +20,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.history.model.WatchTimelineEntry
+import com.cinetrack.ui.theme.HazeStyles
+import dev.chrisbanes.haze.HazeState
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 import java.util.Locale
@@ -36,7 +36,8 @@ fun HistoryTimelineView(
     onEditDate: (entry: WatchTimelineEntry) -> Unit,
     onDeleteSession: (entry: WatchTimelineEntry) -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    hazeState: HazeState? = null
 ) {
     if (entries.isEmpty()) {
         Box(
@@ -45,35 +46,13 @@ fun HistoryTimelineView(
                 .padding(contentPadding),
             contentAlignment = Alignment.Center
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(12.dp),
-                modifier = Modifier.padding(32.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp)),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.SearchOff,
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.4f),
-                        modifier = Modifier.size(32.dp)
-                    )
-                }
-                Text(
-                    text = stringResource(id = R.string.history_no_entries_filter),
-                    style = MaterialTheme.typography.bodyLarge.copy(
-                        color = Color.White.copy(alpha = 0.6f),
-                        fontWeight = FontWeight.Medium,
-                        textAlign = TextAlign.Center
-                    )
-                )
-            }
+            Text(
+                text = stringResource(id = R.string.history_no_entries_filter),
+                color = Color.White.copy(alpha = 0.5f),
+                style = MaterialTheme.typography.bodyLarge,
+                textAlign = TextAlign.Center,
+                modifier = Modifier.padding(horizontal = 32.dp)
+            )
         }
         return
     }
@@ -88,11 +67,12 @@ fun HistoryTimelineView(
         verticalArrangement = Arrangement.spacedBy(10.dp)
     ) {
         groupedByMonth.forEach { (yearMonth, monthEntries) ->
-            // Natural scrolling Header for Month (scrolls off under blur instead of sticking)
-            item(key = "month_${yearMonth}") {
+            // Sticky floating pill for each Month
+            stickyHeader(key = "month_${yearMonth}") {
                 MonthSectionHeader(
                     yearMonth = yearMonth,
-                    count = monthEntries.size
+                    count = monthEntries.size,
+                    hazeState = hazeState
                 )
             }
 
@@ -118,6 +98,7 @@ fun HistoryTimelineView(
 private fun MonthSectionHeader(
     yearMonth: YearMonth,
     count: Int,
+    hazeState: HazeState?,
     modifier: Modifier = Modifier
 ) {
     val monthTitle = remember(yearMonth) {
@@ -133,21 +114,32 @@ private fun MonthSectionHeader(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp)
+            .padding(top = 4.dp, bottom = 6.dp),
+        contentAlignment = Alignment.Center
     ) {
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .hazeGlass(
+                    state = hazeState,
+                    shape = CircleShape,
+                    blurRadius = HazeStyles.SmallGlassBlurRadius,
+                    containerColor = Color(0xFF101418).copy(alpha = 0.70f),
+                    borderColor = Color.White.copy(alpha = 0.14f),
+                    borderWidth = 0.8.dp
+                )
+                .padding(horizontal = 16.dp, vertical = 9.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
                 Box(
                     modifier = Modifier
                         .size(8.dp)
-                        .clip(RoundedCornerShape(4.dp))
+                        .clip(CircleShape)
                         .background(MaterialTheme.colorScheme.primary)
                 )
                 Text(
@@ -155,24 +147,24 @@ private fun MonthSectionHeader(
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
-                        fontSize = 16.sp
+                        fontSize = 15.sp
                     )
                 )
             }
 
             Surface(
-                shape = RoundedCornerShape(12.dp),
-                color = Color.White.copy(alpha = 0.08f),
-                border = androidx.compose.foundation.BorderStroke(0.5.dp, Color.White.copy(alpha = 0.12f))
+                shape = CircleShape,
+                color = Color.White.copy(alpha = 0.10f),
+                border = BorderStroke(0.5.dp, Color.White.copy(alpha = 0.16f))
             ) {
                 Text(
                     text = "$count",
                     style = MaterialTheme.typography.labelSmall.copy(
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 11.sp
+                        fontWeight = FontWeight.Bold,
+                        color = Color.White.copy(alpha = 0.85f),
+                        fontSize = 12.sp
                     ),
-                    modifier = Modifier.padding(horizontal = 8.dp, vertical = 3.dp)
+                    modifier = Modifier.padding(horizontal = 9.dp, vertical = 2.5.dp)
                 )
             }
         }

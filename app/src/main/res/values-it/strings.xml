@@ -1316,6 +1316,8 @@
     <string name="settings_show_general_stats_desc">Mostra la scheda delle statistiche generali nella dashboard del profilo.</string>
     <string name="settings_show_trophies">Card Sala dei Trofei</string>
     <string name="settings_show_trophies_desc">Mostra la card della Sala dei Trofei nella dashboard del profilo.</string>
+    <string name="settings_show_diary">Card Diario</string>
+    <string name="settings_show_diary_desc">Mostra la card Diario nel tuo profilo.</string>
     <string name="stats_map_no_movies">Nessun film</string>
     <string name="stats_map_movies">%1$d film</string>
     <string name="feedback_roadmap_note">Hai un\'idea complessa o vuoi discutere la roadmap? Unisciti a r/FlickTrove o apri una Issue su GitHub!</string>
@@ -1877,5 +1879,7 @@
     <string name="history_sort_oldest">Data meno recente</string>
     <string name="history_sort_title">Titolo (A - Z)</string>
     <string name="history_sort_rating">Voto personale</string>
+    <string name="history_media_movie">Film</string>
+    <string name="history_media_series">Serie</string>
 </resources>
 

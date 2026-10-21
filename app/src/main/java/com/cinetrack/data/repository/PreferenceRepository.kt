@@ -65,6 +65,7 @@ class PreferenceRepository @Inject constructor(
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
         val SHOW_GENERAL_STATS = booleanPreferencesKey("show_general_stats")
         val SHOW_TROPHIES = booleanPreferencesKey("show_trophies")
+        val SHOW_DIARY = booleanPreferencesKey("show_diary")
         val DASHBOARD_CARD_ORDER = stringPreferencesKey("dashboard_card_order")
         val SHOW_HOME_CONTINUE_WATCHING = booleanPreferencesKey("show_home_continue_watching")
         val SHOW_HOME_BOX_OFFICE = booleanPreferencesKey("show_home_box_office")
@@ -122,8 +123,9 @@ class PreferenceRepository @Inject constructor(
                 imageQuality = preferences[PreferencesKeys.IMAGE_QUALITY] ?: "MEDIUM",
                 showGeneralStats = preferences[PreferencesKeys.SHOW_GENERAL_STATS] ?: true,
                 showTrophies = preferences[PreferencesKeys.SHOW_TROPHIES] ?: true,
+                showDiary = preferences[PreferencesKeys.SHOW_DIARY] ?: true,
                 dashboardCardOrder = run {
-                    val raw = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,trophies,flow").split(",").filter { it.isNotBlank() }
+                    val raw = (preferences[PreferencesKeys.DASHBOARD_CARD_ORDER] ?: "stats,folders,trophies,flow,diary").split(",").filter { it.isNotBlank() }
                     val withTrophies = if (!raw.contains("trophies")) {
                         val flowIdx = raw.indexOf("flow")
                         if (flowIdx != -1) {
@@ -134,10 +136,13 @@ class PreferenceRepository @Inject constructor(
                             raw + "trophies"
                         }
                     } else raw
-                    if (withTrophies == listOf("stats", "folders", "flow", "trophies")) {
-                        listOf("stats", "folders", "trophies", "flow")
+                    val withDiary = if (!withTrophies.contains("diary") && !withTrophies.contains("history")) {
+                        withTrophies + "diary"
+                    } else withTrophies
+                    if (withDiary == listOf("stats", "folders", "flow", "trophies")) {
+                        listOf("stats", "folders", "trophies", "flow", "diary")
                     } else {
-                        withTrophies
+                        withDiary
                     }
                 },
                 showHomeContinueWatching = preferences[PreferencesKeys.SHOW_HOME_CONTINUE_WATCHING] ?: true,
@@ -363,6 +368,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateShowTrophies(show: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_TROPHIES] = show
+        }
+    }
+
+    suspend fun updateShowDiary(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_DIARY] = show
         }
     }
 

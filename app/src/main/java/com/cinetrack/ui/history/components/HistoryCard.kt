@@ -1,20 +1,11 @@
 package com.cinetrack.ui.history.components
 
-import androidx.compose.animation.core.Spring
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.spring
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.DateRange
-import androidx.compose.material.icons.rounded.Delete
-import androidx.compose.material.icons.rounded.Edit
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -22,7 +13,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -58,17 +48,6 @@ fun HistoryCard(
     val context = LocalContext.current
     val haptic = LocalHapticFeedback.current
 
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
-    val scale by animateFloatAsState(
-        targetValue = if (isPressed) 0.96f else 1f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = if (isPressed) Spring.StiffnessHigh else Spring.StiffnessLow
-        ),
-        label = "historyCardScale"
-    )
-
     val posterUrl = remember(entry.posterPath) {
         if (!entry.posterPath.isNullOrBlank()) {
             "https://image.tmdb.org/t/p/w342${entry.posterPath}"
@@ -78,20 +57,13 @@ fun HistoryCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .graphicsLayer {
-                scaleX = scale
-                scaleY = scale
-            }
-            .clip(RoundedCornerShape(22.dp))
-            .background(Color(0xFF1C1C1E))
-            .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(22.dp))
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null
-            ) {
+            .bounceClick(scaleDown = 0.98f) {
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 onClick()
             }
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White.copy(alpha = 0.05f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
             .padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
         Row(
@@ -261,20 +233,21 @@ fun HistoryCard(
             Box {
                 Box(
                     modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .bounceClick(scaleDown = 0.85f) {
+                        .size(36.dp)
+                        .bounceClick(scaleDown = 0.88f) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             showMenu = true
-                        },
+                        }
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(0.5.dp, Color.White.copy(alpha = 0.12f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
                         imageVector = Icons.Rounded.MoreVert,
                         contentDescription = "Opzioni",
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(17.dp)
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(18.dp)
                     )
                 }
 
@@ -294,7 +267,7 @@ fun HistoryCard(
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Rounded.DateRange,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(18.dp)
@@ -315,7 +288,7 @@ fun HistoryCard(
                         },
                         leadingIcon = {
                             Icon(
-                                imageVector = Icons.Rounded.Delete,
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.error,
                                 modifier = Modifier.size(18.dp)

@@ -22,6 +22,7 @@ import com.cinetrack.ui.screens.StatsTab
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.screens.FlowStatsTab
 import com.cinetrack.ui.screens.TrophyRoomTab
+import com.cinetrack.ui.screens.HistoryTab
 import dev.chrisbanes.haze.HazeState
 
 fun isPrimaryMainTab(currentTab: Tab): Boolean {
@@ -38,6 +39,7 @@ fun isPrimaryMainTab(currentTab: Tab): Boolean {
             currentTab is FlowTab ||
             currentTab is FlowStatsTab ||
             currentTab is TrophyRoomTab ||
+            currentTab is HistoryTab ||
             currentTab is NewsTab ||
             currentTab is BoxOfficeTab
 }
@@ -60,7 +62,7 @@ fun BoxScope.MainBottomBarOverlay(
                     is com.cinetrack.ui.screens.HomeFeedTab -> "feed"
                     is HomeTab -> "index"
                     is VistiTab -> "visti"
-                    is AccountTab, is FoldersTab, is FolderDetailTab, is StatsTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab -> "account"
+                    is AccountTab, is FoldersTab, is FolderDetailTab, is StatsTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> "account"
                     else -> null
                 },
                 onNavigate = onNavigate

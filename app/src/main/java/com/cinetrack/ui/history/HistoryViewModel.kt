@@ -102,6 +102,13 @@ class HistoryViewModel @Inject constructor(
                 formatTvEpisodes(rec.historicalEpisodes, rec.currentEpisodes)
             } else null
 
+            val rawReleaseDate = if (rec.mediaType == "tv") {
+                rec.firstAirDate ?: rec.releaseDate
+            } else {
+                rec.releaseDate ?: rec.firstAirDate
+            }
+            val releaseYear = rawReleaseDate?.take(4)?.takeIf { it.length == 4 && it.all { ch -> ch.isDigit() } }
+
             WatchTimelineEntry(
                 historyId = rec.historyId,
                 movieId = rec.movieId,
@@ -118,7 +125,8 @@ class HistoryViewModel @Inject constructor(
                 personalNote = rec.personalNote?.takeIf { it.isNotBlank() },
                 runtimeMinutes = rec.runtimeMinutes,
                 episodeInfo = episodeInfo,
-                isTvShow = rec.mediaType == "tv"
+                isTvShow = rec.mediaType == "tv",
+                releaseYear = releaseYear
             )
         }
 
@@ -139,15 +147,10 @@ class HistoryViewModel @Inject constructor(
             matchesMedia && matchesViewing && matchesNotes
         }
 
-        // Apply sort
+        // Apply sort (chronological)
         val sortedEntries = when (filterConfig.sortOption) {
             HistorySortOption.DATE_DESC -> filteredByCriteria
             HistorySortOption.DATE_ASC -> filteredByCriteria.reversed()
-            HistorySortOption.TITLE_ASC -> filteredByCriteria.sortedWith(compareBy(String.CASE_INSENSITIVE_ORDER) { it.title })
-            HistorySortOption.RATING_DESC -> filteredByCriteria.sortedWith(
-                compareByDescending<WatchTimelineEntry> { it.personalRating ?: 0.0 }
-                    .thenByDescending { it.watchedAt }
-            )
         }
 
         // Precompute calendar entries grouped by date O(1)

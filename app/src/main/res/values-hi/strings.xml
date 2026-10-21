@@ -200,6 +200,8 @@
     <string name="settings_show_general_stats_desc">आपकी प्रोफ़ाइल डैशबोर्ड पर सामान्य आँकड़े कार्ड दिखाता है।</string>
     <string name="settings_show_trophies">ट्रॉफ़ी रूम कार्ड</string>
     <string name="settings_show_trophies_desc">आपकी प्रोफ़ाइल डैशबोर्ड पर ट्रॉफ़ी रूम कार्ड दिखाता है।</string>
+    <string name="settings_show_diary">डायरी कार्ड</string>
+    <string name="settings_show_diary_desc">आपकी प्रोफ़ाइल डैशबोर्ड पर डायरी कार्ड दिखाता है।</string>
     <string name="settings_language">ऐप की भाषा</string>
     <string name="settings_language_desc">परिवर्तन पुनरारंभ करने पर लागू होंगे</string>
     <string name="settings_language_system">सिस्टम</string>

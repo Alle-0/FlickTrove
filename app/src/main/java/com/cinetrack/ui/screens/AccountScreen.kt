@@ -83,6 +83,7 @@ import com.cinetrack.ui.screens.FoldersTab
 import com.cinetrack.ui.screens.FolderDetailTab
 import com.cinetrack.ui.components.shared.FolderCreateDialog
 import com.cinetrack.ui.screens.TrophyRoomTab
+import com.cinetrack.ui.screens.HistoryTab
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext
 import dagger.hilt.android.EntryPointAccessors
@@ -154,6 +155,7 @@ object AccountTab : Tab {
         val showYourFlow by settingsViewModel.showYourFlow.collectAsStateWithLifecycle()
         val showGeneralStats by settingsViewModel.showGeneralStats.collectAsStateWithLifecycle()
         val showTrophies by settingsViewModel.showTrophies.collectAsStateWithLifecycle()
+        val showDiary by settingsViewModel.showDiary.collectAsStateWithLifecycle()
         val dashboardCardOrder by settingsViewModel.dashboardCardOrder.collectAsStateWithLifecycle()
         
         // Firebase User Info
@@ -514,27 +516,29 @@ object AccountTab : Tab {
                                     }
                                 }
                                 "diary", "history" -> {
-                                    com.cinetrack.ui.components.account.HistoryDiaryCard(
-                                        hazeState = backgroundHazeState,
-                                        backgroundLuminance = rawLuminance,
-                                        recentEntries = historyUiState.allEntries.take(3),
-                                        totalCount = historyUiState.allEntries.size,
-                                        onClick = {
-                                            parentNavigator.push(com.cinetrack.ui.screens.HistoryScreen())
-                                        }
-                                    )
+                                    if (showDiary) {
+                                        com.cinetrack.ui.components.account.HistoryDiaryCard(
+                                            hazeState = backgroundHazeState,
+                                            backgroundLuminance = rawLuminance,
+                                            recentEntries = historyUiState.allEntries.take(3),
+                                            totalCount = historyUiState.allEntries.size,
+                                            onClick = {
+                                                tabNavigator.current = HistoryTab
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }
 
-                        if (!isDiaryInDashboardOrder) {
+                        if (!isDiaryInDashboardOrder && showDiary) {
                             com.cinetrack.ui.components.account.HistoryDiaryCard(
                                 hazeState = backgroundHazeState,
                                 backgroundLuminance = rawLuminance,
                                 recentEntries = historyUiState.allEntries.take(3),
                                 totalCount = historyUiState.allEntries.size,
                                 onClick = {
-                                    parentNavigator.push(com.cinetrack.ui.screens.HistoryScreen())
+                                    tabNavigator.current = HistoryTab
                                 }
                             )
                         }

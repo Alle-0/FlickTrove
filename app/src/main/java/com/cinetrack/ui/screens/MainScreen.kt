@@ -82,6 +82,10 @@ import com.cinetrack.ui.screens.HomeFeedTab
 import com.cinetrack.ui.screens.FlowTab
 import com.cinetrack.ui.screens.FlowStatsTab
 import com.cinetrack.ui.screens.TrophyRoomTab
+import com.cinetrack.ui.screens.HistoryTab
+import com.cinetrack.ui.screens.HistoryViewSwitcher
+import com.cinetrack.ui.history.HistoryViewModel
+import com.cinetrack.ui.history.model.ViewMode
 import com.cinetrack.ui.viewmodel.FlowViewModel
 import com.cinetrack.ui.screens.BoxOfficeTab
 import com.cinetrack.ui.viewmodel.BoxOfficeViewModel
@@ -198,7 +202,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             BackHandler(enabled = currentTab !is HomeFeedTab) {
                 if (currentTab is FolderDetailTab) {
                     tabNavigator.current = FoldersTab
-                } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is TrophyRoomTab) {
+                } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is TrophyRoomTab || currentTab is HistoryTab) {
                     tabNavigator.current = AccountTab
                 } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is SettingsTab || currentTab is BoxOfficeTab) {
                     tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab
@@ -250,13 +254,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 transitionSpec = {
                                     val targetDepth = when (targetState) {
                                         is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
-                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab -> 1
+                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
                                     }
                                     val initialDepth = when (initialState) {
                                         is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
-                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab -> 1
+                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
                                         is FolderDetailTab -> 2
                                         else -> 0
                                     }
@@ -311,6 +315,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is FlowTab -> "Flow"
                                 is FlowStatsTab -> "Flow stats"
                                 is TrophyRoomTab -> stringResource(R.string.dashboard_trophies)
+                                is HistoryTab -> stringResource(R.string.history_screen_title)
                                 else -> stringResource(R.string.app_name)
                             }
 
@@ -363,6 +368,20 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     flowHasActiveFilters = flowUiState.filterConfig.hasActiveFilters
                                 }
 
+                                var historyHasActiveFilters = false
+                                var historyCustomActions: (@Composable () -> Unit)? = null
+                                if (currentTab is HistoryTab && activity != null) {
+                                    val historyVm = hiltViewModel<HistoryViewModel>(activity)
+                                    val historyUiState by historyVm.uiState.collectAsStateWithLifecycle()
+                                    historyHasActiveFilters = historyUiState.filterConfig.isFiltered
+                                    historyCustomActions = {
+                                        HistoryViewSwitcher(
+                                            isTimeline = historyUiState.selectedViewMode == ViewMode.TIMELINE,
+                                            onSelectMode = { historyVm.setViewMode(it) }
+                                        )
+                                    }
+                                }
+
                                 GlassyTopBar(
                                     title = title,
                                     hazeState = contentHazeState,
@@ -375,20 +394,21 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         }
                                     },
                                     onMenuClick = null, // Menu rimosso
-                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is TrophyRoomTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
+                                    onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is TrophyRoomTab || currentTab is HistoryTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
-                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
-                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else discoverHasActiveFilters,
+                                    onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is HistoryTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
+                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else if (currentTab is HistoryTab) historyHasActiveFilters else discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
                                     notificationCount = updatesUiState.totalUnreadCount,
                                     hasAppUpdateBadge = hasAppUpdateBadge,
+                                    customActions = historyCustomActions,
                                     onEditBackdropClick = if (currentTab is AccountTab) { 
                                         { bounds ->
-                                            settingsViewModel.triggerEditProfileMenu(bounds)
+                                             settingsViewModel.triggerEditProfileMenu(bounds)
                                         } 
                                     } else null,
                                     onEditBackdropBoundsChanged = if (currentTab is AccountTab) {

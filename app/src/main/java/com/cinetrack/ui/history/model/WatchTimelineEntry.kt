@@ -13,9 +13,7 @@ enum class HistoryFilter {
 
 enum class HistorySortOption {
     DATE_DESC,
-    DATE_ASC,
-    TITLE_ASC,
-    RATING_DESC
+    DATE_ASC
 }
 
 enum class HistoryMediaTypeFilter {
@@ -74,7 +72,8 @@ data class WatchTimelineEntry(
     val personalNote: String?,
     val runtimeMinutes: Int,
     val episodeInfo: String?,
-    val isTvShow: Boolean
+    val isTvShow: Boolean,
+    val releaseYear: String? = null
 )
 
 data class HistoryUiState(

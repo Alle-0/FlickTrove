@@ -35,6 +35,9 @@ import com.cinetrack.ui.viewmodel.FlowViewModel
 import com.cinetrack.ui.LocalActiveTrophyFilterConfig
 import com.cinetrack.ui.components.badge.TrophyFilterModal
 import com.cinetrack.ui.screens.TrophyRoomTab
+import com.cinetrack.ui.screens.HistoryTab
+import com.cinetrack.ui.history.HistoryViewModel
+import com.cinetrack.ui.history.components.HistoryFilterModal
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -253,6 +256,21 @@ fun MainModalsContainer(
                     }
                 }
             }
+        } else if (currentTab is HistoryTab) {
+            val historyVm = if (activity != null) {
+                hiltViewModel<HistoryViewModel>(activity)
+            } else {
+                with(screen) { getViewModel<HistoryViewModel>() }
+            }
+            val historyUiState by historyVm.uiState.collectAsStateWithLifecycle()
+            HistoryFilterModal(
+                isVisible = isFilterModalVisible,
+                filterConfig = historyUiState.filterConfig,
+                onFilterConfigChanged = { historyVm.setFilterConfig(it) },
+                onDismissRequest = onFilterModalDismiss,
+                triggerBounds = filterButtonBounds,
+                hazeState = globalHazeState
+            )
         }
     }
     

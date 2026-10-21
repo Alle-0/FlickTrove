@@ -28,6 +28,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.cinetrack.R
 import com.cinetrack.ui.components.dialog.ExpandableSection
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import com.cinetrack.ui.components.dialog.DirectionChip
+import com.cinetrack.ui.components.dialog.FilterChip
 import com.cinetrack.ui.components.dialog.SortOptionItem
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalCloseButton
@@ -40,8 +43,10 @@ import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.graphicsLayer
 import com.cinetrack.ui.components.shared.MorphGlassModal
+import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
 
+@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun HistoryFilterModal(
     isVisible: Boolean,
@@ -135,11 +140,11 @@ fun HistoryFilterModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .weight(1f, fill = false)
+                        .verticalFadingEdges(scrollState, 16.dp, 16.dp)
                         .verticalScroll(scrollState)
-                        .padding(bottom = 12.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
+                        .padding(bottom = 8.dp)
                 ) {
-                    // SECTION 1: ORDINA PER
+                    // SECTION 1: ORDINA PER (Data sempre selezionata + Direzione Decrescente/Crescente)
                     ExpandableSection(
                         title = stringResource(R.string.filter_sort_by),
                         isExpanded = expandedSection == "sort",
@@ -150,32 +155,41 @@ fun HistoryFilterModal(
                     ) {
                         Column(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                            verticalArrangement = Arrangement.spacedBy(8.dp)
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             SortOptionItem(
-                                label = stringResource(R.string.history_sort_recent),
-                                isSelected = localConfig.sortOption == HistorySortOption.DATE_DESC,
-                                onClick = { localConfig = localConfig.copy(sortOption = HistorySortOption.DATE_DESC) }
+                                label = stringResource(R.string.comment_sort_date),
+                                isSelected = true,
+                                onClick = { /* Data è sempre l'ordinamento cardine del Diario */ }
                             )
-                            SortOptionItem(
-                                label = stringResource(R.string.history_sort_oldest),
-                                isSelected = localConfig.sortOption == HistorySortOption.DATE_ASC,
-                                onClick = { localConfig = localConfig.copy(sortOption = HistorySortOption.DATE_ASC) }
-                            )
-                            SortOptionItem(
-                                label = stringResource(R.string.history_sort_title),
-                                isSelected = localConfig.sortOption == HistorySortOption.TITLE_ASC,
-                                onClick = { localConfig = localConfig.copy(sortOption = HistorySortOption.TITLE_ASC) }
-                            )
-                            SortOptionItem(
-                                label = stringResource(R.string.history_sort_rating),
-                                isSelected = localConfig.sortOption == HistorySortOption.RATING_DESC,
-                                onClick = { localConfig = localConfig.copy(sortOption = HistorySortOption.RATING_DESC) }
-                            )
+
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 8.dp),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                DirectionChip(
+                                    label = stringResource(R.string.filter_dir_desc),
+                                    isSelected = localConfig.sortOption == HistorySortOption.DATE_DESC,
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                    iconRotation = 90f,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { localConfig = localConfig.copy(sortOption = HistorySortOption.DATE_DESC) }
+                                )
+                                DirectionChip(
+                                    label = stringResource(R.string.filter_dir_asc),
+                                    isSelected = localConfig.sortOption == HistorySortOption.DATE_ASC,
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                    iconRotation = -90f,
+                                    modifier = Modifier.weight(1f),
+                                    onClick = { localConfig = localConfig.copy(sortOption = HistorySortOption.DATE_ASC) }
+                                )
+                            }
                         }
                     }
 
-                    // SECTION 2: TIPO MEDIA
+                    // SECTION 2: TIPO MEDIA (Pillole FilterChip)
                     ExpandableSection(
                         title = stringResource(R.string.history_filter_media_type),
                         isExpanded = expandedSection == "media",
@@ -184,21 +198,22 @@ fun HistoryFilterModal(
                         badgeCount = if (localConfig.mediaTypeFilter != HistoryMediaTypeFilter.ALL) 1 else 0,
                         onToggle = { expandedSection = if (expandedSection == "media") null else "media" }
                     ) {
-                        Column(
+                        FlowRow(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_all),
                                 isSelected = localConfig.mediaTypeFilter == HistoryMediaTypeFilter.ALL,
                                 onClick = { localConfig = localConfig.copy(mediaTypeFilter = HistoryMediaTypeFilter.ALL) }
                             )
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_movies),
                                 isSelected = localConfig.mediaTypeFilter == HistoryMediaTypeFilter.MOVIES,
                                 onClick = { localConfig = localConfig.copy(mediaTypeFilter = HistoryMediaTypeFilter.MOVIES) }
                             )
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_tv),
                                 isSelected = localConfig.mediaTypeFilter == HistoryMediaTypeFilter.TV,
                                 onClick = { localConfig = localConfig.copy(mediaTypeFilter = HistoryMediaTypeFilter.TV) }
@@ -206,7 +221,7 @@ fun HistoryFilterModal(
                         }
                     }
 
-                    // SECTION 3: TIPO VISIONE
+                    // SECTION 3: TIPO VISIONE (Pillole FilterChip)
                     ExpandableSection(
                         title = stringResource(R.string.history_filter_viewing_type),
                         isExpanded = expandedSection == "viewing",
@@ -215,21 +230,22 @@ fun HistoryFilterModal(
                         badgeCount = if (localConfig.viewingTypeFilter != HistoryViewingTypeFilter.ALL) 1 else 0,
                         onToggle = { expandedSection = if (expandedSection == "viewing") null else "viewing" }
                     ) {
-                        Column(
+                        FlowRow(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_all_viewings),
                                 isSelected = localConfig.viewingTypeFilter == HistoryViewingTypeFilter.ALL,
                                 onClick = { localConfig = localConfig.copy(viewingTypeFilter = HistoryViewingTypeFilter.ALL) }
                             )
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_rewatches_only),
                                 isSelected = localConfig.viewingTypeFilter == HistoryViewingTypeFilter.REWATCH_ONLY,
                                 onClick = { localConfig = localConfig.copy(viewingTypeFilter = HistoryViewingTypeFilter.REWATCH_ONLY) }
                             )
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_first_watches_only),
                                 isSelected = localConfig.viewingTypeFilter == HistoryViewingTypeFilter.FIRST_WATCH_ONLY,
                                 onClick = { localConfig = localConfig.copy(viewingTypeFilter = HistoryViewingTypeFilter.FIRST_WATCH_ONLY) }
@@ -237,7 +253,7 @@ fun HistoryFilterModal(
                         }
                     }
 
-                    // SECTION 4: NOTE
+                    // SECTION 4: NOTE (Pillole FilterChip)
                     ExpandableSection(
                         title = stringResource(R.string.history_filter_notes),
                         isExpanded = expandedSection == "notes",
@@ -246,16 +262,17 @@ fun HistoryFilterModal(
                         badgeCount = if (localConfig.withNotesOnly) 1 else 0,
                         onToggle = { expandedSection = if (expandedSection == "notes") null else "notes" }
                     ) {
-                        Column(
+                        FlowRow(
                             modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                            horizontalArrangement = Arrangement.spacedBy(8.dp),
                             verticalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_all_notes),
                                 isSelected = !localConfig.withNotesOnly,
                                 onClick = { localConfig = localConfig.copy(withNotesOnly = false) }
                             )
-                            SortOptionItem(
+                            FilterChip(
                                 label = stringResource(R.string.history_filter_with_notes_only),
                                 isSelected = localConfig.withNotesOnly,
                                 onClick = { localConfig = localConfig.copy(withNotesOnly = true) }

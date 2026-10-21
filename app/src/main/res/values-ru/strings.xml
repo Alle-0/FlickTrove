@@ -201,6 +201,8 @@
     <string name="settings_show_general_stats_desc">Показывает карточку общей статистики на панели вашего профиля.</string>
     <string name="settings_show_trophies">Карточка «Комната трофеев»</string>
     <string name="settings_show_trophies_desc">Показывает карточку «Комната трофеев» на панели вашего профиля.</string>
+    <string name="settings_show_diary">Карточка «Дневник»</string>
+    <string name="settings_show_diary_desc">Показывает карточку «Дневник» на панели вашего профиля.</string>
     <string name="settings_language">Язык приложения</string>
     <string name="settings_language_desc">Изменения вступят в силу после перезапуска</string>
     <string name="settings_language_system">Системный</string>
@@ -1864,5 +1866,7 @@
     <string name="history_sort_oldest">Сначала старые</string>
     <string name="history_sort_title">По названию (А - Я)</string>
     <string name="history_sort_rating">Личная оценка</string>
+    <string name="history_media_movie">Фильм</string>
+    <string name="history_media_series">Сериал</string>
 </resources>
 
