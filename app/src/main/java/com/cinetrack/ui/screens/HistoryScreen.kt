@@ -138,8 +138,9 @@ fun HistoryScreenContent(
     var entryToDelete by remember { mutableStateOf<WatchTimelineEntry?>(null) }
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
-    val statusBarTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-    val topBarClearance = statusBarTop + 46.dp + 8.dp
+    val statusBarsTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+    val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+    val topBarClearance = paddingValues.calculateTopPadding() + statusBarsTop + cutoutTop + 46.dp + 16.dp
     val bottomClearance = paddingValues.calculateBottomPadding() + 100.dp
 
     Box(modifier = Modifier.fillMaxSize()) {
@@ -161,7 +162,7 @@ fun HistoryScreenContent(
                     contentPadding = PaddingValues(
                         start = 16.dp,
                         end = 16.dp,
-                        top = topBarClearance + 6.dp,
+                        top = topBarClearance,
                         bottom = bottomClearance
                     ),
                     modifier = Modifier.fillMaxSize()
@@ -191,7 +192,7 @@ fun HistoryScreenContent(
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
                                     end = 16.dp,
-                                    top = topBarClearance + 8.dp,
+                                    top = topBarClearance,
                                     bottom = bottomClearance
                                 ),
                                 modifier = Modifier.fillMaxSize()
@@ -218,7 +219,7 @@ fun HistoryScreenContent(
                                 contentPadding = PaddingValues(
                                     start = 16.dp,
                                     end = 16.dp,
-                                    top = topBarClearance + 8.dp,
+                                    top = topBarClearance,
                                     bottom = bottomClearance
                                 )
                             )
