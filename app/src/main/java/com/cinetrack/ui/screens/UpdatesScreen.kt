@@ -731,30 +731,19 @@ fun UpdatesScreen(
                         )
                     }
 
-                    // Calendar Toggle Button
+                    // Calendar View Switcher
                     androidx.compose.animation.AnimatedVisibility(
                         visible = pagerState.currentPage == 1,
                         enter = fadeIn() + slideInHorizontally { it / 2 },
                         exit = fadeOut() + slideOutHorizontally { it / 2 },
-                        modifier = Modifier.align(Alignment.CenterEnd).padding(end = 16.dp)
+                        modifier = Modifier
+                            .align(Alignment.CenterEnd)
+                            .padding(end = 16.dp)
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(44.dp)
-                                .bounceClick { 
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    isCalendarView = !isCalendarView 
-                                }
-                                .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = if (isCalendarView) R.drawable.ic_lista else R.drawable.ic_calendario),
-                                contentDescription = "Toggle Calendar",
-                                tint = MaterialTheme.colorScheme.onSurface,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
+                        com.cinetrack.ui.components.shared.ListCalendarSwitcher(
+                            isCalendar = isCalendarView,
+                            onSelectMode = { isCalendarView = it }
+                        )
                     }
                     } // end inner Box (statusBarsPadding)
                     } // end Column
