@@ -679,12 +679,27 @@ class MovieRepository @Inject constructor(
         // Push pending Movies
         val pendingMovies = favoriteDao.getPendingSync()
         val toDelete = pendingMovies.filter { it.syncStatus == "pending_delete" }
-        val toSync = pendingMovies.filter { it.syncStatus == "pending" }.map { it.copy(syncStatus = "synced") }
+        val now = System.currentTimeMillis()
+        val toSync = pendingMovies.filter { it.syncStatus == "pending" }.map { 
+            it.copy(syncStatus = "synced", clientUpdatedAt = now) 
+        }
 
         for (movie in toDelete) {
             try {
                 firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
-                favoriteDao.deleteById(movie.id, movie.mediaType)
+                // Preserva lo scudo tombstone in Room azzerando flag, rating e note
+                val tombstoneMovie = movie.copy(
+                    syncStatus = "deleted",
+                    watched = false,
+                    favorite = false,
+                    reminder = false,
+                    dropped = false,
+                    personalRating = null,
+                    personalNote = null,
+                    watchedEpisodes = emptyMap(),
+                    clientUpdatedAt = now
+                )
+                favoriteDao.insert(tombstoneMovie)
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
                 android.util.Log.e("MovieRepository", "Failed to push pending delete movie ${movie.id}", e)
@@ -695,7 +710,7 @@ class MovieRepository @Inject constructor(
             try {
                 firebaseRemoteDataSource.setMoviesBulk(toSync)
                 for (movie in toSync) {
-                    favoriteDao.updateSyncStatus(movie.id, movie.mediaType, "synced")
+                    favoriteDao.insert(movie)
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
@@ -745,9 +760,19 @@ class MovieRepository @Inject constructor(
                 emit(UiText.StringResource(R.string.sync_msg_syncing_favorites), 0.35f)
                 val (tombstones, modified) = deltaMovies.partition { it.syncStatus == "deleted" }
                 
-                // 1. Epurazione fisica dei record cancellati su altri dispositivi (Tombstones)
+                // 1. Preservazione dello scudo locale dei tombstone (invisibili alla UI, visibili a getMovieIncludingDeleted)
                 for (tombstone in tombstones) {
-                    favoriteDao.deleteById(tombstone.id, tombstone.mediaType)
+                    val tombstoneMovie = tombstone.copy(
+                        syncStatus = "deleted",
+                        watched = false,
+                        favorite = false,
+                        reminder = false,
+                        dropped = false,
+                        personalRating = null,
+                        personalNote = null,
+                        watchedEpisodes = emptyMap()
+                    )
+                    favoriteDao.insert(tombstoneMovie)
                 }
                 
                 // 2. Inserimento / Aggiornamento dei record modificati
