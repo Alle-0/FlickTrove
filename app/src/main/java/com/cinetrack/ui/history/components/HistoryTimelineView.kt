@@ -60,11 +60,26 @@ fun HistoryTimelineView(
         entries.groupBy { YearMonth.from(it.parsedDate) }
     }
 
-    // Wrap in a Box offset by topBarClearance so that sticky headers pin to a position
-    // visually below the GlassyTopBar, without needing per-header padding.
     Box(
         modifier = modifier.fillMaxSize()
     ) {
+        // Continuous lateral timeline track line spanning the entire screen height
+        // Extends seamlessly all the way to the top behind the GlassyTopBar and status bar
+        Box(
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .width(22.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(Color.White.copy(alpha = 0.12f))
+            )
+        }
+
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
             contentPadding = contentPadding,
@@ -97,21 +112,13 @@ fun HistoryTimelineView(
                             .animateItem(),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
-                        // Lateral Timeline Track & Node
+                        // Lateral Timeline Node
                         Box(
                             modifier = Modifier
                                 .width(22.dp)
                                 .fillMaxHeight(),
                             contentAlignment = Alignment.Center
                         ) {
-                            // Seamless continuous vertical track line
-                            Box(
-                                modifier = Modifier
-                                    .width(2.dp)
-                                    .fillMaxHeight()
-                                    .background(Color.White.copy(alpha = 0.12f))
-                            )
-
                             // Card session dot node
                             Box(
                                 modifier = Modifier
@@ -177,14 +184,6 @@ private fun MonthTimelineHeader(
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
-            // Continuous vertical line behind node
-            Box(
-                modifier = Modifier
-                    .width(2.dp)
-                    .fillMaxHeight()
-                    .background(Color.White.copy(alpha = 0.12f))
-            )
-
             // Month Milestone Node
             Box(
                 modifier = Modifier

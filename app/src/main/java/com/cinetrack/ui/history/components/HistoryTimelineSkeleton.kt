@@ -25,38 +25,51 @@ fun HistoryTimelineSkeleton(
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
     modifier: Modifier = Modifier
 ) {
-    LazyColumn(
-        modifier = modifier.fillMaxSize(),
-        contentPadding = contentPadding,
-        verticalArrangement = Arrangement.spacedBy(0.dp),
-        userScrollEnabled = false
+    Box(
+        modifier = modifier.fillMaxSize()
     ) {
-        // Sticky Month Header Skeleton
-        item {
-            MonthTimelineHeaderSkeleton()
+        // Continuous lateral timeline track line spanning the entire screen height
+        Box(
+            modifier = Modifier
+                .padding(start = 16.dp)
+                .width(22.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .width(2.dp)
+                    .fillMaxHeight()
+                    .background(Color.White.copy(alpha = 0.08f))
+            )
         }
 
-        // List of Card Skeletons with lateral timeline track
-        items(7) { index ->
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(IntrinsicSize.Min),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                // Lateral Timeline Track & Node Skeleton
-                Box(
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = contentPadding,
+            verticalArrangement = Arrangement.spacedBy(0.dp),
+            userScrollEnabled = false
+        ) {
+            // Sticky Month Header Skeleton
+            item {
+                MonthTimelineHeaderSkeleton()
+            }
+
+            // List of Card Skeletons with lateral timeline track
+            items(7) { index ->
+                Row(
                     modifier = Modifier
-                        .width(22.dp)
-                        .fillMaxHeight(),
-                    contentAlignment = Alignment.Center
+                        .fillMaxWidth()
+                        .height(IntrinsicSize.Min),
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
+                    // Lateral Timeline Node Skeleton
                     Box(
                         modifier = Modifier
-                            .width(2.dp)
-                            .fillMaxHeight()
-                            .background(Color.White.copy(alpha = 0.08f))
-                    )
+                            .width(22.dp)
+                            .fillMaxHeight(),
+                        contentAlignment = Alignment.Center
+                    ) {
                     Box(
                         modifier = Modifier
                             .size(8.dp)
@@ -90,6 +103,7 @@ fun HistoryTimelineSkeleton(
         }
     }
 }
+}
 
 @Composable
 private fun MonthTimelineHeaderSkeleton(
@@ -109,12 +123,6 @@ private fun MonthTimelineHeaderSkeleton(
                 .fillMaxHeight(),
             contentAlignment = Alignment.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .width(2.dp)
-                    .fillMaxHeight()
-                    .background(Color.White.copy(alpha = 0.08f))
-            )
             Box(
                 modifier = Modifier
                     .size(13.dp)
