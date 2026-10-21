@@ -68,7 +68,8 @@ fun FlickTroveTheme(
 
     val colorScheme = baseColorScheme.copy(
         primary = accentColor,
-        onPrimary = ColorUtils.contentColorForAccent(accentColor)
+        onPrimary = ColorUtils.contentColorForAccent(accentColor),
+        secondary = ColorUtils.calculateHarmonicSecondary(accentColor)
     )
     
     MaterialTheme(

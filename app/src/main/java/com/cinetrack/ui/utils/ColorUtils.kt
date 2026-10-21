@@ -195,6 +195,21 @@ object ColorUtils {
     fun contentColorForAccent(color: Color): Color {
         return if (color.luminance() > 0.38f) Color(0xFF000000) else Color.White
     }
+
+    /**
+     * Calcola un colore secondario armonioso analogo derivato dall'accento primario [accentColor].
+     * Sposta l'Hue nello spazio HSV di +30° per creare una tonalità sorella complementare
+     * (es. Teal -> Cyan/Sky, Cyan -> Blu, Blu -> Indaco, Amber -> Oro, Purple -> Magenta)
+     * mantenendo saturazione e luminosità ideali per l'interfaccia scura.
+     */
+    fun calculateHarmonicSecondary(accentColor: Color): Color {
+        val hsv = FloatArray(3)
+        AndroidColor.colorToHSV(accentColor.toArgb(), hsv)
+        hsv[0] = (hsv[0] + 30f) % 360f
+        hsv[1] = hsv[1].coerceIn(0.60f, 0.95f)
+        hsv[2] = hsv[2].coerceIn(0.85f, 1.0f)
+        return Color(AndroidColor.HSVToColor(hsv))
+    }
 }
 
 /** Converts a Compose [Color] to a CSS-style hex string (e.g. "#FF3A2C"). */
