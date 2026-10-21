@@ -424,10 +424,9 @@ fun HistoryViewSwitcher(
     val selectedIndex = if (isTimeline) 0 else 1
     val primaryColor = MaterialTheme.colorScheme.primary
     val activeContentColor = ColorUtils.contentColorForAccent(primaryColor)
-
-    val tabWidthDp = 30.dp
-    val tabHeightDp = 28.dp
-    val paddingDp = 2.dp
+    val tabWidthDp = 34.dp
+    val tabHeightDp = 30.dp
+    val paddingDp = 3.dp
 
     val tabWidthPx = with(density) { tabWidthDp.toPx() }
     val tabHeightPx = with(density) { tabHeightDp.toPx() }
@@ -489,7 +488,7 @@ fun HistoryViewSwitcher(
     }
 
     val dragScale by animateFloatAsState(
-        targetValue = if (isDragging) 1.08f else 1f,
+        targetValue = if (isDragging) 1.06f else 1f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
         label = "dragScale"
     )
@@ -497,18 +496,19 @@ fun HistoryViewSwitcher(
     val pillPath = remember { Path() }
 
     Surface(
-        shape = RoundedCornerShape(14.dp),
+        shape = CircleShape,
         color = Color.White.copy(alpha = 0.08f),
         border = androidx.compose.foundation.BorderStroke(
-            0.5.dp,
-            Color.White.copy(alpha = 0.12f)
+            1.dp,
+            Color.White.copy(alpha = 0.15f)
         ),
-        modifier = modifier
+        modifier = modifier.clip(CircleShape)
     ) {
         Box(
             modifier = Modifier
                 .width(tabWidthDp * 2)
                 .height(tabHeightDp)
+                .clip(CircleShape)
                 .pointerInput(selectedIndex, tabWidthPx) {
                     var isDragActiveOnPill = false
                     val touchMargin = 6.dp.toPx()
@@ -578,14 +578,14 @@ fun HistoryViewSwitcher(
                             var targetLeft = dragTargetLeft
                             var targetRight = dragTargetRight
 
-                            // Soft elastic edge squish
+                            // Soft elastic edge squish within safe bounds
                             if (dragTargetLeft < paddingPx) {
-                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(normalWidthPx * 0.5f)
-                                targetLeft = paddingPx - (overscroll * 0.2f)
+                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(normalWidthPx * 0.4f)
+                                targetLeft = paddingPx - (overscroll * 0.15f)
                                 targetRight = (paddingPx + normalWidthPx) - overscroll * 0.1f
                             } else if (dragTargetRight > maxRight) {
-                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(normalWidthPx * 0.5f)
-                                targetRight = maxRight + (overscroll * 0.2f)
+                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(normalWidthPx * 0.4f)
+                                targetRight = maxRight + (overscroll * 0.15f)
                                 targetLeft = maxLeft + overscroll * 0.1f
                             }
 
@@ -663,14 +663,17 @@ fun HistoryViewSwitcher(
                         val centerXPx = (currentLeft + currentRight) / 2f
 
                         val scaledWidth = (currentWidth * dragScale).coerceAtLeast(1f)
-                        val pillLeft = centerXPx - (scaledWidth / 2f)
+                        val maxAllowedWidth = (size.width - paddingPx * 2f).coerceAtLeast(1f)
+                        val clampedWidth = scaledWidth.coerceAtMost(maxAllowedWidth)
+
+                        val pillLeft = (centerXPx - (clampedWidth / 2f)).coerceIn(paddingPx, size.width - paddingPx - clampedWidth)
                         val pillTop = paddingPx
                         val cornerRadius = pillHeightPx / 2f
 
                         drawRoundRect(
                             color = primaryColor,
                             topLeft = Offset(pillLeft, pillTop),
-                            size = Size(scaledWidth, pillHeightPx),
+                            size = Size(clampedWidth, pillHeightPx),
                             cornerRadius = CornerRadius(cornerRadius, cornerRadius)
                         )
                     }
@@ -681,7 +684,10 @@ fun HistoryViewSwitcher(
                         val centerXPx = (currentLeft + currentRight) / 2f
 
                         val scaledWidth = (currentWidth * dragScale).coerceAtLeast(1f)
-                        val pillLeft = centerXPx - (scaledWidth / 2f)
+                        val maxAllowedWidth = (size.width - paddingPx * 2f).coerceAtLeast(1f)
+                        val clampedWidth = scaledWidth.coerceAtMost(maxAllowedWidth)
+
+                        val pillLeft = (centerXPx - (clampedWidth / 2f)).coerceIn(paddingPx, size.width - paddingPx - clampedWidth)
                         val pillTop = paddingPx
                         val cornerRadius = pillHeightPx / 2f
 
@@ -690,7 +696,7 @@ fun HistoryViewSwitcher(
                             RoundRect(
                                 left = pillLeft,
                                 top = pillTop,
-                                right = pillLeft + scaledWidth,
+                                right = pillLeft + clampedWidth,
                                 bottom = pillTop + pillHeightPx,
                                 radiusX = cornerRadius,
                                 radiusY = cornerRadius
