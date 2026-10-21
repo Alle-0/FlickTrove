@@ -279,11 +279,12 @@ class FirebaseRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Batch set Watch History in Firestore
+     * Batch set Watch History in Firestore with client_updated_at for Delta Sync
      */
     suspend fun batchSetWatchHistory(entries: List<WatchHistoryEntity>) {
         val uid = userId ?: return
         val collection = getWatchHistoryCollection(uid)
+        val now = System.currentTimeMillis()
         
         try {
             val chunks = entries.chunked(40)
@@ -294,7 +295,17 @@ class FirebaseRemoteDataSource @Inject constructor(
                             val safeWatchedAt = entry.watchedAt.replace("/", "-")
                             val docId = "${entry.movieId}_${safeWatchedAt}"
                             val docRef = collection.document(docId)
-                            batch.set(docRef, entry, SetOptions.merge())
+                            val map = mapOf(
+                                "id" to entry.id,
+                                "movieId" to entry.movieId,
+                                "watchedAt" to entry.watchedAt,
+                                "isRewatch" to entry.isRewatch,
+                                "syncStatus" to entry.syncStatus,
+                                "sync_status" to entry.syncStatus,
+                                "historicalEpisodes" to entry.historicalEpisodes,
+                                "client_updated_at" to now
+                            )
+                            batch.set(docRef, map, SetOptions.merge())
                         }
                     }.await()
                 }
@@ -305,38 +316,84 @@ class FirebaseRemoteDataSource @Inject constructor(
     }
 
     /**
-     * Fetch all Watch History for the current user
+     * Fetch Watch History Delta from Firestore
      */
-    suspend fun fetchAllWatchHistory(): List<WatchHistoryEntity> {
+    suspend fun fetchWatchHistoryDelta(sinceTimestamp: Long): List<WatchHistoryEntity> {
         val uid = userId ?: return emptyList()
         val list = mutableListOf<WatchHistoryEntity>()
         try {
-            val snapshot = getWatchHistoryCollection(uid).get().await()
+            val collection = getWatchHistoryCollection(uid)
+            val query = if (sinceTimestamp > 0L) {
+                collection.whereGreaterThan("client_updated_at", sinceTimestamp)
+            } else {
+                collection
+            }
+            val snapshot = query.get(Source.SERVER).await()
             for (doc in snapshot.documents) {
-                doc.toObject(WatchHistoryEntity::class.java)?.let { list.add(it) }
+                val movieId = doc.getLong("movieId") ?: 0L
+                val watchedAt = doc.getString("watchedAt") ?: ""
+                val isRewatch = doc.getBoolean("isRewatch") ?: false
+                val syncStatus = doc.getString("sync_status") ?: doc.getString("syncStatus") ?: "synced"
+                val historicalEpisodes = doc.getString("historicalEpisodes")
+                if (movieId > 0L && watchedAt.isNotBlank()) {
+                    list.add(
+                        WatchHistoryEntity(
+                            id = 0,
+                            movieId = movieId,
+                            watchedAt = watchedAt,
+                            isRewatch = isRewatch,
+                            syncStatus = syncStatus,
+                            historicalEpisodes = historicalEpisodes
+                        )
+                    )
+                }
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching watch history: ${e.message}", e)
+            android.util.Log.e("FirebaseRemoteDataSource", "Error fetching watch history delta: ${e.message}", e)
         }
         return list
     }
 
     /**
-     * Delete a single Watch History entry from Firestore
+     * Fetch all Watch History for the current user (Legacy full fetch)
      */
-    suspend fun deleteWatchHistory(movieId: Long, watchedAt: String) {
+    suspend fun fetchAllWatchHistory(): List<WatchHistoryEntity> {
+        return fetchWatchHistoryDelta(0L)
+    }
+
+    /**
+     * Soft delete a single Watch History entry using Tombstone
+     */
+    suspend fun softDeleteWatchHistory(movieId: Long, watchedAt: String) {
         val uid = userId ?: return
-        val docId = "${movieId}_${watchedAt}"
+        val safeWatchedAt = watchedAt.replace("/", "-")
+        val docId = "${movieId}_${safeWatchedAt}"
+        val now = System.currentTimeMillis()
         try {
-            getWatchHistoryCollection(uid).document(docId).delete().await()
+            val tombstone = mapOf(
+                "movieId" to movieId,
+                "watchedAt" to watchedAt,
+                "syncStatus" to "deleted",
+                "sync_status" to "deleted",
+                "client_updated_at" to now
+            )
+            getWatchHistoryCollection(uid).document(docId).set(tombstone, SetOptions.merge()).await()
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error deleting watch history $docId: ${e.message}", e)
+            android.util.Log.e("FirebaseRemoteDataSource", "Error soft-deleting watch history $docId: ${e.message}", e)
         }
     }
 
-    suspend fun batchDeleteWatchHistory(entries: List<WatchHistoryEntity>) {
+    suspend fun deleteWatchHistory(movieId: Long, watchedAt: String) {
+        softDeleteWatchHistory(movieId, watchedAt)
+    }
+
+    /**
+     * Batch soft-delete Watch History entries using Tombstones
+     */
+    suspend fun batchSoftDeleteWatchHistory(entries: List<WatchHistoryEntity>) {
         val uid = userId ?: return
         val collection = getWatchHistoryCollection(uid)
+        val now = System.currentTimeMillis()
         try {
             val chunks = entries.chunked(100)
             for (chunk in chunks) {
@@ -346,14 +403,25 @@ class FirebaseRemoteDataSource @Inject constructor(
                             val safeWatchedAt = entry.watchedAt.replace("/", "-")
                             val docId = "${entry.movieId}_${safeWatchedAt}"
                             val docRef = collection.document(docId)
-                            batch.delete(docRef)
+                            val tombstone = mapOf(
+                                "movieId" to entry.movieId,
+                                "watchedAt" to entry.watchedAt,
+                                "syncStatus" to "deleted",
+                                "sync_status" to "deleted",
+                                "client_updated_at" to now
+                            )
+                            batch.set(docRef, tombstone, SetOptions.merge())
                         }
                     }.await()
                 }
             }
         } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error batch deleting watch history: ${e.message}", e)
+            android.util.Log.e("FirebaseRemoteDataSource", "Error batch soft-deleting watch history: ${e.message}", e)
         }
+    }
+
+    suspend fun batchDeleteWatchHistory(entries: List<WatchHistoryEntity>) {
+        batchSoftDeleteWatchHistory(entries)
     }
 
     /**
@@ -678,6 +746,8 @@ class FirebaseRemoteDataSource @Inject constructor(
                             firestore.collection("trending_stats_weekly")
                                 .document(weekId)
                                 .collection("movies")
+                                .orderBy("view_count", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                                .limit(15)
                                 .get()
                                 .await()
                         } catch (e: Exception) {

@@ -132,6 +132,7 @@ data class UserPreferences(
     val showAppEntryAnimation: Boolean = true,
     val useMovieLogo: Boolean = true,
     val lastSyncTimestamp: Long = 0L,
+    val lastWatchHistorySyncTimestamp: Long = 0L,
     val defaultStartTab: String = "feed",
     val defaultStartMedia: String = "movie",
     val tvdbJwtToken: String = "",

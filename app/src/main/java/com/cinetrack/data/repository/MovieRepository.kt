@@ -36,6 +36,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.withContext
+import kotlinx.coroutines.sync.withLock
+import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 import javax.inject.Named
 import javax.inject.Singleton
@@ -80,6 +82,24 @@ class MovieRepository @Inject constructor(
     }
     private val memoryDetailsCache = ConcurrentHashMap<String, Any>()
     private val memoryColorCache = ConcurrentHashMap<String, String>() // id -> hexColor
+
+    // In-Memory cache & Mutex per Top 10 FlickTrove (evita ricalcoli e letture multiple su Firestore/TMDB)
+    private val top10Mutex = kotlinx.coroutines.sync.Mutex()
+    private var cachedTop10Both: Pair<List<Movie>, List<Movie>>? = null
+    private var lastTop10FetchTime: Long = 0L
+    private val TOP10_TTL_MS = 12 * 60 * 60 * 1000L // 12 ore
+
+    // Cache LRU per Global Movie Stats (elimina addSnapshotListener continuo a favore di on-demand .get())
+    private data class CachedGlobalStats(
+        val stats: com.cinetrack.data.model.GlobalMovieStats?,
+        val timestamp: Long
+    )
+    private val globalStatsLruCache = android.util.LruCache<String, CachedGlobalStats>(100)
+    private val GLOBAL_STATS_TTL_MS = 30 * 60 * 1000L // 30 minuti
+
+    // Throttle per il pull di cartelle (Folders cambiano raramente: evita fetch da SERVER ogni 15s)
+    private var lastFolderSyncTimestamp: Long = 0L
+    private val FOLDER_SYNC_THROTTLE_MS = 20 * 60 * 1000L // 20 minuti
 
     suspend fun getCachedColor(id: String): String? {
         memoryColorCache[id]?.let { return it }
@@ -373,6 +393,9 @@ class MovieRepository @Inject constructor(
                         oldStatus = oldStatus,
                         viewsDelta = calculatedViewsDelta
                     )
+                    synchronized(globalStatsLruCache) {
+                        globalStatsLruCache.remove(movie.compositeId)
+                    }
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
@@ -611,6 +634,9 @@ class MovieRepository @Inject constructor(
                         oldStatus = if (targetMovie.watched) "watched" else "unwatched",
                         viewsDelta = calculatedViewsDelta
                     )
+                    synchronized(globalStatsLruCache) {
+                        globalStatsLruCache.remove("${targetMovie.mediaType}_${targetMovie.id}")
+                    }
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
@@ -735,7 +761,9 @@ class MovieRepository @Inject constructor(
         }
 
         // Cooldown anti-concorrenza (15 secondi per evitare doppie chiamate da ViewModel simultanei)
-        val lastSync = preferenceRepository.userPreferencesFlow.first().lastSyncTimestamp
+        val userPrefs = preferenceRepository.userPreferencesFlow.first()
+        val lastSync = userPrefs.lastSyncTimestamp
+        val lastHistorySync = userPrefs.lastWatchHistorySyncTimestamp
         if (!force && System.currentTimeMillis() - lastSync < 15_000L) {
             android.util.Log.d("MovieRepository", "Firebase Sync skipped - last sync was less than 15 seconds ago.")
             emit(UiText.StringResource(R.string.sync_msg_cached), 1f)
@@ -789,24 +817,33 @@ class MovieRepository @Inject constructor(
             }
             android.util.Log.d("MovieRepository", "Successfully synchronized favorites via Delta Sync")
 
-            // 2. Pull & Reconcile Folders
-            emit(UiText.StringResource(R.string.sync_msg_fetching_folders), null)
-            val remoteFolders = firebaseRemoteDataSource.fetchAllFolders()
-            
-            emit(UiText.StringResource(R.string.sync_msg_syncing_folders), 0.7f)
-            folderRepository.syncFoldersFromRemote(remoteFolders) { currentCount, totalCount, portion ->
-                val progress = 0.7f + (0.9f - 0.7f) * portion
-                emit(UiText.StringResource(R.string.sync_msg_saving_folders, currentCount, totalCount), progress)
+            val now = System.currentTimeMillis()
+
+            // 2. Pull & Reconcile Folders (con throttle di 20 minuti per azzerare letture server ad ogni foreground)
+            val shouldSyncFolders = force || (now - lastFolderSyncTimestamp > FOLDER_SYNC_THROTTLE_MS)
+            if (shouldSyncFolders) {
+                emit(UiText.StringResource(R.string.sync_msg_fetching_folders), null)
+                val remoteFolders = firebaseRemoteDataSource.fetchAllFolders()
+                
+                emit(UiText.StringResource(R.string.sync_msg_syncing_folders), 0.7f)
+                folderRepository.syncFoldersFromRemote(remoteFolders) { currentCount, totalCount, portion ->
+                    val progress = 0.7f + (0.9f - 0.7f) * portion
+                    emit(UiText.StringResource(R.string.sync_msg_saving_folders, currentCount, totalCount), progress)
+                }
+                lastFolderSyncTimestamp = now
             }
 
-            // 3. Pull & Reconcile Watch History
-            val remoteHistory = firebaseRemoteDataSource.fetchAllWatchHistory()
+            // 3. Pull & Reconcile Watch History (Delta Sync con Tombstones)
+            android.util.Log.d("MovieRepository", "Starting Firebase Watch History Delta Sync (since: $lastHistorySync)...")
+            val remoteHistory = firebaseRemoteDataSource.fetchWatchHistoryDelta(lastHistorySync)
+            android.util.Log.d("MovieRepository", "Fetched ${remoteHistory.size} delta watch history from Firebase")
             watchHistoryRepository.syncWatchHistoryFromRemote(remoteHistory)
+            preferenceRepository.updateLastWatchHistorySyncTimestamp(now)
 
             // 4. Pull Preferences
             emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
             syncPreferencesWithFirebase()
-            preferenceRepository.updateLastSyncTimestamp(System.currentTimeMillis())
+            preferenceRepository.updateLastSyncTimestamp(now)
             
             emit(UiText.StringResource(R.string.sync_msg_completed), 1f)
         } catch (e: Exception) {
@@ -1534,57 +1571,72 @@ class MovieRepository @Inject constructor(
     suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(page = page).results
 
     suspend fun getTop10FlickTroveBoth(): Pair<List<Movie>, List<Movie>> {
-        val (movieIds, tvIds) = firebaseRemoteDataSource.fetchTop10MonthlyBoth()
-        return kotlinx.coroutines.coroutineScope {
-            val moviesDeferred = async {
-                movieIds.mapNotNull { compositeId ->
-                    val idStr = compositeId.removePrefix("movie_")
-                    val id = idStr.toLongOrNull() ?: return@mapNotNull null
-                    try {
-                        val detail = getMovieDetail(id, isTv = false)
-                        Movie(
-                            id = detail.id,
-                            title = detail.title ?: "",
-                            posterPath = detail.posterPath,
-                            backdropPath = detail.backdropPath,
-                            releaseDate = detail.releaseDate ?: "",
-                            overview = detail.overview ?: "",
-                            voteAverage = detail.voteAverage ?: 0.0,
-                            voteCount = detail.voteCount ?: 0,
-                            genreIds = detail.genres?.map { it.id } ?: emptyList(),
-                            mediaType = "movie",
-                            runtime = detail.runtime
-                        )
-                    } catch (e: Exception) {
-                        null
+        val now = System.currentTimeMillis()
+        cachedTop10Both?.let {
+            if (now - lastTop10FetchTime < TOP10_TTL_MS) return it
+        }
+
+        return top10Mutex.withLock {
+            val cached = cachedTop10Both
+            if (cached != null && (System.currentTimeMillis() - lastTop10FetchTime) < TOP10_TTL_MS) {
+                return@withLock cached
+            }
+
+            val (movieIds, tvIds) = firebaseRemoteDataSource.fetchTop10MonthlyBoth()
+            val result = kotlinx.coroutines.coroutineScope {
+                val moviesDeferred = async {
+                    movieIds.mapNotNull { compositeId ->
+                        val idStr = compositeId.removePrefix("movie_")
+                        val id = idStr.toLongOrNull() ?: return@mapNotNull null
+                        try {
+                            val detail = getMovieDetail(id, isTv = false)
+                            Movie(
+                                id = detail.id,
+                                title = detail.title ?: "",
+                                posterPath = detail.posterPath,
+                                backdropPath = detail.backdropPath,
+                                releaseDate = detail.releaseDate ?: "",
+                                overview = detail.overview ?: "",
+                                voteAverage = detail.voteAverage ?: 0.0,
+                                voteCount = detail.voteCount ?: 0,
+                                genreIds = detail.genres?.map { it.id } ?: emptyList(),
+                                mediaType = "movie",
+                                runtime = detail.runtime
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
                 }
-            }
-            val tvDeferred = async {
-                tvIds.mapNotNull { compositeId ->
-                    val idStr = compositeId.removePrefix("tv_")
-                    val id = idStr.toLongOrNull() ?: return@mapNotNull null
-                    try {
-                        val detail = getMovieDetail(id, isTv = true)
-                        Movie(
-                            id = detail.id,
-                            title = detail.name ?: detail.title ?: "",
-                            posterPath = detail.posterPath,
-                            backdropPath = detail.backdropPath,
-                            releaseDate = detail.firstAirDate ?: detail.releaseDate ?: "",
-                            overview = detail.overview ?: "",
-                            voteAverage = detail.voteAverage ?: 0.0,
-                            voteCount = detail.voteCount ?: 0,
-                            genreIds = detail.genres?.map { it.id } ?: emptyList(),
-                            mediaType = "tv",
-                            runtime = detail.runtime
-                        )
-                    } catch (e: Exception) {
-                        null
+                val tvDeferred = async {
+                    tvIds.mapNotNull { compositeId ->
+                        val idStr = compositeId.removePrefix("tv_")
+                        val id = idStr.toLongOrNull() ?: return@mapNotNull null
+                        try {
+                            val detail = getMovieDetail(id, isTv = true)
+                            Movie(
+                                id = detail.id,
+                                title = detail.name ?: detail.title ?: "",
+                                posterPath = detail.posterPath,
+                                backdropPath = detail.backdropPath,
+                                releaseDate = detail.firstAirDate ?: detail.releaseDate ?: "",
+                                overview = detail.overview ?: "",
+                                voteAverage = detail.voteAverage ?: 0.0,
+                                voteCount = detail.voteCount ?: 0,
+                                genreIds = detail.genres?.map { it.id } ?: emptyList(),
+                                mediaType = "tv",
+                                runtime = detail.runtime
+                            )
+                        } catch (e: Exception) {
+                            null
+                        }
                     }
                 }
+                Pair(moviesDeferred.await(), tvDeferred.await())
             }
-            Pair(moviesDeferred.await(), tvDeferred.await())
+            cachedTop10Both = result
+            lastTop10FetchTime = System.currentTimeMillis()
+            result
         }
     }
 
@@ -1698,25 +1750,37 @@ class MovieRepository @Inject constructor(
         return (traktComments + tmdbReviews).distinctBy { it.comment?.take(40) }
     }
 
-    // --- Global Stats ---
-    fun getGlobalMovieStatsFlow(movieId: Long, mediaType: String): Flow<com.cinetrack.data.model.GlobalMovieStats?> {
+    // --- Global Stats (On-demand .get() con LRU Cache da 100 elementi e TTL di 30 min) ---
+    fun getGlobalMovieStatsFlow(movieId: Long, mediaType: String): Flow<com.cinetrack.data.model.GlobalMovieStats?> = flow {
         val compositeId = "${mediaType}_${movieId}"
-        return callbackFlow {
-            val listener = firebaseRemoteDataSource.getGlobalMovieStats(compositeId)
-                .addSnapshotListener { snapshot, error ->
-                    if (error != null) {
-                        trySend(null)
-                        return@addSnapshotListener
-                    }
-                    if (snapshot != null && snapshot.exists()) {
-                        val stats = snapshot.toObject(com.cinetrack.data.model.GlobalMovieStats::class.java)
-                        trySend(stats)
-                    } else {
-                        trySend(com.cinetrack.data.model.GlobalMovieStats())
-                    }
-                }
-            awaitClose { listener.remove() }
+        val now = System.currentTimeMillis()
+
+        // 1. Controlla la cache in memoria (0ms, 0 letture Firestore)
+        val cached = synchronized(globalStatsLruCache) { globalStatsLruCache.get(compositeId) }
+        if (cached != null && (now - cached.timestamp) < GLOBAL_STATS_TTL_MS) {
+            emit(cached.stats)
+            return@flow
         }
+
+        // 2. Lettura singola on-demand via .get()
+        val fetched: com.cinetrack.data.model.GlobalMovieStats? = try {
+            val snapshot = kotlinx.coroutines.withTimeoutOrNull(5_000L) {
+                firebaseRemoteDataSource.getGlobalMovieStats(compositeId).get().await()
+            }
+            if (snapshot != null && snapshot.exists()) {
+                snapshot.toObject(com.cinetrack.data.model.GlobalMovieStats::class.java)
+            } else {
+                com.cinetrack.data.model.GlobalMovieStats()
+            }
+        } catch (e: Exception) {
+            android.util.Log.w("MovieRepository", "Error fetching global stats for $compositeId: ${e.message}")
+            cached?.stats ?: com.cinetrack.data.model.GlobalMovieStats()
+        }
+
+        synchronized(globalStatsLruCache) {
+            globalStatsLruCache.put(compositeId, CachedGlobalStats(fetched, System.currentTimeMillis()))
+        }
+        emit(fetched)
     }
 
     suspend fun autoReconcileGlobalRatingIfMissing(
@@ -1743,6 +1807,9 @@ class MovieRepository @Inject constructor(
                     newStatus = if (localMovie.watched) "watched" else null,
                     oldStatus = null
                 )
+                synchronized(globalStatsLruCache) {
+                    globalStatsLruCache.remove(compositeId)
+                }
                 android.util.Log.d("MovieRepository", "Auto-reconciled global rating ($rating) for $compositeId")
             } catch (e: Exception) {
                 if (e is CancellationException) throw e

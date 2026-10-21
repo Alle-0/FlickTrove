@@ -55,6 +55,7 @@ class PreferenceRepository @Inject constructor(
         val SHOW_APP_ENTRY_ANIMATION = booleanPreferencesKey("show_app_entry_animation")
         val USE_MOVIE_LOGO = booleanPreferencesKey("use_movie_logo")
         val LAST_SYNC_TIMESTAMP = longPreferencesKey("last_sync_timestamp")
+        val LAST_WATCH_HISTORY_SYNC_TIMESTAMP = longPreferencesKey("last_watch_history_sync_timestamp")
         val DEFAULT_START_TAB = stringPreferencesKey("default_start_tab")
         val DEFAULT_START_MEDIA = stringPreferencesKey("default_start_media")
         val TVDB_JWT_TOKEN = stringPreferencesKey("tvdb_jwt_token")
@@ -111,6 +112,7 @@ class PreferenceRepository @Inject constructor(
                 showAppEntryAnimation = preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] ?: true,
                 useMovieLogo = preferences[PreferencesKeys.USE_MOVIE_LOGO] ?: true,
                 lastSyncTimestamp = preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] ?: 0L,
+                lastWatchHistorySyncTimestamp = preferences[PreferencesKeys.LAST_WATCH_HISTORY_SYNC_TIMESTAMP] ?: 0L,
                 defaultStartTab = preferences[PreferencesKeys.DEFAULT_START_TAB] ?: "feed",
                 defaultStartMedia = preferences[PreferencesKeys.DEFAULT_START_MEDIA] ?: startupPrefs?.getString("default_start_media", "movie") ?: "movie",
                 tvdbJwtToken = preferences[PreferencesKeys.TVDB_JWT_TOKEN] ?: "",
@@ -252,6 +254,12 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateLastWatchHistorySyncTimestamp(timestamp: Long) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_WATCH_HISTORY_SYNC_TIMESTAMP] = timestamp
+        }
+    }
+
     suspend fun updateShowSplitReleasesHome(show: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = show
@@ -318,6 +326,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_APP_ENTRY_ANIMATION] = prefs.showAppEntryAnimation
             preferences[PreferencesKeys.USE_MOVIE_LOGO] = prefs.useMovieLogo
             preferences[PreferencesKeys.LAST_SYNC_TIMESTAMP] = prefs.lastSyncTimestamp
+            preferences[PreferencesKeys.LAST_WATCH_HISTORY_SYNC_TIMESTAMP] = prefs.lastWatchHistorySyncTimestamp
             preferences[PreferencesKeys.DEFAULT_START_TAB] = prefs.defaultStartTab
             preferences[PreferencesKeys.DEFAULT_START_MEDIA] = prefs.defaultStartMedia
             preferences[PreferencesKeys.TVDB_JWT_TOKEN] = prefs.tvdbJwtToken
