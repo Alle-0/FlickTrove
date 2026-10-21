@@ -33,8 +33,10 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.cinetrack.ui.utils.parseMarkdown
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
@@ -164,13 +166,20 @@ fun HistoryCard(
                     }
 
                     // Timing / Date badge (Amber / Gold)
+                    val shortDate = remember(entry.parsedDate) {
+                        try {
+                            entry.parsedDate.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", java.util.Locale.getDefault()))
+                        } catch (e: Exception) {
+                            entry.formattedDisplayDate.take(6)
+                        }
+                    }
                     val timingText = if (isCalendarDayMode) {
-                        entry.formattedDisplayTime ?: entry.formattedDisplayDate
+                        entry.formattedDisplayTime ?: shortDate
                     } else {
                         if (entry.formattedDisplayTime != null) {
-                            "${entry.formattedDisplayDate.take(6)} · ${entry.formattedDisplayTime}"
+                            "$shortDate · ${entry.formattedDisplayTime}"
                         } else {
-                            entry.formattedDisplayDate
+                            shortDate
                         }
                     }
                     PillBadge(
@@ -224,17 +233,25 @@ fun HistoryCard(
                     }
                 }
 
-                // Note Callout if present
+                // Note Callout if present (with Markdown formatting & at least 2 lines)
                 if (!entry.personalNote.isNullOrBlank()) {
+                    val parsedNote = remember(entry.personalNote) {
+                        val md = entry.personalNote.parseMarkdown()
+                        buildAnnotatedString {
+                            append("\"")
+                            append(md)
+                            append("\"")
+                        }
+                    }
                     Spacer(modifier = Modifier.height(4.dp))
                     Text(
-                        text = "\"${entry.personalNote}\"",
+                        text = parsedNote,
                         style = MaterialTheme.typography.bodySmall.copy(
-                            fontStyle = FontStyle.Italic,
-                            fontSize = 11.sp,
-                            color = Color.White.copy(alpha = 0.6f)
+                            fontSize = 11.5.sp,
+                            lineHeight = 15.sp,
+                            color = Color.White.copy(alpha = 0.65f)
                         ),
-                        maxLines = 1,
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
