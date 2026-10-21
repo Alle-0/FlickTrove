@@ -2,6 +2,7 @@ package com.cinetrack.ui.history.components
 
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -165,10 +166,12 @@ private fun HistoryCalendarWidget(
     Box(
         modifier = Modifier
             .fillMaxWidth()
-            .hazeGlass(
-                state = internalHazeState,
-                shape = RoundedCornerShape(26.dp),
-                blurRadius = HazeStyles.SmallGlassBlurRadius
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color(0xFF14171E).copy(alpha = 0.92f))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.10f),
+                shape = RoundedCornerShape(26.dp)
             )
             .padding(16.dp)
     ) {
