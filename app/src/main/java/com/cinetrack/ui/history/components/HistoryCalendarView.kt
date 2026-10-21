@@ -24,8 +24,6 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.updates.MonthYearPickerDialog
 import com.cinetrack.ui.components.updates.formatReleaseDate
 import com.cinetrack.ui.history.model.WatchTimelineEntry
 import com.cinetrack.ui.theme.HazeStyles
@@ -49,12 +47,11 @@ fun HistoryCalendarView(
     onMovieClick: (movieId: Long, mediaType: String) -> Unit,
     onEditDate: (entry: WatchTimelineEntry) -> Unit,
     onDeleteSession: (entry: WatchTimelineEntry) -> Unit,
+    onShowMonthPicker: () -> Unit = {},
     hazeState: HazeState? = null,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
 ) {
-    var showMonthPicker by remember { mutableStateOf(false) }
-
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
@@ -69,7 +66,7 @@ fun HistoryCalendarView(
                     onDateSelected = onDateSelected,
                     onPreviousMonth = onPreviousMonth,
                     onNextMonth = onNextMonth,
-                    onShowMonthPicker = { showMonthPicker = true },
+                    onShowMonthPicker = onShowMonthPicker,
                     entriesByDate = calendarEntriesByDate,
                     internalHazeState = hazeState
                 )
@@ -134,19 +131,6 @@ fun HistoryCalendarView(
                 }
             }
         }
-
-        // Year/Month Picker Dialog matching UpdatesScreen
-        MonthYearPickerDialog(
-            showMonthPicker = showMonthPicker,
-            initialMonth = calendarMonth,
-            onMonthSelected = { month ->
-                onMonthChanged(month)
-                showMonthPicker = false
-            },
-            onDismiss = { showMonthPicker = false },
-            internalHazeState = hazeState,
-            accentColor = MaterialTheme.colorScheme.primary
-        )
     }
 }
 

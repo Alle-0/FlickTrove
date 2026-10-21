@@ -36,6 +36,7 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import dev.chrisbanes.haze.HazeState
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -321,129 +322,105 @@ fun MonthYearPickerDialog(
     internalHazeState: HazeState? = null,
     accentColor: Color = Color.Unspecified
 ) {
-    val animatedAlpha by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (showMonthPicker) 1f else 0f,
-        animationSpec = androidx.compose.animation.core.tween(300),
-        label = "dialogAlpha"
-    )
+    if (!showMonthPicker) return
 
-    val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
+    var selectedYear by remember(showMonthPicker, initialMonth.year) { mutableStateOf(initialMonth.year) }
+    val haptic = LocalHapticFeedback.current
 
-    if (animatedAlpha == 0f && !showMonthPicker) return
-
-    var selectedYear by remember(showMonthPicker) { mutableStateOf(initialMonth.year) }
-    
-    // Full screen overlay box catching clicks
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .zIndex(100f)
-            .background(Color.Black.copy(alpha = 0.6f * animatedAlpha))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onDismiss() },
-        contentAlignment = Alignment.Center
+    FlickTroveModal(
+        isVisible = showMonthPicker,
+        onDismissRequest = onDismiss,
+        hazeState = internalHazeState,
+        maxWidth = 360.dp,
+        maxWidthFraction = 0.88f,
+        contentPadding = PaddingValues(20.dp)
     ) {
-        Box(
+        // Year selector
+        Row(
             modifier = Modifier
-                .fillMaxWidth(0.85f)
-                .clickable( // Catch clicks inside the dialog so it doesn't dismiss
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {}
-                .hazeGlass(
-                    state = internalHazeState,
-                    shape = RoundedCornerShape(26.dp),
-                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                    useOffscreenStrategy = true,
-                    alpha = animatedAlpha
-                )
-                .graphicsLayer {
-                    alpha = animatedAlpha
-                    val scale = 0.95f + (0.05f * animatedAlpha)
-                    scaleX = scale
-                    scaleY = scale
-                }
-                .padding(24.dp)
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                    .bounceClick(scaleDown = 0.8f) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        selectedYear--
+                    },
+                contentAlignment = Alignment.Center
             ) {
-                // Year selector
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                            .bounceClick(scaleDown = 0.8f) {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                selectedYear-- 
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_left), contentDescription = stringResource(R.string.updates_calendar_prev_year), tint = Color.White, modifier = Modifier.size(20.dp))
-                    }
-                    Text(
-                        text = selectedYear.toString(), 
-                        color = Color.White,
-                        fontSize = 20.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                            .bounceClick(scaleDown = 0.8f) {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                selectedYear++ 
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_right), contentDescription = stringResource(R.string.updates_calendar_next_year), tint = Color.White, modifier = Modifier.size(20.dp))
-                    }
-                }
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_left),
+                    contentDescription = stringResource(R.string.updates_calendar_prev_year),
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+            Text(
+                text = selectedYear.toString(),
+                color = Color.White,
+                fontSize = 20.sp,
+                fontWeight = FontWeight.Bold
+            )
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                    .bounceClick(scaleDown = 0.8f) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        selectedYear++
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    ImageVector.vectorResource(id = R.drawable.ic_right),
+                    contentDescription = stringResource(R.string.updates_calendar_next_year),
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
+        }
 
-                // Months grid
-                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-                    for (row in 0..3) {
-                        Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                            for (col in 0..2) {
-                                val month = row * 3 + col + 1
-                                val isSelected = initialMonth.year == selectedYear && initialMonth.monthValue == month
-                                val monthName = java.time.Month.of(month).getDisplayName(TextStyle.SHORT, Locale.getDefault()).replaceFirstChar { it.uppercase() }
-                                
-                                val selectedBgColor = if (accentColor != Color.Unspecified) accentColor else MaterialTheme.colorScheme.primary
-                                val selectedContentColor = if (accentColor != Color.Unspecified) {
-                                    ColorUtils.contentColorForAccent(accentColor)
-                                } else {
-                                    MaterialTheme.colorScheme.onPrimary
-                                }
+        // Months grid
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            for (row in 0..3) {
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    for (col in 0..2) {
+                        val month = row * 3 + col + 1
+                        val isSelected = initialMonth.year == selectedYear && initialMonth.monthValue == month
+                        val monthName = java.time.Month.of(month)
+                            .getDisplayName(TextStyle.SHORT, Locale.getDefault())
+                            .replaceFirstChar { it.uppercase() }
 
-                                Box(
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(if (isSelected) selectedBgColor else Color.White.copy(alpha = 0.05f))
-                                        .bounceClick(scaleDown = 0.95f) {
-                                            onMonthSelected(YearMonth.of(selectedYear, month))
-                                            onDismiss()
-                                        }
-                                        .padding(vertical = 14.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Text(
-                                        text = monthName,
-                                        color = if (isSelected) selectedContentColor else Color.White.copy(alpha = 0.8f),
-                                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                                        fontSize = 14.sp
-                                    )
+                        val selectedBgColor = if (accentColor != Color.Unspecified) accentColor else MaterialTheme.colorScheme.primary
+                        val selectedContentColor = if (accentColor != Color.Unspecified) {
+                            ColorUtils.contentColorForAccent(accentColor)
+                        } else {
+                            MaterialTheme.colorScheme.onPrimary
+                        }
+
+                        Box(
+                            modifier = Modifier
+                                .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) selectedBgColor else Color.White.copy(alpha = 0.05f))
+                                .bounceClick(scaleDown = 0.95f) {
+                                    onMonthSelected(YearMonth.of(selectedYear, month))
+                                    onDismiss()
                                 }
-                            }
+                                .padding(vertical = 14.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = monthName,
+                                color = if (isSelected) selectedContentColor else Color.White.copy(alpha = 0.8f),
+                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
+                                fontSize = 14.sp
+                            )
                         }
                     }
                 }

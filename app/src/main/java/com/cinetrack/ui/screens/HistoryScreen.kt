@@ -52,10 +52,12 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.LocalModalHostDimmed
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.navigation.GlassyTopBar
 import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
 import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.updates.MonthYearPickerDialog
 import com.cinetrack.ui.history.HistoryViewModel
 import com.cinetrack.ui.history.components.HistoryCalendarView
 import com.cinetrack.ui.history.components.HistoryFilterModal
@@ -155,8 +157,20 @@ fun HistoryScreenContent(
 
     var editingEntry by remember { mutableStateOf<WatchTimelineEntry?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
+    var showMonthPicker by remember { mutableStateOf(false) }
     var entryToDelete by remember { mutableStateOf<WatchTimelineEntry?>(null) }
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
+
+    val isAnyModalOpen = showDatePicker || entryToDelete != null || showMonthPicker || uiState.isFilterModalOpen
+    val localModalDimmed = LocalModalHostDimmed.current
+    LaunchedEffect(isAnyModalOpen) {
+        localModalDimmed.value = isAnyModalOpen
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            localModalDimmed.value = false
+        }
+    }
 
     val statusBarsTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
@@ -227,6 +241,7 @@ fun HistoryScreenContent(
                                 onPreviousMonth = { viewModel.previousMonth() },
                                 onNextMonth = { viewModel.nextMonth() },
                                 onMonthChanged = { viewModel.setCalendarMonth(it) },
+                                onShowMonthPicker = { showMonthPicker = true },
                                 onMovieClick = onMovieClick,
                                 onEditDate = { entry ->
                                     editingEntry = entry
@@ -261,6 +276,7 @@ fun HistoryScreenContent(
                     hazeState = internalHazeState,
                     title = stringResource(id = R.string.history_screen_title),
                     onBackPress = onBackPress,
+                    isDimmed = isAnyModalOpen,
                     onFilterClick = { bounds ->
                         filterButtonBounds = bounds
                         viewModel.openFilterModal()
@@ -408,6 +424,19 @@ fun HistoryScreenContent(
                 }
             }
         }
+
+        // Month/Year Picker Modal (Rendered at root outside haze capturing scope to ensure crisp text and proper dimming)
+        MonthYearPickerDialog(
+            showMonthPicker = showMonthPicker,
+            initialMonth = uiState.selectedCalendarMonth,
+            onMonthSelected = { month ->
+                viewModel.setCalendarMonth(month)
+                showMonthPicker = false
+            },
+            onDismiss = { showMonthPicker = false },
+            internalHazeState = internalHazeState,
+            accentColor = MaterialTheme.colorScheme.primary
+        )
     }
 }
 
