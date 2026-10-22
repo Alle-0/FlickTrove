@@ -1,0 +1,6 @@
+.agent/
+.agents/
+guidelines/
+GEMINI.md
+build/
+node_modules/
