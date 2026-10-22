@@ -50,6 +50,7 @@ fun HistoryCard(
     onDeleteSession: () -> Unit,
     modifier: Modifier = Modifier,
     isCalendarDayMode: Boolean = false,
+    showDate: Boolean = true,
     hazeState: HazeState? = null
 ) {
     val context = LocalContext.current
@@ -190,100 +191,116 @@ fun HistoryCard(
 
                 Spacer(modifier = Modifier.height(5.dp))
 
-                // Badges Row: Unified Session Capsule + Rating Badge (Max 2 clean badges)
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    // Timing / Date formatted
-                    val shortDate = remember(entry.parsedDate) {
-                        try {
-                            entry.parsedDate.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", java.util.Locale.getDefault()))
-                        } catch (e: Exception) {
-                            entry.formattedDisplayDate.take(6)
-                        }
-                    }
+                // Badges Row: Session Capsule (Date/Ep) + Dedicated Rewatch Badge + Rating Badge
+                val hasSessionCapsule = showDate || !entry.episodeInfo.isNullOrBlank()
+                val hasRewatchBadge = entry.isRewatch
+                val hasRatingBadge = entry.personalRating != null && entry.personalRating > 0.0
 
-                    val rewatchLabel = if (entry.isRewatch) {
-                        if (entry.rewatchNumber > 1) {
-                            stringResource(id = R.string.history_rewatch_badge, entry.rewatchNumber)
-                        } else {
-                            stringResource(id = R.string.watch_history_rewatch)
-                        }
-                    } else null
-
-                    // Theme color for the session capsule:
-                    // TV Series uses active accent (primary), Movies use complementary harmonic (secondary)
-                    val sessionColor = if (entry.isTvShow) {
-                        MaterialTheme.colorScheme.primary
-                    } else {
-                        MaterialTheme.colorScheme.secondary
-                    }
-
-                    // Unified Session Capsule: [ Date • Ep • 🔁 Rewatch ]
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(50))
-                            .background(sessionColor.copy(alpha = 0.14f))
-                            .border(1.dp, sessionColor.copy(alpha = 0.35f), RoundedCornerShape(50))
-                            .padding(horizontal = 8.dp, vertical = 3.dp),
-                        contentAlignment = Alignment.Center
+                if (hasSessionCapsule || hasRewatchBadge || hasRatingBadge) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.fillMaxWidth()
                     ) {
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
-                        ) {
-                            Text(
-                                text = shortDate,
-                                color = sessionColor,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.3.sp,
-                                maxLines = 1
-                            )
-
-                            if (!entry.episodeInfo.isNullOrBlank()) {
-                                Text(
-                                    text = "•",
-                                    color = sessionColor.copy(alpha = 0.55f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Text(
-                                    text = entry.episodeInfo,
-                                    color = sessionColor,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.3.sp,
-                                    maxLines = 1
-                                )
-                            }
-
-                            if (rewatchLabel != null) {
-                                Text(
-                                    text = "•",
-                                    color = sessionColor.copy(alpha = 0.55f),
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
-                                    contentDescription = null,
-                                    tint = sessionColor,
-                                    modifier = Modifier.size(11.dp)
-                                )
-                                Text(
-                                    text = rewatchLabel,
-                                    color = sessionColor,
-                                    fontSize = 11.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    letterSpacing = 0.3.sp,
-                                    maxLines = 1
-                                )
+                        // Timing / Date formatted
+                        val shortDate = remember(entry.parsedDate) {
+                            try {
+                                entry.parsedDate.format(java.time.format.DateTimeFormatter.ofPattern("d MMM", java.util.Locale.getDefault()))
+                            } catch (e: Exception) {
+                                entry.formattedDisplayDate.take(6)
                             }
                         }
-                    }
+
+                        // Theme color for the session capsule:
+                        // TV Series uses active accent (primary), Movies use complementary harmonic (secondary)
+                        val sessionColor = if (entry.isTvShow) {
+                            MaterialTheme.colorScheme.primary
+                        } else {
+                            MaterialTheme.colorScheme.secondary
+                        }
+
+                        // 1. Session Capsule: [ Date? • Ep? ]
+                        if (hasSessionCapsule) {
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(sessionColor.copy(alpha = 0.14f))
+                                    .border(1.dp, sessionColor.copy(alpha = 0.35f), RoundedCornerShape(50))
+                                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    var hasPreceding = false
+
+                                    if (showDate) {
+                                        Text(
+                                            text = shortDate,
+                                            color = sessionColor,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.3.sp,
+                                            maxLines = 1
+                                        )
+                                        hasPreceding = true
+                                    }
+
+                                    if (!entry.episodeInfo.isNullOrBlank()) {
+                                        if (hasPreceding) {
+                                            Text(
+                                                text = "•",
+                                                color = sessionColor.copy(alpha = 0.55f),
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        }
+                                        Text(
+                                            text = entry.episodeInfo,
+                                            color = sessionColor,
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = 0.3.sp,
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+                            }
+                        }
+
+                        // 2. Dedicated Rewatch Badge: [ 🔁 #1 / #2 ] (constant height and padding matching rating badge)
+                        if (hasRewatchBadge) {
+                            val rewatchNum = entry.rewatchNumber.coerceAtLeast(1)
+                            Box(
+                                modifier = Modifier
+                                    .clip(RoundedCornerShape(50))
+                                    .background(sessionColor.copy(alpha = 0.14f))
+                                    .border(1.dp, sessionColor.copy(alpha = 0.35f), RoundedCornerShape(50))
+                                    .padding(horizontal = 7.dp, vertical = 3.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(3.5.dp)
+                                ) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
+                                        contentDescription = null,
+                                        tint = sessionColor,
+                                        modifier = Modifier.size(11.dp)
+                                    )
+                                    Text(
+                                        text = "#$rewatchNum",
+                                        color = sessionColor,
+                                        fontSize = 11.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        letterSpacing = 0.3.sp,
+                                        maxLines = 1
+                                    )
+                                }
+                            }
+                        }
 
                     // Personal Rating badge (with official ic_star_piena)
                     if (entry.personalRating != null && entry.personalRating > 0.0) {
@@ -317,6 +334,7 @@ fun HistoryCard(
                         }
                     }
                 }
+            }
 
                 // Note Callout if present (with Markdown formatting & at least 2 lines)
                 if (!entry.personalNote.isNullOrBlank()) {

@@ -179,6 +179,44 @@ fun SectionHeader(text: String, action: (@Composable () -> Unit)? = null) {
     }
 }
 
+@Composable
+fun MarkAllButton(
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val haptic = LocalHapticFeedback.current
+    val markInteractionSource = remember { MutableInteractionSource() }
+    val markIsPressed by markInteractionSource.collectIsPressedAsState()
+    val markScale by animateFloatAsState(
+        targetValue = if (markIsPressed) 0.9f else 1f,
+        label = "markScale"
+    )
+
+    Box(
+        modifier = modifier
+            .graphicsLayer { scaleX = markScale; scaleY = markScale }
+            .clip(RoundedCornerShape(50))
+            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
+            .clickable(
+                interactionSource = markInteractionSource,
+                indication = null
+            ) {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                onClick()
+            }
+            .padding(horizontal = 14.dp, vertical = 6.dp)
+    ) {
+        Text(
+            text = stringResource(R.string.updates_mark_all),
+            color = MaterialTheme.colorScheme.primary,
+            fontSize = 10.sp,
+            fontWeight = FontWeight.Black,
+            letterSpacing = 1.sp
+        )
+    }
+}
+
 fun formatEpisodeBadge(raw: String?): String? {
     if (raw.isNullOrBlank()) return null
     val cleaned = raw.trim().removePrefix("•").removePrefix("·").trim()

@@ -1,5 +1,6 @@
 package com.cinetrack.ui.history.components
 
+import com.cinetrack.ui.components.shared.calendar.CalendarMonthWidget
 import androidx.compose.animation.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -145,11 +146,15 @@ private fun HistoryCalendarWidget(
     entriesByDate: Map<LocalDate, List<WatchTimelineEntry>>,
     internalHazeState: HazeState? = null
 ) {
-    val haptic = LocalHapticFeedback.current
-
-    Box(
+    CalendarMonthWidget(
+        currentMonth = currentMonth,
+        selectedDate = selectedDate,
+        onDateSelected = onDateSelected,
+        onPreviousMonth = onPreviousMonth,
+        onNextMonth = onNextMonth,
+        onShowMonthPicker = onShowMonthPicker,
+        hasIndicator = { entriesByDate.containsKey(it) },
         modifier = Modifier
-            .fillMaxWidth()
             .clip(RoundedCornerShape(26.dp))
             .background(Color(0xFF14171E).copy(alpha = 0.92f))
             .border(
@@ -157,178 +162,5 @@ private fun HistoryCalendarWidget(
                 color = Color.White.copy(alpha = 0.10f),
                 shape = RoundedCornerShape(26.dp)
             )
-            .padding(16.dp)
-    ) {
-        Column {
-            // Header with month navigation
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(bottom = 16.dp),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .bounceClick(scaleDown = 0.8f) {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onPreviousMonth()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                        contentDescription = stringResource(R.string.updates_calendar_prev_month),
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-
-                val monthName = currentMonth.month.getDisplayName(TextStyle.FULL, Locale.getDefault())
-                    .replaceFirstChar { it.uppercase() }
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .bounceClick(scaleDown = 0.95f) {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onShowMonthPicker()
-                        }
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
-                ) {
-                    Text(
-                        text = "$monthName ${currentMonth.year}",
-                        color = Color.White,
-                        fontSize = 17.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                    Spacer(modifier = Modifier.width(6.dp))
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                        contentDescription = stringResource(R.string.updates_calendar_change_date),
-                        tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
-                    )
-                }
-
-                Box(
-                    modifier = Modifier
-                        .size(48.dp)
-                        .bounceClick(scaleDown = 0.8f) {
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                            onNextMonth()
-                        },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                        contentDescription = "Successivo",
-                        tint = Color.White,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            }
-
-            // Days of week header (L M M G V S D)
-            Row(modifier = Modifier.fillMaxWidth()) {
-                val daysOfWeek = listOf(
-                    DayOfWeek.MONDAY,
-                    DayOfWeek.TUESDAY,
-                    DayOfWeek.WEDNESDAY,
-                    DayOfWeek.THURSDAY,
-                    DayOfWeek.FRIDAY,
-                    DayOfWeek.SATURDAY,
-                    DayOfWeek.SUNDAY
-                )
-                for (day in daysOfWeek) {
-                    Text(
-                        text = day.getDisplayName(TextStyle.SHORT, Locale.getDefault()).take(1).uppercase(),
-                        modifier = Modifier.weight(1f),
-                        textAlign = TextAlign.Center,
-                        color = Color.White.copy(alpha = 0.4f),
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(8.dp))
-
-            // Calendar Grid
-            val firstDayOfMonth = currentMonth.atDay(1)
-            val firstDayOfWeek = firstDayOfMonth.dayOfWeek.value // 1..7 (Monday=1, Sunday=7)
-            val daysInMonth = currentMonth.lengthOfMonth()
-
-            var currentDay = 1
-            var weekRow = 0
-
-            while (currentDay <= daysInMonth) {
-                Row(modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp)) {
-                    for (i in 1..7) {
-                        if (weekRow == 0 && i < firstDayOfWeek) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        } else if (currentDay > daysInMonth) {
-                            Spacer(modifier = Modifier.weight(1f))
-                        } else {
-                            val date = currentMonth.atDay(currentDay)
-                            val hasEntries = entriesByDate.containsKey(date)
-                            val isSelected = selectedDate == date
-                            val isToday = date == LocalDate.now()
-
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .aspectRatio(1f)
-                                    .padding(2.dp)
-                                    .clip(CircleShape)
-                                    .background(
-                                        when {
-                                            isSelected -> MaterialTheme.colorScheme.primary
-                                            isToday -> Color.White.copy(alpha = 0.15f)
-                                            else -> Color.Transparent
-                                        }
-                                    )
-                                    .bounceClick(scaleDown = 0.9f) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                        onDateSelected(date)
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    verticalArrangement = Arrangement.Center
-                                ) {
-                                    Text(
-                                        text = currentDay.toString(),
-                                        color = if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                        else if (hasEntries) MaterialTheme.colorScheme.primary
-                                        else Color.White.copy(alpha = 0.8f),
-                                        fontSize = 15.sp,
-                                        fontWeight = if (isSelected || hasEntries || isToday) FontWeight.Bold else FontWeight.Normal
-                                    )
-                                    if (hasEntries) {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(top = 2.dp)
-                                                .size(4.dp)
-                                                .background(
-                                                    if (isSelected) MaterialTheme.colorScheme.onPrimary
-                                                    else MaterialTheme.colorScheme.primary,
-                                                    CircleShape
-                                                )
-                                        )
-                                    }
-                                }
-                            }
-                            currentDay++
-                        }
-                    }
-                }
-                weekRow++
-            }
-        }
-    }
+    )
 }

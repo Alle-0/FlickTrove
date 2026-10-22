@@ -65,7 +65,11 @@ fun ListCalendarSwitcher(
     calendarIconRes: Int = R.drawable.ic_calendario,
     tabWidthDp: Dp = 34.dp,
     tabHeightDp: Dp = 30.dp,
-    paddingDp: Dp = 3.dp
+    paddingDp: Dp = 3.dp,
+    iconSizeDp: Dp = 16.dp,
+    trackColor: Color = Color.White.copy(alpha = 0.08f),
+    borderColor: Color? = Color.White.copy(alpha = 0.15f),
+    inactiveIconTint: Color = Color.White.copy(alpha = 0.55f)
 ) {
     val haptic = LocalHapticFeedback.current
     val coroutineScope = rememberCoroutineScope()
@@ -143,12 +147,14 @@ fun ListCalendarSwitcher(
 
     Surface(
         shape = CircleShape,
-        color = Color.White.copy(alpha = 0.08f),
-        border = androidx.compose.foundation.BorderStroke(
+        color = trackColor,
+        border = if (borderColor != null) androidx.compose.foundation.BorderStroke(
             1.dp,
-            Color.White.copy(alpha = 0.15f)
-        ),
-        modifier = modifier.clip(CircleShape)
+            borderColor
+        ) else null,
+        modifier = modifier
+            .size(width = tabWidthDp * 2, height = tabHeightDp)
+            .clip(CircleShape)
     ) {
         Box(
             modifier = Modifier
@@ -268,8 +274,8 @@ fun ListCalendarSwitcher(
                     Icon(
                         imageVector = ImageVector.vectorResource(id = listIconRes),
                         contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.55f),
-                        modifier = Modifier.size(16.dp)
+                        tint = inactiveIconTint,
+                        modifier = Modifier.size(iconSizeDp)
                     )
                 }
 
@@ -292,8 +298,8 @@ fun ListCalendarSwitcher(
                     Icon(
                         imageVector = ImageVector.vectorResource(id = calendarIconRes),
                         contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.55f),
-                        modifier = Modifier.size(16.dp)
+                        tint = inactiveIconTint,
+                        modifier = Modifier.size(iconSizeDp)
                     )
                 }
             }
@@ -313,7 +319,7 @@ fun ListCalendarSwitcher(
                         val clampedWidth = scaledWidth.coerceAtMost(maxAllowedWidth)
 
                         val pillLeft = (centerXPx - (clampedWidth / 2f)).coerceIn(paddingPx, size.width - paddingPx - clampedWidth)
-                        val pillTop = paddingPx
+                        val pillTop = (size.height - pillHeightPx) / 2f
                         val cornerRadius = pillHeightPx / 2f
 
                         drawRoundRect(
@@ -334,7 +340,7 @@ fun ListCalendarSwitcher(
                         val clampedWidth = scaledWidth.coerceAtMost(maxAllowedWidth)
 
                         val pillLeft = (centerXPx - (clampedWidth / 2f)).coerceIn(paddingPx, size.width - paddingPx - clampedWidth)
-                        val pillTop = paddingPx
+                        val pillTop = (size.height - pillHeightPx) / 2f
                         val cornerRadius = pillHeightPx / 2f
 
                         pillPath.reset()
@@ -370,7 +376,7 @@ fun ListCalendarSwitcher(
                             imageVector = ImageVector.vectorResource(id = listIconRes),
                             contentDescription = null,
                             tint = activeContentColor,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(iconSizeDp)
                         )
                     }
 
@@ -384,7 +390,7 @@ fun ListCalendarSwitcher(
                             imageVector = ImageVector.vectorResource(id = calendarIconRes),
                             contentDescription = null,
                             tint = activeContentColor,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(iconSizeDp)
                         )
                     }
                 }

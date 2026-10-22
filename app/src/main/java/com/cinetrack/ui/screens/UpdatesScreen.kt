@@ -135,7 +135,6 @@ fun UpdatesScreen(
     var isCalendarView by rememberSaveable { mutableStateOf(false) }
     var currentMonth by remember { mutableStateOf(java.time.YearMonth.now()) }
     var showMonthPicker by remember { mutableStateOf(false) }
-    var lastSocialClickTime by remember { mutableLongStateOf(0L) }
 
     val remindersListState = viewModel.remindersListState
     val notificationsListState = viewModel.notificationsListState
@@ -276,387 +275,63 @@ fun UpdatesScreen(
                                                 internalHazeState = internalHazeState
                                             )
                                         } else {
-                                            LazyColumn(
-                                                state = remindersListState,
-                                                modifier = Modifier.fillMaxSize(),
+                                            UpdatesTimelineView(
+                                                reminders = futureReminders,
+                                                listState = remindersListState,
+                                                onMovieClick = onMovieClick,
                                                 contentPadding = PaddingValues(
                                                     start = 16.dp, 
                                                     end = 16.dp, 
                                                     bottom = paddingValues.calculateBottomPadding() + 80.dp, 
-                                                    top = 180.dp 
-                                                ),
-                                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                                            ) {
-                                                if (futureReminders.isEmpty()) {
-                                                    item {
-                                                        Box(
-                                                            modifier = Modifier.fillParentMaxSize(), 
-                                                            contentAlignment = Alignment.Center
-                                                        ) {
-                                                            Text(stringResource(R.string.updates_no_reminders), color = Color.White.copy(alpha = 0.3f))
-                                                        }
-                                                    }
-                                                } else {
-                                                    items(futureReminders, key = { it.id + "_rem" }, contentType = { "movie" }) { item ->
-                                                        androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                            UpdateCard(
-                                                                movie = item.movie,
-                                                                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
-                                                                episodeBadge = item.episodeInfo,
-                                                                rawDate = item.arrivalDate,
-                                                                iconRes = R.drawable.ic_bell_piena,
-                                                                color = MaterialTheme.colorScheme.primary,
-                                                                isReminder = true,
-                                                                onAction = {},
-                                                                onPress = { onMovieClick(item.movie) }
-                                                            )
-                                                        }
-                                                    }
-                                                }
+                                                    top = 170.dp 
+                                                )
+                                            )
                                         }
-                                }
                             }
                         }
 
                             }
                     } else {
-                            // MAIN NOTIFICATIONS VIEW
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxSize()
-                            ) {
-                                LazyColumn(
-                                state = notificationsListState,
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(
-                                    start = 20.dp, 
-                                    end = 20.dp, 
-                                    bottom = paddingValues.calculateBottomPadding() + 80.dp, 
-                                    top = 195.dp 
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                // Promemoria Summary Card
-                                item {
-                                    RemindersSummaryCard(
-                                        count = futureReminders.size,
-                                        onClick = { 
-                                            scope.launch { pagerState.animateScrollToPage(1) }
-                                        }
-                                    )
-                                    Spacer(modifier = Modifier.height(6.dp))
-                                }
-
-                                if (uiState.isLoading) {
-                                    item {
-                                        Box(
-                                            modifier = Modifier.fillMaxWidth().padding(32.dp), 
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                                        }
-                                    }
-                                } else {
-                                    val hasUpdates = newEpisodes.isNotEmpty() || releasedRecently.isNotEmpty() || trophyNotifications.isNotEmpty()
-
-                                    if (trophyNotifications.isNotEmpty()) {
-                                        item {
-                                            SectionHeader(
-                                                text = stringResource(R.string.dashboard_trophies),
-                                                action = if (trophyNotifications.size > 1) {
-                                                    {
-                                                        val markInteractionSource = remember { MutableInteractionSource() }
-                                                        val markIsPressed by markInteractionSource.collectIsPressedAsState()
-                                                        val markScale by animateFloatAsState(if (markIsPressed) 0.9f else 1f, label = "markTrophiesScale")
-
-                                                        Box(
-                                                            modifier = Modifier
-                                                                .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                                .clip(RoundedCornerShape(50))
-                                                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                                                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
-                                                                .clickable(
-                                                                    interactionSource = markInteractionSource,
-                                                                    indication = null
-                                                                ) {
-                                                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                    viewModel.clearAllTrophyNotifications()
-                                                                }
-                                                                .padding(horizontal = 14.dp, vertical = 6.dp)
-                                                        ) {
-                                                            Text(
-                                                                stringResource(R.string.updates_mark_all),
-                                                                color = MaterialTheme.colorScheme.primary,
-                                                                fontSize = 10.sp,
-                                                                fontWeight = FontWeight.Black,
-                                                                letterSpacing = 1.sp
-                                                            )
-                                                        }
-                                                    }
-                                                } else null
-                                            )
-                                        }
-                                        items(trophyNotifications, key = { it.key }, contentType = { "trophy" }) { notif ->
-                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                TrophyNotificationCard(
-                                                    notification = notif,
-                                                    onDismiss = { viewModel.clearTrophyNotification(notif) },
-                                                    onClick = {
-                                                        val targetBadgeId = (notif as? TrophyUpdateNotification.SingleTrophy)?.badgeId
-                                                        onNavigateToTrophyRoom?.invoke(targetBadgeId)
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-                                    
-                                    if (newEpisodes.isNotEmpty()) {
-                                        item { 
-                                            SectionHeader(
-                                                text = stringResource(R.string.updates_new_episodes),
-                                                action = {
-                                                    val markInteractionSource = remember { MutableInteractionSource() }
-                                                    val markIsPressed by markInteractionSource.collectIsPressedAsState()
-                                                    val markScale by animateFloatAsState(if (markIsPressed) 0.9f else 1f, label = "markScale")
-                                                    
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                            .clip(RoundedCornerShape(50))
-                                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
-                                                            .clickable(
-                                                                interactionSource = markInteractionSource,
-                                                                indication = null
-                                                            ) { 
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                viewModel.clearAllNewEpisodes() 
-                                                            }
-                                                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                                                    ) {
-                                                        Text(
-                                                            stringResource(R.string.updates_mark_all), 
-                                                            color = MaterialTheme.colorScheme.primary, 
-                                                            fontSize = 10.sp, 
-                                                            fontWeight = FontWeight.Black,
-                                                            letterSpacing = 1.sp
-                                                        )
-                                                    }
-                                                }
-                                            ) 
-                                        }
-                                        items(newEpisodes, key = { it.id.toString() + it.mediaType + "_new" }, contentType = { "movie" }) { movie ->
-                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                UpdateCard(
-                                                    movie = movie,
-                                                    label = stringResource(R.string.updates_new_episodes_count, movie.newEpisodesFound ?: 0),
-                                                    iconRes = R.drawable.ic_tick_card,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    onAction = { viewModel.clearUpdate(movie.id, movie.mediaType) },
-                                                    onPress = { onMovieClick(movie) }
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    if (releasedRecently.isNotEmpty()) {
-                                        item { 
-                                            SectionHeader(
-                                                text = stringResource(R.string.updates_out_today),
-                                                action = {
-                                                    val markInteractionSource = remember { MutableInteractionSource() }
-                                                    val markIsPressed by markInteractionSource.collectIsPressedAsState()
-                                                    val markScale by animateFloatAsState(if (markIsPressed) 0.9f else 1f, label = "markMigratedScale")
-                                                    
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                            .clip(RoundedCornerShape(50))
-                                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
-                                                            .clickable(
-                                                                interactionSource = markInteractionSource,
-                                                                indication = null
-                                                            ) { 
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                viewModel.clearAllMigrated() 
-                                                            }
-                                                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                                                    ) {
-                                                        Text(
-                                                            stringResource(R.string.updates_mark_all), 
-                                                            color = MaterialTheme.colorScheme.primary, 
-                                                            fontSize = 10.sp, 
-                                                            fontWeight = FontWeight.Black,
-                                                            letterSpacing = 1.sp
-                                                        )
-                                                    }
-                                                }
-                                            )
-                                        }
-                                        items(releasedRecently, key = { it.id.toString() + it.mediaType + "_recent" }, contentType = { "movie" }) { movie ->
-                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                UpdateCard(
-                                                    movie = movie,
-                                                    label = stringResource(R.string.updates_available_now),
-                                                    iconRes = R.drawable.ic_tick_card,
-                                                    color = MaterialTheme.colorScheme.primary,
-                                                    onAction = { viewModel.clearMigrated(movie.id, movie.mediaType) },
-                                                    onPress = { onMovieClick(movie) }
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    if (!hasUpdates) {
-                                        item {
-                                            EmptyNotificationsState()
-                                        }
-                                    }
-                                } // end uiState.isLoading else
-                            } // end LazyColumn
-                        } // end Box
-                    } // end else
+                        // MAIN NOTIFICATIONS VIEW
+                        NotificationsTabContent(
+                            listState = notificationsListState,
+                            paddingValues = paddingValues,
+                            futureRemindersCount = futureReminders.size,
+                            isLoading = uiState.isLoading,
+                            trophyNotifications = trophyNotifications,
+                            newEpisodes = newEpisodes,
+                            releasedRecently = releasedRecently,
+                            onNavigateToReminders = {
+                                scope.launch { pagerState.animateScrollToPage(1) }
+                            },
+                            onClearAllTrophies = { viewModel.clearAllTrophyNotifications() },
+                            onClearTrophy = { viewModel.clearTrophyNotification(it) },
+                            onNavigateToTrophyRoom = onNavigateToTrophyRoom,
+                            onClearAllNewEpisodes = { viewModel.clearAllNewEpisodes() },
+                            onClearAllMigrated = { viewModel.clearAllMigrated() },
+                            onClearUpdate = { id, type -> viewModel.clearUpdate(id, type) },
+                            onClearMigrated = { id, type -> viewModel.clearMigrated(id, type) },
+                            onMovieClick = onMovieClick
+                        )
+                    }
                 } // end HorizontalPager lambda
             } else { // closes if (mainTab == 0)
-                        // SOCIAL TAB
-                        val unreadSocialNotifs = remember(uiState.socialNotifications) {
-                            uiState.socialNotifications.filter { !it.isRead }.sortedByDescending { it.latestTimestamp?.seconds ?: 0L }
+                // SOCIAL TAB
+                SocialTabContent(
+                    listState = socialListState,
+                    paddingValues = paddingValues,
+                    socialNotifications = uiState.socialNotifications,
+                    onMarkAllAsRead = { viewModel.markAllSocialNotificationsAsRead() },
+                    onNotificationClick = { movie, commentId ->
+                        if (onSocialNotificationClick != null) {
+                            onSocialNotificationClick(movie, commentId)
+                        } else {
+                            onMovieClick(movie)
                         }
-                        val readSocialNotifs = remember(uiState.socialNotifications) {
-                            uiState.socialNotifications.filter { it.isRead }.sortedByDescending { it.latestTimestamp?.seconds ?: 0L }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                        ) {
-                            LazyColumn(
-                                state = socialListState,
-                                modifier = Modifier.fillMaxSize(),
-                                contentPadding = PaddingValues(
-                                    start = 16.dp, 
-                                    end = 16.dp, 
-                                    bottom = paddingValues.calculateBottomPadding() + 80.dp, 
-                                    top = 195.dp 
-                                ),
-                                verticalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                if (uiState.socialNotifications.isEmpty()) {
-                                    item {
-                                        Box(
-                                            modifier = Modifier.fillParentMaxSize(), 
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(stringResource(R.string.updates_no_notifications), color = Color.White.copy(alpha = 0.3f))
-                                        }
-                                    }
-                                } else {
-                                    if (unreadSocialNotifs.isNotEmpty()) {
-                                        item {
-                                            SectionHeader(
-                                                text = stringResource(R.string.updates_social_recent),
-                                                action = {
-                                                    val markInteractionSource = remember { MutableInteractionSource() }
-                                                    val markIsPressed by markInteractionSource.collectIsPressedAsState()
-                                                    val markScale by animateFloatAsState(if (markIsPressed) 0.9f else 1f, label = "markSocialScale")
-                                                    
-                                                    Box(
-                                                        modifier = Modifier
-                                                            .graphicsLayer { scaleX = markScale; scaleY = markScale }
-                                                            .clip(RoundedCornerShape(50))
-                                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                                                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), RoundedCornerShape(50))
-                                                            .clickable(
-                                                                interactionSource = markInteractionSource,
-                                                                indication = null
-                                                            ) { 
-                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                                viewModel.markAllSocialNotificationsAsRead()
-                                                            }
-                                                            .padding(horizontal = 14.dp, vertical = 6.dp)
-                                                    ) {
-                                                        Text(
-                                                            stringResource(R.string.updates_mark_all), 
-                                                            color = MaterialTheme.colorScheme.primary, 
-                                                            fontSize = 10.sp, 
-                                                            fontWeight = FontWeight.Black,
-                                                            letterSpacing = 1.sp
-                                                        )
-                                                    }
-                                                }
-                                            )
-                                        }
-
-                                        items(unreadSocialNotifs, key = { it.id }, contentType = { "social_notif" }) { notif ->
-                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                SocialNotificationCard(
-                                                    notification = notif,
-                                                    onClick = {
-                                                        val currentTime = android.os.SystemClock.elapsedRealtime()
-                                                        if (currentTime - lastSocialClickTime > 500L) {
-                                                            lastSocialClickTime = currentTime
-                                                            viewModel.markSocialNotificationAsRead(notif)
-                                                            val movie = Movie(
-                                                                id = notif.mediaId.toLongOrNull() ?: 0L,
-                                                                mediaType = notif.mediaType,
-                                                                title = notif.mediaTitle,
-                                                                posterPath = null,
-                                                                backdropPath = null
-                                                            )
-                                                            if (onSocialNotificationClick != null) {
-                                                                onSocialNotificationClick(movie, notif.commentId.ifBlank { null })
-                                                            } else {
-                                                                onMovieClick(movie)
-                                                            }
-                                                        }
-                                                    },
-                                                    onMarkRead = {
-                                                        viewModel.markSocialNotificationAsRead(notif)
-                                                    }
-                                                )
-                                            }
-                                        }
-                                    }
-
-                                    if (readSocialNotifs.isNotEmpty()) {
-                                        item {
-                                            SectionHeader(
-                                                text = stringResource(R.string.updates_social_read)
-                                            )
-                                        }
-
-                                        items(readSocialNotifs, key = { it.id }, contentType = { "social_notif" }) { notif ->
-                                            androidx.compose.foundation.layout.Box(modifier = Modifier.animateItem()) {
-                                                SocialNotificationCard(
-                                                    notification = notif,
-                                                    onClick = {
-                                                        val currentTime = android.os.SystemClock.elapsedRealtime()
-                                                        if (currentTime - lastSocialClickTime > 500L) {
-                                                            lastSocialClickTime = currentTime
-                                                            val movie = Movie(
-                                                                id = notif.mediaId.toLongOrNull() ?: 0L,
-                                                                mediaType = notif.mediaType,
-                                                                title = notif.mediaTitle,
-                                                                posterPath = null,
-                                                                backdropPath = null
-                                                            )
-                                                            if (onSocialNotificationClick != null) {
-                                                                onSocialNotificationClick(movie, notif.commentId.ifBlank { null })
-                                                            } else {
-                                                                onMovieClick(movie)
-                                                            }
-                                                        }
-                                                    },
-                                                    onMarkRead = {} // Already read
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
+                    },
+                    onMarkAsRead = { viewModel.markSocialNotificationAsRead(it) }
+                )
+            }
                     } // end AnimatedContent
                 } // end Content Layer Box
 
@@ -667,7 +342,7 @@ fun UpdatesScreen(
                         .wrapContentHeight()
                         .hazeGlass(
                             state = internalHazeState,
-                            shape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp),
+                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
                             borderWidth = 0.dp
                         )
                         .zIndex(10f),
@@ -678,7 +353,7 @@ fun UpdatesScreen(
                             .fillMaxWidth()
                             .statusBarsPadding()
                             .displayCutoutPadding()
-                            .padding(top = 8.dp, bottom = 16.dp),
+                            .padding(top = 8.dp, bottom = 14.dp),
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         Box(
@@ -742,7 +417,14 @@ fun UpdatesScreen(
                     ) {
                         com.cinetrack.ui.components.shared.ListCalendarSwitcher(
                             isCalendar = isCalendarView,
-                            onSelectMode = { isCalendarView = it }
+                            onSelectMode = { isCalendarView = it },
+                            tabWidthDp = 36.dp,
+                            tabHeightDp = 36.dp,
+                            paddingDp = 3.5.dp,
+                            iconSizeDp = 18.dp,
+                            trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
+                            borderColor = null,
+                            inactiveIconTint = Color.White.copy(alpha = 0.45f)
                         )
                     }
                     } // end inner Box (statusBarsPadding)
@@ -758,7 +440,7 @@ fun UpdatesScreen(
                         .align(Alignment.TopCenter)
                         .statusBarsPadding()
                         .displayCutoutPadding()
-                        .padding(top = 78.dp)
+                        .padding(top = 74.dp)
                         .padding(horizontal = 24.dp)
                         .zIndex(9f),
                     contentAlignment = Alignment.Center
