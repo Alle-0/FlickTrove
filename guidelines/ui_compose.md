@@ -40,9 +40,12 @@
      - È vietato utilizzare padding orizzontali compressi (es. `7.dp`) che lasciano una clearance visiva minima di soli $\approx 3.25\text{dp}$, soffocando il testo contro l'arco curvo.
      - Applicare tassativamente `padding(horizontal = 11.dp)` (o `12.dp`) e `minWidth = 72.dp`, garantendo oltre $7.2\text{dp}$ di respiro ottico effettivo sul perimetro curvo.
      - Nella colonna affiancata dei metadati (data, stagioni, status in `DetailHeader`), garantire una clearance simmetrica costante di $16\text{dp}$ dal raggio esterno di $28\text{dp}$ del container (`padding(end = 10.dp)` compensato con il padding perimetrale).
-- **HazeGlass e Modali (No Native Dialogs)**:
+- **HazeGlass e Modali (No Native Dialogs & Global ModalHost)**:
    - Quando si utilizza `hazeGlass` o la libreria Haze per sfocare lo sfondo *dietro* a un modale/popup, **NON** utilizzare `androidx.compose.ui.window.Dialog`. I dialog nativi aprono una finestra separata, rompendo il contesto dell'`hazeState` e causando la sfocatura erronea del testo interno del dialog stesso (o sfondi solidi neri).
    - Implementare sempre questi modali come `Box` in overlay a tutto schermo (`Modifier.fillMaxSize()`) posti alla radice della schermata (es. attorno o in fondo allo `Scaffold`), così da condividere la stessa gerarchia di View per il calcolo corretto del blur sottostante.
+   - **Pattern Global ModalHost (`LocalModalHost`)**:
+     - I modali invocati dai tab figli (es. `MonthYearPickerDialog`, `FlickTroveDatePickerModal`, dialog di conferma) **non devono mai essere renderizzati inline all'interno del composable del tab**, perché risulterebbero bloccati al di sotto degli zIndex di `GlassyTopBar`, `GlassyBottomBar` e `MainSearchFab`.
+     - Delegare sempre l'apertura del modale a `LocalModalHost.current.show { ... }`. Lo slot di montaggio risiede in [FlickTroveApp.kt](file:///c:/Progetti/FlickTrove_Kotlin/app/src/main/java/com/cinetrack/FlickTroveApp.kt) a `zIndex(250000f)`: in questo modo lo scrim nero del modale copre fisicamente e uniformemente il 100% dello schermo (incluse barre e floating buttons), disabilitando i tocchi sottostanti in modo naturale e senza richiedere micro-scrim `isDimmed` duplicati nei singoli componenti di navigazione.
    - **Isolamento dello Scope di Haze ed Evitamento del Self-Blur Ricorsivo**:
      - Un componente che adotta `hazeChild(state = X)` o `hazeGlass(state = X)` (es. `TopAppBar`, `CommentInputBar`, sticky headers) **non deve mai essere un discendente/figlio all'interno di un nodo con `Modifier.haze(state = X)`**.
      - Se un child si trova dentro il container catturato da Haze con lo stesso state, Haze cattura il rendering del child (testo, icone, tinta scura), lo sfoca nei frame successivi e lo ricattura, innescando un feedback loop esponenziale che oblitera l'elemento trasformandolo in una macchia nera sfocata e illeggibile.
@@ -570,6 +573,23 @@
 - **Congruenza Geometrica 1:1 tra Skeleton Placeholder e Componente Reale (`DetailHeader` / `DetailSkeleton`)**:
     - I blocchi shimmer di caricamento (`DetailSkeleton`) devono replicare esattamente le dimensioni, la proporzione e la forma dei componenti reali che andranno a sostituire.
     - Se un pulsante d'azione o chip è circolare (es. `HeaderTechnicalPill` a 36.dp con `CircleShape`), il corrispondente placeholder di caricamento deve adottare tassativamente `.size(36.dp).clip(CircleShape)`, vietando forme a pillola allungate (`width(62.dp)`) o dimensioni approssimate che generano sfarfallii visivi ("frankenstein layout") al completamento del caricamento.
+- **I 3 Archetipi Canonici dei Modali (Morph vs Center vs BottomSheet)**:
+    - **1. Modali da Pulsante (`MorphGlassModal`)**: Si aprono da un'ancora fisica (`triggerBounds: Rect`) ed espandono la superficie con morphing elastico dalle coordinate del tocco verso il centro schermo.
+    - **2. Modali Centrati a Schermo Intero (`FlickTroveModal`)**: Appaiono direttamente a centro schermo con scala morbida (`0.92f ➔ 1.0f`) e dissolvenza.
+    - **3. Fogli dal Basso (`FlickTroveBottomSheet`)**: Scivolano dal fondo dello schermo con `DragHandle` per contenuti lunghi e liste scorrevoli.
+- **Parità Visiva Assoluta 1:1 tra Modali Morfici e Centrati (Single Surface Spec)**:
+    - A regime aperto, la superficie dei modali di Tipo 1 (`MorphGlassModal`) e Tipo 2 (`FlickTroveModal`) deve essere **visivamente identica e indistinguibile**:
+      - Stessa curvatura: `RoundedCornerShape(32.dp)`.
+      - Stesso blur e tint: `HazeStyles.glassmorphicDialog` (`blurRadius = 24.dp`, `tint = Color.Black.copy(alpha = 0.58f)`).
+      - Stesso bordo: `1.dp` con `Color.White.copy(alpha = HazeStyles.ModalBorderAlpha)`.
+      - Stesso scrim di fondo: `Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha)`.
+    - L'unica differenza ammessa è la fisica di transizione (espansione da coordinate per il primo, scala elastica centrale per il secondo).
+- **Divieto di Finestre Native (`androidx.compose.ui.window.Dialog`)**:
+    - È tassativamente vietato creare modali aprendo una finestra nativa Android (`Dialog`). Questa frammentazione rompe il campionamento Haze e isola il modale dall'albero grafico. Tutti i dialog di sistema e cartelle devono risiedere in `FlickTroveModal` su `LocalModalHost`.
+- **Global ModalHost (`LocalModalHost`) & Divieto di Scrim Multipli (Anti-Double-Dimming)**:
+    - Tutti i modali di dialogo e selettori devono essere mostrati tramite il delegato root `LocalModalHost.current.show { ... }` montato ad apice gerarchia in `FlickTroveApp.kt` (`zIndex(250000f)`).
+    - Lo scrim scuro nativo di `FlickTroveModal` copre già fisicamente il 100% dell'app window (incluse `GlassyTopBar`, `GlassyBottomBar` e `MainSearchFab`).
+    - È tassativamente vietato riattivare contemporaneamente oscuramenti artificiali interni sulle singole barre (`animatedDimAlpha = 0.7f`) dai tab figli: tale duplicazione sommerebbe due veli scuri ($0.70 + 0.65$), causando un soffocamento quasi totale ($\sim 90\%$) della luminosità e rendendo le barre illeggibili.
 
 ### Pattern Statistiche e Podio
 

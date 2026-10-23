@@ -66,7 +66,6 @@ import androidx.compose.ui.graphics.Outline
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.zIndex
@@ -523,19 +522,31 @@ fun UpdatesScreen(
 
         } // end Box(fillMaxSize)
         
-        // Dialog OVERLAY - Outside the haze capturing scope to avoid blurring its own text
-        // Dialog OVERLAY - Outside the haze capturing scope to avoid blurring its own text
+        // Dialog OVERLAY via Global ModalHost (Mounts above TopBar, BottomBar and Search FAB)
+        val modalHost = com.cinetrack.ui.LocalModalHost.current
         val dialogHaptic = androidx.compose.ui.platform.LocalHapticFeedback.current
-        MonthYearPickerDialog(
-            showMonthPicker = showMonthPicker,
-            initialMonth = currentMonth,
-            onMonthSelected = { 
-                dialogHaptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
-                currentMonth = it
-            },
-            onDismiss = { showMonthPicker = false },
-            internalHazeState = internalHazeState
-        )
+
+        LaunchedEffect(showMonthPicker) {
+            if (showMonthPicker) {
+                modalHost.show {
+                    MonthYearPickerDialog(
+                        showMonthPicker = true,
+                        initialMonth = currentMonth,
+                        onMonthSelected = { 
+                            dialogHaptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                            currentMonth = it
+                            showMonthPicker = false
+                            modalHost.dismiss()
+                        },
+                        onDismiss = { 
+                            showMonthPicker = false
+                            modalHost.dismiss()
+                        },
+                        internalHazeState = internalHazeState
+                    )
+                }
+            }
+        }
     } // end Box(graphicsLayer clip)
         } // end Box(fillMaxSize)
     } // end BoxWithConstraints

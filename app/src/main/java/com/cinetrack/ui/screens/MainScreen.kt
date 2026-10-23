@@ -224,8 +224,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                 val folderReorderConfig = remember { mutableStateOf<com.cinetrack.ui.FolderReorderModalConfig?>(null) }
 
                 val isTrophyDetailOpen = activeTrophyDetailConfig.value != null
-                val isChildModalDimmed = remember { mutableStateOf(false) }
-                val isBarDimmed = isSettingsDialogOpen || isTrophyDetailOpen || isFilterModalVisible || isChildModalDimmed.value
+                val isBarDimmed = isSettingsDialogOpen
                 BackHandler(enabled = isTrophyDetailOpen) {
                     activeTrophyDetailConfig.value?.onClose?.invoke()
                 }
@@ -238,7 +237,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     com.cinetrack.ui.LocalFolderReorderRequest provides folderReorderRequest,
                     com.cinetrack.ui.LocalFolderReorderConfig provides folderReorderConfig,
                     com.cinetrack.ui.LocalScrollToTopState provides scrollToTopState,
-                    com.cinetrack.ui.LocalModalHostDimmed provides isChildModalDimmed,
                     LocalFilterRequest provides { bounds ->
                         filterButtonBounds = bounds
                         isFilterModalVisible = true
@@ -455,12 +453,28 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 visible = scrollToTopState.value.isVisible && currentTab !is SettingsTab,
                                 scrollProgress = if (currentTab !is SettingsTab) scrollToTopState.value.scrollProgress else 0f,
                                 contentHazeState = contentHazeState,
+                                isDimmed = isBarDimmed,
+                                onDimmedAreaClick = {
+                                    if (isTrophyDetailOpen) {
+                                        activeTrophyDetailConfig.value?.onClose?.invoke()
+                                    } else {
+                                        settingsViewModel.triggerCloseDialogs()
+                                    }
+                                },
                                 onScrollToTop = scrollToTopState.value.onScrollToTop
                             )
 
                             MainSearchFab(
                                 currentTab = currentTab,
                                 contentHazeState = contentHazeState,
+                                isDimmed = isBarDimmed,
+                                onDimmedAreaClick = {
+                                    if (isTrophyDetailOpen) {
+                                        activeTrophyDetailConfig.value?.onClose?.invoke()
+                                    } else {
+                                        settingsViewModel.triggerCloseDialogs()
+                                    }
+                                },
                                 onSearchClick = { offset ->
                                     val initialCategory = when {
                                         currentTab is HomeFeedTab || currentTab is HomeTab -> {

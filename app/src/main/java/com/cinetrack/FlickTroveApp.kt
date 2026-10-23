@@ -160,9 +160,11 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         var searchOverlaySourceScreenKey by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf<String?>(null) }
         
         val avatarSelectionState = remember { com.cinetrack.ui.components.account.AvatarSelectionState() }
+        val modalHostState = remember { com.cinetrack.ui.ModalHostState() }
 
         CompositionLocalProvider(
             com.cinetrack.ui.components.account.LocalAvatarSelection provides avatarSelectionState,
+            com.cinetrack.ui.LocalModalHost provides modalHostState,
             LocalMovieActions provides movieActionsManager,
             LocalVibrationEnabled provides vibrationEnabled,
             LocalDisabledBadges provides disabledBadges,
@@ -412,6 +414,16 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                     avatarSelectionState.dismiss()
                                 }
                             )
+                        }
+                    }
+
+                    val activeModal = modalHostState.currentModal
+                    if (activeModal != null) {
+                        androidx.activity.compose.BackHandler {
+                            modalHostState.dismiss()
+                        }
+                        Box(modifier = Modifier.fillMaxSize().zIndex(250000f)) {
+                            activeModal()
                         }
                     }
                 }

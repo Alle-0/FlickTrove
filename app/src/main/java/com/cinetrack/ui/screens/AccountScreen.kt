@@ -68,8 +68,6 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.vectorResource
 import androidx.activity.compose.BackHandler
 import androidx.compose.ui.platform.LocalFocusManager
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 
 import com.cinetrack.ui.viewmodel.FlowViewModel
 import com.cinetrack.ui.viewmodel.StatsViewModel

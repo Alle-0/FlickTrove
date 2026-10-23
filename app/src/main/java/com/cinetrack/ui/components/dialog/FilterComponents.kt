@@ -63,6 +63,7 @@ import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.hazeChild
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.utils.verticalFadingEdges
 import kotlin.math.roundToInt
 
@@ -448,36 +449,15 @@ fun SeriesStatusInfoDialog(
     onDismiss: () -> Unit,
     hazeState: HazeState? = null
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .zIndex(200f)
-            .background(Color.Black.copy(alpha = 0.72f))
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null
-            ) { onDismiss() },
-        contentAlignment = Alignment.Center
+    FlickTroveModal(
+        isVisible = true,
+        onDismissRequest = onDismiss,
+        hazeState = hazeState,
+        maxWidth = 380.dp,
+        maxWidthFraction = 0.88f,
+        contentPadding = PaddingValues(22.dp)
     ) {
-        Box(
-            modifier = Modifier
-                .widthIn(max = 380.dp)
-                .fillMaxWidth(0.88f)
-                .clip(RoundedCornerShape(28.dp))
-                .background(Color(0xFF111114).copy(alpha = 0.98f))
-                .border(
-                    1.dp,
-                    Color.White.copy(alpha = 0.12f),
-                    RoundedCornerShape(28.dp)
-                )
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) {}
-                .padding(22.dp)
-        ) {
-            Column(modifier = Modifier.fillMaxWidth()) {
-                // Header
+        // Header
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.SpaceBetween,
@@ -620,8 +600,6 @@ fun SeriesStatusInfoDialog(
                     )
                 }
             }
-        }
-    }
 }
 
 private data class SeriesStatusLegendEntry(

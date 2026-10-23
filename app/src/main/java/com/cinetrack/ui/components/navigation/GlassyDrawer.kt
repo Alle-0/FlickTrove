@@ -159,7 +159,7 @@ fun GlassyDrawer(
                         "MAIN" -> {
                             SectionHeader(stringResource(R.string.discover_tab_title))
                             DrawerItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                 label = stringResource(R.string.drawer_movies),
                                 isSelected = false,
                                 onClick = { currentMenu = "FILM" },
@@ -221,7 +221,7 @@ fun GlassyDrawer(
                                 accentColor = accentColor
                             )
                             DrawerItem(
-                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                 label = stringResource(R.string.drawer_movies_now_playing),
                                 isSelected = selectedRoute == "now_playing_movies",
                                 onClick = { onNavigate("now_playing_movies") },

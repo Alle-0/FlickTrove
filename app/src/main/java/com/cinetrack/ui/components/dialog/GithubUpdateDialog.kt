@@ -25,11 +25,9 @@ import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.cinetrack.R
 import com.cinetrack.util.AppUpdateInfo
-import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -44,40 +42,19 @@ fun GithubUpdateDialog(
 
     val uriHandler = LocalUriHandler.current
 
-    Dialog(
+    FlickTroveModal(
+        isVisible = true,
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        hazeState = hazeState,
+        maxWidth = 400.dp,
+        maxWidthFraction = 0.90f,
+        contentPadding = PaddingValues(24.dp)
     ) {
+        // Top Rocket / GitHub Badge
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .hazeGlass(
-                    state = hazeState,
-                    shape = RoundedCornerShape(24.dp),
-                    containerColor = Color(0xFF14141E)
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            accentColor.copy(alpha = 0.6f),
-                            accentColor.copy(alpha = 0.1f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(24.dp)
-                )
-                .padding(24.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Top Rocket / GitHub Badge
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
+                .size(64.dp)
+                .clip(CircleShape)
                         .background(accentColor.copy(alpha = 0.15f))
                         .border(1.dp, accentColor.copy(alpha = 0.4f), CircleShape),
                     contentAlignment = Alignment.Center
@@ -200,7 +177,5 @@ fun GithubUpdateDialog(
                         )
                     }
                 }
-            }
-        }
     }
 }

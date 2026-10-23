@@ -156,10 +156,10 @@ private fun HistoryCalendarWidget(
         hasIndicator = { entriesByDate.containsKey(it) },
         modifier = Modifier
             .clip(RoundedCornerShape(26.dp))
-            .background(Color(0xFF14171E).copy(alpha = 0.92f))
+            .background(Color(0xFF14171E).copy(alpha = 0.35f))
             .border(
                 width = 1.dp,
-                color = Color.White.copy(alpha = 0.10f),
+                color = Color.White.copy(alpha = 0.12f),
                 shape = RoundedCornerShape(26.dp)
             )
     )

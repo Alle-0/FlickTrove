@@ -352,7 +352,7 @@ fun StatsScreenContent(
                                                     val sectionTitle = stringResource(R.string.stats_watched_in_year, selectedYear)
                                                     Box(modifier = Modifier.padding(horizontal = 16.dp)) {
                                                         StatsSectionHeader(
-                                                            icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                                            icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                                             title = sectionTitle,
                                                             count = uiState.moviesInSelectedRange.size
                                                         )
@@ -400,7 +400,7 @@ fun StatsScreenContent(
                             // ── I TUOI FILM ───────────────────────────────────────────
                             Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                 StatsSectionHeader(
-                                    icon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                    icon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                     title = stringResource(R.string.stats_your_movies),
                                     count = null
                                 )
@@ -425,7 +425,7 @@ fun StatsScreenContent(
                                     longestTitle = stats.longestMovie?.title ?: stats.longestMovie?.name,
                                     longestDurationMinutes = stats.longestMovieMinutes,
                                     accentColor = MaterialTheme.colorScheme.primary,
-                                    sectionIcon = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                    sectionIcon = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                     longestPosterPath = stats.longestMovie?.posterPath,
                                     onLongestItemClick = {
                                         stats.longestMovie?.let { onMovieClick(it) }

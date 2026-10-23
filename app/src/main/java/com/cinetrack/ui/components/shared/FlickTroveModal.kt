@@ -66,13 +66,23 @@ fun FlickTroveModal(
 
     val modalAlpha by animateFloatAsState(
         targetValue = targetAlpha,
-        animationSpec = tween(durationMillis = 300),
+        animationSpec = tween(durationMillis = 250),
         finishedListener = {
             if (targetAlpha == 0f && isClosing) {
                 onDismissRequest()
             }
         },
         label = "alpha"
+    )
+
+    val modalScale by animateFloatAsState(
+        targetValue = if (targetAlpha == 1f) 1f else 0.92f,
+        animationSpec = if (targetAlpha == 1f) {
+            spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow)
+        } else {
+            tween(durationMillis = 200, easing = FastOutSlowInEasing)
+        },
+        label = "scale"
     )
 
     // Sync isClosing with isVisible externally
@@ -102,6 +112,10 @@ fun FlickTroveModal(
                         .displayCutoutPadding()
                         .imePadding()
                         .padding(horizontal = 12.dp, vertical = 12.dp)
+                        .graphicsLayer {
+                            scaleX = modalScale
+                            scaleY = modalScale
+                        }
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
                             keyboardController?.hide()
                             focusManager.clearFocus()
@@ -118,7 +132,17 @@ fun FlickTroveModal(
                         Box(
                             modifier = Modifier
                                 .matchParentSize()
-                                .hazeGlass(state = hazeState, shape = cardShape, alpha = modalAlpha)
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = cardShape,
+                                    style = HazeStyles.glassmorphicDialog,
+                                    alpha = modalAlpha
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
+                                    shape = cardShape
+                                )
                         )
 
                         // Sibling 2: The crisp content card (completely untouched by blur!)

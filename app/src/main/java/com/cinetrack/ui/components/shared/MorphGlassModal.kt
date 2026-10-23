@@ -73,7 +73,7 @@ fun MorphGlassModal(
     fixedModalHeightFraction: Float? = null,
     targetCornerRadius: Dp = 32.dp,
     style: HazeStyle = HazeStyles.glassmorphicDialog,
-    scrimAlpha: Float = 0.6f,
+    scrimAlpha: Float = HazeStyles.ModalScrimAlpha,
     zIndex: Float = 100f,
     content: @Composable BoxScope.(contentAlpha: Float) -> Unit
 ) {

@@ -9,6 +9,7 @@ import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
+import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -57,6 +58,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import cafe.adriel.voyager.navigator.tab.Tab
 import com.cinetrack.R
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.screens.SettingsTab
 import com.cinetrack.ui.theme.HazeStyles
@@ -68,6 +71,8 @@ import kotlinx.coroutines.launch
 fun BoxScope.MainSearchFab(
     currentTab: Tab,
     contentHazeState: HazeState,
+    isDimmed: Boolean = false,
+    onDimmedAreaClick: (() -> Unit)? = null,
     onSearchClick: (Offset) -> Unit
 ) {
     if (isPrimaryMainTab(currentTab) && currentTab !is SettingsTab) {
@@ -77,6 +82,12 @@ fun BoxScope.MainSearchFab(
         val animProgress = remember { Animatable(if (isScrollToTopVisible) 1f else 0f) }
         val searchBounceY = remember { Animatable(0f) }
         var hasTriggeredRecoil by remember { androidx.compose.runtime.mutableStateOf(false) }
+
+        val animatedDimAlpha by animateFloatAsState(
+            targetValue = if (isDimmed) 0.7f else 0f,
+            animationSpec = tween(durationMillis = 300),
+            label = "SearchFabDimAlpha"
+        )
 
         LaunchedEffect(isScrollToTopVisible) {
             if (isScrollToTopVisible) {
@@ -142,7 +153,7 @@ fun BoxScope.MainSearchFab(
                     state = contentHazeState,
                     shape = fabShape
                 )
-                .bounceClick(scaleDown = 0.9f) {
+                .bounceClick(scaleDown = 0.9f, enabled = !isDimmed) {
                     val center = fabCenter[0]
                     val startX = center?.x ?: 540f
                     val startY = center?.y ?: 1140f
@@ -156,6 +167,20 @@ fun BoxScope.MainSearchFab(
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(22.dp)
             )
+
+            // Scrim di oscuramento sincronizzato con modali e dialog
+            if (animatedDimAlpha > 0f) {
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .background(Color.Black.copy(alpha = animatedDimAlpha), fabShape)
+                        .pointerInput(Unit) {
+                            detectTapGestures {
+                                onDimmedAreaClick?.invoke()
+                            }
+                        }
+                )
+            }
         }
     }
 }
@@ -165,6 +190,8 @@ fun BoxScope.MainScrollToTopFab(
     visible: Boolean,
     scrollProgress: Float = if (visible) 1f else 0f,
     contentHazeState: HazeState,
+    isDimmed: Boolean = false,
+    onDimmedAreaClick: (() -> Unit)? = null,
     onScrollToTop: () -> Unit
 ) {
     val density = LocalDensity.current
@@ -232,6 +259,12 @@ fun BoxScope.MainScrollToTopFab(
     val arrowAlpha = remember { Animatable(1f) }
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
+    val animatedDimAlpha by animateFloatAsState(
+        targetValue = if (isDimmed) 0.7f else 0f,
+        animationSpec = tween(durationMillis = 300),
+        label = "ScrollToTopDimAlpha"
+    )
+
     val arrowPressScale by animateFloatAsState(
         targetValue = if (isPressed) 0.85f else 1f,
         animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -444,7 +477,7 @@ fun BoxScope.MainScrollToTopFab(
                         alpha = overallAlpha
                     }
                     .clickable(
-                        enabled = visible,
+                        enabled = visible && !isDimmed,
                         interactionSource = interactionSource,
                         indication = null,
                         onClick = triggerScroll
@@ -474,6 +507,19 @@ fun BoxScope.MainScrollToTopFab(
                             .alpha(iconAlpha)
                             .rotate(-90f)
                     )
+
+                    if (animatedDimAlpha > 0f) {
+                        Box(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .background(Color.Black.copy(alpha = animatedDimAlpha), CircleShape)
+                                .pointerInput(Unit) {
+                                    detectTapGestures {
+                                        onDimmedAreaClick?.invoke()
+                                    }
+                                }
+                        )
+                    }
                 }
             }
         }

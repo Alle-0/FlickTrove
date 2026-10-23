@@ -24,8 +24,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import coil.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.model.Episode
@@ -34,6 +32,10 @@ import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
+
+import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.shared.ModalCloseButton
+import dev.chrisbanes.haze.HazeState
 
 @Composable
 internal fun EpisodeCard(
@@ -154,208 +156,168 @@ internal fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, 
 
 @OptIn(ExperimentalLayoutApi::class)
 @Composable
-internal fun EpisodeInfoModal(episode: Episode, onDismiss: () -> Unit) {
-    Dialog(
+internal fun EpisodeInfoModal(
+    episode: Episode,
+    onDismiss: () -> Unit,
+    hazeState: HazeState? = null
+) {
+    FlickTroveModal(
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        hazeState = hazeState,
+        contentPadding = PaddingValues(24.dp)
     ) {
-        Surface(
+        // Titolo e X
+        Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(24.dp),
-            shape = RoundedCornerShape(24.dp),
-            color = Color(0xFF1A1A1C), // Sfondo scuro e monocolore
-            shadowElevation = 8.dp
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.Top
         ) {
-            Column(
+            Text(
+                text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
+                fontWeight = FontWeight.Black,
+                fontSize = 20.sp,
+                color = Color.White,
+                modifier = Modifier
+                    .weight(1f)
+                    .padding(end = 16.dp),
+                lineHeight = 24.sp
+            )
+
+            ModalCloseButton(onClick = onDismiss)
+        }
+
+        // Immagine (se presente)
+        if (!episode.stillPath.isNullOrEmpty()) {
+            AsyncImage(
+                model = buildTmdbImageUrl(episode.stillPath, ImageType.BACKDROP, LocalImageQuality.current),
+                contentDescription = null,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(24.dp)
-            ) {
-                // Titolo e X
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.SpaceBetween,
-                    verticalAlignment = Alignment.Top
+                    .padding(bottom = 16.dp)
+                    .height(160.dp)
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.05f)),
+                contentScale = ContentScale.Crop
+            )
+        }
+
+        // Pillole (Data e Voto)
+        FlowRow(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 16.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            verticalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            if (!episode.airDate.isNullOrEmpty()) {
+                Surface(
+                    color = Color.White.copy(alpha = 0.08f),
+                    shape = CircleShape
                 ) {
-                    Text(
-                        text = "${episode.seasonNumber}x${String.format("%02d", episode.episodeNumber)} - ${episode.name}",
-                        fontWeight = FontWeight.Black,
-                        fontSize = 20.sp,
-                        color = Color.White,
-                        modifier = Modifier.weight(1f).padding(end = 16.dp),
-                        lineHeight = 24.sp
-                    )
-                    
-                    Surface(
-                        modifier = Modifier
-                            .size(32.dp)
-                            .bounceClick { onDismiss() },
-                        color = Color.White.copy(alpha = 0.06f),
-                        shape = CircleShape
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_x), contentDescription = null, tint = Color.White, modifier = Modifier.size(14.dp))
-                        }
-                    }
-                }
-
-                // Immagine (se presente)
-                if (!episode.stillPath.isNullOrEmpty()) {
-                    AsyncImage(
-                        model = buildTmdbImageUrl(episode.stillPath, ImageType.BACKDROP, LocalImageQuality.current),
-                        contentDescription = null,
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 16.dp)
-                            .height(160.dp)
-                            .clip(RoundedCornerShape(16.dp))
-                            .background(Color.White.copy(alpha = 0.05f)),
-                        contentScale = ContentScale.Crop
-                    )
-                }
-                
-                // Pillole (Data e Voto)
-                FlowRow(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    if (!episode.airDate.isNullOrEmpty()) {
-                        Surface(
-                            color = Color.White.copy(alpha = 0.08f),
-                            shape = CircleShape
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                                    contentDescription = null,
-                                    tint = Color.White.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = episode.airDate,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White.copy(alpha = 0.9f)
-                                )
-                            }
-                        }
-                    }
-
-                    if (episode.voteAverage != null && episode.voteAverage > 0.0) {
-                        Surface(
-                            color = Color(0xFF00E676).copy(alpha = 0.15f),
-                            shape = CircleShape
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
-                                    contentDescription = null,
-                                    tint = Color(0xFF00E676),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = String.format(java.util.Locale.US, "%.1f", episode.voteAverage),
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color(0xFF00E676)
-                                )
-                            }
-                        }
-                    }
-
-                    val runtimeText = episode.runtime?.takeIf { it > 0 }?.let { m ->
-                        if (m < 60) "${m}m" else "${m / 60}h ${if (m % 60 > 0) "${m % 60}m" else ""}".trim()
-                    }
-                    if (runtimeText != null) {
-                        Surface(
-                            color = Color.White.copy(alpha = 0.08f),
-                            shape = CircleShape
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_clock),
-                                    contentDescription = null,
-                                    tint = Color.White.copy(alpha = 0.7f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                                Spacer(modifier = Modifier.width(6.dp))
-                                Text(
-                                    text = runtimeText,
-                                    fontSize = 12.sp,
-                                    fontWeight = FontWeight.SemiBold,
-                                    color = Color.White.copy(alpha = 0.9f)
-                                )
-                            }
-                        }
-                    }
-                }
-
-                // Trama
-                val scrollState = rememberScrollState()
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .heightIn(max = 240.dp)
-                        .drawWithContent {
-                            drawContent()
-                            val showTop = scrollState.value > 0
-                            val showBottom = scrollState.maxValue > 0 && scrollState.value < scrollState.maxValue
-                            
-                            if (showTop) {
-                                drawRect(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(Color(0xFF1A1A1C), Color.Transparent),
-                                        startY = 0f,
-                                        endY = 24.dp.toPx()
-                                    )
-                                )
-                            }
-                            if (showBottom) {
-                                drawRect(
-                                    brush = Brush.verticalGradient(
-                                        colors = listOf(Color.Transparent, Color(0xFF1A1A1C)),
-                                        startY = size.height - 24.dp.toPx(),
-                                        endY = size.height
-                                    )
-                                )
-                            }
-                        }
-                ) {
-                    if (!episode.overview.isNullOrEmpty()) {
-                        Text(
-                            text = episode.overview,
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.7f),
-                            lineHeight = 20.sp,
-                            modifier = Modifier
-                                .verticalScroll(scrollState)
-                                .padding(vertical = 12.dp)
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(14.dp)
                         )
-                    } else {
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
-                            text = stringResource(R.string.detail_no_overview),
-                            fontSize = 14.sp,
-                            color = Color.White.copy(alpha = 0.4f),
-                            fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                            modifier = Modifier.padding(vertical = 12.dp)
+                            text = episode.airDate,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.9f)
                         )
                     }
                 }
+            }
+
+            if (episode.voteAverage != null && episode.voteAverage > 0.0) {
+                Surface(
+                    color = Color(0xFF00E676).copy(alpha = 0.15f),
+                    shape = CircleShape
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                            contentDescription = null,
+                            tint = Color(0xFF00E676),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = String.format(java.util.Locale.US, "%.1f", episode.voteAverage),
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold,
+                            color = Color(0xFF00E676)
+                        )
+                    }
+                }
+            }
+
+            val runtimeText = episode.runtime?.takeIf { it > 0 }?.let { m ->
+                if (m < 60) "${m}m" else "${m / 60}h ${if (m % 60 > 0) "${m % 60}m" else ""}".trim()
+            }
+            if (runtimeText != null) {
+                Surface(
+                    color = Color.White.copy(alpha = 0.08f),
+                    shape = CircleShape
+                ) {
+                    Row(
+                        modifier = Modifier.padding(horizontal = 12.dp, vertical = 8.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_clock),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = runtimeText,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
+        }
+
+        // Trama
+        val scrollState = rememberScrollState()
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 240.dp)
+        ) {
+            if (!episode.overview.isNullOrEmpty()) {
+                Text(
+                    text = episode.overview,
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.7f),
+                    lineHeight = 20.sp,
+                    modifier = Modifier
+                        .verticalScroll(scrollState)
+                        .padding(vertical = 12.dp)
+                )
+            } else {
+                Text(
+                    text = stringResource(R.string.detail_no_overview),
+                    fontSize = 14.sp,
+                    color = Color.White.copy(alpha = 0.4f),
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
             }
         }
     }

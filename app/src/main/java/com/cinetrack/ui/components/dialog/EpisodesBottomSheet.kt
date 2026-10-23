@@ -22,8 +22,6 @@ import androidx.compose.foundation.layout.ExperimentalLayoutApi
 import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Info
@@ -190,18 +188,6 @@ fun EpisodesBottomSheet(
 
     val context = LocalContext.current
     val config = LocalConfiguration.current
-
-    if (selectedEpisodeForInfo != null) {
-        CompositionLocalProvider(
-            LocalContext provides context,
-            LocalConfiguration provides config
-        ) {
-            EpisodeInfoModal(
-                episode = selectedEpisodeForInfo!!,
-                onDismiss = { selectedEpisodeForInfo = null }
-            )
-        }
-    }
 
     val settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel = androidx.hilt.navigation.compose.hiltViewModel()
     val episodesLayout by settingsViewModel.episodesLayout.collectAsStateWithLifecycle()
@@ -409,6 +395,14 @@ fun EpisodesBottomSheet(
                         }
                     }
                 }
+            }
+
+            selectedEpisodeForInfo?.let { ep ->
+                EpisodeInfoModal(
+                    episode = ep,
+                    onDismiss = { selectedEpisodeForInfo = null },
+                    hazeState = hazeState
+                )
             }
         }
         }

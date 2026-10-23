@@ -35,11 +35,15 @@ import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.hazeGlass
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.graphics.graphicsLayer
+
 @Composable
 fun GlassmorphicModal(
     visible: Boolean,
     activeHazeState: HazeState,
-    dimBackground: Boolean = false,
+    dimBackground: Boolean = true,
     dismissOnClickOutside: Boolean = true,
     style: dev.chrisbanes.haze.HazeStyle = HazeStyles.glassmorphicDialog,
     scrimAlpha: Float = HazeStyles.ModalScrimAlpha,
@@ -56,6 +60,18 @@ fun GlassmorphicModal(
             transitionSpec = { tween(durationMillis = 300, easing = androidx.compose.animation.core.FastOutSlowInEasing) },
             label = "blurAlpha"
         ) { if (it == EnterExitState.Visible) 1f else 0f }
+
+        val modalScale by transition.animateFloat(
+            transitionSpec = {
+                spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            },
+            label = "modalScale"
+        ) { state ->
+            if (state == EnterExitState.Visible) 1.0f else 0.92f
+        }
 
         val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
 
@@ -91,6 +107,10 @@ fun GlassmorphicModal(
             ) {
                 Box(
                     modifier = Modifier
+                        .graphicsLayer {
+                            scaleX = modalScale
+                            scaleY = modalScale
+                        }
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.9f)
                         .clip(RoundedCornerShape(32.dp))

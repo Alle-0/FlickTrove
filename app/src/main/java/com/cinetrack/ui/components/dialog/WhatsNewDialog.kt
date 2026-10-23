@@ -27,11 +27,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
 import com.cinetrack.BuildConfig
 import com.cinetrack.R
-import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
@@ -44,40 +42,19 @@ fun WhatsNewDialog(
     hazeState: HazeState? = null,
     onDismiss: () -> Unit
 ) {
-    Dialog(
+    FlickTroveModal(
+        isVisible = true,
         onDismissRequest = onDismiss,
-        properties = DialogProperties(usePlatformDefaultWidth = false)
+        hazeState = hazeState,
+        maxWidth = 400.dp,
+        maxWidthFraction = 0.90f,
+        contentPadding = PaddingValues(24.dp)
     ) {
+        // Top Badge / Sparkle Icon
         Box(
             modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 24.dp)
-                .hazeGlass(
-                    state = hazeState,
-                    shape = RoundedCornerShape(26.dp),
-                    containerColor = Color(0xFF13131D)
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            accentColor.copy(alpha = 0.65f),
-                            accentColor.copy(alpha = 0.15f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(26.dp)
-                )
-                .padding(24.dp)
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                // Top Badge / Sparkle Icon
-                Box(
-                    modifier = Modifier
-                        .size(64.dp)
-                        .clip(CircleShape)
+                .size(64.dp)
+                .clip(CircleShape)
                         .background(accentColor.copy(alpha = 0.15f))
                         .border(1.dp, accentColor.copy(alpha = 0.45f), CircleShape),
                     contentAlignment = Alignment.Center
@@ -179,8 +156,6 @@ fun WhatsNewDialog(
                         )
                     }
                 }
-            }
-        }
     }
 }
 

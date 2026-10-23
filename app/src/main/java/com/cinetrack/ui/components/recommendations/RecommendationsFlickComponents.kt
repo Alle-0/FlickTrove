@@ -197,7 +197,7 @@ fun FlickMovieCard(
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.15f),
                         modifier = Modifier.size(80.dp)

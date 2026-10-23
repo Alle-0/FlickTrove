@@ -81,12 +81,12 @@ fun CalendarMonthWidget(
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
                         .bounceClick(scaleDown = 0.95f) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             onShowMonthPicker()
                         }
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
                         .padding(horizontal = 16.dp, vertical = 8.dp)
                 ) {
                     Text(

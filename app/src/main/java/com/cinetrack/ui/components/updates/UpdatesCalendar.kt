@@ -4,6 +4,7 @@ import com.cinetrack.ui.components.shared.calendar.CalendarMonthWidget
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
@@ -33,7 +34,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
-import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
@@ -162,11 +162,14 @@ fun CalendarWidget(
         onNextMonth = { onMonthChanged(currentMonth.plusMonths(1)) },
         onShowMonthPicker = onShowMonthPicker,
         hasIndicator = { remindersByDate.containsKey(it.toString()) },
-        modifier = Modifier.hazeGlass(
-            state = internalHazeState,
-            shape = RoundedCornerShape(26.dp),
-            blurRadius = HazeStyles.SmallGlassBlurRadius
-        )
+        modifier = Modifier
+            .clip(RoundedCornerShape(26.dp))
+            .background(Color(0xFF14171E).copy(alpha = 0.35f))
+            .border(
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(26.dp)
+            )
     )
 }
 

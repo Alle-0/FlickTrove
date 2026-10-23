@@ -90,6 +90,25 @@ data class ScrollToTopState(
 
 val LocalScrollToTopState = compositionLocalOf<MutableState<ScrollToTopState>> { androidx.compose.runtime.mutableStateOf(ScrollToTopState()) }
 
-// Global dimmer signal for modals displayed inside child tabs/screens
-val LocalModalHostDimmed = compositionLocalOf<MutableState<Boolean>> { androidx.compose.runtime.mutableStateOf(false) }
+@androidx.compose.runtime.Stable
+class ModalHostState {
+    private val modalState = androidx.compose.runtime.mutableStateOf<(@androidx.compose.runtime.Composable () -> Unit)?>(null)
+
+    val currentModal: (@androidx.compose.runtime.Composable () -> Unit)?
+        get() = modalState.value
+
+    val isModalOpen: Boolean
+        get() = modalState.value != null
+
+    fun show(content: @androidx.compose.runtime.Composable () -> Unit) {
+        modalState.value = content
+    }
+
+    fun dismiss() {
+        modalState.value = null
+    }
+}
+
+val LocalModalHost = androidx.compose.runtime.staticCompositionLocalOf { ModalHostState() }
+
 

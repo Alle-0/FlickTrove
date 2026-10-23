@@ -52,7 +52,7 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.LocalModalHostDimmed
+import com.cinetrack.ui.LocalModalHost
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.navigation.GlassyTopBar
 import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
@@ -161,17 +161,6 @@ fun HistoryScreenContent(
     var entryToDelete by remember { mutableStateOf<WatchTimelineEntry?>(null) }
     var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
-    val isAnyModalOpen = showDatePicker || entryToDelete != null || showMonthPicker || uiState.isFilterModalOpen
-    val localModalDimmed = LocalModalHostDimmed.current
-    LaunchedEffect(isAnyModalOpen) {
-        localModalDimmed.value = isAnyModalOpen
-    }
-    DisposableEffect(Unit) {
-        onDispose {
-            localModalDimmed.value = false
-        }
-    }
-
     val statusBarsTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
     val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
     val topBarClearance = paddingValues.calculateTopPadding() + statusBarsTop + cutoutTop + 46.dp + 16.dp
@@ -276,7 +265,7 @@ fun HistoryScreenContent(
                     hazeState = internalHazeState,
                     title = stringResource(id = R.string.history_screen_title),
                     onBackPress = onBackPress,
-                    isDimmed = isAnyModalOpen,
+                    isDimmed = uiState.isFilterModalOpen,
                     onFilterClick = { bounds ->
                         filterButtonBounds = bounds
                         viewModel.openFilterModal()
@@ -302,141 +291,170 @@ fun HistoryScreenContent(
             )
         }
 
-        // Edit Watch Date Modal
-        if (showDatePicker) {
-            FlickTroveDatePickerModal(
-                initialDate = editingEntry?.parsedDate ?: LocalDate.now(),
-                isVisible = showDatePicker,
-                onDateSelected = { newDate ->
-                    editingEntry?.let { entry ->
-                        val newIso = newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
-                        viewModel.updateWatchDate(entry.historyId, newIso)
-                    }
-                    showDatePicker = false
-                    editingEntry = null
-                },
-                onDismissRequest = {
-                    showDatePicker = false
-                    editingEntry = null
-                },
-                accentColor = MaterialTheme.colorScheme.primary,
-                hazeState = internalHazeState
-            )
+        val modalHost = LocalModalHost.current
+
+        // Month/Year Picker via Global ModalHost (Mounts above TopBar, BottomBar and Search FAB)
+        LaunchedEffect(showMonthPicker) {
+            if (showMonthPicker) {
+                modalHost.show {
+                    MonthYearPickerDialog(
+                        showMonthPicker = true,
+                        initialMonth = uiState.selectedCalendarMonth,
+                        onMonthSelected = { month ->
+                            viewModel.setCalendarMonth(month)
+                            showMonthPicker = false
+                            modalHost.dismiss()
+                        },
+                        onDismiss = {
+                            showMonthPicker = false
+                            modalHost.dismiss()
+                        },
+                        internalHazeState = internalHazeState,
+                        accentColor = MaterialTheme.colorScheme.primary
+                    )
+                }
+            }
         }
 
-        // Confirm Delete Watch Session Modal
-        entryToDelete?.let { target ->
-            FlickTroveModal(
-                isVisible = true,
-                onDismissRequest = { entryToDelete = null },
-                hazeState = internalHazeState
-            ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 20.dp, vertical = 24.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(16.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(48.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.error,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+        // Edit Watch Date Modal via Global ModalHost
+        LaunchedEffect(showDatePicker, editingEntry) {
+            val entry = editingEntry
+            if (showDatePicker && entry != null) {
+                modalHost.show {
+                    FlickTroveDatePickerModal(
+                        initialDate = entry.parsedDate,
+                        isVisible = true,
+                        onDateSelected = { newDate ->
+                            val newIso = newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
+                            viewModel.updateWatchDate(entry.historyId, newIso)
+                            showDatePicker = false
+                            editingEntry = null
+                            modalHost.dismiss()
+                        },
+                        onDismissRequest = {
+                            showDatePicker = false
+                            editingEntry = null
+                            modalHost.dismiss()
+                        },
+                        accentColor = MaterialTheme.colorScheme.primary,
+                        hazeState = internalHazeState
+                    )
+                }
+            }
+        }
 
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = stringResource(id = R.string.history_delete_session_title),
-                            style = MaterialTheme.typography.titleMedium.copy(
-                                fontWeight = FontWeight.Bold,
-                                color = Color.White
-                            )
-                        )
-                        Spacer(modifier = Modifier.height(6.dp))
-                        Text(
-                            text = stringResource(id = R.string.history_delete_session_confirm),
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                color = Color.White.copy(alpha = 0.65f),
-                                lineHeight = 19.sp
-                            ),
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                        )
-                    }
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
+        // Confirm Delete Watch Session Modal via Global ModalHost
+        LaunchedEffect(entryToDelete) {
+            val target = entryToDelete
+            if (target != null) {
+                modalHost.show {
+                    FlickTroveModal(
+                        isVisible = true,
+                        onDismissRequest = {
+                            entryToDelete = null
+                            modalHost.dismiss()
+                        },
+                        hazeState = internalHazeState
                     ) {
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White.copy(alpha = 0.08f),
+                        Column(
                             modifier = Modifier
-                                .weight(1f)
-                                .bounceClick(scaleDown = 0.94f) { entryToDelete = null }
+                                .fillMaxWidth()
+                                .padding(horizontal = 20.dp, vertical = 24.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
                             Box(
-                                modifier = Modifier.padding(vertical = 12.dp),
+                                modifier = Modifier
+                                    .size(48.dp)
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f)),
                                 contentAlignment = Alignment.Center
                             ) {
-                                Text(
-                                    text = stringResource(id = R.string.settings_cancel),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        color = Color.White.copy(alpha = 0.75f),
-                                        fontWeight = FontWeight.SemiBold
-                                    )
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier.size(24.dp)
                                 )
                             }
-                        }
 
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = MaterialTheme.colorScheme.error,
-                            modifier = Modifier
-                                .weight(1f)
-                                .bounceClick(scaleDown = 0.94f) {
-                                    viewModel.deleteWatchSession(target.historyId)
-                                    entryToDelete = null
-                                }
-                        ) {
-                            Box(
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
+                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
-                                    text = stringResource(id = R.string.quick_action_delete),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        color = Color.White,
-                                        fontWeight = FontWeight.Bold
+                                    text = stringResource(id = R.string.history_delete_session_title),
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White
                                     )
                                 )
+                                Spacer(modifier = Modifier.height(6.dp))
+                                Text(
+                                    text = stringResource(id = R.string.history_delete_session_confirm),
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        color = Color.White.copy(alpha = 0.65f),
+                                        lineHeight = 19.sp
+                                    ),
+                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                                )
+                            }
+
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(10.dp)
+                            ) {
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick(scaleDown = 0.94f) {
+                                            entryToDelete = null
+                                            modalHost.dismiss()
+                                        }
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(vertical = 12.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.settings_cancel),
+                                            style = MaterialTheme.typography.labelLarge.copy(
+                                                color = Color.White.copy(alpha = 0.75f),
+                                                fontWeight = FontWeight.SemiBold
+                                            )
+                                        )
+                                    }
+                                }
+
+                                Surface(
+                                    shape = RoundedCornerShape(12.dp),
+                                    color = MaterialTheme.colorScheme.error,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .bounceClick(scaleDown = 0.94f) {
+                                            viewModel.deleteWatchSession(target.historyId)
+                                            entryToDelete = null
+                                            modalHost.dismiss()
+                                        }
+                                ) {
+                                    Box(
+                                        modifier = Modifier.padding(vertical = 12.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Text(
+                                            text = stringResource(id = R.string.quick_action_delete),
+                                            style = MaterialTheme.typography.labelLarge.copy(
+                                                color = Color.White,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                        )
+                                    }
+                                }
                             }
                         }
                     }
                 }
             }
         }
-
-        // Month/Year Picker Modal (Rendered at root outside haze capturing scope to ensure crisp text and proper dimming)
-        MonthYearPickerDialog(
-            showMonthPicker = showMonthPicker,
-            initialMonth = uiState.selectedCalendarMonth,
-            onMonthSelected = { month ->
-                viewModel.setCalendarMonth(month)
-                showMonthPicker = false
-            },
-            onDismiss = { showMonthPicker = false },
-            internalHazeState = internalHazeState,
-            accentColor = MaterialTheme.colorScheme.primary
-        )
     }
 }
 

@@ -46,8 +46,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.window.Dialog
-import androidx.compose.ui.window.DialogProperties
+import com.cinetrack.ui.LocalModalHost
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import kotlinx.coroutines.launch
 import com.cinetrack.data.local.entities.FolderEntity
@@ -521,42 +520,70 @@ fun FoldersScreenContent(
         }
     }
 
-    if (isCreateDialogOpen) {
-        FolderCreateDialog(
-            onDismiss = { isCreateDialogOpen = false },
-            onCreate = { name, icon, color, description ->
-                viewModel.createFolder(name, icon, color, description ?: "")
-                isCreateDialogOpen = false
-            },
-            hazeState = hazeState
-        )
+    val modalHost = LocalModalHost.current
+
+    LaunchedEffect(isCreateDialogOpen) {
+        if (isCreateDialogOpen) {
+            modalHost.show {
+                FolderCreateDialog(
+                    onDismiss = {
+                        isCreateDialogOpen = false
+                        modalHost.dismiss()
+                    },
+                    onCreate = { name, icon, color, description ->
+                        viewModel.createFolder(name, icon, color, description ?: "")
+                        isCreateDialogOpen = false
+                        modalHost.dismiss()
+                    },
+                    hazeState = hazeState
+                )
+            }
+        }
     }
 
-    folderToDelete?.let { folder ->
-        DeleteFolderDialog(
-            onConfirm = {
-                viewModel.deleteFolder(folder.id)
-                folderToDelete = null
-            },
-            onDismiss = { folderToDelete = null },
-            folderName = folder.name,
-            hazeState = hazeState
-        )
+    LaunchedEffect(folderToDelete) {
+        val folder = folderToDelete
+        if (folder != null) {
+            modalHost.show {
+                DeleteFolderDialog(
+                    onConfirm = {
+                        viewModel.deleteFolder(folder.id)
+                        folderToDelete = null
+                        modalHost.dismiss()
+                    },
+                    onDismiss = {
+                        folderToDelete = null
+                        modalHost.dismiss()
+                    },
+                    folderName = folder.name,
+                    hazeState = hazeState
+                )
+            }
+        }
     }
 
-    folderToEdit?.let { folder ->
-        FolderEditDialog(
-            initialName = folder.name,
-            initialColor = folder.color ?: "#FFFFFF",
-            initialDescription = folder.description,
-            editMode = folderEditMode,
-            onDismiss = { folderToEdit = null },
-            onSave = { newName, newColor, newDesc ->
-                viewModel.updateFolder(folder.copy(name = newName, color = newColor, description = newDesc))
-                folderToEdit = null
-            },
-            hazeState = hazeState
-        )
+    LaunchedEffect(folderToEdit) {
+        val folder = folderToEdit
+        if (folder != null) {
+            modalHost.show {
+                FolderEditDialog(
+                    initialName = folder.name,
+                    initialColor = folder.color ?: "#FFFFFF",
+                    initialDescription = folder.description,
+                    editMode = folderEditMode,
+                    onDismiss = {
+                        folderToEdit = null
+                        modalHost.dismiss()
+                    },
+                    onSave = { newName, newColor, newDesc ->
+                        viewModel.updateFolder(folder.copy(name = newName, color = newColor, description = newDesc))
+                        folderToEdit = null
+                        modalHost.dismiss()
+                    },
+                    hazeState = hazeState
+                )
+            }
+        }
     }
 
     var rememberedMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }

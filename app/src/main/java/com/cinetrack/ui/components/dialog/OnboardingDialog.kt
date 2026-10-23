@@ -44,6 +44,7 @@ import kotlinx.coroutines.launch
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
+import com.cinetrack.ui.components.shared.FlickTroveModal
 
 data class OnboardingSlide(
     val titleRes: Int,
@@ -106,39 +107,11 @@ fun OnboardingDialog(
     val pagerState = rememberPagerState(pageCount = { slides.size })
     val coroutineScope = rememberCoroutineScope()
 
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .background(Color.Black.copy(alpha = 0.65f)) // Scrim
-            .clickable(
-                interactionSource = remember { MutableInteractionSource() },
-                indication = null,
-                onClick = onDismiss
-            )
-            .padding(24.dp),
-        contentAlignment = Alignment.Center
+    FlickTroveModal(
+        onDismissRequest = onDismiss,
+        hazeState = hazeState,
+        contentPadding = PaddingValues(24.dp)
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(32.dp))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = {} // Consume clicks inside modal
-                )
-                .hazeGlass(
-                    state = hazeState,
-                    shape = RoundedCornerShape(32.dp)
-                )
-                .border(
-                    1.dp,
-                    Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
-                    RoundedCornerShape(32.dp)
-                )
-                .padding(24.dp),
-            horizontalAlignment = Alignment.CenterHorizontally
-        ) {
                     // Top Bar with Back and Skip
                     Row(
                         modifier = Modifier.fillMaxWidth(),
@@ -296,9 +269,8 @@ fun OnboardingDialog(
                             )
                         )
                     }
-                }
-            }
-        }
+    }
+}
 
 @Composable
 private fun SlideIconBadge(

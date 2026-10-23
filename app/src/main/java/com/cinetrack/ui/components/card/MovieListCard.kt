@@ -187,7 +187,7 @@ fun MovieListCard(
                     contentAlignment = Alignment.CenterEnd
                 ) {
                     Icon(
-                        imageVector = if (isTv) ImageVector.vectorResource(id = R.drawable.ic_tv) else ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                        imageVector = if (isTv) ImageVector.vectorResource(id = R.drawable.ic_tv) else ImageVector.vectorResource(id = R.drawable.ic_ciak),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.08f),
                         modifier = Modifier

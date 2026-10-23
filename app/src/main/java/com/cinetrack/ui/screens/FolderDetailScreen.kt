@@ -55,6 +55,7 @@ import com.cinetrack.ui.viewmodel.FolderDetailUiState
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.DeleteFolderDialog
+import com.cinetrack.ui.LocalModalHost
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.theme.HazeStyles
@@ -496,7 +497,7 @@ fun FolderDetailScreenContent(
                                         ) {
                                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                                 Icon(
-                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                                                     contentDescription = null,
                                                     tint = Color.White.copy(alpha = 0.15f),
                                                     modifier = Modifier.size(64.dp)
@@ -565,33 +566,51 @@ fun FolderDetailScreenContent(
                                 }
                             }
 
-                            if (showDeleteConfirm) {
-                                DeleteFolderDialog(
-                                    onConfirm = {
-                                        viewModel.deleteFolder()
-                                        onShowDeleteConfirmChange(false)
-                                        onBack()
-                                    },
-                                    onDismiss = { onShowDeleteConfirmChange(false) },
-                                    folderName = state.folder.name,
-                                    hazeState = externalHazeState
-                                )
+                            val modalHost = LocalModalHost.current
+
+                            LaunchedEffect(showDeleteConfirm) {
+                                if (showDeleteConfirm) {
+                                    modalHost.show {
+                                        DeleteFolderDialog(
+                                            onConfirm = {
+                                                viewModel.deleteFolder()
+                                                onShowDeleteConfirmChange(false)
+                                                modalHost.dismiss()
+                                                onBack()
+                                            },
+                                            onDismiss = {
+                                                onShowDeleteConfirmChange(false)
+                                                modalHost.dismiss()
+                                            },
+                                            folderName = state.folder.name,
+                                            hazeState = externalHazeState
+                                        )
+                                    }
+                                }
                             }
                             
-                            if (showEditDialog) {
-                                com.cinetrack.ui.components.shared.FolderEditDialog(
-                                    initialName = state.folder.name,
-                                    initialColor = state.folder.color ?: "#FFFFFF",
-                                    initialDescription = state.folder.description,
-                                    editMode = folderEditMode,
-                                    onDismiss = { onShowEditDialogChange(false) },
-                                    onSave = { newName, newColor, newDesc ->
-                                        onShowEditDialogChange(false)
-                                        viewModel.updateFolderDetails(newName, newColor, newDesc)
-                                        onFolderUpdated(newName, newColor)
-                                    },
-                                    hazeState = externalHazeState
-                                )
+                            LaunchedEffect(showEditDialog) {
+                                if (showEditDialog) {
+                                    modalHost.show {
+                                        com.cinetrack.ui.components.shared.FolderEditDialog(
+                                            initialName = state.folder.name,
+                                            initialColor = state.folder.color ?: "#FFFFFF",
+                                            initialDescription = state.folder.description,
+                                            editMode = folderEditMode,
+                                            onDismiss = {
+                                                onShowEditDialogChange(false)
+                                                modalHost.dismiss()
+                                            },
+                                            onSave = { newName, newColor, newDesc ->
+                                                onShowEditDialogChange(false)
+                                                viewModel.updateFolderDetails(newName, newColor, newDesc)
+                                                onFolderUpdated(newName, newColor)
+                                                modalHost.dismiss()
+                                            },
+                                            hazeState = externalHazeState
+                                        )
+                                    }
+                                }
                             }
 
                         }

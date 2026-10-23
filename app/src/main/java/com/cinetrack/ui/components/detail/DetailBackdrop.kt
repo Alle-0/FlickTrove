@@ -83,7 +83,7 @@ fun DetailBackdrop(
             AtmosphericBackdropFallback(
                 accentColor = accentColor,
                 backgroundColor = backgroundColor,
-                showCiack = (path == null)
+                showCiak = (path == null)
             )
 
             // 2. BACKDROP IMAGE (Crossfade sopra il fallback quando connesso)
@@ -128,7 +128,7 @@ fun DetailBackdrop(
 private fun AtmosphericBackdropFallback(
     accentColor: Color,
     backgroundColor: Color,
-    showCiack: Boolean = false,
+    showCiak: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val gradient = remember(accentColor, backgroundColor) {
@@ -156,7 +156,7 @@ private fun AtmosphericBackdropFallback(
             .background(radialGlow),
         contentAlignment = Alignment.Center
     ) {
-        if (showCiack) {
+        if (showCiak) {
             Box(
                 modifier = Modifier
                     .size(160.dp)
@@ -165,7 +165,7 @@ private fun AtmosphericBackdropFallback(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciack),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_ciak),
                     contentDescription = null,
                     modifier = Modifier.size(54.dp),
                     tint = Color.White.copy(alpha = 0.4f)
