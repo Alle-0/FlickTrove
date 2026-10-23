@@ -155,12 +155,12 @@ private fun HistoryCalendarWidget(
         onShowMonthPicker = onShowMonthPicker,
         hasIndicator = { entriesByDate.containsKey(it) },
         modifier = Modifier
-            .clip(RoundedCornerShape(26.dp))
+            .clip(RoundedCornerShape(36.dp))
             .background(Color(0xFF14171E).copy(alpha = 0.35f))
             .border(
                 width = 1.dp,
                 color = Color.White.copy(alpha = 0.12f),
-                shape = RoundedCornerShape(26.dp)
+                shape = RoundedCornerShape(36.dp)
             )
     )
 }

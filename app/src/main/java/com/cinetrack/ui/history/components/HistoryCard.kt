@@ -192,7 +192,8 @@ fun HistoryCard(
                 Spacer(modifier = Modifier.height(5.dp))
 
                 // Badges Row: Session Capsule (Date/Ep) + Dedicated Rewatch Badge + Rating Badge
-                val hasSessionCapsule = showDate || !entry.episodeInfo.isNullOrBlank()
+                val shouldShowDate = showDate && !isCalendarDayMode
+                val hasSessionCapsule = shouldShowDate || !entry.episodeInfo.isNullOrBlank()
                 val hasRewatchBadge = entry.isRewatch
                 val hasRatingBadge = entry.personalRating != null && entry.personalRating > 0.0
 
@@ -235,7 +236,7 @@ fun HistoryCard(
                                 ) {
                                     var hasPreceding = false
 
-                                    if (showDate) {
+                                    if (shouldShowDate) {
                                         Text(
                                             text = shortDate,
                                             color = sessionColor,

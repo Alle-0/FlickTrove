@@ -226,32 +226,28 @@ fun MainModalsContainer(
 
             val activeTrophyDetailState = LocalActiveTrophyDetailConfig.current
             val detailConfig = activeTrophyDetailState?.value
-            var lastDetailConfig by remember { mutableStateOf<com.cinetrack.ui.TrophyDetailModalConfig?>(null) }
-            if (detailConfig != null) {
-                lastDetailConfig = detailConfig
-            }
-            val currentModalConfig = detailConfig ?: lastDetailConfig
 
-            if (currentModalConfig != null) {
+            if (detailConfig != null) {
                 Box(modifier = Modifier.zIndex(70000f)) {
                     GlassmorphicModal(
-                        visible = detailConfig != null,
+                        visible = true,
                         activeHazeState = globalHazeState,
                         dimBackground = true,
                         dismissOnClickOutside = true,
-                        onDismissRequest = { currentModalConfig.onClose() }
+                        animate = false,
+                        onDismissRequest = { detailConfig.onClose() }
                     ) {
                         TrophyDetailContent(
-                            item = currentModalConfig.item,
-                            onClose = { currentModalConfig.onClose() },
-                            onVerifySupporter = currentModalConfig.onVerifySupporter,
-                            onMovieClick = currentModalConfig.onMovieClick ?: { movieId: Long, mediaType: String ->
-                                currentModalConfig.onClose()
+                            item = detailConfig.item,
+                            onClose = { detailConfig.onClose() },
+                            onVerifySupporter = detailConfig.onVerifySupporter,
+                            onMovieClick = detailConfig.onMovieClick ?: { movieId: Long, mediaType: String ->
+                                detailConfig.onClose()
                                 rootNavigator?.push(com.cinetrack.ui.screens.MovieDetailScreen(movieId, mediaType))
                                 Unit
                             },
-                            onResolveUnlockingMovies = currentModalConfig.onResolveUnlockingMovies,
-                            onResolveUnlockingMovie = currentModalConfig.onResolveUnlockingMovie
+                            onResolveUnlockingMovies = detailConfig.onResolveUnlockingMovies,
+                            onResolveUnlockingMovie = detailConfig.onResolveUnlockingMovie
                         )
                     }
                 }

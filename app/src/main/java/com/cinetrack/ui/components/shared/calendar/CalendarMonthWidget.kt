@@ -48,19 +48,23 @@ fun CalendarMonthWidget(
 ) {
     val haptic = LocalHapticFeedback.current
 
-    Box(modifier = modifier.fillMaxWidth().padding(16.dp)) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(start = 14.dp, end = 14.dp, top = 16.dp, bottom = 12.dp)
+    ) {
         Column {
             // Month Header with navigation
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(bottom = 16.dp),
+                    .padding(bottom = 12.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(44.dp)
                         .bounceClick(scaleDown = 0.8f) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             onPreviousMonth()
@@ -71,7 +75,7 @@ fun CalendarMonthWidget(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
                         contentDescription = stringResource(R.string.updates_calendar_prev_month),
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
 
@@ -86,13 +90,13 @@ fun CalendarMonthWidget(
                             onShowMonthPicker()
                         }
                         .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .padding(horizontal = 16.dp, vertical = 8.dp)
+                        .background(Color.White.copy(alpha = 0.06f))
+                        .padding(horizontal = 14.dp, vertical = 7.dp)
                 ) {
                     Text(
                         text = "$monthName ${currentMonth.year}",
                         color = Color.White,
-                        fontSize = 17.sp,
+                        fontSize = 16.sp,
                         fontWeight = FontWeight.Bold
                     )
                     Spacer(modifier = Modifier.width(6.dp))
@@ -100,13 +104,13 @@ fun CalendarMonthWidget(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                         contentDescription = stringResource(R.string.updates_calendar_change_date),
                         tint = Color.White.copy(alpha = 0.6f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(15.dp)
                     )
                 }
 
                 Box(
                     modifier = Modifier
-                        .size(48.dp)
+                        .size(44.dp)
                         .bounceClick(scaleDown = 0.8f) {
                             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                             onNextMonth()
@@ -117,13 +121,17 @@ fun CalendarMonthWidget(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = "Successivo",
                         tint = Color.White,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(22.dp)
                     )
                 }
             }
 
             // Days of week header (L M M G V S D)
-            Row(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 4.dp)
+            ) {
                 val daysOfWeek = listOf(
                     DayOfWeek.MONDAY,
                     DayOfWeek.TUESDAY,
@@ -139,13 +147,13 @@ fun CalendarMonthWidget(
                         modifier = Modifier.weight(1f),
                         textAlign = TextAlign.Center,
                         color = Color.White.copy(alpha = 0.4f),
-                        fontSize = 13.sp,
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
             }
 
-            Spacer(modifier = Modifier.height(8.dp))
+            Spacer(modifier = Modifier.height(4.dp))
 
             // Calendar Day Grid
             val firstDayOfMonth = currentMonth.atDay(1)
@@ -159,7 +167,7 @@ fun CalendarMonthWidget(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 4.dp)
+                        .padding(vertical = 2.dp)
                 ) {
                     for (i in 1..7) {
                         if (weekRow == 0 && i < firstDayOfWeek) {
@@ -181,7 +189,7 @@ fun CalendarMonthWidget(
                                     .background(
                                         when {
                                             isSelected -> accentColor
-                                            isToday -> Color.White.copy(alpha = 0.15f)
+                                            isToday -> Color.White.copy(alpha = 0.12f)
                                             else -> Color.Transparent
                                         }
                                     )
@@ -200,20 +208,22 @@ fun CalendarMonthWidget(
                                         color = if (isSelected) onAccentColor
                                         else if (hasEvent) accentColor
                                         else Color.White.copy(alpha = 0.8f),
-                                        fontSize = 15.sp,
+                                        fontSize = 14.sp,
                                         fontWeight = if (isSelected || hasEvent || isToday) FontWeight.Bold else FontWeight.Normal
                                     )
-                                    if (hasEvent) {
-                                        Box(
-                                            modifier = Modifier
-                                                .padding(top = 2.dp)
-                                                .size(4.dp)
-                                                .background(
-                                                    if (isSelected) onAccentColor else accentColor,
-                                                    CircleShape
-                                                )
-                                        )
-                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(top = 2.dp)
+                                            .size(4.dp)
+                                            .background(
+                                                if (hasEvent) {
+                                                    if (isSelected) onAccentColor else accentColor
+                                                } else {
+                                                    Color.Transparent
+                                                },
+                                                CircleShape
+                                            )
+                                    )
                                 }
                             }
                             currentDay++

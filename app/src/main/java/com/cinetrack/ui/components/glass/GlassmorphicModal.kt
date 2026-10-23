@@ -47,9 +47,71 @@ fun GlassmorphicModal(
     dismissOnClickOutside: Boolean = true,
     style: dev.chrisbanes.haze.HazeStyle = HazeStyles.glassmorphicDialog,
     scrimAlpha: Float = HazeStyles.ModalScrimAlpha,
+    animate: Boolean = true,
     onDismissRequest: (() -> Unit)? = null,
     content: @Composable BoxScope.(alpha: Float) -> Unit
 ) {
+    if (!visible && !animate) return
+
+    if (!animate) {
+        val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(100f)
+                .then(
+                    if (dimBackground) Modifier.background(Color.Black.copy(alpha = scrimAlpha))
+                    else Modifier
+                )
+        ) {
+            if (onDismissRequest != null && dismissOnClickOutside) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            onDismissRequest()
+                        }
+                )
+            }
+
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .statusBarsPadding()
+                    .displayCutoutPadding()
+                    .imePadding()
+                    .padding(vertical = 16.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Box(
+                    modifier = Modifier
+                        .widthIn(max = 400.dp)
+                        .fillMaxWidth(0.9f)
+                        .clip(RoundedCornerShape(32.dp))
+                        .hazeGlass(
+                            state = activeHazeState,
+                            alpha = 1f,
+                            shape = RoundedCornerShape(32.dp),
+                            style = style
+                        )
+                        .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
+                        .pointerInput(Unit) {
+                            detectTapGestures {
+                                focusManager.clearFocus()
+                            }
+                        }
+                ) {
+                    content(1f)
+                }
+            }
+        }
+        return
+    }
+
     AnimatedVisibility(
         visible = visible,
         enter = fadeIn(tween(durationMillis = 300, easing = androidx.compose.animation.core.FastOutSlowInEasing)),

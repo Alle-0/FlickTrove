@@ -301,30 +301,24 @@ fun TrophyRoomScreenContent(
         // Il pulsante filtro nella TopBar triggera isFilterModalOpen tramite onFilterRequest.
 
         // 5. MODALE DI DETTAGLIO OVERLAY (Fallback locale se invocato fuori da MainScreen o in Preview)
-        if (activeTrophyDetailState == null) {
-            var lastSelectedBadge by remember { mutableStateOf<TrophyRoomItemUi?>(null) }
-            if (selectedBadgeForModal != null) {
-                lastSelectedBadge = selectedBadgeForModal
-            }
-
+        if (activeTrophyDetailState == null && selectedBadgeForModal != null) {
+            val currentModalItem = selectedBadgeForModal!!
             GlassmorphicModal(
-                visible = selectedBadgeForModal != null,
-                activeHazeState = hazeState,
+                visible = true,
+                activeHazeState = localHaze,
                 dimBackground = true,
                 dismissOnClickOutside = true,
+                animate = false,
                 onDismissRequest = { selectedBadgeForModal = null }
             ) {
-                val currentModalItem = selectedBadgeForModal ?: lastSelectedBadge
-                if (currentModalItem != null) {
-                    TrophyDetailContent(
-                        item = currentModalItem,
-                        onClose = { selectedBadgeForModal = null },
-                        onVerifySupporter = onVerifySupporter,
-                        onMovieClick = onMovieClick,
-                        onResolveUnlockingMovies = onResolveUnlockingMovies,
-                        onResolveUnlockingMovie = onResolveUnlockingMovie
-                    )
-                }
+                TrophyDetailContent(
+                    item = currentModalItem,
+                    onClose = { selectedBadgeForModal = null },
+                    onVerifySupporter = onVerifySupporter,
+                    onMovieClick = onMovieClick,
+                    onResolveUnlockingMovies = onResolveUnlockingMovies,
+                    onResolveUnlockingMovie = onResolveUnlockingMovie
+                )
             }
         }
 
