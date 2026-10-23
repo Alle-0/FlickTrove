@@ -27,6 +27,7 @@ class FolderRepository @Inject constructor(
     private val folderDao: FolderDao,
     private val firebaseRemoteDataSource: FirebaseRemoteDataSource,
     private val badgeRepository: dagger.Lazy<BadgeRepository>,
+    private val sharedFolderRepository: dagger.Lazy<SharedFolderRepository>,
     @ApplicationContext private val context: Context
 ) {
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -45,6 +46,19 @@ class FolderRepository @Inject constructor(
         val updatedEntity = folderEntity.copy(syncStatus = "synced", clientUpdatedAt = now)
         folderDao.insert(updatedEntity)
         badgeRepository.get().evaluateBadgesAsync()
+
+        // --- SHARED FOLDERS (Supabase routing - Zero Firebase) ---
+        if (folderEntity.isShared) {
+            repositoryScope.launch {
+                try {
+                    sharedFolderRepository.get().pushFolderUpdate(updatedEntity)
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    android.util.Log.e("FolderRepository", "Supabase shared folder update failed for ${updatedEntity.id}", e)
+                }
+            }
+            return
+        }
 
         // --- TRAKT INTEGRATION (Instant Write) ---
         if (folderEntity.id.startsWith("trakt_")) {
@@ -147,7 +161,23 @@ class FolderRepository @Inject constructor(
     }
 
     suspend fun deleteFolder(folderId: String) {
+        val folder = folderDao.getByIdFlow(folderId).firstOrNull()
         folderDao.markDeleted(folderId)
+
+        // --- SHARED FOLDERS (Supabase routing - Zero Firebase) ---
+        if (folder?.isShared == true) {
+            repositoryScope.launch {
+                try {
+                    sharedFolderRepository.get().handleDeleteOrLeave(folder)
+                    folderDao.deleteById(folderId)
+                    badgeRepository.get().evaluateBadgesAsync()
+                } catch (e: Exception) {
+                    if (e is CancellationException) throw e
+                    android.util.Log.e("FolderRepository", "Supabase shared folder delete/leave failed for $folderId", e)
+                }
+            }
+            return
+        }
 
         // --- TRAKT INTEGRATION ---
         if (folderId.startsWith("trakt_")) {

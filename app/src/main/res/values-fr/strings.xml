@@ -1868,5 +1868,47 @@
     <string name="history_sort_rating">Note personnelle</string>
     <string name="history_media_movie">Film</string>
     <string name="history_media_series">Série</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">Partagé</string>
+    <string name="folder_share_action">Partager le dossier</string>
+    <string name="folder_share_title">Partager le Dossier</string>
+    <string name="folder_share_desc">Créez un lien d\'invitation temporaire pour collaborer.</string>
+    <string name="folder_share_duration">Durée de l\'invitation</string>
+    <string name="folder_invite_duration_1m">1 Minute (Test rapide)</string>
+    <string name="folder_invite_duration_24h">24 Heures</string>
+    <string name="folder_invite_duration_48h">48 Heures</string>
+    <string name="folder_invite_duration_7d">7 Jours</string>
+    <string name="folder_invite_duration_single">Usage Unique (Max. 7 jours)</string>
+    <string name="folder_invite_create_button">Générer l\'invitation</string>
+    <string name="folder_invite_code_label">Code d\'Invitation</string>
+    <string name="folder_invite_copy">Copier le code</string>
+    <string name="folder_invite_copied">Code copié dans le presse-papier !</string>
+    <string name="folder_invite_share">Partager</string>
+    <string name="folder_join_button">Rejoindre avec un code</string>
+    <string name="folder_join_title">Rejoindre un dossier partagé</string>
+    <string name="folder_join_desc">Entrez le code d\'invitation fourni par le propriétaire.</string>
+    <string name="folder_join_hint">ex. FT-7K9P2</string>
+    <string name="folder_join_check">Vérifier le code</string>
+    <string name="folder_join_accept">Accepter et Rejoindre</string>
+    <string name="folder_join_invitation_from">Invitation de %1$s</string>
+    <string name="folder_join_invalid_code">Code d\'invitation invalide ou introuvable.</string>
+    <string name="folder_join_expired">Cette invitation a expiré.</string>
+    <string name="folder_join_revoked">Cette invitation a été révoquée par le propriétaire.</string>
+    <string name="folder_join_max_uses">Cette invitation à usage unique a déjà été utilisée.</string>
+    <string name="folder_join_member_limit">Ce dossier a déjà atteint la limite maximale de 10 membres.</string>
+    <string name="folder_members_title">Membres et Invitations</string>
+    <string name="folder_members_tab">Membres (%1$d/10)</string>
+    <string name="folder_invites_tab">Invitations Actives</string>
+    <string name="folder_member_role_owner">Propriétaire</string>
+    <string name="folder_member_role_editor">Collaborateur</string>
+    <string name="folder_member_remove">Supprimer</string>
+    <string name="folder_member_remove_confirm">Retirer %1$s de ce dossier partagé ?</string>
+    <string name="folder_leave">Quitter le dossier</string>
+    <string name="folder_leave_confirm">Voulez-vous vraiment quitter ce dossier partagé ?</string>
+    <string name="folder_invites_none">Aucune invitation active pour le moment.</string>
+    <string name="folder_invite_revoke">Révoquer</string>
+    <string name="folder_invite_expires_in">Expire le : %1$s</string>
+    <string name="folder_max_items_reached">Capacité maximale atteinte pour ce dossier (1 000/1 000 titres)</string>
 </resources>
 

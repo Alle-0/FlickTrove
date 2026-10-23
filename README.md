@@ -215,7 +215,6 @@ Once the app is launched:
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
 - [ ] **Media Server Live Scrobbling (Jellyfin, Plex, Emby):** Real-time automated scrobbling and episode tracking from self-hosted home media servers via serverless cloud webhooks at zero cost.
-- [x] **Global Watch History Timeline & Cinephile Diary:** 100% offline-first diary of all viewings, rewatches, and TV episode sessions without network calls, featuring dual Timeline and Calendar views with Anti-Tenet rewatch counts.
 - [ ] **Shared & Collaborative Folders:** Create collaborative watchlists with your partner or friends on Supabase with custom invite expiration and member revocation.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.

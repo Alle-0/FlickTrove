@@ -1868,5 +1868,47 @@
     <string name="history_sort_rating">Личная оценка</string>
     <string name="history_media_movie">Фильм</string>
     <string name="history_media_series">Сериал</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">Общая</string>
+    <string name="folder_share_action">Поделиться папкой</string>
+    <string name="folder_share_title">Поделиться Папкой</string>
+    <string name="folder_share_desc">Создайте временную ссылку-приглашение для совместного доступа.</string>
+    <string name="folder_share_duration">Срок действия приглашения</string>
+    <string name="folder_invite_duration_1m">1 минута (Быстрый тест)</string>
+    <string name="folder_invite_duration_24h">24 часа</string>
+    <string name="folder_invite_duration_48h">48 часов</string>
+    <string name="folder_invite_duration_7d">7 дней</string>
+    <string name="folder_invite_duration_single">Одноразовое (Макс. 7 дней)</string>
+    <string name="folder_invite_create_button">Создать Приглашение</string>
+    <string name="folder_invite_code_label">Код Приглашения</string>
+    <string name="folder_invite_copy">Скопировать код</string>
+    <string name="folder_invite_copied">Код скопирован в буфер обмена!</string>
+    <string name="folder_invite_share">Поделиться</string>
+    <string name="folder_join_button">Войти по коду</string>
+    <string name="folder_join_title">Присоединиться к общей папке</string>
+    <string name="folder_join_desc">Введите код приглашения, полученный от владельца.</string>
+    <string name="folder_join_hint">например, FT-7K9P2</string>
+    <string name="folder_join_check">Проверить Код</string>
+    <string name="folder_join_accept">Принять и Войти</string>
+    <string name="folder_join_invitation_from">Приглашение от %1$s</string>
+    <string name="folder_join_invalid_code">Недействительный или несуществующий код приглашения.</string>
+    <string name="folder_join_expired">Срок действия этого приглашения истек.</string>
+    <string name="folder_join_revoked">Это приглашение было отозвано владельцем.</string>
+    <string name="folder_join_max_uses">Это одноразовое приглашение уже было использовано.</string>
+    <string name="folder_join_member_limit">В этой папке уже достигнут лимит в 10 участников.</string>
+    <string name="folder_members_title">Участники и Приглашения</string>
+    <string name="folder_members_tab">Участники (%1$d/10)</string>
+    <string name="folder_invites_tab">Активные Приглашения</string>
+    <string name="folder_member_role_owner">Владелец</string>
+    <string name="folder_member_role_editor">Соавтор</string>
+    <string name="folder_member_remove">Удалить</string>
+    <string name="folder_member_remove_confirm">Удалить %1$s из этой общей папки?</string>
+    <string name="folder_leave">Покинуть папку</string>
+    <string name="folder_leave_confirm">Вы уверены, что хотите покинуть эту общую папку?</string>
+    <string name="folder_invites_none">На данный момент активных приглашений нет.</string>
+    <string name="folder_invite_revoke">Отозвать</string>
+    <string name="folder_invite_expires_in">Действует до: %1$s</string>
+    <string name="folder_max_items_reached">Достигнута максимальная вместимость папки (1 000/1 000 названий)</string>
 </resources>
 

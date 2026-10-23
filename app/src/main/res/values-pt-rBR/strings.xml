@@ -1866,6 +1866,48 @@
     <string name="history_sort_rating">Nota pessoal</string>
     <string name="history_media_movie">Filme</string>
     <string name="history_media_series">Série</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">Compartilhada</string>
+    <string name="folder_share_action">Compartilhar pasta</string>
+    <string name="folder_share_title">Compartilhar Pasta</string>
+    <string name="folder_share_desc">Crie um link de convite temporário para colaborar.</string>
+    <string name="folder_share_duration">Duração do convite</string>
+    <string name="folder_invite_duration_1m">1 Minuto (Teste rápido)</string>
+    <string name="folder_invite_duration_24h">24 Horas</string>
+    <string name="folder_invite_duration_48h">48 Horas</string>
+    <string name="folder_invite_duration_7d">7 Dias</string>
+    <string name="folder_invite_duration_single">Uso Único (Máx. 7 dias)</string>
+    <string name="folder_invite_create_button">Gerar Convite</string>
+    <string name="folder_invite_code_label">Código de Convite</string>
+    <string name="folder_invite_copy">Copiar Código</string>
+    <string name="folder_invite_copied">Código copiado para a área de transferência!</string>
+    <string name="folder_invite_share">Compartilhar</string>
+    <string name="folder_join_button">Entrar com código</string>
+    <string name="folder_join_title">Entrar em pasta compartilhada</string>
+    <string name="folder_join_desc">Digite o código de convite compartilhado pelo proprietário.</string>
+    <string name="folder_join_hint">ex. FT-7K9P2</string>
+    <string name="folder_join_check">Verificar Código</string>
+    <string name="folder_join_accept">Aceitar e Entrar</string>
+    <string name="folder_join_invitation_from">Convite de %1$s</string>
+    <string name="folder_join_invalid_code">Código de convite inválido ou inexistente.</string>
+    <string name="folder_join_expired">Este convite expirou.</string>
+    <string name="folder_join_revoked">Este convite foi revogado pelo proprietário.</string>
+    <string name="folder_join_max_uses">Este convite de uso único já foi resgatado.</string>
+    <string name="folder_join_member_limit">Esta pasta já atingiu o limite máximo de 10 membros.</string>
+    <string name="folder_members_title">Membros e Convites</string>
+    <string name="folder_members_tab">Membros (%1$d/10)</string>
+    <string name="folder_invites_tab">Convites Ativos</string>
+    <string name="folder_member_role_owner">Proprietário</string>
+    <string name="folder_member_role_editor">Colaborador</string>
+    <string name="folder_member_remove">Remover</string>
+    <string name="folder_member_remove_confirm">Remover %1$s desta pasta compartilhada?</string>
+    <string name="folder_leave">Sair da pasta</string>
+    <string name="folder_leave_confirm">Tem certeza de que deseja sair desta pasta compartilhada?</string>
+    <string name="folder_invites_none">Nenhum convite ativo no momento.</string>
+    <string name="folder_invite_revoke">Revogar</string>
+    <string name="folder_invite_expires_in">Expira em: %1$s</string>
+    <string name="folder_max_items_reached">Capacidade máxima atingida para esta pasta (1.000/1.000 títulos)</string>
 </resources>
 
 

@@ -51,7 +51,8 @@ class FolderDetailViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager,
     private val preferenceRepository: PreferenceRepository,
     private val globalErrorHandler: GlobalErrorHandler,
-    private val savedStateHandle: SavedStateHandle
+    private val savedStateHandle: SavedStateHandle,
+    private val sharedFolderRepository: com.cinetrack.data.repository.SharedFolderRepository
 ) : ViewModel() {
 
     private val _folderId = MutableStateFlow<String?>(null)
@@ -367,6 +368,10 @@ class FolderDetailViewModel @Inject constructor(
         viewModelScope.launch {
             val itemId = movie.compositeId
             val isPresent = targetFolder.itemIds.contains(itemId)
+            if (!isPresent && targetFolder.isShared && targetFolder.itemIds.size >= targetFolder.maxItems) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.folder_max_items_reached))
+                return@launch
+            }
             val updatedIds = if (isPresent) {
                 targetFolder.itemIds.filter { it != itemId }
             } else {
@@ -399,6 +404,9 @@ class FolderDetailViewModel @Inject constructor(
             val currentState = uiState.value
             if (currentState is FolderDetailUiState.Success) {
                 val folder = currentState.folder
+                if (folder.isShared) {
+                    sharedFolderRepository.handleDeleteOrLeave(folder)
+                }
                 _folderId.value?.let { id ->
                     repository.deleteFolder(id)
                 }
@@ -421,6 +429,90 @@ class FolderDetailViewModel @Inject constructor(
                     updatedAt = Instant.now().toString()
                 ))
             }
+        }
+    }
+
+    fun convertToShared(onResult: (Result<FolderEntity>) -> Unit) {
+        viewModelScope.launch {
+            val currentState = uiState.value
+            if (currentState is FolderDetailUiState.Success) {
+                val result = sharedFolderRepository.createSharedFolder(currentState.folder)
+                onResult(result)
+            }
+        }
+    }
+
+    fun createSharedInvite(
+        duration: com.cinetrack.data.repository.InviteDurationOption,
+        onResult: (Result<com.cinetrack.data.model.SharedFolderInviteDto>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val currentState = uiState.value
+            if (currentState is FolderDetailUiState.Success) {
+                val sharedId = currentState.folder.sharedFolderId
+                if (sharedId != null) {
+                    val result = sharedFolderRepository.createInvite(sharedId, duration)
+                    onResult(result)
+                } else {
+                    onResult(Result.failure(IllegalStateException("FOLDER_NOT_SHARED")))
+                }
+            }
+        }
+    }
+
+    fun getFolderMembers(onResult: (Result<List<com.cinetrack.data.model.SharedFolderMemberDto>>) -> Unit) {
+        viewModelScope.launch {
+            val currentState = uiState.value
+            if (currentState is FolderDetailUiState.Success) {
+                val sharedId = currentState.folder.sharedFolderId
+                if (sharedId != null) {
+                    val result = sharedFolderRepository.getFolderMembers(sharedId)
+                    onResult(result)
+                } else {
+                    onResult(Result.success(emptyList()))
+                }
+            }
+        }
+    }
+
+    fun getFolderInvites(onResult: (Result<List<com.cinetrack.data.model.SharedFolderInviteDto>>) -> Unit) {
+        viewModelScope.launch {
+            val currentState = uiState.value
+            if (currentState is FolderDetailUiState.Success) {
+                val sharedId = currentState.folder.sharedFolderId
+                if (sharedId != null) {
+                    val result = sharedFolderRepository.getFolderInvites(sharedId)
+                    onResult(result)
+                } else {
+                    onResult(Result.success(emptyList()))
+                }
+            }
+        }
+    }
+
+    fun removeMember(
+        member: com.cinetrack.data.model.SharedFolderMemberDto,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val currentState = uiState.value
+            if (currentState is FolderDetailUiState.Success) {
+                val sharedId = currentState.folder.sharedFolderId
+                if (sharedId != null) {
+                    val result = sharedFolderRepository.removeMember(sharedId, member.userId)
+                    onResult(result)
+                }
+            }
+        }
+    }
+
+    fun revokeInvite(
+        invite: com.cinetrack.data.model.SharedFolderInviteDto,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.revokeInvite(invite.inviteCode)
+            onResult(result)
         }
     }
 }

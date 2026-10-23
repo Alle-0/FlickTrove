@@ -26,7 +26,8 @@ class FoldersViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
-    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
+    private val sharedFolderRepository: com.cinetrack.data.repository.SharedFolderRepository
 ) : ViewModel() {
 
     private val _sortOption = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.FolderSortOption.DATE)
@@ -45,6 +46,9 @@ class FoldersViewModel @Inject constructor(
                 }
                 _sortOrder.value = if (prefs.foldersSort.sortDirection == "asc") com.cinetrack.data.model.CommentSortOrder.ASC else com.cinetrack.data.model.CommentSortOrder.DESC
             }
+        }
+        viewModelScope.launch {
+            sharedFolderRepository.syncUserSharedFolders()
         }
     }
 
@@ -132,6 +136,9 @@ class FoldersViewModel @Inject constructor(
         viewModelScope.launch {
             val folder = folders.value?.find { it.id == folderId }
             if (folder != null) {
+                if (folder.isShared) {
+                    sharedFolderRepository.handleDeleteOrLeave(folder)
+                }
                 repository.deleteFolder(folderId)
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_deleted, folder.name)) {
                     repository.saveFolder(folder)
@@ -139,6 +146,81 @@ class FoldersViewModel @Inject constructor(
                 }
                 badgeRepository.evaluateBadgesAsync()
             }
+        }
+    }
+
+    fun checkInvite(
+        code: String,
+        onResult: (Result<Pair<com.cinetrack.data.model.SharedFolderInviteDto, com.cinetrack.data.model.SharedFolderDto>>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.getInvite(code)
+            onResult(result)
+        }
+    }
+
+    fun acceptInvite(
+        code: String,
+        onResult: (Result<FolderEntity>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.acceptInvite(code)
+            result.onSuccess {
+                badgeRepository.evaluateBadgesAsync()
+            }
+            onResult(result)
+        }
+    }
+
+    fun createInviteForFolder(
+        folder: FolderEntity,
+        durationOption: com.cinetrack.data.repository.InviteDurationOption,
+        onResult: (Result<com.cinetrack.data.model.SharedFolderInviteDto>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.shareFolderAndCreateInvite(folder, durationOption)
+            onResult(result.map { it.second })
+        }
+    }
+
+    fun getFolderMembers(
+        sharedFolderId: String,
+        onResult: (Result<List<com.cinetrack.data.model.SharedFolderMemberDto>>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.getFolderMembers(sharedFolderId)
+            onResult(result)
+        }
+    }
+
+    fun getFolderInvites(
+        sharedFolderId: String,
+        onResult: (Result<List<com.cinetrack.data.model.SharedFolderInviteDto>>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.getFolderInvites(sharedFolderId)
+            onResult(result)
+        }
+    }
+
+    fun removeFolderMember(
+        sharedFolderId: String,
+        userUid: String,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.removeMember(sharedFolderId, userUid)
+            onResult(result)
+        }
+    }
+
+    fun revokeFolderInvite(
+        code: String,
+        onResult: (Result<Unit>) -> Unit
+    ) {
+        viewModelScope.launch {
+            val result = sharedFolderRepository.revokeInvite(code)
+            onResult(result)
         }
     }
 

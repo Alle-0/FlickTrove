@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -44,6 +45,8 @@ import com.cinetrack.ui.components.dialog.WhatsNewDialog
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.FolderEditDialog
 import com.cinetrack.ui.components.shared.FolderEditMode
+import com.cinetrack.ui.components.shared.FolderShareModal
+import com.cinetrack.ui.components.shared.FolderMembersModal
 import com.cinetrack.ui.screens.FolderDetailTab
 import com.cinetrack.ui.screens.FoldersTab
 import com.cinetrack.ui.screens.MovieDetailScreen
@@ -78,6 +81,10 @@ fun MainGlobalDialogs(
     folderEditMode: FolderEditMode,
     showFolderDeleteConfirm: Boolean,
     onFolderDeleteConfirmChange: (Boolean) -> Unit,
+    showFolderShareModal: Boolean = false,
+    onFolderShareModalChange: (Boolean) -> Unit = {},
+    showFolderMembersModal: Boolean = false,
+    onFolderMembersModalChange: (Boolean) -> Unit = {},
     updatesOverlayOffset: Offset?,
     onUpdatesOverlayClose: () -> Unit,
     settingsOverlayOffset: Offset?,
@@ -252,6 +259,87 @@ fun MainGlobalDialogs(
                     }
                 }
             }
+        }
+    }
+
+    if (showFolderShareModal && currentTab is FolderDetailTab) {
+        val foldersViewModel: FoldersViewModel = with(screen) { getViewModel<FoldersViewModel>() }
+        val folderId = currentTab.folderId
+        val folderFlow = foldersViewModel.folders.collectAsStateWithLifecycle()
+        val folder = folderFlow.value?.find { it.id == folderId }
+        if (folder != null) {
+            FolderShareModal(
+                folder = folder,
+                onDismiss = { onFolderShareModalChange(false) },
+                onCreateInvite = { durationOption, callback ->
+                    foldersViewModel.createInviteForFolder(folder, durationOption, callback)
+                },
+                hazeState = globalHazeState
+            )
+        }
+    }
+
+    if (showFolderMembersModal && currentTab is FolderDetailTab) {
+        val foldersViewModel: FoldersViewModel = with(screen) { getViewModel<FoldersViewModel>() }
+        val folderId = currentTab.folderId
+        val folderFlow = foldersViewModel.folders.collectAsStateWithLifecycle()
+        val folder = folderFlow.value?.find { it.id == folderId }
+        val currentUserId = androidx.compose.runtime.remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "" }
+
+        if (folder != null) {
+            val isOwner = folder.ownerUid == currentUserId
+            var members by androidx.compose.runtime.remember(folder.sharedFolderId) {
+                androidx.compose.runtime.mutableStateOf<List<com.cinetrack.data.model.SharedFolderMemberDto>>(emptyList())
+            }
+            var activeInvites by androidx.compose.runtime.remember(folder.sharedFolderId) {
+                androidx.compose.runtime.mutableStateOf<List<com.cinetrack.data.model.SharedFolderInviteDto>>(emptyList())
+            }
+
+            androidx.compose.runtime.LaunchedEffect(folder.sharedFolderId) {
+                folder.sharedFolderId?.let { sharedId ->
+                    foldersViewModel.getFolderMembers(sharedId) { res ->
+                        members = res.getOrDefault(emptyList())
+                    }
+                    foldersViewModel.getFolderInvites(sharedId) { res ->
+                        activeInvites = res.getOrDefault(emptyList())
+                    }
+                }
+            }
+
+            FolderMembersModal(
+                folder = folder,
+                members = members,
+                activeInvites = activeInvites,
+                currentUserId = currentUserId,
+                isOwner = isOwner,
+                onDismiss = { onFolderMembersModalChange(false) },
+                onRemoveMember = { member ->
+                    folder.sharedFolderId?.let { sharedId ->
+                        foldersViewModel.removeFolderMember(sharedId, member.userId) { res ->
+                            if (res.isSuccess) {
+                                members = members.filter { it.userId != member.userId }
+                            }
+                        }
+                    }
+                },
+                onLeaveFolder = {
+                    foldersViewModel.deleteFolder(folder.id)
+                    onFolderMembersModalChange(false)
+                    tabNavigator.current = FoldersTab
+                },
+                onRevokeInvite = { invite ->
+                    foldersViewModel.revokeFolderInvite(invite.inviteCode) { res ->
+                        if (res.isSuccess) {
+                            activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
+                        }
+                    }
+                },
+                onOpenShareModal = {
+                    onFolderMembersModalChange(false)
+                    onFolderShareModalChange(true)
+                },
+                hazeState = globalHazeState
+            )
         }
     }
 

@@ -1873,4 +1873,46 @@
     <string name="history_sort_rating">Rating pribadi</string>
     <string name="history_media_movie">Film</string>
     <string name="history_media_series">Serial</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">Dibagikan</string>
+    <string name="folder_share_action">Bagikan folder</string>
+    <string name="folder_share_title">Bagikan Folder</string>
+    <string name="folder_share_desc">Buat tautan undangan berbatas waktu untuk berkolaborasi.</string>
+    <string name="folder_share_duration">Durasi Undangan</string>
+    <string name="folder_invite_duration_1m">1 Menit (Uji Cepat)</string>
+    <string name="folder_invite_duration_24h">24 Jam</string>
+    <string name="folder_invite_duration_48h">48 Jam</string>
+    <string name="folder_invite_duration_7d">7 Hari</string>
+    <string name="folder_invite_duration_single">Satu Kali Pakai (Maks. 7 Hari)</string>
+    <string name="folder_invite_create_button">Buat Undangan</string>
+    <string name="folder_invite_code_label">Kode Undangan</string>
+    <string name="folder_invite_copy">Salin Kode</string>
+    <string name="folder_invite_copied">Kode disalin ke papan klip!</string>
+    <string name="folder_invite_share">Bagikan</string>
+    <string name="folder_join_button">Gabung dengan kode</string>
+    <string name="folder_join_title">Gabung ke Folder Bersama</string>
+    <string name="folder_join_desc">Masukkan kode undangan yang dibagikan oleh pemilik folder.</string>
+    <string name="folder_join_hint">cth. FT-7K9P2</string>
+    <string name="folder_join_check">Verifikasi Kode</string>
+    <string name="folder_join_accept">Terima dan Gabung</string>
+    <string name="folder_join_invitation_from">Undangan dari %1$s</string>
+    <string name="folder_join_invalid_code">Kode undangan tidak valid atau tidak ditemukan.</string>
+    <string name="folder_join_expired">Undangan ini telah kedaluwarsa.</string>
+    <string name="folder_join_revoked">Undangan ini telah dibatalkan oleh pemilik.</string>
+    <string name="folder_join_max_uses">Undangan sekali pakai ini sudah digunakan.</string>
+    <string name="folder_join_member_limit">Folder ini telah mencapai batas maksimum 10 anggota.</string>
+    <string name="folder_members_title">Anggota dan Undangan</string>
+    <string name="folder_members_tab">Anggota (%1$d/10)</string>
+    <string name="folder_invites_tab">Undangan Aktif</string>
+    <string name="folder_member_role_owner">Pemilik</string>
+    <string name="folder_member_role_editor">Kolaborator</string>
+    <string name="folder_member_remove">Hapus</string>
+    <string name="folder_member_remove_confirm">Hapus %1$s dari folder bersama ini?</string>
+    <string name="folder_leave">Tinggalkan folder</string>
+    <string name="folder_leave_confirm">Yakin ingin meninggalkan folder bersama ini?</string>
+    <string name="folder_invites_none">Tidak ada undangan aktif saat ini.</string>
+    <string name="folder_invite_revoke">Batalkan</string>
+    <string name="folder_invite_expires_in">Kedaluwarsa: %1$s</string>
+    <string name="folder_max_items_reached">Kapasitas maksimum folder tercapai (1.000/1.000 judul)</string>
 </resources>

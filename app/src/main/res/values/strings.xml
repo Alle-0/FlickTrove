@@ -1881,5 +1881,47 @@
     <string name="history_sort_rating">Personal Rating</string>
     <string name="history_media_movie">Movie</string>
     <string name="history_media_series">Series</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">Shared</string>
+    <string name="folder_share_action">Share Folder</string>
+    <string name="folder_share_title">Share Folder</string>
+    <string name="folder_share_desc">Create an invite link with temporary access to collaborate.</string>
+    <string name="folder_share_duration">Invite Duration</string>
+    <string name="folder_invite_duration_1m">1 Minute (Quick Test)</string>
+    <string name="folder_invite_duration_24h">24 Hours</string>
+    <string name="folder_invite_duration_48h">48 Hours</string>
+    <string name="folder_invite_duration_7d">7 Days</string>
+    <string name="folder_invite_duration_single">Single Use (Max 7 Days)</string>
+    <string name="folder_invite_create_button">Generate Invite</string>
+    <string name="folder_invite_code_label">Invite Code</string>
+    <string name="folder_invite_copy">Copy Code</string>
+    <string name="folder_invite_copied">Code copied to clipboard!</string>
+    <string name="folder_invite_share">Share</string>
+    <string name="folder_join_button">Join with Code</string>
+    <string name="folder_join_title">Join Shared Folder</string>
+    <string name="folder_join_desc">Enter the invite code shared by the folder owner.</string>
+    <string name="folder_join_hint">e.g. FT-7K9P2</string>
+    <string name="folder_join_check">Verify Code</string>
+    <string name="folder_join_accept">Accept &amp; Join</string>
+    <string name="folder_join_invitation_from">Invitation from %1$s</string>
+    <string name="folder_join_invalid_code">Invalid or non-existent invite code.</string>
+    <string name="folder_join_expired">This invite has expired.</string>
+    <string name="folder_join_revoked">This invite has been revoked by the owner.</string>
+    <string name="folder_join_max_uses">This single-use invite has already been redeemed.</string>
+    <string name="folder_join_member_limit">This folder has already reached the maximum limit of 10 members.</string>
+    <string name="folder_members_title">Members &amp; Invites</string>
+    <string name="folder_members_tab">Members (%1$d/10)</string>
+    <string name="folder_invites_tab">Active Invites</string>
+    <string name="folder_member_role_owner">Owner</string>
+    <string name="folder_member_role_editor">Collaborator</string>
+    <string name="folder_member_remove">Remove</string>
+    <string name="folder_member_remove_confirm">Remove %1$s from this shared folder?</string>
+    <string name="folder_leave">Leave Folder</string>
+    <string name="folder_leave_confirm">Are you sure you want to leave this shared folder?</string>
+    <string name="folder_invites_none">No active invites for this folder.</string>
+    <string name="folder_invite_revoke">Revoke</string>
+    <string name="folder_invite_expires_in">Expires: %1$s</string>
+    <string name="folder_max_items_reached">Maximum folder capacity reached (1,000/1,000 titles)</string>
 </resources>
 

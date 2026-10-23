@@ -1874,4 +1874,46 @@
     <string name="history_sort_rating">個人評価順</string>
     <string name="history_media_movie">映画</string>
     <string name="history_media_series">シリーズ</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">共有</string>
+    <string name="folder_share_action">フォルダを共有</string>
+    <string name="folder_share_title">フォルダを共有</string>
+    <string name="folder_share_desc">共同編集のための一時的な招待リンクを作成します。</string>
+    <string name="folder_share_duration">招待の有効期間</string>
+    <string name="folder_invite_duration_1m">1分間（テスト用）</string>
+    <string name="folder_invite_duration_24h">24時間</string>
+    <string name="folder_invite_duration_48h">48時間</string>
+    <string name="folder_invite_duration_7d">7日間</string>
+    <string name="folder_invite_duration_single">1回限り（最大7日間）</string>
+    <string name="folder_invite_create_button">招待を作成</string>
+    <string name="folder_invite_code_label">招待コード</string>
+    <string name="folder_invite_copy">コードをコピー</string>
+    <string name="folder_invite_copied">コードをクリップボードにコピーしました！</string>
+    <string name="folder_invite_share">共有</string>
+    <string name="folder_join_button">コードで参加</string>
+    <string name="folder_join_title">共有フォルダに参加</string>
+    <string name="folder_join_desc">フォルダ所有者から共有された招待コードを入力してください。</string>
+    <string name="folder_join_hint">例: FT-7K9P2</string>
+    <string name="folder_join_check">コードを確認</string>
+    <string name="folder_join_accept">承諾して参加</string>
+    <string name="folder_join_invitation_from">%1$s からの招待</string>
+    <string name="folder_join_invalid_code">無効または存在しない招待コードです。</string>
+    <string name="folder_join_expired">この招待は期限切れです。</string>
+    <string name="folder_join_revoked">この招待は所有者によって取り消されました。</string>
+    <string name="folder_join_max_uses">この1回限りの招待は既に使用されています。</string>
+    <string name="folder_join_member_limit">このフォルダは既に上限の10人に達しています。</string>
+    <string name="folder_members_title">メンバーと招待</string>
+    <string name="folder_members_tab">メンバー (%1$d/10)</string>
+    <string name="folder_invites_tab">有効な招待</string>
+    <string name="folder_member_role_owner">所有者</string>
+    <string name="folder_member_role_editor">共同編集者</string>
+    <string name="folder_member_remove">削除</string>
+    <string name="folder_member_remove_confirm">%1$s をこの共有フォルダから削除しますか？</string>
+    <string name="folder_leave">フォルダを退出</string>
+    <string name="folder_leave_confirm">本当にこの共有フォルダから退出しますか？</string>
+    <string name="folder_invites_none">現在、有効な招待はありません。</string>
+    <string name="folder_invite_revoke">取り消す</string>
+    <string name="folder_invite_expires_in">有効期限: %1$s</string>
+    <string name="folder_max_items_reached">フォルダの最大容量に達しました（1,000/1,000作品）</string>
 </resources>

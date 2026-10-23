@@ -145,6 +145,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         var showFolderEditDialog by remember { mutableStateOf(false) }
         var folderEditMode by remember { mutableStateOf(FolderEditMode.NAME) }
         var showFolderDeleteConfirm by remember { mutableStateOf(false) }
+        var showFolderShareModal by remember { mutableStateOf(false) }
+        var showFolderMembersModal by remember { mutableStateOf(false) }
         
         var showFoldersSortMenu by remember { mutableStateOf(false) }
         var foldersFilterButtonBounds by remember { mutableStateOf<Rect?>(null) }
@@ -512,11 +514,29 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         }
 
                         if (rememberedShowFolderOptions) {
+                            val foldersVmForMenu: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (currentTab is FolderDetailTab && activity != null) {
+                                hiltViewModel(activity)
+                            } else null
+                            val foldersListForMenu by (foldersVmForMenu?.folders?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(null) })
+                            val currentFolderForMenu = if (currentTab is FolderDetailTab) foldersListForMenu?.find { it.id == currentTab.folderId } else null
+                            val isCurrentFolderShared = currentFolderForMenu?.isShared == true
+                            val isCurrentFolderOwner = currentFolderForMenu == null || currentFolderForMenu.ownerUid == currentUser?.uid
+
                             MainFolderOptionsMenu(
                                 visible = isFolderMenuVisible,
                                 offset = folderOptionsOffset,
                                 hazeState = contentHazeState,
+                                isShared = isCurrentFolderShared,
+                                isOwner = isCurrentFolderOwner,
                                 onDismiss = { showFolderOptions = false },
+                                onShareOrMembers = {
+                                    showFolderOptions = false
+                                    if (isCurrentFolderShared) {
+                                        showFolderMembersModal = true
+                                    } else {
+                                        showFolderShareModal = true
+                                    }
+                                },
                                 onEdit = {
                                     showFolderOptions = false
                                     folderEditMode = FolderEditMode.ALL
@@ -587,6 +607,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             folderEditMode = folderEditMode,
                             showFolderDeleteConfirm = showFolderDeleteConfirm,
                             onFolderDeleteConfirmChange = { showFolderDeleteConfirm = it },
+                            showFolderShareModal = showFolderShareModal,
+                            onFolderShareModalChange = { showFolderShareModal = it },
+                            showFolderMembersModal = showFolderMembersModal,
+                            onFolderMembersModalChange = { showFolderMembersModal = it },
                             updatesOverlayOffset = updatesOverlayOffset,
                             onUpdatesOverlayClose = { updatesOverlayOffsetX = null; updatesOverlayOffsetY = null },
                             settingsOverlayOffset = settingsOverlayOffset,

@@ -1864,6 +1864,50 @@
     <string name="history_sort_oldest">सबसे पुराना</string>
     <string name="history_sort_title">शीर्षक (A - Z)</string>
     <string name="history_sort_rating">व्यक्तिगत रेटिंग</string>
+    <string name="history_media_movie">फिल्म</string>
+    <string name="history_media_series">सीरीज़</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">साझा</string>
+    <string name="folder_share_action">फ़ोल्डर साझा करें</string>
+    <string name="folder_share_title">फ़ोल्डर साझा करें</string>
+    <string name="folder_share_desc">सहयोग के लिए अस्थायी पहुंच के साथ एक आमंत्रण लिंक बनाएं।</string>
+    <string name="folder_share_duration">आमंत्रण की अवधि</string>
+    <string name="folder_invite_duration_1m">1 मिनट (त्वरित परीक्षण)</string>
+    <string name="folder_invite_duration_24h">24 घंटे</string>
+    <string name="folder_invite_duration_48h">48 घंटे</string>
+    <string name="folder_invite_duration_7d">7 दिन</string>
+    <string name="folder_invite_duration_single">एकल उपयोग (अधिकतम 7 दिन)</string>
+    <string name="folder_invite_create_button">आमंत्रण बनाएं</string>
+    <string name="folder_invite_code_label">आमंत्रण कोड</string>
+    <string name="folder_invite_copy">कोड कॉपी करें</string>
+    <string name="folder_invite_copied">कोड क्लिपबोर्ड पर कॉपी किया गया!</string>
+    <string name="folder_invite_share">साझा करें</string>
+    <string name="folder_join_button">कोड से जुड़ें</string>
+    <string name="folder_join_title">साझा फ़ोल्डर में शामिल हों</string>
+    <string name="folder_join_desc">फ़ोल्डर स्वामी द्वारा साझा किया गया आमंत्रण कोड दर्ज करें।</string>
+    <string name="folder_join_hint">उदा. FT-7K9P2</string>
+    <string name="folder_join_check">कोड सत्यापित करें</string>
+    <string name="folder_join_accept">स्वीकार करें और जुड़ें</string>
+    <string name="folder_join_invitation_from">%1$s का आमंत्रण</string>
+    <string name="folder_join_invalid_code">अमान्य या अनुपलब्ध आमंत्रण कोड।</string>
+    <string name="folder_join_expired">इस आमंत्रण की अवधि समाप्त हो चुकी है।</string>
+    <string name="folder_join_revoked">यह आमंत्रण स्वामी द्वारा निरस्त कर दिया गया है।</string>
+    <string name="folder_join_max_uses">यह एकल-उपयोग आमंत्रण पहले ही उपयोग किया जा चुका है।</string>
+    <string name="folder_join_member_limit">यह फ़ोल्डर पहले से ही अधिकतम 10 सदस्यों की सीमा तक पहुंच चुका है।</string>
+    <string name="folder_members_title">सदस्य और आमंत्रण</string>
+    <string name="folder_members_tab">सदस्य (%1$d/10)</string>
+    <string name="folder_invites_tab">सक्रिय आमंत्रण</string>
+    <string name="folder_member_role_owner">स्वामी</string>
+    <string name="folder_member_role_editor">सहयोगी</string>
+    <string name="folder_member_remove">हटाएं</string>
+    <string name="folder_member_remove_confirm">क्या आप %1$s को इस साझा फ़ोल्डर से हटाना चाहते हैं?</string>
+    <string name="folder_leave">फ़ोल्डर छोड़ें</string>
+    <string name="folder_leave_confirm">क्या आप वाकई इस साझा फ़ोल्डर को छोड़ना चाहते हैं?</string>
+    <string name="folder_invites_none">वर्तमान में कोई सक्रिय आमंत्रण नहीं है।</string>
+    <string name="folder_invite_revoke">रद्द करें</string>
+    <string name="folder_invite_expires_in">समाप्ति: %1$s</string>
+    <string name="folder_max_items_reached">फ़ोल्डर की अधिकतम क्षमता पूरी हो गई (1,000/1,000 शीर्षक)</string>
 </resources>
 
 

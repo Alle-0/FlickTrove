@@ -314,6 +314,46 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    @Named("supabase_okhttp")
+    fun provideSupabaseOkHttpClient(): OkHttpClient {
+        val logging = HttpLoggingInterceptor().apply {
+            level = if (com.cinetrack.BuildConfig.DEBUG) {
+                HttpLoggingInterceptor.Level.BASIC
+            } else {
+                HttpLoggingInterceptor.Level.NONE
+            }
+        }
+        val supabaseAuthInterceptor = okhttp3.Interceptor { chain ->
+            val original = chain.request()
+            val request = original.newBuilder()
+                .header("apikey", com.cinetrack.BuildConfig.SUPABASE_ANON_KEY)
+                .header("Authorization", "Bearer ${com.cinetrack.BuildConfig.SUPABASE_ANON_KEY}")
+                .build()
+            chain.proceed(request)
+        }
+        return OkHttpClient.Builder()
+            .addInterceptor(logging)
+            .addInterceptor(supabaseAuthInterceptor)
+            .build()
+    }
+
+    @Provides
+    @Singleton
+    fun provideSupabaseSharedFolderApi(
+        @Named("supabase_okhttp") okHttpClient: OkHttpClient,
+        json: Json
+    ): com.cinetrack.data.api.SupabaseSharedFolderApi {
+        val baseUrl = Keys.getSupabaseUrl().trimEnd('/') + "/"
+        return Retrofit.Builder()
+            .baseUrl(baseUrl)
+            .client(okHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(com.cinetrack.data.api.SupabaseSharedFolderApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideSupabaseStorageApi(okHttpClient: OkHttpClient, json: Json): com.cinetrack.data.api.SupabaseStorageApi {
         return Retrofit.Builder()
             .baseUrl(Keys.getSupabaseUrl())

@@ -30,5 +30,23 @@ data class FolderEntity(
     @ColumnInfo(name = "sync_status") val syncStatus: String = "synced",
     
     @SerialName("client_updated_at")
-    @ColumnInfo(name = "client_updated_at") val clientUpdatedAt: Long = 0L
+    @ColumnInfo(name = "client_updated_at") val clientUpdatedAt: Long = 0L,
+    
+    @SerialName("is_shared")
+    @ColumnInfo(name = "is_shared") val isShared: Boolean = false,
+    
+    @SerialName("shared_folder_id")
+    @ColumnInfo(name = "shared_folder_id") val sharedFolderId: String? = null,
+    
+    @SerialName("owner_uid")
+    @ColumnInfo(name = "owner_uid") val ownerUid: String? = null,
+    
+    @SerialName("owner_name")
+    @ColumnInfo(name = "owner_name") val ownerName: String? = null,
+    
+    @SerialName("share_code")
+    @ColumnInfo(name = "share_code") val shareCode: String? = null,
+    
+    @SerialName("max_items")
+    @ColumnInfo(name = "max_items") val maxItems: Int = 1000
 )

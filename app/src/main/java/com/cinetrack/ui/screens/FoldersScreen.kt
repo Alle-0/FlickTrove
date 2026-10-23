@@ -64,7 +64,9 @@ import com.cinetrack.ui.components.shared.DeleteFolderDialog
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.FolderCard
 import com.cinetrack.ui.components.shared.NewFolderCard
+import com.cinetrack.ui.components.shared.JoinFolderCard
 import com.cinetrack.ui.components.shared.FolderCreateDialog
+import com.cinetrack.ui.components.shared.FolderJoinDialog
 import com.cinetrack.ui.components.shared.FolderEditDialog
 import com.cinetrack.ui.components.shared.FolderEditMode
 import androidx.compose.ui.layout.onGloballyPositioned
@@ -146,6 +148,7 @@ fun FoldersScreenContent(
     val allMovies by viewModel.allMovies.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     var isCreateDialogOpen by remember { mutableStateOf(false) }
+    var isJoinDialogOpen by remember { mutableStateOf(false) }
     var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
     var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
     var folderEditMode by remember { mutableStateOf(FolderEditMode.ALL) }
@@ -188,20 +191,42 @@ fun FoldersScreenContent(
                         Spacer(Modifier.height(24.dp))
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .bounceClick { isCreateDialogOpen = true }
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                                .padding(horizontal = 24.dp, vertical = 12.dp)
+                            horizontalArrangement = Arrangement.spacedBy(10.dp)
                         ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
-                            Spacer(Modifier.width(8.dp))
-                            Text(
-                                stringResource(R.string.folders_create_first), 
-                                color = Color.White, 
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 1.sp)
-                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .bounceClick { isCreateDialogOpen = true }
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.05f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                            ) {
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(8.dp))
+                                Text(
+                                    stringResource(R.string.folders_create_first), 
+                                    color = Color.White, 
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
+                                )
+                            }
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier
+                                    .bounceClick { isJoinDialogOpen = true }
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.05f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                            ) {
+                                Icon(ImageVector.vectorResource(id = R.drawable.ic_people), null, tint = Color.White, modifier = Modifier.size(18.dp))
+                                Spacer(Modifier.width(6.dp))
+                                Text(
+                                    stringResource(R.string.folder_join_button), 
+                                    color = Color.White, 
+                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
+                                )
+                            }
                         }
                     }
                 }
@@ -478,11 +503,23 @@ fun FoldersScreenContent(
                                     .clipToBounds(),
                                 contentAlignment = Alignment.TopCenter
                             ) {
-                                NewFolderCard(
-                                    onClick = { isCreateDialogOpen = true },
-                                    modifier = Modifier.height(pillHeight),
-                                    alphaProgress = alphaProgress
-                                )
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .height(pillHeight),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                                ) {
+                                    NewFolderCard(
+                                        onClick = { isCreateDialogOpen = true },
+                                        modifier = Modifier.weight(1.05f),
+                                        alphaProgress = alphaProgress
+                                    )
+                                    JoinFolderCard(
+                                        onClick = { isJoinDialogOpen = true },
+                                        modifier = Modifier.weight(0.95f),
+                                        alphaProgress = alphaProgress
+                                    )
+                                }
                             }
                         }
                     }
@@ -536,6 +573,26 @@ fun FoldersScreenContent(
                         viewModel.createFolder(name, icon, color, description ?: "")
                         isCreateDialogOpen = false
                         modalHost.dismiss()
+                    },
+                    hazeState = dialogHazeState
+                )
+            }
+        }
+    }
+
+    LaunchedEffect(isJoinDialogOpen) {
+        if (isJoinDialogOpen) {
+            modalHost.show {
+                FolderJoinDialog(
+                    onDismiss = {
+                        isJoinDialogOpen = false
+                        modalHost.dismiss()
+                    },
+                    onCheckCode = { code, callback ->
+                        viewModel.checkInvite(code, callback)
+                    },
+                    onAcceptInvite = { code, callback ->
+                        viewModel.acceptInvite(code, callback)
                     },
                     hazeState = dialogHazeState
                 )
@@ -663,7 +720,15 @@ fun FoldersScreenContent(
                     ) {
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
-                        Text(stringResource(R.string.folders_delete), color = Color(0xFFFF3B30), style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                        Text(
+                            text = if (folder.isShared && folder.ownerUid != com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid) {
+                                stringResource(R.string.folder_leave)
+                            } else {
+                                stringResource(R.string.folders_delete)
+                            },
+                            color = Color(0xFFFF3B30),
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                        )
                     }
                 }
             }

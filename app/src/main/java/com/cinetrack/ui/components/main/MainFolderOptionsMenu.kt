@@ -51,9 +51,12 @@ fun MainFolderOptionsMenu(
     visible: Boolean = true,
     offset: Offset,
     hazeState: HazeState,
+    isShared: Boolean = false,
+    isOwner: Boolean = true,
     onDismiss: () -> Unit,
     onEdit: () -> Unit,
     onReorder: () -> Unit,
+    onShareOrMembers: () -> Unit = {},
     onDelete: () -> Unit
 ) {
     Box(
@@ -84,6 +87,30 @@ fun MainFolderOptionsMenu(
                     .clip(RoundedCornerShape(24.dp))
                     .then(if (visible) Modifier.hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp)) else Modifier)
             ) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .bounceClick {
+                            onDismiss()
+                            onShareOrMembers()
+                        }
+                        .padding(horizontal = 16.dp, vertical = 14.dp),
+                    verticalAlignment = Alignment.CenterVertically
+                ) {
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.ic_people),
+                        contentDescription = null,
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
+                    Spacer(Modifier.width(12.dp))
+                    Text(
+                        text = if (isShared) stringResource(R.string.folder_members_title) else stringResource(R.string.folder_share_action),
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                    )
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -150,7 +177,7 @@ fun MainFolderOptionsMenu(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        stringResource(R.string.main_folder_delete),
+                        text = if (isShared && !isOwner) stringResource(R.string.folder_leave) else stringResource(R.string.main_folder_delete),
                         color = Color(0xFFFF3B30),
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )

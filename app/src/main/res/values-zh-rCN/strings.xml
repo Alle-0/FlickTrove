@@ -1874,4 +1874,46 @@
     <string name="history_sort_rating">个人评分</string>
     <string name="history_media_movie">电影</string>
     <string name="history_media_series">剧集</string>
+
+    <!-- Shared Folders -->
+    <string name="folder_shared_badge">已共享</string>
+    <string name="folder_share_action">共享文件夹</string>
+    <string name="folder_share_title">共享文件夹</string>
+    <string name="folder_share_desc">创建具有临时访问权限的邀请链接以进行协作。</string>
+    <string name="folder_share_duration">邀请有效期</string>
+    <string name="folder_invite_duration_1m">1分钟（快速测试）</string>
+    <string name="folder_invite_duration_24h">24小时</string>
+    <string name="folder_invite_duration_48h">48小时</string>
+    <string name="folder_invite_duration_7d">7天</string>
+    <string name="folder_invite_duration_single">单次使用（最多7天）</string>
+    <string name="folder_invite_create_button">生成邀请</string>
+    <string name="folder_invite_code_label">邀请码</string>
+    <string name="folder_invite_copy">复制邀请码</string>
+    <string name="folder_invite_copied">邀请码已复制到剪贴板！</string>
+    <string name="folder_invite_share">分享</string>
+    <string name="folder_join_button">使用邀请码加入</string>
+    <string name="folder_join_title">加入共享文件夹</string>
+    <string name="folder_join_desc">输入文件夹创建者分享的邀请码。</string>
+    <string name="folder_join_hint">例如 FT-7K9P2</string>
+    <string name="folder_join_check">验证邀请码</string>
+    <string name="folder_join_accept">接受并加入</string>
+    <string name="folder_join_invitation_from">来自 %1$s 的邀请</string>
+    <string name="folder_join_invalid_code">无效或不存在的邀请码。</string>
+    <string name="folder_join_expired">此邀请已过期。</string>
+    <string name="folder_join_revoked">此邀请已被创建者撤销。</string>
+    <string name="folder_join_max_uses">此单次使用邀请已被兑换。</string>
+    <string name="folder_join_member_limit">此文件夹已达到 10 位成员的上限。</string>
+    <string name="folder_members_title">成员与邀请</string>
+    <string name="folder_members_tab">成员 (%1$d/10)</string>
+    <string name="folder_invites_tab">有效邀请</string>
+    <string name="folder_member_role_owner">创建者</string>
+    <string name="folder_member_role_editor">协作者</string>
+    <string name="folder_member_remove">移除</string>
+    <string name="folder_member_remove_confirm">确定要从此共享文件夹中移除 %1$s 吗？</string>
+    <string name="folder_leave">退出文件夹</string>
+    <string name="folder_leave_confirm">确定要退出此共享文件夹吗？</string>
+    <string name="folder_invites_none">目前没有有效的邀请。</string>
+    <string name="folder_invite_revoke">撤销</string>
+    <string name="folder_invite_expires_in">过期时间：%1$s</string>
+    <string name="folder_max_items_reached">已达到文件夹容量上限（1,000/1,000 部作品）</string>
 </resources>
