@@ -48,6 +48,7 @@ import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
 import kotlin.math.roundToInt
 import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.shared.MorphGlassModal
 
 // ════════════════════════════════════════════════════════════════════
 // Improved Loading Skeleton
@@ -287,294 +288,111 @@ fun YearSelectionModal(
     onYearSelected: (Int) -> Unit,
     onAllTimeSelected: () -> Unit
 ) {
-    val configuration = LocalConfiguration.current
-    val density = LocalDensity.current
-    val screenWidth = with(density) { configuration.screenWidthDp.dp.toPx() }
-    val screenHeight = with(density) { configuration.screenHeightDp.dp.toPx() }
-
-    val targetWidth = (screenWidth * 0.85f).coerceAtMost(with(density) { 320.dp.toPx() })
-    
-    var contentHeightPx by remember { mutableStateOf(0f) }
-    val maxModalHeightPx = with(density) { 430.dp.toPx() }
-    val maxAllowedHeight = minOf(screenHeight * 0.58f, maxModalHeightPx)
-    val minAllowedHeight = with(density) { 260.dp.toPx() }
-    
-    val targetHeightPx by animateFloatAsState(
-        targetValue = if (contentHeightPx > 0) contentHeightPx.coerceIn(minAllowedHeight, maxAllowedHeight) 
-                      else minAllowedHeight,
-        animationSpec = spring(stiffness = Spring.StiffnessLow),
-        label = "dynamicHeight"
-    )
-
-    val targetRect = Rect(
-        left = (screenWidth - targetWidth) / 2f,
-        top = (screenHeight - targetHeightPx) / 2f,
-        right = (screenWidth + targetWidth) / 2f,
-        bottom = (screenHeight + targetHeightPx) / 2f
-    )
-
-    val transition = updateTransition(targetState = isVisible, label = "YearModalTransition")
-
-    androidx.activity.compose.BackHandler(enabled = isVisible) {
-        onDismiss()
-    }
-
-    val progress by transition.animateFloat(
-        transitionSpec = {
-            if (initialState == false && targetState == true) {
-                spring(stiffness = Spring.StiffnessLow, dampingRatio = Spring.DampingRatioLowBouncy)
-            } else {
-                spring(stiffness = Spring.StiffnessMedium)
-            }
-        },
-        label = "expansionProgress"
-    ) { state -> if (state) 1f else 0f }
-
-    val alpha by transition.animateFloat(label = "scrimAlpha") { state -> if (state) 1f else 0f }
-
-    if (transition.currentState || transition.targetState) {
-        val effectiveScrimAlpha = if (triggerBounds != null) {
-            val scrimProgress = ((progress - 0.08f) / 0.92f).coerceIn(0f, 1f)
-            0.6f * FastOutSlowInEasing.transform(scrimProgress)
-        } else {
-            0.6f * alpha
-        }
-
-        Box(
+    MorphGlassModal(
+        isVisible = isVisible,
+        onDismissRequest = onDismiss,
+        triggerBounds = triggerBounds,
+        hazeState = hazeState,
+        targetMaxWidth = 320.dp,
+        targetWidthFraction = 0.85f,
+        maxModalHeightFraction = 0.58f,
+        minModalHeight = 220.dp,
+        defaultModalHeight = 260.dp,
+        zIndex = 200f
+    ) { contentAlpha ->
+        Column(
             modifier = Modifier
-                .fillMaxSize()
-                .zIndex(200f)
-                .background(Color.Black.copy(alpha = effectiveScrimAlpha))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = onDismiss
-                )
+                .fillMaxWidth()
+                .zIndex(1f)
+                .graphicsLayer(
+                    alpha = contentAlpha,
+                    compositingStrategy = CompositingStrategy.Offscreen
+                ),
+            horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // --- GHOST MEASUREMENT LAYER ---
+            // Header
             Box(
                 modifier = Modifier
-                    .width(with(density) { targetWidth.toDp() })
-                    .alpha(0f)
-                    .onSizeChanged { size ->
-                        if (size.height > 0) contentHeightPx = size.height.toFloat()
-                    }
-                    .align(Alignment.Center)
+                    .fillMaxWidth()
+                    .padding(top = 24.dp, bottom = 8.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                ) {
-                    Text(stringResource(R.string.stats_period), style = MaterialTheme.typography.titleMedium)
-                    Spacer(Modifier.height(24.dp))
-                    ModalItem(stringResource(R.string.stats_all_time), false, {})
-                    HorizontalDivider(modifier = Modifier.padding(vertical = 12.dp))
-                    Column {
-                        availableYears.forEach { year ->
-                            ModalItem(year.toString(), false, {})
-                        }
-                    }
-                    Spacer(Modifier.height(24.dp))
-                    Box(modifier = Modifier.fillMaxWidth().height(48.dp))
-                }
-            }
-
-            val startRect = triggerBounds ?: targetRect.copy(
-                left = targetRect.center.x - 20f,
-                top = targetRect.center.y - 20f,
-                right = targetRect.center.x + 20f,
-                bottom = targetRect.center.y + 20f
-            )
-
-            // Center moves smoothly towards screen center
-            val currentCenterX = androidx.compose.ui.util.lerp(startRect.center.x, targetRect.center.x, progress)
-            val currentCenterY = androidx.compose.ui.util.lerp(startRect.center.y, targetRect.center.y, progress)
-
-            // Delayed size expansion: stays compact/circular during liftoff (0..0.18), then blossoms into full size
-            val sizeProgress = if (triggerBounds != null) {
-                val delay = 0.18f
-                if (progress <= delay) {
-                    (progress / delay) * 0.05f
-                } else {
-                    val raw = (progress - delay) / (1f - delay)
-                    0.05f + 0.95f * FastOutSlowInEasing.transform(raw.coerceIn(0f, 1f))
-                }
-            } else {
-                progress
-            }
-
-            // Corner radius stays circular during liftoff, then morphs into target rounded corners
-            val cornerRadiusProgress = if (triggerBounds != null) {
-                val delay = 0.18f
-                if (progress <= delay) 0f
-                else FastOutSlowInEasing.transform(((progress - delay) / (1f - delay)).coerceIn(0f, 1f))
-            } else {
-                progress
-            }
-
-            val currentWidth = androidx.compose.ui.util.lerp(startRect.width, targetRect.width, sizeProgress)
-            val currentHeight = androidx.compose.ui.util.lerp(startRect.height, targetRect.height, sizeProgress)
-
-            val currentRect = Rect(
-                left = currentCenterX - currentWidth / 2f,
-                top = currentCenterY - currentHeight / 2f,
-                right = currentCenterX + currentWidth / 2f,
-                bottom = currentCenterY + currentHeight / 2f
-            )
-
-            val startRadius = if (triggerBounds != null) startRect.width / 2f else with(density) { 32.dp.toPx() }
-            val endRadius = with(density) { 32.dp.toPx() }
-            val currentCornerRadius = androidx.compose.ui.util.lerp(startRadius, endRadius, cornerRadiusProgress)
-            val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
-
-            val currentTintAlpha = if (triggerBounds != null) {
-                androidx.compose.ui.util.lerp(0.48f, HazeStyles.glassmorphicDialog.tint.alpha, sizeProgress)
-            } else {
-                HazeStyles.glassmorphicDialog.tint.alpha
-            }
-            val currentBlur = if (triggerBounds != null) {
-                androidx.compose.ui.unit.lerp(16.dp, HazeStyles.glassmorphicDialog.blurRadius, sizeProgress)
-            } else {
-                HazeStyles.glassmorphicDialog.blurRadius
-            }
-            val animatedStyle = remember(currentTintAlpha, currentBlur) {
-                HazeStyles.glassmorphicDialog.copy(
-                    tint = HazeStyles.glassmorphicDialog.tint.copy(alpha = currentTintAlpha),
-                    blurRadius = currentBlur
+                Text(
+                    text = stringResource(titleRes),
+                    style = MaterialTheme.typography.titleMedium,
+                    fontWeight = FontWeight.Black,
+                    letterSpacing = 3.sp,
+                    color = Color.White
                 )
             }
-            val borderAlpha = if (triggerBounds != null) {
-                androidx.compose.ui.util.lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)
-            } else {
-                HazeStyles.ModalBorderAlpha
-            }
 
-            Box(
+            // Scrollable Content
+            val scrollState = rememberScrollState()
+            val maxScrollHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.45f).coerceAtLeast(180.dp)
+            Column(
                 modifier = Modifier
-                    .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
-                    .size(
-                        width = with(density) { currentRect.width.toDp() },
-                        height = with(density) { currentRect.height.toDp() }
+                    .fillMaxWidth()
+                    .heightIn(max = maxScrollHeight)
+                    .verticalFadingEdges(
+                        scrollState = scrollState,
+                        topEdgeHeight = 16.dp,
+                        bottomEdgeHeight = 16.dp
                     )
-                    .bounceClick(scaleDown = 1f) { /* Prevent dismissal */ }
+                    .verticalScroll(scrollState)
+                    .padding(horizontal = 24.dp)
             ) {
-                // Background Layer (Blurred glass)
-                Spacer(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = currentShape,
-                            style = animatedStyle,
-                            useOffscreenStrategy = false
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = borderAlpha),
-                            shape = currentShape
-                        )
+                val isAllTime = currentRange is TimeRange.AllTime
+
+                ModalItem(
+                    label = stringResource(allTimeLabelRes),
+                    isSelected = isAllTime,
+                    onClick = {
+                        onAllTimeSelected()
+                        onDismiss()
+                    }
                 )
 
-                // Foreground Content
-                if (progress > 0.4f) {
-                    val contentAlpha = ((progress - 0.4f) / 0.6f).coerceIn(0f, 1f)
+                HorizontalDivider(
+                    modifier = Modifier.padding(vertical = 12.dp),
+                    thickness = 0.5.dp,
+                    color = Color.White.copy(alpha = 0.1f)
+                )
 
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .zIndex(1f)
-                            .graphicsLayer(
-                                alpha = contentAlpha,
-                                compositingStrategy = CompositingStrategy.Offscreen
-                            ),
-                        horizontalAlignment = Alignment.CenterHorizontally
-                    ) {
-                        // Header
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 24.dp, bottom = 8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(titleRes),
-                                style = MaterialTheme.typography.titleMedium,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 3.sp,
-                                color = Color.White
-                            )
+                availableYears.forEach { year ->
+                    val isSelected = currentRange is TimeRange.Year &&
+                        currentRange.year == year
+                    ModalItem(
+                        label = year.toString(),
+                        isSelected = isSelected,
+                        onClick = {
+                            onYearSelected(year)
+                            onDismiss()
                         }
-
-                        // Scrollable Content
-                        val scrollState = rememberScrollState()
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .weight(1f)
-                                .verticalFadingEdges(
-                                    scrollState = scrollState,
-                                    topEdgeHeight = 16.dp,
-                                    bottomEdgeHeight = 16.dp
-                                )
-                                .verticalScroll(scrollState)
-                                .padding(horizontal = 24.dp)
-                        ) {
-                            val isAllTime = currentRange is TimeRange.AllTime
-                            
-                            ModalItem(
-                                label = stringResource(allTimeLabelRes),
-                                isSelected = isAllTime,
-                                onClick = { 
-                                    onAllTimeSelected()
-                                    onDismiss()
-                                }
-                            )
-                            
-                            HorizontalDivider(
-                                modifier = Modifier.padding(vertical = 12.dp),
-                                thickness = 0.5.dp,
-                                color = Color.White.copy(alpha = 0.1f)
-                            )
-                            
-                            availableYears.forEach { year ->
-                                val isSelected = currentRange is TimeRange.Year && 
-                                                currentRange.year == year
-                                ModalItem(
-                                    label = year.toString(),
-                                    isSelected = isSelected,
-                                    onClick = { 
-                                        onYearSelected(year)
-                                        onDismiss()
-                                    }
-                                )
-                            }
-                            
-                            Spacer(Modifier.height(8.dp))
-                        }
-
-                        // Close Button
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 20.dp)
-                                .height(48.dp)
-                                .bounceClick { onDismiss() }
-                                .clip(RoundedCornerShape(14.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(14.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                stringResource(R.string.settings_close).uppercase(),
-                                style = MaterialTheme.typography.labelLarge,
-                                fontWeight = FontWeight.Black,
-                                color = Color.White.copy(alpha = 0.7f),
-                                letterSpacing = 1.sp
-                            )
-                        }
-                    }
+                    )
                 }
+
+                Spacer(Modifier.height(8.dp))
+            }
+
+            // Close Button
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 20.dp)
+                    .height(48.dp)
+                    .bounceClick { onDismiss() }
+                    .clip(RoundedCornerShape(14.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(14.dp)),
+                contentAlignment = Alignment.Center
+            ) {
+                Text(
+                    stringResource(R.string.settings_close).uppercase(),
+                    style = MaterialTheme.typography.labelLarge,
+                    fontWeight = FontWeight.Black,
+                    color = Color.White.copy(alpha = 0.7f),
+                    letterSpacing = 1.sp
+                )
             }
         }
     }

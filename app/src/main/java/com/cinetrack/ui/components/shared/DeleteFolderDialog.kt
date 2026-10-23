@@ -40,9 +40,9 @@ fun DeleteFolderDialog(
         isVisible = true,
         onDismissRequest = onDismiss,
         hazeState = hazeState,
-        maxWidth = 360.dp,
-        maxWidthFraction = 0.90f,
-        contentPadding = PaddingValues(24.dp)
+        maxWidth = 440.dp,
+        maxWidthFraction = 0.92f,
+        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 24.dp)
     ) {
         // Destructive icon
         Box(

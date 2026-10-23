@@ -568,6 +568,9 @@ fun FolderDetailScreenContent(
 
                             val modalHost = LocalModalHost.current
 
+                            val globalHazeState = com.cinetrack.ui.LocalGlobalHazeState.current
+                            val dialogHazeState = globalHazeState ?: externalHazeState
+
                             LaunchedEffect(showDeleteConfirm) {
                                 if (showDeleteConfirm) {
                                     modalHost.show {
@@ -583,7 +586,7 @@ fun FolderDetailScreenContent(
                                                 modalHost.dismiss()
                                             },
                                             folderName = state.folder.name,
-                                            hazeState = externalHazeState
+                                            hazeState = dialogHazeState
                                         )
                                     }
                                 }
@@ -607,7 +610,7 @@ fun FolderDetailScreenContent(
                                                 onFolderUpdated(newName, newColor)
                                                 modalHost.dismiss()
                                             },
-                                            hazeState = externalHazeState
+                                            hazeState = dialogHazeState
                                         )
                                     }
                                 }

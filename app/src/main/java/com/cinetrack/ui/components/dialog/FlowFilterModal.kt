@@ -20,6 +20,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -51,9 +52,7 @@ fun FlowFilterModal(
     onDismissRequest: () -> Unit
 ) {
     var localConfig by remember(isVisible) { mutableStateOf(config) }
-    var isSortExpanded by remember(isVisible) { mutableStateOf(false) }
-    var isVibeExpanded by remember(isVisible) { mutableStateOf(false) }
-    var isMediaExpanded by remember(isVisible) { mutableStateOf(false) }
+    var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(isVisible) {
         if (isVisible) {
@@ -77,7 +76,7 @@ fun FlowFilterModal(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 16.dp, top = 20.dp, bottom = 28.dp),
+                    .padding(start = 24.dp, end = 16.dp, top = 20.dp, bottom = 16.dp),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -129,21 +128,22 @@ fun FlowFilterModal(
 
             // Scrollable Sections
             val filterScrollState = rememberScrollState()
+            val maxScrollHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.52f).coerceAtLeast(240.dp)
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .weight(1f, fill = false)
+                    .heightIn(max = maxScrollHeight)
                     .verticalFadingEdges(filterScrollState, 16.dp, 16.dp)
                     .verticalScroll(filterScrollState),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
                 // 1. Sort By Section
                 ExpandableSection(
                     title = stringResource(id = R.string.filter_sort_by),
-                    isExpanded = isSortExpanded,
+                    isExpanded = expandedSection == "sort",
                     showChevron = true,
                     isClickable = true,
-                    onToggle = { isSortExpanded = !isSortExpanded }
+                    onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
                 ) {
                     Column(
                         modifier = Modifier.padding(horizontal = 12.dp, vertical = 4.dp),
@@ -193,11 +193,11 @@ fun FlowFilterModal(
                 // 2. Emotional Vibe Section
                 ExpandableSection(
                     title = stringResource(id = R.string.flow_filter_section_vibe),
-                    isExpanded = isVibeExpanded,
+                    isExpanded = expandedSection == "vibe",
                     showChevron = true,
                     isClickable = true,
                     badgeCount = localConfig.selectedVibes.size,
-                    onToggle = { isVibeExpanded = !isVibeExpanded }
+                    onToggle = { expandedSection = if (expandedSection == "vibe") null else "vibe" }
                 ) {
                     FlowRow(
                         modifier = Modifier
@@ -283,11 +283,11 @@ fun FlowFilterModal(
                 // 3. Media Type Section
                 ExpandableSection(
                     title = stringResource(id = R.string.flow_filter_section_media),
-                    isExpanded = isMediaExpanded,
+                    isExpanded = expandedSection == "media",
                     showChevron = true,
                     isClickable = true,
                     badgeCount = if (localConfig.mediaType != FlowMediaTypeFilter.ALL) 1 else 0,
-                    onToggle = { isMediaExpanded = !isMediaExpanded }
+                    onToggle = { expandedSection = if (expandedSection == "media") null else "media" }
                 ) {
                     Row(
                         modifier = Modifier

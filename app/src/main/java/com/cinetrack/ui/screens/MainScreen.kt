@@ -231,6 +231,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
+                    com.cinetrack.ui.LocalGlobalHazeState provides globalHazeState,
                     LocalActiveFilterConfig provides activeFilterConfig,
                     com.cinetrack.ui.LocalActiveTrophyFilterConfig provides activeTrophyFilterConfig,
                     com.cinetrack.ui.LocalActiveTrophyDetailConfig provides activeTrophyDetailConfig,

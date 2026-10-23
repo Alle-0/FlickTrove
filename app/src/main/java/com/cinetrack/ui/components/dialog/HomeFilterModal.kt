@@ -127,7 +127,7 @@ fun HomeFilterModal(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 24.dp, end = 16.dp, top = 20.dp, bottom = 28.dp),
+                    .padding(start = 24.dp, end = 16.dp, top = 20.dp, bottom = 16.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -232,10 +232,11 @@ fun HomeFilterModal(
 
                         // --- SCROLLABLE CONTENT ---
                         val filterScrollState = rememberScrollState()
+                        val maxScrollHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.60f).coerceAtLeast(280.dp)
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .weight(1f, fill = false)
+                                .heightIn(max = maxScrollHeight)
                                 .verticalFadingEdges(filterScrollState, 16.dp, 16.dp)
                                 .verticalScroll(filterScrollState)
                                 .padding(bottom = 12.dp)

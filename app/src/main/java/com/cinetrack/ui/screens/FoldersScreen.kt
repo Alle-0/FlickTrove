@@ -521,6 +521,8 @@ fun FoldersScreenContent(
     }
 
     val modalHost = LocalModalHost.current
+    val globalHazeState = com.cinetrack.ui.LocalGlobalHazeState.current
+    val dialogHazeState = globalHazeState ?: activeHazeState
 
     LaunchedEffect(isCreateDialogOpen) {
         if (isCreateDialogOpen) {
@@ -535,7 +537,7 @@ fun FoldersScreenContent(
                         isCreateDialogOpen = false
                         modalHost.dismiss()
                     },
-                    hazeState = hazeState
+                    hazeState = dialogHazeState
                 )
             }
         }
@@ -556,7 +558,7 @@ fun FoldersScreenContent(
                         modalHost.dismiss()
                     },
                     folderName = folder.name,
-                    hazeState = hazeState
+                    hazeState = dialogHazeState
                 )
             }
         }
@@ -580,7 +582,7 @@ fun FoldersScreenContent(
                         folderToEdit = null
                         modalHost.dismiss()
                     },
-                    hazeState = hazeState
+                    hazeState = dialogHazeState
                 )
             }
         }

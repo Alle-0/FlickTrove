@@ -10,6 +10,7 @@ import androidx.compose.ui.unit.dp
 
 val LocalAppPadding = compositionLocalOf { PaddingValues(0.dp) }
 val LocalHazeState = compositionLocalOf<dev.chrisbanes.haze.HazeState?> { null }
+val LocalGlobalHazeState = compositionLocalOf<dev.chrisbanes.haze.HazeState?> { null }
 val LocalDeepLinkIntent = staticCompositionLocalOf<MutableState<Intent?>> { error("No intent") }
 // Callback to open the filter modal from inside a tab; passes optional trigger Rect
 val LocalFilterRequest = compositionLocalOf<((Rect?) -> Unit)?> { null }

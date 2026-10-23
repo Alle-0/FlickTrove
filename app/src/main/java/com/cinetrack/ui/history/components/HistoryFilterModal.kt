@@ -136,10 +136,11 @@ fun HistoryFilterModal(
 
                 // Scrollable Accordion Sections
                 val scrollState = rememberScrollState()
+                val maxScrollHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.52f).coerceAtLeast(240.dp)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .weight(1f, fill = false)
+                        .heightIn(max = maxScrollHeight)
                         .verticalFadingEdges(scrollState, 16.dp, 16.dp)
                         .verticalScroll(scrollState)
                         .padding(bottom = 8.dp)

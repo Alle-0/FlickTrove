@@ -18,7 +18,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
 
 enum class FolderEditMode { ALL, NAME, COLOR }
@@ -43,32 +43,40 @@ fun FolderEditDialog(
         isVisible = true,
         onDismissRequest = onDismiss,
         hazeState = hazeState,
-        maxWidth = 360.dp,
-        maxWidthFraction = 0.90f,
-        contentPadding = PaddingValues(24.dp)
+        maxWidth = 440.dp,
+        maxWidthFraction = 0.92f,
+        contentPadding = PaddingValues(0.dp)
     ) {
         val scrollState = rememberScrollState()
+
+        // Fixed Header
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 22.dp, end = 16.dp, top = 22.dp, bottom = 12.dp),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Text(
+                text = if (editMode == FolderEditMode.COLOR) stringResource(R.string.folder_edit_color) else stringResource(R.string.folder_edit_info),
+                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+                color = Color.White
+            )
+            ModalCloseButton(
+                onClose = onDismiss
+            )
+        }
+
+        // Scrollable Body with Fading Edges
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .premiumScrollbar(scrollState)
+                .weight(1f, fill = false)
+                .verticalFadingEdges(scrollState, topEdgeHeight = 16.dp, bottomEdgeHeight = 16.dp)
                 .verticalScroll(scrollState)
+                .padding(horizontal = 22.dp)
         ) {
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = if (editMode == FolderEditMode.COLOR) stringResource(R.string.folder_edit_color) else stringResource(R.string.folder_edit_info),
-                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-                    color = Color.White
-                )
-                ModalCloseButton(
-                    onClose = onDismiss
-                )
-            }
-            Spacer(Modifier.height(24.dp))
+            Spacer(Modifier.height(8.dp))
 
             if (editMode == FolderEditMode.ALL || editMode == FolderEditMode.NAME) {
                 OutlinedTextField(
@@ -133,34 +141,36 @@ fun FolderEditDialog(
                 )
             }
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(12.dp))
+        }
 
-            val isSaveEnabled = when (editMode) {
-                FolderEditMode.ALL -> name.isNotBlank() && (name.trim() != initialName.trim() || description.trim() != (initialDescription ?: "").trim() || selectedColor != initialColor)
-                FolderEditMode.NAME -> name.isNotBlank() && (name.trim() != initialName.trim() || description.trim() != (initialDescription ?: "").trim())
-                FolderEditMode.COLOR -> selectedColor != initialColor
-            }
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp)
-                    .bounceClick(enabled = isSaveEnabled) {
-                        focusManager.clearFocus()
-                        keyboardController?.hide()
-                        onSave(name, selectedColor, description.trim().ifEmpty { null })
-                    }
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        if (isSaveEnabled) Color.White else Color.White.copy(alpha = 0.2f)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    stringResource(R.string.action_save).uppercase(),
-                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = if (isSaveEnabled) Color.Black else Color.Black.copy(alpha = 0.5f)
-                )
-            }
+        // Fixed Footer Action Button
+        val isSaveEnabled = when (editMode) {
+            FolderEditMode.ALL -> name.isNotBlank() && (name.trim() != initialName.trim() || description.trim() != (initialDescription ?: "").trim() || selectedColor != initialColor)
+            FolderEditMode.NAME -> name.isNotBlank() && (name.trim() != initialName.trim() || description.trim() != (initialDescription ?: "").trim())
+            FolderEditMode.COLOR -> selectedColor != initialColor
+        }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 22.dp, end = 22.dp, top = 12.dp, bottom = 22.dp)
+                .height(56.dp)
+                .bounceClick(enabled = isSaveEnabled) {
+                    focusManager.clearFocus()
+                    keyboardController?.hide()
+                    onSave(name, selectedColor, description.trim().ifEmpty { null })
+                }
+                .clip(RoundedCornerShape(16.dp))
+                .background(
+                    if (isSaveEnabled) Color.White else Color.White.copy(alpha = 0.2f)
+                ),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                stringResource(R.string.action_save).uppercase(),
+                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                color = if (isSaveEnabled) Color.Black else Color.Black.copy(alpha = 0.5f)
+            )
         }
     }
 }
