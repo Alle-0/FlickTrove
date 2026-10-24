@@ -288,6 +288,39 @@ class SharedFolderRepository @Inject constructor(
         }
     }
 
+    suspend fun syncSingleSharedFolder(sharedFolderId: String): Result<FolderEntity?> = withContext(Dispatchers.IO) {
+        runCatching {
+            val remoteFolders = api.getSharedFolderById("eq.$sharedFolderId")
+            val remoteDto = remoteFolders.firstOrNull() ?: return@runCatching null
+            val localFolders = folderDao.getAll()
+            val existing = localFolders.find { it.sharedFolderId == sharedFolderId }
+            val localId = existing?.id ?: "shared_$sharedFolderId"
+            val compositeItemIds = remoteDto.items.map { "${it.mediaType}_${it.id}" }
+
+            val updatedEntity = FolderEntity(
+                id = localId,
+                name = remoteDto.title,
+                icon = remoteDto.icon ?: "ic_cartella",
+                color = remoteDto.color ?: "#FFFFFF",
+                description = remoteDto.description,
+                itemIds = compositeItemIds,
+                createdAt = existing?.createdAt ?: remoteDto.createdAt ?: Instant.now().toString(),
+                updatedAt = remoteDto.updatedAt ?: Instant.now().toString(),
+                syncStatus = "synced",
+                clientUpdatedAt = System.currentTimeMillis(),
+                isShared = true,
+                sharedFolderId = sharedFolderId,
+                ownerUid = remoteDto.ownerUid,
+                ownerName = remoteDto.ownerName,
+                shareCode = remoteDto.shareCode,
+                maxItems = remoteDto.maxItems
+            )
+            folderDao.insert(updatedEntity)
+            fetchMissingItemsMetadata(remoteDto.items)
+            updatedEntity
+        }
+    }
+
     suspend fun pushFolderUpdate(folderEntity: FolderEntity): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
             val sharedId = folderEntity.sharedFolderId ?: return@runCatching
@@ -298,42 +331,60 @@ class SharedFolderRepository @Inject constructor(
             }
 
             val now = Instant.now().toString()
+
+            // Fetch current remote items to preserve existing addedBy, addedAt, posterPath and titles
+            val remoteFolder = api.getSharedFolderById("eq.$sharedId").firstOrNull()
+            val remoteItemsMap = remoteFolder?.items?.associateBy { "${it.mediaType}_${it.id}" } ?: emptyMap()
+
             val itemsDto = folderEntity.itemIds.mapNotNull { compositeId ->
                 val parts = compositeId.split("_", limit = 2)
                 if (parts.size == 2) {
                     val type = parts[0]
                     val id = parts[1].toLongOrNull() ?: return@mapNotNull null
-                    val movie = movieRepository.getMovie(id, type)
-                    SharedFolderItemDto(
-                        id = id,
-                        mediaType = type,
-                        title = movie?.title ?: movie?.name,
-                        posterPath = movie?.posterPath,
-                        addedBy = user.displayName ?: "Membro",
-                        addedAt = System.currentTimeMillis()
-                    )
+                    val existing = remoteItemsMap[compositeId]
+                    if (existing != null) {
+                        existing
+                    } else {
+                        val movie = movieRepository.getMovie(id, type)
+                        SharedFolderItemDto(
+                            id = id,
+                            mediaType = type,
+                            title = movie?.title ?: movie?.name,
+                            posterPath = movie?.posterPath,
+                            addedBy = user.displayName ?: "Membro",
+                            addedAt = System.currentTimeMillis()
+                        )
+                    }
                 } else null
             }
 
-            api.updateSharedFolderItems(
+            val respItems = api.updateSharedFolderItems(
                 "eq.$sharedId",
                 UpdateItemsRequest(
                     items = itemsDto,
                     updatedAt = now
                 )
             )
+            if (!respItems.isSuccessful) {
+                throw HttpException(respItems)
+            }
 
-            // If title, description or color changed, update folder metadata too
-            api.updateSharedFolder(
-                "eq.$sharedId",
-                buildJsonObject {
-                    put("title", folderEntity.name)
-                    folderEntity.description?.let { put("description", it) }
-                    folderEntity.color?.let { put("color", it) }
-                    folderEntity.icon?.let { put("icon", it) }
-                    put("updated_at", now)
+            // Only update folder metadata (title, description, color, icon) if user is owner
+            if (folderEntity.ownerUid == user.uid) {
+                val respMeta = api.updateSharedFolder(
+                    "eq.$sharedId",
+                    buildJsonObject {
+                        put("title", folderEntity.name)
+                        folderEntity.description?.let { put("description", it) }
+                        folderEntity.color?.let { put("color", it) }
+                        folderEntity.icon?.let { put("icon", it) }
+                        put("updated_at", now)
+                    }
+                )
+                if (!respMeta.isSuccessful) {
+                    throw HttpException(respMeta)
                 }
-            )
+            }
         }
     }
 

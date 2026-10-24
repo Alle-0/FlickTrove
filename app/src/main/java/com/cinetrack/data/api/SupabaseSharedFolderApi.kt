@@ -29,14 +29,14 @@ interface SupabaseSharedFolderApi {
         @Body folder: SharedFolderDto
     ): List<SharedFolderDto>
 
-    @Headers("Prefer: return=representation")
+    @Headers("Prefer: return=minimal")
     @PATCH("rest/v1/shared_folders")
     suspend fun updateSharedFolder(
         @Query("id") idQuery: String,
         @Body updates: JsonObject
     ): Response<Unit>
 
-    @Headers("Prefer: return=representation")
+    @Headers("Prefer: return=minimal")
     @PATCH("rest/v1/shared_folders")
     suspend fun updateSharedFolderItems(
         @Query("id") idQuery: String,
@@ -93,7 +93,7 @@ interface SupabaseSharedFolderApi {
         @Body invite: SharedFolderInviteDto
     ): List<SharedFolderInviteDto>
 
-    @Headers("Prefer: return=representation")
+    @Headers("Prefer: return=minimal")
     @PATCH("rest/v1/shared_folder_invites")
     suspend fun updateInvite(
         @Query("code") codeQuery: String,

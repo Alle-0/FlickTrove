@@ -51,7 +51,10 @@ class FolderRepository @Inject constructor(
         if (folderEntity.isShared) {
             repositoryScope.launch {
                 try {
-                    sharedFolderRepository.get().pushFolderUpdate(updatedEntity)
+                    val result = sharedFolderRepository.get().pushFolderUpdate(updatedEntity)
+                    if (result.isFailure) {
+                        android.util.Log.e("FolderRepository", "Supabase shared folder update failed for ${updatedEntity.id}", result.exceptionOrNull())
+                    }
                 } catch (e: Exception) {
                     if (e is CancellationException) throw e
                     android.util.Log.e("FolderRepository", "Supabase shared folder update failed for ${updatedEntity.id}", e)

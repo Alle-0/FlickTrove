@@ -65,6 +65,27 @@ class FolderDetailViewModel @Inject constructor(
         if (_folderId.value != id) {
             _folderId.value = id
         }
+        syncFolderIfShared(id)
+    }
+
+    fun refreshFolder() {
+        _folderId.value?.let { syncFolderIfShared(it) }
+    }
+
+    private fun syncFolderIfShared(id: String) {
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            try {
+                val folder = repository.getFolderFlow(id).firstOrNull()
+                val sharedId = folder?.sharedFolderId 
+                    ?: if (id.startsWith("shared_")) id.removePrefix("shared_") else null
+                if (sharedId != null) {
+                    sharedFolderRepository.syncSingleSharedFolder(sharedId)
+                }
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                android.util.Log.e("FolderDetailViewModel", "Background shared folder sync failed for $id", e)
+            }
+        }
     }
 
     fun emitMessage(message: UiText) {

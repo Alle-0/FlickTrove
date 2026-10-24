@@ -55,6 +55,17 @@ class FoldersViewModel @Inject constructor(
         }
     }
 
+    fun refreshFolders() {
+        viewModelScope.launch {
+            try {
+                sharedFolderRepository.syncUserSharedFolders()
+            } catch (e: Exception) {
+                if (e is kotlinx.coroutines.CancellationException) throw e
+                android.util.Log.e("FoldersViewModel", "Manual syncUserSharedFolders failed", e)
+            }
+        }
+    }
+
     private fun parseDateString(dateString: String): Long {
         return try {
             dateString.toLong()
