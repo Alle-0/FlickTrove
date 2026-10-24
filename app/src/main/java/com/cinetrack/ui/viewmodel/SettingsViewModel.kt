@@ -53,6 +53,7 @@ class SettingsViewModel @Inject constructor(
     private val appUpdateManager: com.cinetrack.util.AppUpdateManager,
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
+    private val sharedFolderRepository: dagger.Lazy<com.cinetrack.data.repository.SharedFolderRepository>,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -62,6 +63,11 @@ class SettingsViewModel @Inject constructor(
                 commsUniRepository.updateProfile(displayName, avatarUrl)
             } catch (e: Exception) {
                 android.util.Log.e("SettingsViewModel", "Failed to sync profile to CommsUni", e)
+            }
+            try {
+                sharedFolderRepository.get().syncProfileToSharedFolders(displayName, avatarUrl)
+            } catch (e: Exception) {
+                android.util.Log.e("SettingsViewModel", "Failed to sync profile to Shared Folders", e)
             }
         }
     }

@@ -38,6 +38,13 @@ interface SupabaseSharedFolderApi {
 
     @Headers("Prefer: return=minimal")
     @PATCH("rest/v1/shared_folders")
+    suspend fun updateSharedFoldersByOwner(
+        @Query("owner_uid") ownerUidQuery: String,
+        @Body updates: JsonObject
+    ): Response<Unit>
+
+    @Headers("Prefer: return=minimal")
+    @PATCH("rest/v1/shared_folders")
     suspend fun updateSharedFolderItems(
         @Query("id") idQuery: String,
         @Body request: UpdateItemsRequest
@@ -66,6 +73,13 @@ interface SupabaseSharedFolderApi {
     suspend fun addMember(
         @Body member: SharedFolderMemberDto
     ): List<SharedFolderMemberDto>
+
+    @Headers("Prefer: return=minimal")
+    @PATCH("rest/v1/shared_folder_members")
+    suspend fun updateMemberProfile(
+        @Query("user_uid") userUidQuery: String,
+        @Body updates: JsonObject
+    ): Response<Unit>
 
     @DELETE("rest/v1/shared_folder_members")
     suspend fun removeMember(

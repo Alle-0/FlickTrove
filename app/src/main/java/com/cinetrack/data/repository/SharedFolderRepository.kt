@@ -553,4 +553,37 @@ class SharedFolderRepository @Inject constructor(
             Unit
         }
     }
+
+    suspend fun syncProfileToSharedFolders(displayName: String, avatarUrl: String?): Result<Unit> = withContext(Dispatchers.IO) {
+        runCatching {
+            val user = getCurrentUser() ?: return@runCatching
+            val now = Instant.now().toString()
+
+            // 1. Update member records across all joined shared folders
+            val memberUpdates = buildJsonObject {
+                put("user_name", displayName)
+                if (avatarUrl != null) {
+                    put("user_avatar_url", avatarUrl)
+                }
+            }
+            api.updateMemberProfile("eq.${user.uid}", memberUpdates)
+
+            // 2. Update owner records across all owned shared folders
+            val ownerUpdates = buildJsonObject {
+                put("owner_name", displayName)
+                if (avatarUrl != null) {
+                    put("owner_avatar_url", avatarUrl)
+                }
+                put("updated_at", now)
+            }
+            api.updateSharedFoldersByOwner("eq.${user.uid}", ownerUpdates)
+
+            // 3. Update local Room folder entities where user is owner
+            val localFolders = folderDao.getAll()
+            localFolders.filter { it.isShared && it.ownerUid == user.uid }.forEach { folder ->
+                folderDao.insert(folder.copy(ownerName = displayName))
+            }
+            Unit
+        }
+    }
 }
