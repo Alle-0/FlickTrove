@@ -43,7 +43,8 @@ fun GlobalMovieActions(
         // 1. Actions Popup
         if (manager.showActionsPopup && manager.activeMovie != null) {
             val isSaved = movie.favorite || movie.watched || movie.reminder || (movie.personalRating ?: 0.0) > 0.0 || !movie.personalNote.isNullOrEmpty() || manager.foldersList.any { manager.isItemInFolderCallback(movie, it.id) }
-            val canDelete = (isSaved && manager.onDeleteCallback != null) || manager.onDeleteWatchSessionCallback != null
+            val watchSessionCallback = manager.onDeleteWatchSessionCallback
+            val canDelete = (isSaved && manager.onDeleteCallback != null) || watchSessionCallback != null
             MovieActionsPopup(
                 movie = movie,
                 showMenu = true,
@@ -71,18 +72,17 @@ fun GlobalMovieActions(
                     context.startActivity(shareIntent)
                     manager.closeAll()
                 },
-                onDelete = if (manager.onDeleteWatchSessionCallback != null) {
+                onDelete = if (watchSessionCallback != null) {
                     {
-                        val callback = manager.onDeleteWatchSessionCallback
                         manager.closeAll()
-                        callback?.invoke()
+                        watchSessionCallback.invoke()
                     }
                 } else if (canDelete) {
                     { manager.startCardExplosion(it) }
                 } else null,
                 isSaved = isSaved,
                 canDelete = canDelete,
-                deleteLabel = if (manager.onDeleteWatchSessionCallback != null) {
+                deleteLabel = if (watchSessionCallback != null) {
                     context.getString(R.string.history_delete_session_title)
                 } else null
             )

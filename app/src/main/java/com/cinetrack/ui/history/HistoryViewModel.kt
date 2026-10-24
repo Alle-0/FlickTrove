@@ -4,9 +4,12 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.local.dao.RawTimelineRecord
 import com.cinetrack.data.repository.BadgeRepository
+import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.WatchHistoryRepository
+import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.history.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.serialization.json.Json
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -28,7 +31,9 @@ import javax.inject.Inject
 @HiltViewModel
 class HistoryViewModel @Inject constructor(
     private val watchHistoryRepository: WatchHistoryRepository,
-    private val badgeRepository: BadgeRepository
+    private val badgeRepository: BadgeRepository,
+    private val movieRepository: MovieRepository,
+    private val updateEpisodesUseCase: UpdateEpisodesUseCase
 ) : ViewModel() {
 
     private val _viewMode = MutableStateFlow(ViewMode.TIMELINE)
@@ -242,6 +247,46 @@ class HistoryViewModel @Inject constructor(
             if (entry != null) {
                 watchHistoryRepository.deleteWatchHistory(entry)
                 watchHistoryRepository.pushPendingWatchHistory()
+
+                // Reconcile Movie entity to preserve Single Source of Truth
+                val remainingHistory = watchHistoryRepository.getWatchHistoryForMovie(entry.movieId, entry.mediaType)
+                val local = movieRepository.getMovie(entry.movieId, entry.mediaType)
+                if (local != null) {
+                    if (remainingHistory.isEmpty()) {
+                        movieRepository.saveMovie(
+                            local.copy(
+                                watched = false,
+                                watchedAt = null,
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                        )
+                    } else {
+                        val latest = remainingHistory.maxByOrNull { it.watchedAt }
+                        if (latest != null && local.watchedAt != latest.watchedAt) {
+                            var updatedLocal = local.copy(
+                                watchedAt = latest.watchedAt,
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                            if (entry.mediaType == "tv") {
+                                if (latest.historicalEpisodes != null) {
+                                    try {
+                                        val parsedMap: Map<String, List<Int>> = Json.decodeFromString(latest.historicalEpisodes)
+                                        val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
+                                        updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
+                                    } catch (e: Exception) {
+                                        updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                                    }
+                                } else {
+                                    updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                                }
+                            } else {
+                                updatedLocal = updatedLocal.copy(watched = true)
+                            }
+                            movieRepository.saveMovie(updatedLocal)
+                        }
+                    }
+                }
+
                 badgeRepository.evaluateBadgesAsync()
             }
         }
@@ -251,6 +296,25 @@ class HistoryViewModel @Inject constructor(
         viewModelScope.launch(Dispatchers.IO) {
             watchHistoryRepository.updateWatchDate(historyId, newWatchedAtIso)
             watchHistoryRepository.pushPendingWatchHistory()
+
+            val allHistory = watchHistoryRepository.getAllWatchHistory()
+            val entry = allHistory.find { it.id == historyId }
+            if (entry != null) {
+                val remainingHistory = watchHistoryRepository.getWatchHistoryForMovie(entry.movieId, entry.mediaType)
+                val local = movieRepository.getMovie(entry.movieId, entry.mediaType)
+                if (local != null) {
+                    val latest = remainingHistory.maxByOrNull { it.watchedAt }
+                    if (latest != null && local.watchedAt != latest.watchedAt) {
+                        movieRepository.saveMovie(
+                            local.copy(
+                                watchedAt = latest.watchedAt,
+                                clientUpdatedAt = System.currentTimeMillis()
+                            )
+                        )
+                    }
+                }
+            }
+
             badgeRepository.evaluateBadgesAsync()
         }
     }

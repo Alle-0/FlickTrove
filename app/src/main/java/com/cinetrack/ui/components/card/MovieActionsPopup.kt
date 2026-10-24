@@ -138,8 +138,8 @@ fun MovieActionsPopup(
                             .bounceClick(scaleDown = 1f, onClick = onDismiss)
                     )
 
-                    val menuWidth = if (onEditDate != null) 205.dp else 180.dp
-                    val menuHeight = if (onEditDate != null) 305.dp else 260.dp
+                    val menuWidth = if (onEditDate != null) 225.dp else 180.dp
+                    val menuHeight = if (onEditDate != null) 310.dp else 260.dp
                     
                     val menuWidthPx = with(density) { menuWidth.toPx() }
                     val menuHeightPx = with(density) { menuHeight.toPx() }
@@ -170,7 +170,7 @@ fun MovieActionsPopup(
                     Column(
                         modifier = Modifier
                             .offset { IntOffset(xPos.toInt(), yPos.toInt()) }
-                            .width(if (onEditDate != null) 195.dp else 170.dp)
+                            .width(if (onEditDate != null) 215.dp else 170.dp)
                             .hazeGlass(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp)
@@ -284,7 +284,7 @@ fun MovieActionsPopup(
                                 modifier = Modifier.animateEnterExit(
                                     enter = slideInVertically(tween(300, delayMillis = 240)) { it / 2 } + fadeIn(tween(300, delayMillis = 240))
                                 ),
-                                onClick = { onDismiss(); onDelete(movie) }
+                                onClick = { onDelete(movie); onDismiss() }
                             )
                         }
                     }
