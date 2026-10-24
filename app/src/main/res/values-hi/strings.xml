@@ -1871,7 +1871,7 @@
     <string name="folder_shared_badge">साझा</string>
     <string name="folder_share_action">फ़ोल्डर साझा करें</string>
     <string name="folder_share_title">फ़ोल्डर साझा करें</string>
-    <string name="folder_share_desc">सहयोग के लिए अस्थायी पहुंच के साथ एक आमंत्रण लिंक बनाएं।</string>
+    <string name="folder_share_desc">सहयोग के लिए दोस्तों को आमंत्रित करें। एक बार शामिल होने के बाद, उनका एक्सेस स्थायी होता है, लेकिन अप्रयुक्त आमंत्रण लिंक समाप्त हो जाएंगे।</string>
     <string name="folder_share_duration">आमंत्रण की अवधि</string>
     <string name="folder_invite_duration_24h">24 घंटे</string>
     <string name="folder_invite_duration_48h">48 घंटे</string>

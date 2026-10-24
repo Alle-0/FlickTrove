@@ -1879,7 +1879,7 @@
     <string name="folder_shared_badge">共有</string>
     <string name="folder_share_action">フォルダを共有</string>
     <string name="folder_share_title">フォルダを共有</string>
-    <string name="folder_share_desc">共同編集のための一時的な招待リンクを作成します。</string>
+    <string name="folder_share_desc">友達を招待して共同編集しましょう。一度参加するとアクセスは永続的ですが、未使用の招待リンクは期限切れになります。</string>
     <string name="folder_share_duration">招待の有効期間</string>
     <string name="folder_invite_duration_24h">24時間</string>
     <string name="folder_invite_duration_48h">48時間</string>

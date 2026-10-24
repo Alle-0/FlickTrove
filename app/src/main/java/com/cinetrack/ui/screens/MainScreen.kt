@@ -184,9 +184,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             var _lastTab by remember { mutableStateOf<Tab>(currentTab) }
             val scrollToTopState = remember { mutableStateOf(com.cinetrack.ui.ScrollToTopState()) }
 
-            val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel? = if ((currentTab is FoldersTab || currentTab is FolderDetailTab) && activity != null) {
+            val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (activity != null) {
                 hiltViewModel(activity)
             } else null
+
+            LaunchedEffect(Unit) {
+                foldersViewModel?.refreshFolders()
+            }
+
             val allFoldersList by (foldersViewModel?.folders?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(null) })
             val activeFolderForDetail = if (currentTab is FolderDetailTab) allFoldersList?.find { it.id == currentTab.folderId } else null
 
@@ -260,44 +265,50 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             Box(modifier = Modifier.fillMaxSize().haze(contentHazeState)) {
                                 AnimatedContent(
                                     targetState = currentTab,
-                                transitionSpec = {
-                                    val targetDepth = when (targetState) {
-                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
-                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
-                                        is FolderDetailTab -> 2
-                                        else -> 0
-                                    }
-                                    val initialDepth = when (initialState) {
-                                        is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
-                                        is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
-                                        is FolderDetailTab -> 2
-                                        else -> 0
-                                    }
+                                    contentKey = { tab ->
+                                        when (tab) {
+                                            is FolderDetailTab -> "FolderDetailTab_${tab.folderId}"
+                                            else -> tab::class.qualifiedName ?: "tab"
+                                        }
+                                    },
+                                    transitionSpec = {
+                                        val targetDepth = when (targetState) {
+                                            is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
+                                            is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
+                                            is FolderDetailTab -> 2
+                                            else -> 0
+                                        }
+                                        val initialDepth = when (initialState) {
+                                            is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
+                                            is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
+                                            is FolderDetailTab -> 2
+                                            else -> 0
+                                        }
 
-                                    if (targetState::class == initialState::class) {
-                                        // Same tab class (e.g. rename of FolderDetailTab): no animation
-                                        EnterTransition.None togetherWith ExitTransition.None
-                                    } else if (targetDepth > initialDepth) {
-                                        slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it }) togetherWith
-                                                slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
-                                    } else if (targetDepth < initialDepth) {
-                                        slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) togetherWith
-                                                slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { it })
+                                        if (targetState::class == initialState::class) {
+                                            // Same tab class (e.g. rename of FolderDetailTab): no animation
+                                            EnterTransition.None togetherWith ExitTransition.None
+                                        } else if (targetDepth > initialDepth) {
+                                            slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it }) togetherWith
+                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
+                                        } else if (targetDepth < initialDepth) {
+                                            slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) togetherWith
+                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
+                                        } else {
+                                            fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                                        }
+                                    },
+                                    label = "TabTransition"
+                                ) { tab ->
+                                    if (tab is FolderDetailTab) {
+                                        tab.Content()
                                     } else {
-                                        fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
+                                        tabNavigator.saveableState(tab::class.simpleName ?: "tab", tab) {
+                                            tab.Content()
+                                        }
                                     }
-                                },
-                                label = "TabTransition"
-                            ) { tab ->
-                                val key = when (tab) {
-                                    is FolderDetailTab -> "FolderDetailTab_${tab.folderId}"
-                                    else -> tab::class.simpleName ?: "tab"
-                                }
-                                tabNavigator.saveableState(key, tab) {
-                                    tab.Content()
                                 }
                             }
-                        }
 
                             // Top Bar Layer
                             val title = when (currentTab) {
@@ -409,8 +420,14 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is TrophyRoomTab || currentTab is HistoryTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
                                     indicatorColor = if (currentTab is FolderDetailTab) (activeFolderForDetail?.color ?: currentTab.folderColor)?.toComposeColor() else null,
-                                    onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
-                                    onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
+                                    onRefreshClick = if (currentTab is RecommendationsTab) {
+                                        {
+                                            recommendationsViewModel?.lazyGridState?.let { gridState ->
+                                                scope.launch { gridState.scrollToItem(0) }
+                                            }
+                                            recommendationsViewModel?.onRefresh()
+                                        }
+                                    } else null,
                                     onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is HistoryTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
                                     hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else if (currentTab is HistoryTab) historyHasActiveFilters else if (currentTab is FoldersTab) foldersHasActiveFilters else discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
@@ -536,7 +553,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 onDismiss = { showFolderOptions = false },
                                 onShareOrMembers = {
                                     showFolderOptions = false
-                                    if (isCurrentFolderShared) {
+                                    if (currentUser == null || currentUser.isAnonymous) {
+                                        settingsViewModel.triggerGuestAuthDialog()
+                                    } else if (isCurrentFolderShared) {
                                         showFolderMembersModal = true
                                     } else {
                                         showFolderShareModal = true

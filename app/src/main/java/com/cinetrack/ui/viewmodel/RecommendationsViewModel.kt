@@ -158,6 +158,9 @@ class RecommendationsViewModel @Inject constructor(
             _mediaType.value = type
             topCardIndex = 0
             currentTopSourceIds = emptyList()
+            viewModelScope.launch {
+                lazyGridState.scrollToItem(0)
+            }
         }
     }
 
@@ -166,11 +169,13 @@ class RecommendationsViewModel @Inject constructor(
         currentTopSourceIds = emptyList()
         val currentState = uiState.value
         viewModelScope.launch {
+            lazyGridState.scrollToItem(0)
             currentPage = 1
             _isEndReached.value = false
             val hideSaved = settingsRepository.hideSavedFromDiscovery.first()
             val allLocalMovies = repository.getLocalMoviesFlow().first()
             fetchRecommendations(currentState.mediaType, allLocalMovies, page = 1, hideSaved = hideSaved)
+            lazyGridState.scrollToItem(0)
         }
     }
 

@@ -1879,7 +1879,7 @@
     <string name="folder_shared_badge">Paylaşılan</string>
     <string name="folder_share_action">Klasörü paylaş</string>
     <string name="folder_share_title">Klasörü Paylaş</string>
-    <string name="folder_share_desc">Birlikte çalışmak için geçici erişimli bir davet bağlantısı oluşturun.</string>
+    <string name="folder_share_desc">Birlikte çalışmak için arkadaşlarınızı davet edin. Katıldıklarında erişimleri kalıcı olur, ancak kullanılmayan davet bağlantılarının süresi dolar.</string>
     <string name="folder_share_duration">Davet Süresi</string>
     <string name="folder_invite_duration_24h">24 Saat</string>
     <string name="folder_invite_duration_48h">48 Saat</string>

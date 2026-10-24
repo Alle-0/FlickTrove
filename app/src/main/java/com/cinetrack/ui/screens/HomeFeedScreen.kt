@@ -510,8 +510,14 @@ fun HomeFeedScreenContent(
                                         HomePosterRow(
                                             title = stringResource(R.string.home_section_recommended),
                                             movies = restRecommended,
-                                            onTitleClick = { tabNavigator.current = RecommendationsTab },
-                                            onShowMoreClick = { tabNavigator.current = RecommendationsTab },
+                                            onTitleClick = {
+                                                RecommendationsTab.requestedMediaType = if (isTv) "tv" else "movie"
+                                                tabNavigator.current = RecommendationsTab
+                                            },
+                                            onShowMoreClick = {
+                                                RecommendationsTab.requestedMediaType = if (isTv) "tv" else "movie"
+                                                tabNavigator.current = RecommendationsTab
+                                            },
                                             resolveLocalMovie = resolveLocalMovie,
                                             isMovieFavorite = isMovieFavorite,
                                             isMovieWatched = isMovieWatched,

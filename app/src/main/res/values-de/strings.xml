@@ -1876,7 +1876,7 @@
     <string name="folder_shared_badge">Geteilt</string>
     <string name="folder_share_action">Ordner teilen</string>
     <string name="folder_share_title">Ordner Teilen</string>
-    <string name="folder_share_desc">Erstelle einen Einladungslink mit temporärem Zugriff zur Zusammenarbeit.</string>
+    <string name="folder_share_desc">Lade Freunde zur Zusammenarbeit ein. Sobald sie beitreten, ist ihr Zugriff dauerhaft, ungenutzte Einladungslinks laufen jedoch ab.</string>
     <string name="folder_share_duration">Gültigkeitsdauer der Einladung</string>
     <string name="folder_invite_duration_24h">24 Stunden</string>
     <string name="folder_invite_duration_48h">48 Stunden</string>

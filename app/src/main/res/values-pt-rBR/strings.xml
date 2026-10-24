@@ -1871,7 +1871,7 @@
     <string name="folder_shared_badge">Compartilhada</string>
     <string name="folder_share_action">Compartilhar pasta</string>
     <string name="folder_share_title">Compartilhar Pasta</string>
-    <string name="folder_share_desc">Crie um link de convite temporário para colaborar.</string>
+    <string name="folder_share_desc">Convide amigos para colaborar. Depois que eles entrarem, o acesso será permanente, mas os links de convite não usados expirarão.</string>
     <string name="folder_share_duration">Duração do convite</string>
     <string name="folder_invite_duration_24h">24 Horas</string>
     <string name="folder_invite_duration_48h">48 Horas</string>

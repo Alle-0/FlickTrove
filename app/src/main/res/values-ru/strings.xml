@@ -1873,7 +1873,7 @@
     <string name="folder_shared_badge">Общая</string>
     <string name="folder_share_action">Поделиться папкой</string>
     <string name="folder_share_title">Поделиться Папкой</string>
-    <string name="folder_share_desc">Создайте временную ссылку-приглашение для совместного доступа.</string>
+    <string name="folder_share_desc">Приглашайте друзей к совместной работе. После присоединения их доступ становится постоянным, но неиспользованные ссылки-приглашения истекают.</string>
     <string name="folder_share_duration">Срок действия приглашения</string>
     <string name="folder_invite_duration_24h">24 часа</string>
     <string name="folder_invite_duration_48h">48 часов</string>

@@ -31,6 +31,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
+import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 import java.text.SimpleDateFormat
 import java.util.Calendar
 import java.util.Date
@@ -1323,13 +1326,16 @@ class BadgeRepository @Inject constructor(
                 calculateProgressiveTiers(allFolders.size, badge.progressiveSteps)
             }
 
-            // 22. Prime Visioni: Prima Visione Assoluta (film visti il giorno esatto di uscita)
+            // 22. Prime Visioni: Prima Visione Assoluta (film visti il giorno esatto di uscita nel fuso locale)
             "badge_day_one_premiere", "secret_day_one_premiere" -> {
                 val dayOneCount = allWatched.count { movie ->
-                    val relDate = movie.releaseDate?.take(10) ?: return@count false
-                    val watchedDate = movie.watchedAt?.take(10)
-                    if (watchedDate != null && watchedDate == relDate) return@count true
-                    allHistory.any { h -> h.movieId == movie.id && h.watchedAt.take(10) == relDate }
+                    val relDateStr = (movie.releaseDate ?: movie.firstAirDate)?.take(10) ?: return@count false
+                    val relDate = runCatching { LocalDate.parse(relDateStr) }.getOrNull() ?: return@count false
+                    val watchedLocal = parseToLocalDate(movie.watchedAt)
+                    if (watchedLocal != null && watchedLocal == relDate) return@count true
+                    allHistory.any { h ->
+                        h.movieId == movie.id && parseToLocalDate(h.watchedAt) == relDate
+                    }
                 }
                 calculateProgressiveTiers(dayOneCount, badge.progressiveSteps)
             }
@@ -1737,6 +1743,22 @@ class BadgeRepository @Inject constructor(
             PreviewBadgeTier.LOST_REEL to 6
         )
         return (tierRank[candidate] ?: 0) > (tierRank[current] ?: 0)
+    }
+
+    private fun parseToLocalDate(raw: String?): LocalDate? {
+        if (raw.isNullOrBlank()) return null
+        val trimmed = raw.trim()
+        return try {
+            Instant.parse(trimmed).atZone(ZoneId.systemDefault()).toLocalDate()
+        } catch (_: Exception) {
+            try {
+                if (trimmed.length >= 10 && trimmed[4] == '-' && trimmed[7] == '-') {
+                    LocalDate.parse(trimmed.take(10))
+                } else null
+            } catch (_: Exception) {
+                null
+            }
+        }
     }
 
     private fun parseWatchedAtMillis(dateStr: String): Long {

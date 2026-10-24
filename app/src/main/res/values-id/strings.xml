@@ -1878,7 +1878,7 @@
     <string name="folder_shared_badge">Dibagikan</string>
     <string name="folder_share_action">Bagikan folder</string>
     <string name="folder_share_title">Bagikan Folder</string>
-    <string name="folder_share_desc">Buat tautan undangan berbatas waktu untuk berkolaborasi.</string>
+    <string name="folder_share_desc">Undang teman untuk berkolaborasi. Begitu mereka bergabung, akses mereka bersifat permanen, tetapi tautan undangan yang tidak digunakan akan kedaluwarsa.</string>
     <string name="folder_share_duration">Durasi Undangan</string>
     <string name="folder_invite_duration_24h">24 Jam</string>
     <string name="folder_invite_duration_48h">48 Jam</string>

@@ -1879,7 +1879,7 @@
     <string name="folder_shared_badge">已共享</string>
     <string name="folder_share_action">共享資料夾</string>
     <string name="folder_share_title">共享資料夾</string>
-    <string name="folder_share_desc">建立具有暫時存取權限的邀請連結以進行協作。</string>
+    <string name="folder_share_desc">邀請好友一起協作。加入後，存取權限是永久的，但未使用的邀請連結將會過期。</string>
     <string name="folder_share_duration">邀請有效期限</string>
     <string name="folder_invite_duration_24h">24小時</string>
     <string name="folder_invite_duration_48h">48小時</string>

@@ -70,6 +70,8 @@ import com.cinetrack.ui.components.shared.FolderCreateDialog
 import com.cinetrack.ui.components.shared.FolderJoinDialog
 import com.cinetrack.ui.components.shared.FolderEditDialog
 import com.cinetrack.ui.components.shared.FolderEditMode
+import com.cinetrack.ui.components.shared.FolderShareModal
+import com.cinetrack.ui.components.shared.FolderMembersModal
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.animation.AnimatedVisibility
@@ -126,6 +128,11 @@ object FoldersTab : Tab {
         } else {
             getViewModel<FoldersViewModel>()
         }
+        val settingsViewModel = if (activity != null) {
+            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activity)
+        } else {
+            getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        }
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val tabNavigator = LocalTabNavigator.current
@@ -136,6 +143,9 @@ object FoldersTab : Tab {
             hazeState = hazeState,
             onFolderClick = { folder ->
                 tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
+            },
+            onGuestAuthRequired = {
+                settingsViewModel.triggerGuestAuthDialog()
             }
         )
     }
@@ -146,7 +156,8 @@ fun FoldersScreenContent(
     viewModel: FoldersViewModel,
     paddingValues: PaddingValues,
     hazeState: HazeState? = null,
-    onFolderClick: (FolderEntity) -> Unit = {}
+    onFolderClick: (FolderEntity) -> Unit = {},
+    onGuestAuthRequired: () -> Unit = {}
 ) {
     val folders by viewModel.folders.collectAsStateWithLifecycle()
     val allMovies by viewModel.allMovies.collectAsStateWithLifecycle()
@@ -156,18 +167,28 @@ fun FoldersScreenContent(
     var isJoinDialogOpen by remember { mutableStateOf(false) }
     var joinDialogInitialCode by remember { mutableStateOf("") }
 
+    val isGuest = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false }
+
     LaunchedEffect(Unit) {
+        viewModel.refreshFolders()
         val pending = FoldersTab.pendingJoinCode
         if (!pending.isNullOrBlank()) {
-            joinDialogInitialCode = pending
-            isJoinDialogOpen = true
-            FoldersTab.pendingJoinCode = null
+            if (isGuest) {
+                onGuestAuthRequired()
+                FoldersTab.pendingJoinCode = null
+            } else {
+                joinDialogInitialCode = pending
+                isJoinDialogOpen = true
+                FoldersTab.pendingJoinCode = null
+            }
         }
     }
 
     var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
     var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
     var folderEditMode by remember { mutableStateOf(FolderEditMode.ALL) }
+    var folderToShare by remember { mutableStateOf<FolderEntity?>(null) }
+    var folderForMembers by remember { mutableStateOf<FolderEntity?>(null) }
     
     var activeMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
     var activeMenuBounds by remember { mutableStateOf(Rect.Zero) }
@@ -231,7 +252,9 @@ fun FoldersScreenContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier
-                                    .bounceClick { isJoinDialogOpen = true }
+                                    .bounceClick {
+                                        if (isGuest) onGuestAuthRequired() else isJoinDialogOpen = true
+                                    }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f))
                                     .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
@@ -538,7 +561,9 @@ fun FoldersScreenContent(
                                         alphaProgress = alphaProgress
                                     )
                                     JoinFolderCard(
-                                        onClick = { isJoinDialogOpen = true },
+                                        onClick = {
+                                            if (isGuest) onGuestAuthRequired() else isJoinDialogOpen = true
+                                        },
                                         modifier = Modifier.weight(0.95f),
                                         alphaProgress = alphaProgress
                                     )
@@ -673,6 +698,89 @@ fun FoldersScreenContent(
         }
     }
 
+    folderToShare?.let { folder ->
+        FolderShareModal(
+            folder = folder,
+            onDismiss = { folderToShare = null },
+            onCreateInvite = { durationOption, callback ->
+                viewModel.createInviteForFolder(folder, durationOption, callback)
+            },
+            hazeState = dialogHazeState
+        )
+    }
+
+    folderForMembers?.let { folder ->
+        val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "" }
+        val isOwner = folder.ownerUid == currentUserId
+        var members by remember(folder.sharedFolderId) {
+            mutableStateOf<List<com.cinetrack.data.model.SharedFolderMemberDto>>(emptyList())
+        }
+        var activeInvites by remember(folder.sharedFolderId) {
+            mutableStateOf<List<com.cinetrack.data.model.SharedFolderInviteDto>>(emptyList())
+        }
+
+        LaunchedEffect(folder.sharedFolderId) {
+            folder.sharedFolderId?.let { sharedId ->
+                viewModel.getFolderMembers(sharedId) { res ->
+                    members = res.getOrDefault(emptyList())
+                }
+                viewModel.getFolderInvites(sharedId) { res ->
+                    activeInvites = res.getOrDefault(emptyList())
+                    if (isOwner) {
+                        viewModel.checkAutoRevert(folder) { didRevert ->
+                            if (didRevert) {
+                                folderForMembers = null
+                            }
+                        }
+                    }
+                }
+            }
+        }
+
+        FolderMembersModal(
+            folder = folder,
+            members = members,
+            activeInvites = activeInvites,
+            currentUserId = currentUserId,
+            isOwner = isOwner,
+            onDismiss = { folderForMembers = null },
+            onRemoveMember = { member ->
+                viewModel.removeFolderMember(folder, member.userId) { res ->
+                    if (res.isSuccess) {
+                        val didRevert = res.getOrDefault(false)
+                        if (didRevert) {
+                            folderForMembers = null
+                        } else {
+                            members = members.filter { it.userId != member.userId }
+                        }
+                    }
+                }
+            },
+            onLeaveFolder = {
+                viewModel.deleteFolder(folder.id)
+                folderForMembers = null
+            },
+            onRevokeInvite = { invite ->
+                viewModel.revokeFolderInvite(folder, invite.inviteCode) { res ->
+                    if (res.isSuccess) {
+                        val didRevert = res.getOrDefault(false)
+                        if (didRevert) {
+                            folderForMembers = null
+                        } else {
+                            activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
+                        }
+                    }
+                }
+            },
+            onOpenShareModal = {
+                val target = folder
+                folderForMembers = null
+                folderToShare = target
+            },
+            hazeState = dialogHazeState
+        )
+    }
+
     var rememberedMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
     var isMenuVisible by remember { mutableStateOf(false) }
 
@@ -723,6 +831,43 @@ fun FoldersScreenContent(
                 ) {
                     val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                     val isOwner = !folder.isShared || (folder.ownerUid == currentUserId)
+
+                    if (folder.isShared || isOwner) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bounceClick { 
+                                    val target = folder
+                                    activeMenuFolder = null
+                                    if (isGuest) {
+                                        onGuestAuthRequired()
+                                    } else if (target.isShared) {
+                                        folderForMembers = target
+                                    } else {
+                                        folderToShare = target
+                                    }
+                                }
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                ImageVector.vectorResource(id = R.drawable.ic_people), 
+                                contentDescription = null, 
+                                tint = Color.White, 
+                                modifier = Modifier.size(20.dp)
+                            )
+                            Spacer(Modifier.width(12.dp))
+                            Text(
+                                text = if (folder.isShared) {
+                                    if (isOwner) stringResource(R.string.folder_members_title) else stringResource(R.string.folder_members_only_title)
+                                } else {
+                                    stringResource(R.string.folder_share_action)
+                                }, 
+                                color = Color.White, 
+                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                            )
+                        }
+                    }
 
                     if (isOwner) {
                         Row(

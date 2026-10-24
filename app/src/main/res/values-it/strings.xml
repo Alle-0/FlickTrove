@@ -1886,7 +1886,7 @@
     <string name="folder_shared_badge">Condivisa</string>
     <string name="folder_share_action">Condividi cartella</string>
     <string name="folder_share_title">Condividi Cartella</string>
-    <string name="folder_share_desc">Genera un codice o link d\'invito temporaneo per collaborare.</string>
+    <string name="folder_share_desc">Invita amici a collaborare. Una volta entrati, l\'accesso è permanente, ma i link d\'invito non utilizzati scadranno.</string>
     <string name="folder_share_duration">Durata dell\'invito</string>
     <string name="folder_invite_duration_24h">24 Ore</string>
     <string name="folder_invite_duration_48h">48 Ore</string>

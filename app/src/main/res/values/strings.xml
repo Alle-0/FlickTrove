@@ -1886,7 +1886,7 @@
     <string name="folder_shared_badge">Shared</string>
     <string name="folder_share_action">Share Folder</string>
     <string name="folder_share_title">Share Folder</string>
-    <string name="folder_share_desc">Create an invite link with temporary access to collaborate.</string>
+    <string name="folder_share_desc">Invite friends to collaborate. Once they join, their access is permanent, but unused invite links will expire.</string>
     <string name="folder_share_duration">Invite Duration</string>
     <string name="folder_invite_duration_24h">24 Hours</string>
     <string name="folder_invite_duration_48h">48 Hours</string>

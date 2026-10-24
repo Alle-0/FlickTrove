@@ -111,7 +111,6 @@ fun FolderShareModal(
                 val options = listOf(
                     InviteDurationOption.SINGLE_USE to stringResource(R.string.folder_invite_duration_single),
                     InviteDurationOption.TWENTY_FOUR_HOURS to stringResource(R.string.folder_invite_duration_24h),
-                    InviteDurationOption.FORTY_EIGHT_HOURS to stringResource(R.string.folder_invite_duration_48h),
                     InviteDurationOption.SEVEN_DAYS to stringResource(R.string.folder_invite_duration_7d)
                 )
 

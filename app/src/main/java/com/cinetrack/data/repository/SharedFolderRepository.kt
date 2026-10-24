@@ -42,7 +42,7 @@ class SharedFolderRepository @Inject constructor(
         return "FT-$randomPart"
     }
 
-    private fun getCurrentUser() = auth.currentUser
+    private fun getCurrentUser() = auth.currentUser?.takeIf { !it.isAnonymous }
 
     suspend fun createSharedFolder(folderEntity: FolderEntity): Result<FolderEntity> = withContext(Dispatchers.IO) {
         runCatching {

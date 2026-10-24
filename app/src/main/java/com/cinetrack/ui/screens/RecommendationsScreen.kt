@@ -100,6 +100,8 @@ import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.*
 
 object RecommendationsTab : Tab {
+    var requestedMediaType: String? by androidx.compose.runtime.mutableStateOf(null)
+
     override val options: TabOptions
         @Composable
         get() {
@@ -127,6 +129,16 @@ object RecommendationsTab : Tab {
         } else {
             androidx.hilt.navigation.compose.hiltViewModel<RecommendationsViewModel>()
         }
+
+        LaunchedEffect(requestedMediaType) {
+            val req = requestedMediaType
+            if (req != null) {
+                viewModel.onMediaTypeChanged(req)
+                viewModel.lazyGridState.scrollToItem(0)
+                requestedMediaType = null
+            }
+        }
+
         val paddingValues = LocalAppPadding.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
         val hazeState = com.cinetrack.ui.LocalHazeState.current
@@ -200,6 +212,7 @@ fun RecommendationsScreenContent(
     LaunchedEffect(uiState.isLoading) {
         if (uiState.isLoading && !uiState.isNextPageLoading) {
             topCardIndex = 0
+            lazyGridState.scrollToItem(0)
         }
     }
     

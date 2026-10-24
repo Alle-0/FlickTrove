@@ -1879,7 +1879,7 @@
     <string name="folder_shared_badge">공유됨</string>
     <string name="folder_share_action">폴더 공유</string>
     <string name="folder_share_title">폴더 공유</string>
-    <string name="folder_share_desc">협업을 위한 임시 접근 권한의 초대 링크를 생성합니다.</string>
+    <string name="folder_share_desc">친구를 초대하여 협업하세요. 참여한 후에는 접근 권한이 영구적이지만, 사용하지 않은 초대 링크는 만료됩니다.</string>
     <string name="folder_share_duration">초대 유효 기간</string>
     <string name="folder_invite_duration_24h">24시간</string>
     <string name="folder_invite_duration_48h">48시간</string>

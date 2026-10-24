@@ -1879,7 +1879,7 @@
     <string name="folder_shared_badge">已共享</string>
     <string name="folder_share_action">共享文件夹</string>
     <string name="folder_share_title">共享文件夹</string>
-    <string name="folder_share_desc">创建具有临时访问权限的邀请链接以进行协作。</string>
+    <string name="folder_share_desc">邀请好友一起协作。加入后，访问权限是永久的，但未使用的邀请链接将会过期。</string>
     <string name="folder_share_duration">邀请有效期</string>
     <string name="folder_invite_duration_24h">24小时</string>
     <string name="folder_invite_duration_48h">48小时</string>

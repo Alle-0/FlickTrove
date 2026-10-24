@@ -327,11 +327,30 @@ object NetworkModule {
         val supabaseAuthInterceptor = okhttp3.Interceptor { chain ->
             val original = chain.request()
             val anonKey = Keys.getSupabaseAnonKey()
+            val firebaseUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+            val token = if (firebaseUser != null && !firebaseUser.isAnonymous && android.os.Looper.myLooper() != android.os.Looper.getMainLooper()) {
+                try {
+                    com.google.android.gms.tasks.Tasks.await(firebaseUser.getIdToken(false))?.token
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+            val authHeader = if (!token.isNullOrEmpty()) "Bearer $token" else "Bearer $anonKey"
             val request = original.newBuilder()
                 .header("apikey", anonKey)
-                .header("Authorization", "Bearer $anonKey")
+                .header("Authorization", authHeader)
                 .build()
-            chain.proceed(request)
+            val response = chain.proceed(request)
+            if (response.code == 401 && !token.isNullOrEmpty()) {
+                response.close()
+                val fallbackRequest = original.newBuilder()
+                    .header("apikey", anonKey)
+                    .header("Authorization", "Bearer $anonKey")
+                    .build()
+                chain.proceed(fallbackRequest)
+            } else {
+                response
+            }
         }
         return OkHttpClient.Builder()
             .addInterceptor(logging)

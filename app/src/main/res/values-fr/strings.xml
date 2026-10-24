@@ -1873,7 +1873,7 @@
     <string name="folder_shared_badge">Partagé</string>
     <string name="folder_share_action">Partager le dossier</string>
     <string name="folder_share_title">Partager le Dossier</string>
-    <string name="folder_share_desc">Créez un lien d\'invitation temporaire pour collaborer.</string>
+    <string name="folder_share_desc">Invitez des amis à collaborer. Une fois qu\'ils ont rejoint, leur accès est permanent, mais les liens d\'invitation inutilisés expireront.</string>
     <string name="folder_share_duration">Durée de l\'invitation</string>
     <string name="folder_invite_duration_24h">24 Heures</string>
     <string name="folder_invite_duration_48h">48 Heures</string>
