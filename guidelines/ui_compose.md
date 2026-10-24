@@ -651,3 +651,21 @@
    - È tassativamente vietato introdurre fallback generici verso film già usciti o verso la watchlist generica.
    - Quando non ci sono titoli in uscita salvati con reminder, mostrare un empty state curato: icona calendario (`ic_calendario`), testo localizzato `widget_no_releases` e pillola o sfondo dark coerente.
    - Per le date future, mostrare un badge a pillola moderno (`cornerRadius(12.dp)`) con data localizzata, senza prefissi verbali ridondanti (es. "Releasing on:").
+
+- **Invarianti Architetturali Android Glance & RemoteViews (Home Widgets)**:
+   - **Divieto Assoluto di Modificatori Standard Compose Non Supportati da RemoteViews**:
+     - I widget Jetpack Glance compilano in `RemoteViews` native di Android e NON in un canvas Compose standard.
+     - È severamente vietato usare modificatori grafici ricchi non supportati (es. `.graphicsLayer`, `.blur`, `.haze`, ombre custom o gradienti arbitrari non supportati da RemoteViews): causano crash fatali del processo Launcher dell'utente (`BadParcelableException` o `InflateException`).
+     - Non concatenare modificatori `.padding(...)` prima di `.background(...)`: Glance fonde tutti i padding nel `setPadding` nativo della View, distorcendo le forme. Spaziare sempre con `Spacer(GlanceModifier.width/height(...))` esterni al box con sfondo.
+   - **Interattività e Click tramite `ActionCallback` e `actionRunCallback`**:
+     - Nei widget Glance è tassativamente vietato usare lambda standard Compose `onClick = { ... }`, in quanto le lambda non possono essere serializzate tra i processi di sistema (launcher vs app).
+     - Utilizzare esclusivamente `actionRunCallback<MyActionCallback>(actionParametersOf(...))` per azionare la logica (es. spuntare un episodio, cambiare tab o aprire un film specifico via Intent).
+   - **Contrasto Adattivo Day/Night e Sfondi Launcher Eterogenei**:
+     - Poiché i widget risiedono sulla home screen dell'utente (con sfondi da bianchi a neri e launcher personalizzati), i testi e le icone devono adottare tassativamente `ColorProvider` con contrasto elevato (es. Day: `#1A1A1A`, Night: `Color.White`).
+     - Usare container protetti da card semitrasparenti (`ColorProvider(day = Color(0xEEFFFFFF), night = Color(0xEE14171E))`) con angoli arrotondati concentrici (`16.dp` o `24.dp`) per garantire perfetta leggibilità su qualsiasi wallpaper.
+   - **Ciclo di Aggiornamento Reattivo (Zero-Battery-Drain)**:
+     - È vietato implementare timer o polling continui a frequenze elevate dentro i widget.
+     - L'aggiornamento deve scattare esclusivamente:
+       1. Al cambio di stato locale nei DAO di Room (tramite trigger broadcast/worker).
+       2. Al completamento dei worker di sincronizzazione cloud (`SyncWorker`).
+       3. All'intervallo standard di sistema configurato nel metadato `android:updatePeriodMillis`.

@@ -8,9 +8,16 @@
    - **Verifica Preventiva di Esistenza**: Prima di inserire nuove chiavi in dizionari o mappe di lookup (`KeywordDictionary.kt`), verificare sempre che il termine o il suo sinonimo non sia già presente nella mappa. Vietato accodare ciecamente elementi (`mapOf` sovrascrive silenziosamente o genera duplicati).
    - **Verifica Canonica Endpoint TMDB**: Non inventare o assumere ID numerici TMDB a memoria o da snippet web non ufficiali (rischio di associare ID errati). Interrogare sempre l'endpoint ufficiale `/search/keyword` usando la chiave API di progetto per ottenere l'ID numerico esatto e la grafia canonica.
    - **Simmetria 1:1 e Chiavi Univoche**: Mantenere perfetta simmetria tra i dizionari linguistici (`italianToTmdbKeywordIds` ed `englishToTmdbKeywordIds`) condividendo gli stessi ID TMDB. Le varianti di scrittura dello stesso concetto (es. `aftercreditsstinger` vs `after credits stinger`) devono avere chiavi stringa distinte per intercettare qualsiasi forma restituita da TMDB.
-- **Allineamento Simultaneo delle Risorse Stringa nelle 15 Lingue**:
-   - Ogni volta che vengono introdotte nuove chiavi di testo o modificate chiavi esistenti per componenti UI, dialoghi o impostazioni, aggiornare tassativamente e contestualmente tutti i 15 file di risorse localizzate (`values`, `values-it`, `values-de`, `values-es`, `values-fr`, `values-pt-rBR`, `values-ru`, `values-tr`, `values-ja`, `values-ko`, `values-zh`, `values-zh-rCN`, `values-id`, `values-in`, `values-hi`).
-   - Verificare sempre l'escaping corretto delle entità XML (es. `&amp;` anziché `&`) per prevenire errori di parsing durante `mergeDebugResources`.
+- **Allineamento Simultaneo delle Risorse Stringa nelle 15 Lingue (Parità & Formattazione XML)**:
+   - **Copertura Contestuale a 15 Lingue**: Ogni volta che vengono introdotte nuove chiavi di testo o modificate chiavi esistenti per componenti UI, dialoghi o impostazioni, aggiornare tassativamente e contestualmente tutti i 15 file di risorse localizzate (`values`, `values-it`, `values-de`, `values-es`, `values-fr`, `values-pt-rBR`, `values-ru`, `values-tr`, `values-ja`, `values-ko`, `values-zh`, `values-zh-rCN`, `values-id`, `values-in`, `values-hi`).
+   - **Escaping Obbligatorio di Apostrofi ed Entità XML**:
+     - Gli apostrofi singoli `'` non racchiusi da virgolette doppie esterne causano l'errore fatale di build AAPT2 (`AAPT: error: unescaped apostrophe in string`). Eseguire sempre l'escape: `\'` (es. `L\'attesa`, `Don\'t miss out`).
+     - Le e-commerciali devono essere espresse rigorosamente come entità XML `&amp;` (vietato il carattere crudo `&`).
+   - **Parità Rigorosa degli Specifier di Formattazione (`%1$s`, `%2$d`)**:
+     - Quando una stringa del file base `values/strings.xml` contiene argomenti posizionali o numerati (es. `%1$s`, `%2$d`), tutte le 14 traduzioni localizzate devono contenere **esattamente gli stessi specifier**, con lo stesso tipo (`d` per interi, `s` per stringhe).
+     - La mancanza o la mutazione di tipo di uno specifier (es. trasformare `%d` in `%s` o omettere `%2$s`) causa crash fatali a runtime (`UnknownFormatConversionException` o `MissingFormatArgumentException`) durante l'invocazione di `stringResource(...)`.
+   - **Prevenzione Chiavi Orfane**:
+     - Quando una stringa viene eliminata o rinominata in Kotlin, rimuoverla contestualmente da tutti i 15 file per evitare l'accumulo di debito tecnico e stringhe orfane.
 
 ### Legal & Asset Attribution Invariants
 

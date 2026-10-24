@@ -185,3 +185,29 @@
       2. Le risorse remote su Supabase (`shared_folders`, `folder_members`, `folder_invites`) vengono epurate silenziosamente a costo zero per evitare costi di hosting e tabelle orfane sul cloud.
       3. L'utente viene notificato in-app con un feedback discreto (`folder_auto_reverted_private`), garantendo chiarezza sul nuovo stato locale della cartella.
 
+- **Architettura Cartelle Condivise Collaborative (Supabase Real-Time, Inviti & Permessi)**:
+    - **Limite Rigido a 25 Membri per Cartella (`MAX_MEMBERS = 25`)**:
+      - Ogni cartella condivisa può ospitare al massimo 25 membri totali (Owner incluso).
+      - Il controllo del limite deve essere applicato a monte nella UI (`FolderJoinDialog` e `FolderShareModal`), disabilitando la creazione di nuovi inviti e respingendo l'accesso se `memberCount >= 25`.
+      - Lato database, il vincolo è presidiato dalle policy PostgreSQL RLS e/o vincoli di trigger.
+    - **Formato Codici Invito Alfanumerici (`FT-XXXXX`)**:
+      - I codici di invito generati adottano tassativamente il prefisso `FT-` seguito da 5 caratteri alfanumerici casuali in maiuscolo (es. `FT-AB12C`).
+      - Per prevenire errori di digitazione e confusione visiva, il generatore esclude caratteri ambigui come `0` vs `O` e `1` vs `I`.
+      - Nella dialog di inserimento (`FolderJoinDialog`), il campo accetta solo i 5 caratteri del corpo (filtrando prefisso se incollato) e il pulsante di unione si abilita rigorosamente solo quando `input.length == 5`.
+    - **Separazione Rigorosa Ruoli e Permessi (`Owner` vs `Collaborator`)**:
+      - *Owner*: è l'unico utente abilitato a eliminare l'intera cartella condivisa, revocare o modificare ruoli (`admin`/`collaborator`), espellere membri e generare o cancellare inviti.
+      - *Collaboratore*: può aggiungere o rimuovere media (`folder_items`), ma non può eliminare la cartella né modificare i permessi di altri partecipanti.
+    - **Aggiornamenti Ottimistici in Room (Zero Latency UX)**:
+      - Quando un membro aggiunge o rimuove un film/serie da una cartella condivisa, l'entità SQLite locale in Room viene aggiornata **immediatamente** prima di qualsiasi chiamata di rete.
+      - La sincronizzazione verso Supabase avviene in background in modo asincrono; in caso di errore di connessione, la modifica rimane persistente in locale e viene accodata per il retry senza bloccare l'interfaccia né mostrare toast di crash.
+    - **Gestione Abbandono Cartella (Leave vs Delete)**:
+      - Quando un collaboratore abbandona una cartella condivisa, la cartella viene rimossa localmente dal suo dispositivo (o trasformata in privata se richiesto) senza toccare la cartella remota né i contenuti degli altri 24 partecipanti.
+      - Se invece l'Owner elimina la cartella, la cancellazione cancella a cascata i riferimenti cloud, notificando i membri al successivo sync delta.
+
+- **Hardening Sincronizzazione Cloud Esterna (Trakt.tv & SIMKL Lifecycle)**:
+    - **Gestione Trasparente Token Refresh (Zero-Crash su Scadenza Sessione)**:
+      - Se un token OAuth 2.0 scade durante un job di sincronizzazione `WorkManager` (es. `TraktSyncWorker`, `SimklSyncWorker`), il worker deve intercettare l'errore HTTP 401 Unauthorized e tentare immediatamente il rinnovo tramite `refreshToken`.
+      - Se anche il refresh fallisce (token revocato dall'utente sul web o credenziali invalide), marcare l'account come scollegato in DataStore in modo silenzioso, senza lanciare notifiche allarmanti né bloccare l'esperienza offline dell'app.
+    - **Chunking Batch nelle Scritture Esterne (Anti-Rate-Limiting)**:
+      - Quando si inviano batch di aggiunta/rimozione cronologia o watchlist verso Trakt o SIMKL, suddividere le richieste in chunk di 50-100 elementi (`chunked(50)`), rispettando i rate-limit delle rispettive API (es. 1 req/sec su Trakt free tier) per prevenire risposte `429 Too Many Requests`.
+
