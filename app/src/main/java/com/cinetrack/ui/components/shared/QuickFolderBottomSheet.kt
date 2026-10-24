@@ -43,7 +43,8 @@ fun QuickFolderModal(
 ) {
     FlickTroveModal(
         onDismissRequest = onClose,
-        hazeState = hazeState
+        hazeState = hazeState,
+        contentPadding = PaddingValues(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -197,9 +198,9 @@ fun QuickFolderModal(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(50.dp)
+                    .height(52.dp)
                     .bounceClick(scaleDown = 0.92f, onClick = onClose)
-                    .clip(CircleShape)
+                    .clip(RoundedCornerShape(16.dp))
                     .background(accentColor),
                 contentAlignment = Alignment.Center
             ) {

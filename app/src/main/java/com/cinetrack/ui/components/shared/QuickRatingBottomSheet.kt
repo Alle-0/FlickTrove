@@ -47,7 +47,8 @@ fun QuickRatingModal(
 
     FlickTroveModal(
         onDismissRequest = onDismiss,
-        hazeState = hazeState
+        hazeState = hazeState,
+        contentPadding = PaddingValues(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
@@ -156,9 +157,9 @@ fun QuickRatingModal(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
+                        .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.08f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -176,12 +177,12 @@ fun QuickRatingModal(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(50.dp)
+                        .height(52.dp)
                         .bounceClick(scaleDown = 0.92f) {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(currentRating)
                         }
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {
