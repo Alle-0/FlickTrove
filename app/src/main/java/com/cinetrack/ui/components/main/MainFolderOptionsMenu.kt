@@ -111,28 +111,30 @@ fun MainFolderOptionsMenu(
                     )
                 }
 
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .bounceClick {
-                            onDismiss()
-                            onEdit()
-                        }
-                        .padding(horizontal = 16.dp, vertical = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Icon(
-                        ImageVector.vectorResource(id = R.drawable.ic_pencil),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
-                    Spacer(Modifier.width(12.dp))
-                    Text(
-                        stringResource(R.string.folder_edit_info),
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                    )
+                if (!isShared || isOwner) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bounceClick {
+                                onDismiss()
+                                onEdit()
+                            }
+                            .padding(horizontal = 16.dp, vertical = 14.dp),
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            ImageVector.vectorResource(id = R.drawable.ic_pencil),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                        Spacer(Modifier.width(12.dp))
+                        Text(
+                            stringResource(R.string.folder_edit_info),
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
+                        )
+                    }
                 }
 
                 Row(
