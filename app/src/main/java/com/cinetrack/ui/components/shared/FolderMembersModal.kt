@@ -104,7 +104,11 @@ fun FolderMembersModal(
         ) {
             Column {
                 Text(
-                    text = stringResource(R.string.folder_members_title),
+                    text = if (isOwner) {
+                        stringResource(R.string.folder_members_title)
+                    } else {
+                        stringResource(R.string.folder_members_only_title)
+                    },
                     style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
                     color = Color.White
                 )
@@ -117,30 +121,32 @@ fun FolderMembersModal(
             ModalCloseButton(onClose = onDismiss)
         }
 
-        // Tabs with classic FlickTrove physics
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 22.dp, vertical = 6.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
-        ) {
-            CategoryTabSelector(
-                options = listOf(
-                    stringResource(R.string.folder_members_tab, members.size),
-                    stringResource(R.string.folder_invites_tab_count, validInvites.size)
-                ),
-                selectedIndex = selectedTab,
-                onOptionClick = { selectedTab = it },
-                modifier = Modifier.fillMaxWidth(),
-                fillWidth = true,
-                indicatorColor = folderColor,
-                uppercase = false
-            )
-        }
+        if (isOwner) {
+            // Tabs with classic FlickTrove physics (Owner only)
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 22.dp, vertical = 6.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+            ) {
+                CategoryTabSelector(
+                    options = listOf(
+                        stringResource(R.string.folder_members_tab, members.size),
+                        stringResource(R.string.folder_invites_tab_count, validInvites.size)
+                    ),
+                    selectedIndex = selectedTab,
+                    onOptionClick = { selectedTab = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    fillWidth = true,
+                    indicatorColor = folderColor,
+                    uppercase = false
+                )
+            }
 
-        Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(8.dp))
+        }
 
         // Content with spring morph size animation and fading gradients
         AnimatedContent(

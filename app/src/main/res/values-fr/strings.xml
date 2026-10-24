@@ -1921,5 +1921,6 @@
     <string name="folder_filter_all">Tous les dossiers</string>
     <string name="folder_filter_shared">Partagés uniquement</string>
     <string name="folder_filter_private">Privés uniquement</string>
+    <string name="folder_members_only_title">Membres</string>
 </resources>
 

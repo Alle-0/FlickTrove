@@ -1926,4 +1926,5 @@
     <string name="folder_filter_all">Semua Folder</string>
     <string name="folder_filter_shared">Hanya Bersama</string>
     <string name="folder_filter_private">Hanya Pribadi</string>
+    <string name="folder_members_only_title">Anggota</string>
 </resources>

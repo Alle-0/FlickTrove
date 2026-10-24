@@ -1927,4 +1927,5 @@
     <string name="folder_filter_all">所有文件夹</string>
     <string name="folder_filter_shared">仅共享文件夹</string>
     <string name="folder_filter_private">仅私有文件夹</string>
+    <string name="folder_members_only_title">成员</string>
 </resources>

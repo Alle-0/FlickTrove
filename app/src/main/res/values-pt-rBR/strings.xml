@@ -1919,6 +1919,7 @@
     <string name="folder_filter_all">Todas as pastas</string>
     <string name="folder_filter_shared">Apenas compartilhadas</string>
     <string name="folder_filter_private">Apenas privadas</string>
+    <string name="folder_members_only_title">Membros</string>
 </resources>
 
 

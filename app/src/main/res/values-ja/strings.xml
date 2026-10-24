@@ -1927,4 +1927,5 @@
     <string name="folder_filter_all">すべてのフォルダー</string>
     <string name="folder_filter_shared">共有のみ</string>
     <string name="folder_filter_private">非公開のみ</string>
+    <string name="folder_members_only_title">メンバー</string>
 </resources>

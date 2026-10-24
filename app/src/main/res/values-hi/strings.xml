@@ -1919,6 +1919,7 @@
     <string name="folder_filter_all">सभी फ़ोल्डर</string>
     <string name="folder_filter_shared">केवल साझा</string>
     <string name="folder_filter_private">केवल निजी</string>
+    <string name="folder_members_only_title">सदस्य</string>
 </resources>
 
 

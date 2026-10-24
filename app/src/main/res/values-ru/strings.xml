@@ -1921,5 +1921,6 @@
     <string name="folder_filter_all">Все папки</string>
     <string name="folder_filter_shared">Только общие</string>
     <string name="folder_filter_private">Только личные</string>
+    <string name="folder_members_only_title">Участники</string>
 </resources>
 
