@@ -1889,7 +1889,8 @@
     <string name="folder_invite_create_button">產生邀請</string>
     <string name="folder_invite_code_label">邀請碼</string>
     <string name="folder_invite_copy">複製邀請碼</string>
-    <string name="folder_invite_copied">邀請碼已複製到剪貼簿！</string>
+    <string name="folder_invite_copied">已複製!</string>
+    <string name="folder_invite_copied_toast">邀請碼已複製到剪貼簿！</string>
     <string name="folder_invite_share">分享</string>
     <string name="folder_join_button">使用邀請碼加入</string>
     <string name="folder_join_title">加入共享資料夾</string>

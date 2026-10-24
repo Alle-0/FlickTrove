@@ -1889,7 +1889,8 @@
     <string name="folder_invite_create_button">초대 생성</string>
     <string name="folder_invite_code_label">초대 코드</string>
     <string name="folder_invite_copy">코드 복사</string>
-    <string name="folder_invite_copied">코드가 클립보드에 복사되었습니다!</string>
+    <string name="folder_invite_copied">복사됨!</string>
+    <string name="folder_invite_copied_toast">코드가 클립보드에 복사되었습니다!</string>
     <string name="folder_invite_share">공유</string>
     <string name="folder_join_button">코드로 참여</string>
     <string name="folder_join_title">공유 폴더 참여</string>

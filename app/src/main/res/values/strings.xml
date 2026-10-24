@@ -1896,7 +1896,8 @@
     <string name="folder_invite_create_button">Generate Invite</string>
     <string name="folder_invite_code_label">Invite Code</string>
     <string name="folder_invite_copy">Copy Code</string>
-    <string name="folder_invite_copied">Code copied to clipboard!</string>
+    <string name="folder_invite_copied">Copied!</string>
+    <string name="folder_invite_copied_toast">Code copied to clipboard!</string>
     <string name="folder_invite_share">Share</string>
     <string name="folder_join_button">Join with Code</string>
     <string name="folder_join_title">Join Shared Folder</string>

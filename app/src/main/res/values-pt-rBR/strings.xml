@@ -1881,7 +1881,8 @@
     <string name="folder_invite_create_button">Gerar Convite</string>
     <string name="folder_invite_code_label">Código de Convite</string>
     <string name="folder_invite_copy">Copiar Código</string>
-    <string name="folder_invite_copied">Código copiado para a área de transferência!</string>
+    <string name="folder_invite_copied">Copiado!</string>
+    <string name="folder_invite_copied_toast">Código copiado para a área de transferência!</string>
     <string name="folder_invite_share">Compartilhar</string>
     <string name="folder_join_button">Entrar com código</string>
     <string name="folder_join_title">Entrar em pasta compartilhada</string>

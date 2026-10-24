@@ -1883,7 +1883,8 @@
     <string name="folder_invite_create_button">Создать Приглашение</string>
     <string name="folder_invite_code_label">Код Приглашения</string>
     <string name="folder_invite_copy">Скопировать код</string>
-    <string name="folder_invite_copied">Код скопирован в буфер обмена!</string>
+    <string name="folder_invite_copied">Скопировано!</string>
+    <string name="folder_invite_copied_toast">Код скопирован в буфер обмена!</string>
     <string name="folder_invite_share">Поделиться</string>
     <string name="folder_join_button">Войти по коду</string>
     <string name="folder_join_title">Присоединиться к общей папке</string>

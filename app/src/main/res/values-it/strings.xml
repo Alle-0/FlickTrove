@@ -1896,7 +1896,8 @@
     <string name="folder_invite_create_button">Genera Invito</string>
     <string name="folder_invite_code_label">Codice Invito</string>
     <string name="folder_invite_copy">Copia Codice</string>
-    <string name="folder_invite_copied">Codice copiato negli appunti!</string>
+    <string name="folder_invite_copied">Copiato!</string>
+    <string name="folder_invite_copied_toast">Codice copiato negli appunti!</string>
     <string name="folder_invite_share">Condividi</string>
     <string name="folder_join_button">Unisciti con codice</string>
     <string name="folder_join_title">Unisciti a una cartella</string>

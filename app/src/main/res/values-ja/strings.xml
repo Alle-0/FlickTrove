@@ -1889,7 +1889,8 @@
     <string name="folder_invite_create_button">招待を作成</string>
     <string name="folder_invite_code_label">招待コード</string>
     <string name="folder_invite_copy">コードをコピー</string>
-    <string name="folder_invite_copied">コードをクリップボードにコピーしました！</string>
+    <string name="folder_invite_copied">コピー完了!</string>
+    <string name="folder_invite_copied_toast">コードをクリップボードにコピーしました！</string>
     <string name="folder_invite_share">共有</string>
     <string name="folder_join_button">コードで参加</string>
     <string name="folder_join_title">共有フォルダに参加</string>

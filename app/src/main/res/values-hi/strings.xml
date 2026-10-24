@@ -1881,7 +1881,8 @@
     <string name="folder_invite_create_button">आमंत्रण बनाएं</string>
     <string name="folder_invite_code_label">आमंत्रण कोड</string>
     <string name="folder_invite_copy">कोड कॉपी करें</string>
-    <string name="folder_invite_copied">कोड क्लिपबोर्ड पर कॉपी किया गया!</string>
+    <string name="folder_invite_copied">कॉपी किया गया!</string>
+    <string name="folder_invite_copied_toast">कोड क्लिपबोर्ड पर कॉपी किया गया!</string>
     <string name="folder_invite_share">साझा करें</string>
     <string name="folder_join_button">कोड से जुड़ें</string>
     <string name="folder_join_title">साझा फ़ोल्डर में शामिल हों</string>

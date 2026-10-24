@@ -1885,7 +1885,8 @@
     <string name="folder_invite_create_button">Generar Invitación</string>
     <string name="folder_invite_code_label">Código de Invitación</string>
     <string name="folder_invite_copy">Copiar Código</string>
-    <string name="folder_invite_copied">¡Código copiado al portapapeles!</string>
+    <string name="folder_invite_copied">¡Copiado!</string>
+    <string name="folder_invite_copied_toast">¡Código copiado al portapapeles!</string>
     <string name="folder_invite_share">Compartir</string>
     <string name="folder_join_button">Unirse con código</string>
     <string name="folder_join_title">Unirse a carpeta compartida</string>

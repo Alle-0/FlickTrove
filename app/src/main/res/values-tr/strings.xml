@@ -1889,7 +1889,8 @@
     <string name="folder_invite_create_button">Davet Oluştur</string>
     <string name="folder_invite_code_label">Davet Kodu</string>
     <string name="folder_invite_copy">Kodu kopyala</string>
-    <string name="folder_invite_copied">Kod panoya kopyalandı!</string>
+    <string name="folder_invite_copied">Kopyalandı!</string>
+    <string name="folder_invite_copied_toast">Kod panoya kopyalandı!</string>
     <string name="folder_invite_share">Paylaş</string>
     <string name="folder_join_button">Kodla katıl</string>
     <string name="folder_join_title">Paylaşılan Klasöre Katıl</string>

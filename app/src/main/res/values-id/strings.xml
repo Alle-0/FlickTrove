@@ -1888,7 +1888,8 @@
     <string name="folder_invite_create_button">Buat Undangan</string>
     <string name="folder_invite_code_label">Kode Undangan</string>
     <string name="folder_invite_copy">Salin Kode</string>
-    <string name="folder_invite_copied">Kode disalin ke papan klip!</string>
+    <string name="folder_invite_copied">Tersalin!</string>
+    <string name="folder_invite_copied_toast">Kode disalin ke papan klip!</string>
     <string name="folder_invite_share">Bagikan</string>
     <string name="folder_join_button">Gabung dengan kode</string>
     <string name="folder_join_title">Gabung ke Folder Bersama</string>

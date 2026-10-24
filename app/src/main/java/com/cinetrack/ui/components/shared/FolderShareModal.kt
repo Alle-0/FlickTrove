@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
+import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -22,6 +23,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
@@ -30,6 +32,7 @@ import com.cinetrack.data.model.SharedFolderInviteDto
 import com.cinetrack.data.repository.InviteDurationOption
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.delay
 
 @Composable
 fun FolderShareModal(
@@ -44,6 +47,13 @@ fun FolderShareModal(
     var createdInvite by remember { mutableStateOf<SharedFolderInviteDto?>(null) }
     var copiedToast by remember { mutableStateOf(false) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(copiedToast) {
+        if (copiedToast) {
+            delay(2000)
+            copiedToast = false
+        }
+    }
 
     FlickTroveModal(
         isVisible = true,
@@ -234,6 +244,7 @@ fun FolderShareModal(
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // Copy code button
+                    val isCopied = copiedToast
                     Box(
                         modifier = Modifier
                             .weight(1f)
@@ -243,26 +254,37 @@ fun FolderShareModal(
                                 val clip = ClipData.newPlainText("FlickTrove Invite Code", invite.code)
                                 clipboard.setPrimaryClip(clip)
                                 copiedToast = true
+                                Toast.makeText(context, context.getString(R.string.folder_invite_copied_toast), Toast.LENGTH_SHORT).show()
                             }
                             .clip(CircleShape)
-                            .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
-                            .background(Color.White.copy(alpha = 0.06f)),
+                            .border(
+                                width = 1.dp,
+                                color = if (isCopied) Color(0xFF34C759).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.25f),
+                                shape = CircleShape
+                            )
+                            .background(if (isCopied) Color(0xFF34C759).copy(alpha = 0.15f) else Color.White.copy(alpha = 0.06f)),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.Center
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.padding(horizontal = 8.dp)
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_link),
+                                imageVector = ImageVector.vectorResource(id = if (isCopied) R.drawable.ic_tick else R.drawable.ic_link),
                                 contentDescription = null,
-                                tint = Color.White,
+                                tint = if (isCopied) Color(0xFF34C759) else Color.White,
                                 modifier = Modifier.size(15.dp)
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
-                                text = if (copiedToast) stringResource(R.string.folder_invite_copied) else stringResource(R.string.folder_invite_copy),
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, color = Color.White)
+                                text = if (isCopied) stringResource(R.string.folder_invite_copied) else stringResource(R.string.folder_invite_copy),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.SemiBold,
+                                    color = if (isCopied) Color(0xFF34C759) else Color.White
+                                ),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }

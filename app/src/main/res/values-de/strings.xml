@@ -1886,7 +1886,8 @@
     <string name="folder_invite_create_button">Einladung Erstellen</string>
     <string name="folder_invite_code_label">Einladungscode</string>
     <string name="folder_invite_copy">Code kopieren</string>
-    <string name="folder_invite_copied">Code in die Zwischenablage kopiert!</string>
+    <string name="folder_invite_copied">Kopiert!</string>
+    <string name="folder_invite_copied_toast">Code in die Zwischenablage kopiert!</string>
     <string name="folder_invite_share">Teilen</string>
     <string name="folder_join_button">Mit Code beitreten</string>
     <string name="folder_join_title">Geteiltem Ordner beitreten</string>

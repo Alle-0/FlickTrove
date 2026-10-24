@@ -1883,7 +1883,8 @@
     <string name="folder_invite_create_button">Générer l\'invitation</string>
     <string name="folder_invite_code_label">Code d\'Invitation</string>
     <string name="folder_invite_copy">Copier le code</string>
-    <string name="folder_invite_copied">Code copié dans le presse-papier !</string>
+    <string name="folder_invite_copied">Copié !</string>
+    <string name="folder_invite_copied_toast">Code copié dans le presse-papier !</string>
     <string name="folder_invite_share">Partager</string>
     <string name="folder_join_button">Rejoindre avec un code</string>
     <string name="folder_join_title">Rejoindre un dossier partagé</string>
