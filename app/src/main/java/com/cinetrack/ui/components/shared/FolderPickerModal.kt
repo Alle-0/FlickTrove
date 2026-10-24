@@ -8,6 +8,11 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -208,7 +213,16 @@ private fun FolderListContent(
                     contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
                     items(folders, key = { it.id }, contentType = { "folder_picker_item" }) { folder ->
-                        Box(modifier = Modifier.animateItem()) {
+                        Box(
+                            modifier = Modifier.animateItem(
+                                fadeInSpec = androidx.compose.animation.core.tween(220),
+                                fadeOutSpec = androidx.compose.animation.core.tween(220),
+                                placementSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                )
+                            )
+                        ) {
                             FolderItem(
                                 folder = folder,
                                 isSelected = isItemInFolder(folder.id),
@@ -309,8 +323,38 @@ private fun FolderItem(
     }
     val folderColor = folder.color.toComposeColor()
 
-    val backgroundColor = if (isSelected) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.03f)
-    val borderColor = if (isSelected) folderColor else Color.White.copy(alpha = 0.08f)
+    val backgroundColor by androidx.compose.animation.animateColorAsState(
+        targetValue = if (isSelected) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.03f),
+        label = "bgColor"
+    )
+    val borderColor by androidx.compose.animation.animateColorAsState(
+        targetValue = if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
+        label = "borderColor"
+    )
+
+    val iconScale = remember { Animatable(if (isSelected) 1f else 0.6f) }
+    LaunchedEffect(isSelected) {
+        if (isSelected) {
+            iconScale.snapTo(0.65f)
+            iconScale.animateTo(
+                targetValue = 1.18f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+            iconScale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+        }
+    }
+
+    val animatedIcon = AnimatedImageVector.animatedVectorResource(id = R.drawable.ic_tick_anim)
+    val painter = rememberAnimatedVectorPainter(animatedIcon, atEnd = isSelected)
     
     Row(
         modifier = Modifier
@@ -425,14 +469,46 @@ private fun FolderItem(
         ) {
             androidx.compose.animation.AnimatedVisibility(
                 visible = isSelected,
-                enter = fadeIn() + scaleIn(initialScale = 0.8f),
-                exit = fadeOut() + scaleOut(targetScale = 0.8f)
+                enter = fadeIn(androidx.compose.animation.core.tween(160)) + scaleIn(
+                    initialScale = 0.6f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
+                exit = fadeOut(androidx.compose.animation.core.tween(160)) + scaleOut(targetScale = 0.6f)
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
-                    contentDescription = "Selected",
-                    tint = Color(0xFF4ADE80),
-                    modifier = Modifier.size(20.dp)
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale.value
+                            scaleY = iconScale.value
+                        }
+                        .clip(CircleShape)
+                        .background(folderColor.copy(alpha = 0.22f))
+                        .border(1.dp, folderColor.copy(alpha = 0.45f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painter,
+                        contentDescription = "Selected",
+                        tint = folderColor,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !isSelected,
+                enter = fadeIn(androidx.compose.animation.core.tween(160)) + scaleIn(initialScale = 0.8f),
+                exit = fadeOut(androidx.compose.animation.core.tween(160)) + scaleOut(targetScale = 0.8f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, Color.White.copy(alpha = 0.15f), CircleShape)
                 )
             }
         }

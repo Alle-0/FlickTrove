@@ -1,0 +1,55 @@
+<?xml version="1.0" encoding="utf-8"?>
+<animated-vector xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:aapt="http://schemas.android.com/aapt">
+    <aapt:attr name="android:drawable">
+        <vector
+            android:width="24dp"
+            android:height="24dp"
+            android:viewportWidth="24"
+            android:viewportHeight="24">
+
+            <!-- Checkmark Dot / Short Stroke -->
+            <path
+                android:name="dot_stroke"
+                android:pathData="M 3.0,12.99 L 4.74,14.33"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2.4"
+                android:strokeLineCap="round"
+                android:trimPathEnd="0" />
+
+            <!-- Checkmark Slash / Long Stroke -->
+            <path
+                android:name="slash_stroke"
+                android:pathData="M 8.17,16.96 c 1.0,0.77 2.43,0.58 3.2,-0.43 L 20.18,5.0"
+                android:strokeColor="#FFFFFF"
+                android:strokeWidth="2.4"
+                android:strokeLineCap="round"
+                android:trimPathEnd="0" />
+        </vector>
+    </aapt:attr>
+
+    <!-- Animate Short Stroke -->
+    <target android:name="dot_stroke">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:duration="100"
+                android:interpolator="@android:anim/decelerate_interpolator" />
+        </aapt:attr>
+    </target>
+
+    <!-- Animate Long Stroke -->
+    <target android:name="slash_stroke">
+        <aapt:attr name="android:animation">
+            <objectAnimator
+                android:propertyName="trimPathEnd"
+                android:valueFrom="0"
+                android:valueTo="1"
+                android:startOffset="60"
+                android:duration="200"
+                android:interpolator="@android:anim/decelerate_interpolator" />
+        </aapt:attr>
+    </target>
+</animated-vector>

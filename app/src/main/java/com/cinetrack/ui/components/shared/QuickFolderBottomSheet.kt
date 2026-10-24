@@ -30,6 +30,20 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.util.toComposeColor
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.graphics.res.animatedVectorResource
+import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
+import androidx.compose.animation.graphics.vector.AnimatedImageVector
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.ui.graphics.graphicsLayer
 
 @Composable
 fun QuickFolderModal(
@@ -94,6 +108,19 @@ fun QuickFolderModal(
             Spacer(modifier = Modifier.height(16.dp))
 
             val listState = rememberLazyListState()
+
+            // Optimistic toggle overrides for 0ms instantaneous feedback
+            val optimisticToggles = remember(movieTitle) { mutableStateMapOf<String, Boolean>() }
+            val itemInFolder: (String) -> Boolean = { folderId ->
+                optimisticToggles[folderId] ?: isItemInFolder(folderId)
+            }
+
+            val sortedFolders = remember(folders, optimisticToggles.toMap()) {
+                folders.sortedWith(
+                    compareByDescending<FolderEntity> { itemInFolder(it.id) }
+                        .thenBy { it.name.lowercase() }
+                )
+            }
             
             Box(
                 modifier = Modifier
@@ -109,7 +136,7 @@ fun QuickFolderModal(
                     verticalArrangement = Arrangement.spacedBy(8.dp),
                     contentPadding = PaddingValues(bottom = 8.dp)
                 ) {
-                    if (folders.isEmpty()) {
+                    if (sortedFolders.isEmpty()) {
                         item {
                             Box(
                                 modifier = Modifier
@@ -125,22 +152,34 @@ fun QuickFolderModal(
                             }
                         }
                     } else {
-                        items(folders, key = { it.id }, contentType = { "quick_folder" }) { folder ->
-                            val inFolder = isItemInFolder(folder.id)
+                        items(sortedFolders, key = { it.id }, contentType = { "quick_folder" }) { folder ->
+                            val inFolder = itemInFolder(folder.id)
                             val folderColor = folder.color.toComposeColor(accentColor)
 
                             QuickFolderItem(
                                 folder = folder,
                                 isSelected = inFolder,
                                 folderColor = folderColor,
-                                onClick = { onToggleItem(folder) }
+                                onClick = {
+                                    val currentVal = itemInFolder(folder.id)
+                                    optimisticToggles[folder.id] = !currentVal
+                                    onToggleItem(folder)
+                                },
+                                modifier = Modifier.animateItem(
+                                    fadeInSpec = tween(220),
+                                    fadeOutSpec = tween(220),
+                                    placementSpec = spring(
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                        stiffness = Spring.StiffnessMediumLow
+                                    )
+                                )
                             )
                         }
                     }
                 }
 
                 // Premium Scrollbar logic
-                val totalItems = folders.size
+                val totalItems = sortedFolders.size
                 val layoutInfo = listState.layoutInfo
                 val visibleItems = layoutInfo.visibleItemsInfo.size
                 
@@ -222,7 +261,8 @@ private fun QuickFolderItem(
     folder: FolderEntity,
     isSelected: Boolean,
     folderColor: Color,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier
 ) {
     val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
     val isOwner = currentUserId != null && folder.ownerUid == currentUserId
@@ -232,18 +272,51 @@ private fun QuickFolderItem(
         folder.ownerName
     }
 
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
+        animationSpec = tween(220),
+        label = "folderBorderColor"
+    )
+    val animatedBgColor by animateColorAsState(
+        targetValue = if (isSelected) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.03f),
+        animationSpec = tween(220),
+        label = "folderBgColor"
+    )
+
+    // Bottom-bar style spring bounce animation on selection
+    val iconScale = remember { Animatable(if (isSelected) 1f else 0.6f) }
+    LaunchedEffect(isSelected) {
+        if (isSelected) {
+            iconScale.snapTo(0.65f)
+            iconScale.animateTo(
+                targetValue = 1.18f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMedium
+                )
+            )
+            iconScale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
+            )
+        }
+    }
+
+    val animatedIcon = AnimatedImageVector.animatedVectorResource(id = R.drawable.ic_tick_anim)
+    val painter = rememberAnimatedVectorPainter(animatedIcon, atEnd = isSelected)
+
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
             .clip(RoundedCornerShape(18.dp))
-            .background(
-                if (isSelected) Color.White.copy(alpha = 0.08f)
-                else Color.White.copy(alpha = 0.03f)
-            )
+            .background(animatedBgColor)
             .border(
                 1.5.dp,
-                if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
+                animatedBorderColor,
                 RoundedCornerShape(18.dp)
             )
             .padding(horizontal = 14.dp, vertical = 12.dp),
@@ -355,18 +428,29 @@ private fun QuickFolderItem(
         ) {
             androidx.compose.animation.AnimatedVisibility(
                 visible = isSelected,
-                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(initialScale = 0.8f),
-                exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut(targetScale = 0.8f)
+                enter = fadeIn(tween(160)) + scaleIn(
+                    initialScale = 0.6f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
+                exit = fadeOut(tween(160)) + scaleOut(targetScale = 0.6f)
             ) {
                 Box(
                     modifier = Modifier
                         .size(24.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale.value
+                            scaleY = iconScale.value
+                        }
                         .clip(CircleShape)
-                        .background(folderColor.copy(alpha = 0.2f)),
+                        .background(folderColor.copy(alpha = 0.22f))
+                        .border(1.dp, folderColor.copy(alpha = 0.45f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                        painter = painter,
                         contentDescription = null,
                         tint = folderColor,
                         modifier = Modifier.size(15.dp)
@@ -374,7 +458,11 @@ private fun QuickFolderItem(
                 }
             }
 
-            if (!isSelected) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = !isSelected,
+                enter = fadeIn(tween(160)) + scaleIn(initialScale = 0.8f),
+                exit = fadeOut(tween(160)) + scaleOut(targetScale = 0.8f)
+            ) {
                 Box(
                     modifier = Modifier
                         .size(18.dp)
