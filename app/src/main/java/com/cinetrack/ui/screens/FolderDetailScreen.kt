@@ -442,7 +442,7 @@ fun FolderDetailScreenContent(
                                     item(span = { GridItemSpan(maxLineSpan) }) {
                                         val currentHeight = if (descMaxHeightPx > 0f) with(density) { descHeightPx.toDp() } else Dp.Unspecified
                                         val progress = if (descMaxHeightPx > 0f) (descHeightPx / descMaxHeightPx).coerceIn(0f, 1f) else 1f
-                                        val alphaProgress = ((progress - 0.25f) / 0.75f).coerceIn(0f, 1f)
+                                        val alphaProgress = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
 
                                         Box(
                                             modifier = Modifier

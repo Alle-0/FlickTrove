@@ -430,9 +430,9 @@ fun FoldersScreenContent(
                         val currentHeight = if (searchBarMaxHeightPx > 0f) with(density) { searchBarHeightPx.toDp() } else Dp.Unspecified
                         val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 8.dp).coerceAtLeast(0.dp)
                         
-                        // Fast fade: fully opaque at 1.0, fully transparent at 0.25
+                        // Fast fade: fully opaque at 1.0, fully transparent already at 0.5 (half height)
                         val progress = if (searchBarMaxHeightPx > 0f) (searchBarHeightPx / searchBarMaxHeightPx).coerceIn(0f, 1f) else 1f
-                        val alphaProgress = ((progress - 0.25f) / 0.75f).coerceIn(0f, 1f)
+                        val alphaProgress = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
                         
                         Box(
                             modifier = Modifier
@@ -511,9 +511,9 @@ fun FoldersScreenContent(
                             val currentHeight = if (newFolderMaxHeightPx > 0f) with(density) { newFolderHeightPx.toDp() } else Dp.Unspecified
                             val pillHeight = if (currentHeight == Dp.Unspecified) Dp.Unspecified else (currentHeight - 12.dp).coerceAtLeast(0.dp)
                             
-                            // Fast fade: fully opaque at 1.0, fully transparent at 0.25
+                            // Fast fade: fully opaque at 1.0, fully transparent already at 0.5 (half height)
                             val progress = if (newFolderMaxHeightPx > 0f) (newFolderHeightPx / newFolderMaxHeightPx).coerceIn(0f, 1f) else 1f
-                            val alphaProgress = ((progress - 0.25f) / 0.75f).coerceIn(0f, 1f)
+                            val alphaProgress = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
                             
                             Box(
                                 modifier = Modifier
