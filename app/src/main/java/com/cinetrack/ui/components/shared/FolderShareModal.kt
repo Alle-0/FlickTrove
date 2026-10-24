@@ -108,33 +108,35 @@ fun FolderShareModal(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clip(RoundedCornerShape(14.dp))
+                            .padding(vertical = 2.5.dp)
+                            .bounceClick(scaleDown = 0.98f) { selectedOption = option }
+                            .clip(RoundedCornerShape(12.dp))
                             .background(if (isSelected) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.04f))
                             .border(
                                 1.dp,
                                 if (isSelected) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
-                                RoundedCornerShape(14.dp)
+                                RoundedCornerShape(12.dp)
                             )
-                            .bounceClick { selectedOption = option }
-                            .padding(horizontal = 14.dp, vertical = 12.dp),
+                            .padding(horizontal = 14.dp, vertical = 7.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
                         Text(
                             text = label,
                             style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal
+                                fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
+                                fontSize = 14.sp
                             ),
                             color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
                         )
                         RadioButton(
                             selected = isSelected,
-                            onClick = { selectedOption = option },
+                            onClick = null,
                             colors = RadioButtonDefaults.colors(
                                 selectedColor = Color.White,
                                 unselectedColor = Color.White.copy(alpha = 0.3f)
-                            )
+                            ),
+                            modifier = Modifier.size(20.dp)
                         )
                     }
                 }
@@ -148,41 +150,44 @@ fun FolderShareModal(
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(14.dp))
 
-                Button(
-                    onClick = {
-                        isLoading = true
-                        errorMessage = null
-                        onCreateInvite(selectedOption) { result ->
-                            isLoading = false
-                            result.onSuccess { invite ->
-                                createdInvite = invite
-                            }.onFailure { err ->
-                                errorMessage = err.message ?: "Errore durante la creazione"
-                            }
-                        }
-                    },
+                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(50.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    enabled = !isLoading
+                        .height(42.dp)
+                        .bounceClick(
+                            enabled = !isLoading,
+                            scaleDown = 0.96f
+                        ) {
+                            isLoading = true
+                            errorMessage = null
+                            onCreateInvite(selectedOption) { result ->
+                                isLoading = false
+                                result.onSuccess { invite ->
+                                    createdInvite = invite
+                                }.onFailure { err ->
+                                    errorMessage = err.message ?: "Errore durante la creazione"
+                                }
+                            }
+                        }
+                        .clip(CircleShape)
+                        .background(if (!isLoading) Color.White else Color.White.copy(alpha = 0.4f)),
+                    contentAlignment = Alignment.Center
                 ) {
                     if (isLoading) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(18.dp),
                             color = Color.Black,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             text = stringResource(R.string.folder_invite_create_button),
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
                         )
                     }
                 }
@@ -192,10 +197,10 @@ fun FolderShareModal(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .clip(RoundedCornerShape(20.dp))
+                        .clip(RoundedCornerShape(18.dp))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(20.dp))
-                        .padding(20.dp),
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(18.dp))
+                        .padding(16.dp),
                     contentAlignment = Alignment.Center
                 ) {
                     Column(
@@ -209,12 +214,12 @@ fun FolderShareModal(
                             ),
                             color = Color.White.copy(alpha = 0.6f)
                         )
-                        Spacer(Modifier.height(8.dp))
+                        Spacer(Modifier.height(6.dp))
                         Text(
                             text = invite.code,
                             style = MaterialTheme.typography.headlineMedium.copy(
                                 fontWeight = FontWeight.Black,
-                                letterSpacing = 4.sp,
+                                letterSpacing = 3.sp,
                                 fontFamily = FontFamily.Monospace
                             ),
                             color = Color.White
@@ -222,68 +227,79 @@ fun FolderShareModal(
                     }
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(14.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // Copy code button
-                    OutlinedButton(
-                        onClick = {
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("FlickTrove Invite Code", invite.code)
-                            clipboard.setPrimaryClip(clip)
-                            copiedToast = true
-                        },
+                    Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp),
-                        shape = CircleShape,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.3f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                            .height(40.dp)
+                            .bounceClick(scaleDown = 0.94f) {
+                                val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                                val clip = ClipData.newPlainText("FlickTrove Invite Code", invite.code)
+                                clipboard.setPrimaryClip(clip)
+                                copiedToast = true
+                            }
+                            .clip(CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                            .background(Color.White.copy(alpha = 0.06f)),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_link),
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = if (copiedToast) stringResource(R.string.folder_invite_copied) else stringResource(R.string.folder_invite_copy),
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_link),
+                                contentDescription = null,
+                                tint = Color.White,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = if (copiedToast) stringResource(R.string.folder_invite_copied) else stringResource(R.string.folder_invite_copy),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.SemiBold, color = Color.White)
+                            )
+                        }
                     }
 
                     // Share intent button
-                    Button(
-                        onClick = {
-                            val shareText = "Unisciti alla mia cartella \"${folder.name}\" su FlickTrove!\nInserisci il codice: ${invite.code}"
-                            val intent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, shareText)
-                            }
-                            context.startActivity(Intent.createChooser(intent, "Condividi invito FlickTrove"))
-                        },
+                    Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
-                        )
+                            .height(40.dp)
+                            .bounceClick(scaleDown = 0.94f) {
+                                val shareText = "Unisciti alla mia cartella \"${folder.name}\" su FlickTrove!\nInserisci il codice: ${invite.code}"
+                                val intent = Intent(Intent.ACTION_SEND).apply {
+                                    type = "text/plain"
+                                    putExtra(Intent.EXTRA_TEXT, shareText)
+                                }
+                                context.startActivity(Intent.createChooser(intent, "Condividi invito FlickTrove"))
+                            }
+                            .clip(CircleShape)
+                            .background(Color.White),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_share),
-                            contentDescription = null,
-                            modifier = Modifier.size(16.dp)
-                        )
-                        Spacer(Modifier.width(8.dp))
-                        Text(
-                            text = stringResource(R.string.folder_invite_share),
-                            style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                        )
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_share),
+                                contentDescription = null,
+                                tint = Color.Black,
+                                modifier = Modifier.size(15.dp)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = stringResource(R.string.folder_invite_share),
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold, color = Color.Black)
+                            )
+                        }
                     }
                 }
             }

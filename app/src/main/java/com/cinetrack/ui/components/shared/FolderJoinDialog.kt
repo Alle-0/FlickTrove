@@ -121,48 +121,53 @@ fun FolderJoinDialog(
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(14.dp))
 
-                Button(
-                    onClick = {
-                        val cleanCode = codeInput.trim().uppercase()
-                        if (cleanCode.isBlank()) return@Button
-                        isChecking = true
-                        errorMessage = null
-                        onCheckCode(cleanCode) { result ->
-                            isChecking = false
-                            result.onSuccess { pair ->
-                                invitePreview = pair
-                            }.onFailure { err ->
-                                errorMessage = when (err.message) {
-                                    "INVITE_EXPIRED" -> context.getString(R.string.folder_join_expired)
-                                    "INVITE_REVOKED" -> context.getString(R.string.folder_join_revoked)
-                                    "INVITE_MAX_USES_REACHED" -> context.getString(R.string.folder_join_max_uses)
-                                    else -> context.getString(R.string.folder_join_invalid_code)
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(42.dp)
+                        .bounceClick(
+                            enabled = codeInput.isNotBlank() && !isChecking,
+                            scaleDown = 0.96f
+                        ) {
+                            val cleanCode = codeInput.trim().uppercase()
+                            if (cleanCode.isBlank()) return@bounceClick
+                            isChecking = true
+                            errorMessage = null
+                            onCheckCode(cleanCode) { result ->
+                                isChecking = false
+                                result.onSuccess { pair ->
+                                    invitePreview = pair
+                                }.onFailure { err ->
+                                    errorMessage = when (err.message) {
+                                        "INVITE_EXPIRED" -> context.getString(R.string.folder_join_expired)
+                                        "INVITE_REVOKED" -> context.getString(R.string.folder_join_revoked)
+                                        "INVITE_MAX_USES_REACHED" -> context.getString(R.string.folder_join_max_uses)
+                                        else -> context.getString(R.string.folder_join_invalid_code)
+                                    }
                                 }
                             }
                         }
-                    },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(50.dp),
-                    shape = CircleShape,
-                    colors = ButtonDefaults.buttonColors(
-                        containerColor = Color.White,
-                        contentColor = Color.Black
-                    ),
-                    enabled = codeInput.isNotBlank() && !isChecking
+                        .clip(CircleShape)
+                        .background(
+                            if (codeInput.isNotBlank() && !isChecking) Color.White else Color.White.copy(alpha = 0.35f)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
                     if (isChecking) {
                         CircularProgressIndicator(
-                            modifier = Modifier.size(20.dp),
+                            modifier = Modifier.size(18.dp),
                             color = Color.Black,
                             strokeWidth = 2.dp
                         )
                     } else {
                         Text(
                             text = stringResource(R.string.folder_join_check),
-                            fontWeight = FontWeight.Bold
+                            style = MaterialTheme.typography.labelLarge.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.Black
+                            )
                         )
                     }
                 }
@@ -255,63 +260,70 @@ fun FolderJoinDialog(
                     )
                 }
 
-                Spacer(Modifier.height(20.dp))
+                Spacer(Modifier.height(14.dp))
 
                 Row(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
-                    OutlinedButton(
-                        onClick = { invitePreview = null },
+                    Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(50.dp),
-                        shape = CircleShape,
-                        border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.25f)),
-                        colors = ButtonDefaults.outlinedButtonColors(contentColor = Color.White)
+                            .height(40.dp)
+                            .bounceClick(scaleDown = 0.94f) { invitePreview = null }
+                            .clip(CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                            .background(Color.White.copy(alpha = 0.06f)),
+                        contentAlignment = Alignment.Center
                     ) {
                         Text(
                             text = stringResource(R.string.settings_cancel),
-                            fontWeight = FontWeight.SemiBold
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                color = Color.White
+                            )
                         )
                     }
 
-                    Button(
-                        onClick = {
-                            isJoining = true
-                            errorMessage = null
-                            onAcceptInvite(invite.code) { result ->
-                                isJoining = false
-                                result.onSuccess {
-                                    onDismiss()
-                                }.onFailure { err ->
-                                    errorMessage = when (err.message) {
-                                        "MEMBER_LIMIT_REACHED" -> context.getString(R.string.folder_join_member_limit)
-                                        else -> err.message ?: "Errore durante l'adesione"
+                    Box(
+                        modifier = Modifier
+                            .weight(1.4f)
+                            .height(40.dp)
+                            .bounceClick(
+                                enabled = !isJoining,
+                                scaleDown = 0.96f
+                            ) {
+                                isJoining = true
+                                errorMessage = null
+                                onAcceptInvite(invite.code) { result ->
+                                    isJoining = false
+                                    result.onSuccess {
+                                        onDismiss()
+                                    }.onFailure { err ->
+                                        errorMessage = when (err.message) {
+                                            "MEMBER_LIMIT_REACHED" -> context.getString(R.string.folder_join_member_limit)
+                                            else -> err.message ?: "Errore durante l'adesione"
+                                        }
                                     }
                                 }
                             }
-                        },
-                        modifier = Modifier
-                            .weight(1.4f)
-                            .height(50.dp),
-                        shape = CircleShape,
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = Color.White,
-                            contentColor = Color.Black
-                        ),
-                        enabled = !isJoining
+                            .clip(CircleShape)
+                            .background(if (!isJoining) Color.White else Color.White.copy(alpha = 0.4f)),
+                        contentAlignment = Alignment.Center
                     ) {
                         if (isJoining) {
                             CircularProgressIndicator(
-                                modifier = Modifier.size(20.dp),
+                                modifier = Modifier.size(18.dp),
                                 color = Color.Black,
                                 strokeWidth = 2.dp
                             )
                         } else {
                             Text(
                                 text = stringResource(R.string.folder_join_accept),
-                                fontWeight = FontWeight.Bold
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    color = Color.Black
+                                )
                             )
                         }
                     }

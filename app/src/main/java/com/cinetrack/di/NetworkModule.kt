@@ -325,9 +325,10 @@ object NetworkModule {
         }
         val supabaseAuthInterceptor = okhttp3.Interceptor { chain ->
             val original = chain.request()
+            val anonKey = Keys.getSupabaseAnonKey()
             val request = original.newBuilder()
-                .header("apikey", com.cinetrack.BuildConfig.SUPABASE_ANON_KEY)
-                .header("Authorization", "Bearer ${com.cinetrack.BuildConfig.SUPABASE_ANON_KEY}")
+                .header("apikey", anonKey)
+                .header("Authorization", "Bearer $anonKey")
                 .build()
             chain.proceed(request)
         }
@@ -343,7 +344,7 @@ object NetworkModule {
         @Named("supabase_okhttp") okHttpClient: OkHttpClient,
         json: Json
     ): com.cinetrack.data.api.SupabaseSharedFolderApi {
-        val baseUrl = Keys.getSupabaseUrl().trimEnd('/') + "/"
+        val baseUrl = Keys.getSupabaseProjectUrl()
         return Retrofit.Builder()
             .baseUrl(baseUrl)
             .client(okHttpClient)

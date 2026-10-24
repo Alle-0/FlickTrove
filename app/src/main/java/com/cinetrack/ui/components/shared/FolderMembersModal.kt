@@ -97,10 +97,10 @@ fun FolderMembersModal(
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .bounceClick(scaleDown = 0.96f) { selectedTab = 0 }
                     .clip(RoundedCornerShape(9.dp))
                     .background(if (selectedTab == 0) Color.White.copy(alpha = 0.14f) else Color.Transparent)
-                    .clickable { selectedTab = 0 }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 7.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -113,10 +113,10 @@ fun FolderMembersModal(
             Box(
                 modifier = Modifier
                     .weight(1f)
+                    .bounceClick(scaleDown = 0.96f) { selectedTab = 1 }
                     .clip(RoundedCornerShape(9.dp))
                     .background(if (selectedTab == 1) Color.White.copy(alpha = 0.14f) else Color.Transparent)
-                    .clickable { selectedTab = 1 }
-                    .padding(vertical = 8.dp),
+                    .padding(vertical = 7.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -203,15 +203,17 @@ fun FolderMembersModal(
                             if (isOwner && !isOwnerMember) {
                                 Box(
                                     modifier = Modifier
+                                        .size(32.dp)
+                                        .bounceClick(scaleDown = 0.88f) { memberToRemove = member }
                                         .clip(CircleShape)
-                                        .clickable { memberToRemove = member }
-                                        .padding(6.dp)
+                                        .background(Color.Red.copy(alpha = 0.1f)),
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
                                         imageVector = ImageVector.vectorResource(R.drawable.ic_trash),
                                         contentDescription = stringResource(R.string.folder_member_remove),
-                                        tint = Color.Red.copy(alpha = 0.7f),
-                                        modifier = Modifier.size(16.dp)
+                                        tint = Color.Red.copy(alpha = 0.8f),
+                                        modifier = Modifier.size(15.dp)
                                     )
                                 }
                             }
@@ -276,13 +278,18 @@ fun FolderMembersModal(
                                 }
 
                                 if (isOwner) {
-                                    TextButton(
-                                        onClick = { onRevokeInvite(invite) }
+                                    Box(
+                                        modifier = Modifier
+                                            .bounceClick(scaleDown = 0.92f) { onRevokeInvite(invite) }
+                                            .clip(CircleShape)
+                                            .background(Color.Red.copy(alpha = 0.12f))
+                                            .padding(horizontal = 10.dp, vertical = 6.dp),
+                                        contentAlignment = Alignment.Center
                                     ) {
                                         Text(
                                             text = stringResource(R.string.folder_invite_revoke),
                                             style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold),
-                                            color = Color.Red.copy(alpha = 0.8f)
+                                            color = Color.Red.copy(alpha = 0.9f)
                                         )
                                     }
                                 }
@@ -293,27 +300,27 @@ fun FolderMembersModal(
             }
         }
 
-        Spacer(Modifier.height(14.dp))
+        Spacer(Modifier.height(10.dp))
 
         // Bottom action bar
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 22.dp, vertical = 12.dp)
+                .padding(horizontal = 22.dp, vertical = 8.dp)
         ) {
             if (isOwner) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .bounceClick(scaleDown = 0.98f, onClick = onOpenShareModal)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(folderColor)
-                        .padding(vertical = 12.dp),
+                        .height(40.dp)
+                        .bounceClick(scaleDown = 0.96f, onClick = onOpenShareModal)
+                        .clip(CircleShape)
+                        .background(folderColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.folder_invite_create_button),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color.White
                     )
                 }
@@ -322,21 +329,21 @@ fun FolderMembersModal(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .bounceClick(scaleDown = 0.98f, onClick = { showLeaveConfirm = true })
-                        .clip(RoundedCornerShape(14.dp))
+                        .height(40.dp)
+                        .bounceClick(scaleDown = 0.96f, onClick = { showLeaveConfirm = true })
+                        .clip(CircleShape)
                         .background(Color.Red.copy(alpha = 0.15f))
-                        .border(1.dp, Color.Red.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
-                        .padding(vertical = 12.dp),
+                        .border(1.dp, Color.Red.copy(alpha = 0.3f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.folder_leave),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
+                        style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
                         color = Color.Red
                     )
                 }
             }
-            Spacer(Modifier.height(8.dp))
+            Spacer(Modifier.height(6.dp))
         }
     }
 
