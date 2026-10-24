@@ -23,6 +23,15 @@ import com.cinetrack.R
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.SharedFolderDto
 import com.cinetrack.data.model.SharedFolderInviteDto
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.text.input.KeyboardCapitalization
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
@@ -35,18 +44,28 @@ fun FolderJoinDialog(
     hazeState: HazeState? = null
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    var codeInput by remember { mutableStateOf(initialCode) }
+    var codeInput by remember(initialCode) { mutableStateOf(sanitizeInviteCode(initialCode)) }
     var isChecking by remember { mutableStateOf(false) }
     var isJoining by remember { mutableStateOf(false) }
     var invitePreview by remember { mutableStateOf<Pair<SharedFolderInviteDto, SharedFolderDto>?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+    val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
+    var isFocused by remember { mutableStateOf(false) }
+
+    LaunchedEffect(Unit) {
+        if (invitePreview == null && initialCode.isBlank()) {
+            kotlinx.coroutines.delay(250)
+            focusRequester.requestFocus()
+        }
+    }
 
     LaunchedEffect(initialCode) {
-        val trimmed = initialCode.trim().uppercase()
-        if (trimmed.isNotBlank() && invitePreview == null && !isChecking) {
+        val clean = sanitizeInviteCode(initialCode)
+        if (clean.isNotBlank() && invitePreview == null && !isChecking) {
+            val fullCode = "FT-$clean"
             isChecking = true
             errorMessage = null
-            onCheckCode(trimmed) { res ->
+            onCheckCode(fullCode) { res ->
                 isChecking = false
                 res.onSuccess { preview ->
                     invitePreview = preview
@@ -99,37 +118,81 @@ fun FolderJoinDialog(
 
                 Spacer(Modifier.height(16.dp))
 
-                OutlinedTextField(
-                    value = codeInput,
-                    onValueChange = { input ->
-                        val clean = input.uppercase().replace(" ", "").take(12)
-                        codeInput = clean
-                        errorMessage = null
-                    },
-                    modifier = Modifier.fillMaxWidth(),
-                    placeholder = {
-                        Text(
-                            stringResource(R.string.folder_join_hint),
-                            color = Color.White.copy(alpha = 0.35f),
-                            fontFamily = FontFamily.Monospace
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(56.dp)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(
+                            width = 1.dp,
+                            color = if (errorMessage != null) MaterialTheme.colorScheme.error
+                            else if (isFocused) Color.White
+                            else Color.White.copy(alpha = 0.2f),
+                            shape = RoundedCornerShape(16.dp)
                         )
-                    },
-                    shape = RoundedCornerShape(16.dp),
-                    colors = OutlinedTextFieldDefaults.colors(
-                        focusedTextColor = Color.White,
-                        unfocusedTextColor = Color.White,
-                        focusedBorderColor = Color.White,
-                        unfocusedBorderColor = Color.White.copy(alpha = 0.2f),
-                        cursorColor = Color.White
-                    ),
-                    singleLine = true,
-                    textStyle = MaterialTheme.typography.headlineSmall.copy(
-                        fontFamily = FontFamily.Monospace,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 2.sp,
-                        textAlign = TextAlign.Center
-                    )
-                )
+                        .clickable(
+                            interactionSource = remember { MutableInteractionSource() },
+                            indication = null
+                        ) {
+                            focusRequester.requestFocus()
+                        },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Text(
+                            text = "FT-",
+                            style = MaterialTheme.typography.headlineSmall.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 2.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.45f)
+                        )
+
+                        BasicTextField(
+                            value = codeInput,
+                            onValueChange = { input ->
+                                codeInput = sanitizeInviteCode(input)
+                                errorMessage = null
+                            },
+                            modifier = Modifier
+                                .focusRequester(focusRequester)
+                                .onFocusChanged { isFocused = it.isFocused },
+                            singleLine = true,
+                            textStyle = MaterialTheme.typography.headlineSmall.copy(
+                                fontFamily = FontFamily.Monospace,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 2.sp,
+                                color = Color.White
+                            ),
+                            cursorBrush = SolidColor(Color.White),
+                            keyboardOptions = KeyboardOptions(
+                                capitalization = KeyboardCapitalization.Characters,
+                                autoCorrectEnabled = false
+                            ),
+                            decorationBox = { innerTextField ->
+                                Box(contentAlignment = Alignment.CenterStart) {
+                                    if (codeInput.isEmpty()) {
+                                        Text(
+                                            text = "7K9P2",
+                                            style = MaterialTheme.typography.headlineSmall.copy(
+                                                fontFamily = FontFamily.Monospace,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 2.sp
+                                            ),
+                                            color = Color.White.copy(alpha = 0.25f)
+                                        )
+                                    }
+                                    innerTextField()
+                                }
+                            }
+                        )
+                    }
+                }
 
                 if (errorMessage != null) {
                     Spacer(Modifier.height(8.dp))
@@ -152,11 +215,12 @@ fun FolderJoinDialog(
                             enabled = codeInput.isNotBlank() && !isChecking,
                             scaleDown = 0.96f
                         ) {
-                            val cleanCode = codeInput.trim().uppercase()
-                            if (cleanCode.isBlank()) return@bounceClick
+                            val clean = codeInput.trim().uppercase()
+                            if (clean.isBlank()) return@bounceClick
+                            val fullCode = "FT-$clean"
                             isChecking = true
                             errorMessage = null
-                            onCheckCode(cleanCode) { result ->
+                            onCheckCode(fullCode) { result ->
                                 isChecking = false
                                 result.onSuccess { pair ->
                                     invitePreview = pair
@@ -352,6 +416,19 @@ fun FolderJoinDialog(
             }
         }
     }
+}
+
+private fun sanitizeInviteCode(input: String): String {
+    var raw = input.trim().uppercase()
+    if (raw.contains("CODE=")) {
+        raw = raw.substringAfter("CODE=").substringBefore("&")
+    }
+    if (raw.startsWith("FT-") || raw.startsWith("FT_") || raw.startsWith("FT:")) {
+        raw = raw.substring(3)
+    } else if (raw.startsWith("FT") && raw.length > 2 && !raw[2].isLetterOrDigit()) {
+        raw = raw.substring(3)
+    }
+    return raw.filter { it.isLetterOrDigit() }.take(8)
 }
 
 @Composable

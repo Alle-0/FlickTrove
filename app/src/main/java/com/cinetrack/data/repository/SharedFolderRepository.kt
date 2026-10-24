@@ -168,7 +168,8 @@ class SharedFolderRepository @Inject constructor(
 
     suspend fun getInvite(code: String): Result<Pair<SharedFolderInviteDto, SharedFolderDto>> = withContext(Dispatchers.IO) {
         runCatching {
-            val formattedCode = code.trim().uppercase()
+            val raw = code.trim().uppercase()
+            val formattedCode = if (raw.startsWith("FT-")) raw else "FT-$raw"
             val invites = api.getInviteByCode("eq.$formattedCode")
             val invite = invites.firstOrNull() ?: throw IllegalStateException("INVITE_NOT_FOUND")
 
