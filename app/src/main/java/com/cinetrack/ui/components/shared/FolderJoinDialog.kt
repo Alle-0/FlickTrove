@@ -35,7 +35,14 @@ import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.input.OffsetMapping
+import androidx.compose.ui.text.input.TransformedText
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.zIndex
 import coil.compose.AsyncImage
 import com.cinetrack.ui.utils.bounceClick
@@ -146,59 +153,31 @@ fun FolderJoinDialog(
                         },
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = "FT-",
-                            style = MaterialTheme.typography.headlineSmall.copy(
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 2.sp
-                            ),
-                            color = Color.White.copy(alpha = 0.45f)
+                    BasicTextField(
+                        value = codeInput,
+                        onValueChange = { input ->
+                            codeInput = sanitizeInviteCode(input)
+                            errorMessage = null
+                        },
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .focusRequester(focusRequester)
+                            .onFocusChanged { isFocused = it.isFocused },
+                        singleLine = true,
+                        visualTransformation = remember { InviteCodeVisualTransformation() },
+                        textStyle = MaterialTheme.typography.headlineSmall.copy(
+                            fontFamily = FontFamily.Monospace,
+                            fontWeight = FontWeight.Bold,
+                            letterSpacing = 2.sp,
+                            color = Color.White,
+                            textAlign = TextAlign.Center
+                        ),
+                        cursorBrush = SolidColor(Color.White),
+                        keyboardOptions = KeyboardOptions(
+                            capitalization = KeyboardCapitalization.Characters,
+                            autoCorrectEnabled = false
                         )
-
-                        BasicTextField(
-                            value = codeInput,
-                            onValueChange = { input ->
-                                codeInput = sanitizeInviteCode(input)
-                                errorMessage = null
-                            },
-                            modifier = Modifier
-                                .focusRequester(focusRequester)
-                                .onFocusChanged { isFocused = it.isFocused },
-                            singleLine = true,
-                            textStyle = MaterialTheme.typography.headlineSmall.copy(
-                                fontFamily = FontFamily.Monospace,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 2.sp,
-                                color = Color.White
-                            ),
-                            cursorBrush = SolidColor(Color.White),
-                            keyboardOptions = KeyboardOptions(
-                                capitalization = KeyboardCapitalization.Characters,
-                                autoCorrectEnabled = false
-                            ),
-                            decorationBox = { innerTextField ->
-                                Box(contentAlignment = Alignment.CenterStart) {
-                                    if (codeInput.isEmpty()) {
-                                        Text(
-                                            text = "7K9P2",
-                                            style = MaterialTheme.typography.headlineSmall.copy(
-                                                fontFamily = FontFamily.Monospace,
-                                                fontWeight = FontWeight.Bold,
-                                                letterSpacing = 2.sp
-                                            ),
-                                            color = Color.White.copy(alpha = 0.25f)
-                                        )
-                                    }
-                                    innerTextField()
-                                }
-                            }
-                        )
-                    }
+                    )
                 }
 
                 if (errorMessage != null) {
@@ -522,4 +501,38 @@ private fun sanitizeInviteCode(input: String): String {
 @Composable
 private fun contextErrorMessage(resId: Int): String {
     return stringResource(resId)
+}
+
+private class InviteCodeVisualTransformation : VisualTransformation {
+    override fun filter(text: AnnotatedString): TransformedText {
+        val prefix = "FT-"
+        val prefixSpan = SpanStyle(color = Color.White.copy(alpha = 0.45f))
+        val codeSpan = SpanStyle(color = Color.White)
+        val placeholderSpan = SpanStyle(color = Color.White.copy(alpha = 0.25f))
+
+        val annotated = buildAnnotatedString {
+            withStyle(prefixSpan) {
+                append(prefix)
+            }
+            if (text.isEmpty()) {
+                withStyle(placeholderSpan) {
+                    append("7K9P2")
+                }
+            } else {
+                withStyle(codeSpan) {
+                    append(text.text)
+                }
+            }
+        }
+
+        val offsetMapping = object : OffsetMapping {
+            override fun originalToTransformed(offset: Int): Int =
+                offset + prefix.length
+
+            override fun transformedToOriginal(offset: Int): Int =
+                (offset - prefix.length).coerceIn(0, text.length)
+        }
+
+        return TransformedText(annotated, offsetMapping)
+    }
 }
