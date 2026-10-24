@@ -41,6 +41,7 @@ object NetworkModule {
         coerceInputValues = true
         isLenient = true
         encodeDefaults = true
+        explicitNulls = false
     }
 
     @Provides
@@ -318,7 +319,7 @@ object NetworkModule {
     fun provideSupabaseOkHttpClient(): OkHttpClient {
         val logging = HttpLoggingInterceptor().apply {
             level = if (com.cinetrack.BuildConfig.DEBUG) {
-                HttpLoggingInterceptor.Level.BASIC
+                HttpLoggingInterceptor.Level.BODY
             } else {
                 HttpLoggingInterceptor.Level.NONE
             }
