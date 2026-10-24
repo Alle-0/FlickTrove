@@ -131,7 +131,6 @@ class FolderDetailViewModel @Inject constructor(
         _folderId.filterNotNull().flatMapLatest { id ->
             repository.getFolderFlow(id).flatMapLatest { folder ->
                 if (folder == null) {
-                    globalErrorHandler.emitError(UiText.StringResource(R.string.msg_folder_not_found)) { initFolder(id) }
                     kotlinx.coroutines.flow.flowOf(FolderDetailUiState.Error("Cartella non trovata") as FolderDetailUiState)
                 } else {
                     combine(
@@ -428,7 +427,9 @@ class FolderDetailViewModel @Inject constructor(
                 if (folder.isShared) {
                     sharedFolderRepository.handleDeleteOrLeave(folder)
                 }
-                _folderId.value?.let { id ->
+                val idToDelete = _folderId.value
+                _folderId.value = null
+                idToDelete?.let { id ->
                     repository.deleteFolder(id)
                 }
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_folder_deleted, folder.name)) {

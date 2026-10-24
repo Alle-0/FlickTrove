@@ -198,11 +198,11 @@ fun FolderJoinDialog(
                         .fillMaxWidth()
                         .height(44.dp)
                         .bounceClick(
-                            enabled = codeInput.isNotBlank() && !isChecking,
+                            enabled = codeInput.length == 5 && !isChecking,
                             scaleDown = 0.96f
                         ) {
                             val clean = codeInput.trim().uppercase()
-                            if (clean.isBlank()) return@bounceClick
+                            if (clean.length != 5) return@bounceClick
                             val fullCode = "FT-$clean"
                             isChecking = true
                             errorMessage = null
@@ -222,7 +222,7 @@ fun FolderJoinDialog(
                         }
                         .clip(buttonShape)
                         .background(
-                            if (codeInput.isNotBlank() && !isChecking) Color.White else Color.White.copy(alpha = 0.35f)
+                            if (codeInput.length == 5 && !isChecking) Color.White else Color.White.copy(alpha = 0.35f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -495,7 +495,7 @@ private fun sanitizeInviteCode(input: String): String {
     } else if (raw.startsWith("FT") && raw.length > 2 && !raw[2].isLetterOrDigit()) {
         raw = raw.substring(3)
     }
-    return raw.filter { it.isLetterOrDigit() }.take(8)
+    return raw.filter { it.isLetterOrDigit() }.take(5)
 }
 
 @Composable
