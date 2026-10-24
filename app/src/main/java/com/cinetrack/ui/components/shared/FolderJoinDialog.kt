@@ -31,8 +31,15 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardCapitalization
+import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.zIndex
+import coil.compose.AsyncImage
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -259,6 +266,12 @@ fun FolderJoinDialog(
             } else {
                 // Verified preview state
                 val (invite, folder) = invitePreview!!
+                val folderColor = remember(folder.color) {
+                    folder.color.toComposeColor(Color(0xFFE5A93C))
+                }
+                val topItems = remember(folder.items) {
+                    folder.items.filter { !it.posterPath.isNullOrBlank() }.take(3)
+                }
 
                 Box(
                     modifier = Modifier
@@ -272,42 +285,117 @@ fun FolderJoinDialog(
                         Row(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(44.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.12f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(22.dp)
-                                )
+                            if (topItems.isEmpty()) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(52.dp)
+                                        .clip(RoundedCornerShape(50))
+                                        .background(folderColor.copy(alpha = 0.15f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
+                                        contentDescription = null,
+                                        tint = folderColor,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+                            } else {
+                                Box(
+                                    modifier = Modifier
+                                        .width(40.dp + ((topItems.size - 1) * 22).dp)
+                                        .height(60.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    topItems.forEachIndexed { index, item ->
+                                        val centerIndex = (topItems.size - 1) / 2f
+                                        val currentRotation = if (topItems.size <= 1) 0f else {
+                                            val maxRotation = 15f
+                                            val rotationStep = (maxRotation * 2) / (topItems.size - 1)
+                                            -maxRotation + (index * rotationStep)
+                                        }
+                                        val xOffset = (index - centerIndex) * 14f
+
+                                        Box(
+                                            modifier = Modifier
+                                                .offset(x = xOffset.dp)
+                                                .size(width = 40.dp, height = 60.dp)
+                                                .graphicsLayer {
+                                                    rotationZ = currentRotation
+                                                    transformOrigin = TransformOrigin(0.5f, 1.1f)
+                                                }
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(10.dp))
+                                                .zIndex((topItems.size - index).toFloat())
+                                        ) {
+                                            AsyncImage(
+                                                model = "https://image.tmdb.org/t/p/w200${item.posterPath}",
+                                                contentDescription = null,
+                                                contentScale = ContentScale.Crop,
+                                                modifier = Modifier.fillMaxSize()
+                                            )
+                                        }
+                                    }
+                                }
                             }
-                            Spacer(Modifier.width(14.dp))
-                            Column {
-                                Text(
-                                    text = folder.title,
-                                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                    color = Color.White
-                                )
+
+                            Spacer(Modifier.width(16.dp))
+
+                            Column(modifier = Modifier.weight(1f)) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    if (topItems.isNotEmpty()) {
+                                        Box(
+                                            modifier = Modifier
+                                                .size(8.dp)
+                                                .clip(CircleShape)
+                                                .background(folderColor)
+                                        )
+                                        Spacer(Modifier.width(8.dp))
+                                    }
+                                    Text(
+                                        text = folder.title,
+                                        style = MaterialTheme.typography.titleLarge.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            letterSpacing = (-0.3).sp
+                                        ),
+                                        color = Color.White,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Spacer(Modifier.height(2.dp))
                                 Text(
                                     text = stringResource(R.string.folder_join_invitation_from, folder.ownerName),
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = Color.White.copy(alpha = 0.65f)
+                                    color = Color.White.copy(alpha = 0.65f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
 
                         if (!folder.description.isNullOrBlank()) {
-                            Spacer(Modifier.height(12.dp))
-                            Text(
-                                text = folder.description,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.75f)
-                            )
+                            Spacer(Modifier.height(14.dp))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clip(RoundedCornerShape(12.dp))
+                                    .background(Color.White.copy(alpha = 0.05f))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
+                                    .padding(horizontal = 12.dp, vertical = 10.dp)
+                            ) {
+                                Text(
+                                    text = folder.description,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        lineHeight = 20.sp
+                                    ),
+                                    color = Color.White.copy(alpha = 0.8f),
+                                    maxLines = 4,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
 
                         Spacer(Modifier.height(14.dp))
@@ -319,16 +407,16 @@ fun FolderJoinDialog(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_clock),
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                                 contentDescription = null,
-                                tint = Color.White.copy(alpha = 0.6f),
-                                modifier = Modifier.size(14.dp)
+                                tint = folderColor,
+                                modifier = Modifier.size(13.dp)
                             )
                             Spacer(Modifier.width(6.dp))
                             Text(
                                 text = "${folder.items.size} titoli inclusi",
                                 style = MaterialTheme.typography.labelSmall,
-                                color = Color.White.copy(alpha = 0.8f)
+                                color = Color.White.copy(alpha = 0.85f)
                             )
                         }
                     }
