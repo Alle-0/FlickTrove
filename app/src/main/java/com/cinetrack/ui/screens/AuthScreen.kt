@@ -161,6 +161,32 @@ fun AuthScreen(
                     modifier = Modifier.padding(bottom = 20.dp),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    ) {
+                        // Subtle ambient neon aura matching the logo's gradient
+                        Box(
+                            modifier = Modifier
+                                .size(width = 84.dp, height = 58.dp)
+                                .background(
+                                    brush = Brush.radialGradient(
+                                        colors = listOf(
+                                            PrimaryTeal.copy(alpha = 0.22f),
+                                            Color(0xFFF386F8).copy(alpha = 0.12f),
+                                            Color.Transparent
+                                        )
+                                    ),
+                                    shape = androidx.compose.foundation.shape.CircleShape
+                                )
+                        )
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_flicktrove_logo),
+                            contentDescription = "FlickTrove Logo",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(width = 72.dp, height = 55.dp)
+                        )
+                    }
                     Text(
                         text = "FlickTrove",
                         color = Color.White,
