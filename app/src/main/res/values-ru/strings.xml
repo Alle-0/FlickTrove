@@ -1916,5 +1916,10 @@
     <string name="folder_invites_limit_reached">Достигнут лимит в 10 активных приглашений. Отозовите существующее приглашение, чтобы создать новое.</string>
     <string name="folder_invites_limit_reached_btn">Лимит исчерпан (10/10)</string>
     <string name="folder_auto_reverted_private">Нет участников или активных приглашений: папка снова приватная.</string>
+
+    <string name="folder_filter_section_type">ТИП</string>
+    <string name="folder_filter_all">Все папки</string>
+    <string name="folder_filter_shared">Только общие</string>
+    <string name="folder_filter_private">Только личные</string>
 </resources>
 

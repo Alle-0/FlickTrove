@@ -1929,5 +1929,10 @@
     <string name="folder_invites_limit_reached_btn">Limit Reached (10/10)</string>
     <string name="folder_max_items_reached">Maximum folder capacity reached (1,000/1,000 titles)</string>
     <string name="folder_auto_reverted_private">No members or active invites: folder is now private.</string>
+
+    <string name="folder_filter_section_type">TYPE</string>
+    <string name="folder_filter_all">All Folders</string>
+    <string name="folder_filter_shared">Shared Only</string>
+    <string name="folder_filter_private">Private Only</string>
 </resources>
 

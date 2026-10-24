@@ -1922,4 +1922,9 @@
     <string name="folder_invites_limit_reached">Maksimum 10 aktif davet sınırına ulaşıldı. Yeni bir davet oluşturmak için mevcut bir daveti iptal edin.</string>
     <string name="folder_invites_limit_reached_btn">Sınıra Ulaşıldı (10/10)</string>
     <string name="folder_auto_reverted_private">Üye veya aktif davet yok: klasör artık gizli.</string>
+
+    <string name="folder_filter_section_type">TÜR</string>
+    <string name="folder_filter_all">Tüm Klasörler</string>
+    <string name="folder_filter_shared">Yalnızca Paylaşılanlar</string>
+    <string name="folder_filter_private">Yalnızca Özel</string>
 </resources>

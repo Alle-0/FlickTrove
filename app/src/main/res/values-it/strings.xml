@@ -1929,5 +1929,10 @@
     <string name="folder_invites_limit_reached">Limite massimo di 10 inviti attivi raggiunto. Revoca un invito esistente per generarne uno nuovo.</string>
     <string name="folder_invites_limit_reached_btn">Limite raggiunto (10/10)</string>
     <string name="folder_auto_reverted_private">Nessun membro né invito attivo: la cartella è tornata privata.</string>
+
+    <string name="folder_filter_section_type">TIPO</string>
+    <string name="folder_filter_all">Tutte le cartelle</string>
+    <string name="folder_filter_shared">Solo condivise</string>
+    <string name="folder_filter_private">Solo private</string>
 </resources>
 

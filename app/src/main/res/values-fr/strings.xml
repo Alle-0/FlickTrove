@@ -1916,5 +1916,10 @@
     <string name="folder_invites_limit_reached">Limite maximale de 10 invitations actives atteinte. Révoquez une invitation pour en générer une nouvelle.</string>
     <string name="folder_invites_limit_reached_btn">Limite atteinte (10/10)</string>
     <string name="folder_auto_reverted_private">Aucun membre ni invitation active : le dossier est désormais privé.</string>
+
+    <string name="folder_filter_section_type">TYPE</string>
+    <string name="folder_filter_all">Tous les dossiers</string>
+    <string name="folder_filter_shared">Partagés uniquement</string>
+    <string name="folder_filter_private">Privés uniquement</string>
 </resources>
 

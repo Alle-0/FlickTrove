@@ -385,6 +385,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     }
                                 }
 
+                                var foldersHasActiveFilters = false
+                                if (currentTab is FoldersTab && activity != null) {
+                                    val foldersVm = hiltViewModel<com.cinetrack.ui.viewmodel.FoldersViewModel>(activity)
+                                    val currentTypeFilter by foldersVm.typeFilter.collectAsStateWithLifecycle()
+                                    foldersHasActiveFilters = currentTypeFilter != com.cinetrack.ui.screens.FolderTypeFilter.ALL
+                                }
+
                                 GlassyTopBar(
                                     title = title,
                                     hazeState = contentHazeState,
@@ -403,7 +410,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                                     onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is HistoryTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
-                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else if (currentTab is HistoryTab) historyHasActiveFilters else discoverHasActiveFilters,
+                                    hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else if (currentTab is HistoryTab) historyHasActiveFilters else if (currentTab is FoldersTab) foldersHasActiveFilters else discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
                                     layoutColumns = discoverGridColumns,
                                     notificationCount = updatesUiState.totalUnreadCount,
@@ -560,6 +567,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         if (foldersViewModelForSort != null) {
                             val currentSortOption by foldersViewModelForSort.sortOption.collectAsStateWithLifecycle()
                             val currentSortOrder by foldersViewModelForSort.sortOrder.collectAsStateWithLifecycle()
+                            val currentTypeFilter by foldersViewModelForSort.typeFilter.collectAsStateWithLifecycle()
 
                             com.cinetrack.ui.components.dialog.FoldersFilterModal(
                                 isVisible = showFoldersSortMenu,
@@ -567,9 +575,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 hazeState = contentHazeState,
                                 currentSortOption = currentSortOption,
                                 currentSortOrder = currentSortOrder,
+                                currentTypeFilter = currentTypeFilter,
                                 onDismissRequest = { showFoldersSortMenu = false },
-                                onSortChange = { newOption, newOrder ->
-                                    foldersViewModelForSort.updateSort(newOption, newOrder)
+                                onApplyFilters = { newOption, newOrder, newTypeFilter ->
+                                    foldersViewModelForSort.updateFilters(newOption, newOrder, newTypeFilter)
                                     showFoldersSortMenu = false
                                 }
                             )

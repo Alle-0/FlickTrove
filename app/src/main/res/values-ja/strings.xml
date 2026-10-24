@@ -1922,4 +1922,9 @@
     <string name="folder_invites_limit_reached">有効な招待の上限（10件）に達しました。新しい招待を作成するには既存の招待を取り消してください。</string>
     <string name="folder_invites_limit_reached_btn">上限に達しました (10/10)</string>
     <string name="folder_auto_reverted_private">メンバーまたは有効な招待がありません：フォルダは非公開に戻りました。</string>
+
+    <string name="folder_filter_section_type">種類</string>
+    <string name="folder_filter_all">すべてのフォルダー</string>
+    <string name="folder_filter_shared">共有のみ</string>
+    <string name="folder_filter_private">非公開のみ</string>
 </resources>

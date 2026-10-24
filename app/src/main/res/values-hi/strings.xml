@@ -1914,6 +1914,11 @@
     <string name="folder_invites_limit_reached">10 सक्रिय आमंत्रणों की अधिकतम सीमा समाप्त हो गई है। नया आमंत्रण बनाने के लिए किसी मौजूदा आमंत्रण को रद्द करें।</string>
     <string name="folder_invites_limit_reached_btn">सीमा समाप्त (10/10)</string>
     <string name="folder_auto_reverted_private">कोई सदस्य या सक्रिय आमंत्रण नहीं: फ़ोल्डर अब निजी है।</string>
+
+    <string name="folder_filter_section_type">प्रकार</string>
+    <string name="folder_filter_all">सभी फ़ोल्डर</string>
+    <string name="folder_filter_shared">केवल साझा</string>
+    <string name="folder_filter_private">केवल निजी</string>
 </resources>
 
 

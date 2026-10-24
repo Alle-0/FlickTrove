@@ -1914,6 +1914,11 @@
     <string name="folder_invites_limit_reached">Limite máximo de 10 convites ativos atingido. Revogue um convite existente para gerar um novo.</string>
     <string name="folder_invites_limit_reached_btn">Limite atingido (10/10)</string>
     <string name="folder_auto_reverted_private">Sem membros ou convites ativos: a pasta voltou a ser privada.</string>
+
+    <string name="folder_filter_section_type">TIPO</string>
+    <string name="folder_filter_all">Todas as pastas</string>
+    <string name="folder_filter_shared">Apenas compartilhadas</string>
+    <string name="folder_filter_private">Apenas privadas</string>
 </resources>
 
 

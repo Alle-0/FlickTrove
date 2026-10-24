@@ -25,6 +25,7 @@ import com.cinetrack.data.model.CommentSortOrder
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.screens.FolderSortOption
+import com.cinetrack.ui.screens.FolderTypeFilter
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
@@ -36,16 +37,20 @@ fun FoldersFilterModal(
     hazeState: HazeState?,
     currentSortOption: FolderSortOption,
     currentSortOrder: CommentSortOrder,
-    onSortChange: (FolderSortOption, CommentSortOrder) -> Unit,
+    currentTypeFilter: FolderTypeFilter = FolderTypeFilter.ALL,
+    onSortChange: ((FolderSortOption, CommentSortOrder) -> Unit)? = null,
+    onApplyFilters: (FolderSortOption, CommentSortOrder, FolderTypeFilter) -> Unit = { opt, ord, _ -> onSortChange?.invoke(opt, ord) },
     onDismissRequest: () -> Unit
 ) {
     var localSortOption by remember(isVisible) { mutableStateOf(currentSortOption) }
     var localSortOrder by remember(isVisible) { mutableStateOf(currentSortOrder) }
+    var localTypeFilter by remember(isVisible) { mutableStateOf(currentTypeFilter) }
 
     LaunchedEffect(isVisible) {
         if (isVisible) {
             localSortOption = currentSortOption
             localSortOrder = currentSortOrder
+            localTypeFilter = currentTypeFilter
         }
     }
 
@@ -81,7 +86,37 @@ fun FoldersFilterModal(
                 )
             }
 
-            // Sort By Section
+            // 1. Folder Type Filter Section (Tutte / Solo Condivise / Solo Private)
+            ExpandableSection(
+                title = stringResource(id = R.string.folder_filter_section_type),
+                isExpanded = true,
+                showChevron = false,
+                isClickable = false,
+                onToggle = { }
+            ) {
+                Column(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    val typeOptions = listOf(
+                        FolderTypeFilter.ALL to stringResource(id = R.string.folder_filter_all),
+                        FolderTypeFilter.SHARED to stringResource(id = R.string.folder_filter_shared),
+                        FolderTypeFilter.PRIVATE to stringResource(id = R.string.folder_filter_private)
+                    )
+
+                    typeOptions.forEach { (type, label) ->
+                        SortOptionItem(
+                            label = label,
+                            isSelected = localTypeFilter == type,
+                            onClick = { localTypeFilter = type }
+                        )
+                    }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 2. Sort By Section
             ExpandableSection(
                 title = stringResource(id = R.string.filter_sort_by),
                 isExpanded = true,
@@ -143,7 +178,8 @@ fun FoldersFilterModal(
                     .clip(RoundedCornerShape(16.dp))
                     .background(MaterialTheme.colorScheme.primary)
                     .bounceClick {
-                        onSortChange(localSortOption, localSortOrder)
+                        onApplyFilters(localSortOption, localSortOrder, localTypeFilter)
+                        onSortChange?.invoke(localSortOption, localSortOrder)
                         onDismissRequest()
                     },
                 contentAlignment = Alignment.Center

@@ -36,6 +36,9 @@ class FoldersViewModel @Inject constructor(
     private val _sortOrder = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.data.model.CommentSortOrder.DESC)
     val sortOrder: StateFlow<com.cinetrack.data.model.CommentSortOrder> = _sortOrder
 
+    private val _typeFilter = kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.screens.FolderTypeFilter.ALL)
+    val typeFilter: StateFlow<com.cinetrack.ui.screens.FolderTypeFilter> = _typeFilter
+
     init {
         viewModelScope.launch {
             preferenceRepository.userPreferencesFlow.collect { prefs ->
@@ -71,11 +74,22 @@ class FoldersViewModel @Inject constructor(
         _searchQuery.value = query
     }
 
-    val folders: StateFlow<ImmutableList<FolderEntity>?> = kotlinx.coroutines.flow.combine(repository.getFoldersFlow(), _sortOption, _sortOrder, _searchQuery) { list, option, order, query ->
-        val filteredList = if (query.isBlank()) list else {
-            val exact = list.filter { it.name.contains(query, ignoreCase = true) }
+    val folders: StateFlow<ImmutableList<FolderEntity>?> = kotlinx.coroutines.flow.combine(
+        repository.getFoldersFlow(),
+        _sortOption,
+        _sortOrder,
+        _searchQuery,
+        _typeFilter
+    ) { list, option, order, query, filterType ->
+        val typeFiltered = when (filterType) {
+            com.cinetrack.ui.screens.FolderTypeFilter.ALL -> list
+            com.cinetrack.ui.screens.FolderTypeFilter.SHARED -> list.filter { it.isShared }
+            com.cinetrack.ui.screens.FolderTypeFilter.PRIVATE -> list.filter { !it.isShared }
+        }
+        val filteredList = if (query.isBlank()) typeFiltered else {
+            val exact = typeFiltered.filter { it.name.contains(query, ignoreCase = true) }
             if (exact.isNotEmpty() || query.length < 4) exact
-            else list.filter { com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, it.name) }
+            else typeFiltered.filter { com.cinetrack.ui.utils.FuzzySearch.matchesFuzzy(query, it.name) }
         }
         val sorted = when (option) {
             com.cinetrack.ui.screens.FolderSortOption.DATE -> filteredList.sortedBy { parseDateString(it.createdAt) }
@@ -89,9 +103,14 @@ class FoldersViewModel @Inject constructor(
         initialValue = null
     )
 
-    fun updateSort(option: com.cinetrack.ui.screens.FolderSortOption, order: com.cinetrack.data.model.CommentSortOrder) {
+    fun updateFilters(
+        option: com.cinetrack.ui.screens.FolderSortOption,
+        order: com.cinetrack.data.model.CommentSortOrder,
+        type: com.cinetrack.ui.screens.FolderTypeFilter
+    ) {
         _sortOption.value = option
         _sortOrder.value = order
+        _typeFilter.value = type
         viewModelScope.launch {
             val sortTypeString = when (option) {
                 com.cinetrack.ui.screens.FolderSortOption.NAME -> "name"
@@ -105,6 +124,10 @@ class FoldersViewModel @Inject constructor(
             val latestPrefs = preferenceRepository.userPreferencesFlow.first()
             repository.savePreferencesRemote(latestPrefs)
         }
+    }
+
+    fun updateSort(option: com.cinetrack.ui.screens.FolderSortOption, order: com.cinetrack.data.model.CommentSortOrder) {
+        updateFilters(option, order, _typeFilter.value)
     }
 
     val allMovies = repository.getLocalMoviesFlow()

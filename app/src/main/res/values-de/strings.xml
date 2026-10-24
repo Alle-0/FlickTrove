@@ -1919,5 +1919,10 @@
     <string name="folder_invites_limit_reached">Maximales Limit von 10 aktiven Einladungen erreicht. Widerrufen Sie eine vorhandene Einladung, um eine neue zu erstellen.</string>
     <string name="folder_invites_limit_reached_btn">Limit erreicht (10/10)</string>
     <string name="folder_auto_reverted_private">Keine Mitglieder oder aktiven Einladungen: Ordner ist wieder privat.</string>
+
+    <string name="folder_filter_section_type">TYP</string>
+    <string name="folder_filter_all">Alle Ordner</string>
+    <string name="folder_filter_shared">Nur geteilte</string>
+    <string name="folder_filter_private">Nur private</string>
 </resources>
 

@@ -1922,4 +1922,9 @@
     <string name="folder_invites_limit_reached">활성 초대 최대 한도(10개)에 도달했습니다. 새로 생성하려면 기존 초대를 취소하세요.</string>
     <string name="folder_invites_limit_reached_btn">한도 도달 (10/10)</string>
     <string name="folder_auto_reverted_private">멤버나 활성 초대가 없습니다. 폴더가 비공개로 전환되었습니다.</string>
+
+    <string name="folder_filter_section_type">유형</string>
+    <string name="folder_filter_all">모든 폴더</string>
+    <string name="folder_filter_shared">공유 폴더만</string>
+    <string name="folder_filter_private">개인 폴더만</string>
 </resources>

@@ -95,6 +95,7 @@ import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
 
 enum class FolderSortOption { DATE, NAME, ITEMS }
+enum class FolderTypeFilter { ALL, SHARED, PRIVATE }
 
 object FoldersTab : Tab {
     var pendingJoinCode: String? = null
@@ -150,6 +151,7 @@ fun FoldersScreenContent(
     val folders by viewModel.folders.collectAsStateWithLifecycle()
     val allMovies by viewModel.allMovies.collectAsStateWithLifecycle()
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
+    val typeFilter by viewModel.typeFilter.collectAsStateWithLifecycle()
     var isCreateDialogOpen by remember { mutableStateOf(false) }
     var isJoinDialogOpen by remember { mutableStateOf(false) }
     var joinDialogInitialCode by remember { mutableStateOf("") }
@@ -184,7 +186,7 @@ fun FoldersScreenContent(
                 .fillMaxSize()
                 .haze(state = activeHazeState)
         ) {
-            if (folders.isNullOrEmpty() && searchQuery.isBlank()) {
+            if (folders.isNullOrEmpty() && searchQuery.isBlank() && typeFilter == FolderTypeFilter.ALL) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = Alignment.Center
@@ -544,14 +546,14 @@ fun FoldersScreenContent(
                             }
                         }
                     }
-                    if (folders.isNullOrEmpty() && searchQuery.isNotBlank()) {
+                    if (folders.isNullOrEmpty()) {
                         item {
                             Box(
                                 modifier = Modifier.fillMaxWidth().padding(32.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = "Nessun risultato per \"$searchQuery\"",
+                                    text = if (searchQuery.isNotBlank()) "Nessun risultato per \"$searchQuery\"" else stringResource(R.string.collection_filter_empty),
                                     color = Color.White.copy(alpha = 0.5f),
                                     style = MaterialTheme.typography.bodyLarge
                                 )

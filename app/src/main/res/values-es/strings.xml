@@ -1918,5 +1918,10 @@
     <string name="folder_invites_limit_reached">Límite máximo de 10 invitaciones activas alcanzado. Revoca una invitación existente para generar una nueva.</string>
     <string name="folder_invites_limit_reached_btn">Límite alcanzado (10/10)</string>
     <string name="folder_auto_reverted_private">Sin miembros ni invitaciones activas: la carpeta vuelve a ser privada.</string>
+
+    <string name="folder_filter_section_type">TIPO</string>
+    <string name="folder_filter_all">Todas las carpetas</string>
+    <string name="folder_filter_shared">Solo compartidas</string>
+    <string name="folder_filter_private">Solo privadas</string>
 </resources>
 

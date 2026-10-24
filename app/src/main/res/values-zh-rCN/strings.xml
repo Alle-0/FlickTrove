@@ -1922,4 +1922,9 @@
     <string name="folder_invites_limit_reached">已达到10个有效邀请的上限。请撤回现有邀请以生成新邀请。</string>
     <string name="folder_invites_limit_reached_btn">已达上限 (10/10)</string>
     <string name="folder_auto_reverted_private">没有成员或有效邀请：文件夹已转为私人。</string>
+
+    <string name="folder_filter_section_type">类型</string>
+    <string name="folder_filter_all">所有文件夹</string>
+    <string name="folder_filter_shared">仅共享文件夹</string>
+    <string name="folder_filter_private">仅私有文件夹</string>
 </resources>

@@ -1921,4 +1921,9 @@
     <string name="folder_invites_limit_reached">Batas maksimum 10 undangan aktif tercapai. Cabut undangan yang ada untuk membuat yang baru.</string>
     <string name="folder_invites_limit_reached_btn">Batas Tercapai (10/10)</string>
     <string name="folder_auto_reverted_private">Tidak ada anggota atau undangan aktif: folder kembali menjadi pribadi.</string>
+
+    <string name="folder_filter_section_type">TIPE</string>
+    <string name="folder_filter_all">Semua Folder</string>
+    <string name="folder_filter_shared">Hanya Bersama</string>
+    <string name="folder_filter_private">Hanya Pribadi</string>
 </resources>
