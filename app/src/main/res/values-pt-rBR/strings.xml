@@ -1873,7 +1873,6 @@
     <string name="folder_share_title">Compartilhar Pasta</string>
     <string name="folder_share_desc">Crie um link de convite temporário para colaborar.</string>
     <string name="folder_share_duration">Duração do convite</string>
-    <string name="folder_invite_duration_1m">1 Minuto (Teste rápido)</string>
     <string name="folder_invite_duration_24h">24 Horas</string>
     <string name="folder_invite_duration_48h">48 Horas</string>
     <string name="folder_invite_duration_7d">7 Dias</string>
@@ -1902,6 +1901,7 @@
     <string name="folder_invites_tab">Convites Ativos</string>
     <string name="folder_member_role_owner">Proprietário</string>
     <string name="folder_member_role_editor">Colaborador</string>
+    <string name="folder_member_you">(Você)</string>
     <string name="folder_member_remove">Remover</string>
     <string name="folder_member_remove_confirm">Remover %1$s desta pasta compartilhada?</string>
     <string name="folder_leave">Sair da pasta</string>
@@ -1910,6 +1910,10 @@
     <string name="folder_invite_revoke">Revogar</string>
     <string name="folder_invite_expires_in">Expira em: %1$s</string>
     <string name="folder_max_items_reached">Capacidade máxima atingida para esta pasta (1.000/1.000 títulos)</string>
+    <string name="folder_invites_tab_count">Convites ativos (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Limite máximo de 10 convites ativos atingido. Revogue um convite existente para gerar um novo.</string>
+    <string name="folder_invites_limit_reached_btn">Limite atingido (10/10)</string>
+    <string name="folder_auto_reverted_private">Sem membros ou convites ativos: a pasta voltou a ser privada.</string>
 </resources>
 
 

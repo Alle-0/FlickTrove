@@ -1875,7 +1875,6 @@
     <string name="folder_share_title">Поделиться Папкой</string>
     <string name="folder_share_desc">Создайте временную ссылку-приглашение для совместного доступа.</string>
     <string name="folder_share_duration">Срок действия приглашения</string>
-    <string name="folder_invite_duration_1m">1 минута (Быстрый тест)</string>
     <string name="folder_invite_duration_24h">24 часа</string>
     <string name="folder_invite_duration_48h">48 часов</string>
     <string name="folder_invite_duration_7d">7 дней</string>
@@ -1904,6 +1903,7 @@
     <string name="folder_invites_tab">Активные Приглашения</string>
     <string name="folder_member_role_owner">Владелец</string>
     <string name="folder_member_role_editor">Соавтор</string>
+    <string name="folder_member_you">(Вы)</string>
     <string name="folder_member_remove">Удалить</string>
     <string name="folder_member_remove_confirm">Удалить %1$s из этой общей папки?</string>
     <string name="folder_leave">Покинуть папку</string>
@@ -1912,5 +1912,9 @@
     <string name="folder_invite_revoke">Отозвать</string>
     <string name="folder_invite_expires_in">Действует до: %1$s</string>
     <string name="folder_max_items_reached">Достигнута максимальная вместимость папки (1 000/1 000 названий)</string>
+    <string name="folder_invites_tab_count">Активные приглашения (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Достигнут лимит в 10 активных приглашений. Отозовите существующее приглашение, чтобы создать новое.</string>
+    <string name="folder_invites_limit_reached_btn">Лимит исчерпан (10/10)</string>
+    <string name="folder_auto_reverted_private">Нет участников или активных приглашений: папка снова приватная.</string>
 </resources>
 

@@ -1,11 +1,20 @@
 package com.cinetrack.ui.components.shared
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -14,6 +23,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -25,9 +35,18 @@ import com.cinetrack.R
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.SharedFolderInviteDto
 import com.cinetrack.data.model.SharedFolderMemberDto
+import com.cinetrack.ui.utils.UiText
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rememberActionFeedbackManager
+import com.cinetrack.ui.utils.verticalFadingEdges
+import com.cinetrack.ui.components.common.CategoryTabSelector
+import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
+import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
+import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDateTime
 import java.time.ZoneId
@@ -47,12 +66,25 @@ fun FolderMembersModal(
     onOpenShareModal: () -> Unit,
     hazeState: HazeState? = null
 ) {
+    val context = LocalContext.current
+    val feedbackManager = rememberActionFeedbackManager()
     var selectedTab by remember { mutableStateOf(0) } // 0 = Members, 1 = Invites
     var memberToRemove by remember { mutableStateOf<SharedFolderMemberDto?>(null) }
     var showLeaveConfirm by remember { mutableStateOf(false) }
 
+    val membersListState = rememberLazyListState()
+    val invitesListState = rememberLazyListState()
+
     val folderColor = remember(folder.color) { folder.color.toComposeColor() }
     val dateFormatter = remember { DateTimeFormatter.ofPattern("d MMM HH:mm", java.util.Locale.getDefault()) }
+
+    val validInvites = remember(activeInvites) {
+        activeInvites.filter { invite ->
+            !invite.isRevoked &&
+            (invite.maxUses == null || invite.usedCount < invite.maxUses) &&
+            !invite.isExpired
+        }
+    }
 
     FlickTroveModal(
         isVisible = true,
@@ -85,79 +117,113 @@ fun FolderMembersModal(
             ModalCloseButton(onClose = onDismiss)
         }
 
-        // Tabs
-        Row(
+        // Tabs with classic FlickTrove physics
+        Box(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 22.dp, vertical = 6.dp)
-                .clip(RoundedCornerShape(12.dp))
+                .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.05f))
-                .padding(3.dp)
+                .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
         ) {
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .bounceClick(scaleDown = 0.96f) { selectedTab = 0 }
-                    .clip(RoundedCornerShape(9.dp))
-                    .background(if (selectedTab == 0) Color.White.copy(alpha = 0.14f) else Color.Transparent)
-                    .padding(vertical = 7.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.folder_members_tab, members.size),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (selectedTab == 0) Color.White else Color.White.copy(alpha = 0.5f)
-                )
-            }
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .bounceClick(scaleDown = 0.96f) { selectedTab = 1 }
-                    .clip(RoundedCornerShape(9.dp))
-                    .background(if (selectedTab == 1) Color.White.copy(alpha = 0.14f) else Color.Transparent)
-                    .padding(vertical = 7.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(R.string.folder_invites_tab),
-                    style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                    color = if (selectedTab == 1) Color.White else Color.White.copy(alpha = 0.5f)
-                )
-            }
+            CategoryTabSelector(
+                options = listOf(
+                    stringResource(R.string.folder_members_tab, members.size),
+                    stringResource(R.string.folder_invites_tab_count, validInvites.size)
+                ),
+                selectedIndex = selectedTab,
+                onOptionClick = { selectedTab = it },
+                modifier = Modifier.fillMaxWidth(),
+                fillWidth = true,
+                indicatorColor = folderColor,
+                uppercase = false
+            )
         }
 
         Spacer(Modifier.height(8.dp))
 
-        // Content
-        Box(
+        // Content with spring morph size animation and fading gradients
+        AnimatedContent(
+            targetState = selectedTab,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)))
+                    .togetherWith(fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)))
+                    .using(
+                        SizeTransform(
+                            clip = true,
+                            sizeAnimationSpec = { _, _ ->
+                                spring(
+                                    dampingRatio = 0.82f,
+                                    stiffness = 380f
+                                )
+                            }
+                        )
+                    )
+            },
             modifier = Modifier
                 .fillMaxWidth()
-                .heightIn(min = 180.dp, max = 360.dp)
-                .padding(horizontal = 22.dp)
-        ) {
-            if (selectedTab == 0) {
+                .padding(horizontal = 22.dp),
+            label = "FolderMembersTabMorph"
+        ) { tab ->
+            if (tab == 0) {
                 // Members List
                 LazyColumn(
-                    modifier = Modifier.fillMaxWidth(),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                    state = membersListState,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .heightIn(max = 340.dp)
+                        .verticalFadingEdges(membersListState, topEdgeHeight = 20.dp, bottomEdgeHeight = 20.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp),
+                    contentPadding = PaddingValues(vertical = 4.dp)
                 ) {
                     items(members, key = { it.userId }) { member ->
                         val isSelf = member.userId == currentUserId
                         val isOwnerMember = member.role.equals("owner", ignoreCase = true)
+                        val currentUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }
+                        var firestoreAvatarUrl by remember { mutableStateOf<String?>(null) }
+
+                        LaunchedEffect(member.userId) {
+                            if (member.userAvatarUrl.isNullOrBlank()) {
+                                try {
+                                    val doc = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                                        .collection("users")
+                                        .document(member.userId)
+                                        .get()
+                                        .await()
+                                    val photo = doc.getString("photoUrl")
+                                    if (!photo.isNullOrBlank()) {
+                                        firestoreAvatarUrl = photo
+                                    }
+                                } catch (_: Exception) {}
+                            }
+                        }
+
+                        val avatarUrl = remember(member.userAvatarUrl, isSelf, firestoreAvatarUrl) {
+                            when {
+                                !member.userAvatarUrl.isNullOrBlank() -> member.userAvatarUrl
+                                isSelf && !currentUser?.photoUrl?.toString().isNullOrBlank() -> currentUser.photoUrl?.toString()
+                                else -> firestoreAvatarUrl
+                            }
+                        }
+                        var isAvatarError by remember(avatarUrl) { mutableStateOf(false) }
 
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(14.dp))
+                                .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.04f))
-                                .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-                                .padding(12.dp),
+                                .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+                                .padding(
+                                    start = 7.dp,
+                                    top = 7.dp,
+                                    bottom = 7.dp,
+                                    end = if (isOwner && !isOwnerMember) 11.dp else 18.dp
+                                ),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Box(
                                 modifier = Modifier
-                                    .size(36.dp)
+                                    .size(40.dp)
                                     .clip(CircleShape)
                                     .background(folderColor.copy(alpha = 0.2f)),
                                 contentAlignment = Alignment.Center
@@ -167,6 +233,19 @@ fun FolderMembersModal(
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = folderColor
                                 )
+
+                                if (!avatarUrl.isNullOrBlank() && !isAvatarError) {
+                                    AsyncImage(
+                                        model = ImageRequest.Builder(context)
+                                            .data(avatarUrl)
+                                            .crossfade(true)
+                                            .build(),
+                                        contentDescription = member.displayName,
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop,
+                                        onError = { isAvatarError = true }
+                                    )
+                                }
                             }
 
                             Spacer(Modifier.width(12.dp))
@@ -181,22 +260,38 @@ fun FolderMembersModal(
                                     if (isSelf) {
                                         Spacer(Modifier.width(6.dp))
                                         Text(
-                                            text = "(Tu)",
+                                            text = stringResource(R.string.folder_member_you),
                                             style = MaterialTheme.typography.labelSmall,
                                             color = Color.White.copy(alpha = 0.5f)
                                         )
                                     }
                                 }
                                 Spacer(Modifier.height(2.dp))
-                                Text(
-                                    text = if (isOwnerMember) {
-                                        stringResource(R.string.folder_member_role_owner)
-                                    } else {
-                                        stringResource(R.string.folder_member_role_editor)
-                                    },
-                                    style = MaterialTheme.typography.labelSmall,
-                                    color = if (isOwnerMember) folderColor else Color.White.copy(alpha = 0.5f)
-                                )
+                                Box(
+                                    modifier = Modifier
+                                        .clip(CircleShape)
+                                        .background(if (isOwnerMember) folderColor.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.08f))
+                                        .border(
+                                            0.5.dp,
+                                            if (isOwnerMember) folderColor.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.14f),
+                                            CircleShape
+                                        )
+                                        .padding(horizontal = 8.dp, vertical = 2.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Text(
+                                        text = if (isOwnerMember) {
+                                            stringResource(R.string.folder_member_role_owner)
+                                        } else {
+                                            stringResource(R.string.folder_member_role_editor)
+                                        },
+                                        style = MaterialTheme.typography.labelSmall.copy(
+                                            fontWeight = FontWeight.Bold,
+                                            fontSize = 10.5.sp
+                                        ),
+                                        color = if (isOwnerMember) folderColor else Color.White.copy(alpha = 0.75f)
+                                    )
+                                }
                             }
 
                             // Owner can remove other members
@@ -221,22 +316,12 @@ fun FolderMembersModal(
                     }
                 }
             } else {
-                val now = remember { Instant.now() }
-                val validInvites = remember(activeInvites) {
-                    activeInvites.filter { invite ->
-                        if (invite.isRevoked) return@filter false
-                        if (invite.maxUses != null && invite.usedCount >= invite.maxUses) return@filter false
-                        val exp = try { Instant.parse(invite.expiresAt) } catch (e: Exception) { Instant.MAX }
-                        now.isBefore(exp)
-                    }
-                }
-
                 // Invites List
                 if (validInvites.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 32.dp),
+                            .padding(vertical = 28.dp),
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
@@ -247,16 +332,26 @@ fun FolderMembersModal(
                     }
                 } else {
                     LazyColumn(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(8.dp)
+                        state = invitesListState,
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 340.dp)
+                            .verticalFadingEdges(invitesListState, topEdgeHeight = 20.dp, bottomEdgeHeight = 20.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        contentPadding = PaddingValues(vertical = 4.dp)
                     ) {
                         items(validInvites, key = { it.inviteCode }) { invite ->
                             val expiryText = remember(invite.expiresAt) {
-                                try {
-                                    val instant = Instant.parse(invite.expiresAt)
-                                    val ldt = LocalDateTime.ofInstant(instant, ZoneId.systemDefault())
+                                val instant = invite.getExpiresAtInstant()
+                                if (instant != null) {
+                                    val userZone = try {
+                                        java.util.TimeZone.getDefault().toZoneId()
+                                    } catch (e: Exception) {
+                                        ZoneId.systemDefault()
+                                    }
+                                    val ldt = instant.atZone(userZone).toLocalDateTime()
                                     ldt.format(dateFormatter)
-                                } catch (e: Exception) {
+                                } else {
                                     invite.expiresAt
                                 }
                             }
@@ -264,10 +359,10 @@ fun FolderMembersModal(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(RoundedCornerShape(14.dp))
+                                    .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.04f))
-                                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-                                    .padding(12.dp),
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+                                    .padding(horizontal = 16.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Column(modifier = Modifier.weight(1f)) {
@@ -312,26 +407,42 @@ fun FolderMembersModal(
 
         Spacer(Modifier.height(10.dp))
 
-        // Bottom action bar
+        // Bottom action bar (Nested concentric corners: Modal R=32dp - Padding=16dp -> Button R=16dp)
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 22.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp)
+                .padding(top = 8.dp, bottom = 16.dp)
         ) {
+            val buttonShape = RoundedCornerShape(16.dp)
             if (isOwner) {
+                val isLimitReached = validInvites.size >= 10
+                val buttonTextColor = if (isLimitReached) {
+                    Color.White.copy(alpha = 0.6f)
+                } else if (folderColor.luminance() > 0.45f) {
+                    Color.Black
+                } else {
+                    Color.White
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
-                        .bounceClick(scaleDown = 0.96f, onClick = onOpenShareModal)
-                        .clip(CircleShape)
-                        .background(folderColor),
+                        .height(44.dp)
+                        .bounceClick(scaleDown = 0.96f) {
+                            if (isLimitReached) {
+                                feedbackManager?.emit(UiText.StringResource(R.string.folder_invites_limit_reached))
+                            } else {
+                                onOpenShareModal()
+                            }
+                        }
+                        .clip(buttonShape)
+                        .background(if (isLimitReached) Color.White.copy(alpha = 0.15f) else folderColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
-                        text = stringResource(R.string.folder_invite_create_button),
+                        text = if (isLimitReached) stringResource(R.string.folder_invites_limit_reached_btn) else stringResource(R.string.folder_invite_create_button),
                         style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
+                        color = buttonTextColor
                     )
                 }
             } else {
@@ -339,11 +450,11 @@ fun FolderMembersModal(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(40.dp)
+                        .height(44.dp)
                         .bounceClick(scaleDown = 0.96f, onClick = { showLeaveConfirm = true })
-                        .clip(CircleShape)
+                        .clip(buttonShape)
                         .background(Color.Red.copy(alpha = 0.15f))
-                        .border(1.dp, Color.Red.copy(alpha = 0.3f), CircleShape),
+                        .border(1.dp, Color.Red.copy(alpha = 0.3f), buttonShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -353,7 +464,6 @@ fun FolderMembersModal(
                     )
                 }
             }
-            Spacer(Modifier.height(6.dp))
         }
     }
 

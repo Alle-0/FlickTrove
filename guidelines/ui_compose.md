@@ -590,6 +590,44 @@
     - Tutti i modali di dialogo e selettori devono essere mostrati tramite il delegato root `LocalModalHost.current.show { ... }` montato ad apice gerarchia in `FlickTroveApp.kt` (`zIndex(250000f)`).
     - Lo scrim scuro nativo di `FlickTroveModal` copre già fisicamente il 100% dell'app window (incluse `GlassyTopBar`, `GlassyBottomBar` e `MainSearchFab`).
     - È tassativamente vietato riattivare contemporaneamente oscuramenti artificiali interni sulle singole barre (`animatedDimAlpha = 0.7f`) dai tab figli: tale duplicazione sommerebbe due veli scuri ($0.70 + 0.65$), causando un soffocamento quasi totale ($\sim 90\%$) della luminosità e rendendo le barre illeggibili.
+- **Divieto Assoluto di `android.widget.Toast` & Toast Standard Glassmorphic (`UndoToast`)**:
+    - È severamente vietato l'uso di `android.widget.Toast.makeText(...)` all'interno dell'applicazione.
+    - I toast nativi di sistema rompono la coerenza visiva glassmorphism e dark mode di FlickTrove, oltre a generare su Android 13+ notifiche di sistema non coordinate e doppie.
+    - Utilizzare sempre `val feedbackManager = rememberActionFeedbackManager()` ed emettere feedback tramite `feedbackManager?.emit(UiText.StringResource(R.string....))`, che attiva l'in-app `UndoToast` a molla elastica e sfondo frosted glass.
+- **Contrasto Dinamico del Testo (`color.luminance() > 0.45f`)**:
+    - Quando un pulsante, badge o contenitore adotta uno sfondo dinamico o personalizzabile dall'utente (es. `folderColor`, `accentColor`, palette estratta da artwork/backdrop):
+      ```kotlin
+      val textColor = if (containerColor.luminance() > 0.45f) Color.Black else Color.White
+      ```
+    - Questo previene testi bianchi su sfondi luminosi (giallo, ciano, lime, bianco) o testi scuri su sfondi scuri, garantendo leggibilità e contrasto WCAG AAA in ogni condizione cromatica.
+- **Formula Concentricità Angoli Annidati ($R_{in} = R_{out} - \text{Padding}$) & Divieto `CircleShape` su Bottoni Modali**:
+    - Nei modali standard a raggio ampio (es. `FlickTroveModal` con $R = 32\text{dp}$), è vietato usare `CircleShape` per i pulsanti di azione a tutta larghezza disposti sul fondo: la sagoma a pillola piena dentro un rettangolo arrotondato genera distorsioni visive e "strozzature" diagonali asimmetriche a 45°.
+    - Applicare rigorosamente la formula matematica di concentricità degli angoli annidati:
+      $$R_{\text{interno}} = R_{\text{esterno}} - \text{Padding}$$
+    - Per un modale con raggio $32\text{dp}$ e padding perimetrale uniforme di $16\text{dp}$ (`horizontal = 16.dp, bottom = 16.dp`), i pulsanti d'azione orizzontali devono adottare tassativamente `RoundedCornerShape(16.dp)` ($32\text{dp} - 16\text{dp} = 16\text{dp}$).
+- **Riuso del Selettore Fisico (`CategoryTabSelector`)**:
+    - Per qualsiasi tab bar o selettore segmentato all'interno di schermate, pannelli o modali, utilizzare il componente canonico `CategoryTabSelector` con `fillWidth = true` (e `uppercase = false` se necessario), ereditando la fisica inerziale asimmetrica unificata (jelly spring, flight dynamics e gesture drag).
+- **Dissolvenza Unificata Contenitore + Contenuto e Rimpicciolimento Testo su Scroll (Anti-Ghost Box)**:
+    - Quando un elemento comprimibile o collassabile varia la sua altezza e trasparenza durante lo scorrimento verticale (es. card di aggiunta cartelle, barra di ricerca, descrizione lista):
+      1. **Anti-Ghost Box**: Il modificatore `graphicsLayer { alpha = alphaProgress }` deve essere applicato tassativamente al **contenitore esterno** (che include sfondo e bordo), e **non** soltanto al testo interno. Se applicato solo al testo, il bordo e lo sfondo del box rimangono visibili come una scatola vuota fantasma opaca.
+      2. **Rimpicciolimento Testo e Ancoraggio (`textScale` & `TransformOrigin`)**: Contemporaneamente alla dissolvenza d'alfa e alla riduzione di altezza del contenitore, scalare la dimensione visiva del testo e delle icone interne con `textScale = 0.75f + 0.25f * alphaProgress`, ancorato tramite `TransformOrigin` idoneo (`Center` per le card, `(0f, 0.5f)` per barre orizzontali, `(0f, 0f)` per blocchi testo a scendere), azzerando salti visivi e donando un collasso tridimensionale naturale.
+- **Morphing Dimensionale dei Modali su Cambio Tab (`AnimatedContent` + `SizeTransform` + `verticalFadingEdges`)**:
+    - Nei modali o drawer con tab interni di altezza eterogenea (es. `FolderMembersModal` con lista membri vs inviti attivi):
+      1. Racchiudere il selettore e la lista all'interno di `AnimatedContent` configurato con transizione morphing di dimensione:
+         ```kotlin
+         transitionSpec = {
+             fadeIn(animationSpec = tween(220, delayMillis = 60)) togetherWith
+                 fadeOut(animationSpec = tween(160)) using
+                 SizeTransform(
+                     clip = true,
+                     sizeAnimationSpec = { _, _ ->
+                         spring(dampingRatio = 0.82f, stiffness = 380f)
+                     }
+                 )
+         }
+         ```
+      2. Non imporre altezze minime rigide (es. `min = 180.dp`) che creano spazi vuoti asimmetrici quando la lista ha un solo elemento; consentire il collasso naturale con vincolo superiore proporzionato (`heightIn(max = 340.dp)`).
+      3. Applicare `Modifier.verticalFadingEdges(topEdgeHeight = 20.dp, bottomEdgeHeight = 20.dp)` su ciascuna lista scrollabile con proprio `LazyListState` dedicato, assicurando gradienti di dissolvenza morbidi sia in testa che in coda.
 
 ### Pattern Statistiche e Podio
 

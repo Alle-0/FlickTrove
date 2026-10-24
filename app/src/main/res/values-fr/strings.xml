@@ -1875,7 +1875,6 @@
     <string name="folder_share_title">Partager le Dossier</string>
     <string name="folder_share_desc">Créez un lien d\'invitation temporaire pour collaborer.</string>
     <string name="folder_share_duration">Durée de l\'invitation</string>
-    <string name="folder_invite_duration_1m">1 Minute (Test rapide)</string>
     <string name="folder_invite_duration_24h">24 Heures</string>
     <string name="folder_invite_duration_48h">48 Heures</string>
     <string name="folder_invite_duration_7d">7 Jours</string>
@@ -1904,6 +1903,7 @@
     <string name="folder_invites_tab">Invitations Actives</string>
     <string name="folder_member_role_owner">Propriétaire</string>
     <string name="folder_member_role_editor">Collaborateur</string>
+    <string name="folder_member_you">(Toi)</string>
     <string name="folder_member_remove">Supprimer</string>
     <string name="folder_member_remove_confirm">Retirer %1$s de ce dossier partagé ?</string>
     <string name="folder_leave">Quitter le dossier</string>
@@ -1912,5 +1912,9 @@
     <string name="folder_invite_revoke">Révoquer</string>
     <string name="folder_invite_expires_in">Expire le : %1$s</string>
     <string name="folder_max_items_reached">Capacité maximale atteinte pour ce dossier (1 000/1 000 titres)</string>
+    <string name="folder_invites_tab_count">Invitations actives (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Limite maximale de 10 invitations actives atteinte. Révoquez une invitation pour en générer une nouvelle.</string>
+    <string name="folder_invites_limit_reached_btn">Limite atteinte (10/10)</string>
+    <string name="folder_auto_reverted_private">Aucun membre ni invitation active : le dossier est désormais privé.</string>
 </resources>
 

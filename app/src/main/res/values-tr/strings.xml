@@ -1881,7 +1881,6 @@
     <string name="folder_share_title">Klasörü Paylaş</string>
     <string name="folder_share_desc">Birlikte çalışmak için geçici erişimli bir davet bağlantısı oluşturun.</string>
     <string name="folder_share_duration">Davet Süresi</string>
-    <string name="folder_invite_duration_1m">1 Dakika (Hızlı test)</string>
     <string name="folder_invite_duration_24h">24 Saat</string>
     <string name="folder_invite_duration_48h">48 Saat</string>
     <string name="folder_invite_duration_7d">7 Gün</string>
@@ -1910,6 +1909,7 @@
     <string name="folder_invites_tab">Aktif Davetler</string>
     <string name="folder_member_role_owner">Sahip</string>
     <string name="folder_member_role_editor">Katılımcı</string>
+    <string name="folder_member_you">(Sen)</string>
     <string name="folder_member_remove">Kaldır</string>
     <string name="folder_member_remove_confirm">%1$s bu paylaşılan klasörden kaldırılsın mı?</string>
     <string name="folder_leave">Klasörden ayrıl</string>
@@ -1918,4 +1918,8 @@
     <string name="folder_invite_revoke">İptal Et</string>
     <string name="folder_invite_expires_in">Geçerlilik: %1$s</string>
     <string name="folder_max_items_reached">Klasör için maksimum kapasiteye ulaşıldı (1.000/1.000 başlık)</string>
+    <string name="folder_invites_tab_count">Aktif Davetler (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Maksimum 10 aktif davet sınırına ulaşıldı. Yeni bir davet oluşturmak için mevcut bir daveti iptal edin.</string>
+    <string name="folder_invites_limit_reached_btn">Sınıra Ulaşıldı (10/10)</string>
+    <string name="folder_auto_reverted_private">Üye veya aktif davet yok: klasör artık gizli.</string>
 </resources>

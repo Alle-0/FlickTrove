@@ -156,3 +156,28 @@
 - **Purezza Cronologica del Diario di Bordo (Anti-Feature Trap)**:
     - **Sequenza Temporale Pura**: Il Diario di Visione / Cronologia è concettualmente un registro temporale delle sessioni di visione dell'utente. A differenza della schermata **Visti** (che funge da catalogo/libreria e richiede filtri per titolo, valutazione, genere o popolarità), il Diario ammette **esclusivamente l'ordinamento cronologico** (`DATE_DESC` o `DATE_ASC`).
     - **Divieto Filtri Alfabetici e per Voto**: È tassativamente vietato introdurre ordinamenti per titolo alfabetico o voto personale nel Diario: distruggono il modello mentale del "diario di bordo" cronologico, generano debito di design e creano sovrapposizioni confuse con la schermata Visti.
+
+- **Parsing Timestamp ISO PostgREST / Supabase (`+00:00` vs `Z`) e Fusi Orari Locali**:
+    - **Compatibilità con Offset UTC Espliciti**: PostgreSQL e PostgREST (Supabase) serializzano i campi `timestamptz` con l'offset esplicito `+00:00` (es. `2026-10-24T13:57:00+00:00`). `Instant.parse()` su Android/Java 8 fallisce con `DateTimeParseException` poiché si aspetta la notazione `Z`.
+    - **Parser Robusto a Doppio Stadio**:
+      ```kotlin
+      val instant = try {
+          Instant.parse(timestampStr)
+      } catch (e: Exception) {
+          try {
+              java.time.OffsetDateTime.parse(timestampStr).toInstant()
+          } catch (e2: Exception) {
+              null
+          }
+      }
+      ```
+    - **Divieto di Fallback Distruttivi**: Non assegnare `Instant.MAX` o date future fittizie in caso di fallimento o assenza di scadenza su filtri temporali (es. `expires_at > now()`), per evitare che inviti scaduti o corrotti appaiano perennemente attivi.
+    - **Visualizzazione nel Fuso Orario Locale dell'Utente**: Per la visualizzazione a schermo di date e orari provenienti dal cloud UTC, convertire sempre con `instant.atZone(java.util.TimeZone.getDefault().toZoneId()).toLocalDateTime()`. Formattare ore e minuti (`HH:mm`) preservando l'orario effettivo del dispositivo ed evitando scostamenti di ore dovuti all'UTC crudo.
+
+- **Invariante Cartelle Condivise: Auto-Revert a Privata (Zero Cloud Waste & Data Preservation)**:
+    - **Single Source of Truth & Integrità Locale**: Una cartella condivisa non deve rimanere in stato `isShared = true` se appartiene all'owner e non ha nessun altro collaboratore attivo (`otherMembers.isEmpty()`) né inviti validi pendenti (`activeInvites.isEmpty()`).
+    - **Riconversione Automatica a Locale**:
+      1. Viene riconvertita automaticamente a cartella privata locale (`isShared = false`, `syncStatus = "local"`), preservando al 100% tutti i film, le serie TV e i metadati Room esistenti.
+      2. Le risorse remote su Supabase (`shared_folders`, `folder_members`, `folder_invites`) vengono epurate silenziosamente a costo zero per evitare costi di hosting e tabelle orfane sul cloud.
+      3. L'utente viene notificato in-app con un feedback discreto (`folder_auto_reverted_private`), garantendo chiarezza sul nuovo stato locale della cartella.
+

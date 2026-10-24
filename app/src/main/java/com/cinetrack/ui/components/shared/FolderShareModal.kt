@@ -4,7 +4,6 @@ import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
 import android.content.Intent
-import android.widget.Toast
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -30,7 +29,9 @@ import com.cinetrack.R
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.SharedFolderInviteDto
 import com.cinetrack.data.repository.InviteDurationOption
+import com.cinetrack.ui.utils.UiText
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rememberActionFeedbackManager
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 
@@ -42,6 +43,7 @@ fun FolderShareModal(
     hazeState: HazeState? = null
 ) {
     val context = LocalContext.current
+    val feedbackManager = rememberActionFeedbackManager()
     var selectedOption by remember { mutableStateOf(InviteDurationOption.TWENTY_FOUR_HOURS) }
     var isLoading by remember { mutableStateOf(false) }
     var createdInvite by remember { mutableStateOf<SharedFolderInviteDto?>(null) }
@@ -82,7 +84,8 @@ fun FolderShareModal(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 22.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
         ) {
             Text(
                 text = stringResource(R.string.folder_share_desc),
@@ -109,8 +112,7 @@ fun FolderShareModal(
                     InviteDurationOption.SINGLE_USE to stringResource(R.string.folder_invite_duration_single),
                     InviteDurationOption.TWENTY_FOUR_HOURS to stringResource(R.string.folder_invite_duration_24h),
                     InviteDurationOption.FORTY_EIGHT_HOURS to stringResource(R.string.folder_invite_duration_48h),
-                    InviteDurationOption.SEVEN_DAYS to stringResource(R.string.folder_invite_duration_7d),
-                    InviteDurationOption.ONE_MINUTE to stringResource(R.string.folder_invite_duration_1m)
+                    InviteDurationOption.SEVEN_DAYS to stringResource(R.string.folder_invite_duration_7d)
                 )
 
                 options.forEach { (option, label) ->
@@ -162,10 +164,11 @@ fun FolderShareModal(
 
                 Spacer(Modifier.height(14.dp))
 
+                val buttonShape = RoundedCornerShape(16.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(42.dp)
+                        .height(44.dp)
                         .bounceClick(
                             enabled = !isLoading,
                             scaleDown = 0.96f
@@ -177,11 +180,15 @@ fun FolderShareModal(
                                 result.onSuccess { invite ->
                                     createdInvite = invite
                                 }.onFailure { err ->
-                                    errorMessage = err.message ?: "Errore durante la creazione"
+                                    errorMessage = if (err.message == "MAX_INVITES_REACHED") {
+                                        context.getString(R.string.folder_invites_limit_reached)
+                                    } else {
+                                        err.message ?: "Errore durante la creazione"
+                                    }
                                 }
                             }
                         }
-                        .clip(CircleShape)
+                        .clip(buttonShape)
                         .background(if (!isLoading) Color.White else Color.White.copy(alpha = 0.4f)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -243,24 +250,25 @@ fun FolderShareModal(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
+                    val postButtonShape = RoundedCornerShape(16.dp)
                     // Copy code button
                     val isCopied = copiedToast
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(40.dp)
+                            .height(44.dp)
                             .bounceClick(scaleDown = 0.94f) {
                                 val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
                                 val clip = ClipData.newPlainText("FlickTrove Invite Code", invite.code)
                                 clipboard.setPrimaryClip(clip)
                                 copiedToast = true
-                                Toast.makeText(context, context.getString(R.string.folder_invite_copied_toast), Toast.LENGTH_SHORT).show()
+                                feedbackManager?.emit(UiText.StringResource(R.string.folder_invite_copied_toast))
                             }
-                            .clip(CircleShape)
+                            .clip(postButtonShape)
                             .border(
                                 width = 1.dp,
                                 color = if (isCopied) Color(0xFF34C759).copy(alpha = 0.6f) else Color.White.copy(alpha = 0.25f),
-                                shape = CircleShape
+                                shape = postButtonShape
                             )
                             .background(if (isCopied) Color(0xFF34C759).copy(alpha = 0.15f) else Color.White.copy(alpha = 0.06f)),
                         contentAlignment = Alignment.Center
@@ -293,7 +301,7 @@ fun FolderShareModal(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(40.dp)
+                            .height(44.dp)
                             .bounceClick(scaleDown = 0.94f) {
                                 val inviteLink = "https://alle-0.github.io/FlickTrove/open.html?type=folder&code=${invite.code}&t=${android.net.Uri.encode(folder.name)}"
                                 val shareText = context.getString(
@@ -308,7 +316,7 @@ fun FolderShareModal(
                                 }
                                 context.startActivity(Intent.createChooser(intent, context.getString(R.string.folder_invite_share)))
                             }
-                            .clip(CircleShape)
+                            .clip(postButtonShape)
                             .background(Color.White),
                         contentAlignment = Alignment.Center
                     ) {
@@ -331,8 +339,6 @@ fun FolderShareModal(
                     }
                 }
             }
-
-            Spacer(Modifier.height(16.dp))
         }
     }
 }

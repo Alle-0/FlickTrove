@@ -79,7 +79,10 @@ fun CategoryTabSelector(
     onOptionClick: (Int) -> Unit,
     modifier: Modifier = Modifier,
     tabWidth: androidx.compose.ui.unit.Dp = 116.dp,
-    fontSize: androidx.compose.ui.unit.TextUnit = 12.sp
+    fontSize: androidx.compose.ui.unit.TextUnit = 12.sp,
+    fillWidth: Boolean = false,
+    indicatorColor: Color? = null,
+    uppercase: Boolean = true
 ) {
     val tabHeight = 34.dp
     val haptic = LocalHapticFeedback.current
@@ -92,9 +95,10 @@ fun CategoryTabSelector(
         val requestedTabWidthPx = with(LocalDensity.current) { tabWidth.toPx() }
         val maxAvailableWidthPx = constraints.maxWidth.toFloat()
         
-        // If the total requested width exceeds available width, the layout will squish the tabs.
-        // We calculate the real tab width to ensure the indicator matches the actual rendered tab size.
-        val realTabWidthPx = if (maxAvailableWidthPx > 0 && maxAvailableWidthPx < requestedTabWidthPx * options.size) {
+        // If fillWidth is true or total requested width exceeds available width, divide equally
+        val realTabWidthPx = if (fillWidth && maxAvailableWidthPx > 0 && options.isNotEmpty()) {
+            maxAvailableWidthPx / options.size
+        } else if (maxAvailableWidthPx > 0 && maxAvailableWidthPx < requestedTabWidthPx * options.size) {
             maxAvailableWidthPx / options.size
         } else {
             requestedTabWidthPx
@@ -225,7 +229,7 @@ fun CategoryTabSelector(
             label = "dragScaleX"
         )
 
-        val primaryColor = MaterialTheme.colorScheme.primary
+        val primaryColor = indicatorColor ?: MaterialTheme.colorScheme.primary
         val pillPath = remember { Path() }
 
         Box(
@@ -388,7 +392,8 @@ fun CategoryTabSelector(
                         isSelectedTabPressed = pressed
                     }
                 },
-                fontSize = fontSize
+                fontSize = fontSize,
+                uppercase = uppercase
             )
 
             // 2. Sliding Highlighter + 3. Active Masked Layer (Only what is under the selector gets colored!)
@@ -487,7 +492,8 @@ fun CategoryTabSelector(
                     pressedTabIndex = pressedTabIndex,
                     onOptionClick = {},
                     onTabPressed = null,
-                    fontSize = fontSize
+                    fontSize = fontSize,
+                    uppercase = uppercase
                 )
             }
         }
@@ -506,7 +512,8 @@ private fun CategoryTabItems(
     pressedTabIndex: Int,
     onOptionClick: (Int) -> Unit,
     onTabPressed: ((Int, Boolean) -> Unit)? = null,
-    fontSize: androidx.compose.ui.unit.TextUnit = 12.sp
+    fontSize: androidx.compose.ui.unit.TextUnit = 12.sp,
+    uppercase: Boolean = true
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     val vibrationEnabled = com.cinetrack.ui.utils.LocalVibrationEnabled.current
@@ -567,7 +574,7 @@ private fun CategoryTabItems(
                         }
                 ) {
                     Text(
-                        text = title.uppercase(),
+                        text = if (uppercase) title.uppercase() else title,
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = fontSize,
                         fontWeight = FontWeight.Bold,

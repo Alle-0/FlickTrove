@@ -1888,7 +1888,6 @@
     <string name="folder_share_title">Condividi Cartella</string>
     <string name="folder_share_desc">Genera un codice o link d\'invito temporaneo per collaborare.</string>
     <string name="folder_share_duration">Durata dell\'invito</string>
-    <string name="folder_invite_duration_1m">1 Minuto (Test rapido)</string>
     <string name="folder_invite_duration_24h">24 Ore</string>
     <string name="folder_invite_duration_48h">48 Ore</string>
     <string name="folder_invite_duration_7d">7 Giorni</string>
@@ -1917,6 +1916,7 @@
     <string name="folder_invites_tab">Inviti Attivi</string>
     <string name="folder_member_role_owner">Proprietario</string>
     <string name="folder_member_role_editor">Collaboratore</string>
+    <string name="folder_member_you">(Tu)</string>
     <string name="folder_member_remove">Rimuovi</string>
     <string name="folder_member_remove_confirm">Vuoi rimuovere %1$s da questa cartella condivisa?</string>
     <string name="folder_leave">Abbandona cartella</string>
@@ -1925,5 +1925,9 @@
     <string name="folder_invite_revoke">Revoca</string>
     <string name="folder_invite_expires_in">Scadenza: %1$s</string>
     <string name="folder_max_items_reached">Capacità massima raggiunta per questa cartella (1.000/1.000 titoli)</string>
+    <string name="folder_invites_tab_count">Inviti Attivi (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Limite massimo di 10 inviti attivi raggiunto. Revoca un invito esistente per generarne uno nuovo.</string>
+    <string name="folder_invites_limit_reached_btn">Limite raggiunto (10/10)</string>
+    <string name="folder_auto_reverted_private">Nessun membro né invito attivo: la cartella è tornata privata.</string>
 </resources>
 

@@ -512,6 +512,16 @@ class FolderDetailViewModel @Inject constructor(
     ) {
         viewModelScope.launch {
             val result = sharedFolderRepository.revokeInvite(invite.inviteCode)
+            if (result.isSuccess) {
+                val currentState = uiState.value
+                if (currentState is FolderDetailUiState.Success) {
+                    val currentFolder = currentState.folder
+                    val didRevert = sharedFolderRepository.checkAndAutoRevertIfEmpty(currentFolder).getOrDefault(false)
+                    if (didRevert) {
+                        actionFeedbackManager.emit(UiText.StringResource(R.string.folder_auto_reverted_private))
+                    }
+                }
+            }
             onResult(result)
         }
     }

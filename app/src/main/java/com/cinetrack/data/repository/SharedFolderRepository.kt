@@ -20,7 +20,6 @@ import javax.inject.Inject
 import javax.inject.Singleton
 
 enum class InviteDurationOption(val minutes: Long?, val maxUses: Int?) {
-    ONE_MINUTE(1L, null),
     TWENTY_FOUR_HOURS(24 * 60L, null),
     FORTY_EIGHT_HOURS(48 * 60L, null),
     SEVEN_DAYS(7 * 24 * 60L, null),
@@ -121,6 +120,12 @@ class SharedFolderRepository @Inject constructor(
     ): Result<SharedFolderInviteDto> = withContext(Dispatchers.IO) {
         runCatching {
             val user = getCurrentUser() ?: throw IllegalStateException("USER_NOT_LOGGED_IN")
+            
+            val currentActiveInvites = getFolderInvites(sharedFolderId).getOrDefault(emptyList())
+            if (currentActiveInvites.size >= 10) {
+                throw IllegalStateException("MAX_INVITES_REACHED")
+            }
+
             val code = generateShareCode()
             val now = Instant.now()
             val expiresAt = if (durationOption.minutes != null) {
@@ -171,13 +176,7 @@ class SharedFolderRepository @Inject constructor(
                 throw IllegalStateException("INVITE_REVOKED")
             }
 
-            val expiresAtInstant = try {
-                Instant.parse(invite.expiresAt)
-            } catch (e: Exception) {
-                Instant.MAX
-            }
-
-            if (Instant.now().isAfter(expiresAtInstant)) {
+            if (invite.isExpired) {
                 throw IllegalStateException("INVITE_EXPIRED")
             }
 
@@ -224,6 +223,12 @@ class SharedFolderRepository @Inject constructor(
                         put("used_count", newCount)
                     }
                 )
+            }
+
+            // Check if user already has this folder locally (e.g. owner or already imported)
+            val existingLocal = folderDao.getAll().find { it.sharedFolderId == sharedId }
+            if (existingLocal != null) {
+                return@runCatching existingLocal
             }
 
             // Map and store in local Room database
@@ -335,11 +340,42 @@ class SharedFolderRepository @Inject constructor(
         runCatching {
             val user = getCurrentUser() ?: return@runCatching
             val memberships = api.getUserSharedFolders("eq.${user.uid}")
+            val localFolders = folderDao.getAll()
+
+            // 1. Auto-cleanup duplicates in local Room database:
+            // Group by sharedFolderId and remove any redundant clone with id == "shared_$sharedId"
+            // if an original folder already exists with a different ID.
+            localFolders.filter { it.isShared && it.sharedFolderId != null }
+                .groupBy { it.sharedFolderId!! }
+                .forEach { (sharedId, foldersWithSameSharedId) ->
+                    if (foldersWithSameSharedId.size > 1) {
+                        // Keep the original folder (prefer the one with oldest createdAt or id != "shared_$sharedId")
+                        val original = foldersWithSameSharedId.minByOrNull { it.createdAt }
+                            ?: foldersWithSameSharedId.first()
+                        val duplicates = foldersWithSameSharedId.filter { it.id != original.id }
+                        duplicates.forEach { dup ->
+                            folderDao.deleteById(dup.id)
+                        }
+                    }
+                }
+
+            // 2. Remove local shared folders where user is collaborator if owner deleted the folder or removed the member
+            val activeRemoteSharedIds = memberships.mapNotNull { it.sharedFolder?.id }.toSet()
+            localFolders.filter { it.isShared && it.ownerUid != user.uid && it.sharedFolderId != null }
+                .filter { it.sharedFolderId !in activeRemoteSharedIds }
+                .forEach { deadFolder ->
+                    folderDao.deleteById(deadFolder.id)
+                }
+
+            val refreshedLocalFolders = folderDao.getAll()
 
             memberships.forEach { membership ->
                 val sharedDto = membership.sharedFolder ?: return@forEach
                 val sharedId = sharedDto.id ?: return@forEach
-                val localId = "shared_${sharedId}"
+                
+                // Match existing local folder by sharedFolderId to avoid ID collision
+                val existing = refreshedLocalFolders.find { it.sharedFolderId == sharedId }
+                val localId = existing?.id ?: "shared_${sharedId}"
                 val compositeItemIds = sharedDto.items.map { "${it.mediaType}_${it.id}" }
 
                 val folderEntity = FolderEntity(
@@ -349,7 +385,7 @@ class SharedFolderRepository @Inject constructor(
                     color = sharedDto.color ?: "#FFFFFF",
                     description = sharedDto.description,
                     itemIds = compositeItemIds,
-                    createdAt = sharedDto.createdAt ?: Instant.now().toString(),
+                    createdAt = existing?.createdAt ?: sharedDto.createdAt ?: Instant.now().toString(),
                     updatedAt = sharedDto.updatedAt ?: Instant.now().toString(),
                     syncStatus = "synced",
                     clientUpdatedAt = System.currentTimeMillis(),
@@ -363,6 +399,13 @@ class SharedFolderRepository @Inject constructor(
                 folderDao.insert(folderEntity)
                 fetchMissingItemsMetadata(sharedDto.items)
             }
+
+            // 3. Auto-revert owner folders with 0 active invites and 0 other members
+            val finalFolders = folderDao.getAll()
+            finalFolders.filter { it.isShared && it.ownerUid == user.uid && it.sharedFolderId != null }
+                .forEach { ownerFolder ->
+                    checkAndAutoRevertIfEmpty(ownerFolder)
+                }
         }
     }
 
@@ -381,12 +424,7 @@ class SharedFolderRepository @Inject constructor(
 
     suspend fun revokeInvite(code: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            val response = api.updateInvite(
-                "eq.$code",
-                buildJsonObject {
-                    put("is_revoked", true)
-                }
-            )
+            val response = api.revokeInvite("eq.$code")
             if (!response.isSuccessful) {
                 throw HttpException(response)
             }
@@ -397,17 +435,54 @@ class SharedFolderRepository @Inject constructor(
     suspend fun getFolderInvites(sharedFolderId: String): Result<List<SharedFolderInviteDto>> = withContext(Dispatchers.IO) {
         runCatching {
             val invites = api.getFolderInvites("eq.$sharedFolderId")
-            val now = Instant.now()
             invites.filter { invite ->
-                if (invite.isRevoked) return@filter false
-                if (invite.maxUses != null && invite.usedCount >= invite.maxUses) return@filter false
-                val expiresAt = try {
-                    Instant.parse(invite.expiresAt)
-                } catch (e: Exception) {
-                    Instant.MAX
-                }
-                now.isBefore(expiresAt)
+                !invite.isRevoked &&
+                (invite.maxUses == null || invite.usedCount < invite.maxUses) &&
+                !invite.isExpired
             }
+        }
+    }
+
+    suspend fun revertSharedFolderToPrivate(folder: FolderEntity): Result<FolderEntity> = withContext(Dispatchers.IO) {
+        runCatching {
+            val sharedId = folder.sharedFolderId
+            if (sharedId != null) {
+                try {
+                    api.deleteSharedFolder("eq.$sharedId")
+                } catch (e: Exception) {
+                    // Ignore network/server errors during remote deletion
+                }
+            }
+            val privateFolder = folder.copy(
+                isShared = false,
+                sharedFolderId = null,
+                shareCode = null,
+                ownerUid = null,
+                ownerName = null,
+                syncStatus = "local",
+                clientUpdatedAt = System.currentTimeMillis()
+            )
+            folderDao.insert(privateFolder)
+            privateFolder
+        }
+    }
+
+    suspend fun checkAndAutoRevertIfEmpty(folder: FolderEntity): Result<Boolean> = withContext(Dispatchers.IO) {
+        runCatching {
+            val sharedId = folder.sharedFolderId ?: return@runCatching false
+            val user = getCurrentUser() ?: return@runCatching false
+            if (folder.ownerUid != user.uid) return@runCatching false
+
+            val members = api.getFolderMembers("eq.$sharedId")
+            val otherMembers = members.filter { it.userUid != user.uid }
+            if (otherMembers.isNotEmpty()) return@runCatching false
+
+            val allInvites = api.getFolderInvites("eq.$sharedId")
+            val activeInvites = allInvites.filter { !it.isRevoked && (it.maxUses == null || it.usedCount < it.maxUses) && !it.isExpired }
+            if (activeInvites.isNotEmpty()) return@runCatching false
+
+            revertSharedFolderToPrivate(folder).getOrThrow()
+            true
         }
     }
 

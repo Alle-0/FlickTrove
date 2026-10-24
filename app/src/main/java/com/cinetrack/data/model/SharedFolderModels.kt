@@ -58,6 +58,28 @@ data class SharedFolderInviteDto(
     @SerialName("created_at") val createdAt: String? = null
 ) {
     val inviteCode: String get() = code
+
+    fun getExpiresAtInstant(): java.time.Instant? {
+        return try {
+            java.time.Instant.parse(expiresAt)
+        } catch (e: Exception) {
+            try {
+                java.time.OffsetDateTime.parse(expiresAt).toInstant()
+            } catch (e2: Exception) {
+                try {
+                    val clean = expiresAt.replace(' ', 'T')
+                    java.time.OffsetDateTime.parse(clean).toInstant()
+                } catch (e3: Exception) {
+                    null
+                }
+            }
+        }
+    }
+
+    val isExpired: Boolean get() {
+        val exp = getExpiresAtInstant() ?: return false
+        return java.time.Instant.now().isAfter(exp)
+    }
 }
 
 @Serializable

@@ -190,6 +190,13 @@ fun FolderCard(
 
             if (folder.isShared) {
                 Spacer(Modifier.height(4.dp))
+                val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
+                val isOwner = currentUserId != null && folder.ownerUid == currentUserId
+                val badgeText = if (isOwner || folder.ownerName.isNullOrBlank()) {
+                    stringResource(id = R.string.folder_shared_badge)
+                } else {
+                    folder.ownerName
+                }
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     modifier = Modifier
@@ -205,7 +212,7 @@ fun FolderCard(
                     )
                     Spacer(Modifier.width(4.dp))
                     Text(
-                        text = folder.ownerName ?: stringResource(id = R.string.folder_shared_badge),
+                        text = badgeText,
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 10.sp,
                             fontWeight = FontWeight.Medium
@@ -257,16 +264,23 @@ fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgr
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .bounceClick(scaleDown = 0.97f) { onClick() }
+            .graphicsLayer { alpha = alphaProgress }
+            .bounceClick(enabled = alphaProgress > 0.3f, scaleDown = 0.97f) { onClick() }
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50)),
         contentAlignment = Alignment.Center
     ) {
         if (alphaProgress > 0f) {
-            Box(modifier = Modifier
-                .wrapContentHeight(unbounded = true)
-                .graphicsLayer { alpha = alphaProgress }
+            val textScale = 0.75f + 0.25f * alphaProgress
+            Box(
+                modifier = Modifier
+                    .wrapContentHeight(unbounded = true)
+                    .graphicsLayer {
+                        scaleX = textScale
+                        scaleY = textScale
+                        transformOrigin = TransformOrigin.Center
+                    }
             ) {
                 Row(
                     modifier = Modifier
@@ -274,41 +288,48 @@ fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgr
                         .padding(vertical = 12.dp, horizontal = 20.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                Icon(
-                    ImageVector.vectorResource(id = R.drawable.ic_plus),
-                    null,
-                    tint = Color.White.copy(alpha = 0.8f),
-                    modifier = Modifier.size(20.dp)
-                )
-                
-                Spacer(Modifier.width(12.dp))
-                
-                Text(
-                    text = stringResource(R.string.folders_new_folder),
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
-                )
+                    Icon(
+                        ImageVector.vectorResource(id = R.drawable.ic_plus),
+                        null,
+                        tint = Color.White.copy(alpha = 0.8f),
+                        modifier = Modifier.size(20.dp)
+                    )
+                    
+                    Spacer(Modifier.width(12.dp))
+                    
+                    Text(
+                        text = stringResource(R.string.folders_new_folder),
+                        color = Color.White,
+                        fontSize = 16.sp,
+                        fontWeight = FontWeight.Medium
+                    )
+                }
             }
         }
     }
-}
 }
 
 @Composable
 fun JoinFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgress: Float = 1f) {
     Box(
         modifier = modifier
-            .bounceClick(scaleDown = 0.97f) { onClick() }
+            .graphicsLayer { alpha = alphaProgress }
+            .bounceClick(enabled = alphaProgress > 0.3f, scaleDown = 0.97f) { onClick() }
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50)),
         contentAlignment = Alignment.Center
     ) {
         if (alphaProgress > 0f) {
-            Box(modifier = Modifier
-                .wrapContentHeight(unbounded = true)
-                .graphicsLayer { alpha = alphaProgress }
+            val textScale = 0.75f + 0.25f * alphaProgress
+            Box(
+                modifier = Modifier
+                    .wrapContentHeight(unbounded = true)
+                    .graphicsLayer {
+                        scaleX = textScale
+                        scaleY = textScale
+                        transformOrigin = TransformOrigin.Center
+                    }
             ) {
                 Row(
                     modifier = Modifier

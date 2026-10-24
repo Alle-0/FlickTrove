@@ -1888,7 +1888,6 @@
     <string name="folder_share_title">Share Folder</string>
     <string name="folder_share_desc">Create an invite link with temporary access to collaborate.</string>
     <string name="folder_share_duration">Invite Duration</string>
-    <string name="folder_invite_duration_1m">1 Minute (Quick Test)</string>
     <string name="folder_invite_duration_24h">24 Hours</string>
     <string name="folder_invite_duration_48h">48 Hours</string>
     <string name="folder_invite_duration_7d">7 Days</string>
@@ -1917,6 +1916,7 @@
     <string name="folder_invites_tab">Active Invites</string>
     <string name="folder_member_role_owner">Owner</string>
     <string name="folder_member_role_editor">Collaborator</string>
+    <string name="folder_member_you">(You)</string>
     <string name="folder_member_remove">Remove</string>
     <string name="folder_member_remove_confirm">Remove %1$s from this shared folder?</string>
     <string name="folder_leave">Leave Folder</string>
@@ -1924,6 +1924,10 @@
     <string name="folder_invites_none">No active invites for this folder.</string>
     <string name="folder_invite_revoke">Revoke</string>
     <string name="folder_invite_expires_in">Expires: %1$s</string>
+    <string name="folder_invites_tab_count">Active Invites (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Maximum limit of 10 active invites reached. Revoke an existing invite to create a new one.</string>
+    <string name="folder_invites_limit_reached_btn">Limit Reached (10/10)</string>
     <string name="folder_max_items_reached">Maximum folder capacity reached (1,000/1,000 titles)</string>
+    <string name="folder_auto_reverted_private">No members or active invites: folder is now private.</string>
 </resources>
 

@@ -115,6 +115,7 @@ fun FlickTroveModal(
                         .graphicsLayer {
                             scaleX = modalScale
                             scaleY = modalScale
+                            transformOrigin = androidx.compose.ui.graphics.TransformOrigin.Center
                         }
                         .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
                             keyboardController?.hide()

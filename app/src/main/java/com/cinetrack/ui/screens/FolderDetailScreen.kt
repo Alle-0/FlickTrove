@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import com.cinetrack.util.VibrationHelper
@@ -441,7 +442,7 @@ fun FolderDetailScreenContent(
                                     item(span = { GridItemSpan(maxLineSpan) }) {
                                         val currentHeight = if (descMaxHeightPx > 0f) with(density) { descHeightPx.toDp() } else Dp.Unspecified
                                         val progress = if (descMaxHeightPx > 0f) (descHeightPx / descMaxHeightPx).coerceIn(0f, 1f) else 1f
-                                        val alphaProgress = ((progress - 0.4f) * 1.67f).coerceIn(0f, 1f)
+                                        val alphaProgress = ((progress - 0.25f) / 0.75f).coerceIn(0f, 1f)
 
                                         Box(
                                             modifier = Modifier
@@ -462,17 +463,23 @@ fun FolderDetailScreenContent(
                                                             }
                                                         }
                                                     }
+                                                    .graphicsLayer { alpha = alphaProgress }
                                                     .clip(RoundedCornerShape(16.dp))
                                                     .background(Color.White.copy(alpha = 0.05f))
                                                     .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
                                                     .padding(horizontal = 16.dp, vertical = 12.dp)
                                             ) {
                                                 if (alphaProgress > 0f) {
+                                                    val textScale = 0.75f + 0.25f * alphaProgress
                                                     Box(
                                                         modifier = Modifier
                                                             .fillMaxWidth()
                                                             .wrapContentHeight(unbounded = true)
-                                                            .graphicsLayer { alpha = alphaProgress }
+                                                            .graphicsLayer {
+                                                                scaleX = textScale
+                                                                scaleY = textScale
+                                                                transformOrigin = TransformOrigin(0f, 0f)
+                                                            }
                                                     ) {
                                                         Text(
                                                             text = state.folder.description.orEmpty(),

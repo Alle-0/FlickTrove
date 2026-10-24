@@ -1881,7 +1881,6 @@
     <string name="folder_share_title">共享資料夾</string>
     <string name="folder_share_desc">建立具有暫時存取權限的邀請連結以進行協作。</string>
     <string name="folder_share_duration">邀請有效期限</string>
-    <string name="folder_invite_duration_1m">1分鐘（快速測試）</string>
     <string name="folder_invite_duration_24h">24小時</string>
     <string name="folder_invite_duration_48h">48小時</string>
     <string name="folder_invite_duration_7d">7天</string>
@@ -1910,6 +1909,7 @@
     <string name="folder_invites_tab">有效邀請</string>
     <string name="folder_member_role_owner">建立者</string>
     <string name="folder_member_role_editor">協作者</string>
+    <string name="folder_member_you">(你)</string>
     <string name="folder_member_remove">移除</string>
     <string name="folder_member_remove_confirm">確定要從此共享資料夾中移除 %1$s 嗎？</string>
     <string name="folder_leave">退出資料夾</string>
@@ -1918,4 +1918,8 @@
     <string name="folder_invite_revoke">撤銷</string>
     <string name="folder_invite_expires_in">過期時間：%1$s</string>
     <string name="folder_max_items_reached">已達到資料夾容量上限（1,000/1,000 部作品）</string>
+    <string name="folder_invites_tab_count">有效邀请 (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">已达到10个有效邀请的上限。请撤回现有邀请以生成新邀请。</string>
+    <string name="folder_invites_limit_reached_btn">已达上限 (10/10)</string>
+    <string name="folder_auto_reverted_private">沒有成員或有效邀請：資料夾已轉為私人。</string>
 </resources>

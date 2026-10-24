@@ -84,13 +84,17 @@ fun FolderJoinDialog(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 22.dp, vertical = 8.dp)
+                .padding(horizontal = 16.dp)
+                .padding(bottom = 16.dp)
         ) {
+            val buttonShape = RoundedCornerShape(16.dp)
+
             if (invitePreview == null) {
                 Text(
                     text = stringResource(R.string.folder_join_desc),
                     style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f)
+                    color = Color.White.copy(alpha = 0.7f),
+                    modifier = Modifier.padding(horizontal = 6.dp)
                 )
 
                 Spacer(Modifier.height(16.dp))
@@ -143,7 +147,7 @@ fun FolderJoinDialog(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(42.dp)
+                        .height(44.dp)
                         .bounceClick(
                             enabled = codeInput.isNotBlank() && !isChecking,
                             scaleDown = 0.96f
@@ -166,7 +170,7 @@ fun FolderJoinDialog(
                                 }
                             }
                         }
-                        .clip(CircleShape)
+                        .clip(buttonShape)
                         .background(
                             if (codeInput.isNotBlank() && !isChecking) Color.White else Color.White.copy(alpha = 0.35f)
                         ),
@@ -286,10 +290,10 @@ fun FolderJoinDialog(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(40.dp)
+                            .height(44.dp)
                             .bounceClick(scaleDown = 0.94f) { invitePreview = null }
-                            .clip(CircleShape)
-                            .border(1.dp, Color.White.copy(alpha = 0.25f), CircleShape)
+                            .clip(buttonShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.25f), buttonShape)
                             .background(Color.White.copy(alpha = 0.06f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -305,7 +309,7 @@ fun FolderJoinDialog(
                     Box(
                         modifier = Modifier
                             .weight(1.4f)
-                            .height(40.dp)
+                            .height(44.dp)
                             .bounceClick(
                                 enabled = !isJoining,
                                 scaleDown = 0.96f
@@ -324,7 +328,7 @@ fun FolderJoinDialog(
                                     }
                                 }
                             }
-                            .clip(CircleShape)
+                            .clip(buttonShape)
                             .background(if (!isJoining) Color.White else Color.White.copy(alpha = 0.4f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -346,8 +350,6 @@ fun FolderJoinDialog(
                     }
                 }
             }
-
-            Spacer(Modifier.height(16.dp))
         }
     }
 }

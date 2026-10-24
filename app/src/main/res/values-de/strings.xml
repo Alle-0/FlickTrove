@@ -1878,7 +1878,6 @@
     <string name="folder_share_title">Ordner Teilen</string>
     <string name="folder_share_desc">Erstelle einen Einladungslink mit temporärem Zugriff zur Zusammenarbeit.</string>
     <string name="folder_share_duration">Gültigkeitsdauer der Einladung</string>
-    <string name="folder_invite_duration_1m">1 Minute (Schnelltest)</string>
     <string name="folder_invite_duration_24h">24 Stunden</string>
     <string name="folder_invite_duration_48h">48 Stunden</string>
     <string name="folder_invite_duration_7d">7 Tage</string>
@@ -1907,6 +1906,7 @@
     <string name="folder_invites_tab">Aktive Einladungen</string>
     <string name="folder_member_role_owner">Inhaber</string>
     <string name="folder_member_role_editor">Mitwirkender</string>
+    <string name="folder_member_you">(Du)</string>
     <string name="folder_member_remove">Entfernen</string>
     <string name="folder_member_remove_confirm">%1$s aus diesem geteilten Ordner entfernen?</string>
     <string name="folder_leave">Ordner verlassen</string>
@@ -1915,5 +1915,9 @@
     <string name="folder_invite_revoke">Widerrufen</string>
     <string name="folder_invite_expires_in">Gültig bis: %1$s</string>
     <string name="folder_max_items_reached">Maximale Ordnerkapazität erreicht (1.000/1.000 Titel)</string>
+    <string name="folder_invites_tab_count">Aktive Einladungen (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Maximales Limit von 10 aktiven Einladungen erreicht. Widerrufen Sie eine vorhandene Einladung, um eine neue zu erstellen.</string>
+    <string name="folder_invites_limit_reached_btn">Limit erreicht (10/10)</string>
+    <string name="folder_auto_reverted_private">Keine Mitglieder oder aktiven Einladungen: Ordner ist wieder privat.</string>
 </resources>
 

@@ -302,6 +302,13 @@ fun MainGlobalDialogs(
                     }
                     foldersViewModel.getFolderInvites(sharedId) { res ->
                         activeInvites = res.getOrDefault(emptyList())
+                        if (isOwner) {
+                            foldersViewModel.checkAutoRevert(folder) { didRevert ->
+                                if (didRevert) {
+                                    onFolderMembersModalChange(false)
+                                }
+                            }
+                        }
                     }
                 }
             }
@@ -314,9 +321,12 @@ fun MainGlobalDialogs(
                 isOwner = isOwner,
                 onDismiss = { onFolderMembersModalChange(false) },
                 onRemoveMember = { member ->
-                    folder.sharedFolderId?.let { sharedId ->
-                        foldersViewModel.removeFolderMember(sharedId, member.userId) { res ->
-                            if (res.isSuccess) {
+                    foldersViewModel.removeFolderMember(folder, member.userId) { res ->
+                        if (res.isSuccess) {
+                            val didRevert = res.getOrDefault(false)
+                            if (didRevert) {
+                                onFolderMembersModalChange(false)
+                            } else {
                                 members = members.filter { it.userId != member.userId }
                             }
                         }
@@ -328,9 +338,14 @@ fun MainGlobalDialogs(
                     tabNavigator.current = FoldersTab
                 },
                 onRevokeInvite = { invite ->
-                    foldersViewModel.revokeFolderInvite(invite.inviteCode) { res ->
+                    foldersViewModel.revokeFolderInvite(folder, invite.inviteCode) { res ->
                         if (res.isSuccess) {
-                            activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
+                            val didRevert = res.getOrDefault(false)
+                            if (didRevert) {
+                                onFolderMembersModalChange(false)
+                            } else {
+                                activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
+                            }
                         }
                     }
                 },

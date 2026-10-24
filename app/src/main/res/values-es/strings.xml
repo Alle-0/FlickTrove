@@ -1877,7 +1877,6 @@
     <string name="folder_share_title">Compartir Carpeta</string>
     <string name="folder_share_desc">Crea un enlace de invitación temporal para colaborar.</string>
     <string name="folder_share_duration">Duración de la invitación</string>
-    <string name="folder_invite_duration_1m">1 Minuto (Prueba rápida)</string>
     <string name="folder_invite_duration_24h">24 Horas</string>
     <string name="folder_invite_duration_48h">48 Horas</string>
     <string name="folder_invite_duration_7d">7 Días</string>
@@ -1906,6 +1905,7 @@
     <string name="folder_invites_tab">Invitaciones Activas</string>
     <string name="folder_member_role_owner">Propietario</string>
     <string name="folder_member_role_editor">Colaborador</string>
+    <string name="folder_member_you">(Tú)</string>
     <string name="folder_member_remove">Eliminar</string>
     <string name="folder_member_remove_confirm">¿Eliminar a %1$s de esta carpeta compartida?</string>
     <string name="folder_leave">Abandonar carpeta</string>
@@ -1914,5 +1914,9 @@
     <string name="folder_invite_revoke">Revocar</string>
     <string name="folder_invite_expires_in">Caduca: %1$s</string>
     <string name="folder_max_items_reached">Capacidad máxima alcanzada para esta carpeta (1.000/1.000 títulos)</string>
+    <string name="folder_invites_tab_count">Invitaciones activas (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">Límite máximo de 10 invitaciones activas alcanzado. Revoca una invitación existente para generar una nueva.</string>
+    <string name="folder_invites_limit_reached_btn">Límite alcanzado (10/10)</string>
+    <string name="folder_auto_reverted_private">Sin miembros ni invitaciones activas: la carpeta vuelve a ser privada.</string>
 </resources>
 

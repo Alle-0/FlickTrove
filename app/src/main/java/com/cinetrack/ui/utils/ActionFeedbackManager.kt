@@ -1,5 +1,13 @@
 package com.cinetrack.ui.utils
 
+import android.content.Context
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.ui.platform.LocalContext
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
 import kotlinx.coroutines.channels.BufferOverflow
 import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharedFlow
@@ -31,5 +39,24 @@ class ActionFeedbackManager @Inject constructor() {
     fun emit(message: UiText, undoFn: (suspend () -> Unit)? = null) {
         val success = _events.tryEmit(UndoAction(message, undoFn))
         android.util.Log.d("ActionFeedbackManager", "Emitted toast, success: $success")
+    }
+}
+
+@EntryPoint
+@InstallIn(SingletonComponent::class)
+interface ActionFeedbackEntryPoint {
+    fun actionFeedbackManager(): ActionFeedbackManager
+}
+
+@Composable
+fun rememberActionFeedbackManager(): ActionFeedbackManager? {
+    val context = LocalContext.current
+    return remember(context) {
+        runCatching {
+            EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                ActionFeedbackEntryPoint::class.java
+            ).actionFeedbackManager()
+        }.getOrNull()
     }
 }

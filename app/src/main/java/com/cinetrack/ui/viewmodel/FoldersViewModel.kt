@@ -204,23 +204,58 @@ class FoldersViewModel @Inject constructor(
     }
 
     fun removeFolderMember(
-        sharedFolderId: String,
+        folder: FolderEntity,
         userUid: String,
-        onResult: (Result<Unit>) -> Unit
+        onResult: (Result<Boolean>) -> Unit
     ) {
         viewModelScope.launch {
-            val result = sharedFolderRepository.removeMember(sharedFolderId, userUid)
-            onResult(result)
+            val sharedId = folder.sharedFolderId
+            if (sharedId == null) {
+                onResult(Result.failure(IllegalStateException("Not shared")))
+                return@launch
+            }
+            val result = sharedFolderRepository.removeMember(sharedId, userUid)
+            if (result.isSuccess) {
+                val didRevert = sharedFolderRepository.checkAndAutoRevertIfEmpty(folder).getOrDefault(false)
+                if (didRevert) {
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.folder_auto_reverted_private))
+                }
+                onResult(Result.success(didRevert))
+            } else {
+                onResult(Result.failure(result.exceptionOrNull() ?: Exception("Remove failed")))
+            }
         }
     }
 
     fun revokeFolderInvite(
+        folder: FolderEntity,
         code: String,
-        onResult: (Result<Unit>) -> Unit
+        onResult: (Result<Boolean>) -> Unit
     ) {
         viewModelScope.launch {
             val result = sharedFolderRepository.revokeInvite(code)
-            onResult(result)
+            if (result.isSuccess) {
+                val didRevert = sharedFolderRepository.checkAndAutoRevertIfEmpty(folder).getOrDefault(false)
+                if (didRevert) {
+                    actionFeedbackManager.emit(UiText.StringResource(R.string.folder_auto_reverted_private))
+                }
+                onResult(Result.success(didRevert))
+            } else {
+                onResult(Result.failure(result.exceptionOrNull() ?: Exception("Revoke failed")))
+            }
+        }
+    }
+
+    fun checkAutoRevert(
+        folder: FolderEntity,
+        onResult: (Boolean) -> Unit
+    ) {
+        viewModelScope.launch {
+            val didRevert = sharedFolderRepository.checkAndAutoRevertIfEmpty(folder).getOrDefault(false)
+            if (didRevert) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.folder_auto_reverted_private))
+            }
+            onResult(didRevert)
         }
     }
 

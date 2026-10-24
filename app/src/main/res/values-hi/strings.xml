@@ -1873,7 +1873,6 @@
     <string name="folder_share_title">फ़ोल्डर साझा करें</string>
     <string name="folder_share_desc">सहयोग के लिए अस्थायी पहुंच के साथ एक आमंत्रण लिंक बनाएं।</string>
     <string name="folder_share_duration">आमंत्रण की अवधि</string>
-    <string name="folder_invite_duration_1m">1 मिनट (त्वरित परीक्षण)</string>
     <string name="folder_invite_duration_24h">24 घंटे</string>
     <string name="folder_invite_duration_48h">48 घंटे</string>
     <string name="folder_invite_duration_7d">7 दिन</string>
@@ -1902,6 +1901,7 @@
     <string name="folder_invites_tab">सक्रिय आमंत्रण</string>
     <string name="folder_member_role_owner">स्वामी</string>
     <string name="folder_member_role_editor">सहयोगी</string>
+    <string name="folder_member_you">(आप)</string>
     <string name="folder_member_remove">हटाएं</string>
     <string name="folder_member_remove_confirm">क्या आप %1$s को इस साझा फ़ोल्डर से हटाना चाहते हैं?</string>
     <string name="folder_leave">फ़ोल्डर छोड़ें</string>
@@ -1910,6 +1910,10 @@
     <string name="folder_invite_revoke">रद्द करें</string>
     <string name="folder_invite_expires_in">समाप्ति: %1$s</string>
     <string name="folder_max_items_reached">फ़ोल्डर की अधिकतम क्षमता पूरी हो गई (1,000/1,000 शीर्षक)</string>
+    <string name="folder_invites_tab_count">सक्रिय आमंत्रण (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">10 सक्रिय आमंत्रणों की अधिकतम सीमा समाप्त हो गई है। नया आमंत्रण बनाने के लिए किसी मौजूदा आमंत्रण को रद्द करें।</string>
+    <string name="folder_invites_limit_reached_btn">सीमा समाप्त (10/10)</string>
+    <string name="folder_auto_reverted_private">कोई सदस्य या सक्रिय आमंत्रण नहीं: फ़ोल्डर अब निजी है।</string>
 </resources>
 
 

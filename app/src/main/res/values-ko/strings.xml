@@ -1881,7 +1881,6 @@
     <string name="folder_share_title">폴더 공유</string>
     <string name="folder_share_desc">협업을 위한 임시 접근 권한의 초대 링크를 생성합니다.</string>
     <string name="folder_share_duration">초대 유효 기간</string>
-    <string name="folder_invite_duration_1m">1분 (빠른 테스트)</string>
     <string name="folder_invite_duration_24h">24시간</string>
     <string name="folder_invite_duration_48h">48시간</string>
     <string name="folder_invite_duration_7d">7일</string>
@@ -1910,6 +1909,7 @@
     <string name="folder_invites_tab">활성 초대</string>
     <string name="folder_member_role_owner">소유자</string>
     <string name="folder_member_role_editor">협업자</string>
+    <string name="folder_member_you">(나)</string>
     <string name="folder_member_remove">삭제</string>
     <string name="folder_member_remove_confirm">이 공유 폴더에서 %1$s님을 삭제하시겠습니까?</string>
     <string name="folder_leave">폴더 나가기</string>
@@ -1918,4 +1918,8 @@
     <string name="folder_invite_revoke">취소</string>
     <string name="folder_invite_expires_in">만료일: %1$s</string>
     <string name="folder_max_items_reached">폴더 최대 용량에 도달했습니다 (1,000/1,000개)</string>
+    <string name="folder_invites_tab_count">활성 초대 (%1$d/10)</string>
+    <string name="folder_invites_limit_reached">활성 초대 최대 한도(10개)에 도달했습니다. 새로 생성하려면 기존 초대를 취소하세요.</string>
+    <string name="folder_invites_limit_reached_btn">한도 도달 (10/10)</string>
+    <string name="folder_auto_reverted_private">멤버나 활성 초대가 없습니다. 폴더가 비공개로 전환되었습니다.</string>
 </resources>
