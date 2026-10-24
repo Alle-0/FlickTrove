@@ -140,8 +140,6 @@ fun FoldersFilterModal(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
-
             // 2. Folder Type Filter Section (Pillole FilterChip)
             @OptIn(ExperimentalLayoutApi::class)
             ExpandableSection(
