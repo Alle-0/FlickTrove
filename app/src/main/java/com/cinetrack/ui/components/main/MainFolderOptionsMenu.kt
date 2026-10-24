@@ -105,7 +105,11 @@ fun MainFolderOptionsMenu(
                     )
                     Spacer(Modifier.width(12.dp))
                     Text(
-                        text = if (isShared) stringResource(R.string.folder_members_title) else stringResource(R.string.folder_share_action),
+                        text = if (isShared) {
+                            if (isOwner) stringResource(R.string.folder_members_title) else stringResource(R.string.folder_members_only_title)
+                        } else {
+                            stringResource(R.string.folder_share_action)
+                        },
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )
