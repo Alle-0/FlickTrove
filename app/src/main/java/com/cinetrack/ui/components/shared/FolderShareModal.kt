@@ -120,16 +120,17 @@ fun FolderShareModal(
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(vertical = 2.5.dp)
+                            .padding(vertical = 3.dp)
+                            .height(46.dp)
                             .bounceClick(scaleDown = 0.98f) { selectedOption = option }
-                            .clip(RoundedCornerShape(12.dp))
+                            .clip(CircleShape)
                             .background(if (isSelected) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.04f))
                             .border(
-                                1.dp,
-                                if (isSelected) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
-                                RoundedCornerShape(12.dp)
+                                width = if (isSelected) 1.5.dp else 1.dp,
+                                color = if (isSelected) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                                shape = CircleShape
                             )
-                            .padding(horizontal = 14.dp, vertical = 7.dp),
+                            .padding(start = 18.dp, end = 13.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -139,7 +140,8 @@ fun FolderShareModal(
                                 fontWeight = if (isSelected) FontWeight.SemiBold else FontWeight.Normal,
                                 fontSize = 14.sp
                             ),
-                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f)
+                            color = if (isSelected) Color.White else Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.weight(1f, fill = false)
                         )
                         RadioButton(
                             selected = isSelected,
