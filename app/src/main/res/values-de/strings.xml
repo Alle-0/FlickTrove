@@ -1889,6 +1889,7 @@
     <string name="folder_invite_copied">Kopiert!</string>
     <string name="folder_invite_copied_toast">Code in die Zwischenablage kopiert!</string>
     <string name="folder_invite_share">Teilen</string>
+    <string name="folder_invite_share_message">Tritt meinem Ordner „%1$s“ auf FlickTrove bei!\n%2$s\n\nEinladungscode: %3$s</string>
     <string name="folder_join_button">Mit Code beitreten</string>
     <string name="folder_join_title">Geteiltem Ordner beitreten</string>
     <string name="folder_join_desc">Gib den Einladungscode des Ordnerinhabers ein.</string>

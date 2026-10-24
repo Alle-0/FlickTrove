@@ -96,6 +96,8 @@ import com.cinetrack.ui.LocalHazeState
 enum class FolderSortOption { DATE, NAME, ITEMS }
 
 object FoldersTab : Tab {
+    var pendingJoinCode: String? = null
+
     override val options: TabOptions
         @Composable
         get() {
@@ -149,6 +151,17 @@ fun FoldersScreenContent(
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     var isCreateDialogOpen by remember { mutableStateOf(false) }
     var isJoinDialogOpen by remember { mutableStateOf(false) }
+    var joinDialogInitialCode by remember { mutableStateOf("") }
+
+    LaunchedEffect(Unit) {
+        val pending = FoldersTab.pendingJoinCode
+        if (!pending.isNullOrBlank()) {
+            joinDialogInitialCode = pending
+            isJoinDialogOpen = true
+            FoldersTab.pendingJoinCode = null
+        }
+    }
+
     var folderToDelete by remember { mutableStateOf<FolderEntity?>(null) }
     var folderToEdit by remember { mutableStateOf<FolderEntity?>(null) }
     var folderEditMode by remember { mutableStateOf(FolderEditMode.ALL) }
@@ -584,8 +597,10 @@ fun FoldersScreenContent(
         if (isJoinDialogOpen) {
             modalHost.show {
                 FolderJoinDialog(
+                    initialCode = joinDialogInitialCode,
                     onDismiss = {
                         isJoinDialogOpen = false
+                        joinDialogInitialCode = ""
                         modalHost.dismiss()
                     },
                     onCheckCode = { code, callback ->

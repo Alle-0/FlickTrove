@@ -43,6 +43,8 @@
                 <category android:name="android.intent.category.BROWSABLE" />
                 <data android:scheme="flicktrove" android:host="media" />
                 <data android:scheme="flicktrove" android:host="detail" />
+                <data android:scheme="flicktrove" android:host="folder" />
+                <data android:scheme="flicktrove" android:host="join" />
                 <data android:scheme="flicktrove" android:host="auth" />
                 <data android:scheme="flicktrove" android:host="simkl_login" />
             </intent-filter>

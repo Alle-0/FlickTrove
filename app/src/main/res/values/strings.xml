@@ -1899,6 +1899,7 @@
     <string name="folder_invite_copied">Copied!</string>
     <string name="folder_invite_copied_toast">Code copied to clipboard!</string>
     <string name="folder_invite_share">Share</string>
+    <string name="folder_invite_share_message">Join my \"%1$s\" folder on FlickTrove!\n%2$s\n\nInvite code: %3$s</string>
     <string name="folder_join_button">Join with Code</string>
     <string name="folder_join_title">Join Shared Folder</string>
     <string name="folder_join_desc">Enter the invite code shared by the folder owner.</string>

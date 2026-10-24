@@ -1888,6 +1888,7 @@
     <string name="folder_invite_copied">¡Copiado!</string>
     <string name="folder_invite_copied_toast">¡Código copiado al portapapeles!</string>
     <string name="folder_invite_share">Compartir</string>
+    <string name="folder_invite_share_message">¡Únete a mi carpeta \"%1$s\" en FlickTrove!\n%2$s\n\nCódigo de invitación: %3$s</string>
     <string name="folder_join_button">Unirse con código</string>
     <string name="folder_join_title">Unirse a carpeta compartida</string>
     <string name="folder_join_desc">Introduce el código de invitación compartido por el propietario.</string>

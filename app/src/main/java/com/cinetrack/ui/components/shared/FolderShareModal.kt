@@ -295,12 +295,18 @@ fun FolderShareModal(
                             .weight(1f)
                             .height(40.dp)
                             .bounceClick(scaleDown = 0.94f) {
-                                val shareText = "Unisciti alla mia cartella \"${folder.name}\" su FlickTrove!\nInserisci il codice: ${invite.code}"
+                                val inviteLink = "https://alle-0.github.io/FlickTrove/open.html?type=folder&code=${invite.code}&t=${android.net.Uri.encode(folder.name)}"
+                                val shareText = context.getString(
+                                    R.string.folder_invite_share_message,
+                                    folder.name,
+                                    inviteLink,
+                                    invite.code
+                                )
                                 val intent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
                                     putExtra(Intent.EXTRA_TEXT, shareText)
                                 }
-                                context.startActivity(Intent.createChooser(intent, "Condividi invito FlickTrove"))
+                                context.startActivity(Intent.createChooser(intent, context.getString(R.string.folder_invite_share)))
                             }
                             .clip(CircleShape)
                             .background(Color.White),

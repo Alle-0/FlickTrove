@@ -1886,6 +1886,7 @@
     <string name="folder_invite_copied">Скопировано!</string>
     <string name="folder_invite_copied_toast">Код скопирован в буфер обмена!</string>
     <string name="folder_invite_share">Поделиться</string>
+    <string name="folder_invite_share_message">Присоединяйся к моей папке «%1$s» в FlickTrove!\n%2$s\n\nКод приглашения: %3$s</string>
     <string name="folder_join_button">Войти по коду</string>
     <string name="folder_join_title">Присоединиться к общей папке</string>
     <string name="folder_join_desc">Введите код приглашения, полученный от владельца.</string>

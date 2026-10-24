@@ -1891,6 +1891,7 @@
     <string name="folder_invite_copied">Tersalin!</string>
     <string name="folder_invite_copied_toast">Kode disalin ke papan klip!</string>
     <string name="folder_invite_share">Bagikan</string>
+    <string name="folder_invite_share_message">Bergabunglah dengan folder \"%1$s\" saya di FlickTrove!\n%2$s\n\nKode undangan: %3$s</string>
     <string name="folder_join_button">Gabung dengan kode</string>
     <string name="folder_join_title">Gabung ke Folder Bersama</string>
     <string name="folder_join_desc">Masukkan kode undangan yang dibagikan oleh pemilik folder.</string>

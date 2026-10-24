@@ -1892,6 +1892,7 @@
     <string name="folder_invite_copied">コピー完了!</string>
     <string name="folder_invite_copied_toast">コードをクリップボードにコピーしました！</string>
     <string name="folder_invite_share">共有</string>
+    <string name="folder_invite_share_message">FlickTroveのフォルダ「%1$s」に参加しよう！\n%2$s\n\n招待コード: %3$s</string>
     <string name="folder_join_button">コードで参加</string>
     <string name="folder_join_title">共有フォルダに参加</string>
     <string name="folder_join_desc">フォルダ所有者から共有された招待コードを入力してください。</string>

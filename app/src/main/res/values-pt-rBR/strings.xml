@@ -1884,6 +1884,7 @@
     <string name="folder_invite_copied">Copiado!</string>
     <string name="folder_invite_copied_toast">Código copiado para a área de transferência!</string>
     <string name="folder_invite_share">Compartilhar</string>
+    <string name="folder_invite_share_message">Participe da minha pasta \"%1$s\" no FlickTrove!\n%2$s\n\nCódigo de convite: %3$s</string>
     <string name="folder_join_button">Entrar com código</string>
     <string name="folder_join_title">Entrar em pasta compartilhada</string>
     <string name="folder_join_desc">Digite o código de convite compartilhado pelo proprietário.</string>

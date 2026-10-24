@@ -1899,6 +1899,7 @@
     <string name="folder_invite_copied">Copiato!</string>
     <string name="folder_invite_copied_toast">Codice copiato negli appunti!</string>
     <string name="folder_invite_share">Condividi</string>
+    <string name="folder_invite_share_message">Unisciti alla mia cartella \"%1$s\" su FlickTrove!\n%2$s\n\nCodice d\'invito: %3$s</string>
     <string name="folder_join_button">Unisciti con codice</string>
     <string name="folder_join_title">Unisciti a una cartella</string>
     <string name="folder_join_desc">Inserisci il codice d\'invito condiviso dal proprietario.</string>

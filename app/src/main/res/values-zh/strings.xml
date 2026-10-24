@@ -1892,6 +1892,7 @@
     <string name="folder_invite_copied">已複製!</string>
     <string name="folder_invite_copied_toast">邀請碼已複製到剪貼簿！</string>
     <string name="folder_invite_share">分享</string>
+    <string name="folder_invite_share_message">加入我在 FlickTrove 上的「%1$s」資料夾！\n%2$s\n\n邀請碼: %3$s</string>
     <string name="folder_join_button">使用邀請碼加入</string>
     <string name="folder_join_title">加入共享資料夾</string>
     <string name="folder_join_desc">輸入資料夾建立者分享的邀請碼。</string>

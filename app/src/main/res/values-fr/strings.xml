@@ -1886,6 +1886,7 @@
     <string name="folder_invite_copied">Copié !</string>
     <string name="folder_invite_copied_toast">Code copié dans le presse-papier !</string>
     <string name="folder_invite_share">Partager</string>
+    <string name="folder_invite_share_message">Rejoins mon dossier « %1$s » sur FlickTrove !\n%2$s\n\nCode d\'invitation : %3$s</string>
     <string name="folder_join_button">Rejoindre avec un code</string>
     <string name="folder_join_title">Rejoindre un dossier partagé</string>
     <string name="folder_join_desc">Entrez le code d\'invitation fourni par le propriétaire.</string>

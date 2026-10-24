@@ -1892,6 +1892,7 @@
     <string name="folder_invite_copied">已复制!</string>
     <string name="folder_invite_copied_toast">邀请码已复制到剪贴板！</string>
     <string name="folder_invite_share">分享</string>
+    <string name="folder_invite_share_message">加入我在 FlickTrove 上的“%1$s”文件夹！\n%2$s\n\n邀请码: %3$s</string>
     <string name="folder_join_button">使用邀请码加入</string>
     <string name="folder_join_title">加入共享文件夹</string>
     <string name="folder_join_desc">输入文件夹创建者分享的邀请码。</string>

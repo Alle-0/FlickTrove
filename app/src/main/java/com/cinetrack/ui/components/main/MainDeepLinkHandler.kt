@@ -46,13 +46,26 @@ fun MainDeepLinkHandler(
             if (isHttpsAppLink) {
                 val type = uri.getQueryParameter("type") ?: "movie"
                 val idStr = uri.getQueryParameter("id")
+                val code = uri.getQueryParameter("code")
                 
-                if (!idStr.isNullOrBlank()) {
+                if (type == "folder" || !code.isNullOrBlank()) {
+                    val joinCode = code ?: idStr
+                    if (!joinCode.isNullOrBlank()) {
+                        com.cinetrack.ui.screens.FoldersTab.pendingJoinCode = joinCode
+                        tabNavigator.current = com.cinetrack.ui.screens.FoldersTab
+                    }
+                } else if (!idStr.isNullOrBlank()) {
                     when (type) {
                         "person" -> idStr.toLongOrNull()?.let { rootNavigator.push(PersonDetailScreen(it, null)) }
                         "collection" -> rootNavigator.push(CollectionDetailScreen(idStr, null))
                         else -> idStr.toLongOrNull()?.let { rootNavigator.push(MovieDetailScreen(it, type)) }
                     }
+                }
+            } else if (uri?.scheme == "flicktrove" && (uri.host == "folder" || uri.host == "join")) {
+                val code = uri.getQueryParameter("code") ?: uri.lastPathSegment
+                if (!code.isNullOrBlank()) {
+                    com.cinetrack.ui.screens.FoldersTab.pendingJoinCode = code
+                    tabNavigator.current = com.cinetrack.ui.screens.FoldersTab
                 }
             } else if (uri?.scheme == "flicktrove" && uri.host == "auth") {
                 // Trakt OAuth callback: flicktrove://auth?code=XXXXX&state=YYYYY

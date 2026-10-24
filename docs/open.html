@@ -531,8 +531,9 @@
 
     // --- Parse query params ---
     const params = new URLSearchParams(window.location.search);
-    const type = params.get('type') || 'movie';  // movie | tv | person
+    const type = params.get('type') || 'movie';  // movie | tv | person | collection | folder
     const id = params.get('id');
+    const code = params.get('code');
     const t = params.get('t');
     const p = params.get('p');
 
@@ -787,14 +788,50 @@
     document.getElementById('footnote').innerHTML = i18n.footnote;
 
     // --- Type label ---
-    const typeLabels = { movie: i18n.type_movie, tv: i18n.type_tv, person: i18n.type_person, collection: i18n.type_collection };
+    const typeLabels = {
+      movie: i18n.type_movie,
+      tv: i18n.type_tv,
+      person: i18n.type_person,
+      collection: i18n.type_collection,
+      folder: (langKey === 'it' ? 'Cartella Condivisa' : 'Shared Folder')
+    };
     typeBadge.textContent = typeLabels[type] || i18n.type_fallback;
 
     // --- Platform detection & Deep linking ---
     const userAgent = navigator.userAgent || '';
     const isAndroid = /android/i.test(userAgent);
 
-    if (id) {
+    if (type === 'folder' || code) {
+      const folderCode = code || id || '';
+      const encodedCode = encodeURIComponent(folderCode);
+      const customScheme = `flicktrove://join?code=${encodedCode}`;
+      const androidIntentUri = `intent://join?code=${encodedCode}#Intent;scheme=flicktrove;package=com.cinetrack;end`;
+      const targetUri = isAndroid ? androidIntentUri : customScheme;
+
+      btnOpenApp.href = targetUri;
+      btnOpenApp.style.display = 'flex';
+      divider.style.display = 'flex';
+
+      const folderTitle = t || (langKey === 'it' ? 'Cartella Condivisa' : 'Shared Folder');
+      titleEl.textContent = folderTitle;
+      titleEl.classList.remove('skeleton');
+      titleEl.style.width = titleEl.style.height = '';
+
+      metaEl.textContent = folderCode ? `${langKey === 'it' ? 'Codice Invito' : 'Invite Code'}: ${folderCode}` : i18n.open_app;
+      metaEl.classList.remove('skeleton');
+      metaEl.style.width = metaEl.style.height = '';
+      document.title = `${folderTitle} — FlickTrove`;
+
+      if (isAndroid) {
+        setTimeout(() => {
+          try {
+            window.location.href = targetUri;
+          } catch (e) {
+            // Fallback ignored
+          }
+        }, 400);
+      }
+    } else if (id) {
       const encodedId = encodeURIComponent(id);
       const customScheme = `flicktrove://media/${type}/${encodedId}`;
       const androidIntentUri = `intent://media/${type}/${encodedId}#Intent;scheme=flicktrove;package=com.cinetrack;end`;
@@ -952,6 +989,7 @@
 
     // --- Fetch metadata from TMDB or URL params ---
     async function fetchTmdb() {
+      if (type === 'folder' || code) return;
       if (!id) { showFallback(i18n.invalid_link); return; }
 
       if (t) {

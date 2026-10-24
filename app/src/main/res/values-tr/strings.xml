@@ -1892,6 +1892,7 @@
     <string name="folder_invite_copied">Kopyalandı!</string>
     <string name="folder_invite_copied_toast">Kod panoya kopyalandı!</string>
     <string name="folder_invite_share">Paylaş</string>
+    <string name="folder_invite_share_message">FlickTrove\'da \"%1$s\" klasörüme katıl!\n%2$s\n\nDavet kodu: %3$s</string>
     <string name="folder_join_button">Kodla katıl</string>
     <string name="folder_join_title">Paylaşılan Klasöre Katıl</string>
     <string name="folder_join_desc">Klasör sahibi tarafından paylaşılan davet kodunu girin.</string>

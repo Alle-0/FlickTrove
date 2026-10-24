@@ -28,17 +28,34 @@ import dev.chrisbanes.haze.HazeState
 
 @Composable
 fun FolderJoinDialog(
+    initialCode: String = "",
     onDismiss: () -> Unit,
     onCheckCode: (String, (Result<Pair<SharedFolderInviteDto, SharedFolderDto>>) -> Unit) -> Unit,
     onAcceptInvite: (String, (Result<FolderEntity>) -> Unit) -> Unit,
     hazeState: HazeState? = null
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
-    var codeInput by remember { mutableStateOf("") }
+    var codeInput by remember { mutableStateOf(initialCode) }
     var isChecking by remember { mutableStateOf(false) }
     var isJoining by remember { mutableStateOf(false) }
     var invitePreview by remember { mutableStateOf<Pair<SharedFolderInviteDto, SharedFolderDto>?>(null) }
     var errorMessage by remember { mutableStateOf<String?>(null) }
+
+    LaunchedEffect(initialCode) {
+        val trimmed = initialCode.trim().uppercase()
+        if (trimmed.isNotBlank() && invitePreview == null && !isChecking) {
+            isChecking = true
+            errorMessage = null
+            onCheckCode(trimmed) { res ->
+                isChecking = false
+                res.onSuccess { preview ->
+                    invitePreview = preview
+                }.onFailure { err ->
+                    errorMessage = err.message ?: context.getString(R.string.folder_join_invalid_code)
+                }
+            }
+        }
+    }
 
     FlickTroveModal(
         isVisible = true,

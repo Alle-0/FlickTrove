@@ -1892,6 +1892,7 @@
     <string name="folder_invite_copied">복사됨!</string>
     <string name="folder_invite_copied_toast">코드가 클립보드에 복사되었습니다!</string>
     <string name="folder_invite_share">공유</string>
+    <string name="folder_invite_share_message">FlickTrove의 \"%1$s\" 폴더에 참여하세요!\n%2$s\n\n초대 코드: %3$s</string>
     <string name="folder_join_button">코드로 참여</string>
     <string name="folder_join_title">공유 폴더 참여</string>
     <string name="folder_join_desc">폴더 소유자가 공유한 초대 코드를 입력하세요.</string>

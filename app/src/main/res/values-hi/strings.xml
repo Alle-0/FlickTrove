@@ -1884,6 +1884,7 @@
     <string name="folder_invite_copied">कॉपी किया गया!</string>
     <string name="folder_invite_copied_toast">कोड क्लिपबोर्ड पर कॉपी किया गया!</string>
     <string name="folder_invite_share">साझा करें</string>
+    <string name="folder_invite_share_message">FlickTrove पर मेरे \"%1$s\" फ़ोल्डर में शामिल हों!\n%2$s\n\nआमंत्रण कोड: %3$s</string>
     <string name="folder_join_button">कोड से जुड़ें</string>
     <string name="folder_join_title">साझा फ़ोल्डर में शामिल हों</string>
     <string name="folder_join_desc">फ़ोल्डर स्वामी द्वारा साझा किया गया आमंत्रण कोड दर्ज करें।</string>
