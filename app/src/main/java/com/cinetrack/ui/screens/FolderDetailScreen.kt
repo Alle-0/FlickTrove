@@ -92,6 +92,7 @@ data class FolderDetailTab(
     override fun Content() {
         val viewModel = getViewModel<FolderDetailViewModel>()
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
+        val tabNavigator = cafe.adriel.voyager.navigator.tab.LocalTabNavigator.current
         val hazeState = com.cinetrack.ui.LocalHazeState.current
         val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
 
@@ -113,7 +114,9 @@ data class FolderDetailTab(
             showEditDialog = showEditDialog,
             onShowEditDialogChange = { showEditDialog = it },
             folderEditMode = folderEditMode,
-            onFolderUpdated = { _, _ -> },
+            onFolderUpdated = { newName, newColor ->
+                tabNavigator.current = FolderDetailTab(folderId, newName, newColor)
+            },
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },

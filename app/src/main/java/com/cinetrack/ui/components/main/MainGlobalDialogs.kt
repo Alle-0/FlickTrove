@@ -181,6 +181,7 @@ fun MainGlobalDialogs(
                 onDismiss = { onFolderEditDialogChange(false) },
                 onSave = { newName, newColor, newDesc ->
                     foldersViewModel.updateFolder(folder.copy(name = newName, color = newColor, description = newDesc))
+                    tabNavigator.current = FolderDetailTab(folderId, newName, newColor)
                     onFolderEditDialogChange(false)
                 }
             )

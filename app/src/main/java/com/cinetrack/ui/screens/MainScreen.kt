@@ -184,6 +184,12 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             var _lastTab by remember { mutableStateOf<Tab>(currentTab) }
             val scrollToTopState = remember { mutableStateOf(com.cinetrack.ui.ScrollToTopState()) }
 
+            val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel? = if ((currentTab is FoldersTab || currentTab is FolderDetailTab) && activity != null) {
+                hiltViewModel(activity)
+            } else null
+            val allFoldersList by (foldersViewModel?.folders?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(null) })
+            val activeFolderForDetail = if (currentTab is FolderDetailTab) allFoldersList?.find { it.id == currentTab.folderId } else null
+
             LaunchedEffect(currentTab) {
                 // previousTab = il tab in cui eravamo PRIMA di questo cambio
                 if (currentTab != _lastTab) {
@@ -314,7 +320,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is SettingsTab -> stringResource(R.string.main_tab_settings)
                                 is NewsTab -> stringResource(R.string.news_tab_title)
                                 is BoxOfficeTab -> stringResource(R.string.box_office_title)
-                                is FolderDetailTab -> currentTab.folderName
+                                is FolderDetailTab -> activeFolderForDetail?.name ?: currentTab.folderName
                                 is FlowTab -> "Flow"
                                 is FlowStatsTab -> "Flow stats"
                                 is TrophyRoomTab -> stringResource(R.string.dashboard_trophies)
@@ -327,10 +333,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             } else null
 
                             val boxOfficeViewModel: BoxOfficeViewModel? = if (currentTab is BoxOfficeTab && activity != null) {
-                                hiltViewModel(activity)
-                            } else null
-
-                            val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (currentTab is FoldersTab && activity != null) {
                                 hiltViewModel(activity)
                             } else null
 
@@ -406,7 +408,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     onMenuClick = null, // Menu rimosso
                                     onBackPress = if (currentTab is FolderDetailTab) { { tabNavigator.current = FoldersTab } } else if (currentTab is StatsTab || currentTab is FoldersTab || currentTab is FlowTab || currentTab is FlowStatsTab || currentTab is SettingsTab || currentTab is TrophyRoomTab || currentTab is HistoryTab) { { tabNavigator.current = AccountTab } } else if (currentTab is DiscoverTab || currentTab is RecommendationsTab || currentTab is NewsTab || currentTab is BoxOfficeTab) { { tabNavigator.current = previousTab.takeIf { it != currentTab } ?: HomeFeedTab } } else null,
                                     onFolderOptionsClick = if (currentTab is FolderDetailTab) { { offset -> showFolderOptions = true; folderOptionsOffset = offset } } else null,
-                                    indicatorColor = if (currentTab is FolderDetailTab) currentTab.folderColor?.toComposeColor() else null,
+                                    indicatorColor = if (currentTab is FolderDetailTab) (activeFolderForDetail?.color ?: currentTab.folderColor)?.toComposeColor() else null,
                                     onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab || currentTab is NewsTab || currentTab is RecommendationsTab || currentTab is DiscoverTab || currentTab is BoxOfficeTab) { { offset -> updatesOverlayOffsetX = offset.x; updatesOverlayOffsetY = offset.y } } else null,
                                     onRefreshClick = if (currentTab is RecommendationsTab) { { recommendationsViewModel?.onRefresh() } } else null,
                                     onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is HistoryTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
@@ -521,11 +523,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         }
 
                         if (rememberedShowFolderOptions) {
-                            val foldersVmForMenu: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (currentTab is FolderDetailTab && activity != null) {
-                                hiltViewModel(activity)
-                            } else null
-                            val foldersListForMenu by (foldersVmForMenu?.folders?.collectAsStateWithLifecycle() ?: remember { mutableStateOf(null) })
-                            val currentFolderForMenu = if (currentTab is FolderDetailTab) foldersListForMenu?.find { it.id == currentTab.folderId } else null
+                            val currentFolderForMenu = activeFolderForDetail ?: if (currentTab is FolderDetailTab) allFoldersList?.find { it.id == currentTab.folderId } else null
                             val isCurrentFolderShared = currentFolderForMenu?.isShared == true
                             val isCurrentFolderOwner = currentFolderForMenu == null || currentFolderForMenu.ownerUid == currentUser?.uid
 
