@@ -97,12 +97,12 @@ fun QuickFolderModal(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp)
+                    .heightIn(min = 120.dp, max = 320.dp)
             ) {
                 LazyColumn(
                     state = listState,
                     modifier = Modifier
-                        .fillMaxSize()
+                        .fillMaxWidth()
                         .padding(end = 10.dp)
                         .verticalFadingEdges(listState, 16.dp, 16.dp),
                     verticalArrangement = Arrangement.spacedBy(8.dp),
@@ -223,12 +223,19 @@ private fun QuickFolderItem(
     folderColor: Color,
     onClick: () -> Unit
 ) {
+    val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
+    val isOwner = currentUserId != null && folder.ownerUid == currentUserId
+    val sharedBadgeText = if (isOwner || folder.ownerName.isNullOrBlank()) {
+        stringResource(id = R.string.folder_shared_badge)
+    } else {
+        folder.ownerName
+    }
+
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .height(58.dp)
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
-            .clip(RoundedCornerShape(16.dp))
+            .clip(RoundedCornerShape(18.dp))
             .background(
                 if (isSelected) Color.White.copy(alpha = 0.08f)
                 else Color.White.copy(alpha = 0.03f)
@@ -236,37 +243,144 @@ private fun QuickFolderItem(
             .border(
                 1.5.dp,
                 if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
-                RoundedCornerShape(16.dp)
+                RoundedCornerShape(18.dp)
             )
-            .padding(horizontal = 16.dp),
+            .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Folder Icon Badge
         Box(
             modifier = Modifier
-                .size(14.dp)
-                .clip(CircleShape)
-                .background(folderColor)
-        )
-
-        Spacer(modifier = Modifier.width(16.dp))
-
-        Text(
-            text = folder.name,
-            style = MaterialTheme.typography.bodyLarge.copy(
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            ),
-            modifier = Modifier.weight(1f),
-            maxLines = 1
-        )
-
-        if (isSelected) {
+                .size(40.dp)
+                .clip(RoundedCornerShape(12.dp))
+                .background(folderColor.copy(alpha = 0.16f))
+                .border(0.5.dp, folderColor.copy(alpha = 0.25f), RoundedCornerShape(12.dp)),
+            contentAlignment = Alignment.Center
+        ) {
             Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                 contentDescription = null,
                 tint = folderColor,
-                modifier = Modifier.size(18.dp)
+                modifier = Modifier.size(20.dp)
             )
+        }
+
+        Spacer(modifier = Modifier.width(14.dp))
+
+        // Center Content: Title, Shared Badge, Item Count, Description
+        Column(
+            modifier = Modifier.weight(1f)
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = folder.name,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = (-0.2).sp
+                    ),
+                    color = Color.White,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
+                )
+
+                if (folder.isShared) {
+                    Spacer(Modifier.width(8.dp))
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .clip(CircleShape)
+                            .background(folderColor.copy(alpha = 0.15f))
+                            .border(0.5.dp, folderColor.copy(alpha = 0.3f), CircleShape)
+                            .padding(horizontal = 7.dp, vertical = 2.dp)
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_people),
+                            contentDescription = null,
+                            tint = folderColor,
+                            modifier = Modifier.size(10.dp)
+                        )
+                        Spacer(Modifier.width(4.dp))
+                        Text(
+                            text = sharedBadgeText,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 10.sp
+                            ),
+                            color = folderColor,
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
+                }
+            }
+
+            Spacer(Modifier.height(3.dp))
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.folder_item_count, folder.itemIds.size),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = Color.White.copy(alpha = 0.45f)
+                )
+
+                if (!folder.description.isNullOrBlank()) {
+                    Text(
+                        text = " • ",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.25f)
+                    )
+                    Text(
+                        text = folder.description,
+                        style = MaterialTheme.typography.labelSmall,
+                        color = Color.White.copy(alpha = 0.55f),
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+
+        Spacer(modifier = Modifier.width(12.dp))
+
+        // Right Selection Indicator
+        Box(
+            modifier = Modifier.size(24.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isSelected,
+                enter = androidx.compose.animation.fadeIn() + androidx.compose.animation.scaleIn(initialScale = 0.8f),
+                exit = androidx.compose.animation.fadeOut() + androidx.compose.animation.scaleOut(targetScale = 0.8f)
+            ) {
+                Box(
+                    modifier = Modifier
+                        .size(24.dp)
+                        .clip(CircleShape)
+                        .background(folderColor.copy(alpha = 0.2f)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                        contentDescription = null,
+                        tint = folderColor,
+                        modifier = Modifier.size(15.dp)
+                    )
+                }
+            }
+
+            if (!isSelected) {
+                Box(
+                    modifier = Modifier
+                        .size(18.dp)
+                        .clip(CircleShape)
+                        .border(1.5.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                )
+            }
         }
     }
 }
