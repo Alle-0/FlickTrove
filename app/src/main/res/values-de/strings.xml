@@ -1900,9 +1900,9 @@
     <string name="folder_join_expired">Diese Einladung ist abgelaufen.</string>
     <string name="folder_join_revoked">Diese Einladung wurde vom Inhaber widerrufen.</string>
     <string name="folder_join_max_uses">Diese Einmaleinladung wurde bereits eingelöst.</string>
-    <string name="folder_join_member_limit">Dieser Ordner hat bereits das Limit von 10 Mitgliedern erreicht.</string>
+    <string name="folder_join_member_limit">Dieser Ordner hat bereits das Limit von 25 Mitgliedern erreicht.</string>
     <string name="folder_members_title">Mitglieder &amp; Einladungen</string>
-    <string name="folder_members_tab">Mitglieder (%1$d/10)</string>
+    <string name="folder_members_tab">Mitglieder (%1$d/25)</string>
     <string name="folder_invites_tab">Aktive Einladungen</string>
     <string name="folder_member_role_owner">Inhaber</string>
     <string name="folder_member_role_editor">Mitwirkender</string>

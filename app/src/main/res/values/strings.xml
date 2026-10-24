@@ -1910,9 +1910,9 @@
     <string name="folder_join_expired">This invite has expired.</string>
     <string name="folder_join_revoked">This invite has been revoked by the owner.</string>
     <string name="folder_join_max_uses">This single-use invite has already been redeemed.</string>
-    <string name="folder_join_member_limit">This folder has already reached the maximum limit of 10 members.</string>
+    <string name="folder_join_member_limit">This folder has already reached the maximum limit of 25 members.</string>
     <string name="folder_members_title">Members &amp; Invites</string>
-    <string name="folder_members_tab">Members (%1$d/10)</string>
+    <string name="folder_members_tab">Members (%1$d/25)</string>
     <string name="folder_invites_tab">Active Invites</string>
     <string name="folder_member_role_owner">Owner</string>
     <string name="folder_member_role_editor">Collaborator</string>

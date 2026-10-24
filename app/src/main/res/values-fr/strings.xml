@@ -1897,9 +1897,9 @@
     <string name="folder_join_expired">Cette invitation a expiré.</string>
     <string name="folder_join_revoked">Cette invitation a été révoquée par le propriétaire.</string>
     <string name="folder_join_max_uses">Cette invitation à usage unique a déjà été utilisée.</string>
-    <string name="folder_join_member_limit">Ce dossier a déjà atteint la limite maximale de 10 membres.</string>
+    <string name="folder_join_member_limit">Ce dossier a déjà atteint la limite maximale de 25 membres.</string>
     <string name="folder_members_title">Membres et Invitations</string>
-    <string name="folder_members_tab">Membres (%1$d/10)</string>
+    <string name="folder_members_tab">Membres (%1$d/25)</string>
     <string name="folder_invites_tab">Invitations Actives</string>
     <string name="folder_member_role_owner">Propriétaire</string>
     <string name="folder_member_role_editor">Collaborateur</string>

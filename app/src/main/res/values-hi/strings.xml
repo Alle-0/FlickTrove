@@ -1895,9 +1895,9 @@
     <string name="folder_join_expired">इस आमंत्रण की अवधि समाप्त हो चुकी है।</string>
     <string name="folder_join_revoked">यह आमंत्रण स्वामी द्वारा निरस्त कर दिया गया है।</string>
     <string name="folder_join_max_uses">यह एकल-उपयोग आमंत्रण पहले ही उपयोग किया जा चुका है।</string>
-    <string name="folder_join_member_limit">यह फ़ोल्डर पहले से ही अधिकतम 10 सदस्यों की सीमा तक पहुंच चुका है।</string>
+    <string name="folder_join_member_limit">यह फ़ोल्डर पहले से ही अधिकतम 25 सदस्यों की सीमा तक पहुंच चुका है।</string>
     <string name="folder_members_title">सदस्य और आमंत्रण</string>
-    <string name="folder_members_tab">सदस्य (%1$d/10)</string>
+    <string name="folder_members_tab">सदस्य (%1$d/25)</string>
     <string name="folder_invites_tab">सक्रिय आमंत्रण</string>
     <string name="folder_member_role_owner">स्वामी</string>
     <string name="folder_member_role_editor">सहयोगी</string>

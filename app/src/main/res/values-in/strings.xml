@@ -1902,9 +1902,9 @@
     <string name="folder_join_expired">Undangan ini telah kedaluwarsa.</string>
     <string name="folder_join_revoked">Undangan ini telah dibatalkan oleh pemilik.</string>
     <string name="folder_join_max_uses">Undangan sekali pakai ini sudah digunakan.</string>
-    <string name="folder_join_member_limit">Folder ini telah mencapai batas maksimum 10 anggota.</string>
+    <string name="folder_join_member_limit">Folder ini telah mencapai batas maksimum 25 anggota.</string>
     <string name="folder_members_title">Anggota dan Undangan</string>
-    <string name="folder_members_tab">Anggota (%1$d/10)</string>
+    <string name="folder_members_tab">Anggota (%1$d/25)</string>
     <string name="folder_invites_tab">Undangan Aktif</string>
     <string name="folder_member_role_owner">Pemilik</string>
     <string name="folder_member_role_editor">Kolaborator</string>

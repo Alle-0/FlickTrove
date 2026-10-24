@@ -198,12 +198,12 @@ class SharedFolderRepository @Inject constructor(
             val (invite, sharedDto) = getInvite(code).getOrThrow()
             val sharedId = sharedDto.id ?: throw IllegalStateException("MISSING_SHARED_FOLDER_ID")
 
-            // Check members count limit (10 members)
+            // Check members count limit (25 members)
             val currentMembers = api.getFolderMembers("eq.$sharedId")
             val alreadyMember = currentMembers.any { it.userUid == user.uid }
 
             if (!alreadyMember) {
-                if (currentMembers.size >= 10) {
+                if (currentMembers.size >= MAX_FOLDER_MEMBERS) {
                     throw IllegalStateException("MEMBER_LIMIT_REACHED")
                 }
                 val memberDto = SharedFolderMemberDto(
@@ -585,5 +585,9 @@ class SharedFolderRepository @Inject constructor(
             }
             Unit
         }
+    }
+
+    companion object {
+        const val MAX_FOLDER_MEMBERS = 25
     }
 }

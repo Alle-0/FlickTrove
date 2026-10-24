@@ -1899,9 +1899,9 @@
     <string name="folder_join_expired">Esta invitación ha caducado.</string>
     <string name="folder_join_revoked">Esta invitación fue revocada por el propietario.</string>
     <string name="folder_join_max_uses">Esta invitación de un solo uso ya ha sido canjeada.</string>
-    <string name="folder_join_member_limit">Esta carpeta ya alcanzó el límite máximo de 10 miembros.</string>
+    <string name="folder_join_member_limit">Esta carpeta ya alcanzó el límite máximo de 25 miembros.</string>
     <string name="folder_members_title">Miembros e Invitaciones</string>
-    <string name="folder_members_tab">Miembros (%1$d/10)</string>
+    <string name="folder_members_tab">Miembros (%1$d/25)</string>
     <string name="folder_invites_tab">Invitaciones Activas</string>
     <string name="folder_member_role_owner">Propietario</string>
     <string name="folder_member_role_editor">Colaborador</string>

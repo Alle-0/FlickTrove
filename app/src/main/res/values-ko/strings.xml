@@ -1903,9 +1903,9 @@
     <string name="folder_join_expired">만료된 초대입니다.</string>
     <string name="folder_join_revoked">소유자에 의해 취소된 초대입니다.</string>
     <string name="folder_join_max_uses">이미 사용된 1회용 초대입니다.</string>
-    <string name="folder_join_member_limit">이 폴더는 이미 최대 인원인 10명에 도달했습니다.</string>
+    <string name="folder_join_member_limit">이 폴더는 이미 최대 인원인 25명에 도달했습니다.</string>
     <string name="folder_members_title">멤버 및 초대</string>
-    <string name="folder_members_tab">멤버 (%1$d/10)</string>
+    <string name="folder_members_tab">멤버 (%1$d/25)</string>
     <string name="folder_invites_tab">활성 초대</string>
     <string name="folder_member_role_owner">소유자</string>
     <string name="folder_member_role_editor">협업자</string>

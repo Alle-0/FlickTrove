@@ -1895,9 +1895,9 @@
     <string name="folder_join_expired">Este convite expirou.</string>
     <string name="folder_join_revoked">Este convite foi revogado pelo proprietário.</string>
     <string name="folder_join_max_uses">Este convite de uso único já foi resgatado.</string>
-    <string name="folder_join_member_limit">Esta pasta já atingiu o limite máximo de 10 membros.</string>
+    <string name="folder_join_member_limit">Esta pasta já atingiu o limite máximo de 25 membros.</string>
     <string name="folder_members_title">Membros e Convites</string>
-    <string name="folder_members_tab">Membros (%1$d/10)</string>
+    <string name="folder_members_tab">Membros (%1$d/25)</string>
     <string name="folder_invites_tab">Convites Ativos</string>
     <string name="folder_member_role_owner">Proprietário</string>
     <string name="folder_member_role_editor">Colaborador</string>
