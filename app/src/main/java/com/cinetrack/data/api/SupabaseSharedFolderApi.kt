@@ -83,6 +83,7 @@ interface SupabaseSharedFolderApi {
     @GET("rest/v1/shared_folder_invites")
     suspend fun getFolderInvites(
         @Query("folder_id") folderIdQuery: String,
+        @Query("is_revoked") isRevokedQuery: String = "eq.false",
         @Query("select") select: String = "*"
     ): List<SharedFolderInviteDto>
 

@@ -15,6 +15,7 @@ import kotlinx.serialization.json.buildJsonObject
 import kotlinx.serialization.json.put
 import java.time.Duration
 import java.time.Instant
+import retrofit2.HttpException
 import javax.inject.Inject
 import javax.inject.Singleton
 
@@ -380,19 +381,33 @@ class SharedFolderRepository @Inject constructor(
 
     suspend fun revokeInvite(code: String): Result<Unit> = withContext(Dispatchers.IO) {
         runCatching {
-            api.updateInvite(
+            val response = api.updateInvite(
                 "eq.$code",
                 buildJsonObject {
                     put("is_revoked", true)
                 }
             )
+            if (!response.isSuccessful) {
+                throw HttpException(response)
+            }
             Unit
         }
     }
 
     suspend fun getFolderInvites(sharedFolderId: String): Result<List<SharedFolderInviteDto>> = withContext(Dispatchers.IO) {
         runCatching {
-            api.getFolderInvites("eq.$sharedFolderId")
+            val invites = api.getFolderInvites("eq.$sharedFolderId")
+            val now = Instant.now()
+            invites.filter { invite ->
+                if (invite.isRevoked) return@filter false
+                if (invite.maxUses != null && invite.usedCount >= invite.maxUses) return@filter false
+                val expiresAt = try {
+                    Instant.parse(invite.expiresAt)
+                } catch (e: Exception) {
+                    Instant.MAX
+                }
+                now.isBefore(expiresAt)
+            }
         }
     }
 

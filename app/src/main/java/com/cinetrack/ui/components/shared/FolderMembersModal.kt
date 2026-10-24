@@ -221,8 +221,18 @@ fun FolderMembersModal(
                     }
                 }
             } else {
+                val now = remember { Instant.now() }
+                val validInvites = remember(activeInvites) {
+                    activeInvites.filter { invite ->
+                        if (invite.isRevoked) return@filter false
+                        if (invite.maxUses != null && invite.usedCount >= invite.maxUses) return@filter false
+                        val exp = try { Instant.parse(invite.expiresAt) } catch (e: Exception) { Instant.MAX }
+                        now.isBefore(exp)
+                    }
+                }
+
                 // Invites List
-                if (activeInvites.isEmpty()) {
+                if (validInvites.isEmpty()) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -240,7 +250,7 @@ fun FolderMembersModal(
                         modifier = Modifier.fillMaxWidth(),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        items(activeInvites, key = { it.inviteCode }) { invite ->
+                        items(validInvites, key = { it.inviteCode }) { invite ->
                             val expiryText = remember(invite.expiresAt) {
                                 try {
                                     val instant = Instant.parse(invite.expiresAt)
