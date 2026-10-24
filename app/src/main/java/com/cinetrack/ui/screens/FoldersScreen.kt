@@ -698,87 +698,45 @@ fun FoldersScreenContent(
         }
     }
 
-    folderToShare?.let { folder ->
-        FolderShareModal(
-            folder = folder,
-            onDismiss = { folderToShare = null },
-            onCreateInvite = { durationOption, callback ->
-                viewModel.createInviteForFolder(folder, durationOption, callback)
-            },
-            hazeState = dialogHazeState
-        )
-    }
-
-    folderForMembers?.let { folder ->
-        val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "" }
-        val isOwner = folder.ownerUid == currentUserId
-        var members by remember(folder.sharedFolderId) {
-            mutableStateOf<List<com.cinetrack.data.model.SharedFolderMemberDto>>(emptyList())
-        }
-        var activeInvites by remember(folder.sharedFolderId) {
-            mutableStateOf<List<com.cinetrack.data.model.SharedFolderInviteDto>>(emptyList())
-        }
-
-        LaunchedEffect(folder.sharedFolderId) {
-            folder.sharedFolderId?.let { sharedId ->
-                viewModel.getFolderMembers(sharedId) { res ->
-                    members = res.getOrDefault(emptyList())
-                }
-                viewModel.getFolderInvites(sharedId) { res ->
-                    activeInvites = res.getOrDefault(emptyList())
-                    if (isOwner) {
-                        viewModel.checkAutoRevert(folder) { didRevert ->
-                            if (didRevert) {
-                                folderForMembers = null
-                            }
-                        }
-                    }
-                }
+    LaunchedEffect(folderToShare) {
+        val folder = folderToShare
+        if (folder != null) {
+            modalHost.show {
+                FolderShareModal(
+                    folder = folder,
+                    onDismiss = {
+                        folderToShare = null
+                        modalHost.dismiss()
+                    },
+                    onCreateInvite = { durationOption, callback ->
+                        viewModel.createInviteForFolder(folder, durationOption, callback)
+                    },
+                    hazeState = dialogHazeState
+                )
             }
         }
+    }
 
-        FolderMembersModal(
-            folder = folder,
-            members = members,
-            activeInvites = activeInvites,
-            currentUserId = currentUserId,
-            isOwner = isOwner,
-            onDismiss = { folderForMembers = null },
-            onRemoveMember = { member ->
-                viewModel.removeFolderMember(folder, member.userId) { res ->
-                    if (res.isSuccess) {
-                        val didRevert = res.getOrDefault(false)
-                        if (didRevert) {
-                            folderForMembers = null
-                        } else {
-                            members = members.filter { it.userId != member.userId }
-                        }
+    LaunchedEffect(folderForMembers) {
+        val folder = folderForMembers
+        if (folder != null) {
+            modalHost.show {
+                FolderMembersModalHostContent(
+                    folder = folder,
+                    viewModel = viewModel,
+                    dialogHazeState = dialogHazeState,
+                    onDismiss = {
+                        folderForMembers = null
+                        modalHost.dismiss()
+                    },
+                    onOpenShareModal = { target ->
+                        folderForMembers = null
+                        modalHost.dismiss()
+                        folderToShare = target
                     }
-                }
-            },
-            onLeaveFolder = {
-                viewModel.deleteFolder(folder.id)
-                folderForMembers = null
-            },
-            onRevokeInvite = { invite ->
-                viewModel.revokeFolderInvite(folder, invite.inviteCode) { res ->
-                    if (res.isSuccess) {
-                        val didRevert = res.getOrDefault(false)
-                        if (didRevert) {
-                            folderForMembers = null
-                        } else {
-                            activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
-                        }
-                    }
-                }
-            },
-            onOpenShareModal = {
-                val target = folder
-                folderForMembers = null
-                folderToShare = target
-            },
-            hazeState = dialogHazeState
-        )
+                )
+            }
+        }
     }
 
     var rememberedMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
@@ -913,5 +871,82 @@ fun FoldersScreenContent(
             }
         }
     }
+}
+
+@Composable
+private fun FolderMembersModalHostContent(
+    folder: FolderEntity,
+    viewModel: FoldersViewModel,
+    dialogHazeState: HazeState?,
+    onDismiss: () -> Unit,
+    onOpenShareModal: (FolderEntity) -> Unit
+) {
+    val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "" }
+    val isOwner = folder.ownerUid == currentUserId
+    var members by remember(folder.sharedFolderId) {
+        mutableStateOf<List<com.cinetrack.data.model.SharedFolderMemberDto>>(emptyList())
+    }
+    var activeInvites by remember(folder.sharedFolderId) {
+        mutableStateOf<List<com.cinetrack.data.model.SharedFolderInviteDto>>(emptyList())
+    }
+
+    LaunchedEffect(folder.sharedFolderId) {
+        folder.sharedFolderId?.let { sharedId ->
+            viewModel.getFolderMembers(sharedId) { res ->
+                members = res.getOrDefault(emptyList())
+            }
+            viewModel.getFolderInvites(sharedId) { res ->
+                activeInvites = res.getOrDefault(emptyList())
+                if (isOwner) {
+                    viewModel.checkAutoRevert(folder) { didRevert ->
+                        if (didRevert) {
+                            onDismiss()
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    FolderMembersModal(
+        folder = folder,
+        members = members,
+        activeInvites = activeInvites,
+        currentUserId = currentUserId,
+        isOwner = isOwner,
+        onDismiss = onDismiss,
+        onRemoveMember = { member ->
+            viewModel.removeFolderMember(folder, member.userId) { res ->
+                if (res.isSuccess) {
+                    val didRevert = res.getOrDefault(false)
+                    if (didRevert) {
+                        onDismiss()
+                    } else {
+                        members = members.filter { it.userId != member.userId }
+                    }
+                }
+            }
+        },
+        onLeaveFolder = {
+            viewModel.deleteFolder(folder.id)
+            onDismiss()
+        },
+        onRevokeInvite = { invite ->
+            viewModel.revokeFolderInvite(folder, invite.inviteCode) { res ->
+                if (res.isSuccess) {
+                    val didRevert = res.getOrDefault(false)
+                    if (didRevert) {
+                        onDismiss()
+                    } else {
+                        activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
+                    }
+                }
+            }
+        },
+        onOpenShareModal = {
+            onOpenShareModal(folder)
+        },
+        hazeState = dialogHazeState
+    )
 }
 
