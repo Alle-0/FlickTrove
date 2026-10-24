@@ -141,7 +141,7 @@ fun QuickNoteModal(
     FlickTroveModal(
         onDismissRequest = onDismiss,
         hazeState = hazeState,
-        contentPadding = PaddingValues(start = 16.dp, top = 20.dp, end = 16.dp, bottom = 16.dp)
+        contentPadding = PaddingValues(16.dp)
     ) {
         Column(
             modifier = Modifier
@@ -161,7 +161,7 @@ fun QuickNoteModal(
                 Box(
                     modifier = Modifier
                         .size(44.dp)
-                        .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(14.dp)),
+                        .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
