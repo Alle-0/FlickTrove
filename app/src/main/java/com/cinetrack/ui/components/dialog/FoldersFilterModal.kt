@@ -45,12 +45,14 @@ fun FoldersFilterModal(
     var localSortOption by remember(isVisible) { mutableStateOf(currentSortOption) }
     var localSortOrder by remember(isVisible) { mutableStateOf(currentSortOrder) }
     var localTypeFilter by remember(isVisible) { mutableStateOf(currentTypeFilter) }
+    var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(isVisible) {
         if (isVisible) {
             localSortOption = currentSortOption
             localSortOrder = currentSortOrder
             localTypeFilter = currentTypeFilter
+            expandedSection = null
         }
     }
 
@@ -86,43 +88,14 @@ fun FoldersFilterModal(
                 )
             }
 
-            // 1. Folder Type Filter Section (Tutte / Solo Condivise / Solo Private)
-            ExpandableSection(
-                title = stringResource(id = R.string.folder_filter_section_type),
-                isExpanded = true,
-                showChevron = false,
-                isClickable = false,
-                onToggle = { }
-            ) {
-                Column(
-                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val typeOptions = listOf(
-                        FolderTypeFilter.ALL to stringResource(id = R.string.folder_filter_all),
-                        FolderTypeFilter.SHARED to stringResource(id = R.string.folder_filter_shared),
-                        FolderTypeFilter.PRIVATE to stringResource(id = R.string.folder_filter_private)
-                    )
-
-                    typeOptions.forEach { (type, label) ->
-                        SortOptionItem(
-                            label = label,
-                            isSelected = localTypeFilter == type,
-                            onClick = { localTypeFilter = type }
-                        )
-                    }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // 2. Sort By Section
+            // 1. Sort By Section (First)
             ExpandableSection(
                 title = stringResource(id = R.string.filter_sort_by),
-                isExpanded = true,
-                showChevron = false,
-                isClickable = false,
-                onToggle = { }
+                isExpanded = expandedSection == "sort",
+                showChevron = true,
+                isClickable = true,
+                badgeCount = if (localSortOption != FolderSortOption.DATE || localSortOrder != CommentSortOrder.DESC) 1 else 0,
+                onToggle = { expandedSection = if (expandedSection == "sort") null else "sort" }
             ) {
                 Column(
                     modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
@@ -164,6 +137,41 @@ fun FoldersFilterModal(
                             onClick = { localSortOrder = CommentSortOrder.ASC }
                         )
                     }
+                }
+            }
+
+            Spacer(modifier = Modifier.height(14.dp))
+
+            // 2. Folder Type Filter Section (Pillole FilterChip)
+            @OptIn(ExperimentalLayoutApi::class)
+            ExpandableSection(
+                title = stringResource(id = R.string.folder_filter_section_type),
+                isExpanded = expandedSection == "type",
+                showChevron = true,
+                isClickable = true,
+                badgeCount = if (localTypeFilter != FolderTypeFilter.ALL) 1 else 0,
+                onToggle = { expandedSection = if (expandedSection == "type") null else "type" }
+            ) {
+                FlowRow(
+                    modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    FilterChip(
+                        label = stringResource(id = R.string.folder_filter_all),
+                        isSelected = localTypeFilter == FolderTypeFilter.ALL,
+                        onClick = { localTypeFilter = FolderTypeFilter.ALL }
+                    )
+                    FilterChip(
+                        label = stringResource(id = R.string.folder_filter_shared),
+                        isSelected = localTypeFilter == FolderTypeFilter.SHARED,
+                        onClick = { localTypeFilter = FolderTypeFilter.SHARED }
+                    )
+                    FilterChip(
+                        label = stringResource(id = R.string.folder_filter_private),
+                        isSelected = localTypeFilter == FolderTypeFilter.PRIVATE,
+                        onClick = { localTypeFilter = FolderTypeFilter.PRIVATE }
+                    )
                 }
             }
             
