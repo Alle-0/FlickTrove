@@ -600,11 +600,17 @@
       val textColor = if (containerColor.luminance() > 0.45f) Color.Black else Color.White
       ```
     - Questo previene testi bianchi su sfondi luminosi (giallo, ciano, lime, bianco) o testi scuri su sfondi scuri, garantendo leggibilità e contrasto WCAG AAA in ogni condizione cromatica.
-- **Formula Concentricità Angoli Annidati ($R_{in} = R_{out} - \text{Padding}$) & Divieto `CircleShape` su Bottoni Modali**:
-    - Nei modali standard a raggio ampio (es. `FlickTroveModal` con $R = 32\text{dp}$), è vietato usare `CircleShape` per i pulsanti di azione a tutta larghezza disposti sul fondo: la sagoma a pillola piena dentro un rettangolo arrotondato genera distorsioni visive e "strozzature" diagonali asimmetriche a 45°.
-    - Applicare rigorosamente la formula matematica di concentricità degli angoli annidati:
-      $$R_{\text{interno}} = R_{\text{esterno}} - \text{Padding}$$
-    - Per un modale con raggio $32\text{dp}$ e padding perimetrale uniforme di $16\text{dp}$ (`horizontal = 16.dp, bottom = 16.dp`), i pulsanti d'azione orizzontali devono adottare tassativamente `RoundedCornerShape(16.dp)` ($32\text{dp} - 16\text{dp} = 16\text{dp}$).
+- **Formula Concentricità Geometrica Angoli Annidati ($R_{in} = R_{out} - \text{Padding}$) & Divieto `CircleShape` su Bottoni Modali**:
+    - **Pulsanti di Azione Orizzontali a Fondo Modale**:
+      - Nei modali standard a raggio ampio (es. `FlickTroveModal` con $R = 32\text{dp}$), è vietato usare `CircleShape` per i pulsanti di azione a tutta larghezza disposti sul fondo: la sagoma a pillola piena dentro un rettangolo arrotondato genera distorsioni visive e "strozzature" diagonali asimmetriche a 45°.
+      - Applicare rigorosamente la formula matematica di concentricità degli angoli annidati:
+        $$R_{\text{interno}} = R_{\text{esterno}} - \text{Padding}$$
+      - Per un modale con raggio $32\text{dp}$ e padding perimetrale uniforme di $16\text{dp}$ (`horizontal = 16.dp, bottom = 16.dp`), i pulsanti d'azione orizzontali devono adottare tassativamente `RoundedCornerShape(16.dp)` ($32\text{dp} - 16\text{dp} = 16\text{dp}$).
+    - **Elementi Sagomati e Icon Container negli Angoli Superiori (Quick Action BottomSheet & Card)**:
+      - Quando un elemento interno (badge, icona quadrata/rettangolare, card figlia) risiede nell'angolo di un container con bordi arrotondati (es. `QuickFolderBottomSheet`, `QuickRatingBottomSheet`, `QuickNoteBottomSheet` con outer radius $32.dp$):
+        1. Il padding orizzontale e verticale nell'angolo deve essere rigorosamente uguale ($P_{start} = P_{top} = P$, es. `16.dp`).
+        2. Il raggio di curvatura dell'elemento interno deve seguire la formula $R_{inner} = R_{outer} - P$.
+        3. *Esempio*: per un container con $R_{outer} = 32.dp$ e padding $16.dp$, il raggio dell'icon container interno deve essere tassativamente $16.dp$ ($32 - 16 = 16$), mai valori disallineati come $14.dp$ o $20.dp$ che appaiono eccentrici o deformati.
 - **Riuso del Selettore Fisico (`CategoryTabSelector`)**:
     - Per qualsiasi tab bar o selettore segmentato all'interno di schermate, pannelli o modali, utilizzare il componente canonico `CategoryTabSelector` con `fillWidth = true` (e `uppercase = false` se necessario), ereditando la fisica inerziale asimmetrica unificata (jelly spring, flight dynamics e gesture drag).
 - **Dissolvenza Unificata Contenitore + Contenuto e Rimpicciolimento Testo su Scroll (Anti-Ghost Box)**:

@@ -236,6 +236,16 @@
      val user = currentUser ?: return@onItemSelected
      // 'user' è ora un riferimento non-nullable sicuro al 100%
      ```
-
 - **Aggiornamento Room Destructive Migration**:
    - In Room 2.7+, `.fallbackToDestructiveMigration()` senza parametri è deprecato. Utilizzare tassativamente l'overload esplicito `.fallbackToDestructiveMigration(true)` per evitare warning e indicare esplicitamente il drop delle tabelle.
+
+- **Ordine di Esecuzione nei Popup e Prevenzione Nullificazione Callback**:
+   - `MovieActionsManager` gestisce popup galleggianti e resetta le sue proprietà (`onDeleteWatchSessionCallback = null`) durante `closeAll()`. Se un pulsante esegue `onDismiss()` prima di invocare il callback, o se la lambda legge lo stato a runtime dopo il dismiss, il callback viene annullato silenziosamente e l'azione non viene mai eseguita.
+   - Nei popup contestuali e menu ad azione singola:
+     1. Invocare sempre prima l'azione di business e poi la chiusura del popup: `onClick = { onAction(target); onDismiss() }`.
+     2. Se un `Manager` pulisce i riferimenti su `closeAll()`, catturare il callback in una variabile locale immutabile (`val action = manager.actionCallback`) prima di costruire la lambda, garantendo che non venga letto come `null` a runtime.
+
+- **Isolamento di `GlobalErrorHandler` e Divieto su Azioni Utente Intenzionali**:
+   - `GlobalErrorHandler.emitError` mostra un toast galleggiante rosso/arancione ad alto impatto con pulsante `RIPROVA` sopra l'intera applicazione. Non deve mai essere attivato da transizioni di stato conseguenti a un'azione volontaria dell'utente (es. cancellazione di una cartella o film).
+   - 1. Vietato usare `GlobalErrorHandler.emitError` per segnalare risorse mancanti dovute a cancellazioni locali dell'utente.
+   - 2. Le schermate di dettaglio devono gestire l'assenza della risorsa localmente (con `UiState.Error` o tornando indietro) e resettare gli ID osservati prima della cancellazione (`_folderId.value = null`), senza allertare l'utente con finti messaggi di errore a livello globale.

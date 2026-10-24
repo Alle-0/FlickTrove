@@ -37,6 +37,10 @@
       - I menu contestuali a comparsa per la gestione delle sessioni (modifica data / eliminazione) devono adottare `hazeGlass` con curvatura concentrica (`20.dp`), container scuro traslucido (`0xFF14171E` con alpha 0.85f), icone inscritte in cerchi con sfondi dedicati e propagazione di `hazeState` da Timeline, Calendario e BottomSheet. È tassativamente vietato usare `DropdownMenu` Material con sfondi grigi piatti o sagome spigolose.
     - **Clearance Top Bar Senza Cutout Ridondante**:
       - Il padding di testa per liste o schermate con `GlassyTopBar` galleggiante deve calcolare unicamente `statusBarTop + 46.dp + 8.dp`, evitando di sommare ridondantemente `displayCutout` (che sulle versioni moderne di Android è già assorbito nella status bar), scongiurando voragini asimmetriche di spazio vuoto sotto la barra.
+    - **Riconciliazione Film su Cancellazione/Modifica Watch Session (Single Source of Truth)**:
+      - Ogni qualvolta si elimina o si modifica una sessione in `WatchHistoryRepository` (sia da `HistoryViewModel` che da `MovieDetailViewModel`):
+        1. Se non rimangono ulteriori sessioni di visione per quel film/serie: riconciliare immediatamente l'entità Room con `watched = false` e `watchedAt = null`.
+        2. Se rimangono altre sessioni (rewatch): aggiornare `watchedAt` al timestamp della sessione più recente rimasta.
 
 ### Architettura di Sincronizzazione Cloud (Trakt & Servizi Esterni)
 
