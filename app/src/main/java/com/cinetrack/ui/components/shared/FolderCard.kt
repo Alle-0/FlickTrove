@@ -177,50 +177,68 @@ fun FolderCard(
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                 )
-            } else if (formattedDate.isNotEmpty()) {
-                Spacer(Modifier.height(3.dp))
-                Text(
-                    text = formattedDate,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.45f),
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                )
             }
 
-            if (folder.isShared) {
+            if (folder.isShared || formattedDate.isNotEmpty()) {
                 Spacer(Modifier.height(4.dp))
-                val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
-                val isOwner = currentUserId != null && folder.ownerUid == currentUserId
-                val badgeText = if (isOwner || folder.ownerName.isNullOrBlank()) {
-                    stringResource(id = R.string.folder_shared_badge)
-                } else {
-                    folder.ownerName
-                }
                 Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(folderColor.copy(alpha = 0.15f))
-                        .padding(horizontal = 7.dp, vertical = 2.dp)
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_people),
-                        contentDescription = null,
-                        tint = folderColor,
-                        modifier = Modifier.size(11.dp)
-                    )
-                    Spacer(Modifier.width(4.dp))
-                    Text(
-                        text = badgeText,
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 10.sp,
-                            fontWeight = FontWeight.Medium
-                        ),
-                        color = folderColor,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                    )
+                    if (folder.isShared) {
+                        val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
+                        val isOwner = currentUserId != null && folder.ownerUid == currentUserId
+                        val badgeText = if (isOwner || folder.ownerName.isNullOrBlank()) {
+                            stringResource(id = R.string.folder_shared_badge)
+                        } else {
+                            folder.ownerName
+                        }
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(folderColor.copy(alpha = 0.15f))
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_people),
+                                contentDescription = null,
+                                tint = folderColor,
+                                modifier = Modifier.size(11.dp)
+                            )
+                            Spacer(Modifier.width(4.dp))
+                            Text(
+                                text = badgeText,
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = folderColor,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                            )
+                        }
+                        if (formattedDate.isNotEmpty()) {
+                            Spacer(Modifier.width(6.dp))
+                            Text(
+                                text = "•",
+                                style = MaterialTheme.typography.bodySmall,
+                                color = Color.White.copy(alpha = 0.35f)
+                            )
+                            Spacer(Modifier.width(6.dp))
+                        }
+                    }
+
+                    if (formattedDate.isNotEmpty()) {
+                        Text(
+                            text = formattedDate,
+                            style = MaterialTheme.typography.bodySmall.copy(
+                                fontSize = if (folder.isShared) 11.sp else 12.sp
+                            ),
+                            color = Color.White.copy(alpha = 0.45f),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
         }
