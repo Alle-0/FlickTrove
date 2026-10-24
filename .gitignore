@@ -95,6 +95,7 @@ GEMINI.md
 AGENTS.md
 .agent/
 .agents/
+guidelines/
 app/src/test/
 *.txt
 partner*.md
