@@ -32,6 +32,7 @@ fun DeleteFolderDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     folderName: String,
+    isLeave: Boolean = false,
     hazeState: HazeState? = null
 ) {
     val haptic = LocalHapticFeedback.current
@@ -65,7 +66,7 @@ fun DeleteFolderDialog(
         Spacer(modifier = Modifier.height(20.dp))
 
         Text(
-            text = stringResource(R.string.folder_delete_title),
+            text = if (isLeave) stringResource(R.string.folder_leave) else stringResource(R.string.folder_delete_title),
             color = Color.White,
             style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
             textAlign = TextAlign.Center
@@ -74,12 +75,18 @@ fun DeleteFolderDialog(
         Spacer(modifier = Modifier.height(12.dp))
 
         Text(
-            text = buildAnnotatedString {
-                append(stringResource(R.string.folder_delete_confirm_prefix))
-                withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
-                    append("\"$folderName\"")
+            text = if (isLeave) {
+                buildAnnotatedString {
+                    append(stringResource(R.string.folder_leave_confirm))
                 }
-                append(stringResource(R.string.folder_delete_confirm_suffix))
+            } else {
+                buildAnnotatedString {
+                    append(stringResource(R.string.folder_delete_confirm_prefix))
+                    withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
+                        append("\"$folderName\"")
+                    }
+                    append(stringResource(R.string.folder_delete_confirm_suffix))
+                }
             },
             color = Color.White.copy(alpha = 0.6f),
             style = MaterialTheme.typography.bodyMedium,
@@ -93,7 +100,7 @@ fun DeleteFolderDialog(
             modifier = Modifier.fillMaxWidth(),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // Delete - high priority
+            // Delete / Leave - high priority
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -110,7 +117,7 @@ fun DeleteFolderDialog(
                     Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), null, tint = Color.White, modifier = Modifier.size(18.dp))
                     Spacer(Modifier.width(8.dp))
                     Text(
-                        stringResource(R.string.folder_delete_action),
+                        if (isLeave) stringResource(R.string.folder_leave) else stringResource(R.string.folder_delete_action),
                         style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Black),
                         color = Color.White
                     )

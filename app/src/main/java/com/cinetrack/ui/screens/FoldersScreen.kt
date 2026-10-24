@@ -628,6 +628,8 @@ fun FoldersScreenContent(
     LaunchedEffect(folderToDelete) {
         val folder = folderToDelete
         if (folder != null) {
+            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+            val isLeave = folder.isShared && (folder.ownerUid != currentUserId)
             modalHost.show {
                 DeleteFolderDialog(
                     onConfirm = {
@@ -640,6 +642,7 @@ fun FoldersScreenContent(
                         modalHost.dismiss()
                     },
                     folderName = folder.name,
+                    isLeave = isLeave,
                     hazeState = dialogHazeState
                 )
             }
@@ -718,21 +721,27 @@ fun FoldersScreenContent(
                         .clip(RoundedCornerShape(24.dp))
                         .then(Modifier.hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp), alpha = menuAlpha))
                 ) {
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .bounceClick { 
-                                activeMenuFolder = null
-                                folderEditMode = FolderEditMode.ALL
-                                folderToEdit = folder
-                            }
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(12.dp))
-                        Text(stringResource(R.string.folder_edit_info), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                    val isOwner = !folder.isShared || (folder.ownerUid == currentUserId)
+
+                    if (isOwner) {
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .bounceClick { 
+                                    activeMenuFolder = null
+                                    folderEditMode = FolderEditMode.ALL
+                                    folderToEdit = folder
+                                }
+                                .padding(horizontal = 16.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
+                            Spacer(Modifier.width(12.dp))
+                            Text(stringResource(R.string.folder_edit_info), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
+                        }
                     }
+
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -746,7 +755,7 @@ fun FoldersScreenContent(
                         Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
                         Spacer(Modifier.width(12.dp))
                         Text(
-                            text = if (folder.isShared && folder.ownerUid != com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid) {
+                            text = if (folder.isShared && !isOwner) {
                                 stringResource(R.string.folder_leave)
                             } else {
                                 stringResource(R.string.folders_delete)
