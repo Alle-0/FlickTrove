@@ -203,18 +203,19 @@ fun FoldersScreenContent(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(Modifier.height(24.dp))
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(10.dp)
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.spacedBy(12.dp)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier
                                     .bounceClick { isCreateDialogOpen = true }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f))
                                     .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                                    .padding(horizontal = 20.dp, vertical = 12.dp)
+                                    .padding(horizontal = 24.dp, vertical = 12.dp)
                             ) {
                                 Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
                                 Spacer(Modifier.width(8.dp))
@@ -226,15 +227,16 @@ fun FoldersScreenContent(
                             }
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier
                                     .bounceClick { isJoinDialogOpen = true }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f))
                                     .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                                    .padding(horizontal = 16.dp, vertical = 12.dp)
+                                    .padding(horizontal = 24.dp, vertical = 12.dp)
                             ) {
                                 Icon(ImageVector.vectorResource(id = R.drawable.ic_people), null, tint = Color.White, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(6.dp))
+                                Spacer(Modifier.width(8.dp))
                                 Text(
                                     stringResource(R.string.folder_join_button), 
                                     color = Color.White, 
