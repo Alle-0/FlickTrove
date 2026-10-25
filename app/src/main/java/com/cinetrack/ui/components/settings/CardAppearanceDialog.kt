@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.LocalEpisodeInfoStyle
+import com.cinetrack.LocalLinearProgressBar
+import com.cinetrack.LocalCircularProgressBar
 import com.cinetrack.LocalProgressBarTarget
 import com.cinetrack.LocalTitleTextSizeMultiplier
 import com.cinetrack.R
@@ -253,7 +255,8 @@ fun CardAppearanceDialog(
 
     // Collect persisted values as initial state
     val persistedEpisodeInfoStyle by settingsViewModel.episodeInfoStyle.collectAsStateWithLifecycle()
-    val persistedProgressBarTarget by settingsViewModel.progressBarTarget.collectAsStateWithLifecycle()
+    val persistedLinearProgressBar by settingsViewModel.linearProgressBar.collectAsStateWithLifecycle()
+    val persistedCircularProgressBar by settingsViewModel.circularProgressBar.collectAsStateWithLifecycle()
     val persistedTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val persistedShowBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val persistedShowFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
@@ -261,7 +264,8 @@ fun CardAppearanceDialog(
 
     // Local state for live preview (not yet persisted)
     var localEpisodeStyle by remember(persistedEpisodeInfoStyle) { mutableStateOf(persistedEpisodeInfoStyle) }
-    var localProgressTarget by remember(persistedProgressBarTarget) { mutableStateOf(persistedProgressBarTarget) }
+    var localLinearBar by remember(persistedLinearProgressBar) { mutableStateOf(persistedLinearProgressBar) }
+    var localCircularBar by remember(persistedCircularProgressBar) { mutableStateOf(persistedCircularProgressBar) }
     var localTextMultiplier by remember(persistedTextSizeMultiplier) { mutableStateOf(persistedTextSizeMultiplier) }
     var localShowBadges by remember(persistedShowBadges) { mutableStateOf(persistedShowBadges) }
     var localShowFolderBookmarks by remember(persistedShowFolderBookmarks) { mutableStateOf(persistedShowFolderBookmarks) }
@@ -464,7 +468,9 @@ fun CardAppearanceDialog(
             ) {
                 CompositionLocalProvider(
                     LocalEpisodeInfoStyle provides localEpisodeStyle,
-                    LocalProgressBarTarget provides localProgressTarget,
+                    LocalProgressBarTarget provides localLinearBar,
+                    LocalLinearProgressBar provides localLinearBar,
+                    LocalCircularProgressBar provides localCircularBar,
                     LocalTitleTextSizeMultiplier provides localTextMultiplier
                 ) {
                     AnimatedContent(
@@ -644,11 +650,16 @@ fun CardAppearanceDialog(
                 // 2. Progress Bar (Chip compatte a griglia)
                 AppearanceSection(title = stringResource(R.string.settings_card_progress_bar)) {
                     ProgressBarCompactOptions(
-                        selected = localProgressTarget,
+                        selectedLinear = localLinearBar,
+                        selectedCircular = localCircularBar,
                         accentColor = accentColor,
-                        onSelect = {
+                        onSelectLinear = {
                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            localProgressTarget = it
+                            localLinearBar = it
+                        },
+                        onSelectCircular = {
+                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                            localCircularBar = it
                         }
                     )
                 }
@@ -725,7 +736,8 @@ fun CardAppearanceDialog(
                         .bounceClick(scaleDown = 0.96f, onLongClick = {}) {
                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                             settingsViewModel.updateEpisodeInfoStyle(localEpisodeStyle)
-                            settingsViewModel.updateProgressBarTarget(localProgressTarget)
+                            settingsViewModel.updateLinearProgressBar(localLinearBar)
+                            settingsViewModel.updateCircularProgressBar(localCircularBar)
                             settingsViewModel.updateTitleTextSizeMultiplier(localTextMultiplier)
                             settingsViewModel.toggleBadges(localShowBadges)
                             settingsViewModel.toggleFolderBookmarks(localShowFolderBookmarks)
@@ -967,66 +979,96 @@ private fun EpisodeStyleCompactOptions(
 
 @Composable
 private fun ProgressBarCompactOptions(
-    selected: String,
+    selectedLinear: String,
+    selectedCircular: String,
     accentColor: Color,
-    onSelect: (String) -> Unit
+    onSelectLinear: (String) -> Unit,
+    onSelectCircular: (String) -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        // Row 1
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            CompactChipOption(
-                title = stringResource(R.string.settings_chip_circular_total),
-                subtitle = stringResource(R.string.settings_chip_whole_series),
-                selected = selected == ProgressBarTarget.CIRCULAR_TOTAL,
-                accentColor = accentColor,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                onClick = { onSelect(ProgressBarTarget.CIRCULAR_TOTAL) }
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+        // ── 1. Barra Lineare ──
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = stringResource(R.string.settings_cat_linear_bar),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = Color.White.copy(alpha = 0.45f)
             )
-            CompactChipOption(
-                title = stringResource(R.string.settings_chip_circular_season),
-                subtitle = stringResource(R.string.settings_chip_current_season),
-                selected = selected == ProgressBarTarget.CIRCULAR_SEASON,
-                accentColor = accentColor,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                onClick = { onSelect(ProgressBarTarget.CIRCULAR_SEASON) }
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CompactChipOption(
+                    title = stringResource(R.string.settings_chip_disabled),
+                    subtitle = stringResource(R.string.settings_chip_progress_none),
+                    selected = selectedLinear == "NONE",
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onSelectLinear("NONE") }
+                )
+                CompactChipOption(
+                    title = stringResource(R.string.settings_chip_col_series),
+                    subtitle = stringResource(R.string.settings_chip_whole_series),
+                    selected = selectedLinear == "TOTAL",
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onSelectLinear("TOTAL") }
+                )
+                CompactChipOption(
+                    title = stringResource(R.string.settings_chip_col_season),
+                    subtitle = stringResource(R.string.settings_chip_current_season),
+                    selected = selectedLinear == "SEASON",
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onSelectLinear("SEASON") }
+                )
+            }
         }
 
-        // Row 2
-        Row(
-            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-            horizontalArrangement = Arrangement.spacedBy(6.dp)
-        ) {
-            CompactChipOption(
-                title = stringResource(R.string.settings_chip_linear_total),
-                subtitle = stringResource(R.string.settings_chip_whole_series),
-                selected = selected == ProgressBarTarget.LINEAR_TOTAL,
-                accentColor = accentColor,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                onClick = { onSelect(ProgressBarTarget.LINEAR_TOTAL) }
+        // ── 2. Barra Circolare ──
+        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+            Text(
+                text = stringResource(R.string.settings_cat_circular_bar),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = Color.White.copy(alpha = 0.45f)
             )
-            CompactChipOption(
-                title = stringResource(R.string.settings_chip_linear_season),
-                subtitle = stringResource(R.string.settings_chip_current_season),
-                selected = selected == ProgressBarTarget.LINEAR_SEASON,
-                accentColor = accentColor,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                onClick = { onSelect(ProgressBarTarget.LINEAR_SEASON) }
-            )
+            Row(
+                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+                horizontalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
+                CompactChipOption(
+                    title = stringResource(R.string.settings_chip_disabled),
+                    subtitle = stringResource(R.string.settings_chip_progress_none),
+                    selected = selectedCircular == "NONE",
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onSelectCircular("NONE") }
+                )
+                CompactChipOption(
+                    title = stringResource(R.string.settings_chip_col_series),
+                    subtitle = stringResource(R.string.settings_chip_whole_series),
+                    selected = selectedCircular == "TOTAL",
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onSelectCircular("TOTAL") }
+                )
+                CompactChipOption(
+                    title = stringResource(R.string.settings_chip_col_season),
+                    subtitle = stringResource(R.string.settings_chip_current_season),
+                    selected = selectedCircular == "SEASON",
+                    accentColor = accentColor,
+                    modifier = Modifier.weight(1f).fillMaxHeight(),
+                    onClick = { onSelectCircular("SEASON") }
+                )
+            }
         }
-
-        // Row 3
-        CompactChipOption(
-            title = stringResource(R.string.settings_chip_progress_none),
-            subtitle = stringResource(R.string.settings_chip_disabled),
-            selected = selected == ProgressBarTarget.NONE,
-            accentColor = accentColor,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { onSelect(ProgressBarTarget.NONE) }
-        )
     }
 }
 

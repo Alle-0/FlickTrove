@@ -1992,4 +1992,7 @@
     <string name="settings_sub_pct_season">उदा. 46%</string>
     <string name="settings_sub_pct_series">उदा. 21%</string>
     <string name="settings_sub_pct_both">उदा. 46% • 21%</string>
+
+    <string name="settings_cat_linear_bar">लीनियर बार</string>
+    <string name="settings_cat_circular_bar">सर्कुलर बार</string>
 </resources>

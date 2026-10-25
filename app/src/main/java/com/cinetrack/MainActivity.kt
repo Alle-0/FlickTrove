@@ -96,8 +96,12 @@ val LocalTitleTextSizeMultiplier = androidx.compose.runtime.compositionLocalOf<F
 val LocalAdvancedVisualEffects = androidx.compose.runtime.compositionLocalOf<Boolean> { true }
 /** "REMAINING" | "WATCHED_OVER_TOTAL" | "SEASON_ONLY" | "SEASON_AND_TOTAL" | "PERCENTAGE" */
 val LocalEpisodeInfoStyle = androidx.compose.runtime.compositionLocalOf<String> { "REMAINING" }
-/** "CIRCULAR_TOTAL" | "CIRCULAR_SEASON" | "LINEAR_TOTAL" | "LINEAR_SEASON" | "NONE" */
+/** "CIRCULAR_TOTAL" | "CIRCULAR_SEASON" | "LINEAR_TOTAL" | "LINEAR_SEASON" | "NONE" (legacy) */
 val LocalProgressBarTarget = androidx.compose.runtime.compositionLocalOf<String> { "CIRCULAR_TOTAL" }
+/** "TOTAL" | "SEASON" | "NONE" */
+val LocalLinearProgressBar = androidx.compose.runtime.compositionLocalOf<String> { "TOTAL" }
+/** "TOTAL" | "SEASON" | "NONE" */
+val LocalCircularProgressBar = androidx.compose.runtime.compositionLocalOf<String> { "TOTAL" }
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {

@@ -437,11 +437,11 @@ fun MovieListCard(
                 val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
                 val isOcchio = !isQuickWatch && isReleased && (isReminder || isFavorite)
 
-                val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
-                        progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
-                val targetCircularProgress = when (progressBarTarget) {
-                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL -> computedProgress
-                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON -> seasonProgress
+                val circularBar = com.cinetrack.LocalCircularProgressBar.current
+                val showCircular = circularBar == "TOTAL" || circularBar == "SEASON"
+                val targetCircularProgress = when (circularBar) {
+                    "TOTAL" -> computedProgress
+                    "SEASON" -> seasonProgress
                     else -> 0f
                 }
                 val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(

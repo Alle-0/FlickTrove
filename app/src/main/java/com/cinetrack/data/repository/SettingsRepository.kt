@@ -26,6 +26,8 @@ interface SettingsRepository {
     val allowMobileDataUpdates: Flow<Boolean>
     val episodeInfoStyle: Flow<String>
     val progressBarTarget: Flow<String>
+    val linearProgressBar: Flow<String>
+    val circularProgressBar: Flow<String>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -50,4 +52,6 @@ interface SettingsRepository {
     suspend fun toggleAllowMobileDataUpdates(enabled: Boolean)
     suspend fun updateEpisodeInfoStyle(style: String)
     suspend fun updateProgressBarTarget(target: String)
+    suspend fun updateLinearProgressBar(target: String)
+    suspend fun updateCircularProgressBar(target: String)
 }

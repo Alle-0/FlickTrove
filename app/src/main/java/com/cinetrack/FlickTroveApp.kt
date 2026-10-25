@@ -131,6 +131,8 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val episodeInfoStyle by settingsViewModel.episodeInfoStyle.collectAsStateWithLifecycle()
     val progressBarTarget by settingsViewModel.progressBarTarget.collectAsStateWithLifecycle()
+    val linearProgressBar by settingsViewModel.linearProgressBar.collectAsStateWithLifecycle()
+    val circularProgressBar by settingsViewModel.circularProgressBar.collectAsStateWithLifecycle()
     
     val accentColor = remember(accentColorName) {
         when (accentColorName) {
@@ -175,6 +177,8 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
             LocalImageQuality provides imageQuality,
             LocalEpisodeInfoStyle provides episodeInfoStyle,
             LocalProgressBarTarget provides progressBarTarget,
+            LocalLinearProgressBar provides linearProgressBar,
+            LocalCircularProgressBar provides circularProgressBar,
             com.cinetrack.ui.LocalDeepLinkIntent provides deepLinkIntent
         ) {
             // Note: Deep link handling can be placed here or inside MainScreen/SplashScreen

@@ -1997,4 +1997,7 @@
     <string name="settings_sub_pct_season">z. B. 46%</string>
     <string name="settings_sub_pct_series">z. B. 21%</string>
     <string name="settings_sub_pct_both">z. B. 46% • 21%</string>
+
+    <string name="settings_cat_linear_bar">LINEARER BALKEN</string>
+    <string name="settings_cat_circular_bar">KREISFÖRMIGER BALKEN</string>
 </resources>

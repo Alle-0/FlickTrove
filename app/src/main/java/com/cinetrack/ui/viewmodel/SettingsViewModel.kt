@@ -404,6 +404,12 @@ class SettingsViewModel @Inject constructor(
     val progressBarTarget: StateFlow<String> = settingsRepository.progressBarTarget
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "CIRCULAR_TOTAL")
 
+    val linearProgressBar: StateFlow<String> = settingsRepository.linearProgressBar
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "TOTAL")
+
+    val circularProgressBar: StateFlow<String> = settingsRepository.circularProgressBar
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "TOTAL")
+
     val showMyFolders: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showMyFolders }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -900,6 +906,18 @@ class SettingsViewModel @Inject constructor(
     fun updateProgressBarTarget(target: String) {
         viewModelScope.launch {
             settingsRepository.updateProgressBarTarget(target)
+        }
+    }
+
+    fun updateLinearProgressBar(target: String) {
+        viewModelScope.launch {
+            settingsRepository.updateLinearProgressBar(target)
+        }
+    }
+
+    fun updateCircularProgressBar(target: String) {
+        viewModelScope.launch {
+            settingsRepository.updateCircularProgressBar(target)
         }
     }
 

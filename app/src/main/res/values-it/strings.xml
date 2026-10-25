@@ -2007,4 +2007,7 @@
     <string name="settings_sub_pct_season">es. 46%</string>
     <string name="settings_sub_pct_series">es. 21%</string>
     <string name="settings_sub_pct_both">es. 46% • 21%</string>
+
+    <string name="settings_cat_linear_bar">BARRA LINEARE</string>
+    <string name="settings_cat_circular_bar">BARRA CIRCOLARE</string>
 </resources>

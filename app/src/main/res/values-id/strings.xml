@@ -1999,4 +1999,7 @@
     <string name="settings_sub_pct_season">cth. 46%</string>
     <string name="settings_sub_pct_series">cth. 21%</string>
     <string name="settings_sub_pct_both">cth. 46% • 21%</string>
+
+    <string name="settings_cat_linear_bar">BATANG LINEAR</string>
+    <string name="settings_cat_circular_bar">BATANG MELINGKAR</string>
 </resources>

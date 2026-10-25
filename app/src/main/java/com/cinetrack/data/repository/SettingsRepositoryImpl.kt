@@ -43,6 +43,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
         val EPISODE_INFO_STYLE = stringPreferencesKey("episode_info_style")
         val PROGRESS_BAR_TARGET = stringPreferencesKey("progress_bar_target")
+        val LINEAR_PROGRESS_BAR = stringPreferencesKey("linear_progress_bar")
+        val CIRCULAR_PROGRESS_BAR = stringPreferencesKey("circular_progress_bar")
     }
 
     override val episodesLayout: Flow<String> = dataStore.data.map { preferences ->
@@ -263,6 +265,29 @@ class SettingsRepositoryImpl @Inject constructor(
         preferences[PreferencesKeys.PROGRESS_BAR_TARGET] ?: "CIRCULAR_TOTAL"
     }
 
+    override val linearProgressBar: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.LINEAR_PROGRESS_BAR] ?: run {
+            val old = preferences[PreferencesKeys.PROGRESS_BAR_TARGET]
+            when (old) {
+                "LINEAR_TOTAL" -> "TOTAL"
+                "LINEAR_SEASON" -> "SEASON"
+                else -> "TOTAL"
+            }
+        }
+    }
+
+    override val circularProgressBar: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.CIRCULAR_PROGRESS_BAR] ?: run {
+            val old = preferences[PreferencesKeys.PROGRESS_BAR_TARGET]
+            when (old) {
+                "CIRCULAR_TOTAL" -> "TOTAL"
+                "CIRCULAR_SEASON" -> "SEASON"
+                "NONE" -> "NONE"
+                else -> "TOTAL"
+            }
+        }
+    }
+
     override suspend fun updateEpisodeInfoStyle(style: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.EPISODE_INFO_STYLE] = style
@@ -272,6 +297,18 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateProgressBarTarget(target: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.PROGRESS_BAR_TARGET] = target
+        }
+    }
+
+    override suspend fun updateLinearProgressBar(target: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LINEAR_PROGRESS_BAR] = target
+        }
+    }
+
+    override suspend fun updateCircularProgressBar(target: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.CIRCULAR_PROGRESS_BAR] = target
         }
     }
 }

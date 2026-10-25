@@ -329,14 +329,13 @@ fun ContinueWatchingSeriesCard(
         label = "seriesTotalProgress"
     )
 
-    val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
-    val showLinear = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL ||
-            progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON
-    val targetLinearProgress = remember(progressBarTarget, totalSeriesProgress, seasonProgress, isReleased) {
+    val linearBar = com.cinetrack.LocalLinearProgressBar.current
+    val showLinear = linearBar == "TOTAL" || linearBar == "SEASON"
+    val targetLinearProgress = remember(linearBar, totalSeriesProgress, seasonProgress, isReleased) {
         if (!isReleased) 0f
-        else when (progressBarTarget) {
-            com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL -> totalSeriesProgress.coerceIn(0f, 1f)
-            com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON -> seasonProgress.coerceIn(0f, 1f)
+        else when (linearBar) {
+            "TOTAL" -> totalSeriesProgress.coerceIn(0f, 1f)
+            "SEASON" -> seasonProgress.coerceIn(0f, 1f)
             else -> 0f
         }
     }
@@ -351,13 +350,13 @@ fun ContinueWatchingSeriesCard(
         label = "linearBarHeight"
     )
 
-    val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
-            progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
-    val targetCircularProgress = remember(progressBarTarget, totalSeriesProgress, seasonProgress, isReleased) {
+    val circularBar = com.cinetrack.LocalCircularProgressBar.current
+    val showCircular = circularBar == "TOTAL" || circularBar == "SEASON"
+    val targetCircularProgress = remember(circularBar, totalSeriesProgress, seasonProgress, isReleased) {
         if (!isReleased) 0f
-        else when (progressBarTarget) {
-            com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL -> totalSeriesProgress.coerceIn(0f, 1f)
-            com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON -> seasonProgress.coerceIn(0f, 1f)
+        else when (circularBar) {
+            "TOTAL" -> totalSeriesProgress.coerceIn(0f, 1f)
+            "SEASON" -> seasonProgress.coerceIn(0f, 1f)
             else -> 0f
         }
     }
