@@ -1984,4 +1984,20 @@
     <string name="settings_chip_text_small">작게</string>
     <string name="settings_chip_text_medium">중간</string>
     <string name="settings_chip_text_large">크게</string>
+
+    <string name="settings_cat_remaining">남음</string>
+    <string name="settings_cat_watched">시청함 / 전체</string>
+    <string name="settings_cat_percentage">백분율</string>
+    <string name="settings_chip_col_season">시즌</string>
+    <string name="settings_chip_col_series">시리즈</string>
+    <string name="settings_chip_col_both">둘 다</string>
+    <string name="settings_sub_rem_season">예: 4개 남음</string>
+    <string name="settings_sub_rem_series">예: 총 11개</string>
+    <string name="settings_sub_rem_both">예: 4 (총 11)</string>
+    <string name="settings_sub_watched_season">예: 9/13화</string>
+    <string name="settings_sub_watched_series">예: 35/49화</string>
+    <string name="settings_sub_watched_both">예: 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">예: 46%</string>
+    <string name="settings_sub_pct_series">예: 21%</string>
+    <string name="settings_sub_pct_both">예: 46% • 21%</string>
 </resources>

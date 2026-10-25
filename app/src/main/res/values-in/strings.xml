@@ -1983,4 +1983,20 @@
     <string name="settings_chip_text_small">Kecil</string>
     <string name="settings_chip_text_medium">Sedang</string>
     <string name="settings_chip_text_large">Besar</string>
+
+    <string name="settings_cat_remaining">TERSISA</string>
+    <string name="settings_cat_watched">DITONTON / TOTAL</string>
+    <string name="settings_cat_percentage">PERSENTASE</string>
+    <string name="settings_chip_col_season">Musim</string>
+    <string name="settings_chip_col_series">Serial</string>
+    <string name="settings_chip_col_both">Keduanya</string>
+    <string name="settings_sub_rem_season">cth. 4 tersisa</string>
+    <string name="settings_sub_rem_series">cth. 11 tot</string>
+    <string name="settings_sub_rem_both">cth. 4 (11 tot)</string>
+    <string name="settings_sub_watched_season">cth. 9/13 ep</string>
+    <string name="settings_sub_watched_series">cth. 35/49 ep</string>
+    <string name="settings_sub_watched_both">cth. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">cth. 46%</string>
+    <string name="settings_sub_pct_series">cth. 21%</string>
+    <string name="settings_sub_pct_both">cth. 46% • 21%</string>
 </resources>

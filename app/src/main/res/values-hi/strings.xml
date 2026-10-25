@@ -1976,4 +1976,20 @@
     <string name="settings_chip_text_small">छोटा</string>
     <string name="settings_chip_text_medium">मध्यम</string>
     <string name="settings_chip_text_large">बड़ा</string>
+
+    <string name="settings_cat_remaining">शेष</string>
+    <string name="settings_cat_watched">देखे गए / कुल</string>
+    <string name="settings_cat_percentage">प्रतिशत</string>
+    <string name="settings_chip_col_season">सीज़न</string>
+    <string name="settings_chip_col_series">सीरीज़</string>
+    <string name="settings_chip_col_both">दोनों</string>
+    <string name="settings_sub_rem_season">उदा. 4 शेष</string>
+    <string name="settings_sub_rem_series">उदा. 11 कुल</string>
+    <string name="settings_sub_rem_both">उदा. 4 (11 कुल)</string>
+    <string name="settings_sub_watched_season">उदा. 9/13 ep</string>
+    <string name="settings_sub_watched_series">उदा. 35/49 ep</string>
+    <string name="settings_sub_watched_both">उदा. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">उदा. 46%</string>
+    <string name="settings_sub_pct_series">उदा. 21%</string>
+    <string name="settings_sub_pct_both">उदा. 46% • 21%</string>
 </resources>

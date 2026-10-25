@@ -1984,4 +1984,20 @@
     <string name="settings_chip_text_small">小</string>
     <string name="settings_chip_text_medium">中</string>
     <string name="settings_chip_text_large">大</string>
+
+    <string name="settings_cat_remaining">剩余</string>
+    <string name="settings_cat_watched">已看 / 总计</string>
+    <string name="settings_cat_percentage">百分比</string>
+    <string name="settings_chip_col_season">单季</string>
+    <string name="settings_chip_col_series">全剧</string>
+    <string name="settings_chip_col_both">两者</string>
+    <string name="settings_sub_rem_season">例: 剩余4</string>
+    <string name="settings_sub_rem_series">例: 共11</string>
+    <string name="settings_sub_rem_both">例: 4 (共11)</string>
+    <string name="settings_sub_watched_season">例: 9/13 集</string>
+    <string name="settings_sub_watched_series">例: 35/49 集</string>
+    <string name="settings_sub_watched_both">例: 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">例: 46%</string>
+    <string name="settings_sub_pct_series">例: 21%</string>
+    <string name="settings_sub_pct_both">例: 46% • 21%</string>
 </resources>

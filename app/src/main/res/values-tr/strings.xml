@@ -1984,4 +1984,20 @@
     <string name="settings_chip_text_small">Küçük</string>
     <string name="settings_chip_text_medium">Orta</string>
     <string name="settings_chip_text_large">Büyük</string>
+
+    <string name="settings_cat_remaining">KALAN</string>
+    <string name="settings_cat_watched">İZLENEN / TOPLAM</string>
+    <string name="settings_cat_percentage">YÜZDE</string>
+    <string name="settings_chip_col_season">Sezon</string>
+    <string name="settings_chip_col_series">Dizi</string>
+    <string name="settings_chip_col_both">İkisi</string>
+    <string name="settings_sub_rem_season">örn. 4 kaldı</string>
+    <string name="settings_sub_rem_series">örn. 11 toplam</string>
+    <string name="settings_sub_rem_both">örn. 4 (11 toplam)</string>
+    <string name="settings_sub_watched_season">örn. 9/13 blm</string>
+    <string name="settings_sub_watched_series">örn. 35/49 blm</string>
+    <string name="settings_sub_watched_both">örn. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">örn. 46%</string>
+    <string name="settings_sub_pct_series">örn. 21%</string>
+    <string name="settings_sub_pct_both">örn. 46% • 21%</string>
 </resources>

@@ -1980,4 +1980,20 @@
     <string name="settings_chip_text_small">Pequeño</string>
     <string name="settings_chip_text_medium">Medio</string>
     <string name="settings_chip_text_large">Grande</string>
+
+    <string name="settings_cat_remaining">RESTANTES</string>
+    <string name="settings_cat_watched">VISTOS / TOTAL</string>
+    <string name="settings_cat_percentage">PORCENTAJE</string>
+    <string name="settings_chip_col_season">Temporada</string>
+    <string name="settings_chip_col_series">Serie</string>
+    <string name="settings_chip_col_both">Ambos</string>
+    <string name="settings_sub_rem_season">ej. 4 restantes</string>
+    <string name="settings_sub_rem_series">ej. 11 tot</string>
+    <string name="settings_sub_rem_both">ej. 4 (11 tot)</string>
+    <string name="settings_sub_watched_season">ej. 9/13 ep</string>
+    <string name="settings_sub_watched_series">ej. 35/49 ep</string>
+    <string name="settings_sub_watched_both">ej. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">ej. 46%</string>
+    <string name="settings_sub_pct_series">ej. 21%</string>
+    <string name="settings_sub_pct_both">ej. 46% • 21%</string>
 </resources>

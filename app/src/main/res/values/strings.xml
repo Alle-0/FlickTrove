@@ -1993,4 +1993,20 @@
     <string name="settings_chip_text_small">Small</string>
     <string name="settings_chip_text_medium">Medium</string>
     <string name="settings_chip_text_large">Large</string>
+
+    <string name="settings_cat_remaining">REMAINING</string>
+    <string name="settings_cat_watched">WATCHED / TOTAL</string>
+    <string name="settings_cat_percentage">PERCENTAGE</string>
+    <string name="settings_chip_col_season">Season</string>
+    <string name="settings_chip_col_series">Series</string>
+    <string name="settings_chip_col_both">Both</string>
+    <string name="settings_sub_rem_season">e.g. 4 left</string>
+    <string name="settings_sub_rem_series">e.g. 11 tot</string>
+    <string name="settings_sub_rem_both">e.g. 4 (11 tot)</string>
+    <string name="settings_sub_watched_season">e.g. 9/13 ep</string>
+    <string name="settings_sub_watched_series">e.g. 35/49 ep</string>
+    <string name="settings_sub_watched_both">e.g. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">e.g. 46%</string>
+    <string name="settings_sub_pct_series">e.g. 21%</string>
+    <string name="settings_sub_pct_both">e.g. 46% • 21%</string>
 </resources>

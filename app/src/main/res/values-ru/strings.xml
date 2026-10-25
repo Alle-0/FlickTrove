@@ -1978,4 +1978,20 @@
     <string name="settings_chip_text_small">Маленький</string>
     <string name="settings_chip_text_medium">Средний</string>
     <string name="settings_chip_text_large">Большой</string>
+
+    <string name="settings_cat_remaining">ОСТАЛОСЬ</string>
+    <string name="settings_cat_watched">ПРОСМОТРЕНО / ВСЕГО</string>
+    <string name="settings_cat_percentage">ПРОЦЕНТ</string>
+    <string name="settings_chip_col_season">Сезон</string>
+    <string name="settings_chip_col_series">Сериал</string>
+    <string name="settings_chip_col_both">Оба</string>
+    <string name="settings_sub_rem_season">напр. 4 ост.</string>
+    <string name="settings_sub_rem_series">напр. 11 всего</string>
+    <string name="settings_sub_rem_both">напр. 4 (11 всего)</string>
+    <string name="settings_sub_watched_season">напр. 9/13 сер.</string>
+    <string name="settings_sub_watched_series">напр. 35/49 сер.</string>
+    <string name="settings_sub_watched_both">напр. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">напр. 46%</string>
+    <string name="settings_sub_pct_series">напр. 21%</string>
+    <string name="settings_sub_pct_both">напр. 46% • 21%</string>
 </resources>

@@ -1981,4 +1981,20 @@
     <string name="settings_chip_text_small">Klein</string>
     <string name="settings_chip_text_medium">Mittel</string>
     <string name="settings_chip_text_large">Groß</string>
+
+    <string name="settings_cat_remaining">VERBLEIBEND</string>
+    <string name="settings_cat_watched">GESEHEN / GESAMT</string>
+    <string name="settings_cat_percentage">PROZENTSATZ</string>
+    <string name="settings_chip_col_season">Staffel</string>
+    <string name="settings_chip_col_series">Serie</string>
+    <string name="settings_chip_col_both">Beide</string>
+    <string name="settings_sub_rem_season">z. B. 4 übrig</string>
+    <string name="settings_sub_rem_series">z. B. 11 gesamt</string>
+    <string name="settings_sub_rem_both">z. B. 4 (11 gesamt)</string>
+    <string name="settings_sub_watched_season">z. B. 9/13 Ep.</string>
+    <string name="settings_sub_watched_series">z. B. 35/49 Ep.</string>
+    <string name="settings_sub_watched_both">z. B. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">z. B. 46%</string>
+    <string name="settings_sub_pct_series">z. B. 21%</string>
+    <string name="settings_sub_pct_both">z. B. 46% • 21%</string>
 </resources>

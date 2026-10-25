@@ -1976,4 +1976,20 @@
     <string name="settings_chip_text_small">Pequeno</string>
     <string name="settings_chip_text_medium">Médio</string>
     <string name="settings_chip_text_large">Grande</string>
+
+    <string name="settings_cat_remaining">RESTANTES</string>
+    <string name="settings_cat_watched">ASSISTIDOS / TOTAL</string>
+    <string name="settings_cat_percentage">PORCENTAGEM</string>
+    <string name="settings_chip_col_season">Temporada</string>
+    <string name="settings_chip_col_series">Série</string>
+    <string name="settings_chip_col_both">Ambos</string>
+    <string name="settings_sub_rem_season">ex. 4 restantes</string>
+    <string name="settings_sub_rem_series">ex. 11 tot</string>
+    <string name="settings_sub_rem_both">ex. 4 (11 tot)</string>
+    <string name="settings_sub_watched_season">ex. 9/13 ep</string>
+    <string name="settings_sub_watched_series">ex. 35/49 ep</string>
+    <string name="settings_sub_watched_both">ex. 9/13 • 35/49</string>
+    <string name="settings_sub_pct_season">ex. 46%</string>
+    <string name="settings_sub_pct_series">ex. 21%</string>
+    <string name="settings_sub_pct_both">ex. 46% • 21%</string>
 </resources>
