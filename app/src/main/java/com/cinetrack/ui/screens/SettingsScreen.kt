@@ -214,7 +214,6 @@ fun SettingsScreenContent(
     val dynamicAppIconEnabled by settingsViewModel.dynamicAppIconEnabled.collectAsStateWithLifecycle()
     val seasonalAppIconEnabled by settingsViewModel.seasonalAppIconEnabled.collectAsStateWithLifecycle()
     var showSeasonalIconsDialog by remember { mutableStateOf(false) }
-    val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
 
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()

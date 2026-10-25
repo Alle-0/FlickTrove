@@ -130,7 +130,6 @@ fun SettingsUILayoutSection(
     onShowCardAppearanceDialog: () -> Unit = {}
 ) {
     val context = LocalContext.current
-    val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val hideSavedFromDiscovery by settingsViewModel.hideSavedFromDiscovery.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
@@ -268,7 +267,7 @@ fun SettingsUILayoutSection(
         )
 
         SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
+            icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
             title = stringResource(R.string.settings_card_appearance_title),
             description = stringResource(R.string.settings_card_appearance_desc),
             trailing = {
@@ -282,26 +281,6 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 onShowCardAppearanceDialog()
-            }
-        )
-
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
-            title = stringResource(R.string.settings_folder_bookmarks),
-            description = stringResource(R.string.settings_folder_bookmarks_desc),
-            trailing = {
-                FlickTroveSwitch(
-                    checked = showFolderBookmarks,
-                    onCheckedChange = { 
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        settingsViewModel.toggleFolderBookmarks(it) 
-                    },
-                    accentColor = currentAccentColor
-                )
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.toggleFolderBookmarks(!showFolderBookmarks)
             }
         )
 

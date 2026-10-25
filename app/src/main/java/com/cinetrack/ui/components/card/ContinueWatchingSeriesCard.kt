@@ -81,6 +81,7 @@ private val UpToDateGreen = Color(0xFF10B981)
 @Composable
 private fun SeasonProgressCheckButton(
     progress: Float,
+    showProgress: Boolean = true,
     accentColor: Color,
     isUpdating: Boolean = false,
     contentDescription: String,
@@ -103,17 +104,18 @@ private fun SeasonProgressCheckButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        // Progressive border right on the border of the button
-        Canvas(modifier = Modifier.fillMaxSize().padding(1.dp)) {
-            val sw = 2.dp.toPx()
-            // Track
-            drawArc(
-                color = Color.White.copy(alpha = 0.15f),
-                startAngle = -90f,
-                sweepAngle = 360f,
-                useCenter = false,
-                style = Stroke(width = sw)
-            )
+        if (showProgress) {
+            // Progressive border right on the border of the button
+            Canvas(modifier = Modifier.fillMaxSize().padding(1.dp)) {
+                val sw = 2.dp.toPx()
+                // Track
+                drawArc(
+                    color = Color.White.copy(alpha = 0.15f),
+                    startAngle = -90f,
+                    sweepAngle = 360f,
+                    useCenter = false,
+                    style = Stroke(width = sw)
+                )
             // Progress fill
             if (progress > 0f) {
                 drawArc(
@@ -125,6 +127,7 @@ private fun SeasonProgressCheckButton(
                 )
             }
         }
+    }
 
         // Inner circular button fill & icon
         Box(
@@ -469,7 +472,12 @@ fun ContinueWatchingSeriesCard(
                 ) { onPress(movie) }
         ) {
             // Pill progress bar tra le due sezioni per l'intera larghezza
-            if (isReleased) {
+            val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
+            val showLinear = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL ||
+                    progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON
+            val linearProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON) animatedSeasonProgress else animatedSeriesProgress
+
+            if (isReleased && showLinear) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -477,11 +485,11 @@ fun ContinueWatchingSeriesCard(
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.10f))
                 ) {
-                    if (animatedSeriesProgress > 0f) {
+                    if (linearProgress > 0f) {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .fillMaxWidth(fraction = animatedSeriesProgress)
+                                .fillMaxWidth(fraction = linearProgress)
                                 .clip(CircleShape)
                                 .background(if (isUpToDate) UpToDateGreen else appAccent)
                         )
@@ -639,16 +647,16 @@ fun ContinueWatchingSeriesCard(
                         overflow = TextOverflow.Ellipsis,
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                     )
-                    if (nextInfo.remainingInSeason > 0) {
-                        val remainingSeason = nextInfo.remainingInSeason
-                        val remainingTotal = nextInfo.remainingTotal
-                        val remainingText = if (remainingTotal > remainingSeason) {
-                            "${stringResource(R.string.lbl_episodes_remaining, remainingSeason)} ($remainingTotal tot)"
-                        } else {
-                            stringResource(R.string.lbl_episodes_remaining, remainingSeason)
-                        }
+                    val episodeInfoStyle = com.cinetrack.LocalEpisodeInfoStyle.current
+                    val epSubtitle = com.cinetrack.ui.components.settings.formatDrawerEpisodeSubtitle(
+                        style = episodeInfoStyle,
+                        nextInfo = nextInfo,
+                        movie = movie,
+                        seriesProgress = animatedSeriesProgress
+                    )
+                    if (epSubtitle.isNotEmpty()) {
                         Text(
-                            text = remainingText,
+                            text = epSubtitle,
                             color = Color.White.copy(alpha = 0.65f),
                             fontSize = 9.sp,
                             fontWeight = FontWeight.Bold,
@@ -659,9 +667,18 @@ fun ContinueWatchingSeriesCard(
                     }
                 }
 
-                // 1-tap Checkmark button (✓) with Season Circular Progress directly on the button border
+                val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
+                        progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
+                val circularProgress = when (progressBarTarget) {
+                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL -> animatedSeriesProgress
+                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON -> animatedSeasonProgress
+                    else -> 0f
+                }
+
+                // 1-tap Checkmark button (✓) with Circular Progress directly on the button border
                 SeasonProgressCheckButton(
-                    progress = animatedSeasonProgress,
+                    progress = if (showCircular) circularProgress else 0f,
+                    showProgress = showCircular,
                     accentColor = appAccent,
                     isUpdating = isUpdating,
                     contentDescription = stringResource(R.string.cd_mark_episode_watched, epText),

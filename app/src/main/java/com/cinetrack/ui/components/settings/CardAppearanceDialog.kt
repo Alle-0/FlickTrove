@@ -18,10 +18,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.PointerEventPass
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -32,8 +35,10 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.NextEpisodeInfo
 import com.cinetrack.data.model.Season
+import com.cinetrack.ui.components.card.ContinueWatchingSeriesCard
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.card.MovieListCard
+import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.components.glass.GlassmorphicModal
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
@@ -124,6 +129,61 @@ fun calculateSeasonProgress(nextInfo: NextEpisodeInfo, movie: Movie): Float {
     return (watchedInSeason.toFloat() / totalInSeason.toFloat()).coerceIn(0f, 1f)
 }
 
+@Composable
+fun formatDrawerEpisodeSubtitle(
+    style: String,
+    nextInfo: NextEpisodeInfo,
+    movie: Movie,
+    seriesProgress: Float
+): String {
+    val totalInSeason = movie.seasons?.find { it.seasonNumber == nextInfo.seasonNumber }?.episodeCount ?: 0
+    val watchedInSeason = movie.watchedEpisodes?.get(nextInfo.seasonNumber.toString())?.size 
+        ?: if (totalInSeason > 0) (totalInSeason - nextInfo.remainingInSeason).coerceAtLeast(0) else 0
+    val totalWatched = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+    val totalEpisodes = movie.numberOfEpisodes ?: 0
+
+    return when (style) {
+        EpisodeInfoStyle.REMAINING -> {
+            val remainingSeason = nextInfo.remainingInSeason
+            val remainingTotal = nextInfo.remainingTotal
+            if (remainingTotal > remainingSeason) {
+                "${stringResource(R.string.lbl_episodes_remaining, remainingSeason)} ($remainingTotal tot)"
+            } else if (remainingSeason > 0) {
+                stringResource(R.string.lbl_episodes_remaining, remainingSeason)
+            } else {
+                ""
+            }
+        }
+        EpisodeInfoStyle.WATCHED_OVER_TOTAL -> {
+            if (totalEpisodes > 0) "$totalWatched / $totalEpisodes ep"
+            else "$totalWatched ep"
+        }
+        EpisodeInfoStyle.SEASON_ONLY -> {
+            if (totalInSeason > 0) "$watchedInSeason / $totalInSeason ep S${nextInfo.seasonNumber}"
+            else "S${nextInfo.seasonNumber}"
+        }
+        EpisodeInfoStyle.SEASON_AND_TOTAL -> {
+            if (totalInSeason > 0 && totalEpisodes > 0) "$watchedInSeason/$totalInSeason S${nextInfo.seasonNumber} • $totalWatched/$totalEpisodes tot"
+            else if (totalInSeason > 0) "$watchedInSeason/$totalInSeason S${nextInfo.seasonNumber}"
+            else "$totalWatched/$totalEpisodes tot"
+        }
+        EpisodeInfoStyle.PERCENTAGE -> {
+            "${(seriesProgress * 100).toInt()}%"
+        }
+        else -> {
+            val remainingSeason = nextInfo.remainingInSeason
+            val remainingTotal = nextInfo.remainingTotal
+            if (remainingTotal > remainingSeason) {
+                "${stringResource(R.string.lbl_episodes_remaining, remainingSeason)} ($remainingTotal tot)"
+            } else if (remainingSeason > 0) {
+                stringResource(R.string.lbl_episodes_remaining, remainingSeason)
+            } else {
+                ""
+            }
+        }
+    }
+}
+
 // ─── Main Dialog ───────────────────────────────────────────────────────────
 
 @Composable
@@ -144,6 +204,7 @@ fun CardAppearanceDialog(
     val persistedProgressBarTarget by settingsViewModel.progressBarTarget.collectAsStateWithLifecycle()
     val persistedTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val persistedShowBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
+    val persistedShowFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val accentColor = MaterialTheme.colorScheme.primary
 
     // Local state for live preview (not yet persisted)
@@ -151,12 +212,37 @@ fun CardAppearanceDialog(
     var localProgressTarget by remember(persistedProgressBarTarget) { mutableStateOf(persistedProgressBarTarget) }
     var localTextMultiplier by remember(persistedTextSizeMultiplier) { mutableStateOf(persistedTextSizeMultiplier) }
     var localShowBadges by remember(persistedShowBadges) { mutableStateOf(persistedShowBadges) }
+    var localShowFolderBookmarks by remember(persistedShowFolderBookmarks) { mutableStateOf(persistedShowFolderBookmarks) }
 
     // Mode selector for preview (3 columns, 2 columns, list)
     var previewMode by remember { mutableStateOf(PreviewCardMode.GRID_2_COL) }
 
-    // Authentic sample Movie for preview with realistic posters and season metadata
-    val mockMovie = remember {
+    // Mock folder colors for bookmark ribbon preview
+    val mockFolderColors = remember { listOf(Color(0xFFE50914), Color(0xFF3B82F6)) }
+
+    // Sample Normal Movie (Film in watchlist/preferiti)
+    val mockNormalMovie = remember {
+        Movie(
+            id = 27205L,
+            title = "Inception",
+            name = "Inception",
+            mediaType = "movie",
+            posterPath = "/ljsZTbVsrQSqZgWeep2B1QiDKuh.jpg",
+            backdropPath = "/8ZTVqvKDQ8emSGUEMjsS4yHAwrp.jpg",
+            releaseDate = "2010-07-15",
+            releaseYear = "2010",
+            voteAverage = 8.8,
+            voteCount = 35000,
+            personalRating = 9.0,
+            genreNamesString = "Fantascienza, Azione"
+        ).apply {
+            favorite = true
+            watched = false
+        }
+    }
+
+    // Sample In-Progress TV Series (Serie "Da vedere" con prossimo episodio)
+    val mockWatchingTv = remember {
         Movie(
             id = 1396L,
             title = "Breaking Bad",
@@ -174,7 +260,7 @@ fun CardAppearanceDialog(
             numberOfSeasons = 5,
             status = "Ended",
             genreIds = listOf(18, 80),
-            genreNamesString = "Drama, Crime",
+            genreNamesString = "Dramma, Crime",
             watchedEpisodes = mapOf(
                 "1" to (1..7).toList(),
                 "2" to (1..6).toList()
@@ -190,6 +276,18 @@ fun CardAppearanceDialog(
             favorite = true
             watched = false
         }
+    }
+
+    val mockNextEpisode = remember(mockWatchingTv) {
+        mockWatchingTv.calculateNextEpisode() ?: NextEpisodeInfo(
+            seasonNumber = 2,
+            episodeNumber = 7,
+            remainingInSeason = 7,
+            remainingTotal = 49,
+            progress = 0.21f,
+            isLastEpisodeOfSeries = false,
+            isUpToDateWithAirDate = false
+        )
     }
 
     GlassmorphicModal(
@@ -212,7 +310,7 @@ fun CardAppearanceDialog(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_grid),
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_temi),
                     contentDescription = null,
                     tint = accentColor,
                     modifier = Modifier.size(22.dp)
@@ -233,9 +331,9 @@ fun CardAppearanceDialog(
                 horizontalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val modes = listOf(
-                    Triple(PreviewCardMode.GRID_3_COL, stringResource(R.string.settings_card_preview_3_cols), R.drawable.ic_grid),
-                    Triple(PreviewCardMode.GRID_2_COL, stringResource(R.string.settings_card_preview_2_cols), R.drawable.ic_grid),
-                    Triple(PreviewCardMode.LIST, stringResource(R.string.settings_card_preview_list), R.drawable.ic_strisce)
+                    Triple(PreviewCardMode.GRID_3_COL, stringResource(R.string.settings_preview_3_columns), R.drawable.ic_grid),
+                    Triple(PreviewCardMode.GRID_2_COL, stringResource(R.string.settings_preview_2_columns), R.drawable.ic_grid_a_4),
+                    Triple(PreviewCardMode.LIST, stringResource(R.string.settings_preview_list), R.drawable.ic_strisce)
                 )
                 modes.forEach { (mode, label, iconRes) ->
                     val isSelected = previewMode == mode
@@ -282,11 +380,11 @@ fun CardAppearanceDialog(
                 }
             }
 
-            // ── Live Authentic Preview Area ───────────────────────────
+            // ── Live Authentic Preview Area (Side by side comparison) ──
             val previewHeight = when (previewMode) {
-                PreviewCardMode.LIST -> 124.dp
-                PreviewCardMode.GRID_3_COL -> 200.dp
-                PreviewCardMode.GRID_2_COL -> 265.dp
+                PreviewCardMode.LIST -> 246.dp
+                PreviewCardMode.GRID_3_COL -> 230.dp
+                PreviewCardMode.GRID_2_COL -> 278.dp
             }
             val animPreviewHeight by animateDpAsState(
                 targetValue = previewHeight,
@@ -301,7 +399,15 @@ fun CardAppearanceDialog(
                     .height(animPreviewHeight)
                     .clip(RoundedCornerShape(20.dp))
                     .background(Color.White.copy(alpha = 0.03f))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp)),
+                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                    .pointerInput(Unit) {
+                        awaitPointerEventScope {
+                            while (true) {
+                                val event = awaitPointerEvent(PointerEventPass.Initial)
+                                event.changes.forEach { it.consume() }
+                            }
+                        }
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 CompositionLocalProvider(
@@ -316,32 +422,142 @@ fun CardAppearanceDialog(
                     ) { mode ->
                         when (mode) {
                             PreviewCardMode.GRID_3_COL -> {
-                                MovieCard(
-                                    movie = mockMovie,
-                                    cardWidth = 118.dp,
-                                    showBadges = localShowBadges,
-                                    isFavorite = true,
-                                    bounceEnabled = false
-                                )
-                            }
-                            PreviewCardMode.GRID_2_COL -> {
-                                MovieCard(
-                                    movie = mockMovie,
-                                    cardWidth = 160.dp,
-                                    showBadges = localShowBadges,
-                                    isFavorite = true,
-                                    bounceEnabled = false
-                                )
-                            }
-                            PreviewCardMode.LIST -> {
-                                MovieListCard(
-                                    movie = mockMovie,
-                                    showBadges = localShowBadges,
-                                    isFavorite = true,
+                                Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 8.dp)
-                                )
+                                        .padding(horizontal = 10.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = stringResource(R.string.settings_card_preview_normal),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp
+                                            ),
+                                            color = Color.White.copy(alpha = 0.45f),
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        MovieCard(
+                                            movie = mockNormalMovie,
+                                            cardWidth = 112.dp,
+                                            showBadges = localShowBadges,
+                                            showFolderBookmarks = localShowFolderBookmarks,
+                                            folderColors = mockFolderColors,
+                                            isFavorite = true,
+                                            bounceEnabled = false
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(16.dp))
+
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = stringResource(R.string.settings_card_preview_to_watch),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp
+                                            ),
+                                            color = accentColor.copy(alpha = 0.75f),
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        ContinueWatchingSeriesCard(
+                                            movie = mockWatchingTv,
+                                            cardWidth = 112.dp,
+                                            showBadges = localShowBadges,
+                                            showFolderBookmarks = localShowFolderBookmarks,
+                                            folderColors = mockFolderColors,
+                                            precalculatedNextInfo = mockNextEpisode,
+                                            onQuickMarkWatched = {},
+                                            onPress = {}
+                                        )
+                                    }
+                                }
+                            }
+                            PreviewCardMode.GRID_2_COL -> {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 8.dp),
+                                    horizontalArrangement = Arrangement.Center,
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = stringResource(R.string.settings_card_preview_normal),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp
+                                            ),
+                                            color = Color.White.copy(alpha = 0.45f),
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        MovieCard(
+                                            movie = mockNormalMovie,
+                                            cardWidth = 138.dp,
+                                            showBadges = localShowBadges,
+                                            showFolderBookmarks = localShowFolderBookmarks,
+                                            folderColors = mockFolderColors,
+                                            isFavorite = true,
+                                            bounceEnabled = false
+                                        )
+                                    }
+
+                                    Spacer(modifier = Modifier.width(12.dp))
+
+                                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                                        Text(
+                                            text = stringResource(R.string.settings_card_preview_to_watch),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontSize = 9.sp,
+                                                fontWeight = FontWeight.Bold,
+                                                letterSpacing = 1.sp
+                                            ),
+                                            color = accentColor.copy(alpha = 0.75f),
+                                            modifier = Modifier.padding(bottom = 4.dp)
+                                        )
+                                        ContinueWatchingSeriesCard(
+                                            movie = mockWatchingTv,
+                                            cardWidth = 138.dp,
+                                            showBadges = localShowBadges,
+                                            showFolderBookmarks = localShowFolderBookmarks,
+                                            folderColors = mockFolderColors,
+                                            precalculatedNextInfo = mockNextEpisode,
+                                            onQuickMarkWatched = {},
+                                            onPress = {}
+                                        )
+                                    }
+                                }
+                            }
+                            PreviewCardMode.LIST -> {
+                                Column(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(horizontal = 10.dp),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
+                                ) {
+                                    MovieListCard(
+                                        movie = mockNormalMovie,
+                                        showBadges = localShowBadges,
+                                        showFolderBookmarks = localShowFolderBookmarks,
+                                        folderColors = mockFolderColors,
+                                        isFavorite = true,
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                    MovieListCard(
+                                        movie = mockWatchingTv,
+                                        showBadges = localShowBadges,
+                                        showFolderBookmarks = localShowFolderBookmarks,
+                                        folderColors = mockFolderColors,
+                                        isFavorite = true,
+                                        onQuickMarkWatched = {},
+                                        modifier = Modifier.fillMaxWidth()
+                                    )
+                                }
                             }
                         }
                     }
@@ -359,11 +575,11 @@ fun CardAppearanceDialog(
                     .premiumScrollbar(state = scrollState, color = accentColor)
                     .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp, vertical = 12.dp),
-                verticalArrangement = Arrangement.spacedBy(18.dp)
+                verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 1. Testo Episodi
+                // 1. Info Episodi (Chip compatte a griglia)
                 AppearanceSection(title = stringResource(R.string.settings_card_episode_info)) {
-                    EpisodeStyleOptions(
+                    EpisodeStyleCompactOptions(
                         selected = localEpisodeStyle,
                         accentColor = accentColor,
                         onSelect = {
@@ -373,9 +589,9 @@ fun CardAppearanceDialog(
                     )
                 }
 
-                // 2. Progress Bar
+                // 2. Progress Bar (Chip compatte a griglia)
                 AppearanceSection(title = stringResource(R.string.settings_card_progress_bar)) {
-                    ProgressBarOptions(
+                    ProgressBarCompactOptions(
                         selected = localProgressTarget,
                         accentColor = accentColor,
                         onSelect = {
@@ -397,7 +613,19 @@ fun CardAppearanceDialog(
                     )
                 }
 
-                // 4. Badge
+                // 4. Segnalibro Cartelle (Folder Bookmarks)
+                AppearanceSection(title = stringResource(R.string.settings_folder_bookmarks)) {
+                    FolderBookmarksToggleOption(
+                        showFolderBookmarks = localShowFolderBookmarks,
+                        accentColor = accentColor,
+                        onToggle = {
+                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                            localShowFolderBookmarks = it
+                        }
+                    )
+                }
+
+                // 5. Badge Informativi
                 AppearanceSection(title = stringResource(R.string.settings_badges)) {
                     BadgeToggleOption(
                         showBadges = localShowBadges,
@@ -450,6 +678,7 @@ fun CardAppearanceDialog(
                             settingsViewModel.updateProgressBarTarget(localProgressTarget)
                             settingsViewModel.updateTitleTextSizeMultiplier(localTextMultiplier)
                             settingsViewModel.toggleBadges(localShowBadges)
+                            settingsViewModel.toggleFolderBookmarks(localShowFolderBookmarks)
                             onDismiss()
                         },
                     contentAlignment = Alignment.Center
@@ -465,78 +694,215 @@ fun CardAppearanceDialog(
     }
 }
 
-// ─── Section Wrapper ──────────────────────────────────────────────────────
+// ─── Appearance Section Wrapper ─────────────────────────────────────────────
 
 @Composable
 private fun AppearanceSection(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
         Text(
             text = title.uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.1.sp,
-                fontSize = 10.sp
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
             ),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.7f)
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+            modifier = Modifier.padding(start = 2.dp)
         )
         content()
     }
 }
 
-// ─── Episode Info Style Options ────────────────────────────────────────────
+// ─── Compact Chip Option Item ───────────────────────────────────────────────
 
 @Composable
-private fun EpisodeStyleOptions(
-    selected: String,
+private fun CompactChipOption(
+    title: String,
+    subtitle: String? = null,
+    selected: Boolean,
     accentColor: Color,
-    onSelect: (String) -> Unit
+    modifier: Modifier = Modifier,
+    onClick: () -> Unit
 ) {
-    val options = listOf(
-        EpisodeInfoStyle.REMAINING to R.string.settings_episode_style_remaining,
-        EpisodeInfoStyle.WATCHED_OVER_TOTAL to R.string.settings_episode_style_watched_total,
-        EpisodeInfoStyle.SEASON_ONLY to R.string.settings_episode_style_season_only,
-        EpisodeInfoStyle.SEASON_AND_TOTAL to R.string.settings_episode_style_season_and_total,
-        EpisodeInfoStyle.PERCENTAGE to R.string.settings_episode_style_percentage,
+    val bg by animateColorAsState(
+        targetValue = if (selected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.04f),
+        label = "chipBg"
     )
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach { (key, labelRes) ->
-            AppearanceOptionRow(
-                label = stringResource(labelRes),
-                selected = selected == key,
-                accentColor = accentColor,
-                onClick = { onSelect(key) }
+    val borderColor by animateColorAsState(
+        targetValue = if (selected) accentColor.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.08f),
+        label = "chipBorder"
+    )
+
+    Column(
+        modifier = modifier
+            .clip(RoundedCornerShape(12.dp))
+            .background(bg)
+            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
+            .bounceClick(scaleDown = 0.95f, onLongClick = {}) { onClick() }
+            .padding(horizontal = 8.dp, vertical = 9.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+        verticalArrangement = Arrangement.Center
+    ) {
+        Text(
+            text = title,
+            style = MaterialTheme.typography.labelMedium.copy(
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
+                fontSize = 11.5.sp
+            ),
+            color = if (selected) accentColor else Color.White.copy(alpha = 0.85f),
+            maxLines = 1,
+            textAlign = TextAlign.Center
+        )
+        if (!subtitle.isNullOrBlank()) {
+            Spacer(modifier = Modifier.height(2.dp))
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 9.sp,
+                    fontWeight = FontWeight.Normal
+                ),
+                color = if (selected) accentColor.copy(alpha = 0.75f) else Color.White.copy(alpha = 0.45f),
+                maxLines = 1,
+                textAlign = TextAlign.Center
             )
         }
     }
 }
 
-// ─── Progress Bar Options ─────────────────────────────────────────────────
+// ─── Compact Episode Style Options ──────────────────────────────────────────
 
 @Composable
-private fun ProgressBarOptions(
+private fun EpisodeStyleCompactOptions(
     selected: String,
     accentColor: Color,
     onSelect: (String) -> Unit
 ) {
-    val options = listOf(
-        ProgressBarTarget.CIRCULAR_TOTAL to R.string.settings_progress_circular_total,
-        ProgressBarTarget.CIRCULAR_SEASON to R.string.settings_progress_circular_season,
-        ProgressBarTarget.LINEAR_TOTAL to R.string.settings_progress_linear_total,
-        ProgressBarTarget.LINEAR_SEASON to R.string.settings_progress_linear_season,
-        ProgressBarTarget.NONE to R.string.settings_progress_none,
-    )
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach { (key, labelRes) ->
-            AppearanceOptionRow(
-                label = stringResource(labelRes),
-                selected = selected == key,
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Row 1
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_remaining),
+                subtitle = stringResource(R.string.settings_chip_remaining_sub),
+                selected = selected == EpisodeInfoStyle.REMAINING,
                 accentColor = accentColor,
-                onClick = { onSelect(key) }
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(EpisodeInfoStyle.REMAINING) }
+            )
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_watched_total),
+                subtitle = stringResource(R.string.settings_chip_watched_total_sub),
+                selected = selected == EpisodeInfoStyle.WATCHED_OVER_TOTAL,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(EpisodeInfoStyle.WATCHED_OVER_TOTAL) }
             )
         }
+
+        // Row 2
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_season_only),
+                subtitle = stringResource(R.string.settings_chip_season_only_sub),
+                selected = selected == EpisodeInfoStyle.SEASON_ONLY,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(EpisodeInfoStyle.SEASON_ONLY) }
+            )
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_season_total),
+                subtitle = stringResource(R.string.settings_chip_season_total_sub),
+                selected = selected == EpisodeInfoStyle.SEASON_AND_TOTAL,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(EpisodeInfoStyle.SEASON_AND_TOTAL) }
+            )
+        }
+
+        // Row 3
+        CompactChipOption(
+            title = stringResource(R.string.settings_chip_percentage),
+            subtitle = stringResource(R.string.settings_chip_percentage_sub),
+            selected = selected == EpisodeInfoStyle.PERCENTAGE,
+            accentColor = accentColor,
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onSelect(EpisodeInfoStyle.PERCENTAGE) }
+        )
+    }
+}
+
+// ─── Compact Progress Bar Options ───────────────────────────────────────────
+
+@Composable
+private fun ProgressBarCompactOptions(
+    selected: String,
+    accentColor: Color,
+    onSelect: (String) -> Unit
+) {
+    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+        // Row 1
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_circular_total),
+                subtitle = stringResource(R.string.settings_chip_whole_series),
+                selected = selected == ProgressBarTarget.CIRCULAR_TOTAL,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(ProgressBarTarget.CIRCULAR_TOTAL) }
+            )
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_circular_season),
+                subtitle = stringResource(R.string.settings_chip_current_season),
+                selected = selected == ProgressBarTarget.CIRCULAR_SEASON,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(ProgressBarTarget.CIRCULAR_SEASON) }
+            )
+        }
+
+        // Row 2
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_linear_total),
+                subtitle = stringResource(R.string.settings_chip_whole_series),
+                selected = selected == ProgressBarTarget.LINEAR_TOTAL,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(ProgressBarTarget.LINEAR_TOTAL) }
+            )
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_linear_season),
+                subtitle = stringResource(R.string.settings_chip_current_season),
+                selected = selected == ProgressBarTarget.LINEAR_SEASON,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f),
+                onClick = { onSelect(ProgressBarTarget.LINEAR_SEASON) }
+            )
+        }
+
+        // Row 3
+        CompactChipOption(
+            title = stringResource(R.string.settings_chip_progress_none),
+            subtitle = stringResource(R.string.settings_chip_disabled),
+            selected = selected == ProgressBarTarget.NONE,
+            accentColor = accentColor,
+            modifier = Modifier.fillMaxWidth(),
+            onClick = { onSelect(ProgressBarTarget.NONE) }
+        )
     }
 }
 
@@ -553,21 +919,21 @@ private fun TextSizeOptions(
         1.0f to R.string.settings_size_medium,
         1.2f to R.string.settings_size_large,
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
+    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
         options.forEach { (value, labelRes) ->
             val isSelected = selected == value
             val bg by animateColorAsState(
-                targetValue = if (isSelected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f),
+                targetValue = if (isSelected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.04f),
                 label = "textSizeBg"
             )
             val borderColor by animateColorAsState(
-                targetValue = if (isSelected) accentColor.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.1f),
+                targetValue = if (isSelected) accentColor.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.08f),
                 label = "textSizeBorder"
             )
             Box(
                 modifier = Modifier
                     .weight(1f)
-                    .height(44.dp)
+                    .height(42.dp)
                     .clip(RoundedCornerShape(12.dp))
                     .background(bg)
                     .border(1.dp, borderColor, RoundedCornerShape(12.dp))
@@ -587,7 +953,50 @@ private fun TextSizeOptions(
     }
 }
 
-// ─── Badge Toggle ─────────────────────────────────────────────────────────
+// ─── Folder Bookmarks Toggle Option ─────────────────────────────────────────
+
+@Composable
+private fun FolderBookmarksToggleOption(
+    showFolderBookmarks: Boolean,
+    accentColor: Color,
+    onToggle: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(14.dp))
+            .background(Color.White.copy(alpha = 0.05f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
+            .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showFolderBookmarks) }
+            .padding(horizontal = 16.dp, vertical = 12.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(2.dp)
+        ) {
+            Text(
+                text = stringResource(R.string.settings_folder_bookmarks),
+                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.SemiBold),
+                color = Color.White.copy(alpha = 0.9f)
+            )
+            Text(
+                text = stringResource(R.string.settings_folder_bookmarks_desc),
+                style = MaterialTheme.typography.bodySmall,
+                color = Color.White.copy(alpha = 0.45f)
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        FlickTroveSwitch(
+            checked = showFolderBookmarks,
+            onCheckedChange = onToggle,
+            accentColor = accentColor
+        )
+    }
+}
+
+// ─── Badge Toggle Option ────────────────────────────────────────────────────
 
 @Composable
 private fun BadgeToggleOption(
@@ -639,69 +1048,11 @@ private fun BadgeToggleOption(
                 )
             }
             Spacer(modifier = Modifier.width(4.dp))
-            com.cinetrack.ui.components.common.FlickTroveSwitch(
+            FlickTroveSwitch(
                 checked = showBadges,
                 onCheckedChange = onToggle,
                 accentColor = accentColor
             )
-        }
-    }
-}
-
-// ─── Generic Option Row ───────────────────────────────────────────────────
-
-@Composable
-private fun AppearanceOptionRow(
-    label: String,
-    selected: Boolean,
-    accentColor: Color,
-    onClick: () -> Unit
-) {
-    val bg by animateColorAsState(
-        targetValue = if (selected) accentColor.copy(alpha = 0.13f) else Color.White.copy(alpha = 0.04f),
-        label = "optBg"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (selected) accentColor.copy(alpha = 0.6f) else Color.White.copy(alpha = 0.08f),
-        label = "optBorder"
-    )
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(12.dp))
-            .background(bg)
-            .border(0.5.dp, borderColor, RoundedCornerShape(12.dp))
-            .bounceClick(scaleDown = 0.97f, onLongClick = {}) { onClick() }
-            .padding(horizontal = 14.dp, vertical = 11.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
-    ) {
-        Text(
-            text = label,
-            style = MaterialTheme.typography.bodyMedium.copy(
-                fontWeight = if (selected) FontWeight.SemiBold else FontWeight.Normal
-            ),
-            color = if (selected) Color.White else Color.White.copy(alpha = 0.65f),
-            modifier = Modifier.weight(1f)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        Box(
-            modifier = Modifier
-                .size(20.dp)
-                .clip(CircleShape)
-                .background(if (selected) accentColor else Color.White.copy(alpha = 0.1f))
-                .border(1.5.dp, if (selected) accentColor else Color.White.copy(alpha = 0.25f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            if (selected) {
-                Box(
-                    modifier = Modifier
-                        .size(8.dp)
-                        .clip(CircleShape)
-                        .background(Color.Black.copy(alpha = 0.8f))
-                )
-            }
         }
     }
 }

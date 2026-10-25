@@ -416,20 +416,16 @@ fun MovieListCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
-                        progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
-                val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
-
-                if (isTv && !isWatched && showCircular && circularProgress > 0f) {
-                    MovieCircularProgress(progress = circularProgress)
-                }
-
+                val isQuickWatch = isTv && !isWatched && nextInfo != null && !nextInfo.isUpToDateWithAirDate
                 val appAccent = MaterialTheme.colorScheme.primary
                 val isReleased = movie.isReleased
                 val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
-                val isOcchio = isReleased && (isReminder || isFavorite)
+                val isOcchio = !isQuickWatch && isReleased && (isReminder || isFavorite)
 
-                val isQuickWatch = isTv && !isWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
+                val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
+                        progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
+                val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
+                val isHasCircularProgress = isTv && !isWatched && showCircular && circularProgress > 0f
 
                 val actionBg = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.15f)
@@ -455,38 +451,65 @@ fun MovieListCard(
                     else -> Color.White
                 }
 
-                Box(
-                    modifier = Modifier
+                if (isHasCircularProgress) {
+                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(2.dp)) {
+                        val sw = 2.dp.toPx()
+                        drawArc(
+                            color = Color.White.copy(alpha = 0.15f),
+                            startAngle = -90f,
+                            sweepAngle = 360f,
+                            useCenter = false,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw)
+                        )
+                        drawArc(
+                            color = appAccent,
+                            startAngle = -90f,
+                            sweepAngle = 360f * circularProgress.coerceIn(0f, 1f),
+                            useCenter = false,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        )
+                    }
+                }
+
+                val isBellOutlined = !isReleased && !(isReminder || isFavorite)
+                val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+                var bellHasInitialized by remember { mutableStateOf(false) }
+
+                LaunchedEffect(isReminder, isFavorite) {
+                    if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
+                        bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                        bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                    }
+                    bellHasInitialized = true
+                }
+
+                val isTick = isQuickWatch || isWatched
+                val isPlus = !isWatched && isReleased && !isOcchio && !isQuickWatch
+                val iconSize = when {
+                    isTick -> 13.dp
+                    !isReleased -> if (isBellOutlined) 20.dp else 21.dp
+                    isOcchio -> 18.dp
+                    else -> 16.dp
+                }
+
+                val buttonModifier = if (isHasCircularProgress) {
+                    Modifier
+                        .size(26.dp)
+                        .background(color = actionBg, shape = CircleShape)
+                } else {
+                    Modifier
                         .size(30.dp)
                         .background(color = actionBg, shape = CircleShape)
-                        .border(width = 1.dp, color = actionBorder, shape = CircleShape),
+                        .border(width = 1.dp, color = actionBorder, shape = CircleShape)
+                }
+
+                Box(
+                    modifier = buttonModifier,
                     contentAlignment = Alignment.Center
                 ) {
-                    val isBellOutlined = !isReleased && !(isReminder || isFavorite)
-                    
-                    val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
-                    var bellHasInitialized by remember { mutableStateOf(false) }
-                    
-                    LaunchedEffect(isReminder, isFavorite) {
-                        if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
-                            bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                            bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                            bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                            bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                            bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                        }
-                        bellHasInitialized = true
-                    }
-                    
-                    val isTick = isQuickWatch || isWatched
-                    val isPlus = !isWatched && isReleased && !isOcchio
-                    val iconSize = when {
-                        isTick -> 13.dp
-                        !isReleased -> if (isBellOutlined) 20.dp else 21.dp
-                        isOcchio -> 18.dp
-                        else -> 16.dp
-                    }
-
                     Icon(
                         imageVector = when {
                             isTick -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)

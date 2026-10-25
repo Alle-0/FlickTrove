@@ -187,7 +187,6 @@ fun MovieCard(
     val nextInfo = remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
         if (isTv) movie.calculateNextEpisode() else null
     }
-    val episodeInfoStyle = com.cinetrack.LocalEpisodeInfoStyle.current
     val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
 
     val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
@@ -347,33 +346,6 @@ fun MovieCard(
                 }
             }
 
-            // Linear Progress Bar (Top)
-            val showLinear = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL ||
-                    progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON
-            val linearProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON) seasonProgress else computedProgress
-
-            if (isTv && !isWatched && showLinear && linearProgress > 0f) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .height(3.dp)
-                        .align(Alignment.TopStart)
-                        .background(Color.White.copy(alpha = 0.08f))
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxHeight()
-                            .fillMaxWidth(linearProgress)
-                            .background(
-                                androidx.compose.ui.graphics.Brush.horizontalGradient(
-                                    listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f), MaterialTheme.colorScheme.primary)
-                                ),
-                                RoundedCornerShape(50)
-                            )
-                    )
-                }
-            }
-
             // Dynamic Badges (Top Right)
             if (showBadges && maxBadges > 0) {
                 val isLarge = cardWidth > 135.dp
@@ -471,44 +443,6 @@ fun MovieCard(
                             )
                         }
                     }
-                    if (isTv && nextInfo != null && !isWatched) {
-                        val isReleased = movie.isReleased
-                        val isUpToDate = isReleased && nextInfo.isUpToDateWithAirDate
-                        if (isReleased && !isUpToDate) {
-                            val epText = com.cinetrack.ui.components.settings.formatEpisodeInfo(
-                                style = episodeInfoStyle,
-                                nextInfo = nextInfo,
-                                movie = movie,
-                                seriesProgress = computedProgress
-                            )
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(top = 1.dp)
-                            ) {
-                                Text(
-                                    text = nextInfo.episodeCode,
-                                    style = MaterialTheme.typography.bodySmall.copy(
-                                        fontWeight = FontWeight.ExtraBold,
-                                        fontSize = ((if (isLarge) 11f else 9.5f) * multiplier).sp
-                                    ),
-                                    color = MaterialTheme.colorScheme.primary,
-                                    maxLines = 1
-                                )
-                                if (epText.isNotEmpty()) {
-                                    Text(
-                                        text = epText,
-                                        style = MaterialTheme.typography.bodySmall.copy(
-                                            fontWeight = FontWeight.SemiBold,
-                                            fontSize = ((if (isLarge) 10.5f else 9f) * multiplier).sp
-                                        ),
-                                        color = Color.White.copy(alpha = 0.6f),
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                            }
-                        }
-                    }
                 }
 
                 val hintReminder = stringResource(R.string.card_hint_manage_reminder)
@@ -550,20 +484,19 @@ fun MovieCard(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
-                                progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
-                        val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
-
-                        if (isTv && !isWatched && showCircular && circularProgress > 0f) {
-                            MovieCircularProgress(progress = circularProgress)
-                        }
-
+                        val isQuickWatch = isTv && !isWatched && nextInfo != null && !nextInfo.isUpToDateWithAirDate
                         val appAccent = MaterialTheme.colorScheme.primary
                         val isReleased = movie.isReleased
                         val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
-                        val isOcchio = isReleased && (isReminder || isFavorite)
+                        val isOcchio = !isQuickWatch && isReleased && (isReminder || isFavorite)
+
+                        val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
+                                progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
+                        val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
+                        val isHasCircularProgress = isTv && !isWatched && showCircular && circularProgress > 0f
 
                         val actionBg = when {
+                            isQuickWatch -> appAccent.copy(alpha = 0.15f)
                             isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
                             isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
                             isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
@@ -571,6 +504,7 @@ fun MovieCard(
                         }
 
                         val actionBorder = when {
+                            isQuickWatch -> appAccent.copy(alpha = 0.45f)
                             isWatched -> appAccent
                             isPromemoriaAttiva -> appAccent
                             isOcchio -> HazeStyles.AccentYellow
@@ -578,48 +512,76 @@ fun MovieCard(
                         }.copy(alpha = 0.3f)
 
                         val actionTint = when {
+                            isQuickWatch -> appAccent
                             isWatched -> appAccent
                             isPromemoriaAttiva -> appAccent
                             isOcchio -> HazeStyles.AccentYellow
                             else -> Color.White
                         }
 
-                        Box(
-                            modifier = Modifier
+                        if (isHasCircularProgress) {
+                            androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(if (isLarge) 2.dp else 1.5.dp)) {
+                                val sw = 2.dp.toPx()
+                                drawArc(
+                                    color = Color.White.copy(alpha = 0.15f),
+                                    startAngle = -90f,
+                                    sweepAngle = 360f,
+                                    useCenter = false,
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw)
+                                )
+                                drawArc(
+                                    color = appAccent,
+                                    startAngle = -90f,
+                                    sweepAngle = 360f * circularProgress.coerceIn(0f, 1f),
+                                    useCenter = false,
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                                )
+                            }
+                        }
+
+                        val isBellOutlined = !isReleased && !(isReminder || isFavorite)
+                        val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
+                        var bellHasInitialized by remember { mutableStateOf(false) }
+
+                        LaunchedEffect(isReminder, isFavorite) {
+                            if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
+                                bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                                bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                                bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                                bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                                bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                            }
+                            bellHasInitialized = true
+                        }
+
+                        val isTick = isWatched || isQuickWatch
+                        val isPlus = !isWatched && isReleased && !isOcchio && !isQuickWatch
+                        val iconSizeModifier = Modifier.size(
+                            if (isLarge) {
+                                if (isTick) 13.dp else if (isPlus) 16.dp else if (isBellOutlined) 20.dp else 21.dp
+                            } else {
+                                if (isTick) 10.dp else if (isPlus) 12.dp else if (isBellOutlined) 15.5.dp else 17.dp
+                            }
+                        )
+
+                        val buttonModifier = if (isHasCircularProgress) {
+                            Modifier
+                                .size(if (isLarge) 26.dp else 18.dp)
+                                .background(color = actionBg, shape = CircleShape)
+                        } else {
+                            Modifier
                                 .size(if (isLarge) 30.dp else 22.dp)
                                 .background(color = actionBg, shape = CircleShape)
-                                .border(width = 1.dp, color = actionBorder, shape = CircleShape),
+                                .border(width = 1.dp, color = actionBorder, shape = CircleShape)
+                        }
+
+                        Box(
+                            modifier = buttonModifier,
                             contentAlignment = Alignment.Center
                         ) {
-                            val isBellOutlined = !isReleased && !(isReminder || isFavorite)
-                            
-                            val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
-                            var bellHasInitialized by remember { mutableStateOf(false) }
-                            
-                            LaunchedEffect(isReminder, isFavorite) {
-                                if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
-                                    bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                                    bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                                    bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                                    bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                                    bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                                }
-                                bellHasInitialized = true
-                            }
-                            
-                            val isTick = isWatched
-                            val isPlus = !isWatched && isReleased && !isOcchio
-                            val iconSizeModifier = Modifier.size(
-                                if (isLarge) {
-                                    if (isTick) 13.dp else if (isPlus) 16.dp else if (isBellOutlined) 20.dp else 21.dp
-                                } else {
-                                    if (isTick) 10.dp else if (isPlus) 12.dp else if (isBellOutlined) 15.5.dp else 17.dp
-                                }
-                            )
-                            
                             Icon(
                                 imageVector = when {
-                                    isWatched -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
+                                    isTick -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
                                     !isReleased -> if (isReminder || isFavorite) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
                                     isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
                                     else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
