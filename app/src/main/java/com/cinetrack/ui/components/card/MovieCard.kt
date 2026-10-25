@@ -340,6 +340,20 @@ fun MovieCard(
                 )
             }
 
+            // Subtle top vignette for badge and bookmark contrast
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(44.dp)
+                    .align(Alignment.TopCenter)
+                    .background(
+                        Brush.verticalGradient(
+                            0.0f to Color.Black.copy(alpha = 0.35f),
+                            1.0f to Color.Transparent
+                        )
+                    )
+            )
+
             if (showFolderBookmarks) {
                 Box(modifier = Modifier.align(Alignment.TopStart)) {
                     MovieFolderBookmarks(folderColors)
@@ -384,15 +398,15 @@ fun MovieCard(
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(100.dp)
+                        .height(110.dp)
                         .align(Alignment.BottomCenter)
                         .background(
                             Brush.verticalGradient(
-                                colors = listOf(
-                                    Color.Transparent,
-                                    Color.Black.copy(alpha = 0.7f),
-                                    Color.Black.copy(alpha = 0.95f)
-                                )
+                                0.00f to Color.Transparent,
+                                0.25f to Color.Black.copy(alpha = 0.20f),
+                                0.50f to Color.Black.copy(alpha = 0.55f),
+                                0.75f to Color.Black.copy(alpha = 0.82f),
+                                1.00f to Color.Black.copy(alpha = 0.96f)
                             )
                         )
                 )

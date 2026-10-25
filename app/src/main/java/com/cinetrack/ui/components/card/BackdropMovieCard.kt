@@ -46,14 +46,17 @@ fun BackdropMovieCard(movie: Movie, onPress: (Movie) -> Unit) {
             contentScale = ContentScale.Crop,
             modifier = Modifier.fillMaxSize()
         )
-        // Gradient overlay
+        // Smooth scrim gradient overlay
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.verticalGradient(
-                        colors = listOf(Color.Transparent, Color.Black.copy(alpha = 0.8f)),
-                        startY = 100f
+                        0.00f to Color.Transparent,
+                        0.35f to Color.Transparent,
+                        0.60f to Color.Black.copy(alpha = 0.35f),
+                        0.80f to Color.Black.copy(alpha = 0.70f),
+                        1.00f to Color.Black.copy(alpha = 0.92f)
                     )
                 )
         )

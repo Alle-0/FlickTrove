@@ -213,19 +213,34 @@ fun MovieListCard(
                 }
             }
 
-            // Gradient for readability
+            // Rich cinematic horizontal scrim: deep coverage on text zone, smooth feathering towards backdrop
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         androidx.compose.ui.graphics.Brush.horizontalGradient(
-                            0.0f to Color.Black.copy(alpha = 0.95f),
-                            0.3f to Color.Black.copy(alpha = 0.8f),
-                            0.6f to Color.Black.copy(alpha = 0.4f),
-                            0.75f to Color.Transparent,
-                            0.85f to Color.Transparent,
-                            0.95f to Color.Black.copy(alpha = 0.5f),
-                            1.0f to Color.Black.copy(alpha = 0.8f)
+                            0.00f to Color.Black.copy(alpha = 0.96f),
+                            0.25f to Color.Black.copy(alpha = 0.94f),
+                            0.45f to Color.Black.copy(alpha = 0.88f),
+                            0.65f to Color.Black.copy(alpha = 0.72f),
+                            0.80f to Color.Black.copy(alpha = 0.35f),
+                            0.92f to Color.Black.copy(alpha = 0.20f),
+                            1.00f to Color.Black.copy(alpha = 0.45f)
+                        )
+                    )
+            )
+
+            // Vertical vignette: protects bottom subtitle/genre text from bright ground and top badges/ribbon from bright skies
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        androidx.compose.ui.graphics.Brush.verticalGradient(
+                            0.00f to Color.Black.copy(alpha = 0.45f),
+                            0.25f to Color.Transparent,
+                            0.50f to Color.Transparent,
+                            0.75f to Color.Black.copy(alpha = 0.45f),
+                            1.00f to Color.Black.copy(alpha = 0.80f)
                         )
                     )
             )
