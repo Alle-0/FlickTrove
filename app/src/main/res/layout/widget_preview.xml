@@ -2,9 +2,10 @@
 <FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="#1C1C1E">
+    android:clipToOutline="true"
+    android:background="@drawable/widget_preview_bg">
 
-    <!-- Fake Poster / Logo -->
+    <!-- Fake Backdrop / Poster -->
     <ImageView
         android:layout_width="match_parent"
         android:layout_height="match_parent"
@@ -14,33 +15,48 @@
     <!-- Gradient overlay for text -->
     <ImageView
         android:layout_width="match_parent"
-        android:layout_height="80dp"
+        android:layout_height="88dp"
         android:layout_gravity="bottom"
         android:background="@drawable/widget_bottom_gradient" />
 
-    <!-- Text -->
+    <!-- Bottom content -->
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom"
         android:orientation="vertical"
-        android:padding="16dp">
+        android:paddingStart="16dp"
+        android:paddingEnd="16dp"
+        android:paddingBottom="14dp">
 
         <TextView
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:text="Inception"
             android:textColor="#FFFFFF"
-            android:textSize="16sp"
+            android:textSize="17sp"
             android:textStyle="bold" />
 
-        <TextView
+        <!-- Date Pill Badge -->
+        <LinearLayout
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_marginTop="4dp"
-            android:text="In uscita il: 2010-07-16"
-            android:textColor="#AAAAAA"
-            android:textSize="12sp" />
+            android:layout_marginTop="6dp"
+            android:background="@drawable/widget_pill_bg"
+            android:paddingStart="8dp"
+            android:paddingEnd="8dp"
+            android:paddingTop="2dp"
+            android:paddingBottom="2dp"
+            android:gravity="center_vertical">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="@string/widget_date_tomorrow"
+                android:textColor="#FFFFFF"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </LinearLayout>
     </LinearLayout>
 
     <!-- Search Icon Mock -->
@@ -52,10 +68,12 @@
         android:background="@drawable/widget_search_bg">
 
         <ImageView
-            android:layout_width="18dp"
-            android:layout_height="18dp"
+            android:layout_width="16dp"
+            android:layout_height="16dp"
             android:layout_gravity="center"
-            android:src="@drawable/ic_widget_search" />
+            android:tint="#FFFFFF"
+            android:src="@drawable/ic_lente" />
     </FrameLayout>
 
 </FrameLayout>
+

@@ -39,12 +39,12 @@ class TraktZipImporter @Inject constructor(
     ): Int = withContext(Dispatchers.IO) {
         var count = 0
         val ratingsMap = buildRatingsMap(zipEntries)
-        val (episodeMap, lastWatchedByShow) = buildEpisodeMap(zipEntries)
+        val (episodeMap, lastWatchedByShow, episodeDatesMap) = buildEpisodeMap(zipEntries)
         val hiddenShowsSet = buildHiddenShowsSet(zipEntries)
         val listsMap = buildListsMap(zipEntries)
 
         count += parseWatchedMovies(zipEntries, ratingsMap, onBatchReady)
-        count += parseWatchedShows(zipEntries, ratingsMap, episodeMap, lastWatchedByShow, hiddenShowsSet, onBatchReady)
+        count += parseWatchedShows(zipEntries, ratingsMap, episodeMap, lastWatchedByShow, episodeDatesMap, hiddenShowsSet, onBatchReady)
         count += parseWatchlist(zipEntries, ratingsMap, onBatchReady)
         count += parseFavorites(zipEntries, ratingsMap, onBatchReady)
         count += parseCustomLists(zipEntries, ratingsMap, listsMap, onBatchReady)
@@ -71,12 +71,13 @@ class TraktZipImporter @Inject constructor(
 
     private fun buildEpisodeMap(
         zipEntries: Map<String, ByteArray>
-    ): Pair<Map<Long, Map<String, List<Int>>>, Map<Long, String>> {
+    ): Triple<Map<Long, Map<String, List<Int>>>, Map<Long, String>, Map<Long, Map<String, String>>> {
         val episodeMap = mutableMapOf<Long, MutableMap<String, MutableSet<Int>>>()
         val lastWatched = mutableMapOf<Long, String>()
+        val episodeDates = mutableMapOf<Long, MutableMap<String, String>>()
 
         val historyEntries = zipEntries.filterKeys { it.startsWith("watched-history") || it.startsWith("watched_history") }.values
-        if (historyEntries.isEmpty()) return Pair(emptyMap(), lastWatched)
+        if (historyEntries.isEmpty()) return Triple(emptyMap(), lastWatched, emptyMap())
 
         historyEntries.forEach { bytes ->
             runCatching {
@@ -104,6 +105,12 @@ class TraktZipImporter @Inject constructor(
                     if (watchedAt != null) {
                         val current = lastWatched[showTmdb]
                         if (current == null || watchedAt > current) lastWatched[showTmdb] = watchedAt
+
+                        val normalizedDate = parseAndNormalizeWatchedDate(watchedAt) ?: watchedAt
+                        if (season > 0 && number > 0) {
+                            episodeDates
+                                .getOrPut(showTmdb) { mutableMapOf() }["S${season}E${number}"] = normalizedDate
+                        }
                     }
                 }
             }
@@ -112,7 +119,7 @@ class TraktZipImporter @Inject constructor(
         val sorted = episodeMap.mapValues { (_, seasons) ->
             seasons.mapValues { (_, eps) -> eps.sorted() }
         }
-        return Pair(sorted, lastWatched)
+        return Triple(sorted, lastWatched, episodeDates)
     }
 
     private suspend fun buildHiddenShowsSet(zipEntries: Map<String, ByteArray>): Set<Long> {
@@ -212,6 +219,7 @@ class TraktZipImporter @Inject constructor(
         ratingsMap: Map<Long, Double>,
         episodeMap: Map<Long, Map<String, List<Int>>>,
         lastWatchedByShow: Map<Long, String>,
+        episodeDatesMap: Map<Long, Map<String, String>>,
         hiddenShowsSet: Set<Long>,
         onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
     ): Int = withContext(Dispatchers.IO) {
@@ -254,6 +262,7 @@ class TraktZipImporter @Inject constructor(
                                 syncStatus = "pending",
                                 clientUpdatedAt = System.currentTimeMillis()
                             )
+                            episodeDatesMap[tmdbId]?.let { movie.extractedEpisodeDates.putAll(it) }
                             Pair(movie, null)
                         }
                     }

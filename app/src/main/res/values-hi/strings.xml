@@ -1920,6 +1920,13 @@
     <string name="folder_filter_shared">केवल साझा</string>
     <string name="folder_filter_private">केवल निजी</string>
     <string name="folder_members_only_title">सदस्य</string>
+    <string name="settings_allow_mobile_data_updates">मोबाइल डेटा से अपडेट करें</string>
+    <string name="settings_allow_mobile_data_updates_desc">सेलुलर डेटा पर भी नई रिलीज़ और एपिसोड की जांच की अनुमति दें (न्यूनतम डेटा खपत)।</string>
+    <string name="settings_msg_mobile_data_updates">मोबाइल डेटा अपडेट %1$s</string>
+    <string name="watch_history_episode_dates_title">एपिसोड की तिथियां</string>
+    <string name="watch_history_episode_dates_subtitle">प्रत्येक एपिसोड के लिए देखे जाने की तिथि प्रबंधित करें</string>
+    <string name="watch_history_apply_to_season">पूरी सीज़न पर लागू करें</string>
+    <string name="history_delete_session_only">केवल सत्र हटाएं</string>
+    <string name="history_delete_entire_rewatch">पूरा रीवॉच हटाएं</string>
+    <string name="history_delete_session_question">क्या आप केवल इस सत्र के एपिसोड (%1$s) हटाना चाहते हैं या पूरा रीवॉच हटाना चाहते हैं?</string>
 </resources>
-
-

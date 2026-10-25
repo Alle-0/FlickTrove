@@ -234,7 +234,10 @@ class TraktSyncWorker @AssistedInject constructor(
                         android.util.Log.e("TRAKT_DEBUG", "SYNC MERGE: Primo sync/Account vuoto -> Push di ${localMoviesToPush.size} film visti su Trakt")
                         try {
                             val syncMovies = localMoviesToPush.map {
-                                com.cinetrack.data.api.TraktSyncMovie(ids = com.cinetrack.data.api.TraktSyncIds(tmdb = it.id))
+                                com.cinetrack.data.api.TraktSyncMovie(
+                                    ids = com.cinetrack.data.api.TraktSyncIds(tmdb = it.id),
+                                    watched_at = it.watchedAt
+                                )
                             }
                             traktService.addToHistory(com.cinetrack.data.api.TraktSyncRequest(movies = syncMovies))
                         } catch (e: Exception) {
@@ -269,6 +272,8 @@ class TraktSyncWorker @AssistedInject constructor(
                 val historyEpisodesByShowTmdb = mutableMapOf<Long, MutableMap<String, MutableSet<Int>>>()
                 val historyShowTitles = mutableMapOf<Long, String>()
                 val historyShowImdbs = mutableMapOf<String, MutableMap<String, MutableSet<Int>>>()
+                val historyEpisodeDatesByShowTmdb = mutableMapOf<Long, MutableMap<String, String>>()
+                val historyEpisodeDatesByShowImdb = mutableMapOf<String, MutableMap<String, String>>()
 
                 for (item in historyAccumulator) {
                     if (item.type == "episode" && item.episode != null && item.show != null) {
@@ -277,15 +282,23 @@ class TraktSyncWorker @AssistedInject constructor(
                         if (seasonNum > 0 && epNum > 0) {
                             val tmdbId = item.show.ids?.tmdb
                             val imdbId = item.show.ids?.imdb
+                            val epKey = "S${seasonNum}E${epNum}"
+                            val watchedAt = item.watched_at
                             if (tmdbId != null) {
                                 val seasonsMap = historyEpisodesByShowTmdb.getOrPut(tmdbId) { mutableMapOf() }
                                 val epsSet = seasonsMap.getOrPut(seasonNum.toString()) { mutableSetOf() }
                                 epsSet.add(epNum)
                                 item.show.title?.let { historyShowTitles[tmdbId] = it }
+                                if (!watchedAt.isNullOrBlank()) {
+                                    historyEpisodeDatesByShowTmdb.getOrPut(tmdbId) { mutableMapOf() }[epKey] = watchedAt
+                                }
                             } else if (!imdbId.isNullOrBlank()) {
                                 val seasonsMap = historyShowImdbs.getOrPut(imdbId) { mutableMapOf() }
                                 val epsSet = seasonsMap.getOrPut(seasonNum.toString()) { mutableSetOf() }
                                 epsSet.add(epNum)
+                                if (!watchedAt.isNullOrBlank()) {
+                                    historyEpisodeDatesByShowImdb.getOrPut(imdbId) { mutableMapOf() }[epKey] = watchedAt
+                                }
                             }
                         }
                     }
@@ -317,7 +330,8 @@ class TraktSyncWorker @AssistedInject constructor(
                     showTmdbId: Long,
                     showTitle: String,
                     seasonsMap: Map<String, List<Int>>,
-                    lastWatchedAt: String? = null
+                    lastWatchedAt: String? = null,
+                    showEpisodeDates: Map<String, String> = emptyMap()
                 ) {
                     val totalWatched = seasonsMap.values.sumOf { it.size }
                     val local = movieRepository.getMovieIncludingDeleted(showTmdbId, "tv")
@@ -326,6 +340,53 @@ class TraktSyncWorker @AssistedInject constructor(
                     if (local != null && (local.syncStatus == "pending_delete" || local.syncStatus == "deleted")) {
                         android.util.Log.d("TraktSyncWorker", "SYNC: Show '$showTitle' è ${local.syncStatus}, skip resurrezione.")
                         return
+                    }
+
+                    // --- Sincronizzazione episodeDates in Room WatchHistoryEntity ---
+                    val existingHistory = movieRepository.getWatchHistoryForMovie(showTmdbId, "tv")
+                    val existingEpDates = mutableMapOf<String, String>()
+                    existingHistory.forEach { h ->
+                        h.episodeDates?.let { json ->
+                            try {
+                                val parsed: Map<String, String> = kotlinx.serialization.json.Json.decodeFromString(json)
+                                existingEpDates.putAll(parsed)
+                            } catch (_: Exception) {}
+                        }
+                    }
+                    val mergedEpDates = (existingEpDates + showEpisodeDates).toMutableMap()
+                    val epDatesJson = if (mergedEpDates.isNotEmpty()) {
+                        try {
+                            kotlinx.serialization.json.Json.encodeToString(
+                                kotlinx.serialization.serializer(),
+                                mergedEpDates
+                            )
+                        } catch (_: Exception) { null }
+                    } else null
+                    val bestWatchedDate = lastWatchedAt ?: showEpisodeDates.values.maxOrNull()
+
+                    if (existingHistory.isNotEmpty()) {
+                        val latestEntity = existingHistory.maxByOrNull { it.watchedAt } ?: existingHistory.first()
+                        if (epDatesJson != null && epDatesJson != latestEntity.episodeDates) {
+                            movieRepository.updateWatchHistory(
+                                latestEntity.copy(
+                                    episodeDates = epDatesJson,
+                                    syncStatus = if (latestEntity.syncStatus == "synced") "pending_update" else latestEntity.syncStatus
+                                )
+                            )
+                        }
+                    } else if (totalWatched > 0) {
+                        val date = bestWatchedDate ?: local?.watchedAt ?: java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US).apply {
+                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                        }.format(java.util.Date())
+                        movieRepository.insertWatchHistory(
+                            com.cinetrack.data.local.entities.WatchHistoryEntity(
+                                movieId = showTmdbId,
+                                mediaType = "tv",
+                                watchedAt = date,
+                                isRewatch = false,
+                                episodeDates = epDatesJson
+                            )
+                        )
                     }
 
                     if (local == null) {
@@ -491,20 +552,33 @@ class TraktSyncWorker @AssistedInject constructor(
 
                     // Unione degli episodi da remoteShow.seasons + historyAccumulator
                     val mergedEps = mutableMapOf<String, MutableSet<Int>>()
+                    val mergedEpDates = mutableMapOf<String, String>()
                     for (season in remoteShow.seasons ?: emptyList()) {
                         if (season.number == 0) continue
-                        val eps = season.episodes?.map { it.number } ?: emptyList()
+                        val sNum = season.number
+                        val eps = season.episodes ?: emptyList()
                         if (eps.isNotEmpty()) {
-                            mergedEps.getOrPut(season.number.toString()) { mutableSetOf() }.addAll(eps)
+                            mergedEps.getOrPut(sNum.toString()) { mutableSetOf() }.addAll(eps.map { it.number })
+                            eps.forEach { ep ->
+                                if (!ep.last_watched_at.isNullOrBlank()) {
+                                    mergedEpDates["S${sNum}E${ep.number}"] = ep.last_watched_at
+                                }
+                            }
                         }
                     }
 
                     historyEpisodesByShowTmdb[showTmdbId]?.forEach { (seasonStr, epsSet) ->
                         mergedEps.getOrPut(seasonStr) { mutableSetOf() }.addAll(epsSet)
                     }
+                    historyEpisodeDatesByShowTmdb[showTmdbId]?.forEach { (epKey, dateStr) ->
+                        mergedEpDates.putIfAbsent(epKey, dateStr)
+                    }
                     if (!imdbId.isNullOrBlank()) {
                         historyShowImdbs[imdbId]?.forEach { (seasonStr, epsSet) ->
                             mergedEps.getOrPut(seasonStr) { mutableSetOf() }.addAll(epsSet)
+                        }
+                        historyEpisodeDatesByShowImdb[imdbId]?.forEach { (epKey, dateStr) ->
+                            mergedEpDates.putIfAbsent(epKey, dateStr)
                         }
                     }
 
@@ -515,7 +589,7 @@ class TraktSyncWorker @AssistedInject constructor(
                         android.util.Log.e("TRAKT_DEBUG", "SYNC SHOW DEBUG '$showTitle': tmdbId=$showTmdbId, seasons=${remoteShow.seasons?.size}, mergedEps=$totalMergedCount")
                     }
 
-                    processShowEpisodes(showTmdbId, showTitle, finalEps, remoteShow.last_watched_at)
+                    processShowEpisodes(showTmdbId, showTitle, finalEps, remoteShow.last_watched_at, mergedEpDates)
                 }
 
                 // Processa anche eventuali serie TV presenti in historyAccumulator non restituite da getWatchedShows
@@ -524,7 +598,8 @@ class TraktSyncWorker @AssistedInject constructor(
                     processedShowTmdbIds.add(showTmdbId)
                     val showTitle = historyShowTitles[showTmdbId] ?: "Unknown"
                     val finalEps = seasonsMap.mapValues { (_, eps) -> eps.sorted() }
-                    processShowEpisodes(showTmdbId, showTitle, finalEps) // Fallback doesn't have an exact last_watched_at for the whole show
+                    val epDates = historyEpisodeDatesByShowTmdb[showTmdbId] ?: emptyMap()
+                    processShowEpisodes(showTmdbId, showTitle, finalEps, null, epDates)
                 }
 
                 // Logica di Merge o Rimozione (Diff) protetta
@@ -535,12 +610,26 @@ class TraktSyncWorker @AssistedInject constructor(
                         val showsToPush = mutableListOf<com.cinetrack.data.api.TraktShowWithEpisodes>()
                         for (local in localTvShows) {
                             if (processedShowTmdbIds.contains(local.id)) continue
+                            val historyList = movieRepository.getWatchHistoryForMovie(local.id, "tv")
+                            val localEpDates = mutableMapOf<String, String>()
+                            historyList.forEach { h ->
+                                h.episodeDates?.let { json ->
+                                    try {
+                                        val parsed: Map<String, String> = kotlinx.serialization.json.Json.decodeFromString(json)
+                                        localEpDates.putAll(parsed)
+                                    } catch (_: Exception) {}
+                                }
+                            }
+
                             val seasonsList = local.watchedEpisodes?.mapNotNull { (seasonStr, epList) ->
                                 val seasonNum = seasonStr.toIntOrNull() ?: return@mapNotNull null
                                 if (seasonNum == 0 || epList.isEmpty()) null
                                 else com.cinetrack.data.api.TraktSeasonEpisodes(
                                     number = seasonNum,
-                                    episodes = epList.map { com.cinetrack.data.api.TraktEpisodeNumber(it) }
+                                    episodes = epList.map { epNum ->
+                                        val epWatchedAt = localEpDates["S${seasonNum}E${epNum}"] ?: local.watchedAt
+                                        com.cinetrack.data.api.TraktEpisodeNumber(epNum, watched_at = epWatchedAt)
+                                    }
                                 )
                             } ?: emptyList()
                             if (seasonsList.isNotEmpty()) {

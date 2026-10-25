@@ -1928,4 +1928,13 @@
     <string name="folder_filter_shared">仅共享文件夹</string>
     <string name="folder_filter_private">仅私有文件夹</string>
     <string name="folder_members_only_title">成员</string>
+    <string name="settings_allow_mobile_data_updates">使用移动数据更新</string>
+    <string name="settings_allow_mobile_data_updates_desc">允许在使用蜂窝移动网络时检查新上映和新剧集（极省流量）。</string>
+    <string name="settings_msg_mobile_data_updates">移动数据更新已%1$s</string>
+    <string name="watch_history_episode_dates_title">剧集观看日期</string>
+    <string name="watch_history_episode_dates_subtitle">管理每集的观看日期</string>
+    <string name="watch_history_apply_to_season">应用到整季</string>
+    <string name="history_delete_session_only">僅刪除此紀錄</string>
+    <string name="history_delete_entire_rewatch">刪除整個重溫紀錄</string>
+    <string name="history_delete_session_question">您要僅刪除此時段的集數（%1$s），還是刪除整個重溫紀錄？</string>
 </resources>

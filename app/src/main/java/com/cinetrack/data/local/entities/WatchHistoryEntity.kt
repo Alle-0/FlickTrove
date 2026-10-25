@@ -21,6 +21,7 @@ data class WatchHistoryEntity(
     val watchedAt: String, // ISO-8601 string representation of the watch date
     val isRewatch: Boolean = false, // false if first watch, true if subsequent rewatch
     val syncStatus: String = "pending", // can be "pending", "synced", or "deleted"
-    val historicalEpisodes: String? = null // JSON map of watchedEpisodes snapshot
+    val historicalEpisodes: String? = null, // JSON map of watchedEpisodes snapshot
+    val episodeDates: String? = null // JSON map of episode watch dates (e.g. "1_1" -> "2026-10-25T12:00:00Z")
 )
 

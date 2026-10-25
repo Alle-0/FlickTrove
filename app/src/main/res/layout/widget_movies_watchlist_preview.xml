@@ -53,8 +53,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@drawable/widget_search_bg"
-        android:layout_marginBottom="14dp">
+        android:clipToOutline="true"
+        android:background="@drawable/widget_banner_rounded_bg"
+        android:layout_marginBottom="12dp">
 
         <ImageView
             android:layout_width="match_parent"
@@ -78,8 +79,9 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@drawable/widget_search_bg"
-        android:layout_marginBottom="14dp">
+        android:clipToOutline="true"
+        android:background="@drawable/widget_banner_rounded_bg"
+        android:layout_marginBottom="12dp">
 
         <ImageView
             android:layout_width="match_parent"
@@ -103,7 +105,8 @@
     <FrameLayout
         android:layout_width="match_parent"
         android:layout_height="56dp"
-        android:background="@drawable/widget_search_bg">
+        android:clipToOutline="true"
+        android:background="@drawable/widget_banner_rounded_bg">
 
         <ImageView
             android:layout_width="match_parent"

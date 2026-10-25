@@ -757,6 +757,12 @@ fun MovieDetailScreenContent(
                                     onAddRewatch = { viewModel.logRewatch() },
                                     onUpdateDate = { entity, newDate -> viewModel.updateWatchHistoryDate(entity, newDate) },
                                     onDelete = { entity -> viewModel.deleteWatchHistory(entity) },
+                                    onUpdateEpisodeDate = { entity, seasonNumber, episodeNumber, newDateIso ->
+                                        viewModel.updateEpisodeWatchDate(entity, seasonNumber, episodeNumber, newDateIso)
+                                    },
+                                    onUpdateSeasonDate = { entity, seasonNumber, episodeNumbers, newDateIso ->
+                                        viewModel.updateSeasonEpisodesWatchDate(entity, seasonNumber, episodeNumbers, newDateIso)
+                                    },
                                     hazeState = localHazeState
                                 )
                             }

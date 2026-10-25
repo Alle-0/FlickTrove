@@ -79,7 +79,7 @@ fun HistoryTimelineView(
 
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
-    val animatedEntryIds = remember { mutableSetOf<Long>() }
+    val animatedEntryIds = remember { mutableSetOf<String>() }
 
     val groupedByMonth = remember(entries) {
         entries.groupBy { YearMonth.from(it.parsedDate) }
@@ -87,7 +87,7 @@ fun HistoryTimelineView(
 
     // Stable global index mapping for clean, predictable stagger ordering
     val entryIndexMap = remember(entries) {
-        entries.mapIndexed { idx, it -> it.historyId to idx }.toMap()
+        entries.mapIndexed { idx, it -> it.uniqueKey to idx }.toMap()
     }
 
     // Micro-Haptic on Month Scroll Crossing:
@@ -145,9 +145,9 @@ fun HistoryTimelineView(
                 // Entries for this month with staggered entry animation
                 items(
                     items = monthEntries,
-                    key = { "timeline_entry_${it.historyId}" }
+                    key = { "timeline_entry_${it.uniqueKey}" }
                 ) { entry ->
-                    val staggerIndex = entryIndexMap[entry.historyId] ?: 0
+                    val staggerIndex = entryIndexMap[entry.uniqueKey] ?: 0
                     TimelineEntryRow(
                         entry = entry,
                         staggerIndex = staggerIndex,
@@ -168,7 +168,7 @@ fun HistoryTimelineView(
 private fun androidx.compose.foundation.lazy.LazyItemScope.TimelineEntryRow(
     entry: WatchTimelineEntry,
     staggerIndex: Int,
-    animatedEntryIds: MutableSet<Long>,
+    animatedEntryIds: MutableSet<String>,
     onMovieClick: (movieId: Long, mediaType: String) -> Unit,
     onEditDate: (entry: WatchTimelineEntry) -> Unit,
     onDeleteSession: (entry: WatchTimelineEntry) -> Unit,
@@ -184,15 +184,15 @@ private fun androidx.compose.foundation.lazy.LazyItemScope.TimelineEntryRow(
     val density = LocalDensity.current
 
     // Canonical FlickTrove card entrance animation
-    val hasAnimated = rememberSaveable(entry.historyId) {
-        mutableStateOf(animatedEntryIds.contains(entry.historyId))
+    val hasAnimated = rememberSaveable(entry.uniqueKey) {
+        mutableStateOf(animatedEntryIds.contains(entry.uniqueKey))
     }
 
-    androidx.compose.runtime.LaunchedEffect(entry.historyId) {
+    androidx.compose.runtime.LaunchedEffect(entry.uniqueKey) {
         if (hasAnimated.value) return@LaunchedEffect
         if (staggerIndex in 0..11) delay(staggerIndex * 40L)
         hasAnimated.value = true
-        animatedEntryIds.add(entry.historyId)
+        animatedEntryIds.add(entry.uniqueKey)
     }
 
     val isScrollItem = staggerIndex < 0 || staggerIndex >= 12

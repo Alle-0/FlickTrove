@@ -105,7 +105,7 @@ fun HistoryCalendarView(
 
                     items(
                         items = displayedEntries,
-                        key = { "cal_entry_${it.historyId}" }
+                        key = { "cal_entry_${it.uniqueKey}" }
                     ) { entry ->
                         HistoryCard(
                             entry = entry,

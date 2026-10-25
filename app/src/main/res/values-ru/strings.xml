@@ -1922,5 +1922,13 @@
     <string name="folder_filter_shared">Только общие</string>
     <string name="folder_filter_private">Только личные</string>
     <string name="folder_members_only_title">Участники</string>
+    <string name="settings_allow_mobile_data_updates">Обновлять через мобильные данные</string>
+    <string name="settings_allow_mobile_data_updates_desc">Разрешить проверку новых релизов и серий через мобильную сеть (минимальный расход трафика).</string>
+    <string name="settings_msg_mobile_data_updates">Обновления по мобильной сети %1$s</string>
+    <string name="watch_history_episode_dates_title">Даты серий</string>
+    <string name="watch_history_episode_dates_subtitle">Управляйте датой просмотра каждой серии</string>
+    <string name="watch_history_apply_to_season">Применить ко всему сезону</string>
+    <string name="history_delete_session_only">Удалить только эту сессию</string>
+    <string name="history_delete_entire_rewatch">Удалить весь повторный просмотр</string>
+    <string name="history_delete_session_question">Удалить только эпизоды этой сессии (%1$s) или удалить весь повторный просмотр?</string>
 </resources>
-

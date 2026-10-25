@@ -28,7 +28,8 @@ class TvTimeGdprImporter @Inject constructor(
         var personalNote: String? = null,
         var rawEpisodesSeen: Int = 0,
         val folders: MutableSet<String> = mutableSetOf(),
-        val watchedEpisodes: MutableMap<String, MutableSet<Int>> = mutableMapOf()
+        val watchedEpisodes: MutableMap<String, MutableSet<Int>> = mutableMapOf(),
+        val episodeDates: MutableMap<String, String> = mutableMapOf()
     )
 
     suspend fun migrateTvTimeGdprZip(
@@ -254,6 +255,9 @@ class TvTimeGdprImporter @Inject constructor(
                             val eNum = cols.getOrNull(episodeIdx)?.trim()?.toIntOrNull()
                             if (sNum != null && sNum > 0 && eNum != null && eNum > 0) {
                                 item.watchedEpisodes.getOrPut(sNum.toString()) { mutableSetOf() }.add(eNum)
+                                if (updatedAt != null) {
+                                    item.episodeDates["S${sNum}E${eNum}"] = updatedAt
+                                }
                             }
                         }
                     }
@@ -336,6 +340,8 @@ class TvTimeGdprImporter @Inject constructor(
                     val showNameIdx = lowerHeaders.indexOfFirst { it in listOf("show_name", "tv_show_name", "series_name", "title") }.takeIf { it != -1 } ?: 5
                     val showIdIdx = lowerHeaders.indexOfFirst { it in listOf("tv_show_id", "show_id", "id") }.takeIf { it != -1 } ?: 13
 
+                    val dateIdx = lowerHeaders.indexOfFirst { it in listOf("updated_at", "created_at", "watched_at", "date") }
+
                     while (lines.hasNext()) {
                         val line = lines.next()
                         val cols = parseCsvLine(line)
@@ -344,6 +350,7 @@ class TvTimeGdprImporter @Inject constructor(
                             val eNum = cols.getOrNull(episodeIdx)?.trim()?.toIntOrNull()
                             val showName = cols[showNameIdx]
                             val showId = cols[showIdIdx]
+                            val epDate = if (dateIdx != -1) cols.getOrNull(dateIdx)?.let { parseAndNormalizeWatchedDate(it) } else null
                             if (sNum != null && sNum > 0 && eNum != null && eNum > 0 && showName.isNotBlank()) {
                                 val match = itemsMap.values.find { existingItem ->
                                     if (showId.isNotBlank() && !existingItem.id.isNullOrBlank()) {
@@ -353,6 +360,9 @@ class TvTimeGdprImporter @Inject constructor(
                                     }
                                 } ?: addItem(id = showId, title = showName, mediaType = "tv", isWatched = false, isFavorite = true)
                                 match.watchedEpisodes.getOrPut(sNum.toString()) { mutableSetOf() }.add(eNum)
+                                if (epDate != null) {
+                                    match.episodeDates["S${sNum}E${eNum}"] = epDate
+                                }
                             }
                         }
                     }
@@ -604,6 +614,7 @@ class TvTimeGdprImporter @Inject constructor(
                             
                             // Mappa 1:1 dal CSV, ri-mappando gli episodi assoluti (es. S1E100) sulle stagioni TMDB
                             var finalEps: Map<String, List<Int>>? = null
+                            val remappedDates = mutableMapOf<String, String>()
                             if (item.watchedEpisodes.isNotEmpty()) {
                                 val remapped = mutableMapOf<String, MutableSet<Int>>()
                                 val tmdbSeasonsSorted = seasonsList?.filter { it.seasonNumber > 0 }?.sortedBy { it.seasonNumber } ?: emptyList()
@@ -631,6 +642,11 @@ class TvTimeGdprImporter @Inject constructor(
                                             }
                                         }
                                         remapped.getOrPut(currentSeason.toString()) { mutableSetOf() }.add(currentEp)
+                                        val epKey = "S${originalSeasonNum}E$ep"
+                                        val originalDate = item.episodeDates[epKey]
+                                        if (originalDate != null) {
+                                            remappedDates["S${currentSeason}E$currentEp"] = originalDate
+                                        }
                                     }
                                 }
                                 finalEps = remapped.mapValues { it.value.toList().sorted() }.takeIf { it.isNotEmpty() }
@@ -762,6 +778,7 @@ class TvTimeGdprImporter @Inject constructor(
                                 syncStatus = "pending",
                                 clientUpdatedAt = System.currentTimeMillis()
                             )
+                            movieObj.extractedEpisodeDates.putAll(if (remappedDates.isNotEmpty()) remappedDates else item.episodeDates)
                             val foldersList = item.folders.toList()
                             if (foldersList.isNotEmpty()) {
                                 foldersList.map { fname -> Pair(movieObj, fname) }

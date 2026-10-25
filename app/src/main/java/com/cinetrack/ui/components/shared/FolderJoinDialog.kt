@@ -365,8 +365,14 @@ fun FolderJoinDialog(
                                     .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(12.dp))
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {
+                                val folderColor = remember(folder.color) {
+                                    folder.color?.toComposeColor() ?: Color(0xFFE50914)
+                                }
+                                val parsedDesc = remember(folder.description, folderColor) {
+                                    com.cinetrack.ui.utils.parseSimpleMarkdown(folder.description, accentColor = folderColor)
+                                }
                                 Text(
-                                    text = folder.description,
+                                    text = parsedDesc,
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         lineHeight = 20.sp
                                     ),

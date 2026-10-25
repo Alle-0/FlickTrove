@@ -148,7 +148,8 @@ data class UserPreferences(
     val showHomeBoxOffice: Boolean = true,
     val showHomeWatchlist: Boolean = true,
     val showHomeBecauseYouWatched: Boolean = true,
-    val homeSectionOrder: List<String> = HomeFeedSectionConstants.DEFAULT_ORDER
+    val homeSectionOrder: List<String> = HomeFeedSectionConstants.DEFAULT_ORDER,
+    val allowMobileDataUpdates: Boolean = true
 )
 
 object HomeFeedSectionConstants {

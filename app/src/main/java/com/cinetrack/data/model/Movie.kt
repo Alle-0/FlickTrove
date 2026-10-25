@@ -385,6 +385,12 @@ data class Movie(
     @Ignore
     @get:Exclude
     @set:Exclude
+    var extractedEpisodeDates: MutableMap<String, String> = mutableMapOf()
+
+    @Transient
+    @Ignore
+    @get:Exclude
+    @set:Exclude
     var logoPath: String? = null
     
     @Ignore

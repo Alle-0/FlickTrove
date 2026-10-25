@@ -377,6 +377,7 @@ class BackupRepository @Inject constructor(
                 }
 
                 existing.extractedWatchDates.addAll(m.extractedWatchDates)
+                existing.extractedEpisodeDates.putAll(m.extractedEpisodeDates)
                 if (mWatched != null) existing.extractedWatchDates.add(mWatched)
                 if (exWatched != null) existing.extractedWatchDates.add(exWatched)
 
@@ -418,6 +419,15 @@ class BackupRepository @Inject constructor(
             if (local == null) {
                 favoriteDao.insert(incoming)
                 // Insert into WatchHistoryDao
+                val epDatesJson = if (incoming.mediaType == "tv" && incoming.extractedEpisodeDates.isNotEmpty()) {
+                    try {
+                        kotlinx.serialization.json.Json.encodeToString(
+                            kotlinx.serialization.serializer(),
+                            incoming.extractedEpisodeDates
+                        )
+                    } catch (e: Exception) { null }
+                } else null
+
                 val watchDatesToInsert = incoming.extractedWatchDates.toMutableSet()
                 if (incoming.watchedAt != null) watchDatesToInsert.add(incoming.watchedAt!!)
                 
@@ -428,7 +438,8 @@ class BackupRepository @Inject constructor(
                             movieId = incoming.id,
                             mediaType = incoming.mediaType,
                             watchedAt = date,
-                            isRewatch = index > 0
+                            isRewatch = index > 0,
+                            episodeDates = if (index == sortedDates.lastIndex) epDatesJson else null
                         )
                     )
                 }
@@ -505,6 +516,26 @@ class BackupRepository @Inject constructor(
                 
                 val newDates = watchDatesToInsert.filter { it !in existingDates }
                 
+                // Merge existing episode dates with incoming extracted episode dates
+                val existingEpDates = mutableMapOf<String, String>()
+                existingHistory.forEach { h ->
+                    h.episodeDates?.let { json ->
+                        try {
+                            val parsed: Map<String, String> = kotlinx.serialization.json.Json.decodeFromString(json)
+                            existingEpDates.putAll(parsed)
+                        } catch (_: Exception) {}
+                    }
+                }
+                val mergedEpDates = (existingEpDates + incoming.extractedEpisodeDates).toMutableMap()
+                val epDatesJson = if (mergedEpDates.isNotEmpty()) {
+                    try {
+                        kotlinx.serialization.json.Json.encodeToString(
+                            kotlinx.serialization.serializer(),
+                            mergedEpDates
+                        )
+                    } catch (_: Exception) { null }
+                } else null
+
                 if (newDates.isNotEmpty()) {
                     val allDates = (existingDates + newDates).sorted()
                     // Rebuild history to maintain proper isRewatch flags
@@ -515,7 +546,31 @@ class BackupRepository @Inject constructor(
                                 movieId = updated.id,
                                 mediaType = updated.mediaType,
                                 watchedAt = date,
-                                isRewatch = index > 0
+                                isRewatch = index > 0,
+                                episodeDates = if (index == allDates.lastIndex) epDatesJson else null
+                            )
+                        )
+                    }
+                } else if (incoming.extractedEpisodeDates.isNotEmpty()) {
+                    if (existingHistory.isNotEmpty()) {
+                        val lastEntity = existingHistory.maxByOrNull { it.watchedAt } ?: existingHistory.last()
+                        watchHistoryDao.update(
+                            lastEntity.copy(
+                                episodeDates = epDatesJson,
+                                syncStatus = if (lastEntity.syncStatus == "synced") "pending_update" else lastEntity.syncStatus
+                            )
+                        )
+                    } else {
+                        val date = updated.watchedAt ?: java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US).apply {
+                            timeZone = java.util.TimeZone.getTimeZone("UTC")
+                        }.format(java.util.Date())
+                        watchHistoryDao.insert(
+                            WatchHistoryEntity(
+                                movieId = updated.id,
+                                mediaType = updated.mediaType,
+                                watchedAt = date,
+                                isRewatch = false,
+                                episodeDates = epDatesJson
                             )
                         )
                     }

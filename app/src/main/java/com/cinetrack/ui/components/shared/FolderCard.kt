@@ -169,9 +169,15 @@ fun FolderCard(
                 }
             }
             if (!folder.description.isNullOrBlank()) {
+                val folderColor = remember(folder.color) {
+                    folder.color?.toComposeColor() ?: Color(0xFFE50914)
+                }
+                val parsedDesc = remember(folder.description, folderColor) {
+                    com.cinetrack.ui.utils.parseSimpleMarkdown(folder.description, accentColor = folderColor)
+                }
                 Spacer(Modifier.height(3.dp))
                 Text(
-                    text = folder.description,
+                    text = parsedDesc,
                     style = MaterialTheme.typography.bodySmall,
                     color = Color.White.copy(alpha = 0.65f),
                     maxLines = 1,

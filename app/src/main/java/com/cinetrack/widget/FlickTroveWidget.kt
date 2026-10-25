@@ -111,9 +111,14 @@ class FlickTroveWidget : GlanceAppWidget() {
             var upcomingMovie: Movie? = null
             var minDistanceDays = Long.MAX_VALUE
             
-            // Cerca il prossimo film in arrivo salvato specificamente con reminder (Remind me)
-            val remindedMovies = allMovies.filter { it.reminder && !it.watched }
-            for (movie in remindedMovies) {
+            // Cerca il prossimo film in arrivo salvato con reminder (Remind me) o presente in watchlist
+            val remindedMovies = allMovies.filter { it.reminder && !it.watched && it.mediaType != "tv" }
+            val candidateMovies = if (remindedMovies.isNotEmpty()) {
+                remindedMovies
+            } else {
+                allMovies.filter { (it.favorite || it.reminder) && !it.watched && !it.dropped && it.mediaType != "tv" }
+            }
+            for (movie in candidateMovies) {
                 val dateStr = movie.releaseDate ?: movie.firstAirDate
                 if (dateStr != null && dateStr.length >= 10 && dateStr >= todayIso) {
                     try {
@@ -281,30 +286,33 @@ class FlickTroveWidget : GlanceAppWidget() {
                         }
                         
                         val date = movie.releaseDate ?: movie.firstAirDate
-                        if (!date.isNullOrEmpty()) {
-                            val formattedDate = if (date.length >= 10) {
-                                try {
-                                    val dateObj = java.time.LocalDate.parse(date.take(10))
-                                    val locale = context.resources.configuration.locales[0]
-                                    val formatter = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
-                                    dateObj.format(formatter)
-                                } catch (e: Exception) { date }
-                            } else date
-
+                        val dateInfo = formatWidgetDate(date, context)
+                        if (dateInfo != null) {
                             Spacer(modifier = GlanceModifier.height(6.dp))
+
+                            val badgeBg = when {
+                                dateInfo.isToday -> Color(0x66E50914)
+                                dateInfo.isTomorrow -> Color(0x66FF9800)
+                                else -> Color(0x33FFFFFF)
+                            }
+                            val badgeTextColor = when {
+                                dateInfo.isToday -> Color(0xFFFF8A80)
+                                dateInfo.isTomorrow -> Color(0xFFFFD180)
+                                else -> Color.White
+                            }
 
                             // Badge a pillola moderno con la data di uscita
                             Row(
                                 modifier = GlanceModifier
-                                    .background(Color(0x33FFFFFF))
+                                    .background(badgeBg)
                                     .cornerRadius(10.dp)
                                     .padding(horizontal = 8.dp, vertical = 2.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Text(
-                                    text = formattedDate,
+                                    text = dateInfo.label,
                                     style = TextStyle(
-                                        color = androidx.glance.color.ColorProvider(day = Color.White, night = Color.White),
+                                        color = androidx.glance.color.ColorProvider(day = badgeTextColor, night = badgeTextColor),
                                         fontSize = 11.sp,
                                         fontWeight = FontWeight.Bold
                                     )
@@ -343,3 +351,51 @@ class FlickTroveWidget : GlanceAppWidget() {
         }
     }
 }
+
+private data class WidgetDateInfo(
+    val label: String,
+    val isToday: Boolean,
+    val isTomorrow: Boolean
+)
+
+private fun formatWidgetDate(dateStr: String?, context: Context): WidgetDateInfo? {
+    if (dateStr.isNullOrEmpty() || dateStr.length < 10) return null
+    return try {
+        val targetDate = java.time.LocalDate.parse(dateStr.take(10))
+        val today = java.time.LocalDate.now()
+        val daysBetween = java.time.temporal.ChronoUnit.DAYS.between(today, targetDate)
+        val locale = try {
+            context.resources.configuration.locales[0]
+        } catch (_: Exception) {
+            java.util.Locale.getDefault()
+        }
+
+        val isToday = daysBetween == 0L
+        val isTomorrow = daysBetween == 1L
+
+        val dayMonthPattern = java.time.format.DateTimeFormatter.ofPattern("d MMM", locale)
+        val formattedDayMonth = targetDate.format(dayMonthPattern)
+
+        val label = when {
+            isToday -> {
+                val todayText = context.getString(R.string.widget_date_today)
+                "$todayText • $formattedDayMonth"
+            }
+            isTomorrow -> {
+                val tomorrowText = context.getString(R.string.widget_date_tomorrow)
+                "$tomorrowText • $formattedDayMonth"
+            }
+            daysBetween in 2L..6L -> {
+                val weekPattern = java.time.format.DateTimeFormatter.ofPattern("EEE • d MMM", locale)
+                targetDate.format(weekPattern)
+            }
+            else -> {
+                val fullPattern = java.time.format.DateTimeFormatter.ofPattern("d MMM yyyy", locale)
+                targetDate.format(fullPattern)
+            }
+        }
+        WidgetDateInfo(label = label, isToday = isToday, isTomorrow = isTomorrow)
+    } catch (e: Exception) {
+        null
+    }
+}

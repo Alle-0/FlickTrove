@@ -736,6 +736,29 @@ fun SettingsNotificationsSection(
                 }
             }
         )
+
+        val allowMobileDataUpdates by settingsViewModel.allowMobileDataUpdates.collectAsStateWithLifecycle()
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_ricarica_cloud),
+            title = stringResource(R.string.settings_allow_mobile_data_updates),
+            description = stringResource(R.string.settings_allow_mobile_data_updates_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = allowMobileDataUpdates,
+                    onCheckedChange = { checked ->
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleAllowMobileDataUpdates(checked)
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                val newAllow = !allowMobileDataUpdates
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleAllowMobileDataUpdates(newAllow)
+            }
+        )
+
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_smartphone_vibra),
             title = stringResource(R.string.settings_haptic_feedback),

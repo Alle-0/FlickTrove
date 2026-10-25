@@ -443,6 +443,26 @@ fun FolderDetailScreenContent(
                             ) {
                                 if (hasDescription) {
                                     item(span = { GridItemSpan(maxLineSpan) }) {
+                                        val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
+                                        val folderAccentColor = remember(state.folder.color) {
+                                            state.folder.color?.toComposeColor() ?: Color(0xFFE50914)
+                                        }
+                                        val parsedDescription = remember(state.folder.description, folderAccentColor) {
+                                            val rawDesc = state.folder.description
+                                            if (rawDesc.isNullOrBlank()) {
+                                                androidx.compose.ui.text.AnnotatedString("")
+                                            } else {
+                                                com.cinetrack.ui.utils.parseSimpleMarkdown(
+                                                    text = rawDesc,
+                                                    accentColor = folderAccentColor,
+                                                    onLinkClick = { url ->
+                                                        try {
+                                                            uriHandler.openUri(url)
+                                                        } catch (_: Exception) {}
+                                                    }
+                                                )
+                                            }
+                                        }
                                         val currentHeight = if (descMaxHeightPx > 0f) with(density) { descHeightPx.toDp() } else Dp.Unspecified
                                         val progress = if (descMaxHeightPx > 0f) (descHeightPx / descMaxHeightPx).coerceIn(0f, 1f) else 1f
                                         val alphaProgress = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
@@ -485,7 +505,7 @@ fun FolderDetailScreenContent(
                                                             }
                                                     ) {
                                                         Text(
-                                                            text = state.folder.description.orEmpty(),
+                                                            text = parsedDescription,
                                                             style = MaterialTheme.typography.bodyMedium,
                                                             color = Color.White.copy(alpha = 0.75f),
                                                             lineHeight = 20.sp

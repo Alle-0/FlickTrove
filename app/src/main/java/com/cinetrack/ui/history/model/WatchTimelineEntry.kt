@@ -73,8 +73,13 @@ data class WatchTimelineEntry(
     val runtimeMinutes: Int,
     val episodeInfo: String?,
     val isTvShow: Boolean,
-    val releaseYear: String? = null
-)
+    val releaseYear: String? = null,
+    val sessionEpisodes: Map<String, List<Int>>? = null,
+    val totalSessionsInRewatch: Int = 1
+) {
+    val uniqueKey: String
+        get() = "${historyId}_${parsedDate}_${episodeInfo.orEmpty()}"
+}
 
 data class HistoryUiState(
     val allEntries: List<WatchTimelineEntry> = emptyList(),

@@ -403,13 +403,19 @@ private fun QuickFolderItem(
                 )
 
                 if (!folder.description.isNullOrBlank()) {
+                    val folderColor = remember(folder.color) {
+                        folder.color?.toComposeColor() ?: Color(0xFFE50914)
+                    }
+                    val parsedDesc = remember(folder.description, folderColor) {
+                        com.cinetrack.ui.utils.parseSimpleMarkdown(folder.description, accentColor = folderColor)
+                    }
                     Text(
                         text = " • ",
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.25f)
                     )
                     Text(
-                        text = folder.description,
+                        text = parsedDesc,
                         style = MaterialTheme.typography.labelSmall,
                         color = Color.White.copy(alpha = 0.55f),
                         maxLines = 1,

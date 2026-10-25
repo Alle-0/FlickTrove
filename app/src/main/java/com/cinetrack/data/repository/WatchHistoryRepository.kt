@@ -19,6 +19,9 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun updateWatchDate(id: Long, newWatchedAt: String) =
         watchHistoryDao.updateWatchDate(id, newWatchedAt)
 
+    suspend fun updateEpisodeDatesAndWatchDate(id: Long, episodeDates: String?, newWatchedAt: String) =
+        watchHistoryDao.updateEpisodeDatesAndWatchDate(id, episodeDates, newWatchedAt)
+
     suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String = "movie"): List<WatchHistoryEntity> =
         watchHistoryDao.getWatchHistoryForMovie(movieId, mediaType)
 
@@ -167,7 +170,9 @@ class WatchHistoryRepository @Inject constructor(
                     }
                     // Entry exists locally and is already in sync → update if remote metadata changed
                     local.syncStatus == "synced" -> {
-                        if (local.historicalEpisodes != remoteEntry.historicalEpisodes || local.isRewatch != remoteEntry.isRewatch) {
+                        if (local.historicalEpisodes != remoteEntry.historicalEpisodes ||
+                            local.episodeDates != remoteEntry.episodeDates ||
+                            local.isRewatch != remoteEntry.isRewatch) {
                             historyToInsert.add(remoteEntry.copy(id = local.id, syncStatus = "synced"))
                         }
                     }

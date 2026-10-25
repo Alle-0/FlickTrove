@@ -46,13 +46,28 @@ fun WatchHistoryBottomSheet(
     onAddRewatch: () -> Unit,
     onUpdateDate: (WatchHistoryEntity, String) -> Unit,
     onDelete: (WatchHistoryEntity) -> Unit,
+    onUpdateEpisodeDate: ((WatchHistoryEntity, seasonNumber: Int, episodeNumber: Int, newDateIso: String) -> Unit)? = null,
+    onUpdateSeasonDate: ((WatchHistoryEntity, seasonNumber: Int, episodeNumbers: List<Int>, newDateIso: String) -> Unit)? = null,
     hazeState: HazeState? = null
 ) {
     var editingHistory by remember { mutableStateOf<WatchHistoryEntity?>(null) }
+    var editingTvHistoryId by remember { mutableStateOf<Long?>(null) }
+    val currentEditingTvHistory = remember(editingTvHistoryId, history) {
+        history.find { it.id == editingTvHistoryId }
+    }
     var showDatePicker by remember { mutableStateOf(false) }
 
+    val handleEditClick: (WatchHistoryEntity) -> Unit = { target ->
+        if (movie.mediaType == "tv") {
+            editingTvHistoryId = target.id
+        } else {
+            editingHistory = target
+            showDatePicker = true
+        }
+    }
+
     val modalVisibilityAlpha by androidx.compose.animation.core.animateFloatAsState(
-        targetValue = if (showDatePicker) 0f else 1f,
+        targetValue = if (showDatePicker || currentEditingTvHistory != null) 0f else 1f,
         animationSpec = androidx.compose.animation.core.tween(durationMillis = 300),
         label = "modalVisibilityAlpha"
     )
@@ -130,10 +145,7 @@ fun WatchHistoryBottomSheet(
                 HistoryItemRow(
                     item = firstViewing,
                     accentColor = accentColor,
-                    onEdit = {
-                        editingHistory = it
-                        showDatePicker = true
-                    },
+                    onEdit = handleEditClick,
                     onDelete = null,
                     label = stringResource(id = R.string.watch_history_first_watch)
                 )
@@ -188,10 +200,7 @@ fun WatchHistoryBottomSheet(
                         HistoryItemRow(
                             item = item,
                             accentColor = accentColor,
-                            onEdit = {
-                                editingHistory = it
-                                showDatePicker = true
-                            },
+                            onEdit = handleEditClick,
                             onDelete = { onDelete(it) },
                             label = "${stringResource(id = R.string.watch_history_rewatch)} $rewatchNumber",
                             modifier = Modifier.animateItem()
@@ -203,6 +212,22 @@ fun WatchHistoryBottomSheet(
         }
     } // End of FlickTroveModal
     } // End of Box
+
+    if (currentEditingTvHistory != null) {
+        EpisodeWatchDatesModal(
+            movie = movie,
+            history = currentEditingTvHistory,
+            accentColor = accentColor,
+            hazeState = hazeState,
+            onDismiss = { editingTvHistoryId = null },
+            onUpdateEpisodeDate = { s, ep, newIso ->
+                onUpdateEpisodeDate?.invoke(currentEditingTvHistory, s, ep, newIso)
+            },
+            onUpdateSeasonDate = { s, eps, newIso ->
+                onUpdateSeasonDate?.invoke(currentEditingTvHistory, s, eps, newIso)
+            }
+        )
+    }
 
     val initialLocalDate = remember(editingHistory?.id, editingHistory?.watchedAt) {
         parseWatchDateToLocalDate(editingHistory?.watchedAt) ?: LocalDate.now()
@@ -300,7 +325,7 @@ private fun HistoryItemRow(
     }
 }
 
-private fun parseWatchDateToLocalDate(raw: String?): LocalDate? {
+internal fun parseWatchDateToLocalDate(raw: String?): LocalDate? {
     if (raw.isNullOrBlank()) return null
     val trimmed = raw.trim()
     
@@ -340,9 +365,9 @@ private fun parseWatchDateToLocalDate(raw: String?): LocalDate? {
     return null
 }
 
-private fun formatDateToLocalDisplay(isoDate: String): String {
+internal fun formatDateToLocalDisplay(isoDate: String): String {
     if (isoDate.isBlank()) return ""
-    val parsedDate = parseWatchDateToLocalDate(isoDate)
+    val parsedDate: LocalDate? = parseWatchDateToLocalDate(isoDate)
     if (parsedDate != null) {
         val formatter = java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
             .withLocale(java.util.Locale.getDefault())

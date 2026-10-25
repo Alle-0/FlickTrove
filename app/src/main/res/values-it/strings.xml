@@ -246,6 +246,9 @@
     <string name="settings_enable_notifications_releases_desc">Ricevi un avviso il giorno dell\'uscita dei film o delle serie che segui.</string>
     <string name="settings_enable_notifications_social">Notifiche Risposte</string>
     <string name="settings_enable_notifications_social_desc">Ricevi un avviso quando qualcuno risponde al tuo commento.</string>
+    <string name="settings_allow_mobile_data_updates">Aggiorna con dati mobili</string>
+    <string name="settings_allow_mobile_data_updates_desc">Consenti il controllo delle nuove uscite anche con rete cellulare (consumo minimo).</string>
+    <string name="settings_msg_mobile_data_updates">Aggiornamenti con dati mobili %1$s</string>
     <string name="notification_reply_title">Nuova Risposta</string>
     <string name="notification_reply_body">%1$s ha risposto al tuo commento.</string>
     <string name="settings_haptic_feedback">Feedback aptico</string>
@@ -1327,6 +1330,9 @@
     <string name="watch_history_rewatch">Rewatch</string>
     <string name="max_rewatch_limit">Limite massimo di rewatch raggiunto (99)</string>
     <string name="watch_history_first_watch">Prima visione</string>
+    <string name="watch_history_episode_dates_title">Date episodi</string>
+    <string name="watch_history_episode_dates_subtitle">Gestisci la data di visione di ogni episodio</string>
+    <string name="watch_history_apply_to_season">Applica a tutta la stagione</string>
     <string name="watch_date_prompt_title">Quando l\'hai visto?</string>
     <string name="watch_date_prompt_now">Adesso</string>
     <string name="watch_date_prompt_release_date">Data di uscita</string>
@@ -1935,5 +1941,7 @@
     <string name="folder_filter_shared">Solo condivise</string>
     <string name="folder_filter_private">Solo private</string>
     <string name="folder_members_only_title">Membri</string>
+    <string name="history_delete_session_only">Rimuovi solo sessione</string>
+    <string name="history_delete_entire_rewatch">Elimina intero rewatch</string>
+    <string name="history_delete_session_question">Vuoi rimuovere solo gli episodi di questa sessione (%1$s) o eliminare l\'intero rewatch?</string>
 </resources>
-

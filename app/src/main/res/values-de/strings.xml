@@ -1925,5 +1925,13 @@
     <string name="folder_filter_shared">Nur geteilte</string>
     <string name="folder_filter_private">Nur private</string>
     <string name="folder_members_only_title">Mitglieder</string>
+    <string name="settings_allow_mobile_data_updates">Über mobile Daten aktualisieren</string>
+    <string name="settings_allow_mobile_data_updates_desc">Prüfung auf neue Veröffentlichungen und Episoden auch über Mobilfunk erlauben (minimaler Verbrauch).</string>
+    <string name="settings_msg_mobile_data_updates">Aktualisierungen über mobile Daten %1$s</string>
+    <string name="watch_history_episode_dates_title">Episodendaten</string>
+    <string name="watch_history_episode_dates_subtitle">Wiedergabedaten für jede Episode verwalten</string>
+    <string name="watch_history_apply_to_season">Auf gesamte Staffel anwenden</string>
+    <string name="history_delete_session_only">Nur Sitzung entfernen</string>
+    <string name="history_delete_entire_rewatch">Gesamten Rewatch löschen</string>
+    <string name="history_delete_session_question">Möchten Sie nur die Episoden dieser Sitzung (%1$s) entfernen oder den gesamten Rewatch löschen?</string>
 </resources>
-

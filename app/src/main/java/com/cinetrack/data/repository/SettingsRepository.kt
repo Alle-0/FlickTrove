@@ -23,6 +23,7 @@ interface SettingsRepository {
     val promptWatchDateOnDetail: Flow<Boolean>
     val autoOpenVibeOnWatch: Flow<Boolean>
     val episodesLayout: Flow<String>
+    val allowMobileDataUpdates: Flow<Boolean>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -44,4 +45,5 @@ interface SettingsRepository {
     suspend fun togglePromptWatchDateOnDetail(enabled: Boolean)
     suspend fun toggleAutoOpenVibeOnWatch(enabled: Boolean)
     suspend fun updateEpisodesLayout(layout: String)
+    suspend fun toggleAllowMobileDataUpdates(enabled: Boolean)
 }

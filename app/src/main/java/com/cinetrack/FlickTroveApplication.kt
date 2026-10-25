@@ -6,6 +6,7 @@ import androidx.work.Configuration
 import com.cinetrack.util.NotificationHelper
 import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
 
 @HiltAndroidApp
@@ -60,98 +61,39 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
             .build()
     }
 
+    @dagger.hilt.EntryPoint
+    @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
+    interface SettingsEntryPoint {
+        fun settingsRepository(): com.cinetrack.data.repository.SettingsRepository
+    }
+
     override fun onCreate() {
         super.onCreate()
         NotificationHelper.createNotificationChannels(this)
 
         kotlinx.coroutines.CoroutineScope(kotlinx.coroutines.Dispatchers.IO).launch {
-            val workManager = androidx.work.WorkManager.getInstance(this@FlickTroveApplication)
-            
-            val networkConstraints = androidx.work.Constraints.Builder()
-                .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED)
-                .setRequiresBatteryNotLow(true)
-                .build()
+            val entryPoint = dagger.hilt.android.EntryPointAccessors.fromApplication(
+                this@FlickTroveApplication,
+                SettingsEntryPoint::class.java
+            )
+            val allowMobileData = try {
+                entryPoint.settingsRepository().allowMobileDataUpdates.first()
+            } catch (e: Exception) {
+                true
+            }
+            scheduleWorkers(this@FlickTroveApplication, allowMobileData)
 
+            val workManager = androidx.work.WorkManager.getInstance(this@FlickTroveApplication)
             val localConstraints = androidx.work.Constraints.Builder()
                 .setRequiresBatteryNotLow(true)
                 .build()
-            
-            val tvUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TVUpdateWorker>(
-                24, java.util.concurrent.TimeUnit.HOURS
-            )
-                .setConstraints(networkConstraints)
+            val networkType = if (allowMobileData) androidx.work.NetworkType.CONNECTED else androidx.work.NetworkType.UNMETERED
+            val networkConstraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(networkType)
                 .build()
-            
-            val movieUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.MovieUpdateWorker>(
-                24, java.util.concurrent.TimeUnit.HOURS
-            )
-                .setConstraints(networkConstraints)
-                .build()
-            
-            val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.ReminderWorker>(
-                12, java.util.concurrent.TimeUnit.HOURS
-            )
-                .setConstraints(localConstraints)
-                .build()
-            
-            // --- Trakt Sync Worker (24h) ---
-            val traktSyncConstraints = androidx.work.Constraints.Builder()
-                .setRequiredNetworkType(androidx.work.NetworkType.UNMETERED)
-                .build()
-
-            val traktSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>(
-                6, java.util.concurrent.TimeUnit.HOURS
-            )
-            .setConstraints(traktSyncConstraints)
-            .build()
-            
-            // --- SIMKL Sync Worker (24h) ---
-            val simklSyncConstraints = androidx.work.Constraints.Builder()
-                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                .build()
-
-            val simklSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>(
-                6, java.util.concurrent.TimeUnit.HOURS
-            )
-            .setConstraints(simklSyncConstraints)
-            .build()
-            
-            workManager.cancelUniqueWork("ReminderMigration")
-            
-            workManager.enqueueUniquePeriodicWork(
-                "TVUpdate",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                tvUpdateRequest
-            )
-
-            workManager.enqueueUniquePeriodicWork(
-                "MovieUpdate",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                movieUpdateRequest
-            )
-
-            workManager.enqueueUniquePeriodicWork(
-                "release_reminder_work",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                releaseReminderRequest
-            )
-
-            workManager.enqueueUniquePeriodicWork(
-                "trakt_sync_work",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                traktSyncRequest
-            )
-
-            workManager.enqueueUniquePeriodicWork(
-                "SimklSync",
-                androidx.work.ExistingPeriodicWorkPolicy.KEEP,
-                simklSyncRequest
-            )
 
             // Refresh the home-screen widget daily so upcoming release dates
             // stay accurate even if TMDB updates them (e.g. a film is delayed).
-            // UPDATE (instead of KEEP) ensures the schedule is always refreshed
-            // even after app updates or reinstalls.
             val widgetRefreshRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.WidgetRefreshWorker>(
                 24, java.util.concurrent.TimeUnit.HOURS
             )
@@ -172,18 +114,96 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
             workManager.enqueue(immediateWidgetRefresh)
             
             // Trigger an immediate sync for Trakt and SIMKL on app startup.
-            // Both workers are optimized to abort early if there are no new changes on the server.
             val immediateTraktSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
-                .setConstraints(traktSyncConstraints)
+                .setConstraints(networkConstraints)
                 .build()
             workManager.enqueueUniqueWork("TraktStartupSync", androidx.work.ExistingWorkPolicy.KEEP, immediateTraktSync)
             
             val immediateSimklSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
-                .setConstraints(simklSyncConstraints)
+                .setConstraints(networkConstraints)
                 .build()
             workManager.enqueueUniqueWork("SimklStartupSync", androidx.work.ExistingWorkPolicy.KEEP, immediateSimklSync)
+        }
+    }
 
+    companion object {
+        fun scheduleWorkers(context: android.content.Context, allowMobileData: Boolean) {
+            val workManager = androidx.work.WorkManager.getInstance(context)
+            val networkType = if (allowMobileData) androidx.work.NetworkType.CONNECTED else androidx.work.NetworkType.UNMETERED
+            val networkConstraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(networkType)
+                .setRequiresBatteryNotLow(true)
+                .build()
 
+            val localConstraints = androidx.work.Constraints.Builder()
+                .setRequiresBatteryNotLow(true)
+                .build()
+
+            val tvUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TVUpdateWorker>(
+                24, java.util.concurrent.TimeUnit.HOURS
+            )
+                .setConstraints(networkConstraints)
+                .build()
+
+            val movieUpdateRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.MovieUpdateWorker>(
+                24, java.util.concurrent.TimeUnit.HOURS
+            )
+                .setConstraints(networkConstraints)
+                .build()
+
+            val releaseReminderRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.ReminderWorker>(
+                12, java.util.concurrent.TimeUnit.HOURS
+            )
+                .setConstraints(localConstraints)
+                .build()
+
+            val traktSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>(
+                6, java.util.concurrent.TimeUnit.HOURS
+            )
+                .setConstraints(networkConstraints)
+                .build()
+
+            val simklSyncConstraints = androidx.work.Constraints.Builder()
+                .setRequiredNetworkType(networkType)
+                .build()
+
+            val simklSyncRequest = androidx.work.PeriodicWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>(
+                6, java.util.concurrent.TimeUnit.HOURS
+            )
+                .setConstraints(simklSyncConstraints)
+                .build()
+
+            workManager.cancelUniqueWork("ReminderMigration")
+
+            workManager.enqueueUniquePeriodicWork(
+                "TVUpdate",
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                tvUpdateRequest
+            )
+
+            workManager.enqueueUniquePeriodicWork(
+                "MovieUpdate",
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                movieUpdateRequest
+            )
+
+            workManager.enqueueUniquePeriodicWork(
+                "release_reminder_work",
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                releaseReminderRequest
+            )
+
+            workManager.enqueueUniquePeriodicWork(
+                "trakt_sync_work",
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                traktSyncRequest
+            )
+
+            workManager.enqueueUniquePeriodicWork(
+                "SimklSync",
+                androidx.work.ExistingPeriodicWorkPolicy.UPDATE,
+                simklSyncRequest
+            )
         }
     }
 }

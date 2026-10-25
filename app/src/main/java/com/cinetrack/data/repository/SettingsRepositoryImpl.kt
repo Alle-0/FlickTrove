@@ -40,6 +40,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val PROMPT_WATCH_DATE_ON_DETAIL = booleanPreferencesKey("prompt_watch_date_on_detail")
         val AUTO_OPEN_VIBE_ON_WATCH = booleanPreferencesKey("auto_open_vibe_on_watch")
         val EPISODES_LAYOUT = stringPreferencesKey("episodes_layout")
+        val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
     }
 
     override val episodesLayout: Flow<String> = dataStore.data.map { preferences ->
@@ -239,6 +240,16 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun updateEpisodesLayout(layout: String) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.EPISODES_LAYOUT] = layout
+        }
+    }
+
+    override val allowMobileDataUpdates: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] ?: true
+    }
+
+    override suspend fun toggleAllowMobileDataUpdates(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = enabled
         }
     }
 }

@@ -81,7 +81,7 @@ fun parseSimpleMarkdown(
             if (currentLine.startsWith("> ")) {
                 isQuote = true
                 currentLine = currentLine.substring(2)
-            } else if (currentLine.startsWith("- ")) {
+            } else if (currentLine.startsWith("- ") || currentLine.startsWith("* ")) {
                 isList = true
                 currentLine = currentLine.substring(2)
             }
@@ -183,7 +183,7 @@ fun parseSimpleMarkdown(
                         }
                     }
 
-                    // 3. Bold: **text**
+                    // 3. Bold: **text** or __text__
                     if (currentLine.startsWith("**", i)) {
                         val end = currentLine.indexOf("**", i + 2)
                         if (end != -1) {
@@ -194,10 +194,30 @@ fun parseSimpleMarkdown(
                             continue
                         }
                     }
+                    if (currentLine.startsWith("__", i)) {
+                        val end = currentLine.indexOf("__", i + 2)
+                        if (end != -1) {
+                            withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                                append(currentLine.substring(i + 2, end))
+                            }
+                            i = end + 2
+                            continue
+                        }
+                    }
 
-                    // 4. Italic: *text*
+                    // 4. Italic: *text* or _text_
                     if (currentLine.startsWith("*", i) && !currentLine.startsWith("**", i)) {
                         val end = currentLine.indexOf("*", i + 1)
+                        if (end != -1) {
+                            withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
+                                append(currentLine.substring(i + 1, end))
+                            }
+                            i = end + 1
+                            continue
+                        }
+                    }
+                    if (currentLine.startsWith("_", i) && !currentLine.startsWith("__", i)) {
+                        val end = currentLine.indexOf("_", i + 1)
                         if (end != -1) {
                             withStyle(SpanStyle(fontStyle = FontStyle.Italic)) {
                                 append(currentLine.substring(i + 1, end))
@@ -219,6 +239,18 @@ fun parseSimpleMarkdown(
                         }
                     }
 
+                    // 6. Inline code: `text`
+                    if (currentLine.startsWith("`", i)) {
+                        val end = currentLine.indexOf("`", i + 1)
+                        if (end != -1) {
+                            withStyle(SpanStyle(fontFamily = androidx.compose.ui.text.font.FontFamily.Monospace, background = androidx.compose.ui.graphics.Color.White.copy(alpha = 0.1f))) {
+                                append(currentLine.substring(i + 1, end))
+                            }
+                            i = end + 1
+                            continue
+                        }
+                    }
+
                     append(currentLine[i])
                     i++
                 }
@@ -236,15 +268,25 @@ class MarkdownVisualTransformation : androidx.compose.ui.text.input.VisualTransf
         val annotatedString = buildAnnotatedString {
             append(originalText)
             
-            // Bold
+            // Bold (** and __)
             Regex("\\*\\*(.*?)\\*\\*").findAll(originalText).forEach { match ->
                 addStyle(SpanStyle(color = symbolColor), match.range.first, match.range.first + 2)
                 addStyle(SpanStyle(color = symbolColor), match.range.last - 1, match.range.last + 1)
                 addStyle(SpanStyle(fontWeight = FontWeight.Bold), match.range.first + 2, match.range.last - 1)
             }
+            Regex("__(.*?)__").findAll(originalText).forEach { match ->
+                addStyle(SpanStyle(color = symbolColor), match.range.first, match.range.first + 2)
+                addStyle(SpanStyle(color = symbolColor), match.range.last - 1, match.range.last + 1)
+                addStyle(SpanStyle(fontWeight = FontWeight.Bold), match.range.first + 2, match.range.last - 1)
+            }
             
-            // Italic
+            // Italic (* and _)
             Regex("(?<!\\*)\\*(?!\\*)(.*?)(?<!\\*)\\*(?!\\*)").findAll(originalText).forEach { match ->
+                addStyle(SpanStyle(color = symbolColor), match.range.first, match.range.first + 1)
+                addStyle(SpanStyle(color = symbolColor), match.range.last, match.range.last + 1)
+                addStyle(SpanStyle(fontStyle = FontStyle.Italic), match.range.first + 1, match.range.last)
+            }
+            Regex("(?<!_)_(?!_)(.*?)(?<!_)_(?!_)").findAll(originalText).forEach { match ->
                 addStyle(SpanStyle(color = symbolColor), match.range.first, match.range.first + 1)
                 addStyle(SpanStyle(color = symbolColor), match.range.last, match.range.last + 1)
                 addStyle(SpanStyle(fontStyle = FontStyle.Italic), match.range.first + 1, match.range.last)

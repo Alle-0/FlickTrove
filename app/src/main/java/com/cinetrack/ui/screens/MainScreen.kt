@@ -293,7 +293,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                                     slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
                                         } else if (targetDepth < initialDepth) {
                                             slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) togetherWith
-                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
+                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { it })
                                         } else {
                                             fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
                                         }
@@ -431,7 +431,12 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     onFilterClick = if (currentTab is DiscoverTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is FoldersTab) { { bounds -> showFoldersSortMenu = true; foldersFilterButtonBounds = bounds } } else if (currentTab is FlowTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is TrophyRoomTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else if (currentTab is HistoryTab) { { bounds -> isFilterModalVisible = true; filterButtonBounds = bounds } } else null,
                                     hasActiveFilters = if (currentTab is FlowTab) flowHasActiveFilters else if (currentTab is TrophyRoomTab) (activeTrophyFilterConfig.value?.config?.hasActiveFilters == true) else if (currentTab is HistoryTab) historyHasActiveFilters else if (currentTab is FoldersTab) foldersHasActiveFilters else discoverHasActiveFilters,
                                     onLayoutToggleClick = discoverOnLayoutToggleClick,
-                                    layoutColumns = discoverGridColumns,
+                                    onUpdatesClick = if (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is AccountTab) {
+                                        { offset ->
+                                            updatesOverlayOffsetX = offset.x
+                                            updatesOverlayOffsetY = offset.y
+                                        }
+                                    } else null,
                                     notificationCount = updatesUiState.totalUnreadCount,
                                     hasAppUpdateBadge = hasAppUpdateBadge,
                                     customActions = historyCustomActions,

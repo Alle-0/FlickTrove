@@ -55,7 +55,7 @@ class TraktJsonImporter @Inject constructor(
 
                 val isDropped = item.dropped == true
                     || item.status?.lowercase()?.let { it == "dropped" || it == "paused" } == true
-                Movie(
+                val m = Movie(
                     id = tmdbId,
                     mediaType = mediaType,
                     title = item.movie?.title ?: item.show?.title ?: "Unknown ($tmdbId)",
@@ -70,6 +70,11 @@ class TraktJsonImporter @Inject constructor(
                     syncStatus = "pending",
                     clientUpdatedAt = System.currentTimeMillis()
                 )
+                if (isEpisode && item.episode?.season != null && item.episode.number != null && item.watchedAt != null) {
+                    val epDate = parseAndNormalizeWatchedDate(item.watchedAt) ?: item.watchedAt
+                    m.extractedEpisodeDates["S${item.episode.season}E${item.episode.number}"] = epDate
+                }
+                m
             }
             if (moviesToInsert.isNotEmpty()) {
                 onBatchReady(moviesToInsert.map { Pair(it, null) }, onProgress)

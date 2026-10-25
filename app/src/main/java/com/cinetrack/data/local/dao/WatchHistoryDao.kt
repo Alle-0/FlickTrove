@@ -23,7 +23,8 @@ data class RawTimelineRecord(
     val historicalEpisodes: String?,
     val currentEpisodes: Map<String, List<Int>>?,
     val releaseDate: String?,
-    val firstAirDate: String?
+    val firstAirDate: String?,
+    val episodeDates: String?
 )
 
 @Dao
@@ -42,7 +43,8 @@ interface WatchHistoryDao {
                h.historicalEpisodes, 
                f.watched_episodes AS currentEpisodes,
                f.release_date AS releaseDate,
-               f.first_air_date AS firstAirDate
+               f.first_air_date AS firstAirDate,
+               h.episodeDates AS episodeDates
         FROM watch_history h
         INNER JOIN favorites f ON h.movieId = f.id AND h.mediaType = f.media_type
         WHERE f.sync_status != 'pending_delete' AND f.sync_status != 'deleted' AND h.syncStatus != 'deleted'
@@ -94,6 +96,9 @@ interface WatchHistoryDao {
     
     @Query("UPDATE watch_history SET watchedAt = :newWatchedAt, syncStatus = 'pending' WHERE id = :id")
     suspend fun updateWatchDate(id: Long, newWatchedAt: String)
+
+    @Query("UPDATE watch_history SET episodeDates = :episodeDates, watchedAt = :newWatchedAt, syncStatus = 'pending' WHERE id = :id")
+    suspend fun updateEpisodeDatesAndWatchDate(id: Long, episodeDates: String?, newWatchedAt: String)
 
     @Query("DELETE FROM watch_history WHERE movieId = :movieId")
     suspend fun purgeHistoryForMovie(movieId: Long)

@@ -305,6 +305,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                                 "syncStatus" to entry.syncStatus,
                                 "sync_status" to entry.syncStatus,
                                 "historicalEpisodes" to entry.historicalEpisodes,
+                                "episodeDates" to entry.episodeDates,
                                 "client_updated_at" to now
                             )
                             batch.set(docRef, map, SetOptions.merge())
@@ -340,6 +341,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                 val isRewatch = doc.getBoolean("isRewatch") ?: false
                 val syncStatus = doc.getString("sync_status") ?: doc.getString("syncStatus") ?: "synced"
                 val historicalEpisodes = doc.getString("historicalEpisodes")
+                val episodeDates = doc.getString("episodeDates")
                 if (movieId > 0L && watchedAt.isNotBlank()) {
                     list.add(
                         WatchHistoryEntity(
@@ -349,7 +351,8 @@ class FirebaseRemoteDataSource @Inject constructor(
                             watchedAt = watchedAt,
                             isRewatch = isRewatch,
                             syncStatus = syncStatus,
-                            historicalEpisodes = historicalEpisodes
+                            historicalEpisodes = historicalEpisodes,
+                            episodeDates = episodeDates
                         )
                     )
                 }

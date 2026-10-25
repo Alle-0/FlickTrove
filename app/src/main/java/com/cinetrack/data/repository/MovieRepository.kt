@@ -320,6 +320,7 @@ class MovieRepository @Inject constructor(
                     val encoded = TraktInstantWriteWorker.encodeEpisodes(addedEps)
                     enqueue(TraktInstantWriteWorker.ACTION_MARK_EPISODES_WATCHED) {
                         putString(TraktInstantWriteWorker.KEY_SEASON_EPISODES, encoded)
+                        movie.watchedAt?.let { putString(TraktInstantWriteWorker.KEY_WATCHED_AT, it) }
                     }
                 }
                 if (removedEps.isNotEmpty()) {

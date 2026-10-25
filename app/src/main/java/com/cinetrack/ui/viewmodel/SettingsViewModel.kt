@@ -334,6 +334,9 @@ class SettingsViewModel @Inject constructor(
     val notificationsReleases: StateFlow<Boolean> = settingsRepository.notificationsReleases
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val allowMobileDataUpdates: StateFlow<Boolean> = settingsRepository.allowMobileDataUpdates
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val notificationsSocial: StateFlow<Boolean> = settingsRepository.notificationsSocial
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
@@ -660,6 +663,15 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_plural_f else R.string.status_disabled_plural_f
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_notifications, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleAllowMobileDataUpdates(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleAllowMobileDataUpdates(enabled)
+            com.cinetrack.FlickTroveApplication.scheduleWorkers(context, enabled)
+            val statusRes = if (enabled) R.string.status_enabled_plural_m else R.string.status_disabled_plural_m
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_mobile_data_updates, context.getString(statusRes)))
         }
     }
 

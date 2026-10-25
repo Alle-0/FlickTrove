@@ -263,6 +263,9 @@
     <string name="settings_enable_notifications_releases_desc">Get notified on the release day of the movies or series you follow.</string>
     <string name="settings_enable_notifications_social">Social Notifications</string>
     <string name="settings_enable_notifications_social_desc">Get notified when someone replies to your comments.</string>
+    <string name="settings_allow_mobile_data_updates">Update with Mobile Data</string>
+    <string name="settings_allow_mobile_data_updates_desc">Allow checking for new releases and episodes on cellular data (minimal bandwidth).</string>
+    <string name="settings_msg_mobile_data_updates">Mobile data updates %1$s</string>
     <string name="notification_reply_title">New Reply</string>
     <string name="notification_reply_body">%1$s replied to your comment.</string>
     <string name="notification_like_title">New Like</string>
@@ -1387,6 +1390,9 @@
     <string name="watch_history_rewatch">Rewatch</string>
     <string name="max_rewatch_limit">Maximum rewatch limit reached (99)</string>
     <string name="watch_history_first_watch">First viewing</string>
+    <string name="watch_history_episode_dates_title">Episode Dates</string>
+    <string name="watch_history_episode_dates_subtitle">Manage watch dates for each episode</string>
+    <string name="watch_history_apply_to_season">Apply date to whole season</string>
 
     <string name="watch_date_prompt_title">When did you watch it?</string>
     <string name="watch_date_prompt_now">Just now (Today)</string>
@@ -1935,5 +1941,7 @@
     <string name="folder_filter_shared">Shared Only</string>
     <string name="folder_filter_private">Private Only</string>
     <string name="folder_members_only_title">Members</string>
+    <string name="history_delete_session_only">Remove Session Only</string>
+    <string name="history_delete_entire_rewatch">Delete Entire Rewatch</string>
+    <string name="history_delete_session_question">Do you want to remove only this session\'s episodes (%1$s) or delete the entire rewatch?</string>
 </resources>
-

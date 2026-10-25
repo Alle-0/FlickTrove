@@ -279,7 +279,8 @@ data class TraktSyncRequest(
 
 @Serializable
 data class TraktSyncMovie(
-    val ids: TraktSyncIds
+    val ids: TraktSyncIds,
+    val watched_at: String? = null
 )
 
 @Serializable
@@ -420,7 +421,8 @@ data class TraktSeasonEpisodes(
 
 @Serializable
 data class TraktEpisodeNumber(
-    val number: Int
+    val number: Int,
+    val watched_at: String? = null
 )
 
 // --- Custom Lists/Folders ──────────────────────────────────────────────────────────────

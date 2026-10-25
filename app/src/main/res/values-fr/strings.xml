@@ -1922,5 +1922,13 @@
     <string name="folder_filter_shared">Partagés uniquement</string>
     <string name="folder_filter_private">Privés uniquement</string>
     <string name="folder_members_only_title">Membres</string>
+    <string name="settings_allow_mobile_data_updates">Mettre à jour avec les données mobiles</string>
+    <string name="settings_allow_mobile_data_updates_desc">Autoriser la recherche de nouvelles sorties et d\'épisodes sur réseau mobile (consommation minimale).</string>
+    <string name="settings_msg_mobile_data_updates">Mises à jour via données mobiles %1$s</string>
+    <string name="watch_history_episode_dates_title">Dates des épisodes</string>
+    <string name="watch_history_episode_dates_subtitle">Gérer la date de visionnage de chaque épisode</string>
+    <string name="watch_history_apply_to_season">Appliquer à toute la saison</string>
+    <string name="history_delete_session_only">Supprimer uniquement la session</string>
+    <string name="history_delete_entire_rewatch">Supprimer tout le rewatch</string>
+    <string name="history_delete_session_question">Voulez-vous supprimer uniquement les épisodes de cette session (%1$s) ou supprimer tout le rewatch ?</string>
 </resources>
-

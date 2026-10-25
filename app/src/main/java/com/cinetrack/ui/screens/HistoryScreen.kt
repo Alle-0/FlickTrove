@@ -357,9 +357,7 @@ fun HistoryScreenContent(
                         hazeState = internalHazeState
                     ) {
                         Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 20.dp, vertical = 24.dp),
+                            modifier = Modifier.fillMaxWidth(),
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(16.dp)
                         ) {
@@ -378,6 +376,8 @@ fun HistoryScreenContent(
                                 )
                             }
 
+                            val isMultiSessionTv = target.isTvShow && target.totalSessionsInRewatch > 1
+
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Text(
                                     text = stringResource(id = R.string.history_delete_session_title),
@@ -388,7 +388,14 @@ fun HistoryScreenContent(
                                 )
                                 Spacer(modifier = Modifier.height(6.dp))
                                 Text(
-                                    text = stringResource(id = R.string.history_delete_session_confirm),
+                                    text = if (isMultiSessionTv) {
+                                        stringResource(
+                                            id = R.string.history_delete_session_question,
+                                            target.episodeInfo.orEmpty()
+                                        )
+                                    } else {
+                                        stringResource(id = R.string.history_delete_session_confirm)
+                                    },
                                     style = MaterialTheme.typography.bodyMedium.copy(
                                         color = Color.White.copy(alpha = 0.65f),
                                         lineHeight = 19.sp
@@ -397,56 +404,140 @@ fun HistoryScreenContent(
                                 )
                             }
 
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(10.dp)
-                            ) {
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = Color.White.copy(alpha = 0.08f),
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .bounceClick(scaleDown = 0.94f) {
-                                            entryToDelete = null
-                                            modalHost.dismiss()
-                                        }
+                            if (isMultiSessionTv) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Box(
-                                        modifier = Modifier.padding(vertical = 12.dp),
-                                        contentAlignment = Alignment.Center
+                                    // Button 1: Remove Session Only
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .bounceClick(scaleDown = 0.96f) {
+                                                viewModel.deleteSessionEpisodes(target)
+                                                entryToDelete = null
+                                                modalHost.dismiss()
+                                            }
                                     ) {
-                                        Text(
-                                            text = stringResource(id = R.string.settings_cancel),
-                                            style = MaterialTheme.typography.labelLarge.copy(
-                                                color = Color.White.copy(alpha = 0.75f),
-                                                fontWeight = FontWeight.SemiBold
+                                        Box(
+                                            modifier = Modifier.padding(vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.history_delete_session_only),
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold
+                                                )
                                             )
-                                        )
+                                        }
+                                    }
+
+                                    // Button 2: Delete Entire Rewatch
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = Color.White.copy(alpha = 0.08f),
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .bounceClick(scaleDown = 0.96f) {
+                                                viewModel.deleteWatchSession(target.historyId)
+                                                entryToDelete = null
+                                                modalHost.dismiss()
+                                            }
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.history_delete_entire_rewatch),
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    color = MaterialTheme.colorScheme.error,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                            )
+                                        }
+                                    }
+
+                                    // Button 3: Cancel
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = Color.Transparent,
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .bounceClick(scaleDown = 0.96f) {
+                                                entryToDelete = null
+                                                modalHost.dismiss()
+                                            }
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(vertical = 10.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.settings_cancel),
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    color = Color.White.copy(alpha = 0.65f),
+                                                    fontWeight = FontWeight.Medium
+                                                )
+                                            )
+                                        }
                                     }
                                 }
-
-                                Surface(
-                                    shape = RoundedCornerShape(12.dp),
-                                    color = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier
-                                        .weight(1f)
-                                        .bounceClick(scaleDown = 0.94f) {
-                                            viewModel.deleteWatchSession(target.historyId)
-                                            entryToDelete = null
-                                            modalHost.dismiss()
-                                        }
+                            } else {
+                                Row(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
-                                    Box(
-                                        modifier = Modifier.padding(vertical = 12.dp),
-                                        contentAlignment = Alignment.Center
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = Color.White.copy(alpha = 0.08f),
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .bounceClick(scaleDown = 0.94f) {
+                                                entryToDelete = null
+                                                modalHost.dismiss()
+                                            }
                                     ) {
-                                        Text(
-                                            text = stringResource(id = R.string.quick_action_delete),
-                                            style = MaterialTheme.typography.labelLarge.copy(
-                                                color = Color.White,
-                                                fontWeight = FontWeight.Bold
+                                        Box(
+                                            modifier = Modifier.padding(vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.settings_cancel),
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    color = Color.White.copy(alpha = 0.75f),
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
                                             )
-                                        )
+                                        }
+                                    }
+
+                                    Surface(
+                                        shape = RoundedCornerShape(12.dp),
+                                        color = MaterialTheme.colorScheme.error,
+                                        modifier = Modifier
+                                            .weight(1f)
+                                            .bounceClick(scaleDown = 0.94f) {
+                                                viewModel.deleteWatchSession(target.historyId)
+                                                entryToDelete = null
+                                                modalHost.dismiss()
+                                            }
+                                    ) {
+                                        Box(
+                                            modifier = Modifier.padding(vertical = 12.dp),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            Text(
+                                                text = stringResource(id = R.string.quick_action_delete),
+                                                style = MaterialTheme.typography.labelLarge.copy(
+                                                    color = Color.White,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            )
+                                        }
                                     }
                                 }
                             }

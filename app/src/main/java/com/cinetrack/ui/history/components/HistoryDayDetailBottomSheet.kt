@@ -115,7 +115,7 @@ fun HistoryDayDetailBottomSheet(
             ) {
                 items(
                     items = entries,
-                    key = { it.historyId }
+                    key = { it.uniqueKey }
                 ) { entry ->
                     HistoryCard(
                         entry = entry,

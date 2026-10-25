@@ -1927,4 +1927,13 @@
     <string name="folder_filter_shared">Hanya Bersama</string>
     <string name="folder_filter_private">Hanya Pribadi</string>
     <string name="folder_members_only_title">Anggota</string>
+    <string name="settings_allow_mobile_data_updates">Perbarui dengan data seluler</string>
+    <string name="settings_allow_mobile_data_updates_desc">Izinkan pemeriksaan rilis baru dan episode dengan data seluler (penggunaan data minimal).</string>
+    <string name="settings_msg_mobile_data_updates">Pembaruan data seluler %1$s</string>
+    <string name="watch_history_episode_dates_title">Tanggal Episode</string>
+    <string name="watch_history_episode_dates_subtitle">Kelola tanggal tonton untuk setiap episode</string>
+    <string name="watch_history_apply_to_season">Terapkan ke seluruh musim</string>
+    <string name="history_delete_session_only">Hapus Sesi Saja</string>
+    <string name="history_delete_entire_rewatch">Hapus Seluruh Tontonan Ulang</string>
+    <string name="history_delete_session_question">Apakah Anda ingin menghapus episode sesi ini saja (%1$s) atau menghapus seluruh tontonan ulang?</string>
 </resources>

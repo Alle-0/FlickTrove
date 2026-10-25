@@ -1928,4 +1928,13 @@
     <string name="folder_filter_shared">공유 폴더만</string>
     <string name="folder_filter_private">개인 폴더만</string>
     <string name="folder_members_only_title">멤버</string>
+    <string name="settings_allow_mobile_data_updates">모바일 데이터로 업데이트</string>
+    <string name="settings_allow_mobile_data_updates_desc">모바일 네트워크에서도 새 출시작 및 에피소드 확인을 허용합니다 (최소한의 데이터 사용).</string>
+    <string name="settings_msg_mobile_data_updates">모바일 데이터 업데이트 %1$s</string>
+    <string name="watch_history_episode_dates_title">에피소드 시청 날짜</string>
+    <string name="watch_history_episode_dates_subtitle">각 에피소드의 시청 날짜 관리</string>
+    <string name="watch_history_apply_to_season">시즌 전체에 적용</string>
+    <string name="history_delete_session_only">이 세션만 삭제</string>
+    <string name="history_delete_entire_rewatch">재시청 전체 삭제</string>
+    <string name="history_delete_session_question">이 세션의 에피소드(%1$s)만 삭제하시겠습니까, 아니면 재시청 전체를 삭제하시겠습니까?</string>
 </resources>

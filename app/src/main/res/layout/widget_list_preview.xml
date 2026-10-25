@@ -28,7 +28,7 @@
             android:layout_height="wrap_content"
             android:layout_weight="1"
             android:layout_marginStart="8dp"
-            android:text="PROSSIMAMENTE"
+            android:text="@string/widget_coming_soon"
             android:textColor="#FFFFFF"
             android:textSize="13sp"
             android:textStyle="bold" />
@@ -83,7 +83,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Inception"
+                android:text="Dune: Part Three"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -92,7 +92,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:background="@drawable/widget_search_bg"
+                android:background="@drawable/widget_pill_bg"
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
                 android:paddingTop="2dp"
@@ -104,13 +104,13 @@
                     android:layout_width="10dp"
                     android:layout_height="10dp"
                     android:src="@drawable/ic_calendario"
-                    android:tint="#AAAAAA" />
+                    android:tint="#B8B8C0" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="16 LUG 2010"
+                    android:text="@string/widget_date_tomorrow"
                     android:textColor="#EEEEEE"
                     android:textSize="10sp"
                     android:textStyle="bold" />
@@ -162,7 +162,7 @@
             <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="Interstellar"
+                android:text="Avengers: Doomsday"
                 android:textColor="#FFFFFF"
                 android:textSize="14sp"
                 android:textStyle="bold" />
@@ -171,7 +171,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:layout_marginTop="4dp"
-                android:background="@drawable/widget_search_bg"
+                android:background="@drawable/widget_pill_bg"
                 android:paddingStart="7dp"
                 android:paddingEnd="7dp"
                 android:paddingTop="2dp"
@@ -183,13 +183,13 @@
                     android:layout_width="10dp"
                     android:layout_height="10dp"
                     android:src="@drawable/ic_calendario"
-                    android:tint="#AAAAAA" />
+                    android:tint="#B8B8C0" />
 
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginStart="4dp"
-                    android:text="07 NOV 2014"
+                    android:text="01 MAG 2026"
                     android:textColor="#EEEEEE"
                     android:textSize="10sp"
                     android:textStyle="bold" />

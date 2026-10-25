@@ -111,6 +111,7 @@ fun FolderEditDialog(
                     modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.folder_edit_description_hint), color = Color.White.copy(alpha = 0.5f)) },
                     shape = RoundedCornerShape(16.dp),
+                    visualTransformation = remember { com.cinetrack.ui.utils.MarkdownVisualTransformation() },
                     colors = OutlinedTextFieldDefaults.colors(
                         focusedTextColor = Color.White,
                         unfocusedTextColor = Color.White,

@@ -10,6 +10,7 @@ import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.history.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.serialization.json.Json
+import kotlinx.serialization.encodeToString
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -84,54 +85,92 @@ class HistoryViewModel @Inject constructor(
             }
         }
 
-        val entries = rawRecords.map { rec ->
-            val (parsedDate, parsedTime) = parseWatchedAt(rec.watchedAt)
-            val hasExplicitTime = parsedTime != null && !(parsedTime.hour == 0 && parsedTime.minute == 0 && parsedTime.second == 0)
-
-            val displayDate = try {
-                parsedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
-            } catch (e: Exception) {
-                rec.watchedAt.take(10)
-            }
-
-            val displayTime = if (hasExplicitTime) {
-                try {
-                    parsedTime.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
-                } catch (e: Exception) {
-                    null
+        val entries = rawRecords.flatMap { rec ->
+            if (rec.mediaType == "tv") {
+                val epMap: Map<String, List<Int>> = if (rec.isRewatch && !rec.historicalEpisodes.isNullOrBlank()) {
+                    try {
+                        Json.decodeFromString(rec.historicalEpisodes)
+                    } catch (e: Exception) {
+                        rec.currentEpisodes ?: emptyMap()
+                    }
+                } else {
+                    rec.currentEpisodes ?: emptyMap()
                 }
-            } else null
 
-            val episodeInfo = if (rec.mediaType == "tv") {
-                formatTvEpisodes(rec.historicalEpisodes, rec.currentEpisodes)
-            } else null
+                val epDatesMap: Map<String, String> = rec.episodeDates?.let {
+                    try {
+                        Json.decodeFromString<Map<String, String>>(it)
+                    } catch (e: Exception) {
+                        emptyMap()
+                    }
+                } ?: emptyMap()
 
-            val rawReleaseDate = if (rec.mediaType == "tv") {
-                rec.firstAirDate ?: rec.releaseDate
+                val validEpMap = epMap.filter { it.key != "0" && it.value.isNotEmpty() }
+                if (validEpMap.isNotEmpty()) {
+                    data class EpItem(val season: String, val episode: Int, val iso: String, val date: LocalDate, val time: LocalTime?)
+
+                    val items = validEpMap.flatMap { (season, eps) ->
+                        eps.map { ep ->
+                            val iso = epDatesMap["${season}_${ep}"] ?: rec.watchedAt
+                            val (d, t) = parseWatchedAt(iso)
+                            EpItem(season, ep, iso, d, t)
+                        }
+                    }
+
+                    val groupedByDay = items.groupBy { it.date }
+
+                    groupedByDay.map { (day, dayItems) ->
+                        val latestItem = dayItems.maxByOrNull { parseToEpochMillis(it.iso) } ?: dayItems.first()
+                        val hasExplicitTime = latestItem.time != null && !(latestItem.time.hour == 0 && latestItem.time.minute == 0 && latestItem.time.second == 0)
+
+                        val displayDate = try {
+                            day.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
+                        } catch (e: Exception) {
+                            latestItem.iso.take(10)
+                        }
+
+                        val displayTime = if (hasExplicitTime && latestItem.time != null) {
+                            try {
+                                latestItem.time.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+                            } catch (e: Exception) {
+                                null
+                            }
+                        } else null
+
+                        val daySeasonMap = dayItems.groupBy({ it.season }, { it.episode })
+                        val episodeInfo = formatTvEpisodesForMap(daySeasonMap)
+
+                        val rawReleaseDate = rec.firstAirDate ?: rec.releaseDate
+                        val releaseYear = rawReleaseDate?.take(4)?.takeIf { it.length == 4 && it.all { ch -> ch.isDigit() } }
+
+                        WatchTimelineEntry(
+                            historyId = rec.historyId,
+                            movieId = rec.movieId,
+                            mediaType = rec.mediaType,
+                            title = rec.title,
+                            posterPath = rec.posterPath,
+                            watchedAt = latestItem.iso,
+                            parsedDate = day,
+                            formattedDisplayDate = displayDate,
+                            formattedDisplayTime = displayTime,
+                            isRewatch = rec.isRewatch,
+                            rewatchNumber = rewatchMap[rec.historyId] ?: 0,
+                            personalRating = rec.personalRating,
+                            personalNote = rec.personalNote?.takeIf { it.isNotBlank() },
+                            runtimeMinutes = rec.runtimeMinutes,
+                            episodeInfo = episodeInfo,
+                            isTvShow = true,
+                            releaseYear = releaseYear,
+                            sessionEpisodes = daySeasonMap,
+                            totalSessionsInRewatch = groupedByDay.size
+                        )
+                    }
+                } else {
+                    listOf(buildSingleEntry(rec, rewatchMap))
+                }
             } else {
-                rec.releaseDate ?: rec.firstAirDate
+                listOf(buildSingleEntry(rec, rewatchMap))
             }
-            val releaseYear = rawReleaseDate?.take(4)?.takeIf { it.length == 4 && it.all { ch -> ch.isDigit() } }
-
-            WatchTimelineEntry(
-                historyId = rec.historyId,
-                movieId = rec.movieId,
-                mediaType = rec.mediaType,
-                title = rec.title,
-                posterPath = rec.posterPath,
-                watchedAt = rec.watchedAt,
-                parsedDate = parsedDate,
-                formattedDisplayDate = displayDate,
-                formattedDisplayTime = displayTime,
-                isRewatch = rec.isRewatch,
-                rewatchNumber = rewatchMap[rec.historyId] ?: 0,
-                personalRating = rec.personalRating,
-                personalNote = rec.personalNote?.takeIf { it.isNotBlank() },
-                runtimeMinutes = rec.runtimeMinutes,
-                episodeInfo = episodeInfo,
-                isTvShow = rec.mediaType == "tv",
-                releaseYear = releaseYear
-            )
         }
 
         // Apply filters: Media, Viewing, Notes
@@ -151,19 +190,19 @@ class HistoryViewModel @Inject constructor(
             matchesMedia && matchesViewing && matchesNotes
         }
 
-        // Apply sort (chronological)
+        // Apply sort (chronological) using epoch millis to avoid lexicographical string discrepancies
         val sortedEntries = when (filterConfig.sortOption) {
-            HistorySortOption.DATE_DESC -> filteredByCriteria
-            HistorySortOption.DATE_ASC -> filteredByCriteria.reversed()
+            HistorySortOption.DATE_DESC -> filteredByCriteria.sortedByDescending { parseToEpochMillis(it.watchedAt) }
+            HistorySortOption.DATE_ASC -> filteredByCriteria.sortedBy { parseToEpochMillis(it.watchedAt) }
         }
 
         // Precompute calendar entries grouped by date O(1)
         val calendarMap = filteredByCriteria.groupBy { it.parsedDate }
 
-        val totalMovies = entries.count { !it.isTvShow }
-        val totalTv = entries.count { it.isTvShow }
-        val totalRewatch = entries.count { it.isRewatch }
-        val totalNotes = entries.count { !it.personalNote.isNullOrBlank() }
+        val totalMovies = rawRecords.count { it.mediaType != "tv" }
+        val totalTv = rawRecords.count { it.mediaType == "tv" }
+        val totalRewatch = rawRecords.count { it.isRewatch }
+        val totalNotes = rawRecords.count { !it.personalNote.isNullOrBlank() }
         val totalMinutes = entries.sumOf { it.runtimeMinutes.toLong() }
 
         HistoryUiState(
@@ -238,6 +277,98 @@ class HistoryViewModel @Inject constructor(
 
     fun resetToCurrentMonth() {
         _selectedCalendarMonth.value = YearMonth.now()
+    }
+
+    fun deleteSessionEpisodes(entry: WatchTimelineEntry) {
+        val sessionEps = entry.sessionEpisodes
+        if (sessionEps == null || entry.totalSessionsInRewatch <= 1) {
+            deleteWatchSession(entry.historyId)
+            return
+        }
+        viewModelScope.launch(Dispatchers.IO) {
+            val allHistory = watchHistoryRepository.getAllWatchHistory()
+            val historyEntity = allHistory.find { it.id == entry.historyId } ?: return@launch
+
+            // 1. Parse and remove from episodeDates
+            val epDatesMap = historyEntity.episodeDates?.let {
+                try {
+                    Json.decodeFromString<Map<String, String>>(it).toMutableMap()
+                } catch (e: Exception) {
+                    mutableMapOf()
+                }
+            } ?: mutableMapOf()
+
+            sessionEps.forEach { (season, eps) ->
+                eps.forEach { ep ->
+                    epDatesMap.remove("${season}_${ep}")
+                    epDatesMap.remove("S${season}E${ep}")
+                }
+            }
+
+            // 2. Handle episodes removal
+            var shouldDeleteEntireEntity = false
+            var updatedHistEpisodesJson: String? = historyEntity.historicalEpisodes
+
+            if (historyEntity.historicalEpisodes != null) {
+                // Archived rewatch snapshot
+                val histMap = try {
+                    Json.decodeFromString<Map<String, List<Int>>>(historyEntity.historicalEpisodes).toMutableMap()
+                } catch (e: Exception) {
+                    mutableMapOf()
+                }
+                sessionEps.forEach { (s, eps) ->
+                    val cur = histMap[s] ?: emptyList()
+                    val rem = cur - eps.toSet()
+                    if (rem.isEmpty()) histMap.remove(s) else histMap[s] = rem
+                }
+                if (histMap.isEmpty() || histMap.values.all { it.isEmpty() }) {
+                    shouldDeleteEntireEntity = true
+                } else {
+                    updatedHistEpisodesJson = Json.encodeToString(histMap.toMap())
+                }
+            } else {
+                // Active/current watch: update local Movie entity
+                val local = movieRepository.getMovie(entry.movieId, entry.mediaType)
+                if (local != null) {
+                    val curEps = (local.watchedEpisodes ?: emptyMap()).toMutableMap()
+                    sessionEps.forEach { (s, eps) ->
+                        val cur = curEps[s] ?: emptyList()
+                        val rem = cur - eps.toSet()
+                        if (rem.isEmpty()) curEps.remove(s) else curEps[s] = rem
+                    }
+                    val totalEps = local.effectiveTotalEpisodes
+                    val watchedCount = curEps.values.sumOf { it.size }
+                    if (watchedCount == 0) {
+                        shouldDeleteEntireEntity = true
+                    }
+                    val isCompleted = totalEps > 0 && watchedCount >= totalEps
+                    val progressVal = if (totalEps > 0) (watchedCount.toDouble() / totalEps.toDouble()).coerceIn(0.0, 1.0) else 0.0
+
+                    val updatedMovie = local.copy(
+                        watchedEpisodes = curEps,
+                        watched = isCompleted,
+                        progress = progressVal,
+                        clientUpdatedAt = System.currentTimeMillis()
+                    )
+                    movieRepository.saveMovie(updatedMovie)
+                }
+            }
+
+            if (shouldDeleteEntireEntity || epDatesMap.isEmpty()) {
+                deleteWatchSession(entry.historyId)
+            } else {
+                val newWatchedAt = epDatesMap.values.maxOrNull() ?: historyEntity.watchedAt
+                val updatedHistory = historyEntity.copy(
+                    watchedAt = newWatchedAt,
+                    episodeDates = if (epDatesMap.isNotEmpty()) Json.encodeToString(epDatesMap.toMap()) else null,
+                    historicalEpisodes = updatedHistEpisodesJson,
+                    syncStatus = if (historyEntity.syncStatus == "synced") "pending_update" else historyEntity.syncStatus
+                )
+                watchHistoryRepository.updateWatchHistory(updatedHistory)
+                watchHistoryRepository.pushPendingWatchHistory()
+                badgeRepository.evaluateBadgesAsync()
+            }
+        }
     }
 
     fun deleteWatchSession(historyId: Long) {
@@ -320,6 +451,59 @@ class HistoryViewModel @Inject constructor(
     }
 
     companion object {
+        fun buildSingleEntry(
+            rec: RawTimelineRecord,
+            rewatchMap: Map<Long, Int>
+        ): WatchTimelineEntry {
+            val (parsedDate, parsedTime) = parseWatchedAt(rec.watchedAt)
+            val hasExplicitTime = parsedTime != null && !(parsedTime.hour == 0 && parsedTime.minute == 0 && parsedTime.second == 0)
+
+            val displayDate = try {
+                parsedDate.format(DateTimeFormatter.ofPattern("d MMMM yyyy", Locale.getDefault()))
+            } catch (e: Exception) {
+                rec.watchedAt.take(10)
+            }
+
+            val displayTime = if (hasExplicitTime) {
+                try {
+                    parsedTime.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
+                } catch (e: Exception) {
+                    null
+                }
+            } else null
+
+            val episodeInfo = if (rec.mediaType == "tv") {
+                formatTvEpisodes(rec.historicalEpisodes, rec.currentEpisodes)
+            } else null
+
+            val rawReleaseDate = if (rec.mediaType == "tv") {
+                rec.firstAirDate ?: rec.releaseDate
+            } else {
+                rec.releaseDate ?: rec.firstAirDate
+            }
+            val releaseYear = rawReleaseDate?.take(4)?.takeIf { it.length == 4 && it.all { ch -> ch.isDigit() } }
+
+            return WatchTimelineEntry(
+                historyId = rec.historyId,
+                movieId = rec.movieId,
+                mediaType = rec.mediaType,
+                title = rec.title,
+                posterPath = rec.posterPath,
+                watchedAt = rec.watchedAt,
+                parsedDate = parsedDate,
+                formattedDisplayDate = displayDate,
+                formattedDisplayTime = displayTime,
+                isRewatch = rec.isRewatch,
+                rewatchNumber = rewatchMap[rec.historyId] ?: 0,
+                personalRating = rec.personalRating,
+                personalNote = rec.personalNote?.takeIf { it.isNotBlank() },
+                runtimeMinutes = rec.runtimeMinutes,
+                episodeInfo = episodeInfo,
+                isTvShow = rec.mediaType == "tv",
+                releaseYear = releaseYear
+            )
+        }
+
         fun parseWatchedAt(raw: String): Pair<LocalDate, LocalTime?> {
             return try {
                 if (raw.contains("T")) {
@@ -341,23 +525,44 @@ class HistoryViewModel @Inject constructor(
             }
         }
 
-        // Single source of truth for episode display in History: always currentEpisodes
-        // (f.watched_episodes). historicalEpisodes is a pre-rewatch snapshot saved *before*
-        // watchedEpisodes is reset to emptyMap(), so it never reflects the actual episodes
-        // watched in a given rewatch session and must NOT be used for display.
+        fun parseToEpochMillis(raw: String?): Long {
+            if (raw.isNullOrBlank()) return 0L
+            return try {
+                if (raw.contains("T")) {
+                    try {
+                        Instant.parse(raw).toEpochMilli()
+                    } catch (e: Exception) {
+                        LocalDateTime.parse(raw.take(19)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                    }
+                } else if (raw.length >= 10) {
+                    LocalDate.parse(raw.take(10)).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
+                } else {
+                    0L
+                }
+            } catch (e: Exception) {
+                0L
+            }
+        }
+
         private fun formatTvEpisodes(
             @Suppress("UNUSED_PARAMETER") historicalEpisodes: String?,
             currentEpisodes: Map<String, List<Int>>?
         ): String? {
-            if (!currentEpisodes.isNullOrEmpty()) {
-                val validMap = currentEpisodes.filter { it.key != "0" }
+            return formatTvEpisodesForMap(currentEpisodes)
+        }
+
+        private fun formatTvEpisodesForMap(
+            episodesMap: Map<String, List<Int>>?
+        ): String? {
+            if (!episodesMap.isNullOrEmpty()) {
+                val validMap = episodesMap.filter { it.key != "0" && it.value.isNotEmpty() }
                 val totalEps = validMap.values.sumOf { it.size }
                 if (totalEps > 0) {
                     val seasonKeys = validMap.keys.sortedBy { it.toIntOrNull() ?: 0 }
-                    return if (seasonKeys.size == 1) {
-                        "S${seasonKeys.first()} • $totalEps ep"
-                    } else {
-                        "$totalEps ep"
+                    return when {
+                        seasonKeys.size == 1 -> "S${seasonKeys.first()} • $totalEps ep"
+                        seasonKeys.size > 1 -> "${seasonKeys.joinToString(", ") { "S$it" }} • $totalEps ep"
+                        else -> "$totalEps ep"
                     }
                 }
             }

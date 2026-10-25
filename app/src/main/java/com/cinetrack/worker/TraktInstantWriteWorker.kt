@@ -197,7 +197,8 @@ class TraktInstantWriteWorker @AssistedInject constructor(
                 ACTION_MARK_EPISODES_WATCHED -> {
                     val encodedEps = inputData.getString(KEY_SEASON_EPISODES)
                         ?: return@withContext Result.failure()
-                    val request = buildEpisodeHistoryRequest(ids, encodedEps)
+                    val watchedAt = inputData.getString(KEY_WATCHED_AT)
+                    val request = buildEpisodeHistoryRequest(ids, encodedEps, watchedAt)
                     traktService.addEpisodesToHistory(request)
                 }
                 ACTION_REMOVE_EPISODES_WATCHED -> {
@@ -231,7 +232,8 @@ class TraktInstantWriteWorker @AssistedInject constructor(
      */
     private fun buildEpisodeHistoryRequest(
         ids: TraktSyncIds,
-        encodedEps: String
+        encodedEps: String,
+        watchedAt: String? = null
     ): TraktEpisodeHistoryRequest {
         val seasons = encodedEps.split(";").mapNotNull { part ->
             val colonIdx = part.indexOf(':')
@@ -240,7 +242,7 @@ class TraktInstantWriteWorker @AssistedInject constructor(
             val epNums = part.substring(colonIdx + 1)
                 .split(",")
                 .mapNotNull { it.trim().toIntOrNull() }
-                .map { TraktEpisodeNumber(it) }
+                .map { TraktEpisodeNumber(it, watched_at = watchedAt) }
             if (epNums.isEmpty()) return@mapNotNull null
             TraktSeasonEpisodes(number = seasonNum, episodes = epNums)
         }
@@ -283,6 +285,7 @@ class TraktInstantWriteWorker @AssistedInject constructor(
         const val KEY_IMDB_ID        = "imdb_id"
         const val KEY_RATING         = "rating"
         const val KEY_SEASON_EPISODES = "season_episodes"
+        const val KEY_WATCHED_AT      = "watched_at"
 
         const val ACTION_MARK_WATCHED           = "mark_watched"
         const val ACTION_REMOVE_WATCHED         = "remove_watched"
