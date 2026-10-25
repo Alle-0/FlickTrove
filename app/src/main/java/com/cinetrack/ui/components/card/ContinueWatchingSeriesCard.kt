@@ -351,13 +351,11 @@ fun ContinueWatchingSeriesCard(
     )
 
     val circularBar = com.cinetrack.LocalCircularProgressBar.current
-    val showCircular = circularBar == "TOTAL" || circularBar == "SEASON"
     val targetCircularProgress = remember(circularBar, totalSeriesProgress, seasonProgress, isReleased) {
         if (!isReleased) 0f
         else when (circularBar) {
-            "TOTAL" -> totalSeriesProgress.coerceIn(0f, 1f)
             "SEASON" -> seasonProgress.coerceIn(0f, 1f)
-            else -> 0f
+            else -> totalSeriesProgress.coerceIn(0f, 1f)
         }
     }
     val animatedCircularProgress by animateFloatAsState(
@@ -703,7 +701,7 @@ fun ContinueWatchingSeriesCard(
                 // 1-tap Checkmark button (✓) with Circular Progress directly on the button border
                 SeasonProgressCheckButton(
                     progress = animatedCircularProgress,
-                    showProgress = showCircular || animatedCircularProgress > 0.005f,
+                    showProgress = true,
                     accentColor = appAccent,
                     isUpdating = isUpdating,
                     contentDescription = stringResource(R.string.cd_mark_episode_watched, epText),

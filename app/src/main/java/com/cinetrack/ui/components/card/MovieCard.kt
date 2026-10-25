@@ -505,11 +505,9 @@ fun MovieCard(
                         val isOcchio = !isQuickWatch && isReleased && (isReminder || isFavorite)
 
                         val circularBar = com.cinetrack.LocalCircularProgressBar.current
-                        val showCircular = circularBar == "TOTAL" || circularBar == "SEASON"
                         val targetCircularProgress = when (circularBar) {
-                            "TOTAL" -> computedProgress
                             "SEASON" -> seasonProgress
-                            else -> 0f
+                            else -> computedProgress
                         }
                         val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(
                             targetValue = targetCircularProgress,
@@ -519,7 +517,7 @@ fun MovieCard(
                             ),
                             label = "movieCardCircularProgress"
                         )
-                        val isHasCircularProgress = isTv && !isWatched && (showCircular || animatedCircularProgress > 0.005f)
+                        val isHasCircularProgress = isTv && !isWatched
 
                         val actionBg = when {
                             isQuickWatch -> appAccent.copy(alpha = 0.15f)

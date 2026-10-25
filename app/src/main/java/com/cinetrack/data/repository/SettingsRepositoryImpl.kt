@@ -277,12 +277,12 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override val circularProgressBar: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.CIRCULAR_PROGRESS_BAR] ?: run {
+        val current = preferences[PreferencesKeys.CIRCULAR_PROGRESS_BAR]
+        if (!current.isNullOrEmpty() && current != "NONE") current
+        else {
             val old = preferences[PreferencesKeys.PROGRESS_BAR_TARGET]
             when (old) {
-                "CIRCULAR_TOTAL" -> "TOTAL"
                 "CIRCULAR_SEASON" -> "SEASON"
-                "NONE" -> "NONE"
                 else -> "TOTAL"
             }
         }
@@ -307,8 +307,9 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun updateCircularProgressBar(target: String) {
+        val safeTarget = if (target == "SEASON") "SEASON" else "TOTAL"
         dataStore.edit { preferences ->
-            preferences[PreferencesKeys.CIRCULAR_PROGRESS_BAR] = target
+            preferences[PreferencesKeys.CIRCULAR_PROGRESS_BAR] = safeTarget
         }
     }
 }

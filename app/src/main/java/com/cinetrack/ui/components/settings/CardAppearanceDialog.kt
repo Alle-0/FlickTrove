@@ -265,7 +265,9 @@ fun CardAppearanceDialog(
     // Local state for live preview (not yet persisted)
     var localEpisodeStyle by remember(persistedEpisodeInfoStyle) { mutableStateOf(persistedEpisodeInfoStyle) }
     var localLinearBar by remember(persistedLinearProgressBar) { mutableStateOf(persistedLinearProgressBar) }
-    var localCircularBar by remember(persistedCircularProgressBar) { mutableStateOf(persistedCircularProgressBar) }
+    var localCircularBar by remember(persistedCircularProgressBar) {
+        mutableStateOf(if (persistedCircularProgressBar == "SEASON") "SEASON" else "TOTAL")
+    }
     var localTextMultiplier by remember(persistedTextSizeMultiplier) { mutableStateOf(persistedTextSizeMultiplier) }
     var localShowBadges by remember(persistedShowBadges) { mutableStateOf(persistedShowBadges) }
     var localShowFolderBookmarks by remember(persistedShowFolderBookmarks) { mutableStateOf(persistedShowFolderBookmarks) }
@@ -1043,14 +1045,6 @@ private fun ProgressBarCompactOptions(
                 modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
                 horizontalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_disabled),
-                    subtitle = stringResource(R.string.settings_chip_progress_none),
-                    selected = selectedCircular == "NONE",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelectCircular("NONE") }
-                )
                 CompactChipOption(
                     title = stringResource(R.string.settings_chip_col_series),
                     subtitle = stringResource(R.string.settings_chip_whole_series),
