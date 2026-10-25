@@ -1332,7 +1332,7 @@
     <string name="watch_history_first_watch">Prima visione</string>
     <string name="watch_history_episode_dates_title">Date episodi</string>
     <string name="watch_history_episode_dates_subtitle">Gestisci la data di visione di ogni episodio</string>
-    <string name="watch_history_apply_to_season">Applica a tutta la stagione</string>
+    <string name="watch_history_apply_to_season">Tutta la stagione</string>
     <string name="watch_date_prompt_title">Quando l\'hai visto?</string>
     <string name="watch_date_prompt_now">Adesso</string>
     <string name="watch_date_prompt_release_date">Data di uscita</string>
@@ -1944,4 +1944,23 @@
     <string name="history_delete_session_only">Rimuovi solo sessione</string>
     <string name="history_delete_entire_rewatch">Elimina intero rewatch</string>
     <string name="history_delete_session_question">Vuoi rimuovere solo gli episodi di questa sessione (%1$s) o eliminare l\'intero rewatch?</string>
+    <string name="settings_apply">Applica</string>
+    <string name="settings_card_appearance_title">Aspetto card</string>
+    <string name="settings_card_appearance_desc">Personalizza info episodi, barra di avanzamento, testo e badge</string>
+    <string name="settings_card_episode_info">Info episodi</string>
+    <string name="settings_card_progress_bar">Barra di avanzamento</string>
+    <string name="settings_card_text_size">Dimensione testo</string>
+    <string name="settings_episode_style_remaining">Episodi rimanenti (es. 4 rimasti, 11 tot)</string>
+    <string name="settings_episode_style_watched_total">Visti / Totali (es. 9 / 20 ep)</string>
+    <string name="settings_episode_style_season_only">Solo stagione attuale (es. 9/13 ep S2)</string>
+    <string name="settings_episode_style_season_and_total">Stagione + Totale (es. 9/13 S2 • 9/20 tot)</string>
+    <string name="settings_episode_style_percentage">Percentuale (es. 45%)</string>
+    <string name="settings_progress_circular_total">Circolare — serie intera</string>
+    <string name="settings_progress_circular_season">Circolare — stagione attuale</string>
+    <string name="settings_progress_linear_total">Barra in alto — serie intera</string>
+    <string name="settings_progress_linear_season">Barra in alto — stagione attuale</string>
+    <string name="settings_progress_none">Nessuna barra</string>
+    <string name="settings_card_preview_3_cols">3 Colonne</string>
+    <string name="settings_card_preview_2_cols">2 Colonne</string>
+    <string name="settings_card_preview_list">Lista</string>
 </resources>

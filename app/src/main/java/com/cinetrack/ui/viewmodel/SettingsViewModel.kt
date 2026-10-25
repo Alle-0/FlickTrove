@@ -398,6 +398,12 @@ class SettingsViewModel @Inject constructor(
     val titleTextSizeMultiplier: StateFlow<Float> = settingsRepository.titleTextSizeMultiplier
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 1.0f)
 
+    val episodeInfoStyle: StateFlow<String> = settingsRepository.episodeInfoStyle
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "REMAINING")
+
+    val progressBarTarget: StateFlow<String> = settingsRepository.progressBarTarget
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "CIRCULAR_TOTAL")
+
     val showMyFolders: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showMyFolders }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -882,6 +888,18 @@ class SettingsViewModel @Inject constructor(
                 else -> UiText.StringResource(R.string.settings_custom)
             }
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_text_size, desc))
+        }
+    }
+
+    fun updateEpisodeInfoStyle(style: String) {
+        viewModelScope.launch {
+            settingsRepository.updateEpisodeInfoStyle(style)
+        }
+    }
+
+    fun updateProgressBarTarget(target: String) {
+        viewModelScope.launch {
+            settingsRepository.updateProgressBarTarget(target)
         }
     }
 

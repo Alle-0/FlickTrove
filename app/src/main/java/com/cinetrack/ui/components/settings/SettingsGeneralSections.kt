@@ -126,13 +126,12 @@ fun SettingsUILayoutSection(
     settingsViewModel: SettingsViewModel,
     currentAccentColor: Color,
     vibrationEnabled: Boolean,
-    onShowBadgesInfo: () -> Unit,
-    onShowHomeSectionsOrderDialog: () -> Unit = {}
+    onShowHomeSectionsOrderDialog: () -> Unit = {},
+    onShowCardAppearanceDialog: () -> Unit = {}
 ) {
     val context = LocalContext.current
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
     val hideSavedFromDiscovery by settingsViewModel.hideSavedFromDiscovery.collectAsStateWithLifecycle()
-    val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
     val showSplitDroppedHome by settingsViewModel.showSplitDroppedHome.collectAsStateWithLifecycle()
@@ -269,6 +268,24 @@ fun SettingsUILayoutSection(
         )
 
         SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_grid),
+            title = stringResource(R.string.settings_card_appearance_title),
+            description = stringResource(R.string.settings_card_appearance_desc),
+            trailing = {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                    modifier = Modifier.size(16.dp)
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                onShowCardAppearanceDialog()
+            }
+        )
+
+        SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_segnalibro),
             title = stringResource(R.string.settings_folder_bookmarks),
             description = stringResource(R.string.settings_folder_bookmarks_desc),
@@ -285,46 +302,6 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleFolderBookmarks(!showFolderBookmarks)
-            }
-        )
-
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_temi),
-            title = stringResource(R.string.settings_badges),
-            description = stringResource(R.string.settings_badges_desc),
-            trailing = {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Box(
-                        modifier = Modifier
-                            .size(36.dp)
-                            .clip(CircleShape)
-                            .bounceClick { 
-                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                onShowBadgesInfo() 
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Info,
-                            contentDescription = "Info Badge",
-                            tint = Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier.size(22.dp)
-                        )
-                    }
-                    Spacer(modifier = Modifier.width(4.dp))
-                    FlickTroveSwitch(
-                        checked = showBadges,
-                        onCheckedChange = { 
-                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            settingsViewModel.toggleBadges(it) 
-                        },
-                        accentColor = currentAccentColor
-                    )
-                }
-            },
-            onClick = {
-                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                settingsViewModel.toggleBadges(!showBadges)
             }
         )
 
@@ -570,52 +547,12 @@ fun SettingsAccessibilitySection(
     vibrationEnabled: Boolean
 ) {
     val context = LocalContext.current
-    val titleTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_accessibility),
         icon = ImageVector.vectorResource(id = R.drawable.ic_accessibilita)
     ) {
-        SettingsItem(
-            icon = ImageVector.vectorResource(id = R.drawable.ic_maiuscolo),
-            title = stringResource(R.string.settings_title_size),
-            description = stringResource(R.string.settings_title_size_desc),
-            trailing = { },
-            onClick = { },
-            customContent = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    val options = listOf(
-                        Triple(0.8f, stringResource(R.string.settings_size_small), titleTextSizeMultiplier == 0.8f),
-                        Triple(1.0f, stringResource(R.string.settings_size_medium), titleTextSizeMultiplier == 1.0f),
-                        Triple(1.2f, stringResource(R.string.settings_size_large), titleTextSizeMultiplier == 1.2f)
-                    )
-                    options.forEach { (value, label, isSelected) ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .bounceClick { 
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    settingsViewModel.updateTitleTextSizeMultiplier(value) 
-                                }
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                            )
-                        }
-                    }
-                }
-            }
-        )
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
             title = stringResource(R.string.settings_visual_effects),

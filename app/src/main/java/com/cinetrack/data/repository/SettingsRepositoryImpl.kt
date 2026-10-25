@@ -41,6 +41,8 @@ class SettingsRepositoryImpl @Inject constructor(
         val AUTO_OPEN_VIBE_ON_WATCH = booleanPreferencesKey("auto_open_vibe_on_watch")
         val EPISODES_LAYOUT = stringPreferencesKey("episodes_layout")
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
+        val EPISODE_INFO_STYLE = stringPreferencesKey("episode_info_style")
+        val PROGRESS_BAR_TARGET = stringPreferencesKey("progress_bar_target")
     }
 
     override val episodesLayout: Flow<String> = dataStore.data.map { preferences ->
@@ -250,6 +252,26 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleAllowMobileDataUpdates(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = enabled
+        }
+    }
+
+    override val episodeInfoStyle: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.EPISODE_INFO_STYLE] ?: "REMAINING"
+    }
+
+    override val progressBarTarget: Flow<String> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.PROGRESS_BAR_TARGET] ?: "CIRCULAR_TOTAL"
+    }
+
+    override suspend fun updateEpisodeInfoStyle(style: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.EPISODE_INFO_STYLE] = style
+        }
+    }
+
+    override suspend fun updateProgressBarTarget(target: String) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.PROGRESS_BAR_TARGET] = target
         }
     }
 }

@@ -60,5 +60,5 @@ fun Movie.generateBadges(showAdvancedBadges: Boolean = false): List<MovieBadge> 
         else if (hasGenre("Family") || hasGenre("Famiglia")) badges.add(MovieBadge.FAMILY)
     }
 
-    return badges.take(3)
+    return badges.distinct()
 }

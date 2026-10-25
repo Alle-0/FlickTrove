@@ -24,6 +24,8 @@ interface SettingsRepository {
     val autoOpenVibeOnWatch: Flow<Boolean>
     val episodesLayout: Flow<String>
     val allowMobileDataUpdates: Flow<Boolean>
+    val episodeInfoStyle: Flow<String>
+    val progressBarTarget: Flow<String>
 
     suspend fun updateAccentColor(color: String)
     suspend fun toggleFolderBookmarks(enabled: Boolean)
@@ -46,4 +48,6 @@ interface SettingsRepository {
     suspend fun toggleAutoOpenVibeOnWatch(enabled: Boolean)
     suspend fun updateEpisodesLayout(layout: String)
     suspend fun toggleAllowMobileDataUpdates(enabled: Boolean)
+    suspend fun updateEpisodeInfoStyle(style: String)
+    suspend fun updateProgressBarTarget(target: String)
 }

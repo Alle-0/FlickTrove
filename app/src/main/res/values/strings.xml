@@ -313,6 +313,23 @@
     <string name="settings_made_with">Developed with </string>
     <string name="settings_for_lovers"> for movie lovers</string>
     <string name="settings_cancel">Cancel</string>
+    <string name="settings_apply">Apply</string>
+    <string name="settings_card_appearance_title">Card Appearance</string>
+    <string name="settings_card_episode_info">Episode Info</string>
+    <string name="settings_card_progress_bar">Progress Bar</string>
+    <string name="settings_card_text_size">Text Size</string>
+    <!-- Episode Info Styles -->
+    <string name="settings_episode_style_remaining">Remaining episodes (e.g. 4 remaining, 11 total)</string>
+    <string name="settings_episode_style_watched_total">Watched / Total (e.g. 9 / 20 ep)</string>
+    <string name="settings_episode_style_season_only">Season progress only (e.g. 9/13 ep S2)</string>
+    <string name="settings_episode_style_season_and_total">Season + Total (e.g. 9/13 S2 • 9/20 tot)</string>
+    <string name="settings_episode_style_percentage">Percentage (e.g. 45%)</string>
+    <!-- Progress Bar Targets -->
+    <string name="settings_progress_circular_total">Circular — whole series</string>
+    <string name="settings_progress_circular_season">Circular — current season</string>
+    <string name="settings_progress_linear_total">Linear bar — whole series</string>
+    <string name="settings_progress_linear_season">Linear bar — current season</string>
+    <string name="settings_progress_none">No progress bar</string>
     <string name="settings_yes_delete">Yes, Delete</string>
     <string name="settings_confirm">Confirm</string>
     <string name="settings_got_it">Got it</string>
@@ -1392,7 +1409,7 @@
     <string name="watch_history_first_watch">First viewing</string>
     <string name="watch_history_episode_dates_title">Episode Dates</string>
     <string name="watch_history_episode_dates_subtitle">Manage watch dates for each episode</string>
-    <string name="watch_history_apply_to_season">Apply date to whole season</string>
+    <string name="watch_history_apply_to_season">Apply to season</string>
 
     <string name="watch_date_prompt_title">When did you watch it?</string>
     <string name="watch_date_prompt_now">Just now (Today)</string>
@@ -1944,4 +1961,8 @@
     <string name="history_delete_session_only">Remove Session Only</string>
     <string name="history_delete_entire_rewatch">Delete Entire Rewatch</string>
     <string name="history_delete_session_question">Do you want to remove only this session\'s episodes (%1$s) or delete the entire rewatch?</string>
+    <string name="settings_card_appearance_desc">Customize episode info, progress bar, text size, and badges</string>
+    <string name="settings_card_preview_3_cols">3 Columns</string>
+    <string name="settings_card_preview_2_cols">2 Columns</string>
+    <string name="settings_card_preview_list">List</string>
 </resources>

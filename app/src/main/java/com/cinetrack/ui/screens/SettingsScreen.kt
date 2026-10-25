@@ -215,7 +215,6 @@ fun SettingsScreenContent(
     val seasonalAppIconEnabled by settingsViewModel.seasonalAppIconEnabled.collectAsStateWithLifecycle()
     var showSeasonalIconsDialog by remember { mutableStateOf(false) }
     val showFolderBookmarks by settingsViewModel.showFolderBookmarks.collectAsStateWithLifecycle()
-    val showBadges by settingsViewModel.showBadges.collectAsStateWithLifecycle()
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
 
     val syncWorkInfo by settingsViewModel.syncWorkInfo.collectAsStateWithLifecycle()
@@ -232,7 +231,6 @@ fun SettingsScreenContent(
     val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
     val defaultStartMedia by settingsViewModel.defaultStartMedia.collectAsStateWithLifecycle()
     val imageQuality by settingsViewModel.imageQuality.collectAsStateWithLifecycle()
-    val titleTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
 
     var showDeleteDialog by remember { mutableStateOf(false) }
@@ -243,6 +241,7 @@ fun SettingsScreenContent(
     var showStartScreenDialog by remember { mutableStateOf(false) }
     var showStartMediaDialog by remember { mutableStateOf(false) }
     var showBadgesInfoDialog by remember { mutableStateOf(false) }
+    var showCardAppearanceDialog by remember { mutableStateOf(false) }
     var showFeedbackDialog by remember { mutableStateOf(false) }
     var showCacheConfirm by remember { mutableStateOf(false) }
     var showDeepSyncConfirm by remember { mutableStateOf(false) }
@@ -527,8 +526,8 @@ fun SettingsScreenContent(
                             settingsViewModel = settingsViewModel,
                             currentAccentColor = currentAccentColor,
                             vibrationEnabled = vibrationEnabled,
-                            onShowBadgesInfo = { showBadgesInfoDialog = true },
-                            onShowHomeSectionsOrderDialog = { showHomeSectionsDialog = true }
+                            onShowHomeSectionsOrderDialog = { showHomeSectionsDialog = true },
+                            onShowCardAppearanceDialog = { showCardAppearanceDialog = true }
                         )
                     }
 
@@ -948,6 +947,14 @@ fun SettingsScreenContent(
             activeHazeState = activeHazeState,
             settingsViewModel = settingsViewModel,
             onDismiss = { showHomeSectionsDialog = false }
+        )
+
+        com.cinetrack.ui.components.settings.CardAppearanceDialog(
+            visible = showCardAppearanceDialog,
+            activeHazeState = activeHazeState,
+            settingsViewModel = settingsViewModel,
+            onShowBadgesInfo = { showBadgesInfoDialog = true },
+            onDismiss = { showCardAppearanceDialog = false }
         )
     }
 }

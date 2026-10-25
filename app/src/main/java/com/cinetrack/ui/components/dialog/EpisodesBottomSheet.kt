@@ -53,6 +53,7 @@ import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.haze
 
 import kotlinx.coroutines.launch
 import android.app.Activity
@@ -201,19 +202,21 @@ fun EpisodesBottomSheet(
         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
         contentWindowInsets = { WindowInsets(0) }
     ) {
+        val sheetHazeState = remember { HazeState() }
         CompositionLocalProvider(
             LocalContext provides context,
             LocalConfiguration provides config
         ) {
             Box(
                 modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.88f)
-                .hazeGlass(state = hazeState, shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
-        ) {
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.88f)
+                    .hazeGlass(state = hazeState, shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+            ) {
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .haze(state = sheetHazeState, style = HazeStyles.PremiumDark)
                     .navigationBarsPadding()
             ) {
                 // Custom Drag Handle
@@ -401,7 +404,7 @@ fun EpisodesBottomSheet(
                 EpisodeInfoModal(
                     episode = ep,
                     onDismiss = { selectedEpisodeForInfo = null },
-                    hazeState = hazeState
+                    hazeState = sheetHazeState
                 )
             }
         }

@@ -81,6 +81,20 @@ fun MovieListCard(
     val nextInfo = precalculatedNextInfo ?: remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
         if (isTv) movie.calculateNextEpisode() else null
     }
+    val episodeInfoStyle = com.cinetrack.LocalEpisodeInfoStyle.current
+    val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
+
+    val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
+        if (progress > 0f) progress
+        else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
+            val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+            (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+        } else 0f
+    }
+
+    val seasonProgress = remember(nextInfo, movie.seasons, movie.watchedEpisodes) {
+        if (isTv && nextInfo != null) com.cinetrack.ui.components.settings.calculateSeasonProgress(nextInfo, movie) else 0f
+    }
     val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -216,6 +230,7 @@ fun MovieListCard(
                     )
             )
 
+
             if (showFolderBookmarks) {
                 Box(modifier = Modifier.align(Alignment.TopStart)) {
                     MovieFolderBookmarks(folderColors)
@@ -234,7 +249,7 @@ fun MovieListCard(
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    badges.filter { it.text !in disabledBadges }.forEach { badge ->
+                    badges.filter { it.text !in disabledBadges }.take(3).forEach { badge ->
                         MovieCardBadge(
                             text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 
@@ -324,19 +339,22 @@ fun MovieListCard(
                             style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.ExtraBold, fontSize = 11.5.sp),
                             color = statusColor
                         )
-                        if (isReleased && !isUpToDate && nextInfo.remainingInSeason > 0) {
-                            val remainingSeason = nextInfo.remainingInSeason
-                            val remainingTotal = nextInfo.remainingTotal
-                            val remainingText = if (remainingTotal > remainingSeason) {
-                                " • $remainingSeason ($remainingTotal tot)"
-                            } else {
-                                " • $remainingSeason"
-                            }
-                            Text(
-                                text = remainingText,
-                                style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.sp),
-                                color = Color.White.copy(alpha = 0.55f)
+                        if (isReleased && !isUpToDate) {
+                            val epText = com.cinetrack.ui.components.settings.formatEpisodeInfo(
+                                style = episodeInfoStyle,
+                                nextInfo = nextInfo,
+                                movie = movie,
+                                seriesProgress = computedProgress
                             )
+                            if (epText.isNotEmpty()) {
+                                Text(
+                                    text = epText,
+                                    style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.sp),
+                                    color = Color.White.copy(alpha = 0.55f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }
@@ -398,15 +416,12 @@ fun MovieListCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
-                    if (progress > 0f) progress
-                    else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
-                        val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
-                        (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
-                    } else 0f
-                }
-                if (isTv && !isWatched && computedProgress > 0f) {
-                    MovieCircularProgress(progress = computedProgress)
+                val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
+                        progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
+                val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
+
+                if (isTv && !isWatched && showCircular && circularProgress > 0f) {
+                    MovieCircularProgress(progress = circularProgress)
                 }
 
                 val appAccent = MaterialTheme.colorScheme.primary

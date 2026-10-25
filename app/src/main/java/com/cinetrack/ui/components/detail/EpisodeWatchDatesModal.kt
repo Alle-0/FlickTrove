@@ -1,13 +1,23 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
@@ -17,7 +27,12 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.StrokeJoin
+import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -33,6 +48,7 @@ import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
 import kotlinx.serialization.json.Json
 import java.time.Instant
@@ -59,6 +75,7 @@ fun EpisodeWatchDatesModal(
     hazeState: HazeState? = null
 ) {
     var activeEdit by remember { mutableStateOf<TargetEdit?>(null) }
+    var collapsedSeasons by remember { mutableStateOf<Set<Int>>(emptySet()) }
 
     val modalVisibilityAlpha by animateFloatAsState(
         targetValue = if (activeEdit != null) 0f else 1f,
@@ -150,128 +167,284 @@ fun EpisodeWatchDatesModal(
                             .padding(vertical = 32.dp)
                     )
                 } else {
+                    val lazyListState = rememberLazyListState()
                     LazyColumn(
+                        state = lazyListState,
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 420.dp),
-                        verticalArrangement = Arrangement.spacedBy(16.dp),
+                            .heightIn(max = 440.dp)
+                            .verticalFadingEdges(
+                                lazyListState = lazyListState,
+                                topEdgeHeight = 20.dp,
+                                bottomEdgeHeight = 20.dp
+                            ),
                         contentPadding = PaddingValues(vertical = 4.dp)
                     ) {
-                        validSeasons.forEach { (seasonNum, eps) ->
-                            item(key = "season_header_$seasonNum") {
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(horizontal = 4.dp, vertical = 2.dp),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = "${movie.seasons?.find { it.seasonNumber == seasonNum }?.name?.takeIf { it.isNotBlank() } ?: "Stagione $seasonNum"} (${eps.size} ep)",
-                                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                                        color = accentColor
-                                    )
+                        validSeasons.forEachIndexed { sIndex, (seasonNum, eps) ->
+                            val isCollapsed = seasonNum in collapsedSeasons
 
-                                    // Quick Action: Apply to all episodes in this season
+                            item(key = "season_$seasonNum") {
+                                val chevronRotation by animateFloatAsState(
+                                    targetValue = if (isCollapsed) 0f else 90f,
+                                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                                    label = "chevronRotation_$seasonNum"
+                                )
+                                val connectorAlpha by animateFloatAsState(
+                                    targetValue = if (isCollapsed) 0f else 0.35f,
+                                    animationSpec = tween(durationMillis = 180),
+                                    label = "connectorAlpha_$seasonNum"
+                                )
+
+                                Column(modifier = Modifier.fillMaxWidth()) {
                                     Row(
                                         modifier = Modifier
-                                            .clip(RoundedCornerShape(8.dp))
-                                            .background(Color.White.copy(alpha = 0.08f))
-                                            .bounceClick(scaleDown = 0.95f) {
-                                                val firstDate = eps.firstOrNull()?.let { ep ->
-                                                    parseWatchDateToLocalDate(episodeDatesMap["${seasonNum}_$ep"] ?: history.watchedAt)
-                                                } ?: LocalDate.now()
-                                                activeEdit = TargetEdit(seasonNumber = seasonNum, episodeNumber = null, currentLocalDate = firstDate)
-                                            }
-                                            .padding(horizontal = 10.dp, vertical = 4.dp),
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            .fillMaxWidth()
+                                            .padding(
+                                                top = if (sIndex == 0) 2.dp else 16.dp,
+                                                bottom = 6.dp
+                                            ),
+                                        horizontalArrangement = Arrangement.SpaceBetween,
+                                        verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
-                                            contentDescription = null,
-                                            tint = Color.White.copy(alpha = 0.8f),
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                        Text(
-                                            text = stringResource(id = R.string.watch_history_apply_to_season),
-                                            style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
-                                            color = Color.White.copy(alpha = 0.8f)
-                                        )
-                                    }
-                                }
-                            }
+                                        // Clickable Season Title to toggle collapse/expand
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            modifier = Modifier
+                                                .weight(1f, fill = false)
+                                                .bounceClick(scaleDown = 0.96f) {
+                                                    collapsedSeasons = if (isCollapsed) {
+                                                        collapsedSeasons - seasonNum
+                                                    } else {
+                                                        collapsedSeasons + seasonNum
+                                                    }
+                                                }
+                                        ) {
+                                            Canvas(
+                                                modifier = Modifier
+                                                    .width(20.dp)
+                                                    .height(26.dp)
+                                            ) {
+                                                val cx = 7.dp.toPx()
+                                                val cy = size.height / 2
+                                                val strokeW = 1.5.dp.toPx()
 
-                            items(
-                                items = eps,
-                                key = { ep -> "s${seasonNum}_e${ep}" }
-                            ) { ep ->
-                                val rawDate = episodeDatesMap["${seasonNum}_$ep"] ?: history.watchedAt
-                                val displayDate = formatDateToLocalDisplay(rawDate)
-                                val parsedDate = parseWatchDateToLocalDate(rawDate) ?: LocalDate.now()
+                                                // Season indicator dot
+                                                drawCircle(
+                                                    color = accentColor,
+                                                    radius = 4.5.dp.toPx(),
+                                                    center = Offset(cx, cy)
+                                                )
 
-                                val episodeTitle = movie.seasons
-                                    ?.find { it.seasonNumber == seasonNum }
-                                    ?.episodes
-                                    ?.find { it.episodeNumber == ep }
-                                    ?.name
-                                    ?.takeIf { it.isNotBlank() }
+                                                // Vertical connector line running down towards episodes (smooth fade with expand/collapse)
+                                                if (eps.isNotEmpty() && connectorAlpha > 0.01f) {
+                                                    drawLine(
+                                                        color = accentColor.copy(alpha = connectorAlpha),
+                                                        start = Offset(cx, cy + 4.5.dp.toPx()),
+                                                        end = Offset(cx, size.height),
+                                                        strokeWidth = strokeW,
+                                                        cap = StrokeCap.Round
+                                                    )
+                                                }
+                                            }
 
-                                Row(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .clip(RoundedCornerShape(12.dp))
-                                        .background(Color.White.copy(alpha = 0.04f))
-                                        .bounceClick(scaleDown = 0.98f) {
-                                            activeEdit = TargetEdit(
-                                                seasonNumber = seasonNum,
-                                                episodeNumber = ep,
-                                                currentLocalDate = parsedDate
+                                            Spacer(modifier = Modifier.width(4.dp))
+
+                                            Text(
+                                                text = "${movie.seasons?.find { it.seasonNumber == seasonNum }?.name?.takeIf { it.isNotBlank() } ?: "Stagione $seasonNum"} (${eps.size} ep)",
+                                                style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
+                                                color = accentColor,
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+
+                                            Spacer(modifier = Modifier.width(2.dp))
+
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                                contentDescription = if (isCollapsed) "Expand" else "Collapse",
+                                                tint = accentColor.copy(alpha = 0.75f),
+                                                modifier = Modifier
+                                                    .size(13.dp)
+                                                    .graphicsLayer { rotationZ = chevronRotation }
                                             )
                                         }
-                                        .padding(horizontal = 14.dp, vertical = 10.dp),
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.SpaceBetween
-                                ) {
-                                    Column(modifier = Modifier.weight(1f)) {
-                                        Text(
-                                            text = "S${seasonNum.toString().padStart(2, '0')} E${ep.toString().padStart(2, '0')}" +
-                                                    if (!episodeTitle.isNullOrBlank()) " • $episodeTitle" else "",
-                                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
-                                            color = Color.White,
-                                            maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Spacer(modifier = Modifier.height(2.dp))
-                                        Text(
-                                            text = displayDate,
-                                            style = MaterialTheme.typography.bodySmall,
-                                            color = Color.White.copy(alpha = 0.6f)
-                                        )
+
+                                        Spacer(modifier = Modifier.width(8.dp))
+
+                                        // Quick Action: Apply to all episodes in this season
+                                        Row(
+                                            modifier = Modifier
+                                                .bounceClick(scaleDown = 0.95f) {
+                                                    val firstDate = eps.firstOrNull()?.let { ep ->
+                                                        parseWatchDateToLocalDate(episodeDatesMap["${seasonNum}_$ep"] ?: history.watchedAt)
+                                                    } ?: LocalDate.now()
+                                                    activeEdit = TargetEdit(seasonNumber = seasonNum, episodeNumber = null, currentLocalDate = firstDate)
+                                                }
+                                                .clip(RoundedCornerShape(8.dp))
+                                                .background(Color.White.copy(alpha = 0.08f))
+                                                .padding(horizontal = 8.dp, vertical = 5.dp),
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_calendario),
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.8f),
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                            Text(
+                                                text = stringResource(id = R.string.watch_history_apply_to_season),
+                                                style = MaterialTheme.typography.labelSmall.copy(fontSize = 11.sp),
+                                                color = Color.White.copy(alpha = 0.8f),
+                                                maxLines = 1,
+                                                overflow = TextOverflow.Ellipsis
+                                            )
+                                        }
                                     }
 
-                                    Box(
-                                        modifier = Modifier
-                                            .size(32.dp)
-                                            .clip(CircleShape)
-                                            .background(accentColor.copy(alpha = 0.15f)),
-                                        contentAlignment = Alignment.Center
+                                    // Dynamic smooth accordion expand/collapse animation
+                                    AnimatedVisibility(
+                                        visible = !isCollapsed,
+                                        enter = expandVertically(
+                                            animationSpec = spring(
+                                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                                stiffness = Spring.StiffnessMediumLow
+                                            ),
+                                            expandFrom = Alignment.Top
+                                        ) + fadeIn(animationSpec = tween(180)),
+                                        exit = shrinkVertically(
+                                            animationSpec = spring(
+                                                dampingRatio = Spring.DampingRatioNoBouncy,
+                                                stiffness = Spring.StiffnessMediumLow
+                                            ),
+                                            shrinkTowards = Alignment.Top
+                                        ) + fadeOut(animationSpec = tween(120))
                                     ) {
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_pencil),
-                                            contentDescription = "Edit date",
-                                            tint = accentColor,
-                                            modifier = Modifier.size(15.dp)
-                                        )
+                                        Column(modifier = Modifier.fillMaxWidth()) {
+                                            eps.forEachIndexed { epIndex, ep ->
+                                                val isLast = epIndex == eps.size - 1
+                                                val rawDate = episodeDatesMap["${seasonNum}_$ep"] ?: history.watchedAt
+                                                val displayDate = formatDateToLocalDisplay(rawDate)
+                                                val parsedDate = parseWatchDateToLocalDate(rawDate) ?: LocalDate.now()
+
+                                                val episodeTitle = movie.seasons
+                                                    ?.find { it.seasonNumber == seasonNum }
+                                                    ?.episodes
+                                                    ?.find { it.episodeNumber == ep }
+                                                    ?.name
+                                                    ?.takeIf { it.isNotBlank() }
+
+                                                Row(
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .height(IntrinsicSize.Min)
+                                                        .padding(bottom = if (isLast) 2.dp else 6.dp),
+                                                    verticalAlignment = Alignment.CenterVertically
+                                                ) {
+                                                    // Thread hierarchy connector line with smooth rounded branch
+                                                    Canvas(
+                                                        modifier = Modifier
+                                                            .width(20.dp)
+                                                            .fillMaxHeight()
+                                                    ) {
+                                                        val cx = 7.dp.toPx()
+                                                        val cy = size.height / 2
+                                                        val strokeW = 1.5.dp.toPx()
+                                                        val lineColor = accentColor.copy(alpha = 0.35f)
+                                                        val cornerR = 8.dp.toPx().coerceAtMost(cy)
+
+                                                        val path = Path().apply {
+                                                            moveTo(cx, 0f)
+                                                            if (isLast) {
+                                                                // Smooth rounded bend curving into the episode card
+                                                                lineTo(cx, cy - cornerR)
+                                                                quadraticTo(cx, cy, cx + cornerR, cy)
+                                                                lineTo(size.width, cy)
+                                                            } else {
+                                                                // Main vertical spine continues straight down to next episode
+                                                                lineTo(cx, size.height)
+                                                                // Branch curves smoothly into this episode card
+                                                                moveTo(cx, cy - cornerR)
+                                                                quadraticTo(cx, cy, cx + cornerR, cy)
+                                                                lineTo(size.width, cy)
+                                                            }
+                                                        }
+
+                                                        drawPath(
+                                                            path = path,
+                                                            color = lineColor,
+                                                            style = Stroke(
+                                                                width = strokeW,
+                                                                cap = StrokeCap.Round,
+                                                                join = StrokeJoin.Round
+                                                            )
+                                                        )
+                                                    }
+
+                                                    Spacer(modifier = Modifier.width(6.dp))
+
+                                                    // Episode card with indentation
+                                                    Row(
+                                                        modifier = Modifier
+                                                            .weight(1f)
+                                                            .bounceClick(scaleDown = 0.98f) {
+                                                                activeEdit = TargetEdit(
+                                                                    seasonNumber = seasonNum,
+                                                                    episodeNumber = ep,
+                                                                    currentLocalDate = parsedDate
+                                                                )
+                                                            }
+                                                            .clip(RoundedCornerShape(12.dp))
+                                                            .background(Color.White.copy(alpha = 0.04f))
+                                                            .border(0.5.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(12.dp))
+                                                            .padding(horizontal = 14.dp, vertical = 10.dp),
+                                                        verticalAlignment = Alignment.CenterVertically,
+                                                        horizontalArrangement = Arrangement.SpaceBetween
+                                                    ) {
+                                                        Column(modifier = Modifier.weight(1f)) {
+                                                            Text(
+                                                                text = "S${seasonNum.toString().padStart(2, '0')} E${ep.toString().padStart(2, '0')}" +
+                                                                        if (!episodeTitle.isNullOrBlank()) " • $episodeTitle" else "",
+                                                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium),
+                                                                color = Color.White,
+                                                                maxLines = 1,
+                                                                overflow = TextOverflow.Ellipsis
+                                                            )
+                                                            Spacer(modifier = Modifier.height(2.dp))
+                                                            Text(
+                                                                text = displayDate,
+                                                                style = MaterialTheme.typography.bodySmall,
+                                                                color = Color.White.copy(alpha = 0.6f)
+                                                            )
+                                                        }
+
+                                                        Box(
+                                                            modifier = Modifier
+                                                                .size(32.dp)
+                                                                .clip(CircleShape)
+                                                                .background(accentColor.copy(alpha = 0.15f)),
+                                                            contentAlignment = Alignment.Center
+                                                        ) {
+                                                            Icon(
+                                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_pencil),
+                                                                contentDescription = "Edit date",
+                                                                tint = accentColor,
+                                                                modifier = Modifier.size(15.dp)
+                                                            )
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
                                     }
                                 }
                             }
                         }
-                    }
                 }
             }
         }
     }
+}
 
     // DatePicker for the active target
     activeEdit?.let { target ->

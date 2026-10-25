@@ -60,62 +60,35 @@ fun RatingPill(
     Box(
         modifier = modifier
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .defaultMinSize(minWidth = 72.dp, minHeight = 36.dp)
+            .defaultMinSize(minHeight = 36.dp)
             .clip(pillShape)
             .background(accentColor, pillShape)
-            .padding(horizontal = 11.dp),
+            .padding(horizontal = 11.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
-        // Main Rating
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.graphicsLayer {
-                // Precise centering logic
-                translationY = (1f - expansion) * -2.dp.toPx()
-                compositingStrategy = CompositingStrategy.Offscreen
-            }
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Image(
-                    painter = painterResource(id = R.drawable.ic_tmdb_logo),
-                    contentDescription = "TMDB Logo",
-                    modifier = Modifier.height(11.dp),
-                    contentScale = ContentScale.Fit,
-                    colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(pillContentColor.copy(alpha = 0.9f))
-                )
-                Spacer(modifier = Modifier.width(4.dp))
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
-                    contentDescription = null,
-                    tint = pillContentColor.copy(alpha = 0.9f),
-                    modifier = Modifier.size(10.dp)
-                )
-                Spacer(modifier = Modifier.width(3.dp))
-                Text(
-                    text = String.format(Locale.US, "%.1f", voteAverage),
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Black,
-                    color = pillContentColor.copy(alpha = 0.9f)
-                )
-            }
+        Row(verticalAlignment = Alignment.CenterVertically) {
+            Image(
+                painter = painterResource(id = R.drawable.ic_tmdb_logo),
+                contentDescription = "TMDB Logo",
+                modifier = Modifier.height(11.dp),
+                contentScale = ContentScale.Fit,
+                colorFilter = androidx.compose.ui.graphics.ColorFilter.tint(pillContentColor.copy(alpha = 0.9f))
+            )
+            Spacer(modifier = Modifier.width(4.dp))
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                contentDescription = null,
+                tint = pillContentColor.copy(alpha = 0.9f),
+                modifier = Modifier.size(10.dp)
+            )
+            Spacer(modifier = Modifier.width(3.dp))
+            Text(
+                text = String.format(Locale.US, "%.1f", voteAverage),
+                fontSize = 12.sp,
+                fontWeight = FontWeight.Black,
+                color = pillContentColor.copy(alpha = 0.9f)
+            )
         }
-
-        // Help Text - Moved further down
-        Text(
-            text = if (expansion > 0.5f) stringResource(R.string.detail_tap_for_less) else stringResource(R.string.detail_tap_for_more),
-            fontSize = 6.8.sp,
-            lineHeight = 7.sp,
-            fontWeight = FontWeight.Black,
-            color = pillContentColor.copy(alpha = 0.4f),
-            maxLines = 1,
-            softWrap = false,
-            modifier = Modifier
-                .graphicsLayer {
-                    // Precise offset
-                    val startOffset = 11.dp.toPx()
-                    translationY = startOffset
-                }
-        )
     }
 }
 

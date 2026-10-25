@@ -170,6 +170,7 @@ fun MovieCard(
     showFolderBookmarks: Boolean = true,
     showBadges: Boolean = true,
     showAdvancedBadges: Boolean = false,
+    maxBadges: Int = if (cardWidth > 135.dp) 3 else 1,
     showActionButton: Boolean = true,
     bounceEnabled: Boolean = true,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(28.dp),
@@ -183,6 +184,23 @@ fun MovieCard(
 ) {
     val cardHeight = cardWidth * 1.5f
     val isTv = movie.mediaType == "tv"
+    val nextInfo = remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
+        if (isTv) movie.calculateNextEpisode() else null
+    }
+    val episodeInfoStyle = com.cinetrack.LocalEpisodeInfoStyle.current
+    val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
+
+    val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
+        if (progress > 0f) progress
+        else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
+            val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
+            (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
+        } else 0f
+    }
+
+    val seasonProgress = remember(nextInfo, movie.seasons, movie.watchedEpisodes) {
+        if (isTv && nextInfo != null) com.cinetrack.ui.components.settings.calculateSeasonProgress(nextInfo, movie) else 0f
+    }
     val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
     val context = LocalContext.current
     val density = LocalDensity.current
@@ -329,11 +347,39 @@ fun MovieCard(
                 }
             }
 
+            // Linear Progress Bar (Top)
+            val showLinear = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL ||
+                    progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON
+            val linearProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON) seasonProgress else computedProgress
+
+            if (isTv && !isWatched && showLinear && linearProgress > 0f) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(3.dp)
+                        .align(Alignment.TopStart)
+                        .background(Color.White.copy(alpha = 0.08f))
+                ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxHeight()
+                            .fillMaxWidth(linearProgress)
+                            .background(
+                                androidx.compose.ui.graphics.Brush.horizontalGradient(
+                                    listOf(MaterialTheme.colorScheme.primary.copy(alpha = 0.7f), MaterialTheme.colorScheme.primary)
+                                ),
+                                RoundedCornerShape(50)
+                            )
+                    )
+                }
+            }
+
             // Dynamic Badges (Top Right)
-            if (showBadges) {
-                val isLarge = cardWidth > 150.dp
+            if (showBadges && maxBadges > 0) {
+                val isLarge = cardWidth > 135.dp
                 val disabledBadges = com.cinetrack.LocalDisabledBadges.current
-                val badges = remember(movie, showAdvancedBadges) { movie.generateBadges(showAdvancedBadges) }
+                val effectiveShowAdvanced = showAdvancedBadges || isLarge
+                val badges = remember(movie, effectiveShowAdvanced) { movie.generateBadges(effectiveShowAdvanced) }
                 
                 androidx.compose.foundation.layout.Column(
                     modifier = Modifier
@@ -342,7 +388,7 @@ fun MovieCard(
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    badges.filter { it.text !in disabledBadges }.take(1).forEach { badge ->
+                    badges.filter { it.text !in disabledBadges }.take(maxBadges).forEach { badge ->
                         MovieCardBadge(
                             text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 
@@ -425,6 +471,44 @@ fun MovieCard(
                             )
                         }
                     }
+                    if (isTv && nextInfo != null && !isWatched) {
+                        val isReleased = movie.isReleased
+                        val isUpToDate = isReleased && nextInfo.isUpToDateWithAirDate
+                        if (isReleased && !isUpToDate) {
+                            val epText = com.cinetrack.ui.components.settings.formatEpisodeInfo(
+                                style = episodeInfoStyle,
+                                nextInfo = nextInfo,
+                                movie = movie,
+                                seriesProgress = computedProgress
+                            )
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(top = 1.dp)
+                            ) {
+                                Text(
+                                    text = nextInfo.episodeCode,
+                                    style = MaterialTheme.typography.bodySmall.copy(
+                                        fontWeight = FontWeight.ExtraBold,
+                                        fontSize = ((if (isLarge) 11f else 9.5f) * multiplier).sp
+                                    ),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    maxLines = 1
+                                )
+                                if (epText.isNotEmpty()) {
+                                    Text(
+                                        text = epText,
+                                        style = MaterialTheme.typography.bodySmall.copy(
+                                            fontWeight = FontWeight.SemiBold,
+                                            fontSize = ((if (isLarge) 10.5f else 9f) * multiplier).sp
+                                        ),
+                                        color = Color.White.copy(alpha = 0.6f),
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                            }
+                        }
+                    }
                 }
 
                 val hintReminder = stringResource(R.string.card_hint_manage_reminder)
@@ -466,15 +550,12 @@ fun MovieCard(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
-                            if (progress > 0f) progress
-                            else if (isTv && !movie.watchedEpisodes.isNullOrEmpty() && (movie.numberOfEpisodes ?: 0) > 0) {
-                                val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
-                                (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
-                            } else 0f
-                        }
-                        if (isTv && !isWatched && computedProgress > 0f) {
-                            MovieCircularProgress(progress = computedProgress)
+                        val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
+                                progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
+                        val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
+
+                        if (isTv && !isWatched && showCircular && circularProgress > 0f) {
+                            MovieCircularProgress(progress = circularProgress)
                         }
 
                         val appAccent = MaterialTheme.colorScheme.primary
