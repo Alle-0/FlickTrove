@@ -51,7 +51,9 @@ import dev.chrisbanes.haze.HazeState
 
 /** Values for episodeInfoStyle preference */
 object EpisodeInfoStyle {
+    const val REMAINING_SEASON = "REMAINING_SEASON"
     const val REMAINING = "REMAINING"
+    const val REMAINING_AND_TOTAL = "REMAINING_AND_TOTAL"
     const val WATCHED_OVER_TOTAL = "WATCHED_OVER_TOTAL"
     const val SEASON_ONLY = "SEASON_ONLY"
     const val SEASON_AND_TOTAL = "SEASON_AND_TOTAL"
@@ -88,11 +90,17 @@ fun formatEpisodeInfo(
     val totalEpisodes = movie.numberOfEpisodes ?: 0
 
     return when (style) {
-        EpisodeInfoStyle.REMAINING -> {
+        EpisodeInfoStyle.REMAINING_SEASON -> {
+            if (nextInfo.remainingInSeason > 0) " • ${nextInfo.remainingInSeason}"
+            else ""
+        }
+        EpisodeInfoStyle.REMAINING, EpisodeInfoStyle.REMAINING_AND_TOTAL -> {
             if (nextInfo.remainingTotal > nextInfo.remainingInSeason) {
                 " • ${nextInfo.remainingInSeason} (${nextInfo.remainingTotal} tot)"
-            } else {
+            } else if (nextInfo.remainingInSeason > 0) {
                 " • ${nextInfo.remainingInSeason}"
+            } else {
+                ""
             }
         }
         EpisodeInfoStyle.WATCHED_OVER_TOTAL -> {
@@ -100,23 +108,21 @@ fun formatEpisodeInfo(
             else " • $totalWatched ep"
         }
         EpisodeInfoStyle.SEASON_ONLY -> {
-            if (totalInSeason > 0) " • $watchedInSeason/$totalInSeason ep S${nextInfo.seasonNumber}"
-            else " • S${nextInfo.seasonNumber}"
+            if (totalInSeason > 0) " • $watchedInSeason/$totalInSeason ep"
+            else ""
         }
         EpisodeInfoStyle.SEASON_AND_TOTAL -> {
-            if (totalInSeason > 0 && totalEpisodes > 0) " • $watchedInSeason/$totalInSeason S${nextInfo.seasonNumber} • $totalWatched/$totalEpisodes tot"
-            else if (totalInSeason > 0) " • $watchedInSeason/$totalInSeason S${nextInfo.seasonNumber}"
-            else " • $totalWatched/$totalEpisodes tot"
+            if (totalInSeason > 0 && totalEpisodes > 0) " • $watchedInSeason/$totalInSeason • $totalWatched/$totalEpisodes tot"
+            else if (totalInSeason > 0) " • $watchedInSeason/$totalInSeason ep"
+            else if (totalEpisodes > 0) " • $totalWatched/$totalEpisodes tot"
+            else ""
         }
         EpisodeInfoStyle.PERCENTAGE -> {
             " • ${(seriesProgress * 100).toInt()}%"
         }
         else -> {
-            if (nextInfo.remainingTotal > nextInfo.remainingInSeason) {
-                " • ${nextInfo.remainingInSeason} (${nextInfo.remainingTotal} tot)"
-            } else {
-                " • ${nextInfo.remainingInSeason}"
-            }
+            if (nextInfo.remainingInSeason > 0) " • ${nextInfo.remainingInSeason}"
+            else ""
         }
     }
 }
@@ -143,7 +149,15 @@ fun formatDrawerEpisodeSubtitle(
     val totalEpisodes = movie.numberOfEpisodes ?: 0
 
     return when (style) {
-        EpisodeInfoStyle.REMAINING -> {
+        EpisodeInfoStyle.REMAINING_SEASON -> {
+            val remainingSeason = nextInfo.remainingInSeason
+            if (remainingSeason > 0) {
+                stringResource(R.string.lbl_episodes_remaining, remainingSeason)
+            } else {
+                ""
+            }
+        }
+        EpisodeInfoStyle.REMAINING, EpisodeInfoStyle.REMAINING_AND_TOTAL -> {
             val remainingSeason = nextInfo.remainingInSeason
             val remainingTotal = nextInfo.remainingTotal
             if (remainingTotal > remainingSeason) {
@@ -159,23 +173,21 @@ fun formatDrawerEpisodeSubtitle(
             else "$totalWatched ep"
         }
         EpisodeInfoStyle.SEASON_ONLY -> {
-            if (totalInSeason > 0) "$watchedInSeason / $totalInSeason ep S${nextInfo.seasonNumber}"
-            else "S${nextInfo.seasonNumber}"
+            if (totalInSeason > 0) "$watchedInSeason / $totalInSeason ep"
+            else ""
         }
         EpisodeInfoStyle.SEASON_AND_TOTAL -> {
-            if (totalInSeason > 0 && totalEpisodes > 0) "$watchedInSeason/$totalInSeason S${nextInfo.seasonNumber} • $totalWatched/$totalEpisodes tot"
-            else if (totalInSeason > 0) "$watchedInSeason/$totalInSeason S${nextInfo.seasonNumber}"
-            else "$totalWatched/$totalEpisodes tot"
+            if (totalInSeason > 0 && totalEpisodes > 0) "$watchedInSeason/$totalInSeason • $totalWatched/$totalEpisodes tot"
+            else if (totalInSeason > 0) "$watchedInSeason / $totalInSeason ep"
+            else if (totalEpisodes > 0) "$totalWatched / $totalEpisodes tot"
+            else ""
         }
         EpisodeInfoStyle.PERCENTAGE -> {
             "${(seriesProgress * 100).toInt()}%"
         }
         else -> {
             val remainingSeason = nextInfo.remainingInSeason
-            val remainingTotal = nextInfo.remainingTotal
-            if (remainingTotal > remainingSeason) {
-                "${stringResource(R.string.lbl_episodes_remaining, remainingSeason)} ($remainingTotal tot)"
-            } else if (remainingSeason > 0) {
+            if (remainingSeason > 0) {
                 stringResource(R.string.lbl_episodes_remaining, remainingSeason)
             } else {
                 ""
@@ -783,7 +795,7 @@ private fun EpisodeStyleCompactOptions(
     onSelect: (String) -> Unit
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        // Row 1
+        // Row 1: Remaining (Season only) & Remaining (Season & Total)
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -791,22 +803,22 @@ private fun EpisodeStyleCompactOptions(
             CompactChipOption(
                 title = stringResource(R.string.settings_chip_remaining),
                 subtitle = stringResource(R.string.settings_chip_remaining_sub),
-                selected = selected == EpisodeInfoStyle.REMAINING,
+                selected = selected == EpisodeInfoStyle.REMAINING_SEASON,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                onClick = { onSelect(EpisodeInfoStyle.REMAINING_SEASON) }
+            )
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_remaining_total),
+                subtitle = stringResource(R.string.settings_chip_remaining_total_sub),
+                selected = selected == EpisodeInfoStyle.REMAINING || selected == EpisodeInfoStyle.REMAINING_AND_TOTAL,
                 accentColor = accentColor,
                 modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(EpisodeInfoStyle.REMAINING) }
             )
-            CompactChipOption(
-                title = stringResource(R.string.settings_chip_watched_total),
-                subtitle = stringResource(R.string.settings_chip_watched_total_sub),
-                selected = selected == EpisodeInfoStyle.WATCHED_OVER_TOTAL,
-                accentColor = accentColor,
-                modifier = Modifier.weight(1f).fillMaxHeight(),
-                onClick = { onSelect(EpisodeInfoStyle.WATCHED_OVER_TOTAL) }
-            )
         }
 
-        // Row 2
+        // Row 2: Season only & Season and Total
         Row(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -829,15 +841,28 @@ private fun EpisodeStyleCompactOptions(
             )
         }
 
-        // Row 3
-        CompactChipOption(
-            title = stringResource(R.string.settings_chip_percentage),
-            subtitle = stringResource(R.string.settings_chip_percentage_sub),
-            selected = selected == EpisodeInfoStyle.PERCENTAGE,
-            accentColor = accentColor,
-            modifier = Modifier.fillMaxWidth(),
-            onClick = { onSelect(EpisodeInfoStyle.PERCENTAGE) }
-        )
+        // Row 3: Watched / Total & Percentage
+        Row(
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
+            horizontalArrangement = Arrangement.spacedBy(6.dp)
+        ) {
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_watched_total),
+                subtitle = stringResource(R.string.settings_chip_watched_total_sub),
+                selected = selected == EpisodeInfoStyle.WATCHED_OVER_TOTAL,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                onClick = { onSelect(EpisodeInfoStyle.WATCHED_OVER_TOTAL) }
+            )
+            CompactChipOption(
+                title = stringResource(R.string.settings_chip_percentage),
+                subtitle = stringResource(R.string.settings_chip_percentage_sub),
+                selected = selected == EpisodeInfoStyle.PERCENTAGE,
+                accentColor = accentColor,
+                modifier = Modifier.weight(1f).fillMaxHeight(),
+                onClick = { onSelect(EpisodeInfoStyle.PERCENTAGE) }
+            )
+        }
     }
 }
 
