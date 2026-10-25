@@ -424,8 +424,20 @@ fun MovieListCard(
 
                 val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
                         progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
-                val circularProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON) seasonProgress else computedProgress
-                val isHasCircularProgress = isTv && !isWatched && showCircular && circularProgress > 0f
+                val targetCircularProgress = when (progressBarTarget) {
+                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL -> computedProgress
+                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON -> seasonProgress
+                    else -> 0f
+                }
+                val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(
+                    targetValue = targetCircularProgress,
+                    animationSpec = androidx.compose.animation.core.spring(
+                        dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
+                        stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
+                    ),
+                    label = "listCircularProgress"
+                )
+                val isHasCircularProgress = isTv && !isWatched && (showCircular || animatedCircularProgress > 0.005f)
 
                 val actionBg = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.15f)
@@ -464,7 +476,7 @@ fun MovieListCard(
                         drawArc(
                             color = appAccent,
                             startAngle = -90f,
-                            sweepAngle = 360f * circularProgress.coerceIn(0f, 1f),
+                            sweepAngle = 360f * animatedCircularProgress.coerceIn(0f, 1f),
                             useCenter = false,
                             style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
                         )

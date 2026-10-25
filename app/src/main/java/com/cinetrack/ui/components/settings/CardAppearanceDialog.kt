@@ -215,7 +215,7 @@ fun CardAppearanceDialog(
     var localShowFolderBookmarks by remember(persistedShowFolderBookmarks) { mutableStateOf(persistedShowFolderBookmarks) }
 
     // Mode selector for preview (3 columns, 2 columns, list)
-    var previewMode by remember { mutableStateOf(PreviewCardMode.GRID_2_COL) }
+    var previewMode by remember { mutableStateOf(PreviewCardMode.GRID_3_COL) }
 
     // Mock folder colors for bookmark ribbon preview
     val mockFolderColors = remember { listOf(Color(0xFFE50914), Color(0xFF3B82F6)) }
@@ -351,13 +351,13 @@ fun CardAppearanceDialog(
                         modifier = Modifier
                             .weight(1f)
                             .height(34.dp)
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(tabBg)
-                            .border(0.5.dp, tabBorder, RoundedCornerShape(10.dp))
                             .bounceClick(scaleDown = 0.95f, onLongClick = {}) {
                                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                 previewMode = mode
-                            },
+                            }
+                            .clip(RoundedCornerShape(10.dp))
+                            .background(tabBg)
+                            .border(0.5.dp, tabBorder, RoundedCornerShape(10.dp)),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -572,7 +572,7 @@ fun CardAppearanceDialog(
                 modifier = Modifier
                     .weight(1f)
                     .verticalFadingEdges(scrollState)
-                    .premiumScrollbar(state = scrollState, color = accentColor)
+                    .premiumScrollbar(state = scrollState)
                     .verticalScroll(scrollState)
                     .padding(horizontal = 20.dp, vertical = 12.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
@@ -653,10 +653,10 @@ fun CardAppearanceDialog(
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp)
+                        .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onDismiss() }
                         .clip(RoundedCornerShape(14.dp))
                         .background(Color.White.copy(alpha = 0.07f))
-                        .border(0.5.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp))
-                        .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onDismiss() },
+                        .border(0.5.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -670,8 +670,6 @@ fun CardAppearanceDialog(
                     modifier = Modifier
                         .weight(1f)
                         .height(44.dp)
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(accentColor)
                         .bounceClick(scaleDown = 0.96f, onLongClick = {}) {
                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                             settingsViewModel.updateEpisodeInfoStyle(localEpisodeStyle)
@@ -680,7 +678,9 @@ fun CardAppearanceDialog(
                             settingsViewModel.toggleBadges(localShowBadges)
                             settingsViewModel.toggleFolderBookmarks(localShowFolderBookmarks)
                             onDismiss()
-                        },
+                        }
+                        .clip(RoundedCornerShape(14.dp))
+                        .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -738,10 +738,12 @@ private fun CompactChipOption(
 
     Column(
         modifier = modifier
+            .fillMaxWidth()
+            .defaultMinSize(minHeight = 52.dp)
+            .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onClick() }
             .clip(RoundedCornerShape(12.dp))
             .background(bg)
             .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-            .bounceClick(scaleDown = 0.95f, onLongClick = {}) { onClick() }
             .padding(horizontal = 8.dp, vertical = 9.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
@@ -783,7 +785,7 @@ private fun EpisodeStyleCompactOptions(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // Row 1
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CompactChipOption(
@@ -791,7 +793,7 @@ private fun EpisodeStyleCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_remaining_sub),
                 selected = selected == EpisodeInfoStyle.REMAINING,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(EpisodeInfoStyle.REMAINING) }
             )
             CompactChipOption(
@@ -799,14 +801,14 @@ private fun EpisodeStyleCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_watched_total_sub),
                 selected = selected == EpisodeInfoStyle.WATCHED_OVER_TOTAL,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(EpisodeInfoStyle.WATCHED_OVER_TOTAL) }
             )
         }
 
         // Row 2
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CompactChipOption(
@@ -814,7 +816,7 @@ private fun EpisodeStyleCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_season_only_sub),
                 selected = selected == EpisodeInfoStyle.SEASON_ONLY,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(EpisodeInfoStyle.SEASON_ONLY) }
             )
             CompactChipOption(
@@ -822,7 +824,7 @@ private fun EpisodeStyleCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_season_total_sub),
                 selected = selected == EpisodeInfoStyle.SEASON_AND_TOTAL,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(EpisodeInfoStyle.SEASON_AND_TOTAL) }
             )
         }
@@ -850,7 +852,7 @@ private fun ProgressBarCompactOptions(
     Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
         // Row 1
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CompactChipOption(
@@ -858,7 +860,7 @@ private fun ProgressBarCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_whole_series),
                 selected = selected == ProgressBarTarget.CIRCULAR_TOTAL,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(ProgressBarTarget.CIRCULAR_TOTAL) }
             )
             CompactChipOption(
@@ -866,14 +868,14 @@ private fun ProgressBarCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_current_season),
                 selected = selected == ProgressBarTarget.CIRCULAR_SEASON,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(ProgressBarTarget.CIRCULAR_SEASON) }
             )
         }
 
         // Row 2
         Row(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
             horizontalArrangement = Arrangement.spacedBy(6.dp)
         ) {
             CompactChipOption(
@@ -881,7 +883,7 @@ private fun ProgressBarCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_whole_series),
                 selected = selected == ProgressBarTarget.LINEAR_TOTAL,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(ProgressBarTarget.LINEAR_TOTAL) }
             )
             CompactChipOption(
@@ -889,7 +891,7 @@ private fun ProgressBarCompactOptions(
                 subtitle = stringResource(R.string.settings_chip_current_season),
                 selected = selected == ProgressBarTarget.LINEAR_SEASON,
                 accentColor = accentColor,
-                modifier = Modifier.weight(1f),
+                modifier = Modifier.weight(1f).fillMaxHeight(),
                 onClick = { onSelect(ProgressBarTarget.LINEAR_SEASON) }
             )
         }
@@ -934,10 +936,10 @@ private fun TextSizeOptions(
                 modifier = Modifier
                     .weight(1f)
                     .height(42.dp)
+                    .bounceClick(scaleDown = 0.95f, onLongClick = {}) { onSelect(value) }
                     .clip(RoundedCornerShape(12.dp))
                     .background(bg)
-                    .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-                    .bounceClick(scaleDown = 0.95f, onLongClick = {}) { onSelect(value) },
+                    .border(1.dp, borderColor, RoundedCornerShape(12.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -964,10 +966,10 @@ private fun FolderBookmarksToggleOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showFolderBookmarks) }
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-            .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showFolderBookmarks) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -1008,10 +1010,10 @@ private fun BadgeToggleOption(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showBadges) }
             .clip(RoundedCornerShape(14.dp))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-            .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showBadges) }
             .padding(horizontal = 16.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween

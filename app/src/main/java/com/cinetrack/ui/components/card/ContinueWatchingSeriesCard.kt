@@ -6,6 +6,7 @@ import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
@@ -328,6 +329,44 @@ fun ContinueWatchingSeriesCard(
         label = "seriesTotalProgress"
     )
 
+    val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
+    val showLinear = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL ||
+            progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON
+    val targetLinearProgress = remember(progressBarTarget, totalSeriesProgress, seasonProgress, isReleased) {
+        if (!isReleased) 0f
+        else when (progressBarTarget) {
+            com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL -> totalSeriesProgress.coerceIn(0f, 1f)
+            com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON -> seasonProgress.coerceIn(0f, 1f)
+            else -> 0f
+        }
+    }
+    val animatedLinearProgress by animateFloatAsState(
+        targetValue = targetLinearProgress,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "animatedLinearProgress"
+    )
+    val animatedLinearHeight by animateDpAsState(
+        targetValue = if (isReleased && showLinear) 3.dp else 0.dp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "linearBarHeight"
+    )
+
+    val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
+            progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
+    val targetCircularProgress = remember(progressBarTarget, totalSeriesProgress, seasonProgress, isReleased) {
+        if (!isReleased) 0f
+        else when (progressBarTarget) {
+            com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL -> totalSeriesProgress.coerceIn(0f, 1f)
+            com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON -> seasonProgress.coerceIn(0f, 1f)
+            else -> 0f
+        }
+    }
+    val animatedCircularProgress by animateFloatAsState(
+        targetValue = targetCircularProgress,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "animatedCircularProgress"
+    )
+
     val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
     val pressScale = remember { Animatable(1f) }
@@ -472,24 +511,19 @@ fun ContinueWatchingSeriesCard(
                 ) { onPress(movie) }
         ) {
             // Pill progress bar tra le due sezioni per l'intera larghezza
-            val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
-            val showLinear = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_TOTAL ||
-                    progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON
-            val linearProgress = if (progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.LINEAR_SEASON) animatedSeasonProgress else animatedSeriesProgress
-
-            if (isReleased && showLinear) {
+            if (isReleased && (showLinear || animatedLinearProgress > 0.005f)) {
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(3.dp)
+                        .height(animatedLinearHeight)
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.10f))
                 ) {
-                    if (linearProgress > 0f) {
+                    if (animatedLinearProgress > 0f) {
                         Box(
                             modifier = Modifier
                                 .fillMaxHeight()
-                                .fillMaxWidth(fraction = linearProgress)
+                                .fillMaxWidth(fraction = animatedLinearProgress.coerceIn(0f, 1f))
                                 .clip(CircleShape)
                                 .background(if (isUpToDate) UpToDateGreen else appAccent)
                         )
@@ -667,18 +701,10 @@ fun ContinueWatchingSeriesCard(
                     }
                 }
 
-                val showCircular = progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL ||
-                        progressBarTarget == com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON
-                val circularProgress = when (progressBarTarget) {
-                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_TOTAL -> animatedSeriesProgress
-                    com.cinetrack.ui.components.settings.ProgressBarTarget.CIRCULAR_SEASON -> animatedSeasonProgress
-                    else -> 0f
-                }
-
                 // 1-tap Checkmark button (✓) with Circular Progress directly on the button border
                 SeasonProgressCheckButton(
-                    progress = if (showCircular) circularProgress else 0f,
-                    showProgress = showCircular,
+                    progress = animatedCircularProgress,
+                    showProgress = showCircular || animatedCircularProgress > 0.005f,
                     accentColor = appAccent,
                     isUpdating = isUpdating,
                     contentDescription = stringResource(R.string.cd_mark_episode_watched, epText),
