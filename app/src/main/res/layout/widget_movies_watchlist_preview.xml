@@ -80,8 +80,7 @@
         android:layout_width="match_parent"
         android:layout_height="56dp"
         android:clipToOutline="true"
-        android:background="@drawable/widget_banner_rounded_bg"
-        android:layout_marginBottom="12dp">
+        android:background="@drawable/widget_banner_rounded_bg">
 
         <ImageView
             android:layout_width="match_parent"
@@ -95,31 +94,6 @@
             android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:text="INTERSTELLAR"
-            android:textColor="#FFFFFF"
-            android:textSize="12sp"
-            android:textStyle="bold"
-            android:letterSpacing="0.1" />
-    </FrameLayout>
-
-    <!-- Banner Card 3 -->
-    <FrameLayout
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:clipToOutline="true"
-        android:background="@drawable/widget_banner_rounded_bg">
-
-        <ImageView
-            android:layout_width="match_parent"
-            android:layout_height="match_parent"
-            android:scaleType="centerCrop"
-            android:src="@drawable/mock_inception_poster"
-            android:alpha="0.5" />
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:layout_gravity="center"
-            android:text="DUNE"
             android:textColor="#FFFFFF"
             android:textSize="12sp"
             android:textStyle="bold"
