@@ -326,6 +326,7 @@ fun BadgesInfoDialog(
     GlassmorphicModal(
         visible = visible,
         activeHazeState = activeHazeState,
+        zIndex = 150f,
         onDismissRequest = onDismiss
     ) {
         Column(

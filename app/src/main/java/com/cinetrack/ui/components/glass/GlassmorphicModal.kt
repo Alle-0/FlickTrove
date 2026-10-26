@@ -48,6 +48,7 @@ fun GlassmorphicModal(
     style: dev.chrisbanes.haze.HazeStyle = HazeStyles.glassmorphicDialog,
     scrimAlpha: Float = HazeStyles.ModalScrimAlpha,
     animate: Boolean = true,
+    zIndex: Float = 100f,
     onDismissRequest: (() -> Unit)? = null,
     content: @Composable BoxScope.(alpha: Float) -> Unit
 ) {
@@ -59,7 +60,7 @@ fun GlassmorphicModal(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .zIndex(100f)
+                .zIndex(zIndex)
                 .then(
                     if (dimBackground) Modifier.background(Color.Black.copy(alpha = scrimAlpha))
                     else Modifier
@@ -116,7 +117,7 @@ fun GlassmorphicModal(
         visible = visible,
         enter = fadeIn(tween(durationMillis = 300, easing = androidx.compose.animation.core.FastOutSlowInEasing)),
         exit = fadeOut(tween(durationMillis = 300, easing = androidx.compose.animation.core.FastOutSlowInEasing)),
-        modifier = Modifier.zIndex(100f)
+        modifier = Modifier.zIndex(zIndex)
     ) {
         val alpha by transition.animateFloat(
             transitionSpec = { tween(durationMillis = 300, easing = androidx.compose.animation.core.FastOutSlowInEasing) },

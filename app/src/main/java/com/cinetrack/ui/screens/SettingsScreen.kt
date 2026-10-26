@@ -312,10 +312,18 @@ fun SettingsScreenContent(
     val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showSeasonalIconsDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
                            showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || isBackupLoading || showCleanupRewatchesDialog ||
-                           showDeepSyncConfirm || showUnmatchedItemsModal || showBlockedUsersModal || showDashboardSettings || showHomeSectionsDialog
+                           showDeepSyncConfirm || showUnmatchedItemsModal || showBlockedUsersModal || showDashboardSettings || showHomeSectionsDialog || showCardAppearanceDialog
 
     BackHandler(enabled = anyDialogVisible) {
         focusManager.clearFocus()
+        if (showBadgesInfoDialog) {
+            showBadgesInfoDialog = false
+            return@BackHandler
+        }
+        if (showCardAppearanceDialog) {
+            showCardAppearanceDialog = false
+            return@BackHandler
+        }
         showDeleteDialog = false
         showReauthDialog = false
         showColorDialog = false
@@ -337,6 +345,7 @@ fun SettingsScreenContent(
         showBlockedUsersModal = false
         showDashboardSettings = false
         showHomeSectionsDialog = false
+        showCardAppearanceDialog = false
     }
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
@@ -721,14 +730,6 @@ fun SettingsScreenContent(
             }
         )
 
-        BadgesInfoDialog(
-            visible = showBadgesInfoDialog,
-            activeHazeState = activeHazeState,
-            disabledBadges = disabledBadges,
-            onToggleBadge = { text, enabled -> settingsViewModel.toggleBadgeEnabled(text, enabled) },
-            onDismiss = { showBadgesInfoDialog = false }
-        )
-
         LogoutConfirmDialog(
             visible = showLogoutConfirm,
             activeHazeState = activeHazeState,
@@ -954,6 +955,14 @@ fun SettingsScreenContent(
             settingsViewModel = settingsViewModel,
             onShowBadgesInfo = { showBadgesInfoDialog = true },
             onDismiss = { showCardAppearanceDialog = false }
+        )
+
+        BadgesInfoDialog(
+            visible = showBadgesInfoDialog,
+            activeHazeState = activeHazeState,
+            disabledBadges = disabledBadges,
+            onToggleBadge = { text, enabled -> settingsViewModel.toggleBadgeEnabled(text, enabled) },
+            onDismiss = { showBadgesInfoDialog = false }
         )
     }
 }
