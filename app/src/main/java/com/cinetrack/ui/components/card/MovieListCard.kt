@@ -476,26 +476,6 @@ fun MovieListCard(
                     else -> Color.White
                 }
 
-                if (isHasCircularProgress) {
-                    androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize().padding(2.dp)) {
-                        val sw = 2.dp.toPx()
-                        drawArc(
-                            color = Color.White.copy(alpha = 0.15f),
-                            startAngle = -90f,
-                            sweepAngle = 360f,
-                            useCenter = false,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw)
-                        )
-                        drawArc(
-                            color = appAccent,
-                            startAngle = -90f,
-                            sweepAngle = 360f * animatedCircularProgress.coerceIn(0f, 1f),
-                            useCenter = false,
-                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                        )
-                    }
-                }
-
                 val isBellOutlined = !isReleased && !(isReminder || isFavorite)
                 val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
                 var bellHasInitialized by remember { mutableStateOf(false) }
@@ -520,21 +500,47 @@ fun MovieListCard(
                     else -> 16.dp
                 }
 
-                val buttonModifier = if (isHasCircularProgress) {
-                    Modifier
-                        .size(26.dp)
-                        .background(color = actionBg, shape = CircleShape)
-                } else {
-                    Modifier
-                        .size(30.dp)
-                        .background(color = actionBg, shape = CircleShape)
-                        .border(width = 1.dp, color = actionBorder, shape = CircleShape)
-                }
+                val buttonSize = 30.dp
+                val buttonModifier = Modifier
+                    .size(buttonSize)
+                    .background(color = actionBg, shape = CircleShape)
+                    .then(
+                        if (!isHasCircularProgress) Modifier.border(width = 1.dp, color = actionBorder, shape = CircleShape)
+                        else Modifier
+                    )
 
                 Box(
                     modifier = buttonModifier,
                     contentAlignment = Alignment.Center
                 ) {
+                    if (isHasCircularProgress) {
+                        androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
+                            val sw = 2.dp.toPx()
+                            val strokeOffset = sw / 2
+                            val arcSize = androidx.compose.ui.geometry.Size(size.width - sw, size.height - sw)
+                            drawArc(
+                                color = Color.White.copy(alpha = 0.15f),
+                                startAngle = -90f,
+                                sweepAngle = 360f,
+                                useCenter = false,
+                                topLeft = androidx.compose.ui.geometry.Offset(strokeOffset, strokeOffset),
+                                size = arcSize,
+                                style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw)
+                            )
+                            if (animatedCircularProgress > 0f) {
+                                drawArc(
+                                    color = appAccent,
+                                    startAngle = -90f,
+                                    sweepAngle = 360f * animatedCircularProgress.coerceIn(0f, 1f),
+                                    useCenter = false,
+                                    topLeft = androidx.compose.ui.geometry.Offset(strokeOffset, strokeOffset),
+                                    size = arcSize,
+                                    style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                                )
+                            }
+                        }
+                    }
+
                     Icon(
                         imageVector = when {
                             isTick -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)

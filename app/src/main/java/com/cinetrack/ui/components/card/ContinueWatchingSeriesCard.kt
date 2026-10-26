@@ -105,38 +105,42 @@ private fun SeasonProgressCheckButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        if (showProgress) {
-            // Progressive border right on the border of the button
-            Canvas(modifier = Modifier.fillMaxSize().padding(1.dp)) {
-                val sw = 2.dp.toPx()
-                // Track
-                drawArc(
-                    color = Color.White.copy(alpha = 0.15f),
-                    startAngle = -90f,
-                    sweepAngle = 360f,
-                    useCenter = false,
-                    style = Stroke(width = sw)
-                )
-            // Progress fill
-            if (progress > 0f) {
-                drawArc(
-                    color = accentColor,
-                    startAngle = -90f,
-                    sweepAngle = 360f * progress.coerceIn(0f, 1f),
-                    useCenter = false,
-                    style = Stroke(width = sw, cap = StrokeCap.Round)
-                )
-            }
-        }
-    }
-
-        // Inner circular button fill & icon
+        // Inner circular button fill & icon with progressive border directly on boundary
         Box(
             modifier = Modifier
                 .size(22.dp)
                 .background(accentColor.copy(alpha = 0.15f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
+            if (showProgress) {
+                Canvas(modifier = Modifier.fillMaxSize()) {
+                    val sw = 2.dp.toPx()
+                    val strokeOffset = sw / 2
+                    val arcSize = androidx.compose.ui.geometry.Size(size.width - sw, size.height - sw)
+                    // Track
+                    drawArc(
+                        color = Color.White.copy(alpha = 0.15f),
+                        startAngle = -90f,
+                        sweepAngle = 360f,
+                        useCenter = false,
+                        topLeft = androidx.compose.ui.geometry.Offset(strokeOffset, strokeOffset),
+                        size = arcSize,
+                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw)
+                    )
+                    // Progress fill
+                    if (progress > 0f) {
+                        drawArc(
+                            color = accentColor,
+                            startAngle = -90f,
+                            sweepAngle = 360f * progress.coerceIn(0f, 1f),
+                            useCenter = false,
+                            topLeft = androidx.compose.ui.geometry.Offset(strokeOffset, strokeOffset),
+                            size = arcSize,
+                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
+                        )
+                    }
+                }
+            }
             if (isUpdating) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(11.dp),
