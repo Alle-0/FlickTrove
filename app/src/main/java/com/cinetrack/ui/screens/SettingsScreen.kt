@@ -176,6 +176,7 @@ fun SettingsScreenContent(
     onLoginClick: () -> Unit
 ) {
     val activeHazeState = hazeState ?: remember { HazeState() }
+    val cardHazeState = remember { HazeState() }
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val user = remember { FirebaseAuth.getInstance().currentUser }
     val focusManager = LocalFocusManager.current
@@ -949,17 +950,26 @@ fun SettingsScreenContent(
             onDismiss = { showHomeSectionsDialog = false }
         )
 
-        com.cinetrack.ui.components.settings.CardAppearanceDialog(
-            visible = showCardAppearanceDialog,
-            activeHazeState = activeHazeState,
-            settingsViewModel = settingsViewModel,
-            onShowBadgesInfo = { showBadgesInfoDialog = true },
-            onDismiss = { showCardAppearanceDialog = false }
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(
+                    state = cardHazeState,
+                    style = HazeStyles.PremiumDark
+                )
+        ) {
+            com.cinetrack.ui.components.settings.CardAppearanceDialog(
+                visible = showCardAppearanceDialog,
+                activeHazeState = activeHazeState,
+                settingsViewModel = settingsViewModel,
+                onShowBadgesInfo = { showBadgesInfoDialog = true },
+                onDismiss = { showCardAppearanceDialog = false }
+            )
+        }
 
         BadgesInfoDialog(
             visible = showBadgesInfoDialog,
-            activeHazeState = activeHazeState,
+            activeHazeState = if (showCardAppearanceDialog) cardHazeState else activeHazeState,
             disabledBadges = disabledBadges,
             onToggleBadge = { text, enabled -> settingsViewModel.toggleBadgeEnabled(text, enabled) },
             onDismiss = { showBadgesInfoDialog = false }

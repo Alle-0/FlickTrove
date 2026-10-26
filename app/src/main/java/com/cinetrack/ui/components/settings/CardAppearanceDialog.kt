@@ -4,8 +4,10 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -19,11 +21,23 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawBehind
+import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.RoundRect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Path
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import kotlinx.coroutines.launch
+import com.cinetrack.LocalAdvancedVisualEffects
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
@@ -59,6 +73,7 @@ import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
+import com.cinetrack.ui.components.shared.ModalCloseButton
 
 // ─── Constants ─────────────────────────────────────────────────────────────
 
@@ -303,7 +318,7 @@ fun CardAppearanceDialog(
             voteAverage = 8.8,
             voteCount = 35000,
             personalRating = 9.0,
-            genreNamesString = "Fantascienza, Azione"
+            genreIds = listOf(878L, 28L)
         ).apply {
             favorite = true
             watched = false
@@ -328,8 +343,7 @@ fun CardAppearanceDialog(
             numberOfEpisodes = 62,
             numberOfSeasons = 5,
             status = "Ended",
-            genreIds = listOf(18, 80),
-            genreNamesString = "Dramma, Crime",
+            genreIds = listOf(18L, 80L),
             watchedEpisodes = mapOf(
                 "1" to (1..7).toList(),
                 "2" to (1..6).toList()
@@ -371,22 +385,11 @@ fun CardAppearanceDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.92f)
         ) {
-            // ── Top drag handle ───────────────────────────────────────
-            Box(
-                modifier = Modifier
-                    .padding(top = 10.dp, bottom = 4.dp)
-                    .width(36.dp)
-                    .height(4.dp)
-                    .clip(RoundedCornerShape(2.dp))
-                    .background(Color.White.copy(alpha = 0.2f))
-                    .align(Alignment.CenterHorizontally)
-            )
-
             // ── Header ────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 6.dp),
+                    .padding(start = 20.dp, end = 20.dp, top = 16.dp, bottom = 10.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -405,21 +408,9 @@ fun CardAppearanceDialog(
                     )
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(34.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .bounceClick(scaleDown = 0.92f, onLongClick = {}) { onDismiss() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = Icons.Rounded.Close,
-                        contentDescription = stringResource(R.string.settings_cancel),
-                        tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(18.dp)
-                    )
-                }
+                ModalCloseButton(
+                    onClick = onDismiss
+                )
             }
 
             // ── Preview Mode Selector Tabs (Drag & Physics) ───────────
@@ -446,7 +437,7 @@ fun CardAppearanceDialog(
             // ── Live Authentic Preview Area (Side by side comparison) ──
             val previewHeight = when (previewMode) {
                 PreviewCardMode.LIST -> 248.dp
-                PreviewCardMode.GRID_3_COL -> 230.dp
+                PreviewCardMode.GRID_3_COL -> 264.dp
                 PreviewCardMode.GRID_2_COL -> 278.dp
             }
             val animPreviewHeight by animateDpAsState(
@@ -656,6 +647,7 @@ fun CardAppearanceDialog(
                         accentColor = accentColor,
                         vibrationEnabled = vibrationEnabled,
                         context = context,
+                        isLinearEnabled = previewMode != PreviewCardMode.LIST,
                         onSelectLinear = { localLinearBar = it },
                         onSelectCircular = { localCircularBar = it }
                     )
@@ -702,7 +694,7 @@ fun CardAppearanceDialog(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 14.dp),
+                    .padding(start = 16.dp, end = 16.dp, bottom = 16.dp, top = 8.dp),
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Cancel
@@ -712,7 +704,7 @@ fun CardAppearanceDialog(
                         .height(48.dp)
                         .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onDismiss() }
                         .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
+                        .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
                         .border(0.5.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
@@ -738,7 +730,7 @@ fun CardAppearanceDialog(
                             onDismiss()
                         }
                         .clip(RoundedCornerShape(16.dp))
-                        .background(accentColor),
+                        .background(accentColor, RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -774,7 +766,90 @@ private fun AppearanceSection(
     }
 }
 
-// ─── Draggable Preview Mode Selector (Drag & Physics) ───────────────────────
+// ─── Preview Mode Tab Items (Layerable for masking) ──────────────────────────
+
+@Composable
+private fun PreviewModeTabItems(
+    modes: List<Triple<PreviewCardMode, String, Int>>,
+    contentColor: Color,
+    isInteractive: Boolean,
+    pressedTabIndex: Int,
+    onTabPressed: ((Int, Boolean) -> Unit)? = null,
+    onSelect: (PreviewCardMode) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        modes.forEachIndexed { index, (mode, label, iconRes) ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+
+            if (isInteractive && onTabPressed != null) {
+                DisposableEffect(isPressed) {
+                    onTabPressed(index, isPressed)
+                    onDispose { onTabPressed(index, false) }
+                }
+            }
+
+            val isCurrentPressed = (isInteractive && isPressed) || (pressedTabIndex == index)
+            val tabBounceScale by animateFloatAsState(
+                targetValue = if (isCurrentPressed) 0.96f else 1f,
+                animationSpec = spring(
+                    stiffness = if (isCurrentPressed) 10000f else Spring.StiffnessMediumLow,
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ),
+                label = "previewTabBounceScale_$index"
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .then(
+                        if (isInteractive) {
+                            Modifier.clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                onSelect(mode)
+                            }
+                        } else Modifier
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = tabBounceScale
+                        scaleY = tabBounceScale
+                    }
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = iconRes),
+                        contentDescription = null,
+                        tint = contentColor,
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = label,
+                        style = MaterialTheme.typography.labelSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 11.sp
+                        ),
+                        color = contentColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            }
+        }
+    }
+}
+
+// ─── Draggable Preview Mode Selector (FlickTrove Tab Physics) ────────────────
 
 @Composable
 private fun DraggablePreviewModeSelector(
@@ -788,201 +863,462 @@ private fun DraggablePreviewModeSelector(
 ) {
     val selectedIndex = modes.indexOfFirst { it.first == selectedMode }.coerceAtLeast(0)
     val density = LocalDensity.current
-    val viewConfiguration = LocalViewConfiguration.current
     val coroutineScope = rememberCoroutineScope()
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+    val haptic = LocalHapticFeedback.current
 
     val padding = 2.dp
 
     BoxWithConstraints(
         modifier = modifier
             .height(32.dp)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.05f))
+            .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-            .padding(padding)
     ) {
         val usableWidthPx = constraints.maxWidth.toFloat()
         val segmentCount = modes.size
-        val segmentWidthPx = usableWidthPx / segmentCount
-        val segmentWidthDp = maxWidth / segmentCount
-        val usableHeightDp = maxHeight
+        val realTabWidthPx = if (segmentCount > 0) usableWidthPx / segmentCount else 1f
+        val paddingPx = with(density) { padding.toPx() }
+        val normalWidthPx = (realTabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-        val offsetAnim = remember { Animatable(selectedIndex * segmentWidthPx) }
+        val animLeft = remember { Animatable(selectedIndex * realTabWidthPx + paddingPx) }
+        val animRight = remember { Animatable((selectedIndex + 1) * realTabWidthPx - paddingPx) }
+        val animDragY = remember { Animatable(0f) }
+        val flightDynamics = remember { Animatable(0f) }
+
+        var isSelectedTabPressed by remember { mutableStateOf(false) }
         var isDragging by remember { mutableStateOf(false) }
-        var hasInitialized by remember { mutableStateOf(false) }
+        var previousIndex by remember { mutableStateOf(selectedIndex) }
+        var pressedTabIndex by remember { mutableStateOf(-1) }
 
-        LaunchedEffect(selectedIndex, segmentWidthPx) {
-            if (segmentWidthPx > 0f) {
-                val target = selectedIndex * segmentWidthPx
-                if (!hasInitialized) {
-                    offsetAnim.snapTo(target)
-                    hasInitialized = true
-                } else if (!isDragging && offsetAnim.value != target) {
-                    offsetAnim.animateTo(
-                        targetValue = target,
-                        animationSpec = spring(
-                            dampingRatio = 0.72f,
-                            stiffness = Spring.StiffnessMedium
+        LaunchedEffect(selectedIndex, realTabWidthPx, segmentCount, advancedEffectsEnabled) {
+            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+
+            val isTabChangedByClick = previousIndex != selectedIndex && !isDragging
+            val indexDistance = kotlin.math.abs(selectedIndex - previousIndex).coerceAtLeast(1)
+            previousIndex = selectedIndex
+
+            if (!advancedEffectsEnabled) {
+                launch { animLeft.snapTo(targetLeft) }
+                launch { animRight.snapTo(targetRight) }
+                return@LaunchedEffect
+            }
+
+            if (isTabChangedByClick) {
+                val riseDuration = if (indexDistance > 1) 110 else 85
+                val peakBoost = (0.24f + (indexDistance - 1) * 0.05f).coerceAtMost(0.34f)
+                launch {
+                    flightDynamics.snapTo(0f)
+                    flightDynamics.animateTo(peakBoost, tween(riseDuration, easing = FastOutSlowInEasing))
+                    flightDynamics.animateTo(
+                        0f,
+                        spring(
+                            dampingRatio = 0.50f,
+                            stiffness = 300f
                         )
                     )
                 }
             }
+
+            if (targetLeft > animLeft.value) {
+                val jobRight = launch {
+                    animRight.animateTo(
+                        targetValue = targetRight,
+                        animationSpec = spring(
+                            stiffness = 650f,
+                            dampingRatio = 0.64f,
+                            visibilityThreshold = 0.5f
+                        )
+                    )
+                }
+                val jobLeft = launch {
+                    animLeft.animateTo(
+                        targetValue = targetLeft,
+                        animationSpec = spring(
+                            stiffness = 480f,
+                            dampingRatio = 0.68f,
+                            visibilityThreshold = 0.5f
+                        )
+                    )
+                }
+                jobRight.join()
+                jobLeft.join()
+            } else if (targetLeft < animLeft.value) {
+                val jobLeft = launch {
+                    animLeft.animateTo(
+                        targetValue = targetLeft,
+                        animationSpec = spring(
+                            stiffness = 650f,
+                            dampingRatio = 0.64f,
+                            visibilityThreshold = 0.5f
+                        )
+                    )
+                }
+                val jobRight = launch {
+                    animRight.animateTo(
+                        targetValue = targetRight,
+                        animationSpec = spring(
+                            stiffness = 480f,
+                            dampingRatio = 0.68f,
+                            visibilityThreshold = 0.5f
+                        )
+                    )
+                }
+                jobRight.join()
+                jobLeft.join()
+            }
         }
+
+        val dragScaleY by animateFloatAsState(
+            targetValue = if (!advancedEffectsEnabled) 1f
+                else if (isDragging) 1.25f
+                else if (isSelectedTabPressed) 1.07f
+                else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            ),
+            label = "previewDragScaleY"
+        )
+        val dragScaleX by animateFloatAsState(
+            targetValue = if (!advancedEffectsEnabled) 1f
+                else if (isDragging) 1.12f
+                else if (isSelectedTabPressed) 1.04f
+                else 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            ),
+            label = "previewDragScaleX"
+        )
+
+        val pillPath = remember { Path() }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(segmentWidthPx, segmentCount) {
-                    awaitEachGesture {
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        var dragAccumulatedX = 0f
-                        var dragAccumulatedY = 0f
-                        var isDrag = false
-                        val pointerId = down.id
+                .pointerInput(selectedIndex, realTabWidthPx) {
+                    var isDragActiveOnPill = false
+                    val touchMargin = 8.dp.toPx()
+                    var dragTargetLeft = 0f
+                    var dragTargetRight = 0f
+                    var dragTargetY = 0f
 
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
-                            if (!change.pressed) {
-                                if (isDrag) {
-                                    val targetIndex = if (segmentWidthPx > 0f) {
-                                        (offsetAnim.value / segmentWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
-                                    } else selectedIndex
-
-                                    coroutineScope.launch {
-                                        offsetAnim.animateTo(
-                                            targetValue = targetIndex * segmentWidthPx,
-                                            animationSpec = spring(
-                                                dampingRatio = 0.72f,
-                                                stiffness = Spring.StiffnessMedium
-                                            )
-                                        )
-                                    }
-                                    if (targetIndex != selectedIndex) {
-                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                        onSelectMode(modes[targetIndex].first)
-                                    }
-                                } else {
-                                    val tapX = down.position.x.coerceIn(0f, usableWidthPx)
-                                    val tappedIndex = if (segmentWidthPx > 0f) {
-                                        (tapX / segmentWidthPx).toInt().coerceIn(0, segmentCount - 1)
-                                    } else selectedIndex
-
-                                    if (tappedIndex != selectedIndex) {
-                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                        onSelectMode(modes[tappedIndex].first)
-                                    }
-                                    coroutineScope.launch {
-                                        offsetAnim.animateTo(
-                                            targetValue = tappedIndex * segmentWidthPx,
-                                            animationSpec = spring(
-                                                dampingRatio = 0.72f,
-                                                stiffness = Spring.StiffnessMedium
-                                            )
-                                        )
-                                    }
-                                }
-                                isDragging = false
-                                break
-                            }
-
-                            val deltaX = change.position.x - change.previousPosition.x
-                            val deltaY = change.position.y - change.previousPosition.y
-                            dragAccumulatedX += deltaX
-                            dragAccumulatedY += deltaY
-
-                            if (!isDrag) {
-                                if (abs(dragAccumulatedX) > viewConfiguration.touchSlop &&
-                                    abs(dragAccumulatedX) > abs(dragAccumulatedY)
-                                ) {
-                                    isDrag = true
-                                    isDragging = true
-                                } else if (abs(dragAccumulatedY) > viewConfiguration.touchSlop) {
-                                    break
-                                }
-                            }
-
-                            if (isDrag) {
-                                change.consume()
-                                val maxOffset = (segmentCount - 1) * segmentWidthPx
-                                val current = offsetAnim.value + deltaX
-                                val rubberBanded = when {
-                                    current < 0f -> current * 0.35f
-                                    current > maxOffset -> maxOffset + (current - maxOffset) * 0.35f
-                                    else -> current
-                                }
+                    detectDragGestures(
+                        onDragStart = { startOffset ->
+                            val currentLeft = animLeft.value
+                            val currentRight = animRight.value
+                            if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
+                                isDragActiveOnPill = true
+                                isDragging = true
+                                dragTargetLeft = currentLeft
+                                dragTargetRight = currentRight
+                                dragTargetY = 0f
                                 coroutineScope.launch {
-                                    offsetAnim.snapTo(rubberBanded)
+                                    launch { animLeft.stop() }
+                                    launch { animRight.stop() }
+                                    launch { animDragY.stop() }
+                                }
+                            } else {
+                                isDragActiveOnPill = false
+                            }
+                        },
+                        onDragEnd = {
+                            if (!isDragActiveOnPill) return@detectDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val currentLeft = animLeft.value - paddingPx
+                            val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+
+                            coroutineScope.launch {
+                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                            }
+
+                            if (targetIndex != selectedIndex) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                onSelectMode(modes[targetIndex].first)
+                            } else {
+                                val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+                                val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                                coroutineScope.launch {
+                                    launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                    launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
                                 }
                             }
+                        },
+                        onDragCancel = {
+                            if (!isDragActiveOnPill) return@detectDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+                            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                            coroutineScope.launch {
+                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                                launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                            }
+                        }
+                    ) { change, dragAmount ->
+                        if (!isDragActiveOnPill) return@detectDragGestures
+                        isDragging = true
+                        change.consume()
+
+                        val dragX = dragAmount.x
+                        val dragYDelta = dragAmount.y
+
+                        dragTargetLeft += dragX
+                        dragTargetRight += dragX
+                        dragTargetY += dragYDelta
+
+                        coroutineScope.launch {
+                            val maxRight = segmentCount * realTabWidthPx - paddingPx
+                            val maxLeft = maxRight - normalWidthPx
+
+                            var targetLeft = dragTargetLeft
+                            var targetRight = dragTargetRight
+
+                            val maxOverscroll = normalWidthPx * 0.8f
+                            if (dragTargetLeft < paddingPx) {
+                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
+                                val maxPenetration = paddingPx * 1.5f
+                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                targetLeft = paddingPx - penetration
+                                targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f
+                            } else if (dragTargetRight > maxRight) {
+                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
+                                val maxPenetration = paddingPx * 1.5f
+                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                targetRight = maxRight + penetration
+                                targetLeft = maxLeft + overscroll * 0.15f
+                            }
+
+                            val leftStiffness = if (dragX > 0) 250f else if (dragX < 0) 800f else 600f
+                            val rightStiffness = if (dragX > 0) 800f else if (dragX < 0) 250f else 600f
+
+                            launch { animDragY.animateTo(dragTargetY, spring(stiffness = 1000f, dampingRatio = 0.7f)) }
+                            launch { animLeft.animateTo(targetLeft, spring(stiffness = leftStiffness, dampingRatio = 0.65f)) }
+                            launch { animRight.animateTo(targetRight, spring(stiffness = rightStiffness, dampingRatio = 0.65f)) }
                         }
                     }
                 }
         ) {
-            // Sliding Indicator (Solid accentColor with spring deformation)
-            val indicatorOffsetDp = with(density) { offsetAnim.value.toDp() }
-            Box(
-                modifier = Modifier
-                    .offset(x = indicatorOffsetDp)
-                    .width(segmentWidthDp)
-                    .fillMaxHeight()
-                    .graphicsLayer {
-                        scaleX = if (isDragging) 1.03f else 1f
-                        scaleY = if (isDragging) 0.98f else 1f
-                    }
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(accentColor)
+            val divHeight = with(density) { 13.dp.toPx() }
+            val currentLeft = animLeft.value
+            val currentRight = animRight.value
+
+            // 1. Inactive Base Layer (Muted white text, always visible beneath)
+            PreviewModeTabItems(
+                modes = modes,
+                contentColor = Color.White.copy(alpha = 0.65f),
+                isInteractive = true,
+                pressedTabIndex = pressedTabIndex,
+                onTabPressed = { index, pressed ->
+                    pressedTabIndex = if (pressed) index else -1
+                    if (index == selectedIndex) isSelectedTabPressed = pressed
+                },
+                onSelect = { mode ->
+                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                    onSelectMode(mode)
+                }
             )
 
-            // Dividers
-            val currentFraction = if (segmentWidthPx > 0f) offsetAnim.value / segmentWidthPx else selectedIndex.toFloat()
-            for (k in 1 until segmentCount) {
-                val distToBoundary = abs(currentFraction - (k - 0.5f))
-                val dividerAlpha = ((distToBoundary - 0.35f) / 0.15f).coerceIn(0f, 1f)
-                if (dividerAlpha > 0.02f) {
-                    val dividerXDp = segmentWidthDp * k
-                    Box(
-                        modifier = Modifier
-                            .offset(x = dividerXDp - 0.5.dp, y = (usableHeightDp - 13.dp) / 2)
-                            .width(1.dp)
-                            .height(13.dp)
-                            .background(Color.White.copy(alpha = 0.12f * dividerAlpha))
-                    )
+            // 2. Sliding Solid Pill + Active Masked Layer (Black text over solid accentColor, rendered on top)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .drawBehind {
+                        // Dividers
+                        for (k in 1 until segmentCount) {
+                            val boundaryX = k * realTabWidthPx
+                            val isPillNearBoundary = boundaryX in (currentLeft - 4.dp.toPx())..(currentRight + 4.dp.toPx())
+                            if (!isPillNearBoundary) {
+                                drawLine(
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    start = Offset(boundaryX, (size.height - divHeight) / 2f),
+                                    end = Offset(boundaryX, (size.height + divHeight) / 2f),
+                                    strokeWidth = 1.dp.toPx()
+                                )
+                            }
+                        }
+
+                        // Sliding Solid Pill
+                        val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                        val centerXPx = (currentLeft + currentRight) / 2f
+
+                        val flightOffset = flightDynamics.value
+                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
+
+                        val baseHeight = size.height - (paddingPx * 2f)
+                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                        val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val cornerRadius = pillHeight / 2f
+
+                        val rawDragY = animDragY.value
+                        val maxVisualDrag = paddingPx * 0.75f
+                        val dragYOffset = if (rawDragY > 0) {
+                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                        } else if (rawDragY < 0) {
+                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                        } else 0f
+
+                        val pillCenterY = (size.height / 2f) + dragYOffset
+                        val pillTop = pillCenterY - (pillHeight / 2f)
+                        val pillLeft = centerXPx - (finalPillWidth / 2f)
+
+                        drawRoundRect(
+                            color = accentColor,
+                            topLeft = Offset(pillLeft, pillTop),
+                            size = Size(finalPillWidth, pillHeight),
+                            cornerRadius = CornerRadius(cornerRadius, cornerRadius)
+                        )
+                    }
+                    .drawWithContent {
+                        val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                        val centerXPx = (currentLeft + currentRight) / 2f
+
+                        val flightOffset = flightDynamics.value
+                        val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                        val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
+
+                        val baseHeight = size.height - (paddingPx * 2f)
+                        val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                        val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+                        val cornerRadius = pillHeight / 2f
+
+                        val rawDragY = animDragY.value
+                        val maxVisualDrag = paddingPx * 0.75f
+                        val dragYOffset = if (rawDragY > 0) {
+                            maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                        } else if (rawDragY < 0) {
+                            -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                        } else 0f
+
+                        val pillCenterY = (size.height / 2f) + dragYOffset
+                        val pillTop = pillCenterY - (pillHeight / 2f)
+                        val pillLeft = centerXPx - (finalPillWidth / 2f)
+
+                        pillPath.reset()
+                        pillPath.addRoundRect(
+                            RoundRect(
+                                left = pillLeft,
+                                top = pillTop,
+                                right = pillLeft + finalPillWidth,
+                                bottom = pillTop + pillHeight,
+                                radiusX = cornerRadius,
+                                radiusY = cornerRadius
+                            )
+                        )
+
+                        clipPath(pillPath) {
+                            this@drawWithContent.drawContent()
+                        }
+                    }
+            ) {
+                // Active Masked Layer (Black text over solid accentColor)
+                PreviewModeTabItems(
+                    modes = modes,
+                    contentColor = Color.Black.copy(alpha = 0.9f),
+                    isInteractive = false,
+                    pressedTabIndex = -1,
+                    onSelect = {}
+                )
+            }
+        }
+    }
+}
+
+// ─── Segmented Option Model & Items (Layerable for masking) ───────────────────
+
+data class SegmentedOption<T>(
+    val value: T,
+    val title: String,
+    val subtitle: String? = null
+)
+
+@Composable
+private fun <T> SegmentedTabItems(
+    options: List<SegmentedOption<T>>,
+    titleColor: Color,
+    subtitleColor: Color,
+    isInteractive: Boolean,
+    pressedTabIndex: Int,
+    onTabPressed: ((Int, Boolean) -> Unit)? = null,
+    onSelect: (T) -> Unit
+) {
+    Row(
+        modifier = Modifier.fillMaxSize(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        options.forEachIndexed { index, option ->
+            val interactionSource = remember { MutableInteractionSource() }
+            val isPressed by interactionSource.collectIsPressedAsState()
+
+            if (isInteractive && onTabPressed != null) {
+                DisposableEffect(isPressed) {
+                    onTabPressed(index, isPressed)
+                    onDispose { onTabPressed(index, false) }
                 }
             }
 
-            // Labels
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                modes.forEachIndexed { index, (_, label, iconRes) ->
-                    val weight = (1f - abs(currentFraction - index)).coerceIn(0f, 1f)
-                    val contentColor = lerp(Color.White.copy(alpha = 0.65f), Color.Black.copy(alpha = 0.9f), weight)
+            val isCurrentPressed = (isInteractive && isPressed) || (pressedTabIndex == index)
+            val tabBounceScale by animateFloatAsState(
+                targetValue = if (isCurrentPressed) 0.96f else 1f,
+                animationSpec = spring(
+                    stiffness = if (isCurrentPressed) 10000f else Spring.StiffnessMediumLow,
+                    dampingRatio = Spring.DampingRatioNoBouncy
+                ),
+                label = "segTabBounceScale_$index"
+            )
 
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight(),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = iconRes),
-                            contentDescription = null,
-                            tint = contentColor,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(5.dp))
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .then(
+                        if (isInteractive) {
+                            Modifier.clickable(
+                                interactionSource = interactionSource,
+                                indication = null
+                            ) {
+                                onSelect(option.value)
+                            }
+                        } else Modifier
+                    )
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
+                    modifier = Modifier.graphicsLayer {
+                        scaleX = tabBounceScale
+                        scaleY = tabBounceScale
+                    }
+                ) {
+                    Text(
+                        text = option.title,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 12.5.sp
+                        ),
+                        color = titleColor,
+                        maxLines = 1,
+                        textAlign = TextAlign.Center
+                    )
+                    if (!option.subtitle.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(2.dp))
                         Text(
-                            text = label,
+                            text = option.subtitle,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = if (weight > 0.5f) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 11.sp
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Normal
                             ),
-                            color = contentColor,
+                            color = subtitleColor,
                             maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
+                            textAlign = TextAlign.Center
                         )
                     }
                 }
@@ -991,13 +1327,7 @@ private fun DraggablePreviewModeSelector(
     }
 }
 
-// ─── Segmented Option Model & Control (Drag & Physics) ───────────────────────
-
-data class SegmentedOption<T>(
-    val value: T,
-    val title: String,
-    val subtitle: String? = null
-)
+// ─── Segmented Control (FlickTrove Tab Physics + Vanishing unselected indicator)
 
 @Composable
 private fun <T> SegmentedControl(
@@ -1008,224 +1338,403 @@ private fun <T> SegmentedControl(
     context: android.content.Context,
     modifier: Modifier = Modifier,
     height: androidx.compose.ui.unit.Dp = 54.dp,
+    enabled: Boolean = true,
     onSelect: (T) -> Unit
 ) {
-    val selectedIndex = options.indexOfFirst { it.value == selected }.coerceAtLeast(0)
+    val selectedIndex = options.indexOfFirst { it.value == selected }
     val density = LocalDensity.current
-    val viewConfiguration = LocalViewConfiguration.current
     val coroutineScope = rememberCoroutineScope()
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+    val haptic = LocalHapticFeedback.current
 
     val padding = 3.dp
+
+    val controlAlpha by animateFloatAsState(
+        targetValue = if (enabled) 1f else 0.40f,
+        animationSpec = tween(200),
+        label = "segControlAlpha"
+    )
 
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.04f))
+            .graphicsLayer { alpha = controlAlpha }
+            .background(Color.White.copy(alpha = 0.04f), RoundedCornerShape(16.dp))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-            .padding(padding)
     ) {
         val usableWidthPx = constraints.maxWidth.toFloat()
         val segmentCount = options.size
-        val segmentWidthPx = usableWidthPx / segmentCount
-        val segmentWidthDp = maxWidth / segmentCount
-        val usableHeightDp = maxHeight
+        val realTabWidthPx = if (segmentCount > 0) usableWidthPx / segmentCount else 1f
+        val paddingPx = with(density) { padding.toPx() }
+        val normalWidthPx = (realTabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-        val offsetAnim = remember { Animatable(selectedIndex * segmentWidthPx) }
+        val initialLeft = if (selectedIndex >= 0) selectedIndex * realTabWidthPx + paddingPx else -realTabWidthPx
+        val initialRight = if (selectedIndex >= 0) (selectedIndex + 1) * realTabWidthPx - paddingPx else 0f
+
+        val animLeft = remember { Animatable(initialLeft) }
+        val animRight = remember { Animatable(initialRight) }
+        val animDragY = remember { Animatable(0f) }
+        val flightDynamics = remember { Animatable(0f) }
+
+        var isSelectedTabPressed by remember { mutableStateOf(false) }
         var isDragging by remember { mutableStateOf(false) }
-        var hasInitialized by remember { mutableStateOf(false) }
+        var previousIndex by remember { mutableStateOf(selectedIndex) }
+        var pressedTabIndex by remember { mutableStateOf(-1) }
 
-        LaunchedEffect(selectedIndex, segmentWidthPx) {
-            if (segmentWidthPx > 0f) {
-                val target = selectedIndex * segmentWidthPx
-                if (!hasInitialized) {
-                    offsetAnim.snapTo(target)
-                    hasInitialized = true
-                } else if (!isDragging && offsetAnim.value != target) {
-                    offsetAnim.animateTo(
-                        targetValue = target,
-                        animationSpec = spring(
-                            dampingRatio = 0.72f,
-                            stiffness = Spring.StiffnessMedium
-                        )
+        val indicatorAlpha by animateFloatAsState(
+            targetValue = if (selectedIndex >= 0) 1f else 0f,
+            animationSpec = tween(150),
+            label = "segIndicatorAlpha"
+        )
+
+        LaunchedEffect(selectedIndex, realTabWidthPx, segmentCount, advancedEffectsEnabled) {
+            if (selectedIndex < 0) {
+                previousIndex = selectedIndex
+                return@LaunchedEffect
+            }
+            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+
+            val wasPreviouslyUnselected = previousIndex < 0
+            val isTabChangedByClick = previousIndex != selectedIndex && !isDragging && !wasPreviouslyUnselected
+            val indexDistance = if (wasPreviouslyUnselected) 1 else kotlin.math.abs(selectedIndex - previousIndex).coerceAtLeast(1)
+            previousIndex = selectedIndex
+
+            if (wasPreviouslyUnselected) {
+                animLeft.snapTo(targetLeft)
+                animRight.snapTo(targetRight)
+                return@LaunchedEffect
+            }
+
+            if (!advancedEffectsEnabled) {
+                launch { animLeft.snapTo(targetLeft) }
+                launch { animRight.snapTo(targetRight) }
+                return@LaunchedEffect
+            }
+
+            if (isTabChangedByClick) {
+                val riseDuration = if (indexDistance > 1) 110 else 85
+                val peakBoost = (0.24f + (indexDistance - 1) * 0.05f).coerceAtMost(0.34f)
+                launch {
+                    flightDynamics.snapTo(0f)
+                    flightDynamics.animateTo(peakBoost, tween(riseDuration, easing = FastOutSlowInEasing))
+                    flightDynamics.animateTo(
+                        0f,
+                        spring(dampingRatio = 0.50f, stiffness = 300f)
                     )
                 }
             }
+
+            if (targetLeft > animLeft.value) {
+                val jobRight = launch {
+                    animRight.animateTo(
+                        targetValue = targetRight,
+                        animationSpec = spring(stiffness = 650f, dampingRatio = 0.64f, visibilityThreshold = 0.5f)
+                    )
+                }
+                val jobLeft = launch {
+                    animLeft.animateTo(
+                        targetValue = targetLeft,
+                        animationSpec = spring(stiffness = 480f, dampingRatio = 0.68f, visibilityThreshold = 0.5f)
+                    )
+                }
+                jobRight.join()
+                jobLeft.join()
+            } else if (targetLeft < animLeft.value) {
+                val jobLeft = launch {
+                    animLeft.animateTo(
+                        targetValue = targetLeft,
+                        animationSpec = spring(stiffness = 650f, dampingRatio = 0.64f, visibilityThreshold = 0.5f)
+                    )
+                }
+                val jobRight = launch {
+                    animRight.animateTo(
+                        targetValue = targetRight,
+                        animationSpec = spring(stiffness = 480f, dampingRatio = 0.68f, visibilityThreshold = 0.5f)
+                    )
+                }
+                jobRight.join()
+                jobLeft.join()
+            }
         }
+
+        val dragScaleY by animateFloatAsState(
+            targetValue = if (!advancedEffectsEnabled) 1f
+                else if (isDragging) 1.25f
+                else if (isSelectedTabPressed) 1.07f
+                else 1f,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+            label = "segDragScaleY"
+        )
+        val dragScaleX by animateFloatAsState(
+            targetValue = if (!advancedEffectsEnabled) 1f
+                else if (isDragging) 1.12f
+                else if (isSelectedTabPressed) 1.04f
+                else 1f,
+            animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+            label = "segDragScaleX"
+        )
+
+        val pillPath = remember { Path() }
+        val cornerRadiusPx = with(density) { 13.dp.toPx() }
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(segmentWidthPx, segmentCount) {
-                    awaitEachGesture {
-                        val down = awaitFirstDown(requireUnconsumed = false)
-                        var dragAccumulatedX = 0f
-                        var dragAccumulatedY = 0f
-                        var isDrag = false
-                        val pointerId = down.id
+                .pointerInput(selectedIndex, realTabWidthPx, enabled) {
+                    if (!enabled) return@pointerInput
+                    var isDragActiveOnPill = false
+                    val touchMargin = 8.dp.toPx()
+                    var dragTargetLeft = 0f
+                    var dragTargetRight = 0f
+                    var dragTargetY = 0f
 
-                        while (true) {
-                            val event = awaitPointerEvent()
-                            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
-                            if (!change.pressed) {
-                                if (isDrag) {
-                                    val targetIndex = if (segmentWidthPx > 0f) {
-                                        (offsetAnim.value / segmentWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
-                                    } else selectedIndex
-
-                                    coroutineScope.launch {
-                                        offsetAnim.animateTo(
-                                            targetValue = targetIndex * segmentWidthPx,
-                                            animationSpec = spring(
-                                                dampingRatio = 0.72f,
-                                                stiffness = Spring.StiffnessMedium
-                                            )
-                                        )
-                                    }
-                                    if (targetIndex != selectedIndex) {
-                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                        onSelect(options[targetIndex].value)
-                                    }
-                                } else {
-                                    val tapX = down.position.x.coerceIn(0f, usableWidthPx)
-                                    val tappedIndex = if (segmentWidthPx > 0f) {
-                                        (tapX / segmentWidthPx).toInt().coerceIn(0, segmentCount - 1)
-                                    } else selectedIndex
-
-                                    if (tappedIndex != selectedIndex) {
-                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                        onSelect(options[tappedIndex].value)
-                                    }
-                                    coroutineScope.launch {
-                                        offsetAnim.animateTo(
-                                            targetValue = tappedIndex * segmentWidthPx,
-                                            animationSpec = spring(
-                                                dampingRatio = 0.72f,
-                                                stiffness = Spring.StiffnessMedium
-                                            )
-                                        )
-                                    }
-                                }
-                                isDragging = false
-                                break
-                            }
-
-                            val deltaX = change.position.x - change.previousPosition.x
-                            val deltaY = change.position.y - change.previousPosition.y
-                            dragAccumulatedX += deltaX
-                            dragAccumulatedY += deltaY
-
-                            if (!isDrag) {
-                                if (abs(dragAccumulatedX) > viewConfiguration.touchSlop &&
-                                    abs(dragAccumulatedX) > abs(dragAccumulatedY)
-                                ) {
-                                    isDrag = true
-                                    isDragging = true
-                                } else if (abs(dragAccumulatedY) > viewConfiguration.touchSlop) {
-                                    break
-                                }
-                            }
-
-                            if (isDrag) {
-                                change.consume()
-                                val maxOffset = (segmentCount - 1) * segmentWidthPx
-                                val current = offsetAnim.value + deltaX
-                                val rubberBanded = when {
-                                    current < 0f -> current * 0.35f
-                                    current > maxOffset -> maxOffset + (current - maxOffset) * 0.35f
-                                    else -> current
-                                }
+                    detectDragGestures(
+                        onDragStart = { startOffset ->
+                            if (selectedIndex < 0) return@detectDragGestures
+                            val currentLeft = animLeft.value
+                            val currentRight = animRight.value
+                            if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
+                                isDragActiveOnPill = true
+                                isDragging = true
+                                dragTargetLeft = currentLeft
+                                dragTargetRight = currentRight
+                                dragTargetY = 0f
                                 coroutineScope.launch {
-                                    offsetAnim.snapTo(rubberBanded)
+                                    launch { animLeft.stop() }
+                                    launch { animRight.stop() }
+                                    launch { animDragY.stop() }
+                                }
+                            } else {
+                                isDragActiveOnPill = false
+                            }
+                        },
+                        onDragEnd = {
+                            if (!isDragActiveOnPill) return@detectDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val currentLeft = animLeft.value - paddingPx
+                            val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+
+                            coroutineScope.launch {
+                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                            }
+
+                            if (targetIndex != selectedIndex) {
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                onSelect(options[targetIndex].value)
+                            } else {
+                                val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+                                val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                                coroutineScope.launch {
+                                    launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                    launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
                                 }
                             }
+                        },
+                        onDragCancel = {
+                            if (!isDragActiveOnPill) return@detectDragGestures
+                            isDragActiveOnPill = false
+                            isDragging = false
+                            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
+                            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                            coroutineScope.launch {
+                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                                launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                                launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
+                            }
+                        }
+                    ) { change, dragAmount ->
+                        if (!isDragActiveOnPill) return@detectDragGestures
+                        isDragging = true
+                        change.consume()
+
+                        val dragX = dragAmount.x
+                        val dragYDelta = dragAmount.y
+
+                        dragTargetLeft += dragX
+                        dragTargetRight += dragX
+                        dragTargetY += dragYDelta
+
+                        coroutineScope.launch {
+                            val maxRight = segmentCount * realTabWidthPx - paddingPx
+                            val maxLeft = maxRight - normalWidthPx
+
+                            var targetLeft = dragTargetLeft
+                            var targetRight = dragTargetRight
+
+                            val maxOverscroll = normalWidthPx * 0.8f
+                            if (dragTargetLeft < paddingPx) {
+                                val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
+                                val maxPenetration = paddingPx * 1.5f
+                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                targetLeft = paddingPx - penetration
+                                targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f
+                            } else if (dragTargetRight > maxRight) {
+                                val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
+                                val maxPenetration = paddingPx * 1.5f
+                                val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                targetRight = maxRight + penetration
+                                targetLeft = maxLeft + overscroll * 0.15f
+                            }
+
+                            val leftStiffness = if (dragX > 0) 250f else if (dragX < 0) 800f else 600f
+                            val rightStiffness = if (dragX > 0) 800f else if (dragX < 0) 250f else 600f
+
+                            launch { animDragY.animateTo(dragTargetY, spring(stiffness = 1000f, dampingRatio = 0.7f)) }
+                            launch { animLeft.animateTo(targetLeft, spring(stiffness = leftStiffness, dampingRatio = 0.65f)) }
+                            launch { animRight.animateTo(targetRight, spring(stiffness = rightStiffness, dampingRatio = 0.65f)) }
                         }
                     }
                 }
         ) {
-            // Sliding Indicator
-            val indicatorOffsetDp = with(density) { offsetAnim.value.toDp() }
-            Box(
-                modifier = Modifier
-                    .offset(x = indicatorOffsetDp)
-                    .width(segmentWidthDp)
-                    .fillMaxHeight()
-                    .graphicsLayer {
-                        scaleX = if (isDragging) 1.03f else 1f
-                        scaleY = if (isDragging) 0.98f else 1f
+            val divHeight = with(density) { if (options.any { !it.subtitle.isNullOrBlank() }) 22.dp.toPx() else 16.dp.toPx() }
+            val currentLeft = animLeft.value
+            val currentRight = animRight.value
+
+            // Inactive Base Layer (Muted greyish text, always visible beneath)
+            SegmentedTabItems(
+                options = options,
+                titleColor = Color.White.copy(alpha = 0.75f),
+                subtitleColor = Color.White.copy(alpha = 0.40f),
+                isInteractive = enabled,
+                pressedTabIndex = pressedTabIndex,
+                onTabPressed = { index, pressed ->
+                    if (enabled) {
+                        pressedTabIndex = if (pressed) index else -1
+                        if (index == selectedIndex) isSelectedTabPressed = pressed
                     }
-                    .clip(RoundedCornerShape(13.dp))
-                    .background(accentColor.copy(alpha = 0.14f))
-                    .border(1.5.dp, accentColor, RoundedCornerShape(13.dp))
+                },
+                onSelect = { value ->
+                    if (enabled) {
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        onSelect(value)
+                    }
+                }
             )
 
-            // Dividers
-            val currentFraction = if (segmentWidthPx > 0f) offsetAnim.value / segmentWidthPx else selectedIndex.toFloat()
-            val hasSubtitle = options.any { !it.subtitle.isNullOrBlank() }
-            val divHeight = if (hasSubtitle) 22.dp else 16.dp
+            // Active Masked Layer + Pill Background & Inset Border (Rendered on top)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .drawBehind {
+                        // Dividers
+                        for (k in 1 until segmentCount) {
+                            val boundaryX = k * realTabWidthPx
+                            val isPillNearBoundary = if (indicatorAlpha > 0.01f) {
+                                boundaryX in (currentLeft - 4.dp.toPx())..(currentRight + 4.dp.toPx())
+                            } else false
 
-            for (k in 1 until segmentCount) {
-                val distToBoundary = abs(currentFraction - (k - 0.5f))
-                val dividerAlpha = ((distToBoundary - 0.35f) / 0.15f).coerceIn(0f, 1f)
-                if (dividerAlpha > 0.02f) {
-                    val dividerXDp = segmentWidthDp * k
-                    Box(
-                        modifier = Modifier
-                            .offset(x = dividerXDp - 0.5.dp, y = (usableHeightDp - divHeight) / 2)
-                            .width(1.dp)
-                            .height(divHeight)
-                            .background(Color.White.copy(alpha = 0.08f * dividerAlpha))
-                    )
-                }
-            }
-
-            // Labels
-            Row(
-                modifier = Modifier.fillMaxSize(),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                options.forEachIndexed { index, option ->
-                    val weight = (1f - abs(currentFraction - index)).coerceIn(0f, 1f)
-                    val titleColor = lerp(Color.White.copy(alpha = 0.85f), accentColor, weight)
-                    val subtitleColor = lerp(Color.White.copy(alpha = 0.45f), accentColor.copy(alpha = 0.85f), weight)
-
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .padding(horizontal = 4.dp, vertical = 2.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = option.title,
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = if (weight > 0.5f) FontWeight.Bold else FontWeight.SemiBold,
-                                    fontSize = 12.5.sp
-                                ),
-                                color = titleColor,
-                                maxLines = 1,
-                                textAlign = TextAlign.Center
-                            )
-                            if (!option.subtitle.isNullOrBlank()) {
-                                Spacer(modifier = Modifier.height(2.dp))
-                                Text(
-                                    text = option.subtitle,
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontSize = 9.5.sp,
-                                        fontWeight = FontWeight.Normal
-                                    ),
-                                    color = subtitleColor,
-                                    maxLines = 1,
-                                    textAlign = TextAlign.Center
+                            if (!isPillNearBoundary) {
+                                drawLine(
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    start = Offset(boundaryX, (size.height - divHeight) / 2f),
+                                    end = Offset(boundaryX, (size.height + divHeight) / 2f),
+                                    strokeWidth = 1.dp.toPx()
                                 )
                             }
                         }
+
+                        // Sliding Translucent Pill + Inset Border
+                        if (indicatorAlpha > 0.01f) {
+                            val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                            val centerXPx = (currentLeft + currentRight) / 2f
+
+                            val flightOffset = flightDynamics.value
+                            val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                            val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
+
+                            val baseHeight = size.height - (paddingPx * 2f)
+                            val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                            val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+
+                            val rawDragY = animDragY.value
+                            val maxVisualDrag = paddingPx * 0.75f
+                            val dragYOffset = if (rawDragY > 0) {
+                                maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                            } else if (rawDragY < 0) {
+                                -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                            } else 0f
+
+                            val pillCenterY = (size.height / 2f) + dragYOffset
+                            val pillTop = pillCenterY - (pillHeight / 2f)
+                            val pillLeft = centerXPx - (finalPillWidth / 2f)
+
+                            // Background fill
+                            drawRoundRect(
+                                color = accentColor.copy(alpha = 0.14f * indicatorAlpha),
+                                topLeft = Offset(pillLeft, pillTop),
+                                size = Size(finalPillWidth, pillHeight),
+                                cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                            )
+
+                            // Inset border stroke so it never clips at edges
+                            val strokeWidthPx = 1.5.dp.toPx()
+                            val halfStroke = strokeWidthPx / 2f
+                            drawRoundRect(
+                                color = accentColor.copy(alpha = indicatorAlpha),
+                                topLeft = Offset(pillLeft + halfStroke, pillTop + halfStroke),
+                                size = Size((finalPillWidth - strokeWidthPx).coerceAtLeast(1f), (pillHeight - strokeWidthPx).coerceAtLeast(1f)),
+                                cornerRadius = CornerRadius((cornerRadiusPx - halfStroke).coerceAtLeast(0f), (cornerRadiusPx - halfStroke).coerceAtLeast(0f)),
+                                style = Stroke(width = strokeWidthPx)
+                            )
+                        }
                     }
+                    .drawWithContent {
+                        if (indicatorAlpha > 0.01f) {
+                            val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                            val centerXPx = (currentLeft + currentRight) / 2f
+
+                            val flightOffset = flightDynamics.value
+                            val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                            val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
+
+                            val baseHeight = size.height - (paddingPx * 2f)
+                            val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                            val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+
+                            val rawDragY = animDragY.value
+                            val maxVisualDrag = paddingPx * 0.75f
+                            val dragYOffset = if (rawDragY > 0) {
+                                maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                            } else if (rawDragY < 0) {
+                                -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                            } else 0f
+
+                            val pillCenterY = (size.height / 2f) + dragYOffset
+                            val pillTop = pillCenterY - (pillHeight / 2f)
+                            val pillLeft = centerXPx - (finalPillWidth / 2f)
+
+                            pillPath.reset()
+                            pillPath.addRoundRect(
+                                RoundRect(
+                                    left = pillLeft,
+                                    top = pillTop,
+                                    right = pillLeft + finalPillWidth,
+                                    bottom = pillTop + pillHeight,
+                                    radiusX = cornerRadiusPx,
+                                    radiusY = cornerRadiusPx
+                                )
+                            )
+
+                            clipPath(pillPath) {
+                                this@drawWithContent.drawContent()
+                            }
+                        }
+                    }
+            ) {
+                // Active Masked Layer (Accent color, clipped strictly under the pill capsule)
+                if (indicatorAlpha > 0.01f) {
+                    SegmentedTabItems(
+                        options = options,
+                        titleColor = accentColor,
+                        subtitleColor = accentColor.copy(alpha = 0.85f),
+                        isInteractive = false,
+                        pressedTabIndex = -1,
+                        onSelect = {}
+                    )
                 }
             }
         }
@@ -1373,9 +1882,16 @@ private fun ProgressBarCompactOptions(
     accentColor: Color,
     vibrationEnabled: Boolean,
     context: android.content.Context,
+    isLinearEnabled: Boolean = true,
     onSelectLinear: (String) -> Unit,
     onSelectCircular: (String) -> Unit
 ) {
+    val linearLabelAlpha by animateFloatAsState(
+        targetValue = if (isLinearEnabled) 0.45f else 0.20f,
+        animationSpec = tween(200),
+        label = "linearLabelAlpha"
+    )
+
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // ── 1. Barra Lineare ──
         Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
@@ -1386,7 +1902,7 @@ private fun ProgressBarCompactOptions(
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
-                color = Color.White.copy(alpha = 0.45f)
+                color = Color.White.copy(alpha = linearLabelAlpha)
             )
             SegmentedControl(
                 options = listOf(
@@ -1410,6 +1926,7 @@ private fun ProgressBarCompactOptions(
                 accentColor = accentColor,
                 vibrationEnabled = vibrationEnabled,
                 context = context,
+                enabled = isLinearEnabled,
                 onSelect = onSelectLinear
             )
         }

@@ -37,6 +37,9 @@ import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.GlassmorphicModal
 import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 
 @Composable
 fun DeleteAccountDialog(
@@ -315,6 +318,37 @@ fun DeepSyncConfirmDialog(
     }
 }
 
+private data class BadgeInfoItem(
+    val titleRes: Int,
+    val color: Color,
+    val descRes: Int
+)
+
+private val BADGES_LEGEND_LIST = listOf(
+    BadgeInfoItem(R.string.settings_badge_new, NeonPink, R.string.settings_badge_new_desc),
+    BadgeInfoItem(R.string.settings_badge_masterpiece, Color(0xFFFFD700), R.string.settings_badge_masterpiece_desc),
+    BadgeInfoItem(R.string.settings_badge_best, Color(0xFF00E5FF), R.string.settings_badge_best_desc),
+    BadgeInfoItem(R.string.settings_badge_hot, HazeStyles.AccentYellow, R.string.settings_badge_hot_desc),
+    BadgeInfoItem(R.string.settings_badge_wow, NeonTeal, R.string.settings_badge_wow_desc),
+    BadgeInfoItem(R.string.settings_badge_hidden_gem, Color(0xFF00E676), R.string.settings_badge_hidden_gem_desc),
+    BadgeInfoItem(R.string.settings_badge_cult, Color(0xFF9C27B0), R.string.settings_badge_cult_desc),
+    BadgeInfoItem(R.string.settings_badge_classic, Color(0xFF8D6E63), R.string.settings_badge_classic_desc),
+    BadgeInfoItem(R.string.settings_badge_epic, Color(0xFFFF5722), R.string.settings_badge_epic_desc),
+    BadgeInfoItem(R.string.settings_badge_binge, Color(0xFF00BCD4), R.string.settings_badge_binge_desc),
+    BadgeInfoItem(R.string.settings_badge_scifi, Color(0xFF2962FF), R.string.settings_badge_scifi_desc),
+    BadgeInfoItem(R.string.settings_badge_comedy, Color(0xFFFFEA00), R.string.settings_badge_comedy_desc),
+    BadgeInfoItem(R.string.settings_badge_horror, Color(0xFFE53935), R.string.settings_badge_horror_desc),
+    BadgeInfoItem(R.string.settings_badge_animation, Color(0xFFFF9800), R.string.settings_badge_animation_desc),
+    BadgeInfoItem(R.string.settings_badge_blockbuster, Color(0xFF6200EA), R.string.settings_badge_blockbuster_desc),
+    BadgeInfoItem(R.string.settings_badge_indie, Color(0xFFAED581), R.string.settings_badge_indie_desc),
+    BadgeInfoItem(R.string.settings_badge_quick, Color(0xFFC6FF00), R.string.settings_badge_quick_desc),
+    BadgeInfoItem(R.string.settings_badge_snack, Color(0xFFC6FF00), R.string.settings_badge_snack_desc),
+    BadgeInfoItem(R.string.settings_badge_divisive, Color(0xFFFF9800), R.string.settings_badge_divisive_desc),
+    BadgeInfoItem(R.string.settings_badge_vintage, Color(0xFFBCAAA4), R.string.settings_badge_vintage_desc),
+    BadgeInfoItem(R.string.settings_badge_docu, Color(0xFF9E9E9E), R.string.settings_badge_docu_desc),
+    BadgeInfoItem(R.string.settings_badge_family, Color(0xFF81D4FA), R.string.settings_badge_family_desc)
+)
+
 @Composable
 fun BadgesInfoDialog(
     visible: Boolean,
@@ -327,6 +361,7 @@ fun BadgesInfoDialog(
         visible = visible,
         activeHazeState = activeHazeState,
         zIndex = 150f,
+        scrimAlpha = 0.50f,
         onDismissRequest = onDismiss
     ) {
         Column(
@@ -352,49 +387,31 @@ fun BadgesInfoDialog(
             }
             Spacer(modifier = Modifier.height(24.dp))
             
-            val legendScrollState = rememberScrollState()
-            val renderBadge = @Composable { text: String, color: Color, desc: String ->
-                BadgeLegendItem(
-                    text = text,
-                    color = color,
-                    desc = desc,
-                    enabled = !disabledBadges.contains(text),
-                    onToggle = { enabled -> onToggleBadge(text, enabled) }
-                )
-            }
+            val lazyListState = rememberLazyListState()
             
-            Column(
+            LazyColumn(
+                state = lazyListState,
                 verticalArrangement = Arrangement.spacedBy(16.dp),
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(max = 420.dp)
-                    .premiumScrollbar(legendScrollState)
+                    .premiumScrollbar(lazyListState)
                     .padding(end = 12.dp)
-                    .verticalFadingEdges(legendScrollState, 16.dp, 16.dp)
-                    .verticalScroll(legendScrollState)
+                    .verticalFadingEdges(lazyListState, 16.dp, 16.dp)
             ) {
-                renderBadge(stringResource(R.string.settings_badge_new), NeonPink, stringResource(R.string.settings_badge_new_desc))
-                renderBadge(stringResource(R.string.settings_badge_masterpiece), Color(0xFFFFD700), stringResource(R.string.settings_badge_masterpiece_desc))
-                renderBadge(stringResource(R.string.settings_badge_best), Color(0xFF00E5FF), stringResource(R.string.settings_badge_best_desc))
-                renderBadge(stringResource(R.string.settings_badge_hot), HazeStyles.AccentYellow, stringResource(R.string.settings_badge_hot_desc))
-                renderBadge(stringResource(R.string.settings_badge_wow), NeonTeal, stringResource(R.string.settings_badge_wow_desc))
-                renderBadge(stringResource(R.string.settings_badge_hidden_gem), Color(0xFF00E676), stringResource(R.string.settings_badge_hidden_gem_desc))
-                renderBadge(stringResource(R.string.settings_badge_cult), Color(0xFF9C27B0), stringResource(R.string.settings_badge_cult_desc))
-                renderBadge(stringResource(R.string.settings_badge_classic), Color(0xFF8D6E63), stringResource(R.string.settings_badge_classic_desc))
-                renderBadge(stringResource(R.string.settings_badge_epic), Color(0xFFFF5722), stringResource(R.string.settings_badge_epic_desc))
-                renderBadge(stringResource(R.string.settings_badge_binge), Color(0xFF00BCD4), stringResource(R.string.settings_badge_binge_desc))
-                renderBadge(stringResource(R.string.settings_badge_scifi), Color(0xFF2962FF), stringResource(R.string.settings_badge_scifi_desc))
-                renderBadge(stringResource(R.string.settings_badge_comedy), Color(0xFFFFEA00), stringResource(R.string.settings_badge_comedy_desc))
-                renderBadge(stringResource(R.string.settings_badge_horror), Color(0xFFE53935), stringResource(R.string.settings_badge_horror_desc))
-                renderBadge(stringResource(R.string.settings_badge_animation), Color(0xFFFF9800), stringResource(R.string.settings_badge_animation_desc))
-                renderBadge(stringResource(R.string.settings_badge_blockbuster), Color(0xFF6200EA), stringResource(R.string.settings_badge_blockbuster_desc))
-                renderBadge(stringResource(R.string.settings_badge_indie), Color(0xFFAED581), stringResource(R.string.settings_badge_indie_desc))
-                renderBadge(stringResource(R.string.settings_badge_quick), Color(0xFFC6FF00), stringResource(R.string.settings_badge_quick_desc))
-                renderBadge(stringResource(R.string.settings_badge_snack), Color(0xFFC6FF00), stringResource(R.string.settings_badge_snack_desc))
-                renderBadge(stringResource(R.string.settings_badge_divisive), Color(0xFFFF9800), stringResource(R.string.settings_badge_divisive_desc))
-                renderBadge(stringResource(R.string.settings_badge_vintage), Color(0xFFBCAAA4), stringResource(R.string.settings_badge_vintage_desc))
-                renderBadge(stringResource(R.string.settings_badge_docu), Color(0xFF9E9E9E), stringResource(R.string.settings_badge_docu_desc))
-                renderBadge(stringResource(R.string.settings_badge_family), Color(0xFF81D4FA), stringResource(R.string.settings_badge_family_desc))
+                items(
+                    items = BADGES_LEGEND_LIST,
+                    key = { it.titleRes }
+                ) { item ->
+                    val text = stringResource(item.titleRes)
+                    BadgeLegendItem(
+                        text = text,
+                        color = item.color,
+                        desc = stringResource(item.descRes),
+                        enabled = !disabledBadges.contains(text),
+                        onToggle = { enabled -> onToggleBadge(text, enabled) }
+                    )
+                }
             }
             
             Spacer(modifier = Modifier.height(32.dp))

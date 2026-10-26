@@ -236,6 +236,7 @@ class MovieRepository @Inject constructor(
             val oldRating  = oldMovie?.personalRating
             val oldFav     = oldMovie?.favorite ?: false
 
+            var watchlistRemoveEnqueued = false
             // watched changed (o nuovo inserimento già visto)
             if (oldWatched != movie.watched) {
                 if (movie.mediaType == "tv") {
@@ -243,6 +244,8 @@ class MovieRepository @Inject constructor(
                     // Rimuovi l'intero show SOLO se tutti gli episodi sono stati tolti.
                     if (movie.watched) {
                         enqueue(TraktInstantWriteWorker.ACTION_MARK_WATCHED)
+                        enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
+                        watchlistRemoveEnqueued = true
                     } else if (movie.watchedEpisodes.isNullOrEmpty()) {
                         // Se è un rewatch, watchedAt NON è null (viene aggiornato con la data del rewatch).
                         // Se l'utente ha fatto WatchState.NONE, watchedAt diventa null.
@@ -260,6 +263,10 @@ class MovieRepository @Inject constructor(
                                      TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
                                  }
                     enqueue(action)
+                    if (movie.watched) {
+                        enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
+                        watchlistRemoveEnqueued = true
+                    }
                 }
             }
 
@@ -296,9 +303,11 @@ class MovieRepository @Inject constructor(
 
             // favorite changed -> sync watchlist/favorite
             if (oldFav != movie.favorite) {
-                val action = if (movie.favorite) TraktInstantWriteWorker.ACTION_ADD_WATCHLIST
-                             else                TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST
-                enqueue(action)
+                if (movie.favorite) {
+                    enqueue(TraktInstantWriteWorker.ACTION_ADD_WATCHLIST)
+                } else if (!watchlistRemoveEnqueued) {
+                    enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
+                }
             }
 
             // watchedEpisodes changed (TV only)

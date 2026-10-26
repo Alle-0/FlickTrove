@@ -556,7 +556,7 @@ fun DonationBanner(
                 ),
                 shape = RoundedCornerShape(32.dp)
             )
-            .padding(20.dp)
+            .padding(16.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
@@ -618,7 +618,7 @@ fun DonationBanner(
                 }
             }
             
-            Spacer(modifier = Modifier.height(24.dp))
+            Spacer(modifier = Modifier.height(20.dp))
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -628,11 +628,12 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .height(48.dp)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -640,18 +641,20 @@ fun DonationBanner(
                                     Color(0xFFFF2A25)
                                 )
                             )
-                        )
-                        .padding(vertical = 14.dp),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_kofi), 
                             contentDescription = null, 
                             tint = Color.White, 
                             modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "Ko-fi",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
@@ -664,11 +667,12 @@ fun DonationBanner(
                 Box(
                     modifier = Modifier
                         .weight(1f)
+                        .height(48.dp)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://paypal.me/AlessandroBasile0")
                         }
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -676,18 +680,20 @@ fun DonationBanner(
                                     Color(0xFF00457C)
                                 )
                             )
-                        )
-                        .padding(vertical = 14.dp),
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Row(verticalAlignment = Alignment.CenterVertically) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_paypal), 
                             contentDescription = null, 
                             tint = Color.White, 
                             modifier = Modifier.size(18.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
                             text = "PayPal",
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),

@@ -354,27 +354,37 @@ fun MovieCard(
                     )
             )
 
-            if (showFolderBookmarks) {
-                Box(modifier = Modifier.align(Alignment.TopStart)) {
-                    MovieFolderBookmarks(folderColors)
-                }
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showFolderBookmarks,
+                enter = fadeIn(tween(250)) + slideInVertically(tween(250)) { -it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { -it / 2 },
+                modifier = Modifier.align(Alignment.TopStart)
+            ) {
+                MovieFolderBookmarks(folderColors)
             }
 
             // Dynamic Badges (Top Right)
-            if (showBadges && maxBadges > 0) {
-                val isLarge = cardWidth > 135.dp
-                val disabledBadges = com.cinetrack.LocalDisabledBadges.current
-                val effectiveShowAdvanced = showAdvancedBadges || isLarge
-                val badges = remember(movie, effectiveShowAdvanced) { movie.generateBadges(effectiveShowAdvanced) }
-                
+            val isLarge = cardWidth > 135.dp
+            val disabledBadges = com.cinetrack.LocalDisabledBadges.current
+            val effectiveShowAdvanced = showAdvancedBadges || isLarge
+            val badges = remember(movie, effectiveShowAdvanced) { movie.generateBadges(effectiveShowAdvanced) }
+            val visibleBadges = remember(badges, disabledBadges, maxBadges) {
+                badges.filter { it.text !in disabledBadges }.take(maxBadges)
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showBadges && maxBadges > 0 && visibleBadges.isNotEmpty(),
+                enter = fadeIn(tween(250)) + scaleIn(tween(250, easing = FastOutSlowInEasing), initialScale = 0.8f),
+                exit = fadeOut(tween(200)) + scaleOut(tween(200, easing = FastOutSlowInEasing), targetScale = 0.8f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
                 androidx.compose.foundation.layout.Column(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    badges.filter { it.text !in disabledBadges }.take(maxBadges).forEach { badge ->
+                    visibleBadges.forEach { badge ->
                         MovieCardBadge(
                             text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 

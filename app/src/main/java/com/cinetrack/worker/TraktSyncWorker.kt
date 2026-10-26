@@ -138,6 +138,7 @@ class TraktSyncWorker @AssistedInject constructor(
             val total = history.size
             var current = 0
             
+            val remoteWatchedMovieIds = mutableSetOf<Pair<Long, String>>()
             val moviesToUpdate = mutableListOf<com.cinetrack.data.model.Movie>()
 
             for (item in history) {
@@ -147,12 +148,29 @@ class TraktSyncWorker @AssistedInject constructor(
                     updateProgress(current, total)
                 }
 
-                val tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb ?: continue
+                var tmdbId = item.movie?.ids?.tmdb ?: item.show?.ids?.tmdb
+                val imdbId = item.movie?.ids?.imdb ?: item.show?.ids?.imdb
                 val mediaType = if (item.type == "movie") "movie" else "tv"
 
                 // ---> FIX: Saltiamo le Serie TV in questa fase per non forzare il 100%!
                 // Le analizzeremo nella Fase 1b contando matematicamente gli episodi.
                 if (mediaType == "tv") continue
+
+                // Fallback: risoluzione via IMDB se ids.tmdb è assente
+                if (tmdbId == null && !imdbId.isNullOrBlank()) {
+                    try {
+                        val found = tmdbService.findByExternalId(imdbId, "imdb_id")
+                        val resolved = found.movieResults?.firstOrNull()?.id
+                        if (resolved != null && resolved > 100L) {
+                            tmdbId = resolved
+                        }
+                    } catch (e: Exception) {
+                        android.util.Log.e("TraktSyncWorker", "Errore lookup TMDB per IMDB ID $imdbId in history", e)
+                    }
+                }
+
+                if (tmdbId == null || tmdbId <= 0L) continue
+                remoteWatchedMovieIds.add(Pair(tmdbId, "movie"))
 
                 val localMovie = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
                 if (localMovie != null && (localMovie.syncStatus == "pending_delete" || localMovie.syncStatus == "deleted")) {
@@ -217,10 +235,7 @@ class TraktSyncWorker @AssistedInject constructor(
 
             // --- Two Way Merge/Diff (Rimozioni o Caricamento Iniziale) ---
             if (isIntegrityValid) {
-                val remoteWatchedIds = history.mapNotNull { 
-                    val tId = it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb 
-                    if (tId != null) Pair(tId, if (it.type == "movie") "movie" else "tv") else null
-                }.toHashSet()
+                val remoteWatchedIds = remoteWatchedMovieIds
 
                 val localMovies = movieRepository.getLocalMoviesIncludingDeleted()
                 val remoteMovieIds = remoteWatchedIds.filter { it.second != "tv" }
@@ -245,13 +260,32 @@ class TraktSyncWorker @AssistedInject constructor(
                         }
                     }
                 } else {
+                    val now = System.currentTimeMillis()
                     for (localMovie in localMovies) {
                         if (localMovie.watched && localMovie.mediaType != "tv") {
                             val key = Pair(localMovie.id, localMovie.mediaType)
                             if (!remoteWatchedIds.contains(key)) {
-                                // Orfano trovato: l'utente lo ha cancellato da Trakt
-                                val updated = localMovie.copy(watched = false)
-                                moviesToUpdate.add(updated)
+                                // Anti-overwrite guard: se il film è stato modificato di recente in locale (ultimi 15 min),
+                                // non resettarlo a watched = false perché l'InstantWriteWorker potrebbe essere ancora in volo o Trakt in ritardo di indicizzazione.
+                                val isRecentlyModified = (now - localMovie.clientUpdatedAt) < 15 * 60 * 1000L
+                                if (isRecentlyModified) {
+                                    android.util.Log.d("TraktSyncWorker", "SYNC: Film ${localMovie.id} visto di recente in locale, preservo e pusho su Trakt.")
+                                    try {
+                                        val syncMovies = listOf(
+                                            com.cinetrack.data.api.TraktSyncMovie(
+                                                ids = com.cinetrack.data.api.TraktSyncIds(tmdb = localMovie.id, imdb = localMovie.imdbId),
+                                                watched_at = localMovie.watchedAt
+                                            )
+                                        )
+                                        traktService.addToHistory(com.cinetrack.data.api.TraktSyncRequest(movies = syncMovies))
+                                    } catch (e: Exception) {
+                                        android.util.Log.e("TraktSyncWorker", "Errore push film visto di recente su Trakt", e)
+                                    }
+                                } else {
+                                    // Orfano trovato: l'utente lo ha cancellato da Trakt
+                                    val updated = localMovie.copy(watched = false)
+                                    moviesToUpdate.add(updated)
+                                }
                             }
                         }
                     }
@@ -845,6 +879,8 @@ class TraktSyncWorker @AssistedInject constructor(
                     val remoteWatchlistIds = mutableSetOf<Pair<Long, String>>()
                     val watchlistUpdates   = mutableListOf<com.cinetrack.data.model.Movie>()
                     val localMovies        = movieRepository.getLocalMoviesIncludingDeleted()
+                    val toRemoveMoviesFromTraktWatchlist = mutableListOf<com.cinetrack.data.api.TraktSyncMovie>()
+                    val toRemoveShowsFromTraktWatchlist  = mutableListOf<com.cinetrack.data.api.TraktSyncShow>()
 
                     // favorite = true per tutto ciò che è in watchlist remota
                     for (item in allRemoteWatchlist) {
@@ -885,16 +921,41 @@ class TraktSyncWorker @AssistedInject constructor(
 
                         if (tmdbId == null || tmdbId <= 0L) continue
 
-                        remoteWatchlistIds.add(Pair(tmdbId, mediaType))
                         val local = movieRepository.getMovieIncludingDeleted(tmdbId, mediaType)
                         if (local != null && (local.syncStatus == "pending_delete" || local.syncStatus == "deleted")) {
                             android.util.Log.d("TraktSyncWorker", "SYNC: Watchlist $tmdbId è ${local.syncStatus}, skip resurrezione.")
                             continue
                         }
+
+                        // Guard: se il film/serie è già visto o completato (in locale o in Trakt history),
+                        // non deve MAI essere impostato a watched = false né riapparire in Watchlist ("Da Vedere").
+                        // Invece, accodiamo la rimozione dalla Watchlist di Trakt per ripulire lo stato remoto.
+                        val isAlreadyWatched = (local != null && (local.watched || (local.mediaType == "tv" && local.isTvUpToDateOrCompleted()))) ||
+                                remoteWatchedMovieIds.contains(Pair(tmdbId, mediaType))
+
+                        if (isAlreadyWatched) {
+                            android.util.Log.d("TraktSyncWorker", "SYNC: $mediaType $tmdbId è già visto/in pari, skip watchlist e pulisco Trakt.")
+                            if (mediaType == "movie") {
+                                toRemoveMoviesFromTraktWatchlist.add(
+                                    com.cinetrack.data.api.TraktSyncMovie(
+                                        ids = com.cinetrack.data.api.TraktSyncIds(tmdb = tmdbId, imdb = imdbId)
+                                    )
+                                )
+                            } else {
+                                toRemoveShowsFromTraktWatchlist.add(
+                                    com.cinetrack.data.api.TraktSyncShow(
+                                        ids = com.cinetrack.data.api.TraktSyncIds(tmdb = tmdbId, imdb = imdbId)
+                                    )
+                                )
+                            }
+                            continue
+                        }
+
+                        remoteWatchlistIds.add(Pair(tmdbId, mediaType))
                         
                         if (local != null) {
-                            if (!local.favorite || local.watched) {
-                                watchlistUpdates.add(local.copy(favorite = true, watched = false))
+                            if (!local.favorite) {
+                                watchlistUpdates.add(local.copy(favorite = true))
                             }
                         } else {
                             // Se il film/serie in watchlist non esiste nel DB locale, lo scarichiamo da TMDB
@@ -913,6 +974,21 @@ class TraktSyncWorker @AssistedInject constructor(
                             } catch (e: Exception) {
                                 android.util.Log.e("TraktSyncWorker", "Impossibile scaricare dettagli watchlist per TMDB ID $tmdbId", e)
                             }
+                        }
+                    }
+
+                    // Rimozione atomica da Trakt degli elementi già visti che erano rimasti orfani nella watchlist remota
+                    if (toRemoveMoviesFromTraktWatchlist.isNotEmpty() || toRemoveShowsFromTraktWatchlist.isNotEmpty()) {
+                        try {
+                            traktService.removeFromWatchlist(
+                                com.cinetrack.data.api.TraktSyncRequest(
+                                    movies = toRemoveMoviesFromTraktWatchlist.takeIf { it.isNotEmpty() },
+                                    shows = toRemoveShowsFromTraktWatchlist.takeIf { it.isNotEmpty() }
+                                )
+                            )
+                            android.util.Log.d("TraktSyncWorker", "SYNC: Rimossi ${toRemoveMoviesFromTraktWatchlist.size} film e ${toRemoveShowsFromTraktWatchlist.size} serie già visti dalla Watchlist Trakt.")
+                        } catch (e: Exception) {
+                            android.util.Log.e("TraktSyncWorker", "Errore pulizia elementi visti dalla watchlist Trakt", e)
                         }
                     }
 

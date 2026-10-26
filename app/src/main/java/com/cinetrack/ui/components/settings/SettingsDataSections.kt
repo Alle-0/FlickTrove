@@ -44,6 +44,7 @@ import com.cinetrack.util.VibrationHelper
 import com.cinetrack.util.Keys
 import com.google.firebase.auth.FirebaseUser
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.components.common.CategoryTabSelector
 
 @Composable
 fun SettingsImagesStorageSection(
@@ -64,38 +65,42 @@ fun SettingsImagesStorageSection(
             icon = ImageVector.vectorResource(id = R.drawable.ic_hd),
             title = stringResource(R.string.settings_image_quality),
             description = stringResource(R.string.settings_image_quality_desc),
-            trailing = { },
-            onClick = { },
             customContent = {
-                Row(
-                    modifier = Modifier.fillMaxWidth().padding(top = 8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                val qualityOptions = listOf(
+                    stringResource(R.string.quality_low),
+                    stringResource(R.string.quality_medium),
+                    stringResource(R.string.quality_high)
+                )
+                val selectedIndex = when (imageQuality) {
+                    ImageQuality.LOW -> 0
+                    ImageQuality.MEDIUM -> 1
+                    ImageQuality.HIGH -> 2
+                }
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
                 ) {
-                    val options = listOf(
-                        Triple(ImageQuality.LOW, stringResource(R.string.quality_low), imageQuality == ImageQuality.LOW),
-                        Triple(ImageQuality.MEDIUM, stringResource(R.string.quality_medium), imageQuality == ImageQuality.MEDIUM),
-                        Triple(ImageQuality.HIGH, stringResource(R.string.quality_high), imageQuality == ImageQuality.HIGH)
+                    CategoryTabSelector(
+                        options = qualityOptions,
+                        selectedIndex = selectedIndex,
+                        onOptionClick = { index ->
+                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                            val newQuality = when (index) {
+                                0 -> ImageQuality.LOW
+                                1 -> ImageQuality.MEDIUM
+                                else -> ImageQuality.HIGH
+                            }
+                            settingsViewModel.updateImageQuality(newQuality)
+                        },
+                        modifier = Modifier.fillMaxWidth(),
+                        fillWidth = true,
+                        indicatorColor = currentAccentColor,
+                        uppercase = false
                     )
-                    options.forEach { (value, label, isSelected) ->
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .bounceClick { 
-                                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                    settingsViewModel.updateImageQuality(value) 
-                                }
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(if (isSelected) currentAccentColor else Color.White.copy(alpha = 0.05f))
-                                .padding(vertical = 10.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = label,
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                                color = if (isSelected) Color(0xFF1E1E1E) else Color.White
-                            )
-                        }
-                    }
                 }
             }
         )

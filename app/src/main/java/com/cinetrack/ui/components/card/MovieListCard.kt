@@ -78,9 +78,10 @@ fun MovieListCard(
     precalculatedNextInfo: NextEpisodeInfo? = null
 ) {
     val isTv = movie.mediaType == "tv"
-    val nextInfo = precalculatedNextInfo ?: remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
+    val isEffectiveWatched = isWatched || movie.watched
+    val nextInfo = if (isEffectiveWatched) null else (precalculatedNextInfo ?: remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
         if (isTv) movie.calculateNextEpisode() else null
-    }
+    })
     val episodeInfoStyle = com.cinetrack.LocalEpisodeInfoStyle.current
     val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
 
@@ -213,58 +214,67 @@ fun MovieListCard(
                 }
             }
 
-            // Rich cinematic horizontal scrim: deep coverage on text zone, smooth feathering towards backdrop
+            // Cinematic horizontal scrim: strong contrast on text zone (left), fading to clear transparent on the backdrop scene (right)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         androidx.compose.ui.graphics.Brush.horizontalGradient(
-                            0.00f to Color.Black.copy(alpha = 0.96f),
-                            0.25f to Color.Black.copy(alpha = 0.94f),
-                            0.45f to Color.Black.copy(alpha = 0.88f),
-                            0.65f to Color.Black.copy(alpha = 0.72f),
-                            0.80f to Color.Black.copy(alpha = 0.35f),
-                            0.92f to Color.Black.copy(alpha = 0.20f),
-                            1.00f to Color.Black.copy(alpha = 0.45f)
+                            0.00f to Color.Black.copy(alpha = 0.92f),
+                            0.28f to Color.Black.copy(alpha = 0.75f),
+                            0.48f to Color.Black.copy(alpha = 0.30f),
+                            0.60f to Color.Transparent,
+                            0.85f to Color.Transparent,
+                            0.95f to Color.Black.copy(alpha = 0.25f),
+                            1.00f to Color.Black.copy(alpha = 0.50f)
                         )
                     )
             )
 
-            // Vertical vignette: protects bottom subtitle/genre text from bright ground and top badges/ribbon from bright skies
+            // Delicate vertical vignette for top badges and bottom metadata contrast without drowning the image
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         androidx.compose.ui.graphics.Brush.verticalGradient(
-                            0.00f to Color.Black.copy(alpha = 0.45f),
-                            0.25f to Color.Transparent,
-                            0.50f to Color.Transparent,
-                            0.75f to Color.Black.copy(alpha = 0.45f),
-                            1.00f to Color.Black.copy(alpha = 0.80f)
+                            0.00f to Color.Black.copy(alpha = 0.25f),
+                            0.18f to Color.Transparent,
+                            0.78f to Color.Transparent,
+                            1.00f to Color.Black.copy(alpha = 0.35f)
                         )
                     )
             )
 
-
-            if (showFolderBookmarks) {
-                Box(modifier = Modifier.align(Alignment.TopStart)) {
-                    MovieFolderBookmarks(folderColors)
-                }
+            // Animated Folder Bookmarks (Top Left)
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showFolderBookmarks,
+                enter = fadeIn(tween(250)) + slideInVertically(tween(250)) { -it / 2 },
+                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { -it / 2 },
+                modifier = Modifier.align(Alignment.TopStart)
+            ) {
+                MovieFolderBookmarks(folderColors)
             }
 
-            // Dynamic Badges (Top Right)
-            if (showBadges) {
-                val disabledBadges = com.cinetrack.LocalDisabledBadges.current
-                val badges = remember(movie, showAdvancedBadges) { movie.generateBadges(showAdvancedBadges) }
-                
+            // Dynamic Badges (Top Right) with smooth animated entrance/exit
+            val disabledBadges = com.cinetrack.LocalDisabledBadges.current
+            val badges = remember(movie, showAdvancedBadges) { movie.generateBadges(showAdvancedBadges) }
+            val visibleBadges = remember(badges, disabledBadges) {
+                badges.filter { it.text !in disabledBadges }.take(3)
+            }
+
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showBadges && visibleBadges.isNotEmpty(),
+                enter = fadeIn(tween(250)) + scaleIn(tween(250, easing = FastOutSlowInEasing), initialScale = 0.8f),
+                exit = fadeOut(tween(200)) + scaleOut(tween(200, easing = FastOutSlowInEasing), targetScale = 0.8f),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(8.dp)
+            ) {
                 androidx.compose.foundation.layout.Column(
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(8.dp),
                     verticalArrangement = androidx.compose.foundation.layout.Arrangement.spacedBy(4.dp),
                     horizontalAlignment = Alignment.End
                 ) {
-                    badges.filter { it.text !in disabledBadges }.take(3).forEach { badge ->
+                    visibleBadges.forEach { badge ->
                         MovieCardBadge(
                             text = badge.getLocalizedText(), 
                             color = Color(badge.colorValue), 
@@ -340,7 +350,7 @@ fun MovieListCard(
                             )
                         }
                     }
-                    if (isTv && nextInfo != null) {
+                    if (isTv && !isEffectiveWatched && nextInfo != null) {
                         Spacer(modifier = Modifier.width(8.dp))
                         val isUpToDate = isReleased && nextInfo.isUpToDateWithAirDate
                         val statusText = when {
@@ -431,7 +441,7 @@ fun MovieListCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val isQuickWatch = isTv && !isWatched && nextInfo != null && !nextInfo.isUpToDateWithAirDate
+                val isQuickWatch = isTv && !isEffectiveWatched && nextInfo != null && !nextInfo.isUpToDateWithAirDate
                 val appAccent = MaterialTheme.colorScheme.primary
                 val isReleased = movie.isReleased
                 val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
@@ -450,11 +460,11 @@ fun MovieListCard(
                     ),
                     label = "listCircularProgress"
                 )
-                val isHasCircularProgress = isTv && !isWatched
+                val isHasCircularProgress = isTv && !isEffectiveWatched
 
                 val actionBg = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.15f)
-                    isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
+                    isEffectiveWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
                     isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
                     else -> com.cinetrack.ui.theme.HazeStyles.GlassColor.copy(alpha = 0.60f)
@@ -462,7 +472,7 @@ fun MovieListCard(
 
                 val actionBorder = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.45f)
-                    isWatched -> appAccent
+                    isEffectiveWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
                     else -> com.cinetrack.ui.theme.HazeStyles.GlassBorderColor
@@ -470,7 +480,7 @@ fun MovieListCard(
 
                 val actionTint = when {
                     isQuickWatch -> appAccent
-                    isWatched -> appAccent
+                    isEffectiveWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
                     else -> Color.White
@@ -491,8 +501,8 @@ fun MovieListCard(
                     bellHasInitialized = true
                 }
 
-                val isTick = isQuickWatch || isWatched
-                val isPlus = !isWatched && isReleased && !isOcchio && !isQuickWatch
+                val isTick = isQuickWatch || isEffectiveWatched
+                val isPlus = !isEffectiveWatched && isReleased && !isOcchio && !isQuickWatch
                 val iconSize = when {
                     isTick -> 13.dp
                     !isReleased -> if (isBellOutlined) 20.dp else 21.dp
