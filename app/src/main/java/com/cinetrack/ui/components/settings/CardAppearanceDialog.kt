@@ -440,7 +440,7 @@ fun CardAppearanceDialog(
 
             // ── Live Authentic Preview Area (Side by side comparison) ──
             val previewHeight = when (previewMode) {
-                PreviewCardMode.LIST -> 246.dp
+                PreviewCardMode.LIST -> 248.dp
                 PreviewCardMode.GRID_3_COL -> 230.dp
                 PreviewCardMode.GRID_2_COL -> 278.dp
             }
@@ -450,14 +450,25 @@ fun CardAppearanceDialog(
                 label = "previewHeight"
             )
 
+            val previewCornerRadius = when (previewMode) {
+                PreviewCardMode.LIST -> 34.dp // 24.dp card corner + 10.dp padding = 34.dp for perfect concentricity
+                PreviewCardMode.GRID_2_COL -> 32.dp
+                PreviewCardMode.GRID_3_COL -> 28.dp
+            }
+            val animPreviewCorner by animateDpAsState(
+                targetValue = previewCornerRadius,
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
+                label = "previewCorner"
+            )
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp, vertical = 8.dp)
                     .height(animPreviewHeight)
-                    .clip(RoundedCornerShape(20.dp))
+                    .clip(RoundedCornerShape(animPreviewCorner))
                     .background(Color.White.copy(alpha = 0.03f))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(animPreviewCorner))
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
@@ -597,7 +608,7 @@ fun CardAppearanceDialog(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
+                                        .padding(10.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     MovieListCard(
