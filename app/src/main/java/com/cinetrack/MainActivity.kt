@@ -97,11 +97,11 @@ val LocalAdvancedVisualEffects = androidx.compose.runtime.compositionLocalOf<Boo
 /** "REMAINING" | "WATCHED_OVER_TOTAL" | "SEASON_ONLY" | "SEASON_AND_TOTAL" | "PERCENTAGE" */
 val LocalEpisodeInfoStyle = androidx.compose.runtime.compositionLocalOf<String> { "REMAINING" }
 /** "CIRCULAR_TOTAL" | "CIRCULAR_SEASON" | "LINEAR_TOTAL" | "LINEAR_SEASON" | "NONE" (legacy) */
-val LocalProgressBarTarget = androidx.compose.runtime.compositionLocalOf<String> { "CIRCULAR_TOTAL" }
+val LocalProgressBarTarget = androidx.compose.runtime.compositionLocalOf<String> { "CIRCULAR_SEASON" }
 /** "TOTAL" | "SEASON" | "NONE" */
 val LocalLinearProgressBar = androidx.compose.runtime.compositionLocalOf<String> { "TOTAL" }
 /** "TOTAL" | "SEASON" | "NONE" */
-val LocalCircularProgressBar = androidx.compose.runtime.compositionLocalOf<String> { "TOTAL" }
+val LocalCircularProgressBar = androidx.compose.runtime.compositionLocalOf<String> { "SEASON" }
 
 @AndroidEntryPoint
 class MainActivity : FragmentActivity() {

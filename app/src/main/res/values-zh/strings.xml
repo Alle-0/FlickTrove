@@ -1755,6 +1755,9 @@
     <string name="badge_folder_deep_title">終極典藏</string>
     <string name="badge_folder_deep_cat">深度策展</string>
     <string name="badge_folder_deep_desc">創建主題資料夾並精心收錄至少25部精選作品。</string>
+    <string name="badge_co_director_title">聯合執導</string>
+    <string name="badge_co_director_cat">精選資料夾</string>
+    <string name="badge_co_director_desc">電影是四手聯彈的藝術：與其他影迷創建或加入共享資料夾。</string>
     <string name="badge_time_machine_title">時光穿梭機</string>
     <string name="badge_time_machine_cat">縱覽影史</string>
     <string name="badge_time_machine_desc">跨越時光長河，在電影史7個不同的年代各觀賞至少1部電影。</string>

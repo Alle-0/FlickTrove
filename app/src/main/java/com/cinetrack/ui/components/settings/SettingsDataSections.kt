@@ -76,7 +76,7 @@ fun SettingsImagesStorageSection(
                     accentColor = currentAccentColor,
                     vibrationEnabled = vibrationEnabled,
                     context = context,
-                    height = 44.dp,
+                    height = 36.dp,
                     onSelect = { newQuality ->
                         settingsViewModel.updateImageQuality(newQuality)
                     }

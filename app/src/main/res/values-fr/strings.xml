@@ -1749,6 +1749,9 @@
     <string name="badge_folder_deep_title">La Collection Ultime</string>
     <string name="badge_folder_deep_cat">Curation Approfondie</string>
     <string name="badge_folder_deep_desc">Créez et enrichissez un dossier thématique avec au moins 25 œuvres.</string>
+    <string name="badge_co_director_title">Co-Réalisation</string>
+    <string name="badge_co_director_cat">DOSSIERS D\'AUTEUR</string>
+    <string name="badge_co_director_desc">Le cinéma est une œuvre à quatre mains : créez ou rejoignez un dossier partagé avec un autre cinéphile.</string>
     <string name="badge_time_machine_title">La Machine à Remonter le Temps</string>
     <string name="badge_time_machine_cat">Cinéphilie Temporelle</string>
     <string name="badge_time_machine_desc">Regardez au moins un film dans 7 décennies différentes du 7e art.</string>

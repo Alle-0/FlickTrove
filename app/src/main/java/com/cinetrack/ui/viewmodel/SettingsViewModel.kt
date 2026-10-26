@@ -402,13 +402,13 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "REMAINING")
 
     val progressBarTarget: StateFlow<String> = settingsRepository.progressBarTarget
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "CIRCULAR_TOTAL")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "CIRCULAR_SEASON")
 
     val linearProgressBar: StateFlow<String> = settingsRepository.linearProgressBar
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "TOTAL")
 
     val circularProgressBar: StateFlow<String> = settingsRepository.circularProgressBar
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "TOTAL")
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "SEASON")
 
     val showMyFolders: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showMyFolders }

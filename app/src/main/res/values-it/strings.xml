@@ -1777,6 +1777,9 @@
     <string name="badge_folder_deep_title">La Collezione Definitiva</string>
     <string name="badge_folder_deep_cat">RACCOLTE D\'AUTORE</string>
     <string name="badge_folder_deep_desc">Un archivio ricco e meticoloso: hai creato una cartella tematica con almeno 25 titoli.</string>
+    <string name="badge_co_director_title">Co-Regia</string>
+    <string name="badge_co_director_cat">RACCOLTE D\'AUTORE</string>
+    <string name="badge_co_director_desc">Il cinema è un\'opera a quattro mani: crea o unisciti a una cartella condivisa con un altro cinefilo.</string>
 
     <string name="badge_time_machine_title">La Macchina del Tempo</string>
     <string name="badge_time_machine_cat">VIAGGIO NEL TEMPO</string>

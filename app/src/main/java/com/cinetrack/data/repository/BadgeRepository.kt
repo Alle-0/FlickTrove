@@ -967,6 +967,10 @@ class BadgeRepository @Inject constructor(
 
             badgeDao.markBadgesAsSynced(pendingBadges.map { it.badgeId })
             android.util.Log.d("BadgeRepository", "syncPendingBadgesToFirestore: synced ${pendingBadges.size} badges (new increments: ${actuallyNewBadges.size})")
+
+            if (actuallyNewBadges.isNotEmpty()) {
+                fetchGlobalRarityStats(forceRefresh = true)
+            }
             true
         } catch (e: Exception) {
             android.util.Log.e("BadgeRepository", "syncPendingBadgesToFirestore failed", e)
@@ -982,8 +986,9 @@ class BadgeRepository @Inject constructor(
         if (!forceRefresh) {
             val lastCached = badgeDao.getLatestGlobalStatsTimestamp() ?: 0L
             val ttlMillis = 24 * 60 * 60 * 1000L // 24 ore di cache locale
-            if (System.currentTimeMillis() - lastCached < ttlMillis) {
-                return true // Dati già freschi in Room: zero chiamate di rete!
+            val cachedCount = badgeDao.getGlobalStatsCount()
+            if (System.currentTimeMillis() - lastCached < ttlMillis && cachedCount >= OFFICIAL_TROPHY_ROOM_CATALOG.size) {
+                return true // Dati già freschi in Room e catalogo completo: zero chiamate di rete!
             }
         }
         return try {
@@ -1573,6 +1578,20 @@ class BadgeRepository @Inject constructor(
                 )
             }
 
+            // Co-Regia: Cartella condivisa con almeno un altro cinefilo
+            "badge_co_director" -> {
+                val currentUid = auth.currentUser?.uid
+                val hasJoinedSharedFolder = allFolders.any { it.isShared && !it.ownerUid.isNullOrBlank() && it.ownerUid != currentUid }
+                val hasCollaborators = currentUid != null && badgePrefs.getBoolean("has_collaborator_$currentUid", false)
+                val isCoDirector = hasJoinedSharedFolder || hasCollaborators || (prevEntity?.isUnlocked == true)
+                EvaluationResult(
+                    currentProgress = if (isCoDirector) 1 else 0,
+                    targetThreshold = 1,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = isCoDirector
+                )
+            }
+
             // 44. Attraverso i Decenni: La Macchina del Tempo (almeno 1 film visto per 7 decenni diversi)
             "badge_time_machine" -> {
                 val distinctDecades = watchedMovies.mapNotNull { movie ->
@@ -1656,7 +1675,7 @@ class BadgeRepository @Inject constructor(
                 )
             }
 
-            // 51. Meta Trofeo: Il Cacciatore di Trofei (avanza con lo sblocco degli altri trofei)
+            // 52. Meta Trofeo: Il Cacciatore di Trofei (avanza con lo sblocco degli altri trofei)
             "badge_trophy_hunter" -> {
                 val curr = prevEntity?.progressCurrent ?: 0
                 calculateProgressiveTiers(curr, badge.progressiveSteps)

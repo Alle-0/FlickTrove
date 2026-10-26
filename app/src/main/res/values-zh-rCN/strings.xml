@@ -1755,6 +1755,9 @@
     <string name="badge_folder_deep_title">终极典藏</string>
     <string name="badge_folder_deep_cat">深度策展</string>
     <string name="badge_folder_deep_desc">创建主题文件夹并精心收录至少25部佳作。</string>
+    <string name="badge_co_director_title">联合执导</string>
+    <string name="badge_co_director_cat">精选文件夹</string>
+    <string name="badge_co_director_desc">电影是四手联弹的艺术：与其他影迷创建或加入共享文件夹。</string>
     <string name="badge_time_machine_title">时光穿梭机</string>
     <string name="badge_time_machine_cat">纵览影史</string>
     <string name="badge_time_machine_desc">跨越时光长河，在电影史7个不同的年代各观赏至少1部电影。</string>

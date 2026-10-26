@@ -1754,6 +1754,9 @@
     <string name="badge_folder_deep_title">Koleksi Terhebat</string>
     <string name="badge_folder_deep_cat">Kurasi Mendalam</string>
     <string name="badge_folder_deep_desc">Buat dan perkaya folder bertema dengan setidaknya 25 judul pilihan.</string>
+    <string name="badge_co_director_title">Rekan Sutradara</string>
+    <string name="badge_co_director_cat">FOLDER KURASI</string>
+    <string name="badge_co_director_desc">Sinema adalah karya empat tangan: buat atau gabung ke folder bersama dengan pencinta film lain.</string>
     <string name="badge_time_machine_title">Mesin Waktu</string>
     <string name="badge_time_machine_cat">Lintas Era Sinema</string>
     <string name="badge_time_machine_desc">Tonton setidaknya satu film dari masing-masing 7 dekade berbeda dalam sejarah perfilman.</string>

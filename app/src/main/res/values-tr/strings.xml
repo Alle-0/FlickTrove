@@ -1755,6 +1755,9 @@
     <string name="badge_folder_deep_title">Kapsamlı Koleksiyon</string>
     <string name="badge_folder_deep_cat">Derin Kürasyon</string>
     <string name="badge_folder_deep_desc">Tematik bir klasör oluşturup içine en az 25 seçkin yapım ekleyin.</string>
+    <string name="badge_co_director_title">Ortak Yönetmen</string>
+    <string name="badge_co_director_cat">ÖZEL KOLEKSİYONLAR</string>
+    <string name="badge_co_director_desc">Sinema dört elle yapılan bir sanattır: başka bir sinemaseverle paylaşılan bir klasör oluşturun veya katılın.</string>
     <string name="badge_time_machine_title">Zaman Makinesi</string>
     <string name="badge_time_machine_cat">Kuşaklararası Sinema</string>
     <string name="badge_time_machine_desc">Sinema tarihinin 7 farklı on yılından en az birer film izleyin.</string>

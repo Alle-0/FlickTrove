@@ -1755,6 +1755,9 @@
     <string name="badge_folder_deep_title">궁극의 컬렉션</string>
     <string name="badge_folder_deep_cat">심층 큐레이션</string>
     <string name="badge_folder_deep_desc">테마 폴더를 생성하고 25편 이상의 엄선된 작품으로 채우세요.</string>
+    <string name="badge_co_director_title">공동 연출</string>
+    <string name="badge_co_director_cat">큐레이션 폴더</string>
+    <string name="badge_co_director_desc">영화는 네 개의 손으로 빚어낸 예술: 다른 영화 팬과 함께 공유 폴더를 만들거나 참여하세요.</string>
     <string name="badge_time_machine_title">타임머신</string>
     <string name="badge_time_machine_cat">영화사 여행</string>
     <string name="badge_time_machine_desc">영화사의 서로 다른 7개 연대에서 각각 최소 1편 이상의 영화를 감상하세요.</string>

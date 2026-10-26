@@ -33,6 +33,7 @@ class SharedFolderRepository @Inject constructor(
     private val movieRepository: MovieRepository,
     private val tmdbService: TMDBService,
     private val auth: FirebaseAuth,
+    private val badgeRepository: dagger.Lazy<BadgeRepository>,
     @ApplicationContext private val context: Context
 ) {
 
@@ -216,14 +217,28 @@ class SharedFolderRepository @Inject constructor(
                 )
                 api.addMember(memberDto)
 
-                // Increment invite used_count
+                // Increment invite used_count or hard-delete if exhausted (e.g. single-use)
                 val newCount = invite.usedCount + 1
-                api.updateInvite(
-                    "eq.${invite.code}",
-                    buildJsonObject {
-                        put("used_count", newCount)
+                if (invite.maxUses != null && newCount >= invite.maxUses) {
+                    try {
+                        api.revokeInvite("eq.${invite.code}")
+                    } catch (e: Exception) {
+                        android.util.Log.w("SharedFolderRepository", "Could not delete exhausted invite ${invite.code}, falling back to update", e)
+                        api.updateInvite(
+                            "eq.${invite.code}",
+                            buildJsonObject {
+                                put("used_count", newCount)
+                            }
+                        )
                     }
-                )
+                } else {
+                    api.updateInvite(
+                        "eq.${invite.code}",
+                        buildJsonObject {
+                            put("used_count", newCount)
+                        }
+                    )
+                }
             }
 
             // Check if user already has this folder locally (e.g. owner or already imported)
@@ -255,6 +270,7 @@ class SharedFolderRepository @Inject constructor(
                 maxItems = sharedDto.maxItems
             )
             folderDao.insert(folderEntity)
+            badgeRepository.get().evaluateBadgesAsync()
 
             // Asynchronously pre-fetch any missing movie/TV details into Room cache
             fetchMissingItemsMetadata(sharedDto.items)
@@ -463,7 +479,14 @@ class SharedFolderRepository @Inject constructor(
 
     suspend fun getFolderMembers(sharedFolderId: String): Result<List<SharedFolderMemberDto>> = withContext(Dispatchers.IO) {
         runCatching {
-            api.getFolderMembers("eq.$sharedFolderId")
+            val members = api.getFolderMembers("eq.$sharedFolderId")
+            val user = getCurrentUser()
+            if (user != null && members.any { it.userUid != user.uid }) {
+                context.getSharedPreferences("flicktrove_badge_prefs", Context.MODE_PRIVATE)
+                    .edit().putBoolean("has_collaborator_${user.uid}", true).apply()
+                badgeRepository.get().evaluateBadgesAsync()
+            }
+            members
         }
     }
 
@@ -486,12 +509,22 @@ class SharedFolderRepository @Inject constructor(
 
     suspend fun getFolderInvites(sharedFolderId: String): Result<List<SharedFolderInviteDto>> = withContext(Dispatchers.IO) {
         runCatching {
-            val invites = api.getFolderInvites("eq.$sharedFolderId")
-            invites.filter { invite ->
+            val allInvites = api.getFolderInvites("eq.$sharedFolderId")
+            val (activeInvites, deadInvites) = allInvites.partition { invite ->
                 !invite.isRevoked &&
                 (invite.maxUses == null || invite.usedCount < invite.maxUses) &&
                 !invite.isExpired
             }
+            if (deadInvites.isNotEmpty()) {
+                deadInvites.forEach { dead ->
+                    try {
+                        api.revokeInvite("eq.${dead.code}")
+                    } catch (_: Exception) {
+                        // Ignore individual purge failures silently
+                    }
+                }
+            }
+            activeInvites
         }
     }
 
@@ -527,7 +560,12 @@ class SharedFolderRepository @Inject constructor(
 
             val members = api.getFolderMembers("eq.$sharedId")
             val otherMembers = members.filter { it.userUid != user.uid }
-            if (otherMembers.isNotEmpty()) return@runCatching false
+            if (otherMembers.isNotEmpty()) {
+                context.getSharedPreferences("flicktrove_badge_prefs", Context.MODE_PRIVATE)
+                    .edit().putBoolean("has_collaborator_${user.uid}", true).apply()
+                badgeRepository.get().evaluateBadgesAsync()
+                return@runCatching false
+            }
 
             val allInvites = api.getFolderInvites("eq.$sharedId")
             val activeInvites = allInvites.filter { !it.isRevoked && (it.maxUses == null || it.usedCount < it.maxUses) && !it.isExpired }

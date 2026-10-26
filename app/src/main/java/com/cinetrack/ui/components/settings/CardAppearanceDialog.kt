@@ -292,7 +292,7 @@ fun CardAppearanceDialog(
     var localEpisodeStyle by remember(persistedEpisodeInfoStyle) { mutableStateOf(persistedEpisodeInfoStyle) }
     var localLinearBar by remember(persistedLinearProgressBar) { mutableStateOf(persistedLinearProgressBar) }
     var localCircularBar by remember(persistedCircularProgressBar) {
-        mutableStateOf(if (persistedCircularProgressBar == "SEASON") "SEASON" else "TOTAL")
+        mutableStateOf(if (persistedCircularProgressBar == "TOTAL") "TOTAL" else "SEASON")
     }
     var localTextMultiplier by remember(persistedTextSizeMultiplier) { mutableStateOf(persistedTextSizeMultiplier) }
     var localShowBadges by remember(persistedShowBadges) { mutableStateOf(persistedShowBadges) }
@@ -1302,18 +1302,18 @@ internal fun <T> SegmentedTabItems(
                         text = option.title,
                         style = MaterialTheme.typography.labelMedium.copy(
                             fontWeight = FontWeight.Bold,
-                            fontSize = 12.5.sp
+                            fontSize = 12.sp
                         ),
                         color = titleColor,
                         maxLines = 1,
                         textAlign = TextAlign.Center
                     )
                     if (!option.subtitle.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(2.dp))
+                        Spacer(modifier = Modifier.height(1.dp))
                         Text(
                             text = option.subtitle,
                             style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 9.5.sp,
+                                fontSize = 9.sp,
                                 fontWeight = FontWeight.Normal
                             ),
                             color = subtitleColor,
@@ -1337,7 +1337,7 @@ internal fun <T> SegmentedControl(
     vibrationEnabled: Boolean,
     context: android.content.Context,
     modifier: Modifier = Modifier,
-    height: androidx.compose.ui.unit.Dp = 54.dp,
+    height: androidx.compose.ui.unit.Dp = 46.dp,
     enabled: Boolean = true,
     onSelect: (T) -> Unit
 ) {
@@ -1346,8 +1346,9 @@ internal fun <T> SegmentedControl(
     val coroutineScope = rememberCoroutineScope()
     val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
     val haptic = LocalHapticFeedback.current
-
-    val padding = 3.dp
+    val isCompact = height <= 38.dp
+    val padding = 2.5.dp
+    val containerCornerRadius = if (isCompact) 12.dp else 14.dp
 
     val controlAlpha by animateFloatAsState(
         targetValue = if (enabled) 1f else 0.40f,
@@ -1360,8 +1361,8 @@ internal fun <T> SegmentedControl(
             .fillMaxWidth()
             .height(height)
             .graphicsLayer { alpha = controlAlpha }
-            .background(Color.White.copy(alpha = 0.04f), RoundedCornerShape(16.dp))
-            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.04f), RoundedCornerShape(containerCornerRadius))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(containerCornerRadius))
     ) {
         val usableWidthPx = constraints.maxWidth.toFloat()
         val segmentCount = options.size
@@ -1477,7 +1478,7 @@ internal fun <T> SegmentedControl(
         )
 
         val pillPath = remember { Path() }
-        val cornerRadiusPx = with(density) { 13.dp.toPx() }
+        val cornerRadiusPx = with(density) { (if (isCompact) 9.5.dp else 11.5.dp).toPx() }
 
         Box(
             modifier = Modifier
@@ -1590,7 +1591,11 @@ internal fun <T> SegmentedControl(
                     }
                 }
         ) {
-            val divHeight = with(density) { if (options.any { !it.subtitle.isNullOrBlank() }) 22.dp.toPx() else 16.dp.toPx() }
+            val divHeight = with(density) { 
+                if (options.any { !it.subtitle.isNullOrBlank() }) 19.dp.toPx() 
+                else if (isCompact) 13.dp.toPx() 
+                else 16.dp.toPx() 
+            }
             val currentLeft = animLeft.value
             val currentRight = animRight.value
 
@@ -1985,7 +1990,7 @@ private fun TextSizeOptions(
         accentColor = accentColor,
         vibrationEnabled = vibrationEnabled,
         context = context,
-        height = 44.dp,
+        height = 36.dp,
         onSelect = onSelect
     )
 }

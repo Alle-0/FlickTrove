@@ -214,33 +214,34 @@ fun MovieListCard(
                 }
             }
 
-            // Cinematic horizontal scrim: strong contrast on text zone (left), fading to clear transparent on the backdrop scene (right)
+            // Cinematic horizontal scrim: strong contrast on text zone (left), extending past midpoint for long episode subtitles
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         androidx.compose.ui.graphics.Brush.horizontalGradient(
-                            0.00f to Color.Black.copy(alpha = 0.92f),
-                            0.28f to Color.Black.copy(alpha = 0.75f),
-                            0.48f to Color.Black.copy(alpha = 0.30f),
-                            0.60f to Color.Transparent,
-                            0.85f to Color.Transparent,
-                            0.95f to Color.Black.copy(alpha = 0.25f),
-                            1.00f to Color.Black.copy(alpha = 0.50f)
+                            0.00f to Color.Black.copy(alpha = 0.96f),
+                            0.32f to Color.Black.copy(alpha = 0.88f),
+                            0.52f to Color.Black.copy(alpha = 0.72f),
+                            0.68f to Color.Black.copy(alpha = 0.35f),
+                            0.82f to Color.Transparent,
+                            0.92f to Color.Black.copy(alpha = 0.25f),
+                            1.00f to Color.Black.copy(alpha = 0.55f)
                         )
                     )
             )
 
-            // Delicate vertical vignette for top badges and bottom metadata contrast without drowning the image
+            // Bottom-up vertical gradient for strong metadata readability over light backdrops + top badge vignette
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(
                         androidx.compose.ui.graphics.Brush.verticalGradient(
-                            0.00f to Color.Black.copy(alpha = 0.25f),
-                            0.18f to Color.Transparent,
-                            0.78f to Color.Transparent,
-                            1.00f to Color.Black.copy(alpha = 0.35f)
+                            0.00f to Color.Black.copy(alpha = 0.35f),
+                            0.20f to Color.Transparent,
+                            0.45f to Color.Transparent,
+                            0.70f to Color.Black.copy(alpha = 0.50f),
+                            1.00f to Color.Black.copy(alpha = 0.88f)
                         )
                     )
             )
@@ -328,7 +329,7 @@ fun MovieListCard(
                         Text(
                             text = releaseYear,
                             style = MaterialTheme.typography.bodySmall,
-                            color = Color.White.copy(alpha = 0.6f)
+                            color = Color.White.copy(alpha = 0.75f)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
                     }
@@ -375,7 +376,7 @@ fun MovieListCard(
                                 Text(
                                     text = epText,
                                     style = MaterialTheme.typography.bodySmall.copy(fontWeight = FontWeight.SemiBold, fontSize = 11.sp),
-                                    color = Color.White.copy(alpha = 0.55f),
+                                    color = Color.White.copy(alpha = 0.85f),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -389,7 +390,7 @@ fun MovieListCard(
                     Text(
                         text = genres,
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.90f),
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis
                     )
@@ -441,15 +442,15 @@ fun MovieListCard(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val isQuickWatch = isTv && !isEffectiveWatched && nextInfo != null && !nextInfo.isUpToDateWithAirDate
+                val isQuickWatch = isTv && !isEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
                 val appAccent = MaterialTheme.colorScheme.primary
                 val isReleased = movie.isReleased
                 val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
-                val isOcchio = !isQuickWatch && isReleased && (isReminder || isFavorite)
+                val isOcchio = !isQuickWatch && isReleased && !isEffectiveWatched && (isReminder || isFavorite)
 
                 val circularBar = com.cinetrack.LocalCircularProgressBar.current
                 val targetCircularProgress = when (circularBar) {
-                    "SEASON" -> seasonProgress
+                    "SEASON" -> if (seasonProgress > 0f) seasonProgress else computedProgress
                     else -> computedProgress
                 }
                 val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(
@@ -460,7 +461,7 @@ fun MovieListCard(
                     ),
                     label = "listCircularProgress"
                 )
-                val isHasCircularProgress = isTv && !isEffectiveWatched
+                val isHasCircularProgress = isQuickWatch || (isTv && !isEffectiveWatched && (isOcchio || isReminder || isFavorite || computedProgress > 0f))
 
                 val actionBg = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.15f)

@@ -1755,6 +1755,9 @@
     <string name="badge_folder_deep_title">珠玉のコレクション</string>
     <string name="badge_folder_deep_cat">キュレーションの極み</string>
     <string name="badge_folder_deep_desc">テーマ別フォルダーを作成し、25作品以上を厳選して収蔵する。</string>
+    <string name="badge_co_director_title">共同監督</string>
+    <string name="badge_co_director_cat">厳選コレクション</string>
+    <string name="badge_co_director_desc">映画は二人三脚の芸術：他の映画ファンと共有フォルダーを作成または参加しましょう。</string>
     <string name="badge_time_machine_title">タイムマシン</string>
     <string name="badge_time_machine_cat">映画史の旅</string>
     <string name="badge_time_machine_desc">映画史の異なる7つの年代から、それぞれ1本以上の作品を鑑賞する。</string>

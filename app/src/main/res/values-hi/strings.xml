@@ -1747,6 +1747,9 @@
     <string name="badge_folder_deep_title">अंतिम संग्रह</string>
     <string name="badge_folder_deep_cat">गहन क्यूरेशन</string>
     <string name="badge_folder_deep_desc">एक थीम आधारित फ़ोल्डर बनाएं और उसमें कम से कम 25 चुनिंदा शीर्षक जोड़ें।</string>
+    <string name="badge_co_director_title">सह-निर्देशन</string>
+    <string name="badge_co_director_cat">चुनिंदा फोल्डर</string>
+    <string name="badge_co_director_desc">सिनेमा चार हाथों का काम है: किसी अन्य सिनेप्रेमी के साथ एक साझा फ़ोल्डर बनाएं या उसमें शामिल हों।</string>
     <string name="badge_time_machine_title">टाइम मशीन</string>
     <string name="badge_time_machine_cat">युगों की यात्रा</string>
     <string name="badge_time_machine_desc">सिनेमा इतिहास के 7 अलग-अलग दशकों में से प्रत्येक से कम से कम एक फिल्म देखें।</string>

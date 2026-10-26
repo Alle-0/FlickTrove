@@ -57,6 +57,9 @@ interface BadgeDao {
     @Query("SELECT MAX(cached_at) FROM badge_global_stats")
     suspend fun getLatestGlobalStatsTimestamp(): Long?
 
+    @Query("SELECT COUNT(*) FROM badge_global_stats")
+    suspend fun getGlobalStatsCount(): Int
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun upsertGlobalStats(stats: List<BadgeGlobalStatsEntity>)
 

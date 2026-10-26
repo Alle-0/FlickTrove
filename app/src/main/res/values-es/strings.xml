@@ -1751,6 +1751,9 @@
     <string name="badge_folder_deep_title">La Colección Definitiva</string>
     <string name="badge_folder_deep_cat">Curaduría Profunda</string>
     <string name="badge_folder_deep_desc">Crea y nutre una carpeta temática con al menos 25 títulos seleccionados.</string>
+    <string name="badge_co_director_title">Co-Dirección</string>
+    <string name="badge_co_director_cat">COLECCIONES DE AUTOR</string>
+    <string name="badge_co_director_desc">El cine es una obra a cuatro manos: crea o únete a una carpeta compartida con otro cinéfilo.</string>
     <string name="badge_time_machine_title">La Máquina del Tiempo</string>
     <string name="badge_time_machine_cat">Cinefilia Temporal</string>
     <string name="badge_time_machine_desc">Disfruta de al menos una película en cada una de 7 décadas distintas de la historia del cine.</string>

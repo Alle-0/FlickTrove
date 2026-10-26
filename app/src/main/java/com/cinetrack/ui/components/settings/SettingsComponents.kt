@@ -232,13 +232,14 @@ fun SettingsItem(
         modifier = Modifier
             .fillMaxWidth()
             .alpha(alpha)
-            .clip(RoundedCornerShape(20.dp))
             .then(
                 if (isClickable) {
-                    Modifier.bounceClick { 
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        onClick() 
-                    }
+                    Modifier
+                        .clip(RoundedCornerShape(20.dp))
+                        .bounceClick { 
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            onClick() 
+                        }
                 } else {
                     Modifier
                 }
@@ -312,6 +313,7 @@ fun SettingsItem(
             if (customContent != null) {
                 Spacer(modifier = Modifier.height(14.dp))
                 customContent()
+                Spacer(modifier = Modifier.height(2.dp))
             }
         }
     }

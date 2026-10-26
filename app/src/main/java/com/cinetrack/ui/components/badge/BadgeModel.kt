@@ -139,6 +139,7 @@ enum class CustomBadgeIconKind(@DrawableRes val iconRes: Int) {
     HIDDEN_GEM(R.drawable.ic_badge_hidden_gem),
     SHORT_FILMS(R.drawable.ic_badge_short_films),
     TROPHY_HUNTER(R.drawable.ic_badge_trophy_hunter),
+    CO_DIRECTOR(R.drawable.ic_badge_co_director),
 
     // Alias per retrocompatibilità
     DOUBLE_TICKET(R.drawable.ic_badge_ticket),
@@ -268,6 +269,7 @@ fun getBadgeTitleRes(badgeId: String): Int = when (badgeId) {
     "badge_hidden_gem" -> R.string.badge_hidden_gem_title
     "badge_short_films" -> R.string.badge_short_films_title
     "badge_trophy_hunter" -> R.string.badge_trophy_hunter_title
+    "badge_co_director" -> R.string.badge_co_director_title
     else -> 0
 }
 
@@ -349,6 +351,7 @@ fun getBadgeCategoryRes(badgeId: String): Int = when (badgeId) {
     "badge_hidden_gem" -> R.string.badge_hidden_gem_cat
     "badge_short_films" -> R.string.badge_short_films_cat
     "badge_trophy_hunter" -> R.string.badge_trophy_hunter_cat
+    "badge_co_director" -> R.string.badge_co_director_cat
     else -> 0
 }
 
@@ -430,6 +433,7 @@ fun getBadgeDescriptionRes(badgeId: String): Int = when (badgeId) {
     "badge_hidden_gem" -> R.string.badge_hidden_gem_desc
     "badge_short_films" -> R.string.badge_short_films_desc
     "badge_trophy_hunter" -> R.string.badge_trophy_hunter_desc
+    "badge_co_director" -> R.string.badge_co_director_desc
     else -> 0
 }
 

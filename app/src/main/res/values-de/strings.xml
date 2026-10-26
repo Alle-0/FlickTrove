@@ -1752,6 +1752,9 @@
     <string name="badge_folder_deep_title">Die ultimative Sammlung</string>
     <string name="badge_folder_deep_cat">KURATIERTE ORDNER</string>
     <string name="badge_folder_deep_desc">Ein reichhaltiges Archiv: Du hast einen thematischen Ordner mit mindestens 25 Titeln erstellt.</string>
+    <string name="badge_co_director_title">Co-Regie</string>
+    <string name="badge_co_director_cat">KURATIERTE ORDNER</string>
+    <string name="badge_co_director_desc">Kino ist ein Vier-Hände-Werk: Erstelle oder tritt einem geteilten Ordner mit einem anderen Filmfan bei.</string>
     <string name="badge_time_machine_title">Die Zeitmaschine</string>
     <string name="badge_time_machine_cat">ZEITREISE</string>
     <string name="badge_time_machine_desc">Grenzenlose Filmkultur: Du hast mindestens einen Film aus 7 verschiedenen Jahrzehnten gesehen.</string>

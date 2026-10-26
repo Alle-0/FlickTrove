@@ -508,15 +508,14 @@ fun MovieCard(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        val isQuickWatch = isTv && !isWatched && nextInfo != null && !nextInfo.isUpToDateWithAirDate
                         val appAccent = MaterialTheme.colorScheme.primary
                         val isReleased = movie.isReleased
                         val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
-                        val isOcchio = !isQuickWatch && isReleased && (isReminder || isFavorite)
+                        val isOcchio = isReleased && !isWatched && (isReminder || isFavorite)
 
                         val circularBar = com.cinetrack.LocalCircularProgressBar.current
                         val targetCircularProgress = when (circularBar) {
-                            "SEASON" -> seasonProgress
+                            "SEASON" -> if (seasonProgress > 0f) seasonProgress else computedProgress
                             else -> computedProgress
                         }
                         val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(
@@ -527,10 +526,9 @@ fun MovieCard(
                             ),
                             label = "movieCardCircularProgress"
                         )
-                        val isHasCircularProgress = isTv && !isWatched
+                        val isHasCircularProgress = isTv && !isWatched && (isOcchio || isReminder || isFavorite || computedProgress > 0f)
 
                         val actionBg = when {
-                            isQuickWatch -> appAccent.copy(alpha = 0.15f)
                             isWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
                             isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
                             isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
@@ -538,7 +536,6 @@ fun MovieCard(
                         }
 
                         val actionBorder = when {
-                            isQuickWatch -> appAccent.copy(alpha = 0.45f)
                             isWatched -> appAccent
                             isPromemoriaAttiva -> appAccent
                             isOcchio -> HazeStyles.AccentYellow
@@ -546,7 +543,6 @@ fun MovieCard(
                         }.copy(alpha = 0.3f)
 
                         val actionTint = when {
-                            isQuickWatch -> appAccent
                             isWatched -> appAccent
                             isPromemoriaAttiva -> appAccent
                             isOcchio -> HazeStyles.AccentYellow
@@ -568,13 +564,13 @@ fun MovieCard(
                             bellHasInitialized = true
                         }
 
-                        val isTick = isWatched || isQuickWatch
-                        val isPlus = !isWatched && isReleased && !isOcchio && !isQuickWatch
+                        val isTick = isWatched
+                        val isPlus = !isWatched && isReleased && !isOcchio
                         val iconSizeModifier = Modifier.size(
                             if (isLarge) {
-                                if (isTick) 13.dp else if (isPlus) 16.dp else if (isBellOutlined) 20.dp else 21.dp
+                                if (isTick) 13.dp else if (isPlus) 16.dp else if (isOcchio) 20.dp else if (isBellOutlined) 20.dp else 21.dp
                             } else {
-                                if (isTick) 10.dp else if (isPlus) 12.dp else if (isBellOutlined) 15.5.dp else 17.dp
+                                if (isTick) 10.dp else if (isPlus) 12.dp else if (isOcchio) 15.dp else if (isBellOutlined) 15.5.dp else 17.dp
                             }
                         )
 
@@ -593,7 +589,7 @@ fun MovieCard(
                         ) {
                             if (isHasCircularProgress) {
                                 androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-                                    val sw = 2.dp.toPx()
+                                    val sw = if (isLarge) 2.dp.toPx() else 1.5.dp.toPx()
                                     val strokeOffset = sw / 2
                                     val arcSize = androidx.compose.ui.geometry.Size(size.width - sw, size.height - sw)
                                     drawArc(

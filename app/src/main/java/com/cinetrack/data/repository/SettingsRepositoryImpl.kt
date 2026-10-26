@@ -262,7 +262,7 @@ class SettingsRepositoryImpl @Inject constructor(
     }
 
     override val progressBarTarget: Flow<String> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.PROGRESS_BAR_TARGET] ?: "CIRCULAR_TOTAL"
+        preferences[PreferencesKeys.PROGRESS_BAR_TARGET] ?: "CIRCULAR_SEASON"
     }
 
     override val linearProgressBar: Flow<String> = dataStore.data.map { preferences ->
@@ -282,8 +282,8 @@ class SettingsRepositoryImpl @Inject constructor(
         else {
             val old = preferences[PreferencesKeys.PROGRESS_BAR_TARGET]
             when (old) {
-                "CIRCULAR_SEASON" -> "SEASON"
-                else -> "TOTAL"
+                "CIRCULAR_TOTAL" -> "TOTAL"
+                else -> "SEASON"
             }
         }
     }
