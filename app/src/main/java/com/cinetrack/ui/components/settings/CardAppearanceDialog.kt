@@ -10,6 +10,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -360,62 +361,106 @@ fun CardAppearanceDialog(
                 .fillMaxWidth()
                 .fillMaxHeight(0.92f)
         ) {
+            // ── Top drag handle ───────────────────────────────────────
+            Box(
+                modifier = Modifier
+                    .padding(top = 10.dp, bottom = 4.dp)
+                    .width(36.dp)
+                    .height(4.dp)
+                    .clip(RoundedCornerShape(2.dp))
+                    .background(Color.White.copy(alpha = 0.2f))
+                    .align(Alignment.CenterHorizontally)
+            )
+
             // ── Header ────────────────────────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 18.dp, bottom = 12.dp),
-                verticalAlignment = Alignment.CenterVertically
+                    .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 10.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
             ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_temi),
-                    contentDescription = null,
-                    tint = accentColor,
-                    modifier = Modifier.size(22.dp)
-                )
-                Spacer(modifier = Modifier.width(10.dp))
-                Text(
-                    text = stringResource(R.string.settings_card_appearance_title),
-                    style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_temi),
+                        contentDescription = null,
+                        tint = accentColor,
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer(modifier = Modifier.width(10.dp))
+                    Text(
+                        text = stringResource(R.string.settings_card_appearance_title),
+                        style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold, fontSize = 18.sp),
+                        color = MaterialTheme.colorScheme.onSurface
+                    )
+                }
+
+                Box(
+                    modifier = Modifier
+                        .size(34.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .bounceClick(scaleDown = 0.92f, onLongClick = {}) { onDismiss() },
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = Icons.Rounded.Close,
+                        contentDescription = stringResource(R.string.settings_cancel),
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(18.dp)
+                    )
+                }
             }
 
             // ── Preview Mode Selector Tabs ─────────────────────────────
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                    .height(44.dp)
+                    .clip(RoundedCornerShape(22.dp))
+                    .background(Color.White.copy(alpha = 0.05f))
+                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(22.dp))
+                    .padding(3.dp),
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 val modes = listOf(
                     Triple(PreviewCardMode.GRID_3_COL, stringResource(R.string.settings_preview_3_columns), R.drawable.ic_grid),
                     Triple(PreviewCardMode.GRID_2_COL, stringResource(R.string.settings_preview_2_columns), R.drawable.ic_grid_a_4),
                     Triple(PreviewCardMode.LIST, stringResource(R.string.settings_preview_list), R.drawable.ic_strisce)
                 )
-                modes.forEach { (mode, label, iconRes) ->
+
+                modes.forEachIndexed { index, (mode, label, iconRes) ->
                     val isSelected = previewMode == mode
-                    val tabBg by animateColorAsState(
-                        targetValue = if (isSelected) accentColor.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f),
+
+                    if (index > 0) {
+                        val prevSelected = modes[index - 1].first == previewMode
+                        if (!isSelected && !prevSelected) {
+                            Box(
+                                modifier = Modifier
+                                    .width(1.dp)
+                                    .height(16.dp)
+                                    .background(Color.White.copy(alpha = 0.12f))
+                            )
+                        }
+                    }
+
+                    val bg by animateColorAsState(
+                        targetValue = if (isSelected) accentColor else Color.Transparent,
                         label = "tabBg"
                     )
-                    val tabBorder by animateColorAsState(
-                        targetValue = if (isSelected) accentColor.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.1f),
-                        label = "tabBorder"
-                    )
-                    val contentColor = if (isSelected) accentColor else Color.White.copy(alpha = 0.6f)
+                    val contentColor = if (isSelected) Color.Black.copy(alpha = 0.9f) else Color.White.copy(alpha = 0.65f)
 
                     Row(
                         modifier = Modifier
                             .weight(1f)
-                            .height(34.dp)
-                            .bounceClick(scaleDown = 0.95f, onLongClick = {}) {
+                            .fillMaxHeight()
+                            .bounceClick(scaleDown = 0.96f, onLongClick = {}) {
                                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                 previewMode = mode
                             }
-                            .clip(RoundedCornerShape(10.dp))
-                            .background(tabBg)
-                            .border(0.5.dp, tabBorder, RoundedCornerShape(10.dp)),
+                            .clip(RoundedCornerShape(19.dp))
+                            .background(bg),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
@@ -425,12 +470,12 @@ fun CardAppearanceDialog(
                             tint = contentColor,
                             modifier = Modifier.size(13.dp)
                         )
-                        Spacer(modifier = Modifier.width(5.dp))
+                        Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 11.sp
+                                fontSize = 11.5.sp
                             ),
                             color = contentColor
                         )
@@ -450,25 +495,11 @@ fun CardAppearanceDialog(
                 label = "previewHeight"
             )
 
-            val previewCornerRadius = when (previewMode) {
-                PreviewCardMode.LIST -> 34.dp // 24.dp card corner + 10.dp padding = 34.dp for perfect concentricity
-                PreviewCardMode.GRID_2_COL -> 32.dp
-                PreviewCardMode.GRID_3_COL -> 28.dp
-            }
-            val animPreviewCorner by animateDpAsState(
-                targetValue = previewCornerRadius,
-                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                label = "previewCorner"
-            )
-
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 8.dp)
+                    .padding(horizontal = 20.dp, vertical = 6.dp)
                     .height(animPreviewHeight)
-                    .clip(RoundedCornerShape(animPreviewCorner))
-                    .background(Color.White.copy(alpha = 0.03f))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(animPreviewCorner))
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
                             while (true) {
@@ -496,7 +527,7 @@ fun CardAppearanceDialog(
                                 Row(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(horizontal = 10.dp),
+                                        .padding(horizontal = 8.dp),
                                     horizontalArrangement = Arrangement.Center,
                                     verticalAlignment = Alignment.CenterVertically
                                 ) {
@@ -509,7 +540,7 @@ fun CardAppearanceDialog(
                                                 letterSpacing = 1.sp
                                             ),
                                             color = Color.White.copy(alpha = 0.45f),
-                                            modifier = Modifier.padding(bottom = 4.dp)
+                                            modifier = Modifier.padding(bottom = 6.dp)
                                         )
                                         MovieCard(
                                             movie = mockNormalMovie,
@@ -532,8 +563,8 @@ fun CardAppearanceDialog(
                                                 fontWeight = FontWeight.Bold,
                                                 letterSpacing = 1.sp
                                             ),
-                                            color = accentColor.copy(alpha = 0.75f),
-                                            modifier = Modifier.padding(bottom = 4.dp)
+                                            color = accentColor.copy(alpha = 0.85f),
+                                            modifier = Modifier.padding(bottom = 6.dp)
                                         )
                                         ContinueWatchingSeriesCard(
                                             movie = mockWatchingTv,
@@ -565,7 +596,7 @@ fun CardAppearanceDialog(
                                                 letterSpacing = 1.sp
                                             ),
                                             color = Color.White.copy(alpha = 0.45f),
-                                            modifier = Modifier.padding(bottom = 4.dp)
+                                            modifier = Modifier.padding(bottom = 6.dp)
                                         )
                                         MovieCard(
                                             movie = mockNormalMovie,
@@ -588,8 +619,8 @@ fun CardAppearanceDialog(
                                                 fontWeight = FontWeight.Bold,
                                                 letterSpacing = 1.sp
                                             ),
-                                            color = accentColor.copy(alpha = 0.75f),
-                                            modifier = Modifier.padding(bottom = 4.dp)
+                                            color = accentColor.copy(alpha = 0.85f),
+                                            modifier = Modifier.padding(bottom = 6.dp)
                                         )
                                         ContinueWatchingSeriesCard(
                                             movie = mockWatchingTv,
@@ -608,7 +639,7 @@ fun CardAppearanceDialog(
                                 Column(
                                     modifier = Modifier
                                         .fillMaxWidth()
-                                        .padding(10.dp),
+                                        .padding(horizontal = 4.dp),
                                     verticalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
                                     MovieListCard(
@@ -635,8 +666,6 @@ fun CardAppearanceDialog(
                 }
             }
 
-            HorizontalDivider(color = Color.White.copy(alpha = 0.06f), thickness = 0.5.dp)
-
             // ── Options ───────────────────────────────────────────────
             val scrollState = rememberScrollState()
             Column(
@@ -645,10 +674,10 @@ fun CardAppearanceDialog(
                     .verticalFadingEdges(scrollState)
                     .premiumScrollbar(state = scrollState)
                     .verticalScroll(scrollState)
-                    .padding(horizontal = 20.dp, vertical = 12.dp),
+                    .padding(horizontal = 20.dp, vertical = 8.dp),
                 verticalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                // 1. Info Episodi (Chip compatte a griglia)
+                // 1. Info Episodi
                 AppearanceSection(title = stringResource(R.string.settings_card_episode_info)) {
                     EpisodeStyleCompactOptions(
                         selected = localEpisodeStyle,
@@ -660,7 +689,7 @@ fun CardAppearanceDialog(
                     )
                 }
 
-                // 2. Progress Bar (Chip compatte a griglia)
+                // 2. Progress Bar
                 AppearanceSection(title = stringResource(R.string.settings_card_progress_bar)) {
                     ProgressBarCompactOptions(
                         selectedLinear = localLinearBar,
@@ -715,8 +744,6 @@ fun CardAppearanceDialog(
                 }
             }
 
-            HorizontalDivider(color = Color.White.copy(alpha = 0.06f), thickness = 0.5.dp)
-
             // ── Footer Buttons ────────────────────────────────────────
             Row(
                 modifier = Modifier
@@ -728,24 +755,24 @@ fun CardAppearanceDialog(
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp)
+                        .height(48.dp)
                         .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onDismiss() }
-                        .clip(RoundedCornerShape(14.dp))
-                        .background(Color.White.copy(alpha = 0.07f))
-                        .border(0.5.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(14.dp)),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(0.5.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.settings_cancel),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold),
-                        color = Color.White.copy(alpha = 0.75f)
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.SemiBold, fontSize = 15.sp),
+                        color = Color.White.copy(alpha = 0.85f)
                     )
                 }
                 // Apply
                 Box(
                     modifier = Modifier
                         .weight(1f)
-                        .height(44.dp)
+                        .height(48.dp)
                         .bounceClick(scaleDown = 0.96f, onLongClick = {}) {
                             if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                             settingsViewModel.updateEpisodeInfoStyle(localEpisodeStyle)
@@ -756,14 +783,14 @@ fun CardAppearanceDialog(
                             settingsViewModel.toggleFolderBookmarks(localShowFolderBookmarks)
                             onDismiss()
                         }
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(RoundedCornerShape(16.dp))
                         .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
                         text = stringResource(R.string.settings_apply),
-                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                        color = Color.Black.copy(alpha = 0.87f)
+                        style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, fontSize = 15.sp),
+                        color = Color.Black.copy(alpha = 0.88f)
                     )
                 }
             }
@@ -778,75 +805,115 @@ private fun AppearanceSection(
     title: String,
     content: @Composable () -> Unit
 ) {
-    Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+    Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         Text(
             text = title.uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 1.2.sp,
-                fontSize = 11.sp
+                fontSize = 11.5.sp
             ),
-            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.9f),
             modifier = Modifier.padding(start = 2.dp)
         )
         content()
     }
 }
 
-// ─── Compact Chip Option Item ───────────────────────────────────────────────
+// ─── Segmented Option Model & Control ───────────────────────────────────────
+
+data class SegmentedOption<T>(
+    val value: T,
+    val title: String,
+    val subtitle: String? = null
+)
 
 @Composable
-private fun CompactChipOption(
-    title: String,
-    subtitle: String? = null,
-    selected: Boolean,
+private fun <T> SegmentedControl(
+    options: List<SegmentedOption<T>>,
+    selected: T,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    onClick: () -> Unit
+    height: androidx.compose.ui.unit.Dp = 54.dp,
+    onSelect: (T) -> Unit
 ) {
-    val bg by animateColorAsState(
-        targetValue = if (selected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.04f),
-        label = "chipBg"
-    )
-    val borderColor by animateColorAsState(
-        targetValue = if (selected) accentColor.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.08f),
-        label = "chipBorder"
-    )
-
-    Column(
+    Row(
         modifier = modifier
             .fillMaxWidth()
-            .defaultMinSize(minHeight = 52.dp)
-            .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onClick() }
-            .clip(RoundedCornerShape(12.dp))
-            .background(bg)
-            .border(1.dp, borderColor, RoundedCornerShape(12.dp))
-            .padding(horizontal = 8.dp, vertical = 9.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
+            .height(height)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.04f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .padding(3.dp),
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(
-            text = title,
-            style = MaterialTheme.typography.labelMedium.copy(
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Medium,
-                fontSize = 11.5.sp
-            ),
-            color = if (selected) accentColor else Color.White.copy(alpha = 0.85f),
-            maxLines = 1,
-            textAlign = TextAlign.Center
-        )
-        if (!subtitle.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(2.dp))
-            Text(
-                text = subtitle,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
-                    fontWeight = FontWeight.Normal
-                ),
-                color = if (selected) accentColor.copy(alpha = 0.75f) else Color.White.copy(alpha = 0.45f),
-                maxLines = 1,
-                textAlign = TextAlign.Center
+        options.forEachIndexed { index, option ->
+            val isSelected = option.value == selected
+
+            if (index > 0) {
+                val prevSelected = options[index - 1].value == selected
+                if (!isSelected && !prevSelected) {
+                    Box(
+                        modifier = Modifier
+                            .width(1.dp)
+                            .height(if (option.subtitle != null) 22.dp else 16.dp)
+                            .background(Color.White.copy(alpha = 0.08f))
+                    )
+                }
+            }
+
+            val bg by animateColorAsState(
+                targetValue = if (isSelected) accentColor.copy(alpha = 0.14f) else Color.Transparent,
+                label = "segBg"
             )
+            val border by animateColorAsState(
+                targetValue = if (isSelected) accentColor else Color.Transparent,
+                label = "segBorder"
+            )
+
+            Box(
+                modifier = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onSelect(option.value) }
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(bg)
+                    .then(
+                        if (isSelected) Modifier.border(1.5.dp, border, RoundedCornerShape(13.dp))
+                        else Modifier
+                    )
+                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
+                ) {
+                    Text(
+                        text = option.title,
+                        style = MaterialTheme.typography.labelMedium.copy(
+                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
+                            fontSize = 12.5.sp
+                        ),
+                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.85f),
+                        maxLines = 1,
+                        textAlign = TextAlign.Center
+                    )
+                    if (!option.subtitle.isNullOrBlank()) {
+                        Spacer(modifier = Modifier.height(2.dp))
+                        Text(
+                            text = option.subtitle,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontSize = 9.5.sp,
+                                fontWeight = FontWeight.Normal
+                            ),
+                            color = if (isSelected) accentColor.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.45f),
+                            maxLines = 1,
+                            textAlign = TextAlign.Center
+                        )
+                    }
+                }
+            }
         }
     }
 }
@@ -859,131 +926,118 @@ private fun EpisodeStyleCompactOptions(
     accentColor: Color,
     onSelect: (String) -> Unit
 ) {
+    val normRemaining = if (selected == EpisodeInfoStyle.REMAINING || selected == "REMAINING_AND_TOTAL") {
+        EpisodeInfoStyle.REMAINING_SEASON_AND_TOTAL
+    } else selected
+
+    val normPercentage = if (selected == EpisodeInfoStyle.PERCENTAGE) {
+        EpisodeInfoStyle.PERCENTAGE_TOTAL
+    } else selected
+
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // ── 1. Rimanenti (Left) ──
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(
-                text = stringResource(R.string.settings_cat_remaining),
+                text = stringResource(R.string.settings_cat_remaining).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
                 color = Color.White.copy(alpha = 0.45f)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_season),
-                    subtitle = stringResource(R.string.settings_sub_rem_season),
-                    selected = selected == EpisodeInfoStyle.REMAINING_SEASON,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.REMAINING_SEASON) }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_series),
-                    subtitle = stringResource(R.string.settings_sub_rem_series),
-                    selected = selected == EpisodeInfoStyle.REMAINING_TOTAL,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.REMAINING_TOTAL) }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_both),
-                    subtitle = stringResource(R.string.settings_sub_rem_both),
-                    selected = selected == EpisodeInfoStyle.REMAINING || selected == EpisodeInfoStyle.REMAINING_SEASON_AND_TOTAL || selected == "REMAINING_AND_TOTAL",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.REMAINING_SEASON_AND_TOTAL) }
-                )
-            }
+            SegmentedControl(
+                options = listOf(
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.REMAINING_SEASON,
+                        title = stringResource(R.string.settings_chip_col_season),
+                        subtitle = stringResource(R.string.settings_sub_rem_season)
+                    ),
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.REMAINING_TOTAL,
+                        title = stringResource(R.string.settings_chip_col_series),
+                        subtitle = stringResource(R.string.settings_sub_rem_series)
+                    ),
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.REMAINING_SEASON_AND_TOTAL,
+                        title = stringResource(R.string.settings_chip_col_both),
+                        subtitle = stringResource(R.string.settings_sub_rem_both)
+                    )
+                ),
+                selected = normRemaining,
+                accentColor = accentColor,
+                onSelect = onSelect
+            )
         }
 
         // ── 2. Visti / Totale ( / ) ──
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(
-                text = stringResource(R.string.settings_cat_watched),
+                text = stringResource(R.string.settings_cat_watched).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
                 color = Color.White.copy(alpha = 0.45f)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_season),
-                    subtitle = stringResource(R.string.settings_sub_watched_season),
-                    selected = selected == EpisodeInfoStyle.SEASON_ONLY,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.SEASON_ONLY) }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_series),
-                    subtitle = stringResource(R.string.settings_sub_watched_series),
-                    selected = selected == EpisodeInfoStyle.WATCHED_OVER_TOTAL,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.WATCHED_OVER_TOTAL) }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_both),
-                    subtitle = stringResource(R.string.settings_sub_watched_both),
-                    selected = selected == EpisodeInfoStyle.SEASON_AND_TOTAL,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.SEASON_AND_TOTAL) }
-                )
-            }
+            SegmentedControl(
+                options = listOf(
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.SEASON_ONLY,
+                        title = stringResource(R.string.settings_chip_col_season),
+                        subtitle = stringResource(R.string.settings_sub_watched_season)
+                    ),
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.WATCHED_OVER_TOTAL,
+                        title = stringResource(R.string.settings_chip_col_series),
+                        subtitle = stringResource(R.string.settings_sub_watched_series)
+                    ),
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.SEASON_AND_TOTAL,
+                        title = stringResource(R.string.settings_chip_col_both),
+                        subtitle = stringResource(R.string.settings_sub_watched_both)
+                    )
+                ),
+                selected = selected,
+                accentColor = accentColor,
+                onSelect = onSelect
+            )
         }
 
         // ── 3. Percentuale (%) ──
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(
-                text = stringResource(R.string.settings_cat_percentage),
+                text = stringResource(R.string.settings_cat_percentage).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
                 color = Color.White.copy(alpha = 0.45f)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_season),
-                    subtitle = stringResource(R.string.settings_sub_pct_season),
-                    selected = selected == EpisodeInfoStyle.PERCENTAGE_SEASON,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.PERCENTAGE_SEASON) }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_series),
-                    subtitle = stringResource(R.string.settings_sub_pct_series),
-                    selected = selected == EpisodeInfoStyle.PERCENTAGE || selected == EpisodeInfoStyle.PERCENTAGE_TOTAL,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.PERCENTAGE_TOTAL) }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_both),
-                    subtitle = stringResource(R.string.settings_sub_pct_both),
-                    selected = selected == EpisodeInfoStyle.PERCENTAGE_SEASON_AND_TOTAL,
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelect(EpisodeInfoStyle.PERCENTAGE_SEASON_AND_TOTAL) }
-                )
-            }
+            SegmentedControl(
+                options = listOf(
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.PERCENTAGE_SEASON,
+                        title = stringResource(R.string.settings_chip_col_season),
+                        subtitle = stringResource(R.string.settings_sub_pct_season)
+                    ),
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.PERCENTAGE_TOTAL,
+                        title = stringResource(R.string.settings_chip_col_series),
+                        subtitle = stringResource(R.string.settings_sub_pct_series)
+                    ),
+                    SegmentedOption(
+                        value = EpisodeInfoStyle.PERCENTAGE_SEASON_AND_TOTAL,
+                        title = stringResource(R.string.settings_chip_col_both),
+                        subtitle = stringResource(R.string.settings_sub_pct_both)
+                    )
+                ),
+                selected = normPercentage,
+                accentColor = accentColor,
+                onSelect = onSelect
+            )
         }
     }
 }
@@ -1000,79 +1054,68 @@ private fun ProgressBarCompactOptions(
 ) {
     Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
         // ── 1. Barra Lineare ──
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(
-                text = stringResource(R.string.settings_cat_linear_bar),
+                text = stringResource(R.string.settings_cat_linear_bar).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
                 color = Color.White.copy(alpha = 0.45f)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_disabled),
-                    subtitle = stringResource(R.string.settings_chip_progress_none),
-                    selected = selectedLinear == "NONE",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelectLinear("NONE") }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_series),
-                    subtitle = stringResource(R.string.settings_chip_whole_series),
-                    selected = selectedLinear == "TOTAL",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelectLinear("TOTAL") }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_season),
-                    subtitle = stringResource(R.string.settings_chip_current_season),
-                    selected = selectedLinear == "SEASON",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelectLinear("SEASON") }
-                )
-            }
+            SegmentedControl(
+                options = listOf(
+                    SegmentedOption(
+                        value = "NONE",
+                        title = stringResource(R.string.settings_chip_disabled),
+                        subtitle = stringResource(R.string.settings_chip_progress_none)
+                    ),
+                    SegmentedOption(
+                        value = "TOTAL",
+                        title = stringResource(R.string.settings_chip_col_series),
+                        subtitle = stringResource(R.string.settings_chip_whole_series)
+                    ),
+                    SegmentedOption(
+                        value = "SEASON",
+                        title = stringResource(R.string.settings_chip_col_season),
+                        subtitle = stringResource(R.string.settings_chip_current_season)
+                    )
+                ),
+                selected = selectedLinear,
+                accentColor = accentColor,
+                onSelect = onSelectLinear
+            )
         }
 
         // ── 2. Barra Circolare ──
-        Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+        Column(verticalArrangement = Arrangement.spacedBy(5.dp)) {
             Text(
-                text = stringResource(R.string.settings_cat_circular_bar),
+                text = stringResource(R.string.settings_cat_circular_bar).uppercase(),
                 style = MaterialTheme.typography.labelSmall.copy(
-                    fontSize = 9.sp,
+                    fontSize = 9.5.sp,
                     fontWeight = FontWeight.Bold,
                     letterSpacing = 1.sp
                 ),
                 color = Color.White.copy(alpha = 0.45f)
             )
-            Row(
-                modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_series),
-                    subtitle = stringResource(R.string.settings_chip_whole_series),
-                    selected = selectedCircular == "TOTAL",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelectCircular("TOTAL") }
-                )
-                CompactChipOption(
-                    title = stringResource(R.string.settings_chip_col_season),
-                    subtitle = stringResource(R.string.settings_chip_current_season),
-                    selected = selectedCircular == "SEASON",
-                    accentColor = accentColor,
-                    modifier = Modifier.weight(1f).fillMaxHeight(),
-                    onClick = { onSelectCircular("SEASON") }
-                )
-            }
+            SegmentedControl(
+                options = listOf(
+                    SegmentedOption(
+                        value = "TOTAL",
+                        title = stringResource(R.string.settings_chip_col_series),
+                        subtitle = stringResource(R.string.settings_chip_whole_series)
+                    ),
+                    SegmentedOption(
+                        value = "SEASON",
+                        title = stringResource(R.string.settings_chip_col_season),
+                        subtitle = stringResource(R.string.settings_chip_current_season)
+                    )
+                ),
+                selected = selectedCircular,
+                accentColor = accentColor,
+                onSelect = onSelectCircular
+            )
         }
     }
 }
@@ -1085,43 +1128,17 @@ private fun TextSizeOptions(
     accentColor: Color,
     onSelect: (Float) -> Unit
 ) {
-    val options = listOf(
-        0.8f to R.string.settings_size_small,
-        1.0f to R.string.settings_size_medium,
-        1.2f to R.string.settings_size_large,
+    SegmentedControl(
+        options = listOf(
+            SegmentedOption(value = 0.8f, title = stringResource(R.string.settings_size_small)),
+            SegmentedOption(value = 1.0f, title = stringResource(R.string.settings_size_medium)),
+            SegmentedOption(value = 1.2f, title = stringResource(R.string.settings_size_large))
+        ),
+        selected = selected,
+        accentColor = accentColor,
+        height = 44.dp,
+        onSelect = onSelect
     )
-    Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-        options.forEach { (value, labelRes) ->
-            val isSelected = selected == value
-            val bg by animateColorAsState(
-                targetValue = if (isSelected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.04f),
-                label = "textSizeBg"
-            )
-            val borderColor by animateColorAsState(
-                targetValue = if (isSelected) accentColor.copy(alpha = 0.7f) else Color.White.copy(alpha = 0.08f),
-                label = "textSizeBorder"
-            )
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .height(42.dp)
-                    .bounceClick(scaleDown = 0.95f, onLongClick = {}) { onSelect(value) }
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(bg)
-                    .border(1.dp, borderColor, RoundedCornerShape(12.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = stringResource(labelRes),
-                    style = MaterialTheme.typography.labelMedium.copy(
-                        fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                        fontSize = (12f * value).sp
-                    ),
-                    color = if (isSelected) accentColor else Color.White.copy(alpha = 0.65f)
-                )
-            }
-        }
-    }
 }
 
 // ─── Folder Bookmarks Toggle Option ─────────────────────────────────────────
@@ -1136,10 +1153,10 @@ private fun FolderBookmarksToggleOption(
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showFolderBookmarks) }
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.04f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -1180,10 +1197,10 @@ private fun BadgeToggleOption(
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.98f, onLongClick = {}) { onToggle(!showBadges) }
-            .clip(RoundedCornerShape(14.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
-            .padding(horizontal = 16.dp, vertical = 12.dp),
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.04f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 16.dp, vertical = 14.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
