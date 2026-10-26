@@ -35,6 +35,7 @@ import kotlin.math.abs
 import kotlin.math.roundToInt
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -385,7 +386,7 @@ fun CardAppearanceDialog(
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 10.dp),
+                    .padding(start = 20.dp, end = 20.dp, top = 4.dp, bottom = 6.dp),
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.SpaceBetween
             ) {
@@ -434,7 +435,11 @@ fun CardAppearanceDialog(
                 accentColor = accentColor,
                 vibrationEnabled = vibrationEnabled,
                 context = context,
-                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                modifier = Modifier
+                    .align(Alignment.CenterHorizontally)
+                    .padding(horizontal = 20.dp, vertical = 2.dp)
+                    .widthIn(max = 295.dp)
+                    .fillMaxWidth(),
                 onSelectMode = { mode -> previewMode = mode }
             )
 
@@ -453,7 +458,7 @@ fun CardAppearanceDialog(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 6.dp)
+                    .padding(horizontal = 20.dp, vertical = 4.dp)
                     .height(animPreviewHeight)
                     .pointerInput(Unit) {
                         awaitPointerEventScope {
@@ -786,15 +791,14 @@ private fun DraggablePreviewModeSelector(
     val viewConfiguration = LocalViewConfiguration.current
     val coroutineScope = rememberCoroutineScope()
 
-    val padding = 3.dp
+    val padding = 2.dp
 
     BoxWithConstraints(
         modifier = modifier
-            .fillMaxWidth()
-            .height(44.dp)
-            .clip(RoundedCornerShape(22.dp))
+            .height(32.dp)
+            .clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(22.dp))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
             .padding(padding)
     ) {
         val usableWidthPx = constraints.maxWidth.toFloat()
@@ -926,7 +930,7 @@ private fun DraggablePreviewModeSelector(
                         scaleX = if (isDragging) 1.03f else 1f
                         scaleY = if (isDragging) 0.98f else 1f
                     }
-                    .clip(RoundedCornerShape(19.dp))
+                    .clip(RoundedCornerShape(14.dp))
                     .background(accentColor)
             )
 
@@ -939,9 +943,9 @@ private fun DraggablePreviewModeSelector(
                     val dividerXDp = segmentWidthDp * k
                     Box(
                         modifier = Modifier
-                            .offset(x = dividerXDp - 0.5.dp, y = (usableHeightDp - 16.dp) / 2)
+                            .offset(x = dividerXDp - 0.5.dp, y = (usableHeightDp - 13.dp) / 2)
                             .width(1.dp)
-                            .height(16.dp)
+                            .height(13.dp)
                             .background(Color.White.copy(alpha = 0.12f * dividerAlpha))
                     )
                 }
@@ -969,14 +973,16 @@ private fun DraggablePreviewModeSelector(
                             tint = contentColor,
                             modifier = Modifier.size(13.dp)
                         )
-                        Spacer(modifier = Modifier.width(6.dp))
+                        Spacer(modifier = Modifier.width(5.dp))
                         Text(
                             text = label,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = if (weight > 0.5f) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 11.5.sp
+                                fontSize = 11.sp
                             ),
-                            color = contentColor
+                            color = contentColor,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                     }
                 }
