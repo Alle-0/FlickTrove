@@ -4,6 +4,8 @@ import androidx.compose.animation.*
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -18,12 +20,19 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.graphics.vector.ImageVector
+import kotlinx.coroutines.launch
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalViewConfiguration
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import kotlin.math.abs
+import kotlin.math.roundToInt
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -412,76 +421,22 @@ fun CardAppearanceDialog(
                 }
             }
 
-            // ── Preview Mode Selector Tabs ─────────────────────────────
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 20.dp, vertical = 6.dp)
-                    .height(44.dp)
-                    .clip(RoundedCornerShape(22.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(22.dp))
-                    .padding(3.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                val modes = listOf(
-                    Triple(PreviewCardMode.GRID_3_COL, stringResource(R.string.settings_preview_3_columns), R.drawable.ic_grid),
-                    Triple(PreviewCardMode.GRID_2_COL, stringResource(R.string.settings_preview_2_columns), R.drawable.ic_grid_a_4),
-                    Triple(PreviewCardMode.LIST, stringResource(R.string.settings_preview_list), R.drawable.ic_strisce)
-                )
+            // ── Preview Mode Selector Tabs (Drag & Physics) ───────────
+            val previewModes = listOf(
+                Triple(PreviewCardMode.GRID_3_COL, stringResource(R.string.settings_preview_3_columns), R.drawable.ic_grid),
+                Triple(PreviewCardMode.GRID_2_COL, stringResource(R.string.settings_preview_2_columns), R.drawable.ic_grid_a_4),
+                Triple(PreviewCardMode.LIST, stringResource(R.string.settings_preview_list), R.drawable.ic_strisce)
+            )
 
-                modes.forEachIndexed { index, (mode, label, iconRes) ->
-                    val isSelected = previewMode == mode
-
-                    if (index > 0) {
-                        val prevSelected = modes[index - 1].first == previewMode
-                        if (!isSelected && !prevSelected) {
-                            Box(
-                                modifier = Modifier
-                                    .width(1.dp)
-                                    .height(16.dp)
-                                    .background(Color.White.copy(alpha = 0.12f))
-                            )
-                        }
-                    }
-
-                    val bg by animateColorAsState(
-                        targetValue = if (isSelected) accentColor else Color.Transparent,
-                        label = "tabBg"
-                    )
-                    val contentColor = if (isSelected) Color.Black.copy(alpha = 0.9f) else Color.White.copy(alpha = 0.65f)
-
-                    Row(
-                        modifier = Modifier
-                            .weight(1f)
-                            .fillMaxHeight()
-                            .bounceClick(scaleDown = 0.96f, onLongClick = {}) {
-                                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                                previewMode = mode
-                            }
-                            .clip(RoundedCornerShape(19.dp))
-                            .background(bg),
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = iconRes),
-                            contentDescription = null,
-                            tint = contentColor,
-                            modifier = Modifier.size(13.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = label,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-                                fontSize = 11.5.sp
-                            ),
-                            color = contentColor
-                        )
-                    }
-                }
-            }
+            DraggablePreviewModeSelector(
+                modes = previewModes,
+                selectedMode = previewMode,
+                accentColor = accentColor,
+                vibrationEnabled = vibrationEnabled,
+                context = context,
+                modifier = Modifier.padding(horizontal = 20.dp, vertical = 6.dp),
+                onSelectMode = { mode -> previewMode = mode }
+            )
 
             // ── Live Authentic Preview Area (Side by side comparison) ──
             val previewHeight = when (previewMode) {
@@ -544,7 +499,7 @@ fun CardAppearanceDialog(
                                         )
                                         MovieCard(
                                             movie = mockNormalMovie,
-                                            cardWidth = 112.dp,
+                                            cardWidth = 118.dp,
                                             showBadges = localShowBadges,
                                             showFolderBookmarks = localShowFolderBookmarks,
                                             folderColors = mockFolderColors,
@@ -568,7 +523,7 @@ fun CardAppearanceDialog(
                                         )
                                         ContinueWatchingSeriesCard(
                                             movie = mockWatchingTv,
-                                            cardWidth = 112.dp,
+                                            cardWidth = 118.dp,
                                             showBadges = localShowBadges,
                                             showFolderBookmarks = localShowFolderBookmarks,
                                             folderColors = mockFolderColors,
@@ -682,10 +637,9 @@ fun CardAppearanceDialog(
                     EpisodeStyleCompactOptions(
                         selected = localEpisodeStyle,
                         accentColor = accentColor,
-                        onSelect = {
-                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            localEpisodeStyle = it
-                        }
+                        vibrationEnabled = vibrationEnabled,
+                        context = context,
+                        onSelect = { localEpisodeStyle = it }
                     )
                 }
 
@@ -695,14 +649,10 @@ fun CardAppearanceDialog(
                         selectedLinear = localLinearBar,
                         selectedCircular = localCircularBar,
                         accentColor = accentColor,
-                        onSelectLinear = {
-                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            localLinearBar = it
-                        },
-                        onSelectCircular = {
-                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            localCircularBar = it
-                        }
+                        vibrationEnabled = vibrationEnabled,
+                        context = context,
+                        onSelectLinear = { localLinearBar = it },
+                        onSelectCircular = { localCircularBar = it }
                     )
                 }
 
@@ -711,10 +661,9 @@ fun CardAppearanceDialog(
                     TextSizeOptions(
                         selected = localTextMultiplier,
                         accentColor = accentColor,
-                        onSelect = {
-                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            localTextMultiplier = it
-                        }
+                        vibrationEnabled = vibrationEnabled,
+                        context = context,
+                        onSelect = { localTextMultiplier = it }
                     )
                 }
 
@@ -820,7 +769,223 @@ private fun AppearanceSection(
     }
 }
 
-// ─── Segmented Option Model & Control ───────────────────────────────────────
+// ─── Draggable Preview Mode Selector (Drag & Physics) ───────────────────────
+
+@Composable
+private fun DraggablePreviewModeSelector(
+    modes: List<Triple<PreviewCardMode, String, Int>>,
+    selectedMode: PreviewCardMode,
+    accentColor: Color,
+    vibrationEnabled: Boolean,
+    context: android.content.Context,
+    modifier: Modifier = Modifier,
+    onSelectMode: (PreviewCardMode) -> Unit
+) {
+    val selectedIndex = modes.indexOfFirst { it.first == selectedMode }.coerceAtLeast(0)
+    val density = LocalDensity.current
+    val viewConfiguration = LocalViewConfiguration.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val padding = 3.dp
+
+    BoxWithConstraints(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(44.dp)
+            .clip(RoundedCornerShape(22.dp))
+            .background(Color.White.copy(alpha = 0.05f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(22.dp))
+            .padding(padding)
+    ) {
+        val usableWidthPx = constraints.maxWidth.toFloat()
+        val segmentCount = modes.size
+        val segmentWidthPx = usableWidthPx / segmentCount
+        val segmentWidthDp = maxWidth / segmentCount
+        val usableHeightDp = maxHeight
+
+        val offsetAnim = remember { Animatable(selectedIndex * segmentWidthPx) }
+        var isDragging by remember { mutableStateOf(false) }
+        var hasInitialized by remember { mutableStateOf(false) }
+
+        LaunchedEffect(selectedIndex, segmentWidthPx) {
+            if (segmentWidthPx > 0f) {
+                val target = selectedIndex * segmentWidthPx
+                if (!hasInitialized) {
+                    offsetAnim.snapTo(target)
+                    hasInitialized = true
+                } else if (!isDragging && offsetAnim.value != target) {
+                    offsetAnim.animateTo(
+                        targetValue = target,
+                        animationSpec = spring(
+                            dampingRatio = 0.72f,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(segmentWidthPx, segmentCount) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        var dragAccumulatedX = 0f
+                        var dragAccumulatedY = 0f
+                        var isDrag = false
+                        val pointerId = down.id
+
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+                            if (!change.pressed) {
+                                if (isDrag) {
+                                    val targetIndex = if (segmentWidthPx > 0f) {
+                                        (offsetAnim.value / segmentWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+                                    } else selectedIndex
+
+                                    coroutineScope.launch {
+                                        offsetAnim.animateTo(
+                                            targetValue = targetIndex * segmentWidthPx,
+                                            animationSpec = spring(
+                                                dampingRatio = 0.72f,
+                                                stiffness = Spring.StiffnessMedium
+                                            )
+                                        )
+                                    }
+                                    if (targetIndex != selectedIndex) {
+                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                        onSelectMode(modes[targetIndex].first)
+                                    }
+                                } else {
+                                    val tapX = down.position.x.coerceIn(0f, usableWidthPx)
+                                    val tappedIndex = if (segmentWidthPx > 0f) {
+                                        (tapX / segmentWidthPx).toInt().coerceIn(0, segmentCount - 1)
+                                    } else selectedIndex
+
+                                    if (tappedIndex != selectedIndex) {
+                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                        onSelectMode(modes[tappedIndex].first)
+                                    }
+                                    coroutineScope.launch {
+                                        offsetAnim.animateTo(
+                                            targetValue = tappedIndex * segmentWidthPx,
+                                            animationSpec = spring(
+                                                dampingRatio = 0.72f,
+                                                stiffness = Spring.StiffnessMedium
+                                            )
+                                        )
+                                    }
+                                }
+                                isDragging = false
+                                break
+                            }
+
+                            val deltaX = change.position.x - change.previousPosition.x
+                            val deltaY = change.position.y - change.previousPosition.y
+                            dragAccumulatedX += deltaX
+                            dragAccumulatedY += deltaY
+
+                            if (!isDrag) {
+                                if (abs(dragAccumulatedX) > viewConfiguration.touchSlop &&
+                                    abs(dragAccumulatedX) > abs(dragAccumulatedY)
+                                ) {
+                                    isDrag = true
+                                    isDragging = true
+                                } else if (abs(dragAccumulatedY) > viewConfiguration.touchSlop) {
+                                    break
+                                }
+                            }
+
+                            if (isDrag) {
+                                change.consume()
+                                val maxOffset = (segmentCount - 1) * segmentWidthPx
+                                val current = offsetAnim.value + deltaX
+                                val rubberBanded = when {
+                                    current < 0f -> current * 0.35f
+                                    current > maxOffset -> maxOffset + (current - maxOffset) * 0.35f
+                                    else -> current
+                                }
+                                coroutineScope.launch {
+                                    offsetAnim.snapTo(rubberBanded)
+                                }
+                            }
+                        }
+                    }
+                }
+        ) {
+            // Sliding Indicator (Solid accentColor with spring deformation)
+            val indicatorOffsetDp = with(density) { offsetAnim.value.toDp() }
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffsetDp)
+                    .width(segmentWidthDp)
+                    .fillMaxHeight()
+                    .graphicsLayer {
+                        scaleX = if (isDragging) 1.03f else 1f
+                        scaleY = if (isDragging) 0.98f else 1f
+                    }
+                    .clip(RoundedCornerShape(19.dp))
+                    .background(accentColor)
+            )
+
+            // Dividers
+            val currentFraction = if (segmentWidthPx > 0f) offsetAnim.value / segmentWidthPx else selectedIndex.toFloat()
+            for (k in 1 until segmentCount) {
+                val distToBoundary = abs(currentFraction - (k - 0.5f))
+                val dividerAlpha = ((distToBoundary - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                if (dividerAlpha > 0.02f) {
+                    val dividerXDp = segmentWidthDp * k
+                    Box(
+                        modifier = Modifier
+                            .offset(x = dividerXDp - 0.5.dp, y = (usableHeightDp - 16.dp) / 2)
+                            .width(1.dp)
+                            .height(16.dp)
+                            .background(Color.White.copy(alpha = 0.12f * dividerAlpha))
+                    )
+                }
+            }
+
+            // Labels
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                modes.forEachIndexed { index, (_, label, iconRes) ->
+                    val weight = (1f - abs(currentFraction - index)).coerceIn(0f, 1f)
+                    val contentColor = lerp(Color.White.copy(alpha = 0.65f), Color.Black.copy(alpha = 0.9f), weight)
+
+                    Row(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight(),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = iconRes),
+                            contentDescription = null,
+                            tint = contentColor,
+                            modifier = Modifier.size(13.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = label,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = if (weight > 0.5f) FontWeight.Bold else FontWeight.Medium,
+                                fontSize = 11.5.sp
+                            ),
+                            color = contentColor
+                        )
+                    }
+                }
+            }
+        }
+    }
+}
+
+// ─── Segmented Option Model & Control (Drag & Physics) ───────────────────────
 
 data class SegmentedOption<T>(
     val value: T,
@@ -833,84 +998,227 @@ private fun <T> SegmentedControl(
     options: List<SegmentedOption<T>>,
     selected: T,
     accentColor: Color,
+    vibrationEnabled: Boolean,
+    context: android.content.Context,
     modifier: Modifier = Modifier,
     height: androidx.compose.ui.unit.Dp = 54.dp,
     onSelect: (T) -> Unit
 ) {
-    Row(
+    val selectedIndex = options.indexOfFirst { it.value == selected }.coerceAtLeast(0)
+    val density = LocalDensity.current
+    val viewConfiguration = LocalViewConfiguration.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val padding = 3.dp
+
+    BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
             .clip(RoundedCornerShape(16.dp))
             .background(Color.White.copy(alpha = 0.04f))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-            .padding(3.dp),
-        verticalAlignment = Alignment.CenterVertically
+            .padding(padding)
     ) {
-        options.forEachIndexed { index, option ->
-            val isSelected = option.value == selected
+        val usableWidthPx = constraints.maxWidth.toFloat()
+        val segmentCount = options.size
+        val segmentWidthPx = usableWidthPx / segmentCount
+        val segmentWidthDp = maxWidth / segmentCount
+        val usableHeightDp = maxHeight
 
-            if (index > 0) {
-                val prevSelected = options[index - 1].value == selected
-                if (!isSelected && !prevSelected) {
+        val offsetAnim = remember { Animatable(selectedIndex * segmentWidthPx) }
+        var isDragging by remember { mutableStateOf(false) }
+        var hasInitialized by remember { mutableStateOf(false) }
+
+        LaunchedEffect(selectedIndex, segmentWidthPx) {
+            if (segmentWidthPx > 0f) {
+                val target = selectedIndex * segmentWidthPx
+                if (!hasInitialized) {
+                    offsetAnim.snapTo(target)
+                    hasInitialized = true
+                } else if (!isDragging && offsetAnim.value != target) {
+                    offsetAnim.animateTo(
+                        targetValue = target,
+                        animationSpec = spring(
+                            dampingRatio = 0.72f,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                    )
+                }
+            }
+        }
+
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .pointerInput(segmentWidthPx, segmentCount) {
+                    awaitEachGesture {
+                        val down = awaitFirstDown(requireUnconsumed = false)
+                        var dragAccumulatedX = 0f
+                        var dragAccumulatedY = 0f
+                        var isDrag = false
+                        val pointerId = down.id
+
+                        while (true) {
+                            val event = awaitPointerEvent()
+                            val change = event.changes.firstOrNull { it.id == pointerId } ?: break
+                            if (!change.pressed) {
+                                if (isDrag) {
+                                    val targetIndex = if (segmentWidthPx > 0f) {
+                                        (offsetAnim.value / segmentWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+                                    } else selectedIndex
+
+                                    coroutineScope.launch {
+                                        offsetAnim.animateTo(
+                                            targetValue = targetIndex * segmentWidthPx,
+                                            animationSpec = spring(
+                                                dampingRatio = 0.72f,
+                                                stiffness = Spring.StiffnessMedium
+                                            )
+                                        )
+                                    }
+                                    if (targetIndex != selectedIndex) {
+                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                        onSelect(options[targetIndex].value)
+                                    }
+                                } else {
+                                    val tapX = down.position.x.coerceIn(0f, usableWidthPx)
+                                    val tappedIndex = if (segmentWidthPx > 0f) {
+                                        (tapX / segmentWidthPx).toInt().coerceIn(0, segmentCount - 1)
+                                    } else selectedIndex
+
+                                    if (tappedIndex != selectedIndex) {
+                                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                                        onSelect(options[tappedIndex].value)
+                                    }
+                                    coroutineScope.launch {
+                                        offsetAnim.animateTo(
+                                            targetValue = tappedIndex * segmentWidthPx,
+                                            animationSpec = spring(
+                                                dampingRatio = 0.72f,
+                                                stiffness = Spring.StiffnessMedium
+                                            )
+                                        )
+                                    }
+                                }
+                                isDragging = false
+                                break
+                            }
+
+                            val deltaX = change.position.x - change.previousPosition.x
+                            val deltaY = change.position.y - change.previousPosition.y
+                            dragAccumulatedX += deltaX
+                            dragAccumulatedY += deltaY
+
+                            if (!isDrag) {
+                                if (abs(dragAccumulatedX) > viewConfiguration.touchSlop &&
+                                    abs(dragAccumulatedX) > abs(dragAccumulatedY)
+                                ) {
+                                    isDrag = true
+                                    isDragging = true
+                                } else if (abs(dragAccumulatedY) > viewConfiguration.touchSlop) {
+                                    break
+                                }
+                            }
+
+                            if (isDrag) {
+                                change.consume()
+                                val maxOffset = (segmentCount - 1) * segmentWidthPx
+                                val current = offsetAnim.value + deltaX
+                                val rubberBanded = when {
+                                    current < 0f -> current * 0.35f
+                                    current > maxOffset -> maxOffset + (current - maxOffset) * 0.35f
+                                    else -> current
+                                }
+                                coroutineScope.launch {
+                                    offsetAnim.snapTo(rubberBanded)
+                                }
+                            }
+                        }
+                    }
+                }
+        ) {
+            // Sliding Indicator
+            val indicatorOffsetDp = with(density) { offsetAnim.value.toDp() }
+            Box(
+                modifier = Modifier
+                    .offset(x = indicatorOffsetDp)
+                    .width(segmentWidthDp)
+                    .fillMaxHeight()
+                    .graphicsLayer {
+                        scaleX = if (isDragging) 1.03f else 1f
+                        scaleY = if (isDragging) 0.98f else 1f
+                    }
+                    .clip(RoundedCornerShape(13.dp))
+                    .background(accentColor.copy(alpha = 0.14f))
+                    .border(1.5.dp, accentColor, RoundedCornerShape(13.dp))
+            )
+
+            // Dividers
+            val currentFraction = if (segmentWidthPx > 0f) offsetAnim.value / segmentWidthPx else selectedIndex.toFloat()
+            val hasSubtitle = options.any { !it.subtitle.isNullOrBlank() }
+            val divHeight = if (hasSubtitle) 22.dp else 16.dp
+
+            for (k in 1 until segmentCount) {
+                val distToBoundary = abs(currentFraction - (k - 0.5f))
+                val dividerAlpha = ((distToBoundary - 0.35f) / 0.15f).coerceIn(0f, 1f)
+                if (dividerAlpha > 0.02f) {
+                    val dividerXDp = segmentWidthDp * k
                     Box(
                         modifier = Modifier
+                            .offset(x = dividerXDp - 0.5.dp, y = (usableHeightDp - divHeight) / 2)
                             .width(1.dp)
-                            .height(if (option.subtitle != null) 22.dp else 16.dp)
-                            .background(Color.White.copy(alpha = 0.08f))
+                            .height(divHeight)
+                            .background(Color.White.copy(alpha = 0.08f * dividerAlpha))
                     )
                 }
             }
 
-            val bg by animateColorAsState(
-                targetValue = if (isSelected) accentColor.copy(alpha = 0.14f) else Color.Transparent,
-                label = "segBg"
-            )
-            val border by animateColorAsState(
-                targetValue = if (isSelected) accentColor else Color.Transparent,
-                label = "segBorder"
-            )
-
-            Box(
-                modifier = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .bounceClick(scaleDown = 0.96f, onLongClick = {}) { onSelect(option.value) }
-                    .clip(RoundedCornerShape(13.dp))
-                    .background(bg)
-                    .then(
-                        if (isSelected) Modifier.border(1.5.dp, border, RoundedCornerShape(13.dp))
-                        else Modifier
-                    )
-                    .padding(horizontal = 4.dp, vertical = 2.dp),
-                contentAlignment = Alignment.Center
+            // Labels
+            Row(
+                modifier = Modifier.fillMaxSize(),
+                verticalAlignment = Alignment.CenterVertically
             ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center
-                ) {
-                    Text(
-                        text = option.title,
-                        style = MaterialTheme.typography.labelMedium.copy(
-                            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.SemiBold,
-                            fontSize = 12.5.sp
-                        ),
-                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.85f),
-                        maxLines = 1,
-                        textAlign = TextAlign.Center
-                    )
-                    if (!option.subtitle.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(2.dp))
-                        Text(
-                            text = option.subtitle,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontSize = 9.5.sp,
-                                fontWeight = FontWeight.Normal
-                            ),
-                            color = if (isSelected) accentColor.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.45f),
-                            maxLines = 1,
-                            textAlign = TextAlign.Center
-                        )
+                options.forEachIndexed { index, option ->
+                    val weight = (1f - abs(currentFraction - index)).coerceIn(0f, 1f)
+                    val titleColor = lerp(Color.White.copy(alpha = 0.85f), accentColor, weight)
+                    val subtitleColor = lerp(Color.White.copy(alpha = 0.45f), accentColor.copy(alpha = 0.85f), weight)
+
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .fillMaxHeight()
+                            .padding(horizontal = 4.dp, vertical = 2.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = option.title,
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = if (weight > 0.5f) FontWeight.Bold else FontWeight.SemiBold,
+                                    fontSize = 12.5.sp
+                                ),
+                                color = titleColor,
+                                maxLines = 1,
+                                textAlign = TextAlign.Center
+                            )
+                            if (!option.subtitle.isNullOrBlank()) {
+                                Spacer(modifier = Modifier.height(2.dp))
+                                Text(
+                                    text = option.subtitle,
+                                    style = MaterialTheme.typography.labelSmall.copy(
+                                        fontSize = 9.5.sp,
+                                        fontWeight = FontWeight.Normal
+                                    ),
+                                    color = subtitleColor,
+                                    maxLines = 1,
+                                    textAlign = TextAlign.Center
+                                )
+                            }
+                        }
                     }
                 }
             }
@@ -924,6 +1232,8 @@ private fun <T> SegmentedControl(
 private fun EpisodeStyleCompactOptions(
     selected: String,
     accentColor: Color,
+    vibrationEnabled: Boolean,
+    context: android.content.Context,
     onSelect: (String) -> Unit
 ) {
     val normRemaining = if (selected == EpisodeInfoStyle.REMAINING || selected == "REMAINING_AND_TOTAL") {
@@ -966,6 +1276,8 @@ private fun EpisodeStyleCompactOptions(
                 ),
                 selected = normRemaining,
                 accentColor = accentColor,
+                vibrationEnabled = vibrationEnabled,
+                context = context,
                 onSelect = onSelect
             )
         }
@@ -1001,6 +1313,8 @@ private fun EpisodeStyleCompactOptions(
                 ),
                 selected = selected,
                 accentColor = accentColor,
+                vibrationEnabled = vibrationEnabled,
+                context = context,
                 onSelect = onSelect
             )
         }
@@ -1036,6 +1350,8 @@ private fun EpisodeStyleCompactOptions(
                 ),
                 selected = normPercentage,
                 accentColor = accentColor,
+                vibrationEnabled = vibrationEnabled,
+                context = context,
                 onSelect = onSelect
             )
         }
@@ -1049,6 +1365,8 @@ private fun ProgressBarCompactOptions(
     selectedLinear: String,
     selectedCircular: String,
     accentColor: Color,
+    vibrationEnabled: Boolean,
+    context: android.content.Context,
     onSelectLinear: (String) -> Unit,
     onSelectCircular: (String) -> Unit
 ) {
@@ -1084,6 +1402,8 @@ private fun ProgressBarCompactOptions(
                 ),
                 selected = selectedLinear,
                 accentColor = accentColor,
+                vibrationEnabled = vibrationEnabled,
+                context = context,
                 onSelect = onSelectLinear
             )
         }
@@ -1114,6 +1434,8 @@ private fun ProgressBarCompactOptions(
                 ),
                 selected = selectedCircular,
                 accentColor = accentColor,
+                vibrationEnabled = vibrationEnabled,
+                context = context,
                 onSelect = onSelectCircular
             )
         }
@@ -1126,6 +1448,8 @@ private fun ProgressBarCompactOptions(
 private fun TextSizeOptions(
     selected: Float,
     accentColor: Color,
+    vibrationEnabled: Boolean,
+    context: android.content.Context,
     onSelect: (Float) -> Unit
 ) {
     SegmentedControl(
@@ -1136,6 +1460,8 @@ private fun TextSizeOptions(
         ),
         selected = selected,
         accentColor = accentColor,
+        vibrationEnabled = vibrationEnabled,
+        context = context,
         height = 44.dp,
         onSelect = onSelect
     )
