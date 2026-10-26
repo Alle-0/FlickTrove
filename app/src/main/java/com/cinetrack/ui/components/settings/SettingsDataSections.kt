@@ -44,7 +44,6 @@ import com.cinetrack.util.VibrationHelper
 import com.cinetrack.util.Keys
 import com.google.firebase.auth.FirebaseUser
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.components.common.CategoryTabSelector
 
 @Composable
 fun SettingsImagesStorageSection(
@@ -67,41 +66,21 @@ fun SettingsImagesStorageSection(
             description = stringResource(R.string.settings_image_quality_desc),
             customContent = {
                 val qualityOptions = listOf(
-                    stringResource(R.string.quality_low),
-                    stringResource(R.string.quality_medium),
-                    stringResource(R.string.quality_high)
+                    SegmentedOption(value = ImageQuality.LOW, title = stringResource(R.string.quality_low)),
+                    SegmentedOption(value = ImageQuality.MEDIUM, title = stringResource(R.string.quality_medium)),
+                    SegmentedOption(value = ImageQuality.HIGH, title = stringResource(R.string.quality_high))
                 )
-                val selectedIndex = when (imageQuality) {
-                    ImageQuality.LOW -> 0
-                    ImageQuality.MEDIUM -> 1
-                    ImageQuality.HIGH -> 2
-                }
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 8.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
-                ) {
-                    CategoryTabSelector(
-                        options = qualityOptions,
-                        selectedIndex = selectedIndex,
-                        onOptionClick = { index ->
-                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                            val newQuality = when (index) {
-                                0 -> ImageQuality.LOW
-                                1 -> ImageQuality.MEDIUM
-                                else -> ImageQuality.HIGH
-                            }
-                            settingsViewModel.updateImageQuality(newQuality)
-                        },
-                        modifier = Modifier.fillMaxWidth(),
-                        fillWidth = true,
-                        indicatorColor = currentAccentColor,
-                        uppercase = false
-                    )
-                }
+                SegmentedControl(
+                    options = qualityOptions,
+                    selected = imageQuality,
+                    accentColor = currentAccentColor,
+                    vibrationEnabled = vibrationEnabled,
+                    context = context,
+                    height = 44.dp,
+                    onSelect = { newQuality ->
+                        settingsViewModel.updateImageQuality(newQuality)
+                    }
+                )
             }
         )
         SettingsItem(

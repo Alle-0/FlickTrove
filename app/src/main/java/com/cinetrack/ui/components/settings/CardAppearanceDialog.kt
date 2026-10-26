@@ -1239,7 +1239,7 @@ data class SegmentedOption<T>(
 )
 
 @Composable
-private fun <T> SegmentedTabItems(
+internal fun <T> SegmentedTabItems(
     options: List<SegmentedOption<T>>,
     titleColor: Color,
     subtitleColor: Color,
@@ -1330,7 +1330,7 @@ private fun <T> SegmentedTabItems(
 // ─── Segmented Control (FlickTrove Tab Physics + Vanishing unselected indicator)
 
 @Composable
-private fun <T> SegmentedControl(
+internal fun <T> SegmentedControl(
     options: List<SegmentedOption<T>>,
     selected: T,
     accentColor: Color,
