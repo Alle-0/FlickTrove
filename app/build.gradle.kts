@@ -95,7 +95,8 @@ android {
                 "src/main/res-logos",
                 "src/main/res-mock",
                 "src/main/res-onboarding",
-                "src/main/res-launcher"
+                "src/main/res-launcher",
+                "src/main/res-widgets"
             )
         }
     }
