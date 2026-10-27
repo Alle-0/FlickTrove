@@ -366,7 +366,7 @@ fun MovieListCard(
                             color = statusColor
                         )
                         if (isReleased && !isUpToDate) {
-                            val epText = com.cinetrack.ui.components.settings.formatEpisodeInfo(
+                            val epText = formatEpisodeInfo(
                                 style = episodeInfoStyle,
                                 nextInfo = nextInfo,
                                 movie = movie,

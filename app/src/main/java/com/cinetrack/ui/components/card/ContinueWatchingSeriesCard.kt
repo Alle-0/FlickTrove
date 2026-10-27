@@ -683,7 +683,7 @@ fun ContinueWatchingSeriesCard(
                         style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                     )
                     val episodeInfoStyle = com.cinetrack.LocalEpisodeInfoStyle.current
-                    val epSubtitle = com.cinetrack.ui.components.settings.formatDrawerEpisodeSubtitle(
+                    val epSubtitle = formatDrawerEpisodeSubtitle(
                         style = episodeInfoStyle,
                         nextInfo = nextInfo,
                         movie = movie,

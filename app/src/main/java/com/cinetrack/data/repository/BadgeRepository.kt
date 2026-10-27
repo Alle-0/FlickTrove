@@ -1273,13 +1273,19 @@ class BadgeRepository @Inject constructor(
                 calculateProgressiveTiers(watchlistCount, badge.progressiveSteps)
             }
 
-            // 14. Longevità Cineclub: Tessera del Cineclub
+            // 14. Longevità Cineclub: Tessera del Cineclub (Esclusivo per utenti registrati con account)
             "badge_veteran_club" -> {
-                val earliestTime = allMovies.mapNotNull { it.touched.takeIf { t -> t != null && t > 0L } }
-                    .minOrNull() ?: System.currentTimeMillis()
-                val diffMillis = (System.currentTimeMillis() - earliestTime).coerceAtLeast(0L)
-                val months = ((diffMillis / (1000L * 60 * 60 * 24 * 30L)) + 1).toInt().coerceAtLeast(1)
-                calculateProgressiveTiers(months, badge.progressiveSteps)
+                val currentUser = auth.currentUser
+                val isRegisteredUser = currentUser != null && !currentUser.isAnonymous
+                if (!isRegisteredUser) {
+                    calculateProgressiveTiers(0, badge.progressiveSteps)
+                } else {
+                    val registrationTime = currentUser.metadata?.creationTimestamp?.takeIf { it > 0L }
+                        ?: System.currentTimeMillis()
+                    val diffMillis = (System.currentTimeMillis() - registrationTime).coerceAtLeast(0L)
+                    val months = ((diffMillis / (1000L * 60 * 60 * 24 * 30L)) + 1).toInt().coerceAtLeast(1)
+                    calculateProgressiveTiers(months, badge.progressiveSteps)
+                }
             }
 
             // 15. Ore di Visione: Odissea del Tempo
@@ -1781,14 +1787,6 @@ class BadgeRepository @Inject constructor(
     }
 
     private fun parseWatchedAtMillis(dateStr: String): Long {
-        return try {
-            java.time.Instant.parse(dateStr).toEpochMilli()
-        } catch (_: Exception) {
-            try {
-                SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", Locale.US).parse(dateStr)?.time ?: 0L
-            } catch (_: Exception) {
-                0L
-            }
-        }
+        return com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(dateStr)
     }
 }

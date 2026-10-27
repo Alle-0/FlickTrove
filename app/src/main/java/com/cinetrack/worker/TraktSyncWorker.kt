@@ -409,9 +409,7 @@ class TraktSyncWorker @AssistedInject constructor(
                             )
                         }
                     } else if (totalWatched > 0) {
-                        val date = bestWatchedDate ?: local?.watchedAt ?: java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", java.util.Locale.US).apply {
-                            timeZone = java.util.TimeZone.getTimeZone("UTC")
-                        }.format(java.util.Date())
+                        val date = bestWatchedDate ?: local?.watchedAt ?: com.cinetrack.util.DateTimeUtils.nowIsoUtc()
                         movieRepository.insertWatchHistory(
                             com.cinetrack.data.local.entities.WatchHistoryEntity(
                                 movieId = showTmdbId,
@@ -1262,14 +1260,10 @@ class TraktSyncWorker @AssistedInject constructor(
 
     private fun isRecent(dateString: String?): Boolean {
         if (dateString.isNullOrBlank()) return false
-        return try {
-            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
-            val date = format.parse(dateString)
-            val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
-            date != null && date.time >= thirtyDaysAgo
-        } catch (e: Exception) {
-            false
-        }
+        val millis = com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(dateString)
+        if (millis == 0L) return false
+        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+        return millis >= thirtyDaysAgo
     }
 
     private fun isRecentTime(timestamp: Long?): Boolean {

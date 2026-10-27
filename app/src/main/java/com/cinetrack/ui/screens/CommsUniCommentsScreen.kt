@@ -116,7 +116,8 @@ class CommsUniCommentsScreen(
     private val releaseYear: String? = null,
     private val focusInputOnLaunch: Boolean = false,
     private val targetCommentId: String? = null,
-    private val imdbId: String? = null
+    private val imdbId: String? = null,
+    private val initialImageUri: String? = null
 ) : Screen {
 
     override val key: String = "CommentsScreen_${mediaType}_${mediaId}_${java.util.UUID.randomUUID()}"
@@ -237,6 +238,24 @@ class CommsUniCommentsScreen(
                 kotlinx.coroutines.delay(300) // Aspetta fine animazione navigazione
                 focusRequester.requestFocus()
                 keyboardController?.show()
+            }
+        }
+
+        LaunchedEffect(initialImageUri) {
+            if (!initialImageUri.isNullOrBlank()) {
+                val uri = android.net.Uri.parse(initialImageUri)
+                isUploadingImage = true
+                viewModel.uploadCommentImage(
+                    imageUri = uri,
+                    onSuccess = { url ->
+                        isUploadingImage = false
+                        attachedMedia = listOf(url.toString())
+                    },
+                    onError = { error ->
+                        isUploadingImage = false
+                        android.widget.Toast.makeText(context, error, android.widget.Toast.LENGTH_SHORT).show()
+                    }
+                )
             }
         }
 

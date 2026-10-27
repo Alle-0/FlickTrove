@@ -37,6 +37,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.work.WorkInfo
 import com.cinetrack.R
+import com.cinetrack.ui.components.common.SegmentedControl
+import com.cinetrack.ui.components.common.SegmentedOption
 import com.cinetrack.ui.theme.OnSurfaceMuted
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.util.ImageQuality

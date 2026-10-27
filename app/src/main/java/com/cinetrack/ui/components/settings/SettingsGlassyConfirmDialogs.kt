@@ -3,19 +3,14 @@ package com.cinetrack.ui.components.settings
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.horizontalScroll
-import androidx.compose.foundation.rememberScrollState
-import androidx.compose.ui.draw.clip
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.foundation.verticalScroll
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
@@ -26,20 +21,124 @@ import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
-import androidx.compose.ui.geometry.Offset
 import com.cinetrack.R
-import com.cinetrack.ui.utils.premiumScrollbar
-import com.cinetrack.ui.theme.*
-import com.cinetrack.ui.utils.verticalFadingEdges
-import com.cinetrack.ui.utils.horizontalFadingEdges
-import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.GlassmorphicModal
-import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.utils.bounceClick
-import androidx.compose.foundation.lazy.LazyColumn
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.lazy.rememberLazyListState
+import dev.chrisbanes.haze.HazeState
+
+/**
+ * Reusable modal base for settings confirmation dialogs.
+ */
+@Composable
+fun SettingsConfirmBaseDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    icon: @Composable () -> Unit,
+    title: String,
+    description: String,
+    onDismiss: () -> Unit,
+    dimBackground: Boolean = true,
+    dismissOnClickOutside: Boolean = false,
+    contentBelowText: (@Composable () -> Unit)? = null,
+    actionButtons: @Composable () -> Unit
+) {
+    GlassmorphicModal(
+        visible = visible,
+        activeHazeState = activeHazeState,
+        dimBackground = dimBackground,
+        dismissOnClickOutside = dismissOnClickOutside,
+        onDismissRequest = onDismiss
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier.padding(24.dp)
+        ) {
+            icon()
+            Spacer(modifier = Modifier.height(16.dp))
+            Text(
+                title,
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
+                textAlign = TextAlign.Center
+            )
+            Spacer(modifier = Modifier.height(12.dp))
+            Text(
+                description,
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
+                textAlign = TextAlign.Center
+            )
+            if (contentBelowText != null) {
+                contentBelowText()
+            }
+            Spacer(modifier = Modifier.height(if (contentBelowText != null) 24.dp else 32.dp))
+            actionButtons()
+        }
+    }
+}
+
+/**
+ * Standard confirmation dialog layout with Cancel + Confirm buttons.
+ */
+@Composable
+fun SettingsStandardConfirmDialog(
+    visible: Boolean,
+    activeHazeState: HazeState,
+    iconRes: Int,
+    iconTint: Color,
+    title: String,
+    description: String,
+    confirmText: String = stringResource(R.string.settings_confirm),
+    cancelText: String = stringResource(R.string.settings_cancel),
+    confirmColor: Color = MaterialTheme.colorScheme.primary,
+    confirmTextColor: Color = Color.Black,
+    confirmEnabled: Boolean = true,
+    cancelEnabled: Boolean = true,
+    dimBackground: Boolean = true,
+    dismissOnClickOutside: Boolean = false,
+    onDismiss: () -> Unit,
+    onConfirm: () -> Unit
+) {
+    SettingsConfirmBaseDialog(
+        visible = visible,
+        activeHazeState = activeHazeState,
+        icon = {
+            Icon(
+                ImageVector.vectorResource(id = iconRes),
+                null,
+                tint = iconTint,
+                modifier = Modifier.size(48.dp)
+            )
+        },
+        title = title,
+        description = description,
+        dimBackground = dimBackground,
+        dismissOnClickOutside = dismissOnClickOutside,
+        onDismiss = onDismiss,
+        actionButtons = {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                SettingsDialogCancelButton(
+                    text = cancelText,
+                    onClick = onDismiss,
+                    enabled = cancelEnabled,
+                    modifier = Modifier.weight(1f)
+                )
+                SettingsDialogConfirmButton(
+                    text = confirmText,
+                    onClick = onConfirm,
+                    enabled = confirmEnabled,
+                    containerColor = confirmColor,
+                    contentColor = confirmTextColor,
+                    modifier = Modifier.weight(1f)
+                )
+            }
+        }
+    )
+}
 
 @Composable
 fun DeleteAccountDialog(
@@ -48,57 +147,19 @@ fun DeleteAccountDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsStandardConfirmDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = false,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Icon(
-                ImageVector.vectorResource(id = R.drawable.ic_x),
-                null,
-                tint = Color(0xFFFF5252),
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.settings_dialog_delete_account_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                stringResource(R.string.settings_dialog_delete_account_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                )
-                SettingsDialogConfirmButton(
-                    text = stringResource(R.string.settings_yes_delete),
-                    onClick = onConfirm,
-                    containerColor = Color(0xFFFF5252),
-                    contentColor = Color.White,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
+        iconRes = R.drawable.ic_x,
+        iconTint = Color(0xFFFF5252),
+        title = stringResource(R.string.settings_dialog_delete_account_title),
+        description = stringResource(R.string.settings_dialog_delete_account_desc),
+        confirmText = stringResource(R.string.settings_yes_delete),
+        confirmColor = Color(0xFFFF5252),
+        confirmTextColor = Color.White,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
 }
 
 @Composable
@@ -113,37 +174,21 @@ fun ReauthDeleteAccountDialog(
     val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
     LaunchedEffect(visible) { if (visible) password = "" }
 
-    GlassmorphicModal(
+    SettingsConfirmBaseDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = false,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
+        icon = {
             Icon(
                 ImageVector.vectorResource(id = R.drawable.ic_x),
                 null,
                 tint = Color(0xFFFF5252),
                 modifier = Modifier.size(40.dp)
             )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                stringResource(R.string.settings_dialog_reauth_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(
-                stringResource(R.string.settings_dialog_reauth_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
+        },
+        title = stringResource(R.string.settings_dialog_reauth_title),
+        description = stringResource(R.string.settings_dialog_reauth_desc),
+        onDismiss = onDismiss,
+        contentBelowText = {
             Spacer(modifier = Modifier.height(20.dp))
             OutlinedTextField(
                 value = password,
@@ -172,7 +217,8 @@ fun ReauthDeleteAccountDialog(
                     focusedLabelColor = Color(0xFFFF5252)
                 )
             )
-            Spacer(modifier = Modifier.height(24.dp))
+        },
+        actionButtons = {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
@@ -196,7 +242,7 @@ fun ReauthDeleteAccountDialog(
                 )
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -206,55 +252,17 @@ fun ClearCacheConfirmDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsStandardConfirmDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Icon(
-                ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
-                null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.settings_dialog_clear_cache_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                stringResource(R.string.settings_dialog_clear_cache_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                )
-                SettingsDialogConfirmButton(
-                    text = stringResource(R.string.settings_confirm),
-                    onClick = onConfirm,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
+        iconRes = R.drawable.ic_svuota_trash,
+        iconTint = MaterialTheme.colorScheme.primary,
+        title = stringResource(R.string.settings_dialog_clear_cache_title),
+        description = stringResource(R.string.settings_dialog_clear_cache_desc),
+        dismissOnClickOutside = true,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
 }
 
 @Composable
@@ -264,166 +272,16 @@ fun DeepSyncConfirmDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsStandardConfirmDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = false,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Icon(
-                ImageVector.vectorResource(id = R.drawable.ic_cloud),
-                null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.settings_dialog_deep_sync_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                stringResource(R.string.settings_dialog_deep_sync_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                )
-                SettingsDialogConfirmButton(
-                    text = stringResource(R.string.settings_confirm),
-                    onClick = onConfirm,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
-}
-
-private data class BadgeInfoItem(
-    val titleRes: Int,
-    val color: Color,
-    val descRes: Int
-)
-
-private val BADGES_LEGEND_LIST = listOf(
-    BadgeInfoItem(R.string.settings_badge_new, NeonPink, R.string.settings_badge_new_desc),
-    BadgeInfoItem(R.string.settings_badge_masterpiece, Color(0xFFFFD700), R.string.settings_badge_masterpiece_desc),
-    BadgeInfoItem(R.string.settings_badge_best, Color(0xFF00E5FF), R.string.settings_badge_best_desc),
-    BadgeInfoItem(R.string.settings_badge_hot, HazeStyles.AccentYellow, R.string.settings_badge_hot_desc),
-    BadgeInfoItem(R.string.settings_badge_wow, NeonTeal, R.string.settings_badge_wow_desc),
-    BadgeInfoItem(R.string.settings_badge_hidden_gem, Color(0xFF00E676), R.string.settings_badge_hidden_gem_desc),
-    BadgeInfoItem(R.string.settings_badge_cult, Color(0xFF9C27B0), R.string.settings_badge_cult_desc),
-    BadgeInfoItem(R.string.settings_badge_classic, Color(0xFF8D6E63), R.string.settings_badge_classic_desc),
-    BadgeInfoItem(R.string.settings_badge_epic, Color(0xFFFF5722), R.string.settings_badge_epic_desc),
-    BadgeInfoItem(R.string.settings_badge_binge, Color(0xFF00BCD4), R.string.settings_badge_binge_desc),
-    BadgeInfoItem(R.string.settings_badge_scifi, Color(0xFF2962FF), R.string.settings_badge_scifi_desc),
-    BadgeInfoItem(R.string.settings_badge_comedy, Color(0xFFFFEA00), R.string.settings_badge_comedy_desc),
-    BadgeInfoItem(R.string.settings_badge_horror, Color(0xFFE53935), R.string.settings_badge_horror_desc),
-    BadgeInfoItem(R.string.settings_badge_animation, Color(0xFFFF9800), R.string.settings_badge_animation_desc),
-    BadgeInfoItem(R.string.settings_badge_blockbuster, Color(0xFF6200EA), R.string.settings_badge_blockbuster_desc),
-    BadgeInfoItem(R.string.settings_badge_indie, Color(0xFFAED581), R.string.settings_badge_indie_desc),
-    BadgeInfoItem(R.string.settings_badge_quick, Color(0xFFC6FF00), R.string.settings_badge_quick_desc),
-    BadgeInfoItem(R.string.settings_badge_snack, Color(0xFFC6FF00), R.string.settings_badge_snack_desc),
-    BadgeInfoItem(R.string.settings_badge_divisive, Color(0xFFFF9800), R.string.settings_badge_divisive_desc),
-    BadgeInfoItem(R.string.settings_badge_vintage, Color(0xFFBCAAA4), R.string.settings_badge_vintage_desc),
-    BadgeInfoItem(R.string.settings_badge_docu, Color(0xFF9E9E9E), R.string.settings_badge_docu_desc),
-    BadgeInfoItem(R.string.settings_badge_family, Color(0xFF81D4FA), R.string.settings_badge_family_desc)
-)
-
-@Composable
-fun BadgesInfoDialog(
-    visible: Boolean,
-    activeHazeState: HazeState,
-    disabledBadges: Set<String>,
-    onToggleBadge: (String, Boolean) -> Unit,
-    onDismiss: () -> Unit
-) {
-    GlassmorphicModal(
-        visible = visible,
-        activeHazeState = activeHazeState,
-        zIndex = 150f,
-        scrimAlpha = 0.50f,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center,
-                modifier = Modifier.fillMaxWidth()
-            ) {
-                Icon(
-                    Icons.Rounded.Info,
-                    null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(32.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                Text(
-                    stringResource(R.string.settings_badges_meaning),
-                    style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                    color = MaterialTheme.colorScheme.onSurface
-                )
-            }
-            Spacer(modifier = Modifier.height(24.dp))
-            
-            val lazyListState = rememberLazyListState()
-            
-            LazyColumn(
-                state = lazyListState,
-                verticalArrangement = Arrangement.spacedBy(16.dp),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .heightIn(max = 420.dp)
-                    .premiumScrollbar(lazyListState)
-                    .padding(end = 12.dp)
-                    .verticalFadingEdges(lazyListState, 16.dp, 16.dp)
-            ) {
-                items(
-                    items = BADGES_LEGEND_LIST,
-                    key = { it.titleRes }
-                ) { item ->
-                    val text = stringResource(item.titleRes)
-                    BadgeLegendItem(
-                        text = text,
-                        color = item.color,
-                        desc = stringResource(item.descRes),
-                        enabled = !disabledBadges.contains(text),
-                        onToggle = { enabled -> onToggleBadge(text, enabled) }
-                    )
-                }
-            }
-            
-            Spacer(modifier = Modifier.height(32.dp))
-            SettingsDialogConfirmButton(
-                text = stringResource(R.string.settings_got_it),
-                onClick = onDismiss,
-                containerColor = MaterialTheme.colorScheme.primary,
-                contentColor = Color.Black,
-                modifier = Modifier.fillMaxWidth()
-            )
-        }
-    }
+        iconRes = R.drawable.ic_cloud,
+        iconTint = MaterialTheme.colorScheme.primary,
+        title = stringResource(R.string.settings_dialog_deep_sync_title),
+        description = stringResource(R.string.settings_dialog_deep_sync_desc),
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
 }
 
 @Composable
@@ -436,57 +294,19 @@ fun WipeDataConfirmDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsStandardConfirmDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = false,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Icon(
-                ImageVector.vectorResource(id = R.drawable.ic_trash),
-                null,
-                tint = Color(0xFFFF9800),
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                title,
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                description,
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                )
-                SettingsDialogConfirmButton(
-                    text = buttonText,
-                    onClick = onConfirm,
-                    containerColor = Color(0xFFFF9800),
-                    contentColor = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
+        iconRes = R.drawable.ic_trash,
+        iconTint = Color(0xFFFF9800),
+        title = title,
+        description = description,
+        confirmText = buttonText,
+        confirmColor = Color(0xFFFF9800),
+        confirmTextColor = Color.Black,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
 }
 
 @Composable
@@ -498,42 +318,26 @@ fun CleanupRewatchesConfirmDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsConfirmBaseDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = !isLoading,
-        onDismissRequest = { if (!isLoading) onDismiss() }
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
+        icon = {
             Icon(
                 ImageVector.vectorResource(id = R.drawable.ic_svuota_trash),
                 null,
                 tint = Color(0xFFFFA000),
                 modifier = Modifier.size(48.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.settings_cleanup_rewatches_dialog_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface,
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                if (duplicateCount > 0) {
-                    stringResource(R.string.settings_cleanup_rewatches_dialog_desc, duplicateCount)
-                } else {
-                    stringResource(R.string.settings_cleanup_rewatches_dialog_desc_zero)
-                },
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
+        },
+        title = stringResource(R.string.settings_cleanup_rewatches_dialog_title),
+        description = if (duplicateCount > 0) {
+            stringResource(R.string.settings_cleanup_rewatches_dialog_desc, duplicateCount)
+        } else {
+            stringResource(R.string.settings_cleanup_rewatches_dialog_desc_zero)
+        },
+        dismissOnClickOutside = !isLoading,
+        onDismiss = { if (!isLoading) onDismiss() },
+        actionButtons = {
             if (duplicateCount > 0) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
@@ -565,7 +369,7 @@ fun CleanupRewatchesConfirmDialog(
                 )
             }
         }
-    }
+    )
 }
 
 @Composable
@@ -575,57 +379,19 @@ fun LogoutConfirmDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsStandardConfirmDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = false,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
-            Icon(
-                ImageVector.vectorResource(id = R.drawable.ic_exit),
-                null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(48.dp)
-            )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.settings_dialog_logout_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                stringResource(R.string.settings_dialog_logout_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                SettingsDialogCancelButton(
-                    text = stringResource(R.string.settings_cancel),
-                    onClick = onDismiss,
-                    modifier = Modifier.weight(1f)
-                )
-                SettingsDialogConfirmButton(
-                    text = stringResource(R.string.settings_yes_logout),
-                    onClick = onConfirm,
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = Color.Black,
-                    modifier = Modifier.weight(1f)
-                )
-            }
-        }
-    }
+        iconRes = R.drawable.ic_exit,
+        iconTint = MaterialTheme.colorScheme.primary,
+        title = stringResource(R.string.settings_dialog_logout_title),
+        description = stringResource(R.string.settings_dialog_logout_desc),
+        confirmText = stringResource(R.string.settings_yes_logout),
+        confirmColor = MaterialTheme.colorScheme.primary,
+        confirmTextColor = Color.Black,
+        onDismiss = onDismiss,
+        onConfirm = onConfirm
+    )
 }
 
 @Composable
@@ -636,38 +402,21 @@ fun WipeDataSelectionDialog(
     onSelectLocal: () -> Unit,
     onSelectTotal: () -> Unit
 ) {
-    GlassmorphicModal(
+    SettingsConfirmBaseDialog(
         visible = visible,
         activeHazeState = activeHazeState,
-        dimBackground = true,
-        dismissOnClickOutside = false,
-        onDismissRequest = onDismiss
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            modifier = Modifier.padding(24.dp)
-        ) {
+        icon = {
             Icon(
                 ImageVector.vectorResource(id = R.drawable.ic_trash),
                 null,
                 tint = MaterialTheme.colorScheme.primary,
                 modifier = Modifier.size(48.dp)
             )
-            Spacer(modifier = Modifier.height(16.dp))
-            Text(
-                stringResource(id = R.string.settings_dialog_wipe_data_title),
-                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                color = MaterialTheme.colorScheme.onSurface
-            )
-            Spacer(modifier = Modifier.height(12.dp))
-            Text(
-                stringResource(id = R.string.settings_wipe_data_desc),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.7f),
-                textAlign = TextAlign.Center
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            
+        },
+        title = stringResource(id = R.string.settings_dialog_wipe_data_title),
+        description = stringResource(id = R.string.settings_wipe_data_desc),
+        onDismiss = onDismiss,
+        actionButtons = {
             Column(
                 modifier = Modifier.fillMaxWidth(),
                 verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -696,7 +445,7 @@ fun WipeDataSelectionDialog(
                         )
                     }
                 }
-                
+
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -721,7 +470,7 @@ fun WipeDataSelectionDialog(
                         )
                     }
                 }
-                
+
                 SettingsDialogCancelButton(
                     text = stringResource(R.string.settings_cancel),
                     onClick = onDismiss,
@@ -729,6 +478,5 @@ fun WipeDataSelectionDialog(
                 )
             }
         }
-    }
+    )
 }
-

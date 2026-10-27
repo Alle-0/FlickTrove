@@ -51,6 +51,7 @@ import com.cinetrack.data.model.AppComment
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.parseSimpleMarkdown
 import com.cinetrack.ui.viewmodel.CommentsViewModel
+import com.cinetrack.ui.components.common.ZoomableImageViewerDialog
 import kotlinx.coroutines.launch
 import java.text.SimpleDateFormat
 import java.util.Locale
@@ -87,6 +88,7 @@ fun CommentCardItem(
     val visualDepth = comment.depth.coerceAtMost(3)
     val baseStartPadding = 16.dp
     val indentSpacing = 20.dp
+    var previewImageUrl by remember { mutableStateOf<String?>(null) }
 
     Row(
         modifier = modifier
@@ -430,6 +432,9 @@ fun CommentCardItem(
                                         .padding(top = 8.dp)
                                         .fillMaxWidth()
                                         .clip(RoundedCornerShape(20.dp))
+                                        .bounceClick(enabled = !isBlurred) {
+                                            previewImageUrl = mediaUrl
+                                        }
                                         .then(
                                             if (isBlurred) Modifier.clip(RoundedCornerShape(20.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
                                         ),
@@ -633,6 +638,12 @@ fun CommentCardItem(
                 }
             }
         }
+
+    ZoomableImageViewerDialog(
+        visible = previewImageUrl != null,
+        imageUrl = previewImageUrl,
+        onDismiss = { previewImageUrl = null }
+    )
 }
 
 @Composable

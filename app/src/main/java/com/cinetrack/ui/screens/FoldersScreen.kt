@@ -315,28 +315,18 @@ fun FoldersScreenContent(
                 var snapJob by remember { mutableStateOf<kotlinx.coroutines.Job?>(null) }
 
                 fun performSnap(velocity: Float = 0f) {
-                    val searchIsPartial = searchBarHeightPx > 0.5f && searchBarHeightPx < searchBarMaxHeightPx - 0.5f
+                    val searchIsPartial = com.cinetrack.ui.utils.CollapsingHeaderUtils.isPartial(searchBarHeightPx, searchBarMaxHeightPx)
                     val folderMax = if (searchQuery.isBlank()) newFolderMaxHeightPx else 0f
-                    val folderIsPartial = folderMax > 0f && newFolderHeightPx > 0.5f && newFolderHeightPx < folderMax - 0.5f
+                    val folderIsPartial = com.cinetrack.ui.utils.CollapsingHeaderUtils.isPartial(newFolderHeightPx, folderMax)
 
                     if (!searchIsPartial && !folderIsPartial) return
 
                     val targetSearch = if (searchIsPartial) {
-                        when {
-                            velocity < -300f -> 0f
-                            velocity > 300f -> searchBarMaxHeightPx
-                            searchBarHeightPx < searchBarMaxHeightPx * 0.5f -> 0f
-                            else -> searchBarMaxHeightPx
-                        }
+                        com.cinetrack.ui.utils.CollapsingHeaderUtils.calculateSnapTarget(searchBarHeightPx, searchBarMaxHeightPx, velocity)
                     } else searchBarHeightPx
 
                     val targetFolder = if (folderIsPartial) {
-                        when {
-                            velocity < -300f -> 0f
-                            velocity > 300f -> folderMax
-                            newFolderHeightPx < folderMax * 0.5f -> 0f
-                            else -> folderMax
-                        }
+                        com.cinetrack.ui.utils.CollapsingHeaderUtils.calculateSnapTarget(newFolderHeightPx, folderMax, velocity)
                     } else newFolderHeightPx
 
                     val startSearch = searchBarHeightPx
@@ -344,19 +334,14 @@ fun FoldersScreenContent(
 
                     snapJob?.cancel()
                     snapJob = coroutineScope.launch {
-                        val anim = Animatable(0f)
-                        anim.animateTo(
-                            targetValue = 1f,
-                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                        ) {
+                        com.cinetrack.ui.utils.CollapsingHeaderUtils.animateSnap(context) { progress ->
                             if (searchIsPartial) {
-                                searchBarHeightPx = startSearch + (targetSearch - startSearch) * value
+                                searchBarHeightPx = startSearch + (targetSearch - startSearch) * progress
                             }
                             if (folderIsPartial) {
-                                newFolderHeightPx = startFolder + (targetFolder - startFolder) * value
+                                newFolderHeightPx = startFolder + (targetFolder - startFolder) * progress
                             }
                         }
-                        VibrationHelper.vibrateTick(context)
                     }
                 }
 
@@ -416,9 +401,9 @@ fun FoldersScreenContent(
                         }
 
                         override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
-                            val searchIsPartial = searchBarHeightPx > 0.5f && searchBarHeightPx < searchBarMaxHeightPx - 0.5f
+                            val searchIsPartial = com.cinetrack.ui.utils.CollapsingHeaderUtils.isPartial(searchBarHeightPx, searchBarMaxHeightPx)
                             val folderMax = if (searchQuery.isBlank()) newFolderMaxHeightPx else 0f
-                            val folderIsPartial = folderMax > 0f && newFolderHeightPx > 0.5f && newFolderHeightPx < folderMax - 0.5f
+                            val folderIsPartial = com.cinetrack.ui.utils.CollapsingHeaderUtils.isPartial(newFolderHeightPx, folderMax)
 
                             if (searchIsPartial || folderIsPartial) {
                                 performSnap(available.y)

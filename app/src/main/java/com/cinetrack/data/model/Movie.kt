@@ -944,13 +944,13 @@ data class Movie(
         return when (value) {
             is String -> value
             is com.google.firebase.Timestamp -> {
-                utcFormatter.get()?.format(value.toDate())
+                com.cinetrack.util.DateTimeUtils.formatIsoMillisUtc(value.toDate())
             }
             is Map<*, *> -> {
                 // Sometimes Firestore deserializes Timestamps as Maps {seconds=..., nanoseconds=...}
                 val seconds = (value["seconds"] as? Number)?.toLong()
                 if (seconds != null) {
-                    utcFormatter.get()?.format(Date(seconds * 1000))
+                    com.cinetrack.util.DateTimeUtils.formatIsoMillisUtc(seconds * 1000)
                 } else null
             }
             else -> null
@@ -1004,13 +1004,6 @@ data class Movie(
 
     companion object {
         private val EPISODE_REGEX = Regex("""[Ss](\d+)[Ee](\d+)""")
-        private val utcFormatter = object : ThreadLocal<SimpleDateFormat>() {
-            override fun initialValue(): SimpleDateFormat {
-                return SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-                    timeZone = TimeZone.getTimeZone("UTC")
-                }
-            }
-        }
     }
 }
 

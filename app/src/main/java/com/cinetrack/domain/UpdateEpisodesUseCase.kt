@@ -1,16 +1,12 @@
 package com.cinetrack.domain
 
 import com.cinetrack.data.model.Movie
-import java.text.SimpleDateFormat
+import com.cinetrack.util.DateTimeUtils
 import java.time.LocalDate
 import java.util.*
 import javax.inject.Inject
 
 class UpdateEpisodesUseCase @Inject constructor() {
-
-    private val dateFormat = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US).apply {
-        timeZone = TimeZone.getTimeZone("UTC")
-    }
 
     /**
      * Calculates the updated movie object after changing watched episodes.
@@ -28,7 +24,7 @@ class UpdateEpisodesUseCase @Inject constructor() {
         val totalEpisodes = movie.effectiveTotalEpisodes
         val progressVal = if (totalEpisodes > 0) (totalWatched.toDouble() / totalEpisodes).coerceIn(0.0, 1.0) else 0.0
 
-        val now = dateFormat.format(Date())
+        val now = DateTimeUtils.nowIsoUtc()
 
         return movie.copy(
             watchedEpisodes = currentWatched,
@@ -69,7 +65,7 @@ class UpdateEpisodesUseCase @Inject constructor() {
         val totalEpisodes = movie.effectiveTotalEpisodes
         val progressVal = if (totalEpisodes > 0) (totalWatched.toDouble() / totalEpisodes).coerceIn(0.0, 1.0) else 0.0
 
-        val now = dateFormat.format(Date())
+        val now = DateTimeUtils.nowIsoUtc()
 
         return movie.copy(
             watchedEpisodes = currentWatched,
@@ -135,7 +131,7 @@ class UpdateEpisodesUseCase @Inject constructor() {
         val totalWatched = allWatched.filter { it.key != "0" }.values.sumOf { it.size }
         val totalEpisodes = movie.effectiveTotalEpisodes
         val progressVal = if (totalEpisodes > 0) (totalWatched.toDouble() / totalEpisodes).coerceIn(0.0, 1.0) else 0.0
-        val now = dateFormat.format(Date())
+        val now = DateTimeUtils.nowIsoUtc()
 
         return movie.copy(
             watchedEpisodes = allWatched,

@@ -23,23 +23,7 @@ object CommsUniMapper {
         cachedLocalAvatar: String? = null,
         cachedLocalName: String? = null
     ): AppComment {
-        val date = try {
-            java.util.Date.from(java.time.Instant.parse(comment.createdAt))
-        } catch (e: Exception) {
-            try {
-                val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'", Locale.US)
-                format.timeZone = TimeZone.getTimeZone("UTC")
-                format.parse(comment.createdAt)
-            } catch (e2: Exception) {
-                try {
-                    val format = SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss'Z'", Locale.US)
-                    format.timeZone = TimeZone.getTimeZone("UTC")
-                    format.parse(comment.createdAt)
-                } catch (e3: Exception) {
-                    null
-                }
-            }
-        }
+        val date = com.cinetrack.util.DateTimeUtils.parseIsoDate(comment.createdAt)
 
         val allMediaUrls = mutableListOf<String>()
         val primaryMediaUrl = comment.media?.url ?: comment.media?.apiUrl ?: comment.imageUrl

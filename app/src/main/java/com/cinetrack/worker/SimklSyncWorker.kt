@@ -535,14 +535,10 @@ class SimklSyncWorker @AssistedInject constructor(
 
     private fun isRecent(dateString: String?): Boolean {
         if (dateString.isNullOrBlank()) return false
-        return try {
-            val format = java.text.SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss", java.util.Locale.US)
-            val date = format.parse(dateString)
-            val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
-            date != null && date.time >= thirtyDaysAgo
-        } catch (e: Exception) {
-            false
-        }
+        val millis = com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(dateString)
+        if (millis == 0L) return false
+        val thirtyDaysAgo = System.currentTimeMillis() - (30L * 24 * 60 * 60 * 1000)
+        return millis >= thirtyDaysAgo
     }
 
     private fun isRecentTime(timestamp: Long?): Boolean {

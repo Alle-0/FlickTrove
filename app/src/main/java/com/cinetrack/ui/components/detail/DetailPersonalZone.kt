@@ -7,6 +7,7 @@ import androidx.compose.ui.res.vectorResource
 import com.cinetrack.R
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -33,6 +34,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.scale
+import com.cinetrack.ui.components.share.ShareStoryCardModal
 
 @Composable
 fun DetailPersonalZone(
@@ -44,10 +46,12 @@ fun DetailPersonalZone(
     hazeState: HazeState? = null,
     globalStats: com.cinetrack.data.model.GlobalMovieStats? = null,
     onHistoryClick: (() -> Unit)? = null,
+    onShareToComments: ((android.net.Uri) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     var expandedAction by remember { mutableStateOf<String?>(null) } // "rate" or "note"
     var lastActiveAction by remember { mutableStateOf<String?>(null) }
+    var showShareStoryModal by remember { mutableStateOf(false) }
     
     // Track the rating being selected in real-time
     var previewRating by remember(movie.personalRating) { mutableDoubleStateOf(movie.personalRating ?: 0.0) }
@@ -155,7 +159,26 @@ fun DetailPersonalZone(
                 isActive = expandedAction == "rate",
                 enabled = canInteract,
                 onClick = { if (canInteract) expandedAction = if (expandedAction == "rate") null else "rate" },
-                modifier = Modifier.weight(1f).fillMaxHeight(),
+                modifier = Modifier.fillMaxWidth().fillMaxHeight(),
+                inlineContent = {
+                    Box(
+                        modifier = Modifier
+                            .size(28.dp)
+                            .bounceClick(scaleDown = 0.88f) {
+                                showShareStoryModal = true
+                            }
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.04f)),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_share),
+                            contentDescription = "Condividi Story Card",
+                            tint = Color.White.copy(alpha = 0.45f),
+                            modifier = Modifier.size(13.dp)
+                        )
+                    }
+                },
                 trailingContent = if (flickTroveRatingText != null) {
                     {
                         Column(
@@ -246,6 +269,19 @@ fun DetailPersonalZone(
             }
         }
     }
+
+    if (showShareStoryModal) {
+        ShareStoryCardModal(
+            visible = showShareStoryModal,
+            movie = movie,
+            accentColor = accentColor,
+            hazeState = hazeState,
+            onDismiss = { showShareStoryModal = false },
+            onShareToComments = { uri ->
+                onShareToComments?.invoke(uri)
+            }
+        )
+    }
 }
 
 @Composable
@@ -260,6 +296,7 @@ private fun PersonalAction(
     enabled: Boolean = true,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    inlineContent: (@Composable () -> Unit)? = null,
     trailingContent: @Composable (RowScope.() -> Unit)? = null
 ) {
     val haptic = androidx.compose.ui.platform.LocalHapticFeedback.current
@@ -359,6 +396,11 @@ private fun PersonalAction(
                             else -> 14.sp
                         }
                     )
+                }
+
+                if (inlineContent != null) {
+                    Spacer(modifier = Modifier.width(8.dp))
+                    inlineContent()
                 }
             }
             if (trailingContent != null) {

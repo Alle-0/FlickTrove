@@ -627,7 +627,38 @@ fun MovieDetailScreenContent(
                                             forceExpandCheckIn = true
                                             showCheckInDrawer = true 
                                         },
-                                        onHistoryClick = { showWatchHistorySheet = true }
+                                        onHistoryClick = { showWatchHistorySheet = true },
+                                        onShareToComments = { cardUri ->
+                                            if (com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true) {
+                                                settingsViewModel.triggerGuestAuthDialog()
+                                            } else {
+                                                val mediaTitle = state.details.title ?: state.details.name ?: ""
+                                                val image = buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
+                                                val backdrop = buildTmdbImageUrl(
+                                                    state.movieEntry.customBackdropPath ?: state.movieEntry.backdropPath ?: state.details.backdropPath ?: state.details.posterPath,
+                                                    if (state.movieEntry.customBackdropPath != null || state.movieEntry.backdropPath != null || state.details.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER,
+                                                    ImageQuality.HIGH
+                                                )
+                                                val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
+                                                val imdbId = state.details.externalIds?.imdbId
+                                                val releaseYear = (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
+                                                navigator.push(
+                                                    com.cinetrack.ui.screens.CommsUniCommentsScreen(
+                                                        tvdbId = tvdbId,
+                                                        mediaId = viewModel.movieId.toString(),
+                                                        mediaType = viewModel.mediaType,
+                                                        accentColorValue = globalAccentColor.value.toLong(),
+                                                        mediaTitle = mediaTitle,
+                                                        mediaImage = image,
+                                                        backdropUrl = backdrop,
+                                                        releaseYear = releaseYear,
+                                                        focusInputOnLaunch = true,
+                                                        imdbId = imdbId,
+                                                        initialImageUri = cardUri.toString()
+                                                    )
+                                                )
+                                            }
+                                        }
                                     )
 
                                     Spacer(modifier = Modifier.height(40.dp))

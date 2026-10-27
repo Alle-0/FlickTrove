@@ -345,27 +345,16 @@ fun FolderDetailScreenContent(
 
                             fun performSnap(velocity: Float = 0f) {
                                 if (!hasDescription || descMaxHeightPx <= 0f) return
-                                val isPartial = descHeightPx > 0.5f && descHeightPx < descMaxHeightPx - 0.5f
+                                val isPartial = com.cinetrack.ui.utils.CollapsingHeaderUtils.isPartial(descHeightPx, descMaxHeightPx)
                                 if (!isPartial) return
 
-                                val targetDesc = when {
-                                    velocity < -300f -> 0f
-                                    velocity > 300f -> descMaxHeightPx
-                                    descHeightPx < descMaxHeightPx * 0.5f -> 0f
-                                    else -> descMaxHeightPx
-                                }
-
+                                val targetDesc = com.cinetrack.ui.utils.CollapsingHeaderUtils.calculateSnapTarget(descHeightPx, descMaxHeightPx, velocity)
                                 val startDesc = descHeightPx
                                 snapJob?.cancel()
                                 snapJob = coroutineScope.launch {
-                                    val anim = Animatable(0f)
-                                    anim.animateTo(
-                                        targetValue = 1f,
-                                        animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing)
-                                    ) {
-                                        descHeightPx = startDesc + (targetDesc - startDesc) * value
+                                    com.cinetrack.ui.utils.CollapsingHeaderUtils.animateSnap(context) { progress ->
+                                        descHeightPx = startDesc + (targetDesc - startDesc) * progress
                                     }
-                                    VibrationHelper.vibrateTick(context)
                                 }
                             }
 
@@ -407,7 +396,7 @@ fun FolderDetailScreenContent(
 
                                     override suspend fun onPreFling(available: androidx.compose.ui.unit.Velocity): androidx.compose.ui.unit.Velocity {
                                         if (!hasDescription || descMaxHeightPx <= 0f) return androidx.compose.ui.unit.Velocity.Zero
-                                        val isPartial = descHeightPx > 0.5f && descHeightPx < descMaxHeightPx - 0.5f
+                                        val isPartial = com.cinetrack.ui.utils.CollapsingHeaderUtils.isPartial(descHeightPx, descMaxHeightPx)
                                         if (isPartial) {
                                             performSnap(available.y)
                                             return available
