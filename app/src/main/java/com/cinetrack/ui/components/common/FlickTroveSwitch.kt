@@ -27,27 +27,29 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.PointerIcon
 import androidx.compose.ui.input.pointer.pointerHoverIcon
+import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun FlickTroveSwitch(
     checked: Boolean,
-    onCheckedChange: (Boolean) -> Unit,
+    onCheckedChange: ((Boolean) -> Unit)? = null,
     accentColor: Color,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true,
+    trackWidth: Dp = 52.dp,
+    trackHeight: Dp = 28.dp,
+    baseThumbSize: Dp = 24.dp,
+    padding: Dp = 2.dp
 ) {
-    val trackWidth = 52.dp
-    val trackHeight = 28.dp
-    val baseThumbSize = 24.dp
-    val padding = 2.dp
-
     val interactionSource = remember { MutableInteractionSource() }
     val isHovered by interactionSource.collectIsHoveredAsState()
     val isPressed by interactionSource.collectIsPressedAsState()
 
-    // Elastic stretch on press (increases width from 24.dp to 28.dp like iOS / Material You)
+    // Elastic stretch on press (increases width like iOS / Material You)
+    val pressedStretch = if (trackWidth < 40.dp) 2.dp else 4.dp
     val animatedThumbWidth by animateDpAsState(
-        targetValue = if (isPressed) 28.dp else baseThumbSize,
+        targetValue = if (isPressed && enabled) baseThumbSize + pressedStretch else baseThumbSize,
         animationSpec = spring(dampingRatio = 0.7f, stiffness = Spring.StiffnessMedium),
         label = "thumbWidth"
     )
@@ -60,6 +62,7 @@ fun FlickTroveSwitch(
     )
 
     val targetScale = when {
+        !enabled -> 0.85f
         isPressed -> 0.95f
         isHovered -> if (checked) 1.05f else 0.95f
         checked -> 1f
@@ -72,6 +75,7 @@ fun FlickTroveSwitch(
     )
 
     val targetTrackAlpha = when {
+        !enabled -> 0.08f
         checked -> if (isHovered) 0.75f else 0.6f
         isHovered -> 0.25f
         else -> 0.15f
@@ -83,38 +87,43 @@ fun FlickTroveSwitch(
     )
 
     val animatedHoverHaloAlpha by animateFloatAsState(
-        targetValue = if (isHovered) 0.18f else 0f,
+        targetValue = if (isHovered && enabled) 0.18f else 0f,
         animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
         label = "hoverHaloAlpha"
     )
 
     val borderColor = when {
+        !enabled -> Color.White.copy(alpha = 0.08f)
         checked -> if (isHovered) accentColor else accentColor.copy(alpha = 0.85f)
         isHovered -> Color.White.copy(alpha = 0.35f)
         else -> Color.White.copy(alpha = 0.15f)
     }
 
+    val clickableMod = if (onCheckedChange != null && enabled) {
+        Modifier.clickable(
+            interactionSource = interactionSource,
+            indication = null,
+            onClick = { onCheckedChange(!checked) }
+        )
+    } else Modifier
+
     Box(
         modifier = modifier
             .width(trackWidth)
             .height(trackHeight)
-            .pointerHoverIcon(PointerIcon.Hand)
+            .then(if (enabled && onCheckedChange != null) Modifier.pointerHoverIcon(PointerIcon.Hand) else Modifier)
             .clip(CircleShape)
-            .background(if (checked) accentColor.copy(alpha = animatedTrackAlpha) else Color.White.copy(alpha = animatedTrackAlpha))
+            .background(if (checked && enabled) accentColor.copy(alpha = animatedTrackAlpha) else Color.White.copy(alpha = animatedTrackAlpha))
             .border(
                 width = 1.dp,
                 color = borderColor,
                 shape = CircleShape
             )
-            .clickable(
-                interactionSource = interactionSource,
-                indication = null,
-                onClick = { onCheckedChange(!checked) }
-            ),
+            .then(clickableMod),
         contentAlignment = Alignment.CenterStart
     ) {
         // Glow effect behind the thumb when checked
-        if (checked) {
+        if (checked && enabled) {
             Box(
                 modifier = Modifier
                     .offset(x = animatedOffset)
@@ -149,12 +158,13 @@ fun FlickTroveSwitch(
                 .graphicsLayer {
                     scaleX = animatedScale
                     scaleY = animatedScale
+                    if (!enabled) alpha = 0.45f
                 }
                 .shadow(
-                    elevation = if (checked) (if (isHovered) 8.dp else 6.dp) else 2.dp,
+                    elevation = if (checked && enabled) (if (isHovered) 8.dp else 6.dp) else 2.dp,
                     shape = CircleShape,
-                    ambientColor = if (checked) accentColor else Color.Black,
-                    spotColor = if (checked) accentColor else Color.Black
+                    ambientColor = if (checked && enabled) accentColor else Color.Black,
+                    spotColor = if (checked && enabled) accentColor else Color.Black
                 )
                 .background(Color.White, CircleShape)
         )

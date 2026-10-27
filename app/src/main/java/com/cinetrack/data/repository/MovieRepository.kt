@@ -7,6 +7,7 @@ import com.cinetrack.data.api.Person
 import com.cinetrack.data.api.PersonSearchResult
 import com.cinetrack.data.model.Season
 import com.cinetrack.data.api.TMDBService
+import com.cinetrack.data.api.ImagesResponse
 import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.model.ExtraRatings
 import com.cinetrack.data.local.dao.CacheDao
@@ -1136,6 +1137,19 @@ class MovieRepository @Inject constructor(
             // Ignore
         }
         return response
+    }
+
+    suspend fun getMediaImagesAllLanguages(id: Long, isTv: Boolean): ImagesResponse? = withContext(Dispatchers.IO) {
+        val cacheKey = "images_all:${if (isTv) "tv" else "movie"}:$id"
+        (memoryDetailsCache[cacheKey] as? ImagesResponse)?.let { return@withContext it }
+        try {
+            val response = if (isTv) tmdbService.getTVImagesAllLanguages(id) else tmdbService.getMovieImagesAllLanguages(id)
+            memoryDetailsCache[cacheKey] = response
+            response
+        } catch (e: Exception) {
+            timber.log.Timber.e(e, "Error fetching images for all languages for $id")
+            null
+        }
     }
 
     suspend fun getCachedHomeFeed(): CachedFeedData? {

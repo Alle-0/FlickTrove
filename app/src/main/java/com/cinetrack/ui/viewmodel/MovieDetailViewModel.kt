@@ -6,6 +6,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.api.MovieDetailResponse
+import com.cinetrack.data.api.ImagesResponse
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.TvdbRepository
 import com.cinetrack.data.model.deduplicateComments
@@ -340,6 +341,20 @@ class MovieDetailViewModel @Inject constructor(
     val useMovieLogo: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.useMovieLogo }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
+    private val _allMediaImages = MutableStateFlow<ImagesResponse?>(null)
+    val allMediaImages: StateFlow<ImagesResponse?> = _allMediaImages.asStateFlow()
+
+    fun loadAllMediaImages() {
+        if (_allMediaImages.value != null || movieId == 0L) return
+        viewModelScope.launch {
+            val isTv = mediaType == "tv"
+            val response = repository.getMediaImagesAllLanguages(movieId, isTv)
+            if (response != null) {
+                _allMediaImages.value = response
+            }
+        }
+    }
 
     val uiState: StateFlow<DetailUiState> = buildUiState()
         .stateIn(

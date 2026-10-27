@@ -60,6 +60,7 @@ object NetworkModule {
         val tmdbAuthInterceptor = okhttp3.Interceptor { chain ->
             val original = chain.request()
             if (original.url.host.contains("themoviedb.org")) {
+                val skipLanguage = original.header("X-Skip-Language") != null
                 val rawLanguage = preferenceRepository.getContentLanguage()
                 val resolvedLanguage = if (rawLanguage == "system") {
                     java.util.Locale.getDefault().language
@@ -68,7 +69,12 @@ object NetworkModule {
                 }
                 val urlBuilder = original.url.newBuilder()
                     .addQueryParameter("api_key", Keys.getTmdbKey())
-                    .setQueryParameter("language", resolvedLanguage)
+
+                if (skipLanguage) {
+                    urlBuilder.removeAllQueryParameters("language")
+                } else {
+                    urlBuilder.setQueryParameter("language", resolvedLanguage)
+                }
 
                 if (original.url.queryParameter("include_image_language") != null) {
                     val imageLanguage = "$resolvedLanguage,en,null"
@@ -81,8 +87,11 @@ object NetworkModule {
                 }
                 
                 val url = urlBuilder.build()
-                val request = original.newBuilder().url(url).build()
-                chain.proceed(request)
+                val requestBuilder = original.newBuilder().url(url)
+                if (skipLanguage) {
+                    requestBuilder.removeHeader("X-Skip-Language")
+                }
+                chain.proceed(requestBuilder.build())
             } else {
                 chain.proceed(original)
             }

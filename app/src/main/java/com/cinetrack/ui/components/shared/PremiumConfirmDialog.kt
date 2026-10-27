@@ -147,13 +147,13 @@ fun PremiumConfirmDialog(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(56.dp)
-                                .clip(RoundedCornerShape(18.dp))
-                                .background(accentColor)
-                                .bounceClick {
+                                .bounceClick(shape = RoundedCornerShape(18.dp)) {
                                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                     onConfirm()
                                     onDismiss()
-                                },
+                                }
+                                .clip(RoundedCornerShape(18.dp))
+                                .background(accentColor),
                             contentAlignment = Alignment.Center
                         ) {
                             Text(

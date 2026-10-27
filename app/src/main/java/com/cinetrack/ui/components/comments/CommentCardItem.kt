@@ -431,12 +431,16 @@ fun CommentCardItem(
                                     modifier = Modifier
                                         .padding(top = 8.dp)
                                         .fillMaxWidth()
-                                        .clip(RoundedCornerShape(20.dp))
-                                        .bounceClick(enabled = !isBlurred) {
+                                        .bounceClick(
+                                            scaleDown = 0.96f,
+                                            shape = RoundedCornerShape(20.dp),
+                                            enabled = !isBlurred
+                                        ) {
                                             previewImageUrl = mediaUrl
                                         }
+                                        .clip(RoundedCornerShape(20.dp))
                                         .then(
-                                            if (isBlurred) Modifier.clip(RoundedCornerShape(20.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
+                                            if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded).clip(RoundedCornerShape(20.dp)) else Modifier
                                         ),
                                     contentScale = ContentScale.Crop
                                 )

@@ -15,6 +15,10 @@ import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.NestedScrollSource
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.components.glass.glassmorphic
@@ -22,6 +26,7 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
+import kotlin.math.roundToInt
 
 /**
  * Base BottomSheet for FlickTrove that enforces glassmorphism and edge-to-edge behavior.
@@ -57,9 +62,14 @@ fun FlickTroveBottomSheet(
         ) {
             // The Surface below provides the glassmorphic background
             val shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+            val handleDragOffset = remember { Animatable(0f) }
+
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .offset {
+                        IntOffset(0, handleDragOffset.value.roundToInt().coerceAtLeast(0))
+                    }
                     .then(
                         if (hazeState != null) Modifier.hazeGlass(state = hazeState, shape = shape)
                         else Modifier.glassmorphic(shape = shape, blurRadius = HazeStyles.GlassBlurRadius)
@@ -80,33 +90,42 @@ fun FlickTroveBottomSheet(
                             .then(
                                 if (dragOnlyFromHandle) {
                                     Modifier.pointerInput(Unit) {
-                                        var totalDrag = 0f
-                                        var isDismissing = false
                                         detectVerticalDragGestures(
                                             onDragStart = {
-                                                totalDrag = 0f
+                                                // Drag started from handle
                                             },
                                             onDragEnd = {
-                                                if (!isDismissing && totalDrag > 30f) {
-                                                    isDismissing = true
-                                                    coroutineScope.launch {
+                                                coroutineScope.launch {
+                                                    if (handleDragOffset.value > 120f) {
                                                         sheetState.hide()
                                                         onDismissRequest()
+                                                    } else {
+                                                        handleDragOffset.animateTo(
+                                                            0f,
+                                                            spring(
+                                                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                                                stiffness = Spring.StiffnessMediumLow
+                                                            )
+                                                        )
                                                     }
                                                 }
                                             },
                                             onDragCancel = {
-                                                totalDrag = 0f
+                                                coroutineScope.launch {
+                                                    handleDragOffset.animateTo(
+                                                        0f,
+                                                        spring(
+                                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                                            stiffness = Spring.StiffnessMediumLow
+                                                        )
+                                                    )
+                                                }
                                             },
                                             onVerticalDrag = { change, dragAmount ->
-                                                totalDrag += dragAmount
-                                                if (!isDismissing && (totalDrag > 45f || dragAmount > 12f)) {
-                                                    isDismissing = true
-                                                    change.consume()
-                                                    coroutineScope.launch {
-                                                        sheetState.hide()
-                                                        onDismissRequest()
-                                                    }
+                                                change.consume()
+                                                val newOffset = (handleDragOffset.value + dragAmount).coerceAtLeast(0f)
+                                                coroutineScope.launch {
+                                                    handleDragOffset.snapTo(newOffset)
                                                 }
                                             }
                                         )

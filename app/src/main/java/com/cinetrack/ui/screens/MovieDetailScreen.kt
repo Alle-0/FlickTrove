@@ -252,6 +252,7 @@ fun MovieDetailScreenContent(
     val movieActions = com.cinetrack.ui.components.shared.LocalMovieActions.current
     val useMovieLogo by viewModel.useMovieLogo.collectAsStateWithLifecycle()
     val globalStats by viewModel.globalStats.collectAsStateWithLifecycle()
+    val allMediaImages by viewModel.allMediaImages.collectAsStateWithLifecycle()
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
     val autoOpenVibeOnWatch by settingsViewModel.autoOpenVibeOnWatch.collectAsStateWithLifecycle()
     var showWatchDatePrompt by remember { mutableStateOf(false) }
@@ -621,6 +622,17 @@ fun MovieDetailScreenContent(
                                         accentColor = accentColor,
                                         hazeState = localHazeState,
                                         globalStats = globalStats,
+                                        logoPath = remember(state.details.images?.logos, preloadedLogoPath) {
+                                            val currentLang = java.util.Locale.getDefault().language
+                                            val logos = state.details.images?.logos
+                                            val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
+                                                ?: logos?.firstOrNull { it.iso6391 == "en" } 
+                                                ?: logos?.firstOrNull()
+                                            bestLogo?.filePath ?: preloadedLogoPath
+                                        },
+                                        initialImages = state.details.images,
+                                        allMediaImages = allMediaImages,
+                                        onLoadAllImages = { viewModel.loadAllMediaImages() },
                                         onRate = { viewModel.onEvent(DetailEvent.Rate(it)) },
                                         onNoteUpdate = { viewModel.onEvent(DetailEvent.UpdateNote(it)) },
                                         onCheckInClick = { 

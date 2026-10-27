@@ -35,6 +35,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.drawscope.scale
 import com.cinetrack.ui.components.share.ShareStoryCardModal
+import com.cinetrack.data.api.ImagesResponse
 
 @Composable
 fun DetailPersonalZone(
@@ -45,6 +46,10 @@ fun DetailPersonalZone(
     onCheckInClick: () -> Unit = {},
     hazeState: HazeState? = null,
     globalStats: com.cinetrack.data.model.GlobalMovieStats? = null,
+    logoPath: String? = null,
+    initialImages: ImagesResponse? = null,
+    allMediaImages: ImagesResponse? = null,
+    onLoadAllImages: () -> Unit = {},
     onHistoryClick: (() -> Unit)? = null,
     onShareToComments: ((android.net.Uri) -> Unit)? = null,
     modifier: Modifier = Modifier
@@ -160,25 +165,27 @@ fun DetailPersonalZone(
                 enabled = canInteract,
                 onClick = { if (canInteract) expandedAction = if (expandedAction == "rate") null else "rate" },
                 modifier = Modifier.fillMaxWidth().fillMaxHeight(),
-                inlineContent = {
-                    Box(
-                        modifier = Modifier
-                            .size(28.dp)
-                            .bounceClick(scaleDown = 0.88f) {
-                                showShareStoryModal = true
-                            }
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.04f)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_share),
-                            contentDescription = "Condividi Story Card",
-                            tint = Color.White.copy(alpha = 0.45f),
-                            modifier = Modifier.size(13.dp)
-                        )
+                inlineContent = if (previewRating > 0.0) {
+                    {
+                        Box(
+                            modifier = Modifier
+                                .size(28.dp)
+                                .bounceClick(scaleDown = 0.88f) {
+                                    showShareStoryModal = true
+                                }
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.04f)),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                painter = painterResource(id = R.drawable.ic_share),
+                                contentDescription = "Condividi Story Card",
+                                tint = Color.White.copy(alpha = 0.45f),
+                                modifier = Modifier.size(13.dp)
+                            )
+                        }
                     }
-                },
+                } else null,
                 trailingContent = if (flickTroveRatingText != null) {
                     {
                         Column(
@@ -276,6 +283,10 @@ fun DetailPersonalZone(
             movie = movie,
             accentColor = accentColor,
             hazeState = hazeState,
+            logoPath = logoPath,
+            initialImages = initialImages,
+            allMediaImages = allMediaImages,
+            onLoadAllImages = onLoadAllImages,
             onDismiss = { showShareStoryModal = false },
             onShareToComments = { uri ->
                 onShareToComments?.invoke(uri)

@@ -15,6 +15,7 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.geometry.Offset
 import kotlinx.coroutines.launch
 import kotlin.math.pow
@@ -33,6 +34,7 @@ fun Modifier.bounceClick(
     vibrateOnLongClick: Boolean = true,
     requireUnconsumed: Boolean = false,
     enabled: Boolean = true,
+    shape: Shape? = null,
     onPress: (() -> Unit)? = null,
     onClick: () -> Unit
 ): Modifier = bounceClickWithOffset(
@@ -42,6 +44,7 @@ fun Modifier.bounceClick(
     vibrateOnLongClick = vibrateOnLongClick,
     requireUnconsumed = requireUnconsumed,
     enabled = enabled,
+    shape = shape,
     onPress = onPress?.let { action -> { _ -> action() } },
     onClick = { _ -> onClick() }
 )
@@ -60,6 +63,7 @@ fun Modifier.bounceClickWithOffset(
     vibrateOnLongClick: Boolean = true,
     requireUnconsumed: Boolean = false,
     enabled: Boolean = true,
+    shape: Shape? = null,
     onPress: ((Offset) -> Unit)? = null,
     onClick: (Offset) -> Unit
 ): Modifier = composed {
@@ -109,6 +113,10 @@ fun Modifier.bounceClickWithOffset(
         .graphicsLayer {
             scaleX = scale.value
             scaleY = scale.value
+            if (shape != null) {
+                this.shape = shape
+                this.clip = true
+            }
         }
         .pointerInput(enabled, requireUnconsumed) {
             if (enabled) {

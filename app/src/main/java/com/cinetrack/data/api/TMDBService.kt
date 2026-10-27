@@ -228,4 +228,16 @@ interface TMDBService {
         @Query("external_source") externalSource: String,
 
     ): FindResponse
+
+    @retrofit2.http.Headers("X-Skip-Language: true")
+    @GET("movie/{id}/images")
+    suspend fun getMovieImagesAllLanguages(
+        @Path("id") id: Long
+    ): ImagesResponse
+
+    @retrofit2.http.Headers("X-Skip-Language: true")
+    @GET("tv/{id}/images")
+    suspend fun getTVImagesAllLanguages(
+        @Path("id") id: Long
+    ): ImagesResponse
 }

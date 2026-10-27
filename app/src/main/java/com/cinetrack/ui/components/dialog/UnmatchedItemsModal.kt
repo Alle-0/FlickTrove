@@ -145,8 +145,8 @@ fun UnmatchedItemsModal(
                                 Box(
                                     modifier = Modifier
                                         .size(36.dp)
-                                        .clip(CircleShape)
-                                        .bounceClick { onRemoveItem(item) },
+                                        .bounceClick(shape = CircleShape) { onRemoveItem(item) }
+                                        .clip(CircleShape),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(

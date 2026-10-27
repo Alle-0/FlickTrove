@@ -171,54 +171,59 @@ fun ZoomableImageViewerDialog(
                 },
             contentAlignment = Alignment.Center
         ) {
-            // Main image container (con angoli arrotondati e haze source)
-            SubcomposeAsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(imageUrl)
-                    .crossfade(true)
-                    .apply {
-                        if (imageUrl.contains("commsuni.tv")) {
-                            addHeader("Authorization", "Bearer ${BuildConfig.COMMSUNI_API_KEY}")
-                            addHeader("User-Agent", "FlickTrove-Android/${BuildConfig.VERSION_NAME}")
-                        }
-                    }
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Fit,
+            // Main image container (avvolto in Box a tutto schermo per cattura globale hazeState)
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 8.dp, vertical = 20.dp)
-                    .haze(hazeState)
-                    .graphicsLayer {
-                        val s = scaleAnim.value
-                        scaleX = s
-                        scaleY = s
-                        translationX = offsetAnim.value.x
-                        translationY = offsetAnim.value.y
-                    }
-                    .clip(RoundedCornerShape(20.dp))
+                    .haze(state = hazeState, style = HazeStyles.PremiumDark)
             ) {
-                when (painter.state) {
-                    is AsyncImagePainter.State.Loading -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            CircularProgressIndicator(
-                                color = MaterialTheme.colorScheme.primary,
-                                strokeWidth = 3.dp,
-                                modifier = Modifier.size(36.dp)
-                            )
+                SubcomposeAsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(imageUrl)
+                        .crossfade(true)
+                        .apply {
+                            if (imageUrl.contains("commsuni.tv")) {
+                                addHeader("Authorization", "Bearer ${BuildConfig.COMMSUNI_API_KEY}")
+                                addHeader("User-Agent", "FlickTrove-Android/${BuildConfig.VERSION_NAME}")
+                            }
                         }
-                    }
-                    is AsyncImagePainter.State.Error -> {
-                        Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
-                            Text(
-                                text = stringResource(R.string.detail_error_unknown),
-                                color = Color.White.copy(alpha = 0.6f),
-                                style = MaterialTheme.typography.bodyMedium
-                            )
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Fit,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .padding(horizontal = 8.dp, vertical = 20.dp)
+                        .graphicsLayer {
+                            val s = scaleAnim.value
+                            scaleX = s
+                            scaleY = s
+                            translationX = offsetAnim.value.x
+                            translationY = offsetAnim.value.y
                         }
-                    }
-                    else -> {
-                        SubcomposeAsyncImageContent()
+                        .clip(RoundedCornerShape(20.dp))
+                ) {
+                    when (painter.state) {
+                        is AsyncImagePainter.State.Loading -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                CircularProgressIndicator(
+                                    color = MaterialTheme.colorScheme.primary,
+                                    strokeWidth = 3.dp,
+                                    modifier = Modifier.size(36.dp)
+                                )
+                            }
+                        }
+                        is AsyncImagePainter.State.Error -> {
+                            Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+                                Text(
+                                    text = stringResource(R.string.detail_error_unknown),
+                                    color = Color.White.copy(alpha = 0.6f),
+                                    style = MaterialTheme.typography.bodyMedium
+                                )
+                            }
+                        }
+                        else -> {
+                            SubcomposeAsyncImageContent()
+                        }
                     }
                 }
             }
@@ -241,30 +246,34 @@ fun ZoomableImageViewerDialog(
                 ) {
                     Box(
                         modifier = Modifier
-                            .then(
-                                Modifier.hazeGlass(
-                                    state = hazeState,
-                                    shape = CircleShape,
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                    useOffscreenStrategy = false
-                                )
-                            )
-                            .glassmorphic(shape = CircleShape, borderWidth = 0.8.dp)
-                            .bounceClick {
-                                coroutineScope.launch {
-                                    launch { scaleAnim.animateTo(1f, tween(250)) }
-                                    launch { offsetAnim.animateTo(Offset.Zero, tween(250)) }
-                                }
-                            }
-                            .padding(horizontal = 12.dp, vertical = 6.dp),
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = CircleShape,
+                                blurRadius = 20.dp,
+                                containerColor = Color.Black.copy(alpha = 0.28f),
+                                borderWidth = 1.dp,
+                                borderColor = Color.White.copy(alpha = 0.20f)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
-                        Text(
-                            text = "${(scaleAnim.value * 100).roundToInt()}%",
-                            color = Color.White,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Bold
-                        )
+                        Box(
+                            modifier = Modifier
+                                .bounceClick(scaleDown = 0.90f) {
+                                    coroutineScope.launch {
+                                        launch { scaleAnim.animateTo(1f, tween(250)) }
+                                        launch { offsetAnim.animateTo(Offset.Zero, tween(250)) }
+                                    }
+                                }
+                                .padding(horizontal = 14.dp, vertical = 7.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Text(
+                                text = "${(scaleAnim.value * 100).roundToInt()}%",
+                                color = Color.White,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Bold
+                            )
+                        }
                     }
                 }
 
@@ -272,28 +281,33 @@ fun ZoomableImageViewerDialog(
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
-                // Close button con blur autentico (hazeGlass + glassmorphic)
+                // Close button con blur autentico (il vetro hazeGlass resta fisso, rimbalza solo l'icona interna)
                 Box(
                     modifier = Modifier
                         .size(42.dp)
-                        .then(
-                            Modifier.hazeGlass(
-                                state = hazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = false
-                            )
-                        )
-                        .glassmorphic(shape = CircleShape, borderWidth = 0.8.dp)
-                        .bounceClick { onDismiss() },
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = CircleShape,
+                            blurRadius = 20.dp,
+                            containerColor = Color.Black.copy(alpha = 0.28f),
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.20f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_x),
-                        contentDescription = stringResource(R.string.settings_close),
-                        tint = Color.White,
-                        modifier = Modifier.size(20.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .bounceClick(scaleDown = 0.86f) { onDismiss() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_x),
+                            contentDescription = stringResource(R.string.settings_close),
+                            tint = Color.White,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

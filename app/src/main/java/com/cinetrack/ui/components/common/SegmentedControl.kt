@@ -20,6 +20,7 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.graphics.ClipOp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.Stroke
@@ -408,28 +409,80 @@ fun <T> SegmentedControl(
             val currentLeft = animLeft.value
             val currentRight = animRight.value
 
-            // Inactive Base Layer (Muted greyish text, always visible beneath)
-            SegmentedTabItems(
-                options = options,
-                titleColor = Color.White.copy(alpha = 0.75f),
-                subtitleColor = Color.White.copy(alpha = 0.40f),
-                isInteractive = enabled,
-                pressedTabIndex = pressedTabIndex,
-                onTabPressed = { index, pressed ->
-                    if (enabled) {
-                        pressedTabIndex = if (pressed) index else -1
-                        if (index == selectedIndex) isSelectedTabPressed = pressed
-                    }
-                },
-                onSelect = { value ->
-                    if (enabled) {
-                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
-                        onSelect(value)
-                    }
-                }
-            )
+            val updatePillPath: (Path, Float) -> Unit = { path, h ->
+                val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
+                val centerXPx = (currentLeft + currentRight) / 2f
 
-            // Active Masked Layer + Pill Background & Inset Border (Rendered on top)
+                val flightOffset = flightDynamics.value
+                val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
+                val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
+
+                val baseHeight = h - (paddingPx * 2f)
+                val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
+                val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
+
+                val rawDragY = animDragY.value
+                val maxVisualDrag = paddingPx * 0.75f
+                val dragYOffset = if (rawDragY > 0) {
+                    maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
+                } else if (rawDragY < 0) {
+                    -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
+                } else 0f
+
+                val pillCenterY = (h / 2f) + dragYOffset
+                val pillTop = pillCenterY - (pillHeight / 2f)
+                val pillLeft = centerXPx - (finalPillWidth / 2f)
+
+                path.reset()
+                path.addRoundRect(
+                    RoundRect(
+                        left = pillLeft,
+                        top = pillTop,
+                        right = pillLeft + finalPillWidth,
+                        bottom = pillTop + pillHeight,
+                        radiusX = cornerRadiusPx,
+                        radiusY = cornerRadiusPx
+                    )
+                )
+            }
+
+            // Inactive Base Layer (Muted greyish text, strictly clipped OUTSIDE the active pill via ClipOp.Difference)
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .drawWithContent {
+                        if (indicatorAlpha > 0.01f) {
+                            updatePillPath(pillPath, size.height)
+                            clipPath(pillPath, clipOp = ClipOp.Difference) {
+                                this@drawWithContent.drawContent()
+                            }
+                        } else {
+                            this@drawWithContent.drawContent()
+                        }
+                    }
+            ) {
+                SegmentedTabItems(
+                    options = options,
+                    titleColor = Color.White.copy(alpha = 0.75f),
+                    subtitleColor = Color.White.copy(alpha = 0.40f),
+                    isInteractive = enabled,
+                    pressedTabIndex = pressedTabIndex,
+                    onTabPressed = { index, pressed ->
+                        if (enabled) {
+                            pressedTabIndex = if (pressed) index else -1
+                            if (index == selectedIndex) isSelectedTabPressed = pressed
+                        }
+                    },
+                    onSelect = { value ->
+                        if (enabled) {
+                            if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                            onSelect(value)
+                        }
+                    }
+                )
+            }
+
+            // Active Masked Layer + Pill Background & Inset Border (Rendered on top, strictly INSIDE the pill via ClipOp.Intersect)
             Box(
                 modifier = Modifier
                     .matchParentSize()
@@ -453,87 +506,27 @@ fun <T> SegmentedControl(
 
                         // Sliding Translucent Pill + Inset Border
                         if (indicatorAlpha > 0.01f) {
-                            val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
-                            val centerXPx = (currentLeft + currentRight) / 2f
-
-                            val flightOffset = flightDynamics.value
-                            val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
-                            val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
-
-                            val baseHeight = size.height - (paddingPx * 2f)
-                            val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
-                            val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
-
-                            val rawDragY = animDragY.value
-                            val maxVisualDrag = paddingPx * 0.75f
-                            val dragYOffset = if (rawDragY > 0) {
-                                maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
-                            } else if (rawDragY < 0) {
-                                -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
-                            } else 0f
-
-                            val pillCenterY = (size.height / 2f) + dragYOffset
-                            val pillTop = pillCenterY - (pillHeight / 2f)
-                            val pillLeft = centerXPx - (finalPillWidth / 2f)
+                            updatePillPath(pillPath, size.height)
 
                             // Background fill
-                            drawRoundRect(
-                                color = accentColor.copy(alpha = 0.14f * indicatorAlpha),
-                                topLeft = Offset(pillLeft, pillTop),
-                                size = Size(finalPillWidth, pillHeight),
-                                cornerRadius = CornerRadius(cornerRadiusPx, cornerRadiusPx)
+                            drawPath(
+                                path = pillPath,
+                                color = accentColor.copy(alpha = 0.14f * indicatorAlpha)
                             )
 
                             // Inset border stroke so it never clips at edges
                             val strokeWidthPx = 1.5.dp.toPx()
-                            val halfStroke = strokeWidthPx / 2f
-                            drawRoundRect(
+                            drawPath(
+                                path = pillPath,
                                 color = accentColor.copy(alpha = indicatorAlpha),
-                                topLeft = Offset(pillLeft + halfStroke, pillTop + halfStroke),
-                                size = Size((finalPillWidth - strokeWidthPx).coerceAtLeast(1f), (pillHeight - strokeWidthPx).coerceAtLeast(1f)),
-                                cornerRadius = CornerRadius((cornerRadiusPx - halfStroke).coerceAtLeast(0f), (cornerRadiusPx - halfStroke).coerceAtLeast(0f)),
                                 style = Stroke(width = strokeWidthPx)
                             )
                         }
                     }
                     .drawWithContent {
                         if (indicatorAlpha > 0.01f) {
-                            val currentWidth = (currentRight - currentLeft).coerceAtLeast(1f)
-                            val centerXPx = (currentLeft + currentRight) / 2f
-
-                            val flightOffset = flightDynamics.value
-                            val totalScaleY = if (advancedEffectsEnabled) dragScaleY * (1f + flightOffset) else 1f
-                            val totalScaleX = if (advancedEffectsEnabled) dragScaleX * (1f + kotlin.math.min(0f, flightOffset * 0.6f)) else 1f
-
-                            val baseHeight = size.height - (paddingPx * 2f)
-                            val pillHeight = (baseHeight * totalScaleY).coerceAtLeast(1f)
-                            val finalPillWidth = (currentWidth * totalScaleX).coerceAtLeast(1f)
-
-                            val rawDragY = animDragY.value
-                            val maxVisualDrag = paddingPx * 0.75f
-                            val dragYOffset = if (rawDragY > 0) {
-                                maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
-                            } else if (rawDragY < 0) {
-                                -maxVisualDrag * (1f - kotlin.math.exp(rawDragY / 80f))
-                            } else 0f
-
-                            val pillCenterY = (size.height / 2f) + dragYOffset
-                            val pillTop = pillCenterY - (pillHeight / 2f)
-                            val pillLeft = centerXPx - (finalPillWidth / 2f)
-
-                            pillPath.reset()
-                            pillPath.addRoundRect(
-                                RoundRect(
-                                    left = pillLeft,
-                                    top = pillTop,
-                                    right = pillLeft + finalPillWidth,
-                                    bottom = pillTop + pillHeight,
-                                    radiusX = cornerRadiusPx,
-                                    radiusY = cornerRadiusPx
-                                )
-                            )
-
-                            clipPath(pillPath) {
+                            updatePillPath(pillPath, size.height)
+                            clipPath(pillPath, clipOp = ClipOp.Intersect) {
                                 this@drawWithContent.drawContent()
                             }
                         }
@@ -546,7 +539,7 @@ fun <T> SegmentedControl(
                         titleColor = accentColor,
                         subtitleColor = accentColor.copy(alpha = 0.85f),
                         isInteractive = false,
-                        pressedTabIndex = -1,
+                        pressedTabIndex = pressedTabIndex,
                         onSelect = {}
                     )
                 }
