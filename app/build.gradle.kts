@@ -92,7 +92,9 @@ android {
             res.srcDirs(
                 "src/main/res",
                 "src/main/res-badges",
-                "src/main/res-logos"
+                "src/main/res-logos",
+                "src/main/res-mock",
+                "src/main/res-onboarding"
             )
         }
     }
