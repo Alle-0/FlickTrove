@@ -74,7 +74,7 @@ internal fun ShareLandscapePosterLayout(
         ) {
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val posterShape = RoundedCornerShape(20.dp)
+            val posterShape = RoundedCornerShape(26.dp)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -113,7 +113,7 @@ internal fun ShareLandscapePosterLayout(
                     cardHazeState = state.cardHazeState,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(8.dp),
+                        .padding(10.dp),
                     iconSize = 14.dp,
                     horizontalPadding = 7.dp,
                     verticalPadding = 4.dp

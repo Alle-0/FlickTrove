@@ -127,7 +127,7 @@ internal fun ShareVerticalPosterLayout(
         ) {
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val posterShape = RoundedCornerShape(if (isSquare) 18.dp else 24.dp)
+            val posterShape = RoundedCornerShape(if (isSquare) 24.dp else 32.dp)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -169,7 +169,7 @@ internal fun ShareVerticalPosterLayout(
                     cardHazeState = state.cardHazeState,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
-                        .padding(if (isSquare) 5.dp else 8.dp),
+                        .padding(if (isSquare) 7.dp else 10.dp),
                     iconSize = if (isSquare) 11.dp else 14.dp,
                     horizontalPadding = if (isSquare) 5.dp else 7.dp,
                     verticalPadding = if (isSquare) 2.5.dp else 4.dp
