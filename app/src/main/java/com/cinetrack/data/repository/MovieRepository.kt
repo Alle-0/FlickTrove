@@ -59,7 +59,6 @@ class MovieRepository @Inject constructor(
     private val favoriteDao: FavoriteDao,
     private val folderRepository: FolderRepository,
     private val cacheDao: CacheDao,
-    private val searchHistoryRepository: SearchHistoryRepository,
     private val watchHistoryRepository: WatchHistoryRepository,
     private val tmdbService: TMDBService,
     private val omdbService: OmdbService,
@@ -727,21 +726,6 @@ class MovieRepository @Inject constructor(
         favoriteDao.clearAll()
         folderRepository.clearAll()
         preferenceRepository.clearAll()
-    }
-
-    // --- Search History (Delegated to SearchHistoryRepository) ---
-    fun getRecentSearches(): Flow<List<String>> = searchHistoryRepository.getRecentSearches()
-
-    suspend fun saveSearchQuery(query: String) {
-        searchHistoryRepository.saveSearchQuery(query)
-    }
-
-    suspend fun deleteSearchQuery(query: String) {
-        searchHistoryRepository.deleteSearchQuery(query)
-    }
-
-    suspend fun clearRecentSearches() {
-        searchHistoryRepository.clearRecentSearches()
     }
 
 

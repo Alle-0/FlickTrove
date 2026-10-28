@@ -68,7 +68,8 @@ class SearchViewModel @Inject constructor(
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val searchByIdUseCase: com.cinetrack.domain.SearchByIdUseCase,
-    private val editorialCollectionRepository: com.cinetrack.data.repository.EditorialCollectionRepository
+    private val editorialCollectionRepository: com.cinetrack.data.repository.EditorialCollectionRepository,
+    private val searchHistoryRepository: com.cinetrack.data.repository.SearchHistoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -168,7 +169,7 @@ class SearchViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
-            repository.getRecentSearches().collect { recent ->
+            searchHistoryRepository.getRecentSearches().collect { recent ->
                 _uiState.update { it.copy(recentSearches = recent.toImmutableList()) }
             }
         }
@@ -473,7 +474,7 @@ class SearchViewModel @Inject constructor(
                 applyStateFilters()
 
                 if (accumulatedResults.isNotEmpty() && query.length >= 3) {
-                    repository.saveSearchQuery(query)
+                    searchHistoryRepository.saveSearchQuery(query)
                 }
             } catch (e: Exception) {
                 if (e is CancellationException) throw e
@@ -856,7 +857,7 @@ class SearchViewModel @Inject constructor(
     fun deleteRecentSearch(query: String) {
         viewModelScope.launch {
             try {
-                repository.deleteSearchQuery(query)
+                searchHistoryRepository.deleteSearchQuery(query)
             } catch (e: Exception) {
                 android.util.Log.e("SearchViewModel", "Error deleting recent search", e)
             }
@@ -866,7 +867,7 @@ class SearchViewModel @Inject constructor(
     fun clearRecentSearches() {
         viewModelScope.launch {
             try {
-                repository.clearRecentSearches()
+                searchHistoryRepository.clearRecentSearches()
             } catch (e: Exception) {
                 android.util.Log.e("SearchViewModel", "Error clearing recent searches", e)
             }
