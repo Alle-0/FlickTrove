@@ -45,6 +45,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
@@ -94,7 +95,6 @@ internal fun ShareVerticalPosterLayout(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .animateContentSize()
             .padding(
                 start = if (isSquare) 8.dp else 14.dp,
                 end = if (isSquare) 8.dp else 14.dp,
@@ -279,10 +279,16 @@ internal fun ShareVerticalBackdropLayout(
     val isSquare = state.config.aspectRatio == ShareAspectRatio.SQUARE_1_1
     val isPost = state.config.aspectRatio == ShareAspectRatio.POST_4_5
 
+    val smoothSpring = remember {
+        spring<IntSize>(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        )
+    }
+
     Column(
         modifier = modifier
             .fillMaxSize()
-            .animateContentSize()
             .padding(
                 start = if (isSquare) 10.dp else 14.dp,
                 end = if (isSquare) 10.dp else 14.dp,
@@ -309,12 +315,20 @@ internal fun ShareVerticalBackdropLayout(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .animateContentSize()
+                .animateContentSize(animationSpec = smoothSpring)
                 .padding(bottom = if (isSquare) 2.dp else 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Vibes row
-            if (state.config.showVibe && state.vibes.isNotEmpty()) {
+            // Vibes row with smooth animation
+            AnimatedVisibility(
+                visible = state.config.showVibe && state.vibes.isNotEmpty(),
+                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                ),
+                exit = fadeOut(tween(150)) + shrinkVertically(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                )
+            ) {
                 ShareVibesPill(
                     vibes = state.vibes,
                     cardHazeState = state.cardHazeState,
@@ -415,14 +429,22 @@ internal fun ShareVerticalBackdropLayout(
                 )
             }
 
-            // MVP PILL
+            // MVP PILL with smooth animation
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            if (state.config.showMvp && !actorName.isNullOrBlank()) {
+            AnimatedVisibility(
+                visible = state.config.showMvp && !actorName.isNullOrBlank(),
+                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                ),
+                exit = fadeOut(tween(150)) + shrinkVertically(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                )
+            ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(if (isSquare) 5.dp else 7.dp))
                     MvpPill(
-                        actorName = actorName,
+                        actorName = actorName.orEmpty(),
                         characterName = state.movie.favoriteActorCharacter,
                         profilePath = profilePath,
                         accentColor = state.accentColor,

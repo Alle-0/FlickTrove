@@ -5,9 +5,11 @@ import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandHorizontally
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -269,7 +271,6 @@ internal fun ShareLandscapeBackdropLayout(
     Column(
         modifier = modifier
             .fillMaxSize()
-            .animateContentSize()
             .padding(horizontal = 26.dp, vertical = 20.dp),
         verticalArrangement = Arrangement.SpaceBetween
     ) {
@@ -284,7 +285,15 @@ internal fun ShareLandscapeBackdropLayout(
                 isSquare = false
             )
 
-            if (state.config.showVibe && state.vibes.isNotEmpty()) {
+            AnimatedVisibility(
+                visible = state.config.showVibe && state.vibes.isNotEmpty(),
+                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandHorizontally(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                ),
+                exit = fadeOut(tween(150)) + shrinkHorizontally(
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                )
+            ) {
                 ShareVibesPill(
                     vibes = state.vibes,
                     cardHazeState = state.cardHazeState,
@@ -376,9 +385,17 @@ internal fun ShareLandscapeBackdropLayout(
             ) {
                 val actorName = state.movie.favoriteActorName
                 val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-                if (state.config.showMvp && !actorName.isNullOrBlank()) {
+                AnimatedVisibility(
+                    visible = state.config.showMvp && !actorName.isNullOrBlank(),
+                    enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                    ),
+                    exit = fadeOut(tween(150)) + shrinkVertically(
+                        animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                    )
+                ) {
                     MvpMiniCard(
-                        actorName = actorName,
+                        actorName = actorName.orEmpty(),
                         characterName = state.movie.favoriteActorCharacter,
                         profilePath = profilePath,
                         accentColor = state.accentColor,
