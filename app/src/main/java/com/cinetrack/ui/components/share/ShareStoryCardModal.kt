@@ -80,6 +80,8 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInParent
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -994,6 +996,7 @@ private fun CoverSelectionView(
 
     val coverHazeState = remember { HazeState() }
     var languageMenuExpanded by remember { mutableStateOf(false) }
+    var languageButtonBottomPx by remember { mutableFloatStateOf(0f) }
     LaunchedEffect(coverTab) { languageMenuExpanded = false }
 
     Box(
@@ -1102,161 +1105,58 @@ private fun CoverSelectionView(
                 label = "langChevron"
             )
 
-            Box(
+            val currentCount = if (selectedLanguageCode == "all") {
+                validPosters.size
+            } else {
+                validPosters.count { it.iso6391.equals(selectedLanguageCode, ignoreCase = true) }
+            }
+            val currentLabel = if (selectedLanguageCode == "all") {
+                stringResource(R.string.share_cover_picker_all_languages)
+            } else {
+                getLanguageDisplayName(selectedLanguageCode)
+            }
+
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(38.dp)
                     .padding(horizontal = 24.dp)
-                    .zIndex(if (languageMenuExpanded) 100f else 1f)
-            ) {
-                val currentCount = if (selectedLanguageCode == "all") {
-                    validPosters.size
-                } else {
-                    validPosters.count { it.iso6391.equals(selectedLanguageCode, ignoreCase = true) }
-                }
-                val currentLabel = if (selectedLanguageCode == "all") {
-                    stringResource(R.string.share_cover_picker_all_languages)
-                } else {
-                    getLanguageDisplayName(selectedLanguageCode)
-                }
-
-                Row(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = !languageMenuExpanded }
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.06f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
-                        .padding(horizontal = 14.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.SpaceBetween
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        Text(
-                            text = currentLabel,
-                            fontSize = 13.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White
-                        )
-                        CountPill(
-                            count = currentCount,
-                            isSelected = false,
-                            accentColor = accentColor
-                        )
+                    .onGloballyPositioned { coordinates ->
+                        languageButtonBottomPx = coordinates.positionInParent().y + coordinates.size.height
                     }
-
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_right),
-                        contentDescription = stringResource(R.string.share_cover_picker_select_language),
-                        tint = Color.White.copy(alpha = 0.70f),
-                        modifier = Modifier
-                            .size(15.dp)
-                            .rotate(chevronRotation)
+                    .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = !languageMenuExpanded }
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color.White.copy(alpha = 0.06f))
+                    .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                    .padding(horizontal = 14.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween
+            ) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    Text(
+                        text = currentLabel,
+                        fontSize = 13.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color.White
+                    )
+                    CountPill(
+                        count = currentCount,
+                        isSelected = false,
+                        accentColor = accentColor
                     )
                 }
 
-                // In-tree Animated Glass Dropdown with Haze & Top/Bottom scroll fade gradient
-                androidx.compose.animation.AnimatedVisibility(
-                    visible = languageMenuExpanded,
-                    enter = fadeIn(tween(180)) + scaleIn(
-                        initialScale = 0.95f,
-                        transformOrigin = TransformOrigin(0.5f, 0f),
-                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                    ),
-                    exit = fadeOut(tween(130)) + scaleOut(
-                        targetScale = 0.95f,
-                        transformOrigin = TransformOrigin(0.5f, 0f),
-                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                    ),
+                Icon(
+                    painter = painterResource(id = R.drawable.ic_right),
+                    contentDescription = stringResource(R.string.share_cover_picker_select_language),
+                    tint = Color.White.copy(alpha = 0.70f),
                     modifier = Modifier
-                        .align(Alignment.TopCenter)
-                        .offset(y = 44.dp)
-                        .fillMaxWidth()
-                        .wrapContentHeight(align = Alignment.Top, unbounded = true)
-                ) {
-                    val scrollState = rememberScrollState()
-                    val canScrollUp = scrollState.canScrollBackward
-                    val canScrollDown = scrollState.canScrollForward
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .requiredHeightIn(max = 280.dp)
-                            .shadow(20.dp, RoundedCornerShape(16.dp))
-                            .hazeGlass(
-                                state = coverHazeState,
-                                shape = RoundedCornerShape(16.dp),
-                                blurRadius = 24.dp,
-                                containerColor = Color(0xFF141418).copy(alpha = 0.60f),
-                                borderWidth = 1.dp,
-                                borderColor = Color.White.copy(alpha = 0.18f)
-                            )
-                    ) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                                .drawWithContent {
-                                    drawContent()
-                                    if (canScrollUp || canScrollDown) {
-                                        val topStop = if (canScrollUp) 0.08f else 0f
-                                        val bottomStop = if (canScrollDown) 0.92f else 1f
-                                        drawRect(
-                                            brush = Brush.verticalGradient(
-                                                0f to (if (canScrollUp) Color.Transparent else Color.Black),
-                                                topStop to Color.Black,
-                                                bottomStop to Color.Black,
-                                                1f to (if (canScrollDown) Color.Transparent else Color.Black)
-                                            ),
-                                            blendMode = BlendMode.DstIn
-                                        )
-                                    }
-                                }
-                                .verticalScroll(scrollState)
-                                .padding(vertical = 6.dp)
-                        ) {
-                            // Opzione "Tutte le lingue"
-                            val totalPosters = validPosters.size
-                            val isAllSelected = selectedLanguageCode == "all"
-                            LanguageMenuItem(
-                                text = stringResource(R.string.share_cover_picker_all_languages),
-                                count = totalPosters,
-                                isSelected = isAllSelected,
-                                accentColor = accentColor,
-                                onClick = {
-                                    VibrationHelper.vibrateTick(context)
-                                    selectedLanguageCode = "all"
-                                    languageMenuExpanded = false
-                                }
-                            )
-
-                            HorizontalDivider(
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
-                                color = Color.White.copy(alpha = 0.08f),
-                                thickness = 0.5.dp
-                            )
-
-                            availableLanguages.forEach { code ->
-                                val count = validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
-                                val isCurrent = selectedLanguageCode.equals(code, ignoreCase = true)
-                                LanguageMenuItem(
-                                    text = getLanguageDisplayName(code),
-                                    count = count,
-                                    isSelected = isCurrent,
-                                    accentColor = accentColor,
-                                    onClick = {
-                                        VibrationHelper.vibrateTick(context)
-                                        selectedLanguageCode = code
-                                        languageMenuExpanded = false
-                                    }
-                                )
-                            }
-                        }
-                    }
-                }
+                        .size(15.dp)
+                        .rotate(chevronRotation)
+                )
             }
             Spacer(modifier = Modifier.height(10.dp))
         }
@@ -1398,16 +1298,122 @@ private fun CoverSelectionView(
         }
     }
 
-    // Tap-outside dismiss overlay across the entire modal when dropdown is open
+    // Layer 2: Tap-outside dismiss overlay across the entire modal when dropdown is open
     if (languageMenuExpanded) {
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .zIndex(90f)
+                .zIndex(50f)
                 .pointerInput(Unit) {
                     detectTapGestures { languageMenuExpanded = false }
                 }
         )
+    }
+
+    // Layer 3: Floating In-tree Glass Dropdown with Haze & Top/Bottom scroll fade gradient
+    if (coverTab == 0 && availableLanguages.isNotEmpty()) {
+        val dropdownTopDp = if (languageButtonBottomPx > 0f) {
+            with(LocalDensity.current) { languageButtonBottomPx.toDp() + 6.dp }
+        } else {
+            156.dp
+        }
+
+        androidx.compose.animation.AnimatedVisibility(
+            visible = languageMenuExpanded,
+            enter = fadeIn(tween(180)) + scaleIn(
+                initialScale = 0.95f,
+                transformOrigin = TransformOrigin(0.5f, 0f),
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+            ),
+            exit = fadeOut(tween(130)) + scaleOut(
+                targetScale = 0.95f,
+                transformOrigin = TransformOrigin(0.5f, 0f),
+                animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 24.dp)
+                .offset(y = dropdownTopDp)
+                .zIndex(60f)
+        ) {
+            val scrollState = rememberScrollState()
+            val canScrollUp = scrollState.canScrollBackward
+            val canScrollDown = scrollState.canScrollForward
+
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .requiredHeightIn(max = 280.dp)
+                    .shadow(20.dp, RoundedCornerShape(16.dp))
+                    .hazeGlass(
+                        state = coverHazeState,
+                        shape = RoundedCornerShape(16.dp),
+                        blurRadius = 24.dp,
+                        containerColor = Color(0xFF141418).copy(alpha = 0.60f),
+                        borderWidth = 1.dp,
+                        borderColor = Color.White.copy(alpha = 0.18f)
+                    )
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                        .drawWithContent {
+                            drawContent()
+                            if (canScrollUp || canScrollDown) {
+                                val topStop = if (canScrollUp) 0.08f else 0f
+                                val bottomStop = if (canScrollDown) 0.92f else 1f
+                                drawRect(
+                                    brush = Brush.verticalGradient(
+                                        0f to (if (canScrollUp) Color.Transparent else Color.Black),
+                                        topStop to Color.Black,
+                                        bottomStop to Color.Black,
+                                        1f to (if (canScrollDown) Color.Transparent else Color.Black)
+                                    ),
+                                    blendMode = BlendMode.DstIn
+                                )
+                            }
+                        }
+                        .verticalScroll(scrollState)
+                        .padding(vertical = 6.dp)
+                ) {
+                    // Opzione "Tutte le lingue"
+                    val totalPosters = validPosters.size
+                    val isAllSelected = selectedLanguageCode == "all"
+                    LanguageMenuItem(
+                        text = stringResource(R.string.share_cover_picker_all_languages),
+                        count = totalPosters,
+                        isSelected = isAllSelected,
+                        accentColor = accentColor,
+                        onClick = {
+                            selectedLanguageCode = "all"
+                            languageMenuExpanded = false
+                        }
+                    )
+
+                    HorizontalDivider(
+                        modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                        color = Color.White.copy(alpha = 0.08f),
+                        thickness = 0.5.dp
+                    )
+
+                    availableLanguages.forEach { code ->
+                        val count = validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
+                        val isCurrent = selectedLanguageCode.equals(code, ignoreCase = true)
+                        LanguageMenuItem(
+                            text = getLanguageDisplayName(code),
+                            count = count,
+                            isSelected = isCurrent,
+                            accentColor = accentColor,
+                            onClick = {
+                                selectedLanguageCode = code
+                                languageMenuExpanded = false
+                            }
+                        )
+                    }
+                }
+            }
+        }
     }
 }
 }
