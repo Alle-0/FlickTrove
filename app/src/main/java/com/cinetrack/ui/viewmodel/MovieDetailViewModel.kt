@@ -9,11 +9,6 @@ import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.api.ImagesResponse
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.TvdbRepository
-import com.cinetrack.data.model.deduplicateComments
-import com.cinetrack.data.model.mergeComments
-import com.cinetrack.data.model.isSameAuthor
-import com.cinetrack.data.model.isSameCommentText
-
 import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.ui.components.detail.*
 import com.cinetrack.ui.theme.FlickTroveTheme
@@ -23,7 +18,6 @@ import com.cinetrack.domain.UpdateEpisodesUseCase
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.ErrorMapper
-import com.cinetrack.util.TranslationManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
@@ -64,16 +58,14 @@ class MovieDetailViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
     private val actionFeedbackManager: ActionFeedbackManager,
-    private val translationManager: TranslationManager,
     private val detailUiStateMapper: DetailUiStateMapper,
     private val tvdbRepository: TvdbRepository,
-    private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
-    private val commentRepository: com.cinetrack.data.repository.CommentRepository,
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
+    private val commentsDelegate: MovieDetailCommentsDelegate,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -102,107 +94,14 @@ class MovieDetailViewModel @Inject constructor(
     private var lastTitle: String? = null
     private var lastYear: String? = null
 
-    private suspend fun fetchPreviewComments(
-        tvdbId: Int?,
-        title: String?,
-        year: String?
-    ): List<com.cinetrack.data.model.AppComment> {
-        return try {
-            kotlinx.coroutines.coroutineScope {
-                val firestoreDeferred = async {
-                    if (movieId != 0L) {
-                        try {
-                            commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 5)
-                        } catch (e: Exception) {
-                            emptyList()
-                        }
-                    } else emptyList()
-                }
-
-                val commsUniDeferred = async {
-                    try {
-                        val resolvedTvdbId = if (tvdbId != null && tvdbId > 0) {
-                            tvdbId
-                        } else {
-                            val searchType = if (mediaType == "tv") "series" else "movie"
-                            tvdbRepository.resolveTvdbIdByRemoteId(movieId.toString(), searchType)
-                                ?: if (!title.isNullOrBlank()) tvdbRepository.resolveTvdbId(title, year, searchType) else null
-                        }
-
-                        if (resolvedTvdbId != null && resolvedTvdbId > 0) {
-                            lastTvdbId = resolvedTvdbId
-                            val uid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                            commsUniRepository.getTopCommentsPreview(
-                                tvdbId = resolvedTvdbId,
-                                entityType = if (mediaType == "tv") "show" else "movie",
-                                limit = 5,
-                                currentUserId = uid
-                            )
-                        } else {
-                            emptyList()
-                        }
-                    } catch (e: Exception) {
-                        emptyList()
-                    }
-                }
-
-                val firestoreComments = firestoreDeferred.await()
-                val commsUniComments = commsUniDeferred.await()
-
-                val matchedFirestoreIds = mutableSetOf<String>()
-                val mergedCommsUni = commsUniComments.map { cc ->
-                    val matchingFc = firestoreComments.firstOrNull { fc ->
-                        fc.id == cc.id || (
-                            isSameAuthor(fc, cc) &&
-                            isSameCommentText(fc.text, cc.text) &&
-                            fc.parentId == cc.parentId
-                        )
-                    }
-                    if (matchingFc != null) {
-                        matchedFirestoreIds.add(matchingFc.id)
-                        mergeComments(cc, matchingFc)
-                    } else {
-                        cc
-                    }
-                }
-
-                val remainingFirestore = firestoreComments
-                    .filterNot { it.id in matchedFirestoreIds }
-                    .map { fc ->
-                        if (fc.originSlug.isBlank()) {
-                            fc.copy(originSlug = "flicktrove", originName = "FlickTrove", originColor = "#2dd4bf")
-                        } else fc
-                    }
-
-                val combined = (mergedCommsUni + remainingFirestore)
-                    .filterNot { blockedAuthorsManager.isAuthorBlocked(it.userId, it.userDisplayName) }
-                    .deduplicateComments()
-                    .filterNot { it.isEffectivelyDeleted }
-                combined.sortedWith(
-                    compareByDescending<com.cinetrack.data.model.AppComment> {
-                        it.originSlug.equals("flicktrove", ignoreCase = true) || it.originSlug.isBlank()
-                    }.thenByDescending {
-                        it.likesCount
-                    }.thenByDescending {
-                        it.createdAt?.seconds ?: 0L
-                    }
-                ).take(5)
-            }
-        } catch (e: Exception) {
-            if (e is kotlinx.coroutines.CancellationException) throw e
-            emptyList()
-        }
-    }
-
     private fun onNetworkRestored() {
         viewModelScope.launch {
             if (_error.value != null) {
                 _error.value = null
             }
             fetchFromTMDB(movieId, mediaType == "tv")
-            val comments = fetchPreviewComments(lastTvdbId, lastTitle, lastYear)
-            if (comments.isNotEmpty() || _appComments.value.isEmpty()) {
-                _appComments.value = comments
+            commentsDelegate.refreshComments(movieId, mediaType, lastTvdbId, lastTitle, lastYear, viewModelScope) {
+                lastTvdbId = it
             }
         }
     }
@@ -217,6 +116,7 @@ class MovieDetailViewModel @Inject constructor(
         if (movieId == 0L && id != 0L) {
             movieId = id
             mediaType = type
+            commentsDelegate.reset()
             // Load cached accent color instantly if available
             viewModelScope.launch {
                 val cachedHex = repository.getCachedColor("$type:$id")
@@ -310,23 +210,14 @@ class MovieDetailViewModel @Inject constructor(
     private val _loadingSeason = MutableStateFlow(false)
     private val _seasonDetails = MutableStateFlow<Map<Int, com.cinetrack.data.model.Season>>(emptyMap())
     private val _collectionMovies = MutableStateFlow<List<Movie>>(emptyList())
-    private val _appComments = MutableStateFlow<List<com.cinetrack.data.model.AppComment>>(emptyList())
     private val _characterImages = MutableStateFlow<Map<String, String>>(emptyMap())
     private val _watchHistory = MutableStateFlow<List<com.cinetrack.data.local.entities.WatchHistoryEntity>>(emptyList())
     private val _error = MutableStateFlow<String?>(null)
     
     private val movieUpdateMutex = kotlinx.coroutines.sync.Mutex()
     
-    data class TranslationState(
-        val isTranslating: Boolean = false,
-        val translatedText: String? = null,
-        val error: String? = null
-    )
-    private val _translationStates = MutableStateFlow<Map<Long, TranslationState>>(emptyMap())
-    val translationStates: StateFlow<Map<Long, TranslationState>> = _translationStates.asStateFlow()
-
-    private val _showTranslationPrompt = MutableStateFlow<Pair<Long, String>?>(null)
-    val showTranslationPrompt: StateFlow<Pair<Long, String>?> = _showTranslationPrompt.asStateFlow()
+    val translationStates = commentsDelegate.translationStates
+    val showTranslationPrompt: StateFlow<Pair<Long, String>?> = commentsDelegate.showTranslationPrompt
 
     private val _extractedColor = MutableStateFlow<Color?>(null)
     val extractedColor: StateFlow<Color?> = _extractedColor.asStateFlow()
@@ -381,7 +272,7 @@ class MovieDetailViewModel @Inject constructor(
         }
 
         val flow3 = combine(
-            _appComments,
+            commentsDelegate.appComments,
             _characterImages,
             _watchHistory,
             blockedAuthorsManager.blockedAuthorIds,
@@ -607,13 +498,17 @@ class MovieDetailViewModel @Inject constructor(
                 val omdbDeferred = imdbId?.let { async { repository.fetchOmdbRatings(it) } }
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
-                val commentsDeferred = async { fetchPreviewComments(tvdbId, title, year) }
+                val commentsDeferred = async {
+                    commentsDelegate.fetchPreviewComments(movieId, mediaType, tvdbId, title, year) {
+                        lastTvdbId = it
+                    }
+                }
 
                 val omdbResult = try { omdbDeferred?.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val traktResult = try { traktDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; null }
                 val commentsResult = try { commentsDeferred.await() } catch (e: Exception) { if (e is kotlinx.coroutines.CancellationException) throw e; emptyList() }
 
-                _appComments.value = commentsResult
+                commentsDelegate.setComments(commentsResult)
 
                 _externalRatings.update {  
                     it.copy(
@@ -655,43 +550,7 @@ class MovieDetailViewModel @Inject constructor(
             is DetailEvent.CreateFolder -> createFolder(event.name, event.color, event.description)
             is DetailEvent.UpdateCustomCover -> updateCustomCover(event.newPath)
             is DetailEvent.SaveCheckIn -> saveCheckIn(event.rating, event.vibes, event.mvpActor, event.characterImageUrl)
-            is DetailEvent.ToggleCommentLike -> toggleCommentLike(event.commentId)
-        }
-    }
-
-    private fun toggleCommentLike(commentId: String) {
-        val uId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: return
-        
-        // Ottimistico
-        val currentComments = _appComments.value.toMutableList()
-        val index = currentComments.indexOfFirst { it.id == commentId }
-        if (index != -1) {
-            val comment = currentComments[index]
-            val isLiked = comment.likedBy.contains(uId)
-            
-            val newLikedBy = if (isLiked) comment.likedBy - uId else comment.likedBy + uId
-            val newLikesCount = if (isLiked) maxOf(0, comment.likesCount - 1) else comment.likesCount + 1
-            
-            currentComments[index] = comment.copy(likedBy = newLikedBy, likesCount = newLikesCount)
-            _appComments.value = currentComments
-
-            // Chiamata di rete in background verso Firestore (se commento FlickTrove) o CommsUni
-            viewModelScope.launch {
-                val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
-                val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
-                val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
-                if (isFlickTrove) {
-                    commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
-                }
-                val result = if (isLiked) {
-                    commsUniRepository.unlikeComment(commentId)
-                } else {
-                    commsUniRepository.likeComment(commentId)
-                }
-                if (result.isFailure && !isFlickTrove) {
-                    refreshComments()
-                }
-            }
+            is DetailEvent.ToggleCommentLike -> toggleLikeComment(event.commentId)
         }
     }
 
@@ -1413,43 +1272,15 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun requestTranslation(commentId: Long, text: String) {
-        viewModelScope.launch {
-            // Update target language from user preferences before translation
-            val prefs = preferenceRepository.userPreferencesFlow.first()
-            val systemLang = java.util.Locale.getDefault().language
-            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-
-            // Direct background translation without modal download prompt
-            translateComment(commentId, text, requireWifi = false)
-        }
+        commentsDelegate.requestTranslation(commentId, text, viewModelScope)
     }
 
     fun dismissTranslationPrompt() {
-        _showTranslationPrompt.value = null
+        commentsDelegate.dismissTranslationPrompt()
     }
 
     fun translateComment(commentId: Long, text: String, requireWifi: Boolean) {
-        viewModelScope.launch {
-            _showTranslationPrompt.value = null
-            _translationStates.update { it + (commentId to TranslationState(isTranslating = true)) }
-            // Ensure the target language is in sync with current user preferences
-            val prefs = preferenceRepository.userPreferencesFlow.first()
-            val systemLang = java.util.Locale.getDefault().language
-            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-            when (val result = translationManager.translateCommentSmart(text)) {
-                is com.cinetrack.util.TranslationManager.TranslationResult.Success -> {
-                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, translatedText = result.text)) }
-                }
-                is com.cinetrack.util.TranslationManager.TranslationResult.AlreadyInLanguage -> {
-                    _translationStates.update { it - commentId }
-                    emitMessage(UiText.StringResource(R.string.comment_already_in_language))
-                }
-                is com.cinetrack.util.TranslationManager.TranslationResult.Error -> {
-                    _translationStates.update { it + (commentId to TranslationState(isTranslating = false, error = "Errore durante la traduzione")) }
-                    emitMessage(UiText.StringResource(R.string.msg_error_translating))
-                }
-            }
-        }
+        commentsDelegate.translateComment(commentId, text, requireWifi, viewModelScope)
     }
 
     private suspend fun preloadAccentColor(imageUrl: String, targetAspectRatio: Float? = null) {
@@ -1508,45 +1339,27 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun addComment(text: String, isSpoiler: Boolean = false, parentId: String? = null, parentUserId: String? = null, depth: Int = 0) {
-        viewModelScope.launch {
-            val success = commentRepository.addComment(
-                mediaId = movieId.toString(),
-                mediaType = mediaType,
-                text = text,
-                isSpoiler = isSpoiler,
-                parentId = parentId,
-                parentUserId = parentUserId,
-                depth = depth,
-                mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" },
-                mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
-            )
-            if (success) {
-                badgeRepository.recordCommentWritten()
-                // Refresh comments
-                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
-            }
-        }
+        val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
+        val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
+        commentsDelegate.addComment(movieId, mediaType, mediaTitle, mediaImage, text, isSpoiler, parentId, parentUserId, depth, viewModelScope)
     }
 
     fun refreshComments() {
-        viewModelScope.launch {
-            _appComments.value = fetchPreviewComments(lastTvdbId, lastTitle, lastYear)
+        commentsDelegate.refreshComments(movieId, mediaType, lastTvdbId, lastTitle, lastYear, viewModelScope) {
+            lastTvdbId = it
         }
     }
 
     fun toggleLikeComment(commentId: String) {
-        toggleCommentLike(commentId)
+        val mediaTitle = uiState.value.let { if (it is DetailUiState.Success) it.details.title ?: it.details.name ?: "" else "" }
+        val mediaImage = uiState.value.let { if (it is DetailUiState.Success) buildTmdbImageUrl(it.details.posterPath ?: it.details.backdropPath, com.cinetrack.util.ImageType.POSTER, com.cinetrack.util.ImageQuality.HIGH) else null }
+        commentsDelegate.toggleCommentLike(movieId, mediaType, mediaTitle, mediaImage, commentId, viewModelScope) {
+            refreshComments()
+        }
     }
 
     fun reportComment(commentId: String, reason: String, commentText: String, commentAuthorId: String, commentAuthorName: String) {
-        viewModelScope.launch {
-            val result = commentRepository.reportComment(movieId.toString(), commentId, reason, commentText, commentAuthorId, commentAuthorName)
-            when (result) {
-                com.cinetrack.data.repository.CommentRepository.ReportResult.SUCCESS -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_success))
-                com.cinetrack.data.repository.CommentRepository.ReportResult.COOLDOWN -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_cooldown))
-                com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR -> actionFeedbackManager.emit(UiText.StringResource(R.string.report_error))
-            }
-        }
+        commentsDelegate.reportComment(movieId, commentId, reason, commentText, commentAuthorId, commentAuthorName, viewModelScope)
     }
 }
 
