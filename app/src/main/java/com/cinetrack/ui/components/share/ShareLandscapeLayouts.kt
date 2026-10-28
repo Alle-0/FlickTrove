@@ -82,7 +82,7 @@ internal fun ShareLandscapePosterLayout(
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
             val showMvpOnPoster = state.config.showMvp && !actorName.isNullOrBlank()
             val showPosterHaze = showVibesOnPoster || showMvpOnPoster
-            val posterHazeState = remember(showPosterHaze) { HazeState() }
+            val posterHazeState = remember(state.config) { HazeState() }
 
             Box(
                 modifier = Modifier
