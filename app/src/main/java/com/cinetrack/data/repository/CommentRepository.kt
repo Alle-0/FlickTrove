@@ -506,13 +506,15 @@ enum class ReportResult {
             val repliesSnapshot = mediaCommentsColl.whereEqualTo("parentId", commentId).get().await()
 
             val imageRegex = Regex("""!\[.*?\]\((.*?)\)""")
-            for (match in imageRegex.findAll(comment.text)) {
-                val imageUrl = match.groupValues[1]
-                if (imageUrl.contains("supabase.co")) {
+            val inlineUrls = imageRegex.findAll(comment.text).map { it.groupValues[1] }.toList()
+            val allMedia = (comment.attachedMedia + inlineUrls).distinct()
+            for (imageUrl in allMedia) {
+                if (imageUrl.contains("supabase.co") || imageUrl.contains("supabase")) {
                     val result = storageRepository.deleteCommentImage(imageUrl)
                     if (result.isFailure) {
-                        android.util.Log.e("CommentRepository", "Failed to delete image: $imageUrl", result.exceptionOrNull())
-                        return DeleteCommentResult.FAILED
+                        android.util.Log.e("CommentRepository", "Failed to delete Supabase image: $imageUrl", result.exceptionOrNull())
+                    } else {
+                        android.util.Log.d("CommentRepository", "Successfully deleted Supabase image: $imageUrl")
                     }
                 }
             }
@@ -537,6 +539,7 @@ enum class ReportResult {
                         "userDisplayName" to "",
                         "userAvatarUrl" to "",
                         "parentUserId" to FieldValue.delete(),
+                        "attachedMedia" to emptyList<String>(),
                         "isSpoiler" to false,
                         "likesCount" to 0,
                         "likedBy" to emptyList<String>(),

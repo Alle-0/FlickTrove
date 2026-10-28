@@ -386,6 +386,7 @@ class CommentsViewModel @Inject constructor(
                             parentUserId = null,
                             likesCount = 0,
                             likedBy = emptyList(),
+                            attachedMedia = emptyList(),
                             isSpoiler = false,
                             isDeleted = true
                         ) else comment

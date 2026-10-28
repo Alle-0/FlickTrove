@@ -3,6 +3,7 @@ package com.cinetrack.ui.viewmodel
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.api.CommsUniComment
+import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.model.filterDeletedWithoutReplies
 import com.cinetrack.data.model.deduplicateComments
 import com.cinetrack.data.model.mergeComments
@@ -1036,15 +1037,20 @@ class CommsUniViewModel @Inject constructor(
         }
     }
 
-    fun deleteComment(commentId: String) {
+    fun deleteComment(commentId: String, targetComment: AppComment? = null) {
         viewModelScope.launch {
             // Optimistic: remove immediately
             val currentList = _comments.value.toMutableList()
-            val removed = currentList.find { it.id == commentId }
+            val removed = currentList.find { it.id == commentId } ?: targetComment
             currentList.removeAll { it.id == commentId }
             _comments.value = currentList
 
+            val mediaRegex = Regex("""!\[.*?\]\((.*?)\)""")
+            val inlineUrls = removed?.let { mediaRegex.findAll(it.text).map { m -> m.groupValues[1] }.toList() } ?: emptyList()
+            val allMediaUrls = ((removed?.attachedMedia ?: emptyList()) + inlineUrls).distinct()
+
             var anySuccess = false
+            var firestoreDeleted = false
 
             // 1. Elimina su CommsUni (se connesso a un'entità di rete)
             if (currentEntityId.isNotBlank()) {
@@ -1064,11 +1070,25 @@ class CommsUniViewModel @Inject constructor(
                 }
                 if (firestoreRes) {
                     anySuccess = true
+                    firestoreDeleted = true
                 }
             }
 
             if (anySuccess) {
                 untrackMyCommentId(commentId)
+                // Se non è già stato eliminato tramite CommentRepository su Firestore, elimina le immagini da Supabase Storage
+                if (!firestoreDeleted) {
+                    allMediaUrls.forEach { imageUrl ->
+                        if (imageUrl.contains("supabase.co") || imageUrl.contains("supabase")) {
+                            val delRes = storageRepository.deleteCommentImage(imageUrl)
+                            if (delRes.isFailure) {
+                                android.util.Log.e("CommsUniViewModel", "Failed to delete Supabase comment image: $imageUrl", delRes.exceptionOrNull())
+                            } else {
+                                android.util.Log.d("CommsUniViewModel", "Successfully deleted Supabase comment image: $imageUrl")
+                            }
+                        }
+                    }
+                }
             } else {
                 // Revert in caso di fallimento su entrambi
                 removed?.let {

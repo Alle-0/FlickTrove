@@ -697,7 +697,7 @@ class CommsUniCommentsScreen(
                 onDismiss = { commentToDelete = null },
                 onConfirm = {
                     commentToDelete?.let { c ->
-                        viewModel.deleteComment(c.id)
+                        viewModel.deleteComment(c.id, c)
                     }
                     commentToDelete = null
                 },
