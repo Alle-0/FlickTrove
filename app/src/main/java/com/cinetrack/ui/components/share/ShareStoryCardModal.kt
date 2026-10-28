@@ -46,6 +46,7 @@ import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.common.FlickTroveSwitch
+import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
@@ -1358,15 +1359,9 @@ private fun CoverSelectionView(
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .background(Color(0xFF18181B)),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        CircularProgressIndicator(
-                                            modifier = Modifier.size(20.dp),
-                                            strokeWidth = 2.dp,
-                                            color = accentColor.copy(alpha = 0.6f)
-                                        )
-                                    }
+                                            .background(Color(0xFF1E1E24))
+                                            .shimmerEffect()
+                                    )
                                 }
                             )
 
