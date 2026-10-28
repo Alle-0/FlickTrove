@@ -112,3 +112,4 @@ internal fun saveBitmapToCacheUri(context: Context, bitmap: Bitmap, title: Strin
         null
     }
 }
+
