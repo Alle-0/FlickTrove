@@ -28,6 +28,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -47,6 +48,7 @@ import coil.compose.SubcomposeAsyncImageContent
 import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.ui.theme.HazeStyles
+import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 
 /**
@@ -75,11 +77,21 @@ internal fun ShareLandscapePosterLayout(
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
             val posterShape = RoundedCornerShape(26.dp)
+            val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
+            val posterHazeState = remember(showVibesOnPoster) { HazeState() }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .shadow(elevation = 28.dp, shape = posterShape)
                     .clip(posterShape)
+                    .then(
+                        if (showVibesOnPoster) {
+                            Modifier.haze(state = posterHazeState, style = HazeStyles.PremiumDark)
+                        } else {
+                            Modifier
+                        }
+                    )
                     .border(1.dp, Color.White.copy(alpha = 0.22f), posterShape)
             ) {
                 if (state.posterUrl != null) {
@@ -107,10 +119,10 @@ internal fun ShareLandscapePosterLayout(
             }
 
             // Vibe icons floating sul poster
-            if (state.config.showVibe && state.vibes.isNotEmpty()) {
+            if (showVibesOnPoster) {
                 ShareVibesPill(
                     vibes = state.vibes,
-                    cardHazeState = state.cardHazeState,
+                    cardHazeState = posterHazeState,
                     modifier = Modifier
                         .align(Alignment.TopEnd)
                         .padding(10.dp),

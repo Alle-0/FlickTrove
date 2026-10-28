@@ -177,8 +177,14 @@ internal fun ShareVibesPill(
 ) {
     Row(
         modifier = modifier
-            .background(Color.Black.copy(alpha = 0.42f), RoundedCornerShape(50))
-            .border(0.6.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
+            .hazeGlass(
+                state = cardHazeState,
+                shape = RoundedCornerShape(50),
+                blurRadius = 16.dp,
+                containerColor = Color.Black.copy(alpha = 0.35f),
+                borderWidth = 0.6.dp,
+                borderColor = Color.White.copy(alpha = 0.25f)
+            )
             .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         horizontalArrangement = Arrangement.spacedBy(spacing),
         verticalAlignment = Alignment.CenterVertically
