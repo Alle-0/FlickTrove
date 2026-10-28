@@ -56,10 +56,11 @@ internal fun FlickTroveBrandPill(
     cardHazeState: HazeState,
     modifier: Modifier = Modifier,
     isSquare: Boolean = false,
-    iconSize: Dp = if (isSquare) 20.dp else 24.dp,
-    fontSize: TextUnit = if (isSquare) 8.5.sp else 9.5.sp,
-    horizontalPadding: Dp = if (isSquare) 8.dp else 10.dp,
-    verticalPadding: Dp = if (isSquare) 2.5.dp else 3.dp
+    iconSize: Dp = if (isSquare) 13.dp else 14.dp,
+    fontSize: TextUnit = if (isSquare) 8.5.sp else 9.sp,
+    startPadding: Dp = if (isSquare) 4.5.dp else 5.dp,
+    endPadding: Dp = if (isSquare) 6.dp else 7.dp,
+    verticalPadding: Dp = if (isSquare) 1.5.dp else 2.dp
 ) {
     Row(
         modifier = modifier
@@ -71,9 +72,14 @@ internal fun FlickTroveBrandPill(
                 borderWidth = 0.6.dp,
                 borderColor = Color.White.copy(alpha = 0.22f)
             )
-            .padding(horizontal = horizontalPadding, vertical = verticalPadding),
+            .padding(
+                start = startPadding,
+                end = endPadding,
+                top = verticalPadding,
+                bottom = verticalPadding
+            ),
         verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(5.dp)
+        horizontalArrangement = Arrangement.spacedBy(3.5.dp)
     ) {
         Icon(
             painter = painterResource(id = R.drawable.ic_launcher_foreground_vector),

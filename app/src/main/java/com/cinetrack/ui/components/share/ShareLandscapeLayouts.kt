@@ -158,11 +158,7 @@ internal fun ShareLandscapePosterLayout(
             // Top Branding
             FlickTroveBrandPill(
                 cardHazeState = state.cardHazeState,
-                isSquare = false,
-                iconSize = 20.dp,
-                fontSize = 9.sp,
-                horizontalPadding = 9.dp,
-                verticalPadding = 3.dp
+                isSquare = false
             )
 
             // Middle: Titolo/Logo + Metadati
@@ -277,11 +273,7 @@ internal fun ShareLandscapeBackdropLayout(
         ) {
             FlickTroveBrandPill(
                 cardHazeState = state.cardHazeState,
-                isSquare = false,
-                iconSize = 20.dp,
-                fontSize = 9.sp,
-                horizontalPadding = 9.dp,
-                verticalPadding = 3.dp
+                isSquare = false
             )
 
             if (state.config.showVibe && state.vibes.isNotEmpty()) {

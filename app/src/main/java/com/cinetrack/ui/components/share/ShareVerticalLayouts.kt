@@ -108,11 +108,7 @@ internal fun ShareVerticalPosterLayout(
         ) {
             FlickTroveBrandPill(
                 cardHazeState = state.cardHazeState,
-                isSquare = isSquare,
-                iconSize = if (isSquare) 20.dp else 24.dp,
-                fontSize = if (isSquare) 8.5.sp else 9.5.sp,
-                horizontalPadding = if (isSquare) 8.dp else 10.dp,
-                verticalPadding = if (isSquare) 2.5.dp else 3.dp
+                isSquare = isSquare
             )
         }
 
@@ -292,11 +288,7 @@ internal fun ShareVerticalBackdropLayout(
         ) {
             FlickTroveBrandPill(
                 cardHazeState = state.cardHazeState,
-                isSquare = isSquare,
-                iconSize = if (isSquare) 20.dp else 25.dp,
-                fontSize = if (isSquare) 8.5.sp else 9.5.sp,
-                horizontalPadding = if (isSquare) 8.dp else 10.dp,
-                verticalPadding = if (isSquare) 2.5.dp else 3.dp
+                isSquare = isSquare
             )
         }
 
