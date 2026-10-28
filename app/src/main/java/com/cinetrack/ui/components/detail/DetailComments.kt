@@ -26,6 +26,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.bounceClickWithOffset
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -210,12 +211,23 @@ private fun CommentCard(
     var isSpoilerRevealed by remember { mutableStateOf(false) }
     var tapOffset by remember { mutableStateOf(androidx.compose.ui.geometry.Offset.Zero) }
     val revealRadius = remember { androidx.compose.animation.core.Animatable(0f) }
+
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
     val configuration = androidx.compose.ui.platform.LocalConfiguration.current
     val expandedWidth = (configuration.screenWidthDp * 0.85f).dp
     val targetWidth = if (isExpanded) expandedWidth else 280.dp
 
-    val context = LocalContext.current
-    val coroutineScope = rememberCoroutineScope()
+    val revealSpoiler: (androidx.compose.ui.geometry.Offset) -> Unit = { offset ->
+        tapOffset = offset
+        coroutineScope.launch {
+            revealRadius.animateTo(
+                targetValue = 2000f,
+                animationSpec = androidx.compose.animation.core.tween(600, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+            )
+            isSpoilerRevealed = true
+        }
+    }
     val entryPoint = remember(context) {
         dagger.hilt.android.EntryPointAccessors.fromApplication(
             context.applicationContext,
@@ -479,6 +491,13 @@ private fun CommentCard(
                                     modifier = Modifier
                                         .then(if (textWithoutMedia.isNotEmpty()) Modifier.padding(top = 8.dp) else Modifier)
                                         .fillMaxWidth()
+                                        .then(
+                                            if (isBlurred) {
+                                                Modifier.bounceClickWithOffset(scaleDown = 0.98f) { offset ->
+                                                    revealSpoiler(offset)
+                                                }
+                                            } else Modifier
+                                        )
                                         .clip(RoundedCornerShape(10.dp))
                                         .then(
                                             if (isBlurred) Modifier.clip(RoundedCornerShape(10.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
@@ -497,14 +516,7 @@ private fun CommentCard(
                         .pointerInput(comment.isSpoiler, isSpoilerRevealed) {
                         if (comment.isSpoiler && !isSpoilerRevealed) {
                             detectTapGestures(onTap = { offset ->
-                                tapOffset = offset
-                                coroutineScope.launch {
-                                    revealRadius.animateTo(
-                                        targetValue = 2000f,
-                                        animationSpec = androidx.compose.animation.core.tween(600, easing = androidx.compose.animation.core.FastOutSlowInEasing)
-                                    )
-                                    isSpoilerRevealed = true
-                                }
+                                revealSpoiler(offset)
                             })
                         }
                     }
@@ -532,7 +544,14 @@ private fun CommentCard(
                             exit = androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(200)),
                             modifier = Modifier.matchParentSize()
                         ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .bounceClickWithOffset(scaleDown = 0.99f) { offset ->
+                                        revealSpoiler(offset)
+                                    }
+                            ) {
                                 if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.S) {
                                     Box(
                                         modifier = Modifier

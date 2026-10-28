@@ -49,6 +49,7 @@ import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.bounceClickWithOffset
 import com.cinetrack.ui.utils.parseSimpleMarkdown
 import com.cinetrack.ui.viewmodel.CommentsViewModel
 import com.cinetrack.ui.components.common.ZoomableImageViewerDialog
@@ -359,6 +360,17 @@ fun CommentCardItem(
                 val revealRadius = remember { androidx.compose.animation.core.Animatable(0f) }
                 val coroutineScope = rememberCoroutineScope()
 
+                val revealSpoiler: (Offset) -> Unit = { offset ->
+                    tapOffset = offset
+                    coroutineScope.launch {
+                        revealRadius.animateTo(
+                            targetValue = 2000f,
+                            animationSpec = tween(600, easing = FastOutSlowInEasing)
+                        )
+                        isSpoilerRevealed = true
+                    }
+                }
+
                 val displayedTextRaw = when {
                     isEffectivelyDeleted -> stringResource(R.string.comment_deleted)
                     translationState is CommentsViewModel.TranslationState.Translated -> translationState.text
@@ -431,13 +443,20 @@ fun CommentCardItem(
                                     modifier = Modifier
                                         .padding(top = 8.dp)
                                         .fillMaxWidth()
-                                        .bounceClick(
-                                            scaleDown = 0.96f,
-                                            shape = RoundedCornerShape(20.dp),
-                                            enabled = !isBlurred
-                                        ) {
-                                            previewImageUrl = mediaUrl
-                                        }
+                                        .then(
+                                            if (isBlurred) {
+                                                Modifier.bounceClickWithOffset(scaleDown = 0.98f) { offset ->
+                                                    revealSpoiler(offset)
+                                                }
+                                            } else {
+                                                Modifier.bounceClick(
+                                                    scaleDown = 0.96f,
+                                                    shape = RoundedCornerShape(20.dp)
+                                                ) {
+                                                    previewImageUrl = mediaUrl
+                                                }
+                                            }
+                                        )
                                         .clip(RoundedCornerShape(20.dp))
                                         .then(
                                             if (isBlurred) Modifier.blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded).clip(RoundedCornerShape(20.dp)) else Modifier
@@ -457,14 +476,7 @@ fun CommentCardItem(
                         .pointerInput(comment.isSpoiler, isSpoilerRevealed) {
                             if (comment.isSpoiler && !isSpoilerRevealed) {
                                 detectTapGestures(onTap = { offset ->
-                                    tapOffset = offset
-                                    coroutineScope.launch {
-                                        revealRadius.animateTo(
-                                            targetValue = 2000f,
-                                            animationSpec = tween(600, easing = FastOutSlowInEasing)
-                                        )
-                                        isSpoilerRevealed = true
-                                    }
+                                    revealSpoiler(offset)
                                 })
                             }
                         }
@@ -492,7 +504,14 @@ fun CommentCardItem(
                             exit = fadeOut(animationSpec = tween(200)),
                             modifier = Modifier.matchParentSize()
                         ) {
-                            Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
+                            Box(
+                                contentAlignment = Alignment.Center,
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .bounceClickWithOffset(scaleDown = 0.99f) { offset ->
+                                        revealSpoiler(offset)
+                                    }
+                            ) {
                                 if (Build.VERSION.SDK_INT < Build.VERSION_CODES.S) {
                                     Box(modifier = Modifier.matchParentSize().background(Color(0xFF141414).copy(alpha = 0.9f), RoundedCornerShape(8.dp)))
                                 }
