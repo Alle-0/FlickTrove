@@ -64,9 +64,10 @@ internal fun ShareVerticalPosterLayout(
 ) {
     val context = LocalContext.current
     val isSquare = state.config.aspectRatio == ShareAspectRatio.SQUARE_1_1
+    val isPost = state.config.aspectRatio == ShareAspectRatio.POST_4_5
     val posterFraction = when (state.config.aspectRatio) {
         ShareAspectRatio.STORY_9_16 -> 0.76f
-        ShareAspectRatio.POST_4_5 -> 0.60f
+        ShareAspectRatio.POST_4_5 -> 0.52f
         ShareAspectRatio.SQUARE_1_1 -> 0.44f
         ShareAspectRatio.LANDSCAPE_16_9 -> 0.30f
     }
@@ -112,7 +113,11 @@ internal fun ShareVerticalPosterLayout(
             )
         }
 
-        Spacer(modifier = Modifier.weight(animatedTopWeight))
+        Spacer(
+            modifier = Modifier
+                .heightIn(min = if (isSquare) 4.dp else 14.dp)
+                .weight(animatedTopWeight)
+        )
 
         // CENTER: Floating Poster
         Box(
@@ -188,7 +193,7 @@ internal fun ShareVerticalPosterLayout(
             }
         }
 
-        Spacer(modifier = Modifier.height(if (isSquare) 4.dp else 12.dp))
+        Spacer(modifier = Modifier.height(if (isSquare) 4.dp else if (isPost) 8.dp else 12.dp))
 
         // Year & Metadata
         if (state.metaItems.isNotEmpty()) {
@@ -203,7 +208,7 @@ internal fun ShareVerticalPosterLayout(
                         blurRadius = 8f
                     )
                 ),
-                modifier = Modifier.padding(bottom = if (isSquare) 2.dp else 5.dp)
+                modifier = Modifier.padding(bottom = if (isSquare || isPost) 3.dp else 5.dp)
             )
         }
 
