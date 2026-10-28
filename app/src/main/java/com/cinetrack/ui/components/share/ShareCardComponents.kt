@@ -420,7 +420,8 @@ internal fun MvpMiniCard(
     modifier: Modifier = Modifier,
     posterUrl: String? = null,
     backdropUrl: String? = null,
-    hazeState: HazeState? = null
+    hazeState: HazeState? = null,
+    isFloatingPoster: Boolean = false
 ) {
     val context = LocalContext.current
     val profileUrl = remember(profilePath) {
@@ -429,68 +430,84 @@ internal fun MvpMiniCard(
     val cardShape = RoundedCornerShape(14.dp)
     val bgArtworkUrl = posterUrl ?: backdropUrl
 
-    Box(
-        modifier = modifier
+    val baseModifier = if (isFloatingPoster) {
+        modifier
             .width(68.dp)
             .shadow(elevation = 16.dp, shape = cardShape)
             .clip(cardShape)
             .border(0.8.dp, Color.White.copy(alpha = 0.28f), cardShape)
-    ) {
-        // Base dark glass background (ensures the right side and bottom hanging off the poster remain dark)
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.76f else 0.88f))
-        )
+    } else {
+        modifier
+            .width(68.dp)
+            .shadow(elevation = 16.dp, shape = cardShape)
+            .hazeGlass(
+                state = hazeState,
+                shape = cardShape,
+                blurRadius = 18.dp,
+                containerColor = Color(0xFF141418).copy(alpha = 0.44f),
+                borderWidth = 0.8.dp,
+                borderColor = Color.White.copy(alpha = 0.28f)
+            )
+    }
 
-        // Continuous blurred artwork underlay feathered towards the right and bottom edges
-        if (bgArtworkUrl != null) {
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(bgArtworkUrl)
-                    .crossfade(false)
-                    .build(),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                alignment = Alignment.BottomEnd,
+    Box(modifier = baseModifier) {
+        if (isFloatingPoster) {
+            // Base dark glass background (ensures the right side and bottom hanging off the poster remain dark)
+            Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .blur(18.dp)
-                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                    .drawWithContent {
-                        drawContent()
-                        // Feather towards right edge where the card hangs outside the poster (~70% width)
-                        drawRect(
-                            brush = Brush.horizontalGradient(
-                                0.0f to Color.Black,
-                                0.40f to Color.Black,
-                                0.68f to Color.Black.copy(alpha = 0.45f),
-                                0.84f to Color.Transparent,
-                                1.0f to Color.Transparent
-                            ),
-                            blendMode = BlendMode.DstIn
-                        )
-                        // Feather towards bottom edge where the card hangs outside the poster (~85% height)
-                        drawRect(
-                            brush = Brush.verticalGradient(
-                                0.0f to Color.Black,
-                                0.60f to Color.Black,
-                                0.82f to Color.Black.copy(alpha = 0.45f),
-                                0.96f to Color.Transparent,
-                                1.0f to Color.Transparent
-                            ),
-                            blendMode = BlendMode.DstIn
-                        )
-                    }
+                    .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.76f else 0.88f))
+            )
+
+            // Continuous blurred artwork underlay feathered towards the right and bottom edges
+            if (bgArtworkUrl != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(bgArtworkUrl)
+                        .crossfade(false)
+                        .build(),
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    alignment = Alignment.BottomEnd,
+                    modifier = Modifier
+                        .matchParentSize()
+                        .blur(18.dp)
+                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                        .drawWithContent {
+                            drawContent()
+                            // Feather towards right edge where the card hangs outside the poster (~70% width)
+                            drawRect(
+                                brush = Brush.horizontalGradient(
+                                    0.0f to Color.Black,
+                                    0.40f to Color.Black,
+                                    0.68f to Color.Black.copy(alpha = 0.45f),
+                                    0.84f to Color.Transparent,
+                                    1.0f to Color.Transparent
+                                ),
+                                blendMode = BlendMode.DstIn
+                            )
+                            // Feather towards bottom edge where the card hangs outside the poster (~85% height)
+                            drawRect(
+                                brush = Brush.verticalGradient(
+                                    0.0f to Color.Black,
+                                    0.60f to Color.Black,
+                                    0.82f to Color.Black.copy(alpha = 0.45f),
+                                    0.96f to Color.Transparent,
+                                    1.0f to Color.Transparent
+                                ),
+                                blendMode = BlendMode.DstIn
+                            )
+                        }
+                )
+            }
+
+            // Frosted dark glass overlay tint
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .background(Color(0xFF141418).copy(alpha = 0.35f))
             )
         }
-
-        // Frosted dark glass overlay tint
-        Box(
-            modifier = Modifier
-                .matchParentSize()
-                .background(Color(0xFF141418).copy(alpha = 0.35f))
-        )
 
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,

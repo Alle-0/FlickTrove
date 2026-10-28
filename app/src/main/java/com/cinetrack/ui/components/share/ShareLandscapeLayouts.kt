@@ -130,6 +130,7 @@ internal fun ShareLandscapePosterLayout(
                     posterUrl = state.posterUrl,
                     backdropUrl = state.backdropUrl,
                     hazeState = state.cardHazeState,
+                    isFloatingPoster = true,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = 20.dp, y = 14.dp)
@@ -366,9 +367,8 @@ internal fun ShareLandscapeBackdropLayout(
                         characterName = state.movie.favoriteActorCharacter,
                         profilePath = profilePath,
                         accentColor = state.accentColor,
-                        posterUrl = state.posterUrl,
-                        backdropUrl = state.backdropUrl,
-                        hazeState = state.cardHazeState
+                        hazeState = state.cardHazeState,
+                        isFloatingPoster = false
                     )
                 }
 

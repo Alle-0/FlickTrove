@@ -186,6 +186,7 @@ internal fun ShareVerticalPosterLayout(
                     posterUrl = state.posterUrl,
                     backdropUrl = state.backdropUrl,
                     hazeState = state.cardHazeState,
+                    isFloatingPoster = true,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = 20.dp, y = 16.dp)
