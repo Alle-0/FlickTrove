@@ -75,8 +75,8 @@ internal fun ShareLandscapePosterLayout(
                 .fillMaxHeight()
                 .aspectRatio(2f / 3f)
         ) {
-            val posterWidth = maxWidth
             val posterHeight = maxHeight
+            val posterWidth = posterHeight * (2f / 3f)
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
             val cornerRadiusDp = 26.dp

@@ -129,7 +129,7 @@ internal fun ShareVerticalPosterLayout(
                 .aspectRatio(2f / 3f)
         ) {
             val posterWidth = maxWidth
-            val posterHeight = maxHeight
+            val posterHeight = posterWidth * 1.5f
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
             val cornerRadiusDp = if (isSquare) 24.dp else 32.dp

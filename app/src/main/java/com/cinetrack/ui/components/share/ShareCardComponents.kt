@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
@@ -49,6 +50,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.isSpecified
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
@@ -487,7 +489,7 @@ internal fun MvpMiniCard(
             )
 
             // Scaled and positioned blurred poster underlay matching the exact physical dimensions and ratio
-            if (bgArtworkUrl != null && posterWidth != null && posterHeight != null) {
+            if (bgArtworkUrl != null && posterWidth != null && posterHeight != null && posterWidth.isSpecified && posterHeight.isSpecified) {
                 val posterShape = RoundedCornerShape(posterCornerRadius)
                 Box(
                     modifier = Modifier
@@ -505,10 +507,10 @@ internal fun MvpMiniCard(
                             .requiredSize(posterWidth, posterHeight)
                             .clip(posterShape)
                             .blur(16.dp)
-                            .graphicsLayer {
-                                translationX = (cardWidthDp - cardOffsetX - posterWidth).toPx()
-                                translationY = (cardHeightDp - cardOffsetY - posterHeight).toPx()
-                            }
+                            .offset(
+                                x = cardWidthDp - cardOffsetX - posterWidth,
+                                y = cardHeightDp - cardOffsetY - posterHeight
+                            )
                     )
                 }
             } else if (bgArtworkUrl != null) {
