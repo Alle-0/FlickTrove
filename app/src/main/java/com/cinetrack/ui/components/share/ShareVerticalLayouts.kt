@@ -124,13 +124,24 @@ internal fun ShareVerticalPosterLayout(
                 .fillMaxWidth(posterFraction)
                 .aspectRatio(2f / 3f)
         ) {
+            val actorName = state.movie.favoriteActorName
+            val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
+            val hasPosterGlassChildren = (state.config.showVibe && state.vibes.isNotEmpty()) ||
+                (state.config.showMvp && !actorName.isNullOrBlank())
+
             val posterShape = RoundedCornerShape(if (isSquare) 18.dp else 24.dp)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .shadow(elevation = 28.dp, shape = posterShape)
                     .clip(posterShape)
-                    .haze(state = state.cardHazeState, style = HazeStyles.PremiumDark)
+                    .then(
+                        if (hasPosterGlassChildren) {
+                            Modifier.haze(state = state.cardHazeState, style = HazeStyles.PremiumDark)
+                        } else {
+                            Modifier
+                        }
+                    )
                     .border(1.dp, Color.White.copy(alpha = 0.22f), posterShape)
             ) {
                 if (state.posterUrl != null) {
@@ -175,8 +186,6 @@ internal fun ShareVerticalPosterLayout(
             }
 
             // MVP Badge: floating on the bottom edge
-            val actorName = state.movie.favoriteActorName
-            val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
             if (state.config.showMvp && !actorName.isNullOrBlank()) {
                 MvpMiniCard(
                     actorName = actorName,

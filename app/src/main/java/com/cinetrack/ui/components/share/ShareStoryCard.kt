@@ -166,7 +166,7 @@ fun ShareStoryCard(
     val effectiveRating = movie.personalRating ?: 0.0
     val hasRating = config.showRating && effectiveRating > 0.0
 
-    val cardHazeState = remember { HazeState() }
+    val cardHazeState = remember(config) { HazeState() }
 
     // Extract all emotional vibes and resolve their visual models/icons
     val vibes = remember(movie.emotionalVibes) {
