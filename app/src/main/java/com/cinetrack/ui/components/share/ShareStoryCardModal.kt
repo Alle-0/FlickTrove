@@ -1101,6 +1101,7 @@ private fun CoverSelectionView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .height(38.dp)
                     .padding(horizontal = 24.dp)
                     .zIndex(if (languageMenuExpanded) 100f else 1f)
             ) {
@@ -1117,8 +1118,7 @@ private fun CoverSelectionView(
 
                 Row(
                     modifier = Modifier
-                        .fillMaxWidth()
-                        .height(38.dp)
+                        .fillMaxSize()
                         .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = !languageMenuExpanded }
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.06f))
@@ -1389,18 +1389,18 @@ private fun CoverSelectionView(
                 }
             }
         }
+    }
 
-        // Tap-outside dismiss overlay when dropdown is open
-        if (languageMenuExpanded) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zIndex(50f)
-                    .pointerInput(Unit) {
-                        detectTapGestures { languageMenuExpanded = false }
-                    }
-            )
-        }
+    // Tap-outside dismiss overlay across the entire modal when dropdown is open
+    if (languageMenuExpanded) {
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .zIndex(90f)
+                .pointerInput(Unit) {
+                    detectTapGestures { languageMenuExpanded = false }
+                }
+        )
     }
 }
 }
