@@ -1,15 +1,9 @@
 package com.cinetrack.ui.components.share
 
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.expandVertically
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -246,15 +240,7 @@ internal fun ShareVerticalPosterLayout(
         Spacer(modifier = Modifier.weight(animatedBottomWeight))
 
         // USER PROFILE
-        AnimatedVisibility(
-            visible = showProfile,
-            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
-                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-            ),
-            exit = fadeOut(tween(150)) + shrinkVertically(
-                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-            )
-        ) {
+        if (showProfile) {
             ShareSimpleProfileRow(
                 userDisplayName = state.userDisplayName.orEmpty(),
                 userPhotoUrl = state.userPhotoUrl,
@@ -311,18 +297,8 @@ internal fun ShareVerticalBackdropLayout(
                 .padding(bottom = if (isSquare) 2.dp else 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Vibes row with smooth animation anchored to top so items below remain fixed
-            AnimatedVisibility(
-                visible = state.config.showVibe && state.vibes.isNotEmpty(),
-                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
-                    expandFrom = Alignment.Top
-                ),
-                exit = fadeOut(tween(150)) + shrinkVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
-                    shrinkTowards = Alignment.Top
-                )
-            ) {
+            // Vibes row
+            if (state.config.showVibe && state.vibes.isNotEmpty()) {
                 ShareVibesPill(
                     vibes = state.vibes,
                     cardHazeState = state.cardHazeState,
@@ -423,20 +399,10 @@ internal fun ShareVerticalBackdropLayout(
                 )
             }
 
-            // MVP PILL with smooth animation
+            // MVP PILL
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            AnimatedVisibility(
-                visible = state.config.showMvp && !actorName.isNullOrBlank(),
-                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
-                    expandFrom = Alignment.Top
-                ),
-                exit = fadeOut(tween(150)) + shrinkVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
-                    shrinkTowards = Alignment.Top
-                )
-            ) {
+            if (state.config.showMvp && !actorName.isNullOrBlank()) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(if (isSquare) 5.dp else 7.dp))
                     MvpPill(
@@ -450,15 +416,7 @@ internal fun ShareVerticalBackdropLayout(
             }
 
             // USER PROFILE
-            AnimatedVisibility(
-                visible = state.config.showProfile && !state.userDisplayName.isNullOrBlank(),
-                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-                ),
-                exit = fadeOut(tween(150)) + shrinkVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
-                )
-            ) {
+            if (state.config.showProfile && !state.userDisplayName.isNullOrBlank()) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
                     Spacer(modifier = Modifier.height(if (isSquare) 5.dp else if (isPost) 7.dp else 10.dp))
                     ShareSimpleProfileRow(
