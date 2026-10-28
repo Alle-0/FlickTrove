@@ -986,7 +986,13 @@ private fun CoverSelectionView(
 
     val currentDisplayList = if (coverTab == 0) filteredPosters else validBackdrops
 
-    val hasCustomForCurrentTab = if (coverTab == 0) config.customPosterPath != null else config.customBackdropPath != null
+    val defaultPoster = movie.posterPath
+    val defaultBackdrop = movie.customBackdropPath ?: movie.backdropPath
+    val hasCustomForCurrentTab = if (coverTab == 0) {
+        config.customPosterPath != null && config.customPosterPath != defaultPoster
+    } else {
+        config.customBackdropPath != null && config.customBackdropPath != defaultBackdrop
+    }
 
     val coverHazeState = remember { HazeState() }
     var languageMenuExpanded by remember { mutableStateOf(false) }
@@ -1316,9 +1322,9 @@ private fun CoverSelectionView(
                 ) {
                     items(currentDisplayList, key = { it.filePath }) { item ->
                         val isSelected = if (isPosterTab) {
-                            (config.customPosterPath ?: movie.posterPath) == item.filePath
+                            (config.customPosterPath ?: defaultPoster) == item.filePath
                         } else {
-                            (config.customBackdropPath ?: (movie.customBackdropPath ?: movie.backdropPath)) == item.filePath
+                            (config.customBackdropPath ?: defaultBackdrop) == item.filePath
                         }
 
                         val imageUrl = remember(item.filePath) {
@@ -1333,9 +1339,11 @@ private fun CoverSelectionView(
                                 .bounceClick(scaleDown = 0.95f) {
                                     VibrationHelper.vibrateTick(context)
                                     if (isPosterTab) {
-                                        onConfigChange(config.copy(customPosterPath = item.filePath))
+                                        val newPath = if (item.filePath == defaultPoster) null else item.filePath
+                                        onConfigChange(config.copy(customPosterPath = newPath))
                                     } else {
-                                        onConfigChange(config.copy(customBackdropPath = item.filePath))
+                                        val newPath = if (item.filePath == defaultBackdrop) null else item.filePath
+                                        onConfigChange(config.copy(customBackdropPath = newPath))
                                     }
                                     onBack() // Si applica subito alla card e torna indietro
                                 }
