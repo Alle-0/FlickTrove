@@ -123,19 +123,19 @@ internal fun ShareVerticalPosterLayout(
         )
 
         // CENTER: Floating Poster
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxWidth(posterFraction)
                 .aspectRatio(2f / 3f)
         ) {
-            val posterWidth = maxWidth
-            val posterHeight = posterWidth * 1.5f
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
             val cornerRadiusDp = if (isSquare) 24.dp else 32.dp
             val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
-            val posterHazeState = remember(showVibesOnPoster) { HazeState() }
+            val showMvpOnPoster = state.config.showMvp && !actorName.isNullOrBlank()
+            val showPosterHaze = showVibesOnPoster || showMvpOnPoster
+            val posterHazeState = remember(showPosterHaze) { HazeState() }
 
             Box(
                 modifier = Modifier
@@ -143,7 +143,7 @@ internal fun ShareVerticalPosterLayout(
                     .shadow(elevation = 28.dp, shape = posterShape)
                     .clip(posterShape)
                     .then(
-                        if (showVibesOnPoster) {
+                        if (showPosterHaze) {
                             Modifier.haze(state = posterHazeState, style = HazeStyles.PremiumDark)
                         } else {
                             Modifier
@@ -192,24 +192,16 @@ internal fun ShareVerticalPosterLayout(
                 )
             }
 
-            // MVP Badge: floating on the bottom edge, adapting simulated blur to exact poster geometry
-            if (state.config.showMvp && !actorName.isNullOrBlank()) {
+            // MVP Badge: floating on the bottom edge with real frosted glass blur
+            if (showMvpOnPoster) {
                 val cardOffsetX = if (isSquare) 18.dp else 20.dp
                 val cardOffsetY = if (isSquare) 14.dp else 16.dp
                 MvpMiniCard(
-                    actorName = actorName,
+                    actorName = actorName.orEmpty(),
                     characterName = state.movie.favoriteActorCharacter,
                     profilePath = profilePath,
                     accentColor = state.accentColor,
-                    posterUrl = state.posterUrl,
-                    backdropUrl = state.backdropUrl,
-                    hazeState = state.cardHazeState,
-                    isFloatingPoster = true,
-                    posterWidth = posterWidth,
-                    posterHeight = posterHeight,
-                    posterCornerRadius = cornerRadiusDp,
-                    cardOffsetX = cardOffsetX,
-                    cardOffsetY = cardOffsetY,
+                    hazeState = posterHazeState,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = cardOffsetX, y = cardOffsetY)

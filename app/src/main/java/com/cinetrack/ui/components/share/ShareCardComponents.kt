@@ -422,10 +422,9 @@ internal fun MvpPill(
 }
 
 /**
- * Vertical mini card badge for MVP floating over poster edges.
- * Uses a blurred artwork underlay scaled and positioned to match the exact
- * physical poster dimensions and ratio, creating a natural optical blur of the
- * poster edge and seamless fade into the dark glass background.
+ * Vertical mini card badge for MVP floating over poster edges or backdrops.
+ * Uses real frosted glassmorphism (hazeGlass) to seamlessly blur whatever is
+ * physically underneath the card (poster artwork, seams, and background).
  */
 @Composable
 internal fun MvpMiniCard(
@@ -434,109 +433,28 @@ internal fun MvpMiniCard(
     profilePath: String?,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    posterUrl: String? = null,
-    backdropUrl: String? = null,
-    hazeState: HazeState? = null,
-    isFloatingPoster: Boolean = false,
-    posterWidth: Dp? = null,
-    posterHeight: Dp? = null,
-    posterCornerRadius: Dp = 32.dp,
-    cardOffsetX: Dp = 20.dp,
-    cardOffsetY: Dp = 16.dp
+    hazeState: HazeState? = null
 ) {
     val context = LocalContext.current
-    val density = LocalDensity.current
     val profileUrl = remember(profilePath) {
         buildTmdbImageUrl(profilePath, ImageType.PROFILE, com.cinetrack.util.ImageQuality.HIGH)
     }
     val cardShape = RoundedCornerShape(14.dp)
-    val bgArtworkUrl = posterUrl ?: backdropUrl
-    var cardHeightDp by remember { mutableStateOf(92.dp) }
     val cardWidthDp = 68.dp
 
-    val baseModifier = if (isFloatingPoster) {
-        modifier
-            .width(cardWidthDp)
-            .shadow(elevation = 16.dp, shape = cardShape)
-            .clip(cardShape)
-            .border(0.8.dp, Color.White.copy(alpha = 0.28f), cardShape)
-            .onSizeChanged {
-                if (it.height > 0) {
-                    cardHeightDp = with(density) { it.height.toDp() }
-                }
-            }
-    } else {
-        modifier
+    Box(
+        modifier = modifier
             .width(cardWidthDp)
             .shadow(elevation = 16.dp, shape = cardShape)
             .hazeGlass(
                 state = hazeState,
                 shape = cardShape,
                 blurRadius = 18.dp,
-                containerColor = Color(0xFF141418).copy(alpha = 0.44f),
+                containerColor = Color(0xFF141418).copy(alpha = 0.55f),
                 borderWidth = 0.8.dp,
                 borderColor = Color.White.copy(alpha = 0.28f)
             )
-    }
-
-    Box(modifier = baseModifier) {
-        if (isFloatingPoster) {
-            // Base dark glass background (ensures the right side and bottom hanging off the poster remain dark)
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.72f else 0.88f))
-            )
-
-            // Scaled and positioned blurred poster underlay matching the exact physical dimensions and ratio
-            if (bgArtworkUrl != null && posterWidth != null && posterHeight != null && posterWidth.isSpecified && posterHeight.isSpecified) {
-                val posterShape = RoundedCornerShape(posterCornerRadius)
-                Box(
-                    modifier = Modifier
-                        .matchParentSize()
-                        .clipToBounds()
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(bgArtworkUrl)
-                            .crossfade(false)
-                            .build(),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .requiredSize(posterWidth, posterHeight)
-                            .clip(posterShape)
-                            .blur(16.dp)
-                            .offset(
-                                x = cardWidthDp - cardOffsetX - posterWidth,
-                                y = cardHeightDp - cardOffsetY - posterHeight
-                            )
-                    )
-                }
-            } else if (bgArtworkUrl != null) {
-                // Fallback if dimensions not provided
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(bgArtworkUrl)
-                        .crossfade(false)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    alignment = Alignment.BottomEnd,
-                    modifier = Modifier
-                        .matchParentSize()
-                        .blur(18.dp)
-                )
-            }
-
-            // Frosted dark glass overlay tint
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .background(Color(0xFF141418).copy(alpha = 0.28f))
-            )
-        }
-
+    ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             modifier = Modifier

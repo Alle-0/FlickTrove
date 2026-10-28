@@ -70,19 +70,19 @@ internal fun ShareLandscapePosterLayout(
         horizontalArrangement = Arrangement.spacedBy(36.dp)
     ) {
         // COLONNA SINISTRA: Poster floating con ombra e badge
-        BoxWithConstraints(
+        Box(
             modifier = Modifier
                 .fillMaxHeight()
                 .aspectRatio(2f / 3f)
         ) {
-            val posterHeight = maxHeight
-            val posterWidth = posterHeight * (2f / 3f)
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
             val cornerRadiusDp = 26.dp
             val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
-            val posterHazeState = remember(showVibesOnPoster) { HazeState() }
+            val showMvpOnPoster = state.config.showMvp && !actorName.isNullOrBlank()
+            val showPosterHaze = showVibesOnPoster || showMvpOnPoster
+            val posterHazeState = remember(showPosterHaze) { HazeState() }
 
             Box(
                 modifier = Modifier
@@ -90,7 +90,7 @@ internal fun ShareLandscapePosterLayout(
                     .shadow(elevation = 28.dp, shape = posterShape)
                     .clip(posterShape)
                     .then(
-                        if (showVibesOnPoster) {
+                        if (showPosterHaze) {
                             Modifier.haze(state = posterHazeState, style = HazeStyles.PremiumDark)
                         } else {
                             Modifier
@@ -136,24 +136,16 @@ internal fun ShareLandscapePosterLayout(
                 )
             }
 
-            // MVP badge in basso a destra sul poster
-            if (state.config.showMvp && !actorName.isNullOrBlank()) {
+            // MVP badge in basso a destra sul poster con real frosted glass blur
+            if (showMvpOnPoster) {
                 val cardOffsetX = 20.dp
                 val cardOffsetY = 14.dp
                 MvpMiniCard(
-                    actorName = actorName,
+                    actorName = actorName.orEmpty(),
                     characterName = state.movie.favoriteActorCharacter,
                     profilePath = profilePath,
                     accentColor = state.accentColor,
-                    posterUrl = state.posterUrl,
-                    backdropUrl = state.backdropUrl,
-                    hazeState = state.cardHazeState,
-                    isFloatingPoster = true,
-                    posterWidth = posterWidth,
-                    posterHeight = posterHeight,
-                    posterCornerRadius = cornerRadiusDp,
-                    cardOffsetX = cardOffsetX,
-                    cardOffsetY = cardOffsetY,
+                    hazeState = posterHazeState,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
                         .offset(x = cardOffsetX, y = cardOffsetY)
@@ -390,8 +382,7 @@ internal fun ShareLandscapeBackdropLayout(
                         characterName = state.movie.favoriteActorCharacter,
                         profilePath = profilePath,
                         accentColor = state.accentColor,
-                        hazeState = state.cardHazeState,
-                        isFloatingPoster = false
+                        hazeState = state.cardHazeState
                     )
                 }
 
