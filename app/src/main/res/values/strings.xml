@@ -2015,4 +2015,40 @@
 
     <string name="settings_cat_linear_bar">LINEAR BAR</string>
     <string name="settings_cat_circular_bar">CIRCULAR BAR</string>
+
+    <!-- Share Story Card -->
+    <string name="share_story_card_title">Story Card</string>
+    <string name="share_cover_poster">Poster</string>
+    <string name="share_cover_backdrop">Backdrop</string>
+    <string name="share_ratio_story">Story</string>
+    <string name="share_ratio_post">Post</string>
+    <string name="share_ratio_square">Square</string>
+    <string name="share_ratio_wide">Wide</string>
+    <string name="share_toggle_vibe">Vibe</string>
+    <string name="share_toggle_mvp">MVP</string>
+    <string name="share_toggle_profile">Profile</string>
+    <string name="share_cover_choose">Choose cover</string>
+    <string name="share_cover_edit">Edit</string>
+    <string name="share_cover_reset_original">Reset to original</string>
+    <string name="share_action_share_comments">Share in comments</string>
+    <string name="share_action_share">Share</string>
+    <string name="share_action_save">Save</string>
+    <string name="share_toast_saved_success">Card saved to gallery!</string>
+    <string name="share_toast_saved_error">Error saving card</string>
+    <string name="share_toast_prep_error">Error preparing image</string>
+    <string name="share_toast_share_error">Error sharing card</string>
+    <string name="share_intent_text">Check out my card for %1$s on FlickTrove! 🎬</string>
+    <string name="share_intent_chooser_title">Share Story Card</string>
+    <string name="share_cover_picker_title">Customize Image</string>
+    <string name="share_cover_picker_poster_hint">Tap a poster for the card</string>
+    <string name="share_cover_picker_backdrop_hint">Tap a backdrop for the card</string>
+    <string name="share_cover_picker_reset">Reset</string>
+    <string name="share_cover_picker_posters_tab">Posters (%1$d)</string>
+    <string name="share_cover_picker_backdrops_tab">Backdrops (%1$d)</string>
+    <string name="share_cover_picker_all_languages">🌐 All languages</string>
+    <string name="share_cover_picker_empty">No images available</string>
+    <string name="share_cover_picker_select_language">Select language</string>
+    <string name="share_cover_picker_selected">Selected</string>
+    <string name="share_meta_season_single">1 Season</string>
+    <string name="share_meta_seasons_multiple">%1$d Seasons</string>
 </resources>

@@ -246,6 +246,7 @@ fun MovieDetailScreenContent(
     var showWatchHistorySheet by remember { mutableStateOf(false) }
     var forceExpandCheckIn by remember { mutableStateOf(false) }
     var isDetailCastSheetOpen by remember { mutableStateOf(false) }
+    var showShareStoryModal by remember { mutableStateOf(false) }
     var previousWatchState by remember { mutableStateOf<WatchState?>(null) }
     val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
     val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
@@ -633,6 +634,8 @@ fun MovieDetailScreenContent(
                                         initialImages = state.details.images,
                                         allMediaImages = allMediaImages,
                                         onLoadAllImages = { viewModel.loadAllMediaImages() },
+                                        showShareStoryModal = showShareStoryModal,
+                                        onShowShareStoryModalChange = { showShareStoryModal = it },
                                         onRate = { viewModel.onEvent(DetailEvent.Rate(it)) },
                                         onNoteUpdate = { viewModel.onEvent(DetailEvent.UpdateNote(it)) },
                                         onCheckInClick = { 
@@ -753,7 +756,7 @@ fun MovieDetailScreenContent(
                                 }
                             }
 
-                            if (!showEpisodesSheet && !isDetailCastSheetOpen) {
+                            if (!showEpisodesSheet && !isDetailCastSheetOpen && !showShareStoryModal) {
                                 Box(
                                     modifier = Modifier
                                         .fillMaxWidth()
@@ -843,6 +846,11 @@ fun MovieDetailScreenContent(
 
         // Morphing Top Bar (pill → folder picker modal)
         val successState = uiState as? DetailUiState.Success
+        val topBarAlpha by animateFloatAsState(
+            targetValue = if (showShareStoryModal) 0f else 1f,
+            animationSpec = tween(durationMillis = 200),
+            label = "TopBarAlphaStoryModal"
+        )
         DetailMorphingTopBar(
             successState = successState,
             viewModel = viewModel,
@@ -853,7 +861,8 @@ fun MovieDetailScreenContent(
             showFolderPicker = showFolderPicker,
             onFolderPickerChange = { showFolderPicker = it },
             onBackClick = onBackClick,
-            onHomeClick = onHomeClick
+            onHomeClick = onHomeClick,
+            modifier = Modifier.graphicsLayer { alpha = topBarAlpha }
         )
 
         // Peek-a-boo Check-in Drawer (non-invasive, optional)

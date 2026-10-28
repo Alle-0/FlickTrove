@@ -2006,4 +2006,40 @@
 
     <string name="settings_cat_linear_bar">リニアバー</string>
     <string name="settings_cat_circular_bar">サークルバー</string>
+
+    <!-- Share Story Card -->
+    <string name="share_story_card_title">Story Card</string>
+    <string name="share_cover_poster">ポスター</string>
+    <string name="share_cover_backdrop">Backdrop</string>
+    <string name="share_ratio_story">ストーリー</string>
+    <string name="share_ratio_post">投稿</string>
+    <string name="share_ratio_square">スクエア</string>
+    <string name="share_ratio_wide">ワイド</string>
+    <string name="share_toggle_vibe">ムード</string>
+    <string name="share_toggle_mvp">MVP</string>
+    <string name="share_toggle_profile">プロフィール</string>
+    <string name="share_cover_choose">カバーを選択</string>
+    <string name="share_cover_edit">編集</string>
+    <string name="share_cover_reset_original">オリジナルに戻す</string>
+    <string name="share_action_share_comments">コメントで共有</string>
+    <string name="share_action_share">共有</string>
+    <string name="share_action_save">保存</string>
+    <string name="share_toast_saved_success">カードをギャラリーに保存しました！</string>
+    <string name="share_toast_saved_error">保存中にエラーが発生しました</string>
+    <string name="share_toast_prep_error">画像の準備中にエラーが発生しました</string>
+    <string name="share_toast_share_error">共有中にエラーが発生しました</string>
+    <string name="share_intent_text">FlickTroveで%1$sのカードをチェック！ 🎬</string>
+    <string name="share_intent_chooser_title">Story Cardを共有</string>
+    <string name="share_cover_picker_title">画像をカスタマイズ</string>
+    <string name="share_cover_picker_poster_hint">カード用のポスターをタップ</string>
+    <string name="share_cover_picker_backdrop_hint">カード用の背景画像をタップ</string>
+    <string name="share_cover_picker_reset">リセット</string>
+    <string name="share_cover_picker_posters_tab">ポスター (%1$d)</string>
+    <string name="share_cover_picker_backdrops_tab">背景画像 (%1$d)</string>
+    <string name="share_cover_picker_all_languages">🌐 すべての言語</string>
+    <string name="share_cover_picker_empty">利用可能な画像がありません</string>
+    <string name="share_cover_picker_select_language">言語を選択</string>
+    <string name="share_cover_picker_selected">選択済み</string>
+    <string name="share_meta_season_single">1シーズン</string>
+    <string name="share_meta_seasons_multiple">%1$dシーズン</string>
 </resources>

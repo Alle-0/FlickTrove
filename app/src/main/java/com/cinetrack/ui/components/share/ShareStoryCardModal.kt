@@ -57,6 +57,18 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.VibrationHelper
 import com.google.firebase.auth.FirebaseAuth
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
+import androidx.compose.ui.zIndex
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.tween
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.animation.core.animateDpAsState
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
@@ -204,7 +216,7 @@ fun ShareStoryCardModal(
                     modifier = Modifier
                         .fillMaxWidth()
                         .navigationBarsPadding()
-                        .padding(bottom = 8.dp)
+                        .padding(bottom = 16.dp)
                         .verticalScroll(rememberScrollState()),
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
@@ -224,7 +236,7 @@ fun ShareStoryCardModal(
                 )
                 Spacer(modifier = Modifier.width(8.dp))
                 Text(
-                    text = "Story Card",
+                    text = stringResource(R.string.share_story_card_title),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White
@@ -232,11 +244,13 @@ fun ShareStoryCardModal(
                 )
             }
 
-            // SegmentedControl centrato sopra lo show off (Poster vs Backdrop)
+            Spacer(modifier = Modifier.height(10.dp))
+
+            // SegmentedControl centrato sopra lo show off (Poster vs Backdrop a pillola)
             SegmentedControl(
                 options = listOf(
-                    SegmentedOption(value = ShareCoverStyle.POSTER_FLOATING, title = "Poster"),
-                    SegmentedOption(value = ShareCoverStyle.BACKDROP_FULL, title = "Backdrop")
+                    SegmentedOption(value = ShareCoverStyle.POSTER_FLOATING, title = stringResource(R.string.share_cover_poster)),
+                    SegmentedOption(value = ShareCoverStyle.BACKDROP_FULL, title = stringResource(R.string.share_cover_backdrop))
                 ),
                 selected = config.coverStyle,
                 accentColor = accentColor,
@@ -244,12 +258,13 @@ fun ShareStoryCardModal(
                 context = context,
                 modifier = Modifier.width(190.dp),
                 height = 30.dp,
+                isPill = true,
                 onSelect = { newStyle ->
                     config = config.copy(coverStyle = newStyle)
                 }
             )
 
-            Spacer(modifier = Modifier.height(4.dp))
+            Spacer(modifier = Modifier.height(16.dp))
 
             // Scaled Live Preview Card (Pixel-perfect Full HD layout, scaled to preview dimensions)
             val currentRatio = config.aspectRatio
@@ -257,10 +272,36 @@ fun ShareStoryCardModal(
             val previewScale = (currentRatio.previewWidthDp.value * screenDensity) / currentRatio.targetWidthPx.toFloat()
             val exportDensity = currentRatio.targetWidthPx.toFloat() / currentRatio.baseWidthDp.value
 
+            val springSpec = spring<androidx.compose.ui.unit.Dp>(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+            val floatSpringSpec = spring<Float>(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+
+            val animatedPreviewWidth by animateDpAsState(
+                targetValue = currentRatio.previewWidthDp,
+                animationSpec = springSpec,
+                label = "PreviewWidth"
+            )
+            val animatedRatio by animateFloatAsState(
+                targetValue = currentRatio.ratio,
+                animationSpec = floatSpringSpec,
+                label = "PreviewRatio"
+            )
+            val animatedPreviewScale by animateFloatAsState(
+                targetValue = previewScale,
+                animationSpec = floatSpringSpec,
+                label = "PreviewScale"
+            )
+
             Box(
                 modifier = Modifier
-                    .width(currentRatio.previewWidthDp)
-                    .aspectRatio(currentRatio.ratio)
+                    .width(animatedPreviewWidth)
+                    .aspectRatio(animatedRatio)
+                    .clip(RoundedCornerShape(24.dp))
                     .clipToBounds(),
                 contentAlignment = Alignment.Center
             ) {
@@ -274,7 +315,7 @@ fun ShareStoryCardModal(
                                 graphicsLayer.record {
                                     this@drawWithContent.drawContent()
                                 }
-                                scale(scale = previewScale, pivot = center) {
+                                scale(scale = animatedPreviewScale, pivot = center) {
                                     drawLayer(graphicsLayer)
                                 }
                             },
@@ -293,59 +334,31 @@ fun ShareStoryCardModal(
                 }
             }
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
-            // Aspect Ratio Selector (4 formati con nome e destinazione chiaramente visibili: Storia, Post, ecc.)
-            Row(
+            // Aspect Ratio Selector come selettore unico a pillola
+            SegmentedControl(
+                options = listOf(
+                    SegmentedOption(value = ShareAspectRatio.STORY_9_16, title = "9:16", subtitle = stringResource(ShareAspectRatio.STORY_9_16.subtitleResId)),
+                    SegmentedOption(value = ShareAspectRatio.POST_4_5, title = "4:5", subtitle = stringResource(ShareAspectRatio.POST_4_5.subtitleResId)),
+                    SegmentedOption(value = ShareAspectRatio.SQUARE_1_1, title = "1:1", subtitle = stringResource(ShareAspectRatio.SQUARE_1_1.subtitleResId)),
+                    SegmentedOption(value = ShareAspectRatio.LANDSCAPE_16_9, title = "16:9", subtitle = stringResource(ShareAspectRatio.LANDSCAPE_16_9.subtitleResId))
+                ),
+                selected = config.aspectRatio,
+                accentColor = accentColor,
+                vibrationEnabled = true,
+                context = context,
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 20.dp),
-                horizontalArrangement = Arrangement.spacedBy(6.dp)
-            ) {
-                ShareAspectRatio.values().forEach { ratio ->
-                    val isSelected = config.aspectRatio == ratio
-                    Column(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(36.dp)
-                            .bounceClick(scaleDown = 0.94f) {
-                                config = config.copy(aspectRatio = ratio)
-                            }
-                            .clip(RoundedCornerShape(8.dp))
-                            .background(
-                                if (isSelected) accentColor.copy(alpha = 0.22f)
-                                else Color.White.copy(alpha = 0.05f)
-                            )
-                            .border(
-                                1.dp,
-                                if (isSelected) accentColor.copy(alpha = 0.70f)
-                                else Color.White.copy(alpha = 0.10f),
-                                RoundedCornerShape(8.dp)
-                            )
-                            .padding(vertical = 2.dp),
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        verticalArrangement = Arrangement.Center
-                    ) {
-                        Text(
-                            text = ratio.ratioName,
-                            fontSize = 11.sp,
-                            fontWeight = if (isSelected) FontWeight.Black else FontWeight.Bold,
-                            color = if (isSelected) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White,
-                            lineHeight = 12.sp
-                        )
-                        Text(
-                            text = ratio.subtitle,
-                            fontSize = 8.5.sp,
-                            fontWeight = FontWeight.Medium,
-                            color = if (isSelected) ColorUtils.lightenForText(accentColor, 1.2f).copy(alpha = 0.95f) else Color.White.copy(alpha = 0.60f),
-                            maxLines = 1,
-                            lineHeight = 10.sp
-                        )
-                    }
+                height = 38.dp,
+                isPill = true,
+                onSelect = { newRatio ->
+                    config = config.copy(aspectRatio = newRatio)
                 }
-            }
+            )
 
-            Spacer(modifier = Modifier.height(6.dp))
+            Spacer(modifier = Modifier.height(8.dp))
 
             // Griglia 2x2 dei controlli:
             // Riga 1: Toggle Vibe + Toggle MVP
@@ -369,7 +382,7 @@ fun ShareStoryCardModal(
                 ) {
                     // Toggle Vibe
                     ShareGridToggleCard(
-                        label = "Vibe",
+                        label = stringResource(R.string.share_toggle_vibe),
                         checked = config.showVibe,
                         icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                         accentColor = accentColor,
@@ -380,7 +393,7 @@ fun ShareStoryCardModal(
 
                     // Toggle MVP
                     ShareGridToggleCard(
-                        label = "MVP",
+                        label = stringResource(R.string.share_toggle_mvp),
                         checked = config.showMvp,
                         icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
                         accentColor = accentColor,
@@ -398,7 +411,7 @@ fun ShareStoryCardModal(
                 ) {
                     // Toggle Profilo
                     ShareGridToggleCard(
-                        label = "Profilo",
+                        label = stringResource(R.string.share_toggle_profile),
                         checked = config.showProfile,
                         icon = ImageVector.vectorResource(id = R.drawable.ic_persona),
                         accentColor = accentColor,
@@ -407,7 +420,7 @@ fun ShareStoryCardModal(
                         onToggle = { config = config.copy(showProfile = it) }
                     )
 
-                    // Pulsante Scegli / Cambia cover
+                    // Pulsante Scegli / Cambia cover a pillola
                     Row(
                         modifier = Modifier
                             .weight(1f)
@@ -417,7 +430,7 @@ fun ShareStoryCardModal(
                                 coverTab = if (config.coverStyle == ShareCoverStyle.BACKDROP_FULL) 1 else 0
                                 isSelectingCover = true
                             }
-                            .clip(RoundedCornerShape(10.dp))
+                            .clip(RoundedCornerShape(50))
                             .background(
                                 if (hasCustomImage) accentColor.copy(alpha = 0.20f)
                                 else Color.White.copy(alpha = 0.06f)
@@ -426,9 +439,9 @@ fun ShareStoryCardModal(
                                 1.dp,
                                 if (hasCustomImage) accentColor.copy(alpha = 0.65f)
                                 else Color.White.copy(alpha = 0.12f),
-                                RoundedCornerShape(10.dp)
+                                RoundedCornerShape(50)
                             )
-                            .padding(horizontal = 10.dp),
+                            .padding(horizontal = 12.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -444,7 +457,7 @@ fun ShareStoryCardModal(
                                 modifier = Modifier.size(14.dp)
                             )
                             Text(
-                                text = if (hasCustomImage) "Modifica" else "Scegli cover",
+                                text = if (hasCustomImage) stringResource(R.string.share_cover_edit) else stringResource(R.string.share_cover_choose),
                                 fontSize = 11.5.sp,
                                 fontWeight = FontWeight.SemiBold,
                                 color = if (hasCustomImage) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White,
@@ -466,7 +479,7 @@ fun ShareStoryCardModal(
                             ) {
                                 Icon(
                                     painter = painterResource(id = R.drawable.ic_ricarica),
-                                    contentDescription = "Ripristina originale",
+                                    contentDescription = stringResource(R.string.share_cover_reset_original),
                                     tint = Color.White,
                                     modifier = Modifier.size(11.dp)
                                 )
@@ -476,7 +489,7 @@ fun ShareStoryCardModal(
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(18.dp))
 
             // Bottom Action Buttons in 2 Rows:
             // Row 1: [ Condividi nei commenti ] (Hero action a tutta larghezza con accento primario)
@@ -505,7 +518,7 @@ fun ShareStoryCardModal(
                                     onDismiss()
                                     onShareToComments(uri)
                                 } else {
-                                    Toast.makeText(context, "Errore nella preparazione dell'immagine", Toast.LENGTH_SHORT).show()
+                                    Toast.makeText(context, context.getString(R.string.share_toast_prep_error), Toast.LENGTH_SHORT).show()
                                 }
                             }
                             isProcessing = false
@@ -532,7 +545,7 @@ fun ShareStoryCardModal(
                 )
                 Spacer(modifier = Modifier.width(7.dp))
                 Text(
-                    text = "Condividi nei commenti",
+                    text = stringResource(R.string.share_action_share_comments),
                     fontSize = 13.5.sp,
                     fontWeight = FontWeight.Bold,
                     color = ColorUtils.contentColorForAccent(accentColor)
@@ -577,7 +590,7 @@ fun ShareStoryCardModal(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Condividi",
+                        text = stringResource(R.string.share_action_share),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
@@ -599,9 +612,9 @@ fun ShareStoryCardModal(
                                         saveBitmapToGallery(context, bitmap, movie.displayName)
                                     }
                                     if (success) {
-                                        Toast.makeText(context, "Card salvata nella galleria!", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.share_toast_saved_success), Toast.LENGTH_SHORT).show()
                                     } else {
-                                        Toast.makeText(context, "Errore durante il salvataggio", Toast.LENGTH_SHORT).show()
+                                        Toast.makeText(context, context.getString(R.string.share_toast_saved_error), Toast.LENGTH_SHORT).show()
                                     }
                                 }
                                 isProcessing = false
@@ -621,7 +634,7 @@ fun ShareStoryCardModal(
                     )
                     Spacer(modifier = Modifier.width(6.dp))
                     Text(
-                        text = "Salva",
+                        text = stringResource(R.string.share_action_save),
                         fontSize = 13.sp,
                         fontWeight = FontWeight.SemiBold,
                         color = Color.White
@@ -629,7 +642,7 @@ fun ShareStoryCardModal(
                 }
             }
         }
-        Spacer(modifier = Modifier.height(6.dp))
+        Spacer(modifier = Modifier.height(16.dp))
         }
     }
 }
@@ -657,14 +670,14 @@ private fun ShareGridToggleCard(
                     onToggle(!checked)
                 }
             }
-            .clip(RoundedCornerShape(10.dp))
+            .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = if (enabled) 0.06f else 0.02f))
             .border(
                 1.dp,
                 Color.White.copy(alpha = if (enabled) 0.12f else 0.05f),
-                RoundedCornerShape(10.dp)
+                RoundedCornerShape(50)
             )
-            .padding(start = 10.dp, end = 8.dp),
+            .padding(start = 12.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
@@ -689,10 +702,15 @@ private fun ShareGridToggleCard(
             )
         }
 
-        // Toggle Switch ufficiale FlickTrove in formato compatto
+        // Toggle Switch ufficiale FlickTrove in formato compatto con tocco diretto dell'utente abilitato
         FlickTroveSwitch(
             checked = checked,
-            onCheckedChange = null,
+            onCheckedChange = { isChecked ->
+                if (enabled) {
+                    VibrationHelper.vibrateTick(context)
+                    onToggle(isChecked)
+                }
+            },
             accentColor = accentColor,
             enabled = enabled,
             trackWidth = 36.dp,
@@ -763,16 +781,16 @@ private fun shareBitmapExternal(context: Context, bitmap: Bitmap, title: String)
             type = "image/png"
             putExtra(Intent.EXTRA_STREAM, contentUri)
             putExtra(Intent.EXTRA_SUBJECT, title)
-            putExtra(Intent.EXTRA_TEXT, "Guarda la mia scheda per $title su FlickTrove! 🎬")
+            putExtra(Intent.EXTRA_TEXT, context.getString(R.string.share_intent_text, title))
             addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
         }
 
-        val chooser = Intent.createChooser(intent, "Condividi Story Card")
+        val chooser = Intent.createChooser(intent, context.getString(R.string.share_intent_chooser_title))
         chooser.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
         context.startActivity(chooser)
     } catch (e: Exception) {
         e.printStackTrace()
-        Toast.makeText(context, "Errore nella condivisione", Toast.LENGTH_SHORT).show()
+        Toast.makeText(context, context.getString(R.string.share_toast_share_error), Toast.LENGTH_SHORT).show()
     }
 }
 
@@ -865,7 +883,7 @@ private fun getFlagEmoji(languageCode: String?): String {
 private fun getLanguageDisplayName(code: String): String {
     val flag = getFlagEmoji(code)
     val loc = Locale.forLanguageTag(code)
-    val localizedName = loc.getDisplayLanguage(Locale.ITALIAN).replaceFirstChar { it.uppercase() }
+    val localizedName = loc.getDisplayLanguage(Locale.getDefault()).replaceFirstChar { it.uppercase() }
     val display = if (localizedName.isNotBlank() && localizedName != code) localizedName else code.uppercase()
     return "$flag $display"
 }
@@ -942,18 +960,47 @@ private fun CoverSelectionView(
         }
     }
 
-    // Per i backdrop: nessuna lingua, tutti i backdrop ("lascia stare la storia delle lingue")
-    val currentDisplayList = if (coverTab == 0) filteredPosters else rawBackdrops
+    // Per i backdrop: filtra i backdrop con scritte straniere casuali (turco, polacco, ecc.)
+    // Dà priorità assoluta a quelli textless (puliti senza scritte), poi alla lingua dell'utente e all'inglese
+    val validBackdrops = remember(rawBackdrops, userLang) {
+        val relevant = rawBackdrops.filter {
+            it.iso6391.isNullOrBlank() ||
+            it.iso6391.equals(userLang, ignoreCase = true) ||
+            it.iso6391.equals("en", ignoreCase = true)
+        }
+        (if (relevant.isNotEmpty()) relevant else rawBackdrops).sortedWith { a, b ->
+            val aLang = a.iso6391?.lowercase()
+            val bLang = b.iso6391?.lowercase()
+            when {
+                aLang.isNullOrBlank() && !bLang.isNullOrBlank() -> -1
+                !aLang.isNullOrBlank() && bLang.isNullOrBlank() -> 1
+                aLang == userLang && bLang != userLang -> -1
+                bLang == userLang && aLang != userLang -> 1
+                aLang == "en" && bLang != "en" -> -1
+                bLang == "en" && aLang != "en" -> 1
+                else -> 0
+            }
+        }
+    }
+
+    val currentDisplayList = if (coverTab == 0) filteredPosters else validBackdrops
 
     val hasCustomForCurrentTab = if (coverTab == 0) config.customPosterPath != null else config.customBackdropPath != null
 
-    Column(
+    val coverHazeState = remember { HazeState() }
+    var languageMenuExpanded by remember { mutableStateOf(false) }
+    LaunchedEffect(coverTab) { languageMenuExpanded = false }
+
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .navigationBarsPadding()
-            .padding(bottom = 16.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
+            .padding(bottom = 16.dp)
     ) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
         // Header
         Row(
             modifier = Modifier
@@ -977,7 +1024,7 @@ private fun CoverSelectionView(
                 ) {
                     Icon(
                         painter = painterResource(id = R.drawable.ic_left),
-                        contentDescription = "Indietro",
+                        contentDescription = stringResource(R.string.detail_content_desc_back),
                         tint = Color.White,
                         modifier = Modifier.size(16.dp)
                     )
@@ -985,14 +1032,14 @@ private fun CoverSelectionView(
 
                 Column {
                     Text(
-                        text = "Personalizza Immagine",
+                        text = stringResource(R.string.share_cover_picker_title),
                         style = MaterialTheme.typography.titleMedium.copy(
                             fontWeight = FontWeight.Bold,
                             color = Color.White
                         )
                     )
                     Text(
-                        text = if (coverTab == 0) "Tocca una locandina per la card" else "Tocca uno sfondo per la card",
+                        text = if (coverTab == 0) stringResource(R.string.share_cover_picker_poster_hint) else stringResource(R.string.share_cover_picker_backdrop_hint),
                         fontSize = 11.5.sp,
                         color = Color.White.copy(alpha = 0.60f)
                     )
@@ -1001,7 +1048,7 @@ private fun CoverSelectionView(
 
             if (hasCustomForCurrentTab) {
                 Text(
-                    text = "Ripristina",
+                    text = stringResource(R.string.share_cover_picker_reset),
                     fontSize = 12.5.sp,
                     fontWeight = FontWeight.SemiBold,
                     color = ColorUtils.lightenForText(accentColor, 1.35f),
@@ -1024,8 +1071,8 @@ private fun CoverSelectionView(
         // Tab Selector (Posters vs Backdrops)
         SegmentedControl(
             options = listOf(
-                SegmentedOption(value = 0, title = "Locandine (${validPosters.size})"),
-                SegmentedOption(value = 1, title = "Sfondi (${rawBackdrops.size})")
+                SegmentedOption(value = 0, title = stringResource(R.string.share_cover_picker_posters_tab, validPosters.size)),
+                SegmentedOption(value = 1, title = stringResource(R.string.share_cover_picker_backdrops_tab, validBackdrops.size))
             ),
             selected = coverTab,
             accentColor = accentColor,
@@ -1044,7 +1091,6 @@ private fun CoverSelectionView(
 
         // Sezione Filtro Lingua: SOLO per le Locandine (coverTab == 0) con pulsante a tendina e icona standard ic_right
         if (coverTab == 0 && availableLanguages.isNotEmpty()) {
-            var languageMenuExpanded by remember { mutableStateOf(false) }
             val chevronRotation by animateFloatAsState(
                 targetValue = if (languageMenuExpanded) 270f else 90f,
                 animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
@@ -1055,6 +1101,7 @@ private fun CoverSelectionView(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 24.dp)
+                    .zIndex(if (languageMenuExpanded) 100f else 1f)
             ) {
                 val currentCount = if (selectedLanguageCode == "all") {
                     validPosters.size
@@ -1062,7 +1109,7 @@ private fun CoverSelectionView(
                     validPosters.count { it.iso6391.equals(selectedLanguageCode, ignoreCase = true) }
                 }
                 val currentLabel = if (selectedLanguageCode == "all") {
-                    "🌐 Tutte le lingue"
+                    stringResource(R.string.share_cover_picker_all_languages)
                 } else {
                     getLanguageDisplayName(selectedLanguageCode)
                 }
@@ -1071,7 +1118,7 @@ private fun CoverSelectionView(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(38.dp)
-                        .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = true }
+                        .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = !languageMenuExpanded }
                         .clip(RoundedCornerShape(12.dp))
                         .background(Color.White.copy(alpha = 0.06f))
                         .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
@@ -1089,17 +1136,16 @@ private fun CoverSelectionView(
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White
                         )
-                        Text(
-                            text = "($currentCount)",
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.Normal,
-                            color = Color.White.copy(alpha = 0.60f)
+                        CountPill(
+                            count = currentCount,
+                            isSelected = false,
+                            accentColor = accentColor
                         )
                     }
 
                     Icon(
                         painter = painterResource(id = R.drawable.ic_right),
-                        contentDescription = "Seleziona lingua",
+                        contentDescription = stringResource(R.string.share_cover_picker_select_language),
                         tint = Color.White.copy(alpha = 0.70f),
                         modifier = Modifier
                             .size(15.dp)
@@ -1107,80 +1153,102 @@ private fun CoverSelectionView(
                     )
                 }
 
-                DropdownMenu(
-                    expanded = languageMenuExpanded,
-                    onDismissRequest = { languageMenuExpanded = false },
+                // In-tree Animated Glass Dropdown with Haze & Top/Bottom scroll fade gradient
+                androidx.compose.animation.AnimatedVisibility(
+                    visible = languageMenuExpanded,
+                    enter = fadeIn(tween(180)) + scaleIn(
+                        initialScale = 0.95f,
+                        transformOrigin = TransformOrigin(0.5f, 0f),
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                    ),
+                    exit = fadeOut(tween(130)) + scaleOut(
+                        targetScale = 0.95f,
+                        transformOrigin = TransformOrigin(0.5f, 0f),
+                        animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
+                    ),
                     modifier = Modifier
-                        .background(Color(0xFF1E1E24))
-                        .border(1.dp, Color.White.copy(alpha = 0.14f), RoundedCornerShape(12.dp))
-                        .heightIn(max = 280.dp)
+                        .align(Alignment.TopCenter)
+                        .offset(y = 44.dp)
+                        .fillMaxWidth()
                 ) {
-                    // Opzione "Tutte le lingue"
-                    val totalPosters = validPosters.size
-                    DropdownMenuItem(
-                        text = {
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.SpaceBetween,
-                                verticalAlignment = Alignment.CenterVertically
-                            ) {
-                                Text(
-                                    text = "🌐 Tutte le lingue",
-                                    fontSize = 13.5.sp,
-                                    fontWeight = if (selectedLanguageCode == "all") FontWeight.Bold else FontWeight.Normal,
-                                    color = if (selectedLanguageCode == "all") ColorUtils.lightenForText(accentColor, 1.35f) else Color.White
-                                )
-                                Spacer(modifier = Modifier.width(16.dp))
-                                Text(
-                                    text = "($totalPosters)",
-                                    fontSize = 12.sp,
-                                    color = Color.White.copy(alpha = 0.50f)
-                                )
-                            }
-                        },
-                        onClick = {
-                            VibrationHelper.vibrateTick(context)
-                            selectedLanguageCode = "all"
-                            languageMenuExpanded = false
-                        }
-                    )
+                    val scrollState = rememberScrollState()
+                    val canScrollUp = scrollState.canScrollBackward
+                    val canScrollDown = scrollState.canScrollForward
 
-                    HorizontalDivider(
-                        modifier = Modifier.padding(vertical = 2.dp),
-                        color = Color.White.copy(alpha = 0.08f),
-                        thickness = 0.5.dp
-                    )
-
-                    availableLanguages.forEach { code ->
-                        val count = validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
-                        val isCurrent = selectedLanguageCode.equals(code, ignoreCase = true)
-                        DropdownMenuItem(
-                            text = {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.SpaceBetween,
-                                    verticalAlignment = Alignment.CenterVertically
-                                ) {
-                                    Text(
-                                        text = getLanguageDisplayName(code),
-                                        fontSize = 13.5.sp,
-                                        fontWeight = if (isCurrent) FontWeight.Bold else FontWeight.Normal,
-                                        color = if (isCurrent) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White
-                                    )
-                                    Spacer(modifier = Modifier.width(16.dp))
-                                    Text(
-                                        text = "($count)",
-                                        fontSize = 12.sp,
-                                        color = if (isCurrent) ColorUtils.lightenForText(accentColor, 1.35f).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.50f)
-                                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .heightIn(max = 280.dp)
+                            .shadow(20.dp, RoundedCornerShape(16.dp))
+                            .hazeGlass(
+                                state = coverHazeState,
+                                shape = RoundedCornerShape(16.dp),
+                                blurRadius = 24.dp,
+                                containerColor = Color(0xFF141418).copy(alpha = 0.60f),
+                                borderWidth = 1.dp,
+                                borderColor = Color.White.copy(alpha = 0.18f)
+                            )
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                                .drawWithContent {
+                                    drawContent()
+                                    if (canScrollUp || canScrollDown) {
+                                        val topStop = if (canScrollUp) 0.08f else 0f
+                                        val bottomStop = if (canScrollDown) 0.92f else 1f
+                                        drawRect(
+                                            brush = Brush.verticalGradient(
+                                                0f to (if (canScrollUp) Color.Transparent else Color.Black),
+                                                topStop to Color.Black,
+                                                bottomStop to Color.Black,
+                                                1f to (if (canScrollDown) Color.Transparent else Color.Black)
+                                            ),
+                                            blendMode = BlendMode.DstIn
+                                        )
+                                    }
                                 }
-                            },
-                            onClick = {
-                                VibrationHelper.vibrateTick(context)
-                                selectedLanguageCode = code
-                                languageMenuExpanded = false
+                                .verticalScroll(scrollState)
+                                .padding(vertical = 6.dp)
+                        ) {
+                            // Opzione "Tutte le lingue"
+                            val totalPosters = validPosters.size
+                            val isAllSelected = selectedLanguageCode == "all"
+                            LanguageMenuItem(
+                                text = stringResource(R.string.share_cover_picker_all_languages),
+                                count = totalPosters,
+                                isSelected = isAllSelected,
+                                accentColor = accentColor,
+                                onClick = {
+                                    VibrationHelper.vibrateTick(context)
+                                    selectedLanguageCode = "all"
+                                    languageMenuExpanded = false
+                                }
+                            )
+
+                            HorizontalDivider(
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
+                                color = Color.White.copy(alpha = 0.08f),
+                                thickness = 0.5.dp
+                            )
+
+                            availableLanguages.forEach { code ->
+                                val count = validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
+                                val isCurrent = selectedLanguageCode.equals(code, ignoreCase = true)
+                                LanguageMenuItem(
+                                    text = getLanguageDisplayName(code),
+                                    count = count,
+                                    isSelected = isCurrent,
+                                    accentColor = accentColor,
+                                    onClick = {
+                                        VibrationHelper.vibrateTick(context)
+                                        selectedLanguageCode = code
+                                        languageMenuExpanded = false
+                                    }
+                                )
                             }
-                        )
+                        }
                     }
                 }
             }
@@ -1197,7 +1265,8 @@ private fun CoverSelectionView(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(260.dp),
+                    .height(260.dp)
+                    .haze(state = coverHazeState, style = HazeStyles.PremiumDark),
                 contentAlignment = Alignment.Center
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -1209,7 +1278,7 @@ private fun CoverSelectionView(
                     )
                     Spacer(modifier = Modifier.height(10.dp))
                     Text(
-                        text = "Nessuna immagine disponibile",
+                        text = stringResource(R.string.share_cover_picker_empty),
                         fontSize = 13.sp,
                         color = Color.White.copy(alpha = 0.5f)
                     )
@@ -1222,6 +1291,7 @@ private fun CoverSelectionView(
                     .fillMaxWidth()
                     .weight(1f, fill = false)
                     .heightIn(min = 300.dp, max = 500.dp)
+                    .haze(state = coverHazeState, style = HazeStyles.PremiumDark)
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .drawWithContent {
                         drawContent()
@@ -1313,7 +1383,7 @@ private fun CoverSelectionView(
                                 ) {
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_tick),
-                                        contentDescription = "Selezionato",
+                                        contentDescription = stringResource(R.string.share_cover_picker_selected),
                                         tint = ColorUtils.contentColorForAccent(accentColor),
                                         modifier = Modifier.size(13.dp)
                                     )
@@ -1324,5 +1394,88 @@ private fun CoverSelectionView(
                 }
             }
         }
+
+        // Tap-outside dismiss overlay when dropdown is open
+        if (languageMenuExpanded) {
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(50f)
+                    .pointerInput(Unit) {
+                        detectTapGestures { languageMenuExpanded = false }
+                    }
+            )
+        }
+    }
+}
+}
+
+@Composable
+private fun LanguageMenuItem(
+    text: String,
+    count: Int,
+    isSelected: Boolean,
+    accentColor: Color,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .height(42.dp)
+            .bounceClick(scaleDown = 0.98f, onClick = onClick)
+            .clip(RoundedCornerShape(10.dp))
+            .background(if (isSelected) accentColor.copy(alpha = 0.12f) else Color.Transparent)
+            .padding(horizontal = 14.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Text(
+            text = text,
+            fontSize = 13.5.sp,
+            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
+            color = if (isSelected) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.weight(1f, fill = false)
+        )
+        Spacer(modifier = Modifier.width(12.dp))
+        CountPill(
+            count = count,
+            isSelected = isSelected,
+            accentColor = accentColor
+        )
+    }
+}
+
+@Composable
+private fun CountPill(
+    count: Int,
+    isSelected: Boolean,
+    accentColor: Color,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (isSelected) accentColor.copy(alpha = 0.24f)
+                else Color.White.copy(alpha = 0.09f)
+            )
+            .border(
+                0.6.dp,
+                if (isSelected) accentColor.copy(alpha = 0.60f)
+                else Color.White.copy(alpha = 0.14f),
+                RoundedCornerShape(50)
+            )
+            .padding(horizontal = 7.dp, vertical = 2.dp),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(
+            text = count.toString(),
+            fontSize = 11.sp,
+            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold,
+            color = if (isSelected) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White.copy(alpha = 0.75f),
+            lineHeight = 11.sp
+        )
     }
 }

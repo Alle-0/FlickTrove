@@ -2003,4 +2003,40 @@
 
     <string name="settings_cat_linear_bar">LINEARER BALKEN</string>
     <string name="settings_cat_circular_bar">KREISFÖRMIGER BALKEN</string>
+
+    <!-- Share Story Card -->
+    <string name="share_story_card_title">Story Card</string>
+    <string name="share_cover_poster">Poster</string>
+    <string name="share_cover_backdrop">Backdrop</string>
+    <string name="share_ratio_story">Story</string>
+    <string name="share_ratio_post">Beitrag</string>
+    <string name="share_ratio_square">Quadrat</string>
+    <string name="share_ratio_wide">Breitbild</string>
+    <string name="share_toggle_vibe">Vibe</string>
+    <string name="share_toggle_mvp">MVP</string>
+    <string name="share_toggle_profile">Profil</string>
+    <string name="share_cover_choose">Cover wählen</string>
+    <string name="share_cover_edit">Bearbeiten</string>
+    <string name="share_cover_reset_original">Original wiederherstellen</string>
+    <string name="share_action_share_comments">In Kommentaren teilen</string>
+    <string name="share_action_share">Teilen</string>
+    <string name="share_action_save">Speichern</string>
+    <string name="share_toast_saved_success">Card in Galerie gespeichert!</string>
+    <string name="share_toast_saved_error">Fehler beim Speichern</string>
+    <string name="share_toast_prep_error">Fehler beim Vorbereiten des Bildes</string>
+    <string name="share_toast_share_error">Fehler beim Teilen</string>
+    <string name="share_intent_text">Sieh dir meine Card für %1$s auf FlickTrove an! 🎬</string>
+    <string name="share_intent_chooser_title">Story Card teilen</string>
+    <string name="share_cover_picker_title">Bild anpassen</string>
+    <string name="share_cover_picker_poster_hint">Tippe auf ein Poster für die Card</string>
+    <string name="share_cover_picker_backdrop_hint">Tippe auf ein Hintergrundbild für die Card</string>
+    <string name="share_cover_picker_reset">Zurücksetzen</string>
+    <string name="share_cover_picker_posters_tab">Poster (%1$d)</string>
+    <string name="share_cover_picker_backdrops_tab">Hintergründe (%1$d)</string>
+    <string name="share_cover_picker_all_languages">🌐 Alle Sprachen</string>
+    <string name="share_cover_picker_empty">Keine Bilder verfügbar</string>
+    <string name="share_cover_picker_select_language">Sprache wählen</string>
+    <string name="share_cover_picker_selected">Ausgewählt</string>
+    <string name="share_meta_season_single">1 Staffel</string>
+    <string name="share_meta_seasons_multiple">%1$d Staffeln</string>
 </resources>

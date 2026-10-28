@@ -52,11 +52,12 @@ fun DetailPersonalZone(
     onLoadAllImages: () -> Unit = {},
     onHistoryClick: (() -> Unit)? = null,
     onShareToComments: ((android.net.Uri) -> Unit)? = null,
+    showShareStoryModal: Boolean = false,
+    onShowShareStoryModalChange: (Boolean) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     var expandedAction by remember { mutableStateOf<String?>(null) } // "rate" or "note"
     var lastActiveAction by remember { mutableStateOf<String?>(null) }
-    var showShareStoryModal by remember { mutableStateOf(false) }
     
     // Track the rating being selected in real-time
     var previewRating by remember(movie.personalRating) { mutableDoubleStateOf(movie.personalRating ?: 0.0) }
@@ -171,7 +172,7 @@ fun DetailPersonalZone(
                             modifier = Modifier
                                 .size(28.dp)
                                 .bounceClick(scaleDown = 0.88f) {
-                                    showShareStoryModal = true
+                                    onShowShareStoryModalChange(true)
                                 }
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.04f)),
@@ -287,7 +288,7 @@ fun DetailPersonalZone(
             initialImages = initialImages,
             allMediaImages = allMediaImages,
             onLoadAllImages = onLoadAllImages,
-            onDismiss = { showShareStoryModal = false },
+            onDismiss = { onShowShareStoryModalChange(false) },
             onShareToComments = { uri ->
                 onShareToComments?.invoke(uri)
             }

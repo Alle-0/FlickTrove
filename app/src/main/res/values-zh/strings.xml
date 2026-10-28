@@ -2006,4 +2006,40 @@
 
     <string name="settings_cat_linear_bar">线性进度条</string>
     <string name="settings_cat_circular_bar">圆形进度条</string>
+
+    <!-- Share Story Card -->
+    <string name="share_story_card_title">Story Card</string>
+    <string name="share_cover_poster">海報</string>
+    <string name="share_cover_backdrop">Backdrop</string>
+    <string name="share_ratio_story">限時動態</string>
+    <string name="share_ratio_post">貼文</string>
+    <string name="share_ratio_square">正方形</string>
+    <string name="share_ratio_wide">寬螢幕</string>
+    <string name="share_toggle_vibe">氛圍</string>
+    <string name="share_toggle_mvp">MVP</string>
+    <string name="share_toggle_profile">個人資料</string>
+    <string name="share_cover_choose">選擇封面</string>
+    <string name="share_cover_edit">編輯</string>
+    <string name="share_cover_reset_original">恢復原始</string>
+    <string name="share_action_share_comments">在評論中分享</string>
+    <string name="share_action_share">分享</string>
+    <string name="share_action_save">儲存</string>
+    <string name="share_toast_saved_success">卡片已儲存至相簿！</string>
+    <string name="share_toast_saved_error">儲存時發生錯誤</string>
+    <string name="share_toast_prep_error">準備圖片時發生錯誤</string>
+    <string name="share_toast_share_error">分享時發生錯誤</string>
+    <string name="share_intent_text">快來 FlickTrove 查看我為 %1$s 製作的卡片！🎬</string>
+    <string name="share_intent_chooser_title">分享 Story Card</string>
+    <string name="share_cover_picker_title">自訂圖片</string>
+    <string name="share_cover_picker_poster_hint">點擊海報以套用至卡片</string>
+    <string name="share_cover_picker_backdrop_hint">點擊背景圖片以套用至卡片</string>
+    <string name="share_cover_picker_reset">重設</string>
+    <string name="share_cover_picker_posters_tab">海報 (%1$d)</string>
+    <string name="share_cover_picker_backdrops_tab">背景 (%1$d)</string>
+    <string name="share_cover_picker_all_languages">🌐 所有語言</string>
+    <string name="share_cover_picker_empty">無可用圖片</string>
+    <string name="share_cover_picker_select_language">選擇語言</string>
+    <string name="share_cover_picker_selected">已選擇</string>
+    <string name="share_meta_season_single">1 季</string>
+    <string name="share_meta_seasons_multiple">%1$d 季</string>
 </resources>

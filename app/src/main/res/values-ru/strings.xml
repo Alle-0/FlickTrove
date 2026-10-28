@@ -2000,4 +2000,40 @@
 
     <string name="settings_cat_linear_bar">ЛИНЕЙНАЯ ШКАЛА</string>
     <string name="settings_cat_circular_bar">КРУГОВАЯ ШКАЛА</string>
+
+    <!-- Share Story Card -->
+    <string name="share_story_card_title">Story Card</string>
+    <string name="share_cover_poster">Постер</string>
+    <string name="share_cover_backdrop">Backdrop</string>
+    <string name="share_ratio_story">История</string>
+    <string name="share_ratio_post">Пост</string>
+    <string name="share_ratio_square">Квадрат</string>
+    <string name="share_ratio_wide">Широкий</string>
+    <string name="share_toggle_vibe">Вайб</string>
+    <string name="share_toggle_mvp">MVP</string>
+    <string name="share_toggle_profile">Профиль</string>
+    <string name="share_cover_choose">Выбрать обложку</string>
+    <string name="share_cover_edit">Изменить</string>
+    <string name="share_cover_reset_original">Сбросить на оригинал</string>
+    <string name="share_action_share_comments">Поделиться в комментариях</string>
+    <string name="share_action_share">Поделиться</string>
+    <string name="share_action_save">Сохранить</string>
+    <string name="share_toast_saved_success">Карточка сохранена в галерею!</string>
+    <string name="share_toast_saved_error">Ошибка сохранения</string>
+    <string name="share_toast_prep_error">Ошибка подготовки изображения</string>
+    <string name="share_toast_share_error">Ошибка при отправке</string>
+    <string name="share_intent_text">Посмотрите мою карточку %1$s на FlickTrove! 🎬</string>
+    <string name="share_intent_chooser_title">Поделиться Story Card</string>
+    <string name="share_cover_picker_title">Настроить изображение</string>
+    <string name="share_cover_picker_poster_hint">Нажмите на постер для карточки</string>
+    <string name="share_cover_picker_backdrop_hint">Нажмите на фон для карточки</string>
+    <string name="share_cover_picker_reset">Сбросить</string>
+    <string name="share_cover_picker_posters_tab">Постеры (%1$d)</string>
+    <string name="share_cover_picker_backdrops_tab">Фоны (%1$d)</string>
+    <string name="share_cover_picker_all_languages">🌐 Все языки</string>
+    <string name="share_cover_picker_empty">Нет доступных изображений</string>
+    <string name="share_cover_picker_select_language">Выбрать язык</string>
+    <string name="share_cover_picker_selected">Выбрано</string>
+    <string name="share_meta_season_single">1 сезон</string>
+    <string name="share_meta_seasons_multiple">%1$d сезонов</string>
 </resources>

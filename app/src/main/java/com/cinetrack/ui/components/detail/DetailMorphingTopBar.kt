@@ -58,6 +58,7 @@ fun DetailMorphingTopBar(
     onFolderPickerChange: (Boolean) -> Unit,
     onBackClick: () -> Unit,
     onHomeClick: () -> Unit,
+    modifier: Modifier = Modifier,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -195,7 +196,7 @@ fun DetailMorphingTopBar(
 
     // ── Main morphing container ────────────────────────────────────────────────
     Box(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .zIndex(11f)
             .statusBarsPadding()
