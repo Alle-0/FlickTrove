@@ -263,7 +263,8 @@ fun ShareStoryCard(
                 }
             }
             ShareCoverStyle.POSTER_FLOATING -> {
-                // Atmospheric blurred backdrop in background with Haze capture
+                // Atmospheric backdrop in background with Haze capture
+                val isLandscapeRatio = config.aspectRatio == ShareAspectRatio.LANDSCAPE_16_9
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -280,18 +281,26 @@ fun ShareStoryCard(
                             contentScale = ContentScale.Crop,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .blur(32.dp)
+                                .blur(if (isLandscapeRatio) 6.dp else 28.dp)
                         )
                     }
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                             .background(
-                                Brush.verticalGradient(
-                                    0.0f to Color.Black.copy(alpha = 0.65f),
-                                    0.5f to Color(0xFF09090B).copy(alpha = 0.88f),
-                                    1.0f to Color(0xFF09090B)
-                                )
+                                if (isLandscapeRatio) {
+                                    Brush.horizontalGradient(
+                                        0.0f to Color.Black.copy(alpha = 0.32f),
+                                        0.40f to Color(0xFF09090B).copy(alpha = 0.58f),
+                                        1.0f to Color(0xFF09090B).copy(alpha = 0.82f)
+                                    )
+                                } else {
+                                    Brush.verticalGradient(
+                                        0.0f to Color.Black.copy(alpha = 0.65f),
+                                        0.5f to Color(0xFF09090B).copy(alpha = 0.88f),
+                                        1.0f to Color(0xFF09090B)
+                                    )
+                                }
                             )
                     )
                 }
