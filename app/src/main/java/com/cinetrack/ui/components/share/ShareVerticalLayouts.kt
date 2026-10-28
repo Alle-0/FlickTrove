@@ -279,13 +279,6 @@ internal fun ShareVerticalBackdropLayout(
     val isSquare = state.config.aspectRatio == ShareAspectRatio.SQUARE_1_1
     val isPost = state.config.aspectRatio == ShareAspectRatio.POST_4_5
 
-    val smoothSpring = remember {
-        spring<IntSize>(
-            dampingRatio = Spring.DampingRatioNoBouncy,
-            stiffness = Spring.StiffnessMediumLow
-        )
-    }
-
     Column(
         modifier = modifier
             .fillMaxSize()
@@ -315,18 +308,19 @@ internal fun ShareVerticalBackdropLayout(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
-                .animateContentSize(animationSpec = smoothSpring)
                 .padding(bottom = if (isSquare) 2.dp else 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Vibes row with smooth animation
+            // Vibes row with smooth animation anchored to top so items below remain fixed
             AnimatedVisibility(
                 visible = state.config.showVibe && state.vibes.isNotEmpty(),
                 enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+                    expandFrom = Alignment.Top
                 ),
                 exit = fadeOut(tween(150)) + shrinkVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+                    shrinkTowards = Alignment.Top
                 )
             ) {
                 ShareVibesPill(
@@ -435,10 +429,12 @@ internal fun ShareVerticalBackdropLayout(
             AnimatedVisibility(
                 visible = state.config.showMvp && !actorName.isNullOrBlank(),
                 enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+                    expandFrom = Alignment.Top
                 ),
                 exit = fadeOut(tween(150)) + shrinkVertically(
-                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                    animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow),
+                    shrinkTowards = Alignment.Top
                 )
             ) {
                 Column(horizontalAlignment = Alignment.CenterHorizontally) {
