@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -554,7 +555,15 @@ fun ShareStoryCard(
                         }
 
                         // User profile in basso a destra
-                        if (config.showProfile && !userDisplayName.isNullOrBlank()) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = config.showProfile && !userDisplayName.isNullOrBlank(),
+                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
+                                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                            ),
+                            exit = fadeOut(tween(150)) + shrinkVertically(
+                                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                            )
+                        ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -842,6 +851,22 @@ fun ShareStoryCard(
                 // =======================================================
                 // 1) VERTICAL POSTER FLOATING (Poster hero + voto alto)
                 // =======================================================
+                val showProfile = config.showProfile && !userDisplayName.isNullOrBlank()
+                val floatSpring = spring<Float>(
+                    dampingRatio = Spring.DampingRatioNoBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+                val animatedTopWeight by animateFloatAsState(
+                    targetValue = if (isSquare) 0.3f else if (showProfile) 1f else 1.15f,
+                    animationSpec = floatSpring,
+                    label = "TopSpacerWeight"
+                )
+                val animatedBottomWeight by animateFloatAsState(
+                    targetValue = if (isSquare) 0.3f else if (showProfile) 1f else 1.3f,
+                    animationSpec = floatSpring,
+                    label = "BottomSpacerWeight"
+                )
+
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -891,7 +916,7 @@ fun ShareStoryCard(
                         }
                     }
 
-                    Spacer(modifier = Modifier.weight(if (isSquare) 0.3f else 1f))
+                    Spacer(modifier = Modifier.weight(animatedTopWeight))
 
                     // CENTER: Floating Poster ingrandito
                     Box(
@@ -1049,11 +1074,18 @@ fun ShareStoryCard(
                         }
                     }
 
-                    val showProfile = config.showProfile && !userDisplayName.isNullOrBlank()
-                    Spacer(modifier = Modifier.weight(if (isSquare) 0.3f else if (showProfile) 1f else 1.3f))
+                    Spacer(modifier = Modifier.weight(animatedBottomWeight))
 
                     // USER PROFILE (in basso)
-                    if (showProfile) {
+                    androidx.compose.animation.AnimatedVisibility(
+                        visible = showProfile,
+                        enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
+                            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                        ),
+                        exit = fadeOut(tween(150)) + shrinkVertically(
+                            animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                        )
+                    ) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -1321,7 +1353,15 @@ fun ShareStoryCard(
                         }
 
                         // USER PROFILE
-                        if (config.showProfile && !userDisplayName.isNullOrBlank()) {
+                        androidx.compose.animation.AnimatedVisibility(
+                            visible = config.showProfile && !userDisplayName.isNullOrBlank(),
+                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + expandVertically(
+                                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                            ),
+                            exit = fadeOut(tween(150)) + shrinkVertically(
+                                animationSpec = spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)
+                            )
+                        ) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Spacer(modifier = Modifier.height(if (isSquare) 5.dp else if (isPost) 7.dp else 10.dp))
                                 Row(
