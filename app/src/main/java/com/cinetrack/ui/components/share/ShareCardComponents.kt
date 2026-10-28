@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.Color
@@ -171,14 +172,8 @@ internal fun ShareVibesPill(
 ) {
     Row(
         modifier = modifier
-            .hazeGlass(
-                state = cardHazeState,
-                shape = RoundedCornerShape(50),
-                blurRadius = 16.dp,
-                containerColor = Color.Black.copy(alpha = 0.35f),
-                borderWidth = 0.6.dp,
-                borderColor = Color.White.copy(alpha = 0.25f)
-            )
+            .background(Color.Black.copy(alpha = 0.42f), RoundedCornerShape(50))
+            .border(0.6.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
             .padding(horizontal = horizontalPadding, vertical = verticalPadding),
         horizontalArrangement = Arrangement.spacedBy(spacing),
         verticalAlignment = Alignment.CenterVertically
@@ -408,6 +403,8 @@ internal fun MvpPill(
 
 /**
  * Vertical mini card badge for MVP floating over poster edges.
+ * Uses a blurred artwork underlay to seamlessly blur the transition
+ * between the poster edge, border, and the background with zero hard seams.
  */
 @Composable
 internal fun MvpMiniCard(
@@ -415,87 +412,115 @@ internal fun MvpMiniCard(
     characterName: String?,
     profilePath: String?,
     accentColor: Color,
-    hazeState: HazeState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    posterUrl: String? = null,
+    backdropUrl: String? = null,
+    hazeState: HazeState? = null
 ) {
+    val context = LocalContext.current
     val profileUrl = remember(profilePath) {
         buildTmdbImageUrl(profilePath, ImageType.PROFILE, com.cinetrack.util.ImageQuality.HIGH)
     }
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
+    val cardShape = RoundedCornerShape(14.dp)
+    val bgArtworkUrl = posterUrl ?: backdropUrl
+
+    Box(
         modifier = modifier
             .width(68.dp)
-            .shadow(elevation = 16.dp, shape = RoundedCornerShape(14.dp))
-            .hazeGlass(
-                state = hazeState,
-                shape = RoundedCornerShape(14.dp),
-                blurRadius = 18.dp,
-                containerColor = Color(0xFF141418).copy(alpha = 0.44f),
-                borderWidth = 0.8.dp,
-                borderColor = Color.White.copy(alpha = 0.28f)
-            )
-            .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 4.dp)
+            .shadow(elevation = 16.dp, shape = cardShape)
+            .clip(cardShape)
+            .border(0.8.dp, Color.White.copy(alpha = 0.28f), cardShape)
     ) {
-        Text(
-            text = "MVP",
-            fontSize = 8.sp,
-            fontWeight = FontWeight.Black,
-            color = ColorUtils.lightenForText(accentColor, 1.35f),
-            letterSpacing = 0.8.sp,
-            lineHeight = 8.sp,
-            style = androidx.compose.ui.text.TextStyle(
-                platformStyle = androidx.compose.ui.text.PlatformTextStyle(
-                    includeFontPadding = false
-                )
-            ),
-            modifier = Modifier.padding(top = 1.dp, bottom = 1.5.dp)
-        )
-
-        if (profileUrl != null) {
+        // Continuous blurred artwork underlay (blurs poster edge + background together seamlessly)
+        if (bgArtworkUrl != null) {
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data(profileUrl)
+                model = ImageRequest.Builder(context)
+                    .data(bgArtworkUrl)
                     .crossfade(false)
                     .build(),
-                contentDescription = actorName,
+                contentDescription = null,
                 contentScale = ContentScale.Crop,
+                alignment = Alignment.BottomEnd,
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(0.75f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                    .matchParentSize()
+                    .blur(22.dp)
             )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .aspectRatio(0.75f)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(Color.DarkGray),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    painter = painterResource(R.drawable.ic_persona),
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(16.dp)
-                )
-            }
         }
 
-        Spacer(modifier = Modifier.height(2.5.dp))
-
-        val displayName = if (!characterName.isNullOrBlank()) characterName else actorName
-        Text(
-            text = displayName,
-            color = Color.White,
-            fontSize = 8.5.sp,
-            fontWeight = FontWeight.Bold,
-            maxLines = 1,
-            lineHeight = 9.5.sp,
-            textAlign = TextAlign.Center,
-            overflow = TextOverflow.Ellipsis
+        // Frosted dark glass overlay tint
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.52f else 0.88f))
         )
+
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 4.dp)
+        ) {
+            Text(
+                text = "MVP",
+                fontSize = 8.sp,
+                fontWeight = FontWeight.Black,
+                color = ColorUtils.lightenForText(accentColor, 1.35f),
+                letterSpacing = 0.8.sp,
+                lineHeight = 8.sp,
+                style = androidx.compose.ui.text.TextStyle(
+                    platformStyle = androidx.compose.ui.text.PlatformTextStyle(
+                        includeFontPadding = false
+                    )
+                ),
+                modifier = Modifier.padding(top = 1.dp, bottom = 1.5.dp)
+            )
+
+            if (profileUrl != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(profileUrl)
+                        .crossfade(false)
+                        .build(),
+                    contentDescription = actorName,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(0.75f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .border(0.5.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(12.dp))
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .aspectRatio(0.75f)
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.DarkGray),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter = painterResource(R.drawable.ic_persona),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.7f),
+                        modifier = Modifier.size(16.dp)
+                    )
+                }
+            }
+
+            Spacer(modifier = Modifier.height(2.5.dp))
+
+            val displayName = if (!characterName.isNullOrBlank()) characterName else actorName
+            Text(
+                text = displayName,
+                color = Color.White,
+                fontSize = 8.5.sp,
+                fontWeight = FontWeight.Bold,
+                maxLines = 1,
+                lineHeight = 9.5.sp,
+                textAlign = TextAlign.Center,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
     }
 }
 

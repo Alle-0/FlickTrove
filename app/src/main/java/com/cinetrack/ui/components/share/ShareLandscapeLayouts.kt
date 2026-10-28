@@ -74,22 +74,12 @@ internal fun ShareLandscapePosterLayout(
         ) {
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val hasPosterGlassChildren = (state.config.showVibe && state.vibes.isNotEmpty()) ||
-                (state.config.showMvp && !actorName.isNullOrBlank())
-
             val posterShape = RoundedCornerShape(20.dp)
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .shadow(elevation = 28.dp, shape = posterShape)
                     .clip(posterShape)
-                    .then(
-                        if (hasPosterGlassChildren) {
-                            Modifier.haze(state = state.cardHazeState, style = HazeStyles.PremiumDark)
-                        } else {
-                            Modifier
-                        }
-                    )
                     .border(1.dp, Color.White.copy(alpha = 0.22f), posterShape)
             ) {
                 if (state.posterUrl != null) {
@@ -137,6 +127,8 @@ internal fun ShareLandscapePosterLayout(
                     characterName = state.movie.favoriteActorCharacter,
                     profilePath = profilePath,
                     accentColor = state.accentColor,
+                    posterUrl = state.posterUrl,
+                    backdropUrl = state.backdropUrl,
                     hazeState = state.cardHazeState,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
@@ -374,6 +366,8 @@ internal fun ShareLandscapeBackdropLayout(
                         characterName = state.movie.favoriteActorCharacter,
                         profilePath = profilePath,
                         accentColor = state.accentColor,
+                        posterUrl = state.posterUrl,
+                        backdropUrl = state.backdropUrl,
                         hazeState = state.cardHazeState
                     )
                 }
