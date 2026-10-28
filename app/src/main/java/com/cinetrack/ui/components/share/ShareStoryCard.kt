@@ -373,14 +373,10 @@ fun ShareStoryCard(
                         }
 
                         // Vibe icons floating sul poster (fuori dal source haze per non sfocare le proprie icone)
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showVibe && vibes.isNotEmpty(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(tween(150)) + scaleOut(targetScale = 0.8f, animationSpec = tween(150)),
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        ) {
+                        if (config.showVibe && vibes.isNotEmpty()) {
                             Row(
                                 modifier = Modifier
+                                    .align(Alignment.TopEnd)
                                     .padding(8.dp)
                                     .hazeGlass(
                                         state = cardHazeState,
@@ -408,23 +404,17 @@ fun ShareStoryCard(
                         // MVP badge in basso a destra sul poster con frosted glass: mezza dentro e mezza fuori
                         val actorName = movie.favoriteActorName
                         val profilePath = movie.favoriteActorProfilePath ?: movie.favoriteActorTmdbPath
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showMvp && !actorName.isNullOrBlank(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(initialScale = 0.8f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(tween(150)) + scaleOut(targetScale = 0.8f, animationSpec = tween(150)),
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .offset(x = 20.dp, y = 14.dp)
-                        ) {
-                            if (!actorName.isNullOrBlank()) {
-                                MvpMiniCard(
-                                    actorName = actorName,
-                                    characterName = movie.favoriteActorCharacter,
-                                    profilePath = profilePath,
-                                    accentColor = accentColor,
-                                    hazeState = cardHazeState
-                                )
-                            }
+                        if (config.showMvp && !actorName.isNullOrBlank()) {
+                            MvpMiniCard(
+                                actorName = actorName,
+                                characterName = movie.favoriteActorCharacter,
+                                profilePath = profilePath,
+                                accentColor = accentColor,
+                                hazeState = cardHazeState,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = 20.dp, y = 14.dp)
+                            )
                         }
                     }
 
@@ -564,11 +554,7 @@ fun ShareStoryCard(
                         }
 
                         // User profile in basso a destra
-                        AnimatedVisibility(
-                            visible = config.showProfile && !userDisplayName.isNullOrBlank(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(initialScale = 0.85f, animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(tween(150)) + scaleOut(targetScale = 0.85f, animationSpec = tween(150))
-                        ) {
+                        if (config.showProfile && !userDisplayName.isNullOrBlank()) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -652,11 +638,7 @@ fun ShareStoryCard(
                             )
                         }
 
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showVibe && vibes.isNotEmpty(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                        ) {
+                        if (config.showVibe && vibes.isNotEmpty()) {
                             Row(
                                 modifier = Modifier
                                     .hazeGlass(
@@ -777,11 +759,7 @@ fun ShareStoryCard(
                         ) {
                             val actorName = movie.favoriteActorName
                             val profilePath = movie.favoriteActorProfilePath ?: movie.favoriteActorTmdbPath
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = config.showMvp && !actorName.isNullOrBlank(),
-                                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                                exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                            ) {
+                            if (config.showMvp && !actorName.isNullOrBlank()) {
                                 MvpMiniCard(
                                     actorName = actorName.orEmpty(),
                                     characterName = movie.favoriteActorCharacter,
@@ -791,11 +769,7 @@ fun ShareStoryCard(
                                 )
                             }
 
-                            androidx.compose.animation.AnimatedVisibility(
-                                visible = config.showProfile && !userDisplayName.isNullOrBlank(),
-                                enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                                exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                            ) {
+                            if (config.showProfile && !userDisplayName.isNullOrBlank()) {
                                 val profAvatarSize = 16.dp
                                 val profMargin = 3.dp
                                 val profPillHeight = profAvatarSize + (profMargin * 2) // 22.dp
@@ -963,14 +937,10 @@ fun ShareStoryCard(
                         }
 
                         // Vibe icons floating on poster (fuori dal source haze per non sfocare le proprie icone)
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showVibe && vibes.isNotEmpty(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow)),
-                            modifier = Modifier.align(Alignment.TopEnd)
-                        ) {
+                        if (config.showVibe && vibes.isNotEmpty()) {
                             Row(
                                 modifier = Modifier
+                                    .align(Alignment.TopEnd)
                                     .padding(if (isSquare) 6.dp else 9.dp)
                                     .hazeGlass(
                                         state = cardHazeState,
@@ -998,20 +968,16 @@ fun ShareStoryCard(
                         // MVP Badge: mezza dentro e mezza fuori dal poster
                         val actorName = movie.favoriteActorName
                         val profilePath = movie.favoriteActorProfilePath ?: movie.favoriteActorTmdbPath
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showMvp && !actorName.isNullOrBlank(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow)),
-                            modifier = Modifier
-                                .align(Alignment.BottomEnd)
-                                .offset(x = 20.dp, y = 16.dp)
-                        ) {
+                        if (config.showMvp && !actorName.isNullOrBlank()) {
                             MvpMiniCard(
                                 actorName = actorName.orEmpty(),
                                 characterName = movie.favoriteActorCharacter,
                                 profilePath = profilePath,
                                 accentColor = accentColor,
-                                hazeState = cardHazeState
+                                hazeState = cardHazeState,
+                                modifier = Modifier
+                                    .align(Alignment.BottomEnd)
+                                    .offset(x = 20.dp, y = 16.dp)
                             )
                         }
                     }
@@ -1087,11 +1053,7 @@ fun ShareStoryCard(
                     Spacer(modifier = Modifier.weight(if (isSquare) 0.3f else if (showProfile) 1f else 1.3f))
 
                     // USER PROFILE (in basso)
-                    androidx.compose.animation.AnimatedVisibility(
-                        visible = showProfile,
-                        enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                        exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                    ) {
+                    if (showProfile) {
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
@@ -1194,11 +1156,7 @@ fun ShareStoryCard(
                         horizontalAlignment = Alignment.CenterHorizontally
                     ) {
                         // Vibes row
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showVibe && vibes.isNotEmpty(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                        ) {
+                        if (config.showVibe && vibes.isNotEmpty()) {
                             Row(
                                 modifier = Modifier
                                     .padding(bottom = if (isSquare) 6.dp else 10.dp)
@@ -1349,11 +1307,7 @@ fun ShareStoryCard(
                         // MVP PILL (Per Full Backdrop in verticale: compatto e centrato)
                         val actorName = movie.favoriteActorName
                         val profilePath = movie.favoriteActorProfilePath ?: movie.favoriteActorTmdbPath
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showMvp && !actorName.isNullOrBlank(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                        ) {
+                        if (config.showMvp && !actorName.isNullOrBlank()) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Spacer(modifier = Modifier.height(if (isSquare) 5.dp else 7.dp))
                                 MvpPill(
@@ -1367,11 +1321,7 @@ fun ShareStoryCard(
                         }
 
                         // USER PROFILE
-                        androidx.compose.animation.AnimatedVisibility(
-                            visible = config.showProfile && !userDisplayName.isNullOrBlank(),
-                            enter = fadeIn(spring(stiffness = Spring.StiffnessMediumLow)) + scaleIn(spring(stiffness = Spring.StiffnessMediumLow)),
-                            exit = fadeOut(spring(stiffness = Spring.StiffnessMediumLow)) + scaleOut(spring(stiffness = Spring.StiffnessMediumLow))
-                        ) {
+                        if (config.showProfile && !userDisplayName.isNullOrBlank()) {
                             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                                 Spacer(modifier = Modifier.height(if (isSquare) 5.dp else if (isPost) 7.dp else 10.dp))
                                 Row(
