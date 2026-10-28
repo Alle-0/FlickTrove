@@ -270,15 +270,14 @@ fun ShareStoryCardModal(
             // Scaled Live Preview Card (Pixel-perfect Full HD layout, scaled to preview dimensions)
             val currentRatio = config.aspectRatio
             val screenDensity = LocalDensity.current.density
-            val previewScale = (currentRatio.previewWidthDp.value * screenDensity) / currentRatio.targetWidthPx.toFloat()
             val exportDensity = currentRatio.targetWidthPx.toFloat() / currentRatio.baseWidthDp.value
 
             val springSpec = spring<androidx.compose.ui.unit.Dp>(
-                dampingRatio = Spring.DampingRatioLowBouncy,
+                dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessMediumLow
             )
             val floatSpringSpec = spring<Float>(
-                dampingRatio = Spring.DampingRatioLowBouncy,
+                dampingRatio = Spring.DampingRatioNoBouncy,
                 stiffness = Spring.StiffnessMediumLow
             )
 
@@ -292,11 +291,10 @@ fun ShareStoryCardModal(
                 animationSpec = floatSpringSpec,
                 label = "PreviewRatio"
             )
-            val animatedPreviewScale by animateFloatAsState(
-                targetValue = previewScale,
-                animationSpec = floatSpringSpec,
-                label = "PreviewScale"
-            )
+
+            // Dynamic scale derived directly from animatedPreviewWidth to keep card width 1:1 with container
+            // and eliminate asynchronous scale dips/shrinking during aspect ratio transitions
+            val currentPreviewScale = (animatedPreviewWidth.value * screenDensity) / currentRatio.targetWidthPx.toFloat()
 
             Box(
                 modifier = Modifier
@@ -316,7 +314,7 @@ fun ShareStoryCardModal(
                                 graphicsLayer.record {
                                     this@drawWithContent.drawContent()
                                 }
-                                scale(scale = animatedPreviewScale, pivot = center) {
+                                scale(scale = currentPreviewScale, pivot = center) {
                                     drawLayer(graphicsLayer)
                                 }
                             },
