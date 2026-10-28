@@ -14,6 +14,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -122,14 +123,17 @@ internal fun ShareVerticalPosterLayout(
         )
 
         // CENTER: Floating Poster
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth(posterFraction)
                 .aspectRatio(2f / 3f)
         ) {
+            val posterWidth = maxWidth
+            val posterHeight = maxHeight
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val posterShape = RoundedCornerShape(if (isSquare) 24.dp else 32.dp)
+            val cornerRadiusDp = if (isSquare) 24.dp else 32.dp
+            val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
             val posterHazeState = remember(showVibesOnPoster) { HazeState() }
 
@@ -188,8 +192,10 @@ internal fun ShareVerticalPosterLayout(
                 )
             }
 
-            // MVP Badge: floating on the bottom edge
+            // MVP Badge: floating on the bottom edge, adapting simulated blur to exact poster geometry
             if (state.config.showMvp && !actorName.isNullOrBlank()) {
+                val cardOffsetX = if (isSquare) 18.dp else 20.dp
+                val cardOffsetY = if (isSquare) 14.dp else 16.dp
                 MvpMiniCard(
                     actorName = actorName,
                     characterName = state.movie.favoriteActorCharacter,
@@ -199,9 +205,14 @@ internal fun ShareVerticalPosterLayout(
                     backdropUrl = state.backdropUrl,
                     hazeState = state.cardHazeState,
                     isFloatingPoster = true,
+                    posterWidth = posterWidth,
+                    posterHeight = posterHeight,
+                    posterCornerRadius = cornerRadiusDp,
+                    cardOffsetX = cardOffsetX,
+                    cardOffsetY = cardOffsetY,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .offset(x = 20.dp, y = 16.dp)
+                        .offset(x = cardOffsetX, y = cardOffsetY)
                 )
             }
         }

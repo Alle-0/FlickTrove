@@ -13,6 +13,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.aspectRatio
@@ -69,14 +70,17 @@ internal fun ShareLandscapePosterLayout(
         horizontalArrangement = Arrangement.spacedBy(36.dp)
     ) {
         // COLONNA SINISTRA: Poster floating con ombra e badge
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxHeight()
                 .aspectRatio(2f / 3f)
         ) {
+            val posterWidth = maxWidth
+            val posterHeight = maxHeight
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val posterShape = RoundedCornerShape(26.dp)
+            val cornerRadiusDp = 26.dp
+            val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
             val posterHazeState = remember(showVibesOnPoster) { HazeState() }
 
@@ -134,6 +138,8 @@ internal fun ShareLandscapePosterLayout(
 
             // MVP badge in basso a destra sul poster
             if (state.config.showMvp && !actorName.isNullOrBlank()) {
+                val cardOffsetX = 20.dp
+                val cardOffsetY = 14.dp
                 MvpMiniCard(
                     actorName = actorName,
                     characterName = state.movie.favoriteActorCharacter,
@@ -143,9 +149,14 @@ internal fun ShareLandscapePosterLayout(
                     backdropUrl = state.backdropUrl,
                     hazeState = state.cardHazeState,
                     isFloatingPoster = true,
+                    posterWidth = posterWidth,
+                    posterHeight = posterHeight,
+                    posterCornerRadius = cornerRadiusDp,
+                    cardOffsetX = cardOffsetX,
+                    cardOffsetY = cardOffsetY,
                     modifier = Modifier
                         .align(Alignment.BottomEnd)
-                        .offset(x = 20.dp, y = 14.dp)
+                        .offset(x = cardOffsetX, y = cardOffsetY)
                 )
             }
         }

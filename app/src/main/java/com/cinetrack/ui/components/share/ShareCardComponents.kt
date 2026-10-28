@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.requiredSize
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
@@ -18,11 +19,15 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
 import androidx.compose.ui.graphics.BlendMode
@@ -32,7 +37,9 @@ import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -414,8 +421,9 @@ internal fun MvpPill(
 
 /**
  * Vertical mini card badge for MVP floating over poster edges.
- * Uses a blurred artwork underlay to seamlessly blur the transition
- * between the poster edge, border, and the background with zero hard seams.
+ * Uses a blurred artwork underlay scaled and positioned to match the exact
+ * physical poster dimensions and ratio, creating a natural optical blur of the
+ * poster edge and seamless fade into the dark glass background.
  */
 @Composable
 internal fun MvpMiniCard(
@@ -427,24 +435,37 @@ internal fun MvpMiniCard(
     posterUrl: String? = null,
     backdropUrl: String? = null,
     hazeState: HazeState? = null,
-    isFloatingPoster: Boolean = false
+    isFloatingPoster: Boolean = false,
+    posterWidth: Dp? = null,
+    posterHeight: Dp? = null,
+    posterCornerRadius: Dp = 32.dp,
+    cardOffsetX: Dp = 20.dp,
+    cardOffsetY: Dp = 16.dp
 ) {
     val context = LocalContext.current
+    val density = LocalDensity.current
     val profileUrl = remember(profilePath) {
         buildTmdbImageUrl(profilePath, ImageType.PROFILE, com.cinetrack.util.ImageQuality.HIGH)
     }
     val cardShape = RoundedCornerShape(14.dp)
     val bgArtworkUrl = posterUrl ?: backdropUrl
+    var cardHeightDp by remember { mutableStateOf(92.dp) }
+    val cardWidthDp = 68.dp
 
     val baseModifier = if (isFloatingPoster) {
         modifier
-            .width(68.dp)
+            .width(cardWidthDp)
             .shadow(elevation = 16.dp, shape = cardShape)
             .clip(cardShape)
             .border(0.8.dp, Color.White.copy(alpha = 0.28f), cardShape)
+            .onSizeChanged {
+                if (it.height > 0) {
+                    cardHeightDp = with(density) { it.height.toDp() }
+                }
+            }
     } else {
         modifier
-            .width(68.dp)
+            .width(cardWidthDp)
             .shadow(elevation = 16.dp, shape = cardShape)
             .hazeGlass(
                 state = hazeState,
@@ -462,11 +483,36 @@ internal fun MvpMiniCard(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.76f else 0.88f))
+                    .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.72f else 0.88f))
             )
 
-            // Continuous blurred artwork underlay feathered towards the right and bottom edges
-            if (bgArtworkUrl != null) {
+            // Scaled and positioned blurred poster underlay matching the exact physical dimensions and ratio
+            if (bgArtworkUrl != null && posterWidth != null && posterHeight != null) {
+                val posterShape = RoundedCornerShape(posterCornerRadius)
+                Box(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .clipToBounds()
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(bgArtworkUrl)
+                            .crossfade(false)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier
+                            .requiredSize(posterWidth, posterHeight)
+                            .clip(posterShape)
+                            .blur(16.dp)
+                            .graphicsLayer {
+                                translationX = (cardWidthDp - cardOffsetX - posterWidth).toPx()
+                                translationY = (cardHeightDp - cardOffsetY - posterHeight).toPx()
+                            }
+                    )
+                }
+            } else if (bgArtworkUrl != null) {
+                // Fallback if dimensions not provided
                 AsyncImage(
                     model = ImageRequest.Builder(context)
                         .data(bgArtworkUrl)
@@ -478,32 +524,6 @@ internal fun MvpMiniCard(
                     modifier = Modifier
                         .matchParentSize()
                         .blur(18.dp)
-                        .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                        .drawWithContent {
-                            drawContent()
-                            // Feather towards right edge where the card hangs outside the poster (~70% width)
-                            drawRect(
-                                brush = Brush.horizontalGradient(
-                                    0.0f to Color.Black,
-                                    0.40f to Color.Black,
-                                    0.68f to Color.Black.copy(alpha = 0.45f),
-                                    0.84f to Color.Transparent,
-                                    1.0f to Color.Transparent
-                                ),
-                                blendMode = BlendMode.DstIn
-                            )
-                            // Feather towards bottom edge where the card hangs outside the poster (~85% height)
-                            drawRect(
-                                brush = Brush.verticalGradient(
-                                    0.0f to Color.Black,
-                                    0.60f to Color.Black,
-                                    0.82f to Color.Black.copy(alpha = 0.45f),
-                                    0.96f to Color.Transparent,
-                                    1.0f to Color.Transparent
-                                ),
-                                blendMode = BlendMode.DstIn
-                            )
-                        }
                 )
             }
 
@@ -511,7 +531,7 @@ internal fun MvpMiniCard(
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .background(Color(0xFF141418).copy(alpha = 0.35f))
+                    .background(Color(0xFF141418).copy(alpha = 0.28f))
             )
         }
 
