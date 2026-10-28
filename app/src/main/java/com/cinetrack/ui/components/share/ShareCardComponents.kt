@@ -23,8 +23,13 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.BlendMode
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.CompositingStrategy
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -431,7 +436,14 @@ internal fun MvpMiniCard(
             .clip(cardShape)
             .border(0.8.dp, Color.White.copy(alpha = 0.28f), cardShape)
     ) {
-        // Continuous blurred artwork underlay (blurs poster edge + background together seamlessly)
+        // Base dark glass background (ensures the right side and bottom hanging off the poster remain dark)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.76f else 0.88f))
+        )
+
+        // Continuous blurred artwork underlay feathered towards the right and bottom edges
         if (bgArtworkUrl != null) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
@@ -443,7 +455,33 @@ internal fun MvpMiniCard(
                 alignment = Alignment.BottomEnd,
                 modifier = Modifier
                     .matchParentSize()
-                    .blur(22.dp)
+                    .blur(18.dp)
+                    .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                    .drawWithContent {
+                        drawContent()
+                        // Feather towards right edge where the card hangs outside the poster (~70% width)
+                        drawRect(
+                            brush = Brush.horizontalGradient(
+                                0.0f to Color.Black,
+                                0.40f to Color.Black,
+                                0.68f to Color.Black.copy(alpha = 0.45f),
+                                0.84f to Color.Transparent,
+                                1.0f to Color.Transparent
+                            ),
+                            blendMode = BlendMode.DstIn
+                        )
+                        // Feather towards bottom edge where the card hangs outside the poster (~85% height)
+                        drawRect(
+                            brush = Brush.verticalGradient(
+                                0.0f to Color.Black,
+                                0.60f to Color.Black,
+                                0.82f to Color.Black.copy(alpha = 0.45f),
+                                0.96f to Color.Transparent,
+                                1.0f to Color.Transparent
+                            ),
+                            blendMode = BlendMode.DstIn
+                        )
+                    }
             )
         }
 
@@ -451,7 +489,7 @@ internal fun MvpMiniCard(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .background(Color(0xFF141418).copy(alpha = if (bgArtworkUrl != null) 0.52f else 0.88f))
+                .background(Color(0xFF141418).copy(alpha = 0.35f))
         )
 
         Column(
