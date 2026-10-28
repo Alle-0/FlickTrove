@@ -67,7 +67,7 @@ internal fun ShareVerticalPosterLayout(
     val posterFraction = when (state.config.aspectRatio) {
         ShareAspectRatio.STORY_9_16 -> 0.76f
         ShareAspectRatio.POST_4_5 -> 0.60f
-        ShareAspectRatio.SQUARE_1_1 -> 0.38f
+        ShareAspectRatio.SQUARE_1_1 -> 0.44f
         ShareAspectRatio.LANDSCAPE_16_9 -> 0.30f
     }
 
