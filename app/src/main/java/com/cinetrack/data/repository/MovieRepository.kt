@@ -66,6 +66,7 @@ class MovieRepository @Inject constructor(
     private val traktService: TraktService,
     private val firebaseRemoteDataSource: FirebaseRemoteDataSource,
     private val preferenceRepository: PreferenceRepository,
+    private val firebaseSyncCoordinator: com.cinetrack.data.sync.FirebaseSyncCoordinator,
     @Named("tmdb_api_key") private val apiKey: String,
     @Named("omdb_api_key") private val omdbApiKey: String,
     @Named("trakt_api_key") private val traktApiKey: String,
@@ -97,10 +98,6 @@ class MovieRepository @Inject constructor(
     )
     private val globalStatsLruCache = android.util.LruCache<String, CachedGlobalStats>(100)
     private val GLOBAL_STATS_TTL_MS = 30 * 60 * 1000L // 30 minuti
-
-    // Throttle per il pull di cartelle (Folders cambiano raramente: evita fetch da SERVER ogni 15s)
-    private var lastFolderSyncTimestamp: Long = 0L
-    private val FOLDER_SYNC_THROTTLE_MS = 20 * 60 * 1000L // 20 minuti
 
     suspend fun getCachedColor(id: String): String? {
         memoryColorCache[id]?.let { return it }
@@ -711,336 +708,25 @@ class MovieRepository @Inject constructor(
         folderRepository.deleteFolder(folderId)
     }
 
-    // --- Remote Sync (The "Bunker" recovery) ---
-    suspend fun pushPendingChanges() = kotlinx.coroutines.withContext(Dispatchers.IO) {
-        // Push pending Movies
-        val pendingMovies = favoriteDao.getPendingSync()
-        val toDelete = pendingMovies.filter { it.syncStatus == "pending_delete" }
-        val now = System.currentTimeMillis()
-        val toSync = pendingMovies.filter { it.syncStatus == "pending" }.map { 
-            it.copy(syncStatus = "synced", clientUpdatedAt = now) 
-        }
-
-        for (movie in toDelete) {
-            try {
-                firebaseRemoteDataSource.deleteMovie(movie.id, movie.mediaType)
-                // Preserva lo scudo tombstone in Room azzerando flag, rating e note
-                val tombstoneMovie = movie.copy(
-                    syncStatus = "deleted",
-                    watched = false,
-                    favorite = false,
-                    reminder = false,
-                    dropped = false,
-                    personalRating = null,
-                    personalNote = null,
-                    watchedEpisodes = emptyMap(),
-                    clientUpdatedAt = now
-                )
-                favoriteDao.insert(tombstoneMovie)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Failed to push pending delete movie ${movie.id}", e)
-            }
-        }
-
-        if (toSync.isNotEmpty()) {
-            try {
-                firebaseRemoteDataSource.setMoviesBulk(toSync)
-                for (movie in toSync) {
-                    favoriteDao.insert(movie)
-                }
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Failed to push pending movies bulk", e)
-            }
-        }
-        
-        // Push pending Folders
-        folderRepository.pushPendingFolders()
-        
-        // Push pending Watch History
-        watchHistoryRepository.pushPendingWatchHistory()
-        
-    }
+    // --- Remote Sync (Delegated to FirebaseSyncCoordinator) ---
+    suspend fun pushPendingChanges() = firebaseSyncCoordinator.pushPendingChanges()
 
     suspend fun syncWithFirebase(
         force: Boolean = false,
         onProgress: (suspend (SyncProgress) -> Unit)? = null
-    ) = kotlinx.coroutines.withContext(Dispatchers.IO) {
-        suspend fun emit(message: UiText, progress: Float?) {
-            onProgress?.invoke(SyncProgress(message, progress))
-        }
+    ) = firebaseSyncCoordinator.syncWithFirebase(force, onProgress)
 
-        // Cooldown anti-concorrenza (15 secondi per evitare doppie chiamate da ViewModel simultanei)
-        val userPrefs = preferenceRepository.userPreferencesFlow.first()
-        val lastSync = userPrefs.lastSyncTimestamp
-        val lastHistorySync = userPrefs.lastWatchHistorySyncTimestamp
-        if (!force && System.currentTimeMillis() - lastSync < 15_000L) {
-            android.util.Log.d("MovieRepository", "Firebase Sync skipped - last sync was less than 15 seconds ago.")
-            emit(UiText.StringResource(R.string.sync_msg_cached), 1f)
-            return@withContext
-        }
+    fun enqueueSyncWorker() = firebaseSyncCoordinator.enqueueSyncWorker()
 
-        try {
-            // 0. Push any pending local changes first (bounded by timeout so network stalls never freeze the sync)
-            android.util.Log.d("MovieRepository", "Starting Firebase Sync - Pushing pending changes...")
-            emit(UiText.StringResource(R.string.sync_msg_pushing_changes), 0f)
-            kotlinx.coroutines.withTimeoutOrNull(15_000L) {
-                pushPendingChanges()
-            }
+    suspend fun syncPreferencesWithFirebase() = firebaseSyncCoordinator.syncPreferencesWithFirebase()
 
-            // 1. Pull & Reconcile Favorites (Delta Sync con Tombstones)
-            android.util.Log.d("MovieRepository", "Starting Firebase Delta Sync (since: $lastSync)...")
-            emit(UiText.StringResource(R.string.sync_msg_fetching_favorites), null)
-            val deltaMovies = firebaseRemoteDataSource.fetchFavoritesDelta(lastSync)
-            android.util.Log.d("MovieRepository", "Fetched ${deltaMovies.size} delta favorites from Firebase")
-            
-            if (deltaMovies.isNotEmpty()) {
-                emit(UiText.StringResource(R.string.sync_msg_syncing_favorites), 0.35f)
-                val (tombstones, modified) = deltaMovies.partition { it.syncStatus == "deleted" }
-                
-                // 1. Preservazione dello scudo locale dei tombstone (invisibili alla UI, visibili a getMovieIncludingDeleted)
-                for (tombstone in tombstones) {
-                    val tombstoneMovie = tombstone.copy(
-                        syncStatus = "deleted",
-                        watched = false,
-                        favorite = false,
-                        reminder = false,
-                        dropped = false,
-                        personalRating = null,
-                        personalNote = null,
-                        watchedEpisodes = emptyMap()
-                    )
-                    favoriteDao.insert(tombstoneMovie)
-                }
-                
-                // 2. Inserimento / Aggiornamento dei record modificati
-                if (modified.isNotEmpty()) {
-                    val chunks = modified.chunked(50)
-                    chunks.forEachIndexed { index, chunk ->
-                        favoriteDao.insertAll(chunk.map { it.copy(syncStatus = "synced") })
-                        val portion = (index + 1).toFloat() / chunks.size.toFloat()
-                        val progress = 0.35f + (0.55f - 0.35f) * portion
-                        val currentCount = (index + 1) * chunk.size
-                        emit(UiText.StringResource(R.string.sync_msg_saving_favorites, currentCount, modified.size), progress)
-                    }
-                }
-            }
-            android.util.Log.d("MovieRepository", "Successfully synchronized favorites via Delta Sync")
-
-            val now = System.currentTimeMillis()
-
-            // 2. Pull & Reconcile Folders (con throttle di 20 minuti per azzerare letture server ad ogni foreground)
-            val shouldSyncFolders = force || (now - lastFolderSyncTimestamp > FOLDER_SYNC_THROTTLE_MS)
-            if (shouldSyncFolders) {
-                emit(UiText.StringResource(R.string.sync_msg_fetching_folders), null)
-                val remoteFolders = firebaseRemoteDataSource.fetchAllFolders()
-                
-                emit(UiText.StringResource(R.string.sync_msg_syncing_folders), 0.7f)
-                folderRepository.syncFoldersFromRemote(remoteFolders) { currentCount, totalCount, portion ->
-                    val progress = 0.7f + (0.9f - 0.7f) * portion
-                    emit(UiText.StringResource(R.string.sync_msg_saving_folders, currentCount, totalCount), progress)
-                }
-                lastFolderSyncTimestamp = now
-            }
-
-            // 3. Pull & Reconcile Watch History (Delta Sync con Tombstones)
-            android.util.Log.d("MovieRepository", "Starting Firebase Watch History Delta Sync (since: $lastHistorySync)...")
-            val remoteHistory = firebaseRemoteDataSource.fetchWatchHistoryDelta(lastHistorySync)
-            android.util.Log.d("MovieRepository", "Fetched ${remoteHistory.size} delta watch history from Firebase")
-            watchHistoryRepository.syncWatchHistoryFromRemote(remoteHistory)
-            preferenceRepository.updateLastWatchHistorySyncTimestamp(now)
-
-            // 4. Pull Preferences
-            emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
-            syncPreferencesWithFirebase()
-            preferenceRepository.updateLastSyncTimestamp(now)
-            
-            emit(UiText.StringResource(R.string.sync_msg_completed), 1f)
-        } catch (e: Exception) {
-            if (e is CancellationException) throw e
-            android.util.Log.e("MovieRepository", "Error during Firebase synchronization, aborting sync to prevent data loss.", e)
-            emit(UiText.StringResource(R.string.sync_msg_error), 1f)
-        }
-    }
-
-    fun enqueueSyncWorker() {
-        try {
-            val syncConstraints = androidx.work.Constraints.Builder()
-                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                .build()
-            val syncRequest = OneTimeWorkRequestBuilder<com.cinetrack.data.sync.SyncWorker>()
-                .setConstraints(syncConstraints)
-                .build()
-            WorkManager.getInstance(context).enqueueUniqueWork(
-                com.cinetrack.data.sync.SyncWorker.WORK_NAME,
-                androidx.work.ExistingWorkPolicy.KEEP,
-                syncRequest
-            )
-            android.util.Log.d("MovieRepository", "SyncWorker enqueued successfully via WorkManager")
-        } catch (e: Exception) {
-            android.util.Log.e("MovieRepository", "Failed to enqueue SyncWorker", e)
-        }
-    }
+    suspend fun savePreferencesRemote(prefs: com.cinetrack.data.model.UserPreferences) =
+        firebaseSyncCoordinator.savePreferencesRemote(prefs)
 
     suspend fun clearAllData() {
         favoriteDao.clearAll()
         folderRepository.clearAll()
         preferenceRepository.clearAll()
-    }
-
-    suspend fun syncPreferencesWithFirebase() {
-        val remotePrefs = firebaseRemoteDataSource.fetchUserPreferences() ?: return
-        
-        try {
-            val currentPrefs = preferenceRepository.userPreferencesFlow
-                // Fix: Emesso UserPreferences() corretto al posto di SyncProgress
-                .catch { emit(com.cinetrack.data.model.UserPreferences()) }
-                .firstOrNull() ?: com.cinetrack.data.model.UserPreferences()
-                
-            // Helper to parse SortConfig from Firebase Map
-            fun parseSortConfig(map: Any?, default: com.cinetrack.data.model.SortConfig): com.cinetrack.data.model.SortConfig {
-                if (map !is Map<*, *>) return default
-                return com.cinetrack.data.model.SortConfig(
-                    sortType = map["sortType"] as? String ?: default.sortType,
-                    sortDirection = map["sortDirection"] as? String ?: default.sortDirection,
-                    selectedGenres = (map["selectedGenres"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedGenres,
-                    selectedProviders = (map["selectedProviders"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedProviders,
-                    selectedDecades = (map["selectedDecades"] as? List<*>)?.filterIsInstance<String>() ?: default.selectedDecades
-                )
-            }
-
-            // Helper to parse DiscoveryFilters from Firebase Map
-            fun parseDiscoveryFilters(map: Any?, default: com.cinetrack.data.model.DiscoveryFilters): com.cinetrack.data.model.DiscoveryFilters {
-                if (map !is Map<*, *>) return default
-                return com.cinetrack.data.model.DiscoveryFilters(
-                    selectedGenres = (map["selectedGenres"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedGenres,
-                    selectedProviders = (map["selectedProviders"] as? List<*>)?.mapNotNull { (it as? Number)?.toLong() } ?: default.selectedProviders,
-                    selectedDecades = (map["selectedDecades"] as? List<*>)?.filterIsInstance<String>() ?: default.selectedDecades,
-                    sortBy = map["sortBy"] as? String ?: default.sortBy
-                )
-            }
-
-            val updatedPrefs = currentPrefs.copy(
-                gridColumns = (remotePrefs["gridColumns"] as? Number)?.toInt() ?: currentPrefs.gridColumns,
-                showLayoutToggle = remotePrefs["showLayoutToggle"] as? Boolean ?: currentPrefs.showLayoutToggle,
-                isSearchSuggestionsExpanded = remotePrefs["isSearchSuggestionsExpanded"] as? Boolean ?: currentPrefs.isSearchSuggestionsExpanded,
-                notificationsReleases = remotePrefs["notificationsReleases"] as? Boolean ?: currentPrefs.notificationsReleases,
-                notificationsSocial = remotePrefs["notificationsSocial"] as? Boolean ?: currentPrefs.notificationsSocial,
-                showFolderBookmarks = remotePrefs["showFolderBookmarks"] as? Boolean ?: currentPrefs.showFolderBookmarks,
-                showBadges = remotePrefs["showBadges"] as? Boolean ?: currentPrefs.showBadges,
-                disabledBadges = (remotePrefs["disabledBadges"] as? List<*>)?.filterIsInstance<String>()?.toSet() ?: currentPrefs.disabledBadges,
-                vibrationEnabled = remotePrefs["vibrationEnabled"] as? Boolean ?: currentPrefs.vibrationEnabled,
-                accentColor = remotePrefs["accentColor"] as? String ?: currentPrefs.accentColor,
-                appTheme = remotePrefs["appTheme"] as? String ?: currentPrefs.appTheme,
-                contentLanguage = remotePrefs["contentLanguage"] as? String ?: currentPrefs.contentLanguage,
-                advancedVisualEffectsEnabled = remotePrefs["advancedVisualEffectsEnabled"] as? Boolean ?: currentPrefs.advancedVisualEffectsEnabled,
-                dynamicAppIconEnabled = remotePrefs["dynamicAppIconEnabled"] as? Boolean ?: currentPrefs.dynamicAppIconEnabled,
-                seasonalAppIconEnabled = remotePrefs["seasonalAppIconEnabled"] as? Boolean ?: currentPrefs.seasonalAppIconEnabled,
-                showSplitReleasesHome = remotePrefs["showSplitReleasesHome"] as? Boolean ?: currentPrefs.showSplitReleasesHome,
-                showSplitDroppedHome = remotePrefs["showSplitDroppedHome"] as? Boolean ?: currentPrefs.showSplitDroppedHome,
-                showAppEntryAnimation = remotePrefs["showAppEntryAnimation"] as? Boolean ?: currentPrefs.showAppEntryAnimation,
-                useMovieLogo = remotePrefs["useMovieLogo"] as? Boolean ?: currentPrefs.useMovieLogo,
-                defaultStartTab = remotePrefs["defaultStartTab"] as? String ?: currentPrefs.defaultStartTab,
-                defaultStartMedia = remotePrefs["defaultStartMedia"] as? String ?: currentPrefs.defaultStartMedia,
-                showMyFolders = remotePrefs["showMyFolders"] as? Boolean ?: currentPrefs.showMyFolders,
-                showYourFlow = remotePrefs["showYourFlow"] as? Boolean ?: currentPrefs.showYourFlow,
-                titleTextSizeMultiplier = (remotePrefs["titleTextSizeMultiplier"] as? Number)?.toFloat() ?: currentPrefs.titleTextSizeMultiplier,
-                imageQuality = remotePrefs["imageQuality"] as? String ?: currentPrefs.imageQuality,
-                homeSort = parseSortConfig(remotePrefs["homeSort"], currentPrefs.homeSort),
-                vistiSort = parseSortConfig(remotePrefs["vistiSort"], currentPrefs.vistiSort),
-                foldersSort = parseSortConfig(remotePrefs["foldersSort"], currentPrefs.foldersSort),
-                discoveryFilters = parseDiscoveryFilters(remotePrefs["discoveryFilters"], currentPrefs.discoveryFilters),
-                showHomeContinueWatching = remotePrefs["showHomeContinueWatching"] as? Boolean ?: currentPrefs.showHomeContinueWatching,
-                showHomeBoxOffice = remotePrefs["showHomeBoxOffice"] as? Boolean ?: currentPrefs.showHomeBoxOffice,
-                showHomeWatchlist = remotePrefs["showHomeWatchlist"] as? Boolean ?: currentPrefs.showHomeWatchlist,
-                showHomeBecauseYouWatched = remotePrefs["showHomeBecauseYouWatched"] as? Boolean ?: currentPrefs.showHomeBecauseYouWatched,
-                homeSectionOrder = (remotePrefs["homeSectionOrder"] as? List<*>)?.filterIsInstance<String>()?.let {
-                    com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(it)
-                } ?: currentPrefs.homeSectionOrder,
-                lastSyncTimestamp = System.currentTimeMillis()
-            )
-            
-            preferenceRepository.updateAll(updatedPrefs)
-        } catch (e: Exception) {
-            if (e is CancellationException) throw e
-            android.util.Log.e("MovieRepository", "Error syncing preferences: ${e.message}")
-        }
-    }
-
-    suspend fun savePreferencesRemote(prefs: com.cinetrack.data.model.UserPreferences) {
-        repositoryScope.launch {
-            try {
-                // Convert to Map for Firestore
-                val prefsMap = mapOf(
-                    "gridColumns" to prefs.gridColumns,
-                    "showLayoutToggle" to prefs.showLayoutToggle,
-                    "isSearchSuggestionsExpanded" to prefs.isSearchSuggestionsExpanded,
-                    "notificationsReleases" to prefs.notificationsReleases,
-                    "notificationsSocial" to prefs.notificationsSocial,
-                    "showFolderBookmarks" to prefs.showFolderBookmarks,
-                    "showBadges" to prefs.showBadges,
-                    "disabledBadges" to prefs.disabledBadges.toList(),
-                    "vibrationEnabled" to prefs.vibrationEnabled,
-                    "accentColor" to prefs.accentColor,
-                    "appTheme" to prefs.appTheme,
-                    "contentLanguage" to prefs.contentLanguage,
-                    "advancedVisualEffectsEnabled" to prefs.advancedVisualEffectsEnabled,
-                    "dynamicAppIconEnabled" to prefs.dynamicAppIconEnabled,
-                    "seasonalAppIconEnabled" to prefs.seasonalAppIconEnabled,
-                    "showSplitReleasesHome" to prefs.showSplitReleasesHome,
-                    "showSplitDroppedHome" to prefs.showSplitDroppedHome,
-                    "showAppEntryAnimation" to prefs.showAppEntryAnimation,
-                    "useMovieLogo" to prefs.useMovieLogo,
-                    "defaultStartTab" to prefs.defaultStartTab,
-                    "defaultStartMedia" to prefs.defaultStartMedia,
-                    "showMyFolders" to prefs.showMyFolders,
-                    "showYourFlow" to prefs.showYourFlow,
-                    "showGeneralStats" to prefs.showGeneralStats,
-                    "showTrophies" to prefs.showTrophies,
-                    "showDiary" to prefs.showDiary,
-                    "dashboardCardOrder" to prefs.dashboardCardOrder,
-                    "titleTextSizeMultiplier" to prefs.titleTextSizeMultiplier.toDouble(),
-                    "imageQuality" to prefs.imageQuality,
-                    "homeSort" to mapOf(
-                        "sortType" to prefs.homeSort.sortType,
-                        "sortDirection" to prefs.homeSort.sortDirection,
-                        "selectedGenres" to prefs.homeSort.selectedGenres,
-                        "selectedProviders" to prefs.homeSort.selectedProviders,
-                        "selectedDecades" to prefs.homeSort.selectedDecades
-                    ),
-                    "vistiSort" to mapOf(
-                        "sortType" to prefs.vistiSort.sortType,
-                        "sortDirection" to prefs.vistiSort.sortDirection,
-                        "selectedGenres" to prefs.vistiSort.selectedGenres,
-                        "selectedProviders" to prefs.vistiSort.selectedProviders,
-                        "selectedDecades" to prefs.vistiSort.selectedDecades
-                    ),
-                    "foldersSort" to mapOf(
-                        "sortType" to prefs.foldersSort.sortType,
-                        "sortDirection" to prefs.foldersSort.sortDirection,
-                        "selectedGenres" to prefs.foldersSort.selectedGenres,
-                        "selectedProviders" to prefs.foldersSort.selectedProviders,
-                        "selectedDecades" to prefs.foldersSort.selectedDecades
-                    ),
-                    "discoveryFilters" to mapOf(
-                        "selectedGenres" to prefs.discoveryFilters.selectedGenres,
-                        "selectedProviders" to prefs.discoveryFilters.selectedProviders,
-                        "selectedDecades" to prefs.discoveryFilters.selectedDecades,
-                        "sortBy" to prefs.discoveryFilters.sortBy
-                    ),
-                    "showHomeContinueWatching" to prefs.showHomeContinueWatching,
-                    "showHomeBoxOffice" to prefs.showHomeBoxOffice,
-                    "showHomeWatchlist" to prefs.showHomeWatchlist,
-                    "showHomeBecauseYouWatched" to prefs.showHomeBecauseYouWatched,
-                    "homeSectionOrder" to prefs.homeSectionOrder
-                )
-                firebaseRemoteDataSource.setUserPreferences(prefsMap)
-            } catch (e: Exception) {
-                if (e is CancellationException) throw e
-                android.util.Log.e("MovieRepository", "Error saving preferences remote", e)
-            }
-        }
     }
 
     // --- Search History (Delegated to SearchHistoryRepository) ---
