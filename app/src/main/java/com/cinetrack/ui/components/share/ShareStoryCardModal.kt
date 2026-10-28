@@ -1177,6 +1177,7 @@ private fun CoverSelectionView(
                         .align(Alignment.TopCenter)
                         .offset(y = 44.dp)
                         .fillMaxWidth()
+                        .wrapContentHeight(align = Alignment.Top, unbounded = true)
                 ) {
                     val scrollState = rememberScrollState()
                     val canScrollUp = scrollState.canScrollBackward
@@ -1185,7 +1186,7 @@ private fun CoverSelectionView(
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .heightIn(max = 280.dp)
+                            .requiredHeightIn(max = 280.dp)
                             .shadow(20.dp, RoundedCornerShape(16.dp))
                             .hazeGlass(
                                 state = coverHazeState,
