@@ -310,7 +310,7 @@ fun SettingsScreenContent(
     var duplicateRewatchesCount by remember { mutableIntStateOf(0) }
     var isCleaningUpRewatches by remember { mutableStateOf(false) }
 
-    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showSeasonalIconsDialog || showLanguageDialog || showStartScreenDialog || showFeedbackDialog || 
+    val anyDialogVisible = showDeleteDialog || showReauthDialog || showColorDialog || showSeasonalIconsDialog || showLanguageDialog || showStartScreenDialog || showStartMediaDialog || showFeedbackDialog || 
                            showBadgesInfoDialog || showCacheConfirm || showLogoutConfirm || showWipeSelectionDialog || showWipeLocalDataConfirm || showWipeTotalDataConfirm || showBackupDialog || 
                            showExternalMigrationDialog || isBackupLoading || showCleanupRewatchesDialog ||
                            showDeepSyncConfirm || showUnmatchedItemsModal || showBlockedUsersModal || showDashboardSettings || showHomeSectionsDialog || showCardAppearanceDialog
@@ -331,6 +331,7 @@ fun SettingsScreenContent(
         showSeasonalIconsDialog = false
         showLanguageDialog = false
         showStartScreenDialog = false
+        showStartMediaDialog = false
         showFeedbackDialog = false
         showBadgesInfoDialog = false
         showCacheConfirm = false
@@ -398,6 +399,8 @@ fun SettingsScreenContent(
             showBlockedUsersModal = false
             showDashboardSettings = false
             showHomeSectionsDialog = false
+            showStartMediaDialog = false
+            showCardAppearanceDialog = false
         }
     }
 
