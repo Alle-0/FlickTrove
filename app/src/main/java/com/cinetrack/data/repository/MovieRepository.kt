@@ -559,7 +559,7 @@ class MovieRepository @Inject constructor(
             clientUpdatedAt = System.currentTimeMillis()
         )
         favoriteDao.insert(updatedMovie)
-        watchHistoryRepository.purgeHistoryForMovie(targetMovie.id)
+        watchHistoryRepository.purgeHistoryForMovie(targetMovie.id, targetMovie.mediaType)
         widgetNotifier.notifyWidgetUpdated()
 
         // --- PUSH RIMOZIONE A TRAKT ---
@@ -659,7 +659,7 @@ class MovieRepository @Inject constructor(
             clientUpdatedAt = System.currentTimeMillis()
         )
         favoriteDao.insert(updatedMovie)
-        watchHistoryRepository.purgeHistoryForMovie(movie.id)
+        watchHistoryRepository.purgeHistoryForMovie(movie.id, movie.mediaType)
 
         // --- PUSH RIMOZIONE A TRAKT ---
         val builder = androidx.work.Data.Builder()
@@ -1518,15 +1518,15 @@ class MovieRepository @Inject constructor(
     // --- Watch History (Delegated to WatchHistoryRepository) ---
     fun getGlobalTimelineFlow() = watchHistoryRepository.getGlobalTimelineFlow()
     suspend fun updateWatchDate(id: Long, newWatchedAt: String) = watchHistoryRepository.updateWatchDate(id, newWatchedAt)
-    suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.getWatchHistoryForMovie(movieId, mediaType)
-    fun getWatchHistoryForMovieFlow(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.getWatchHistoryForMovieFlow(movieId, mediaType)
+    suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String? = null) = watchHistoryRepository.getWatchHistoryForMovie(movieId, mediaType)
+    fun getWatchHistoryForMovieFlow(movieId: Long, mediaType: String? = null) = watchHistoryRepository.getWatchHistoryForMovieFlow(movieId, mediaType)
     fun getAllWatchHistoryFlow() = watchHistoryRepository.getAllWatchHistoryFlow()
     suspend fun getAllWatchHistory() = watchHistoryRepository.getAllWatchHistory()
     suspend fun insertWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.insertWatchHistory(history)
     suspend fun updateWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.updateWatchHistory(history)
     suspend fun deleteWatchHistory(history: com.cinetrack.data.local.entities.WatchHistoryEntity) = watchHistoryRepository.deleteWatchHistory(history)
-    suspend fun deleteWatchHistoryByMovieId(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.deleteWatchHistoryByMovieId(movieId, mediaType)
-    suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String = "movie") = watchHistoryRepository.purgeHistoryForMovie(movieId, mediaType)
+    suspend fun deleteWatchHistoryByMovieId(movieId: Long, mediaType: String? = null) = watchHistoryRepository.deleteWatchHistoryByMovieId(movieId, mediaType)
+    suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String? = null) = watchHistoryRepository.purgeHistoryForMovie(movieId, mediaType)
     suspend fun countDuplicateRewatches(): Int = watchHistoryRepository.countDuplicateRewatches()
     suspend fun cleanupAllRewatches(): Int = watchHistoryRepository.cleanupAllRewatches()
 

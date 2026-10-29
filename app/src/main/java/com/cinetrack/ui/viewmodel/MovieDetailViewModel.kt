@@ -913,7 +913,7 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             try {
                 // Ensure unique timestamp to satisfy SQLite UNIQUE(movieId, watchedAt) constraint
-                val allHistory = repository.getWatchHistoryForMovie(movieId)
+                val allHistory = repository.getWatchHistoryForMovie(movieId, mediaType)
                 var targetIso = newDateIso
                 var counter = 1
                 while (allHistory.any { it.id != history.id && it.watchedAt == targetIso }) {
@@ -923,8 +923,8 @@ class MovieDetailViewModel @Inject constructor(
                 }
                 repository.updateWatchHistory(history.copy(watchedAt = targetIso))
                 // Update movie's latest watchedAt if necessary
-                val updatedHistory = repository.getWatchHistoryForMovie(movieId)
-                val latest = updatedHistory.maxByOrNull { it.watchedAt }
+                val updatedHistory = repository.getWatchHistoryForMovie(movieId, mediaType)
+                val latest = updatedHistory.maxByOrNull { parseToEpochMillis(it.watchedAt) }
                 val local = repository.getMovie(movieId, mediaType)
                 if (local != null && latest != null && local.watchedAt != latest.watchedAt) {
                     repository.saveMovie(local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
@@ -942,36 +942,40 @@ class MovieDetailViewModel @Inject constructor(
                 repository.deleteWatchHistory(history)
                 
                 // Revert state if history is empty
-                val allHistory = repository.getWatchHistoryForMovie(movieId)
+                val allHistory = repository.getWatchHistoryForMovie(movieId, mediaType)
                 val local = repository.getMovie(movieId, mediaType)
                 if (local != null) {
                     if (allHistory.isEmpty()) {
-                        if (!history.isRewatch) {
-                            repository.saveMovie(local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis()))
+                        val resetMovie = if (mediaType == "tv") {
+                            local.copy(watched = false, watchedAt = null, watchedEpisodes = emptyMap(), progress = 0.0, clientUpdatedAt = System.currentTimeMillis())
+                        } else {
+                            local.copy(watched = false, watchedAt = null, clientUpdatedAt = System.currentTimeMillis())
                         }
+                        repository.saveMovie(resetMovie)
                     } else {
-                        val latest = allHistory.maxByOrNull { it.watchedAt }
-                        if (latest != null && local.watchedAt != latest.watchedAt) {
-                            var updatedLocal = local.copy(watchedAt = latest.watchedAt, clientUpdatedAt = System.currentTimeMillis())
-                            
-                            if (mediaType == "tv") {
-                                if (history.historicalEpisodes != null) {
-                                    try {
-                                        val parsedMap: Map<String, List<Int>> = Json.decodeFromString(history.historicalEpisodes)
-                                        val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
-                                        updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
-                                    } catch (e: Exception) {
-                                        updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
-                                    }
-                                } else {
+                        val latest = allHistory.maxByOrNull { parseToEpochMillis(it.watchedAt) }
+                        var updatedLocal = local.copy(
+                            watchedAt = latest?.watchedAt ?: local.watchedAt,
+                            clientUpdatedAt = System.currentTimeMillis()
+                        )
+                        
+                        if (mediaType == "tv") {
+                            if (history.historicalEpisodes != null) {
+                                try {
+                                    val parsedMap: Map<String, List<Int>> = Json.decodeFromString(history.historicalEpisodes)
+                                    val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
+                                    updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
+                                } catch (e: Exception) {
                                     updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
                                 }
-                            } else {
-                                updatedLocal = updatedLocal.copy(watched = true)
+                            } else if (allHistory.none { it.isRewatch }) {
+                                updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
                             }
-                            
-                            repository.saveMovie(updatedLocal)
+                        } else {
+                            updatedLocal = updatedLocal.copy(watched = true)
                         }
+                        
+                        repository.saveMovie(updatedLocal)
                     }
                 }
                 badgeRepository.evaluateBadgesAsync()
@@ -1081,6 +1085,9 @@ class MovieDetailViewModel @Inject constructor(
                     }
                 }
                 repository.saveMovie(updated)
+                if (watchState == WatchState.NONE) {
+                    repository.purgeHistoryForMovie(previousMovie.id, previousMovie.mediaType)
+                }
                 if (watchState == WatchState.WATCHED && mediaType == "tv") {
                     ensureFirstViewingCreated(updated, customWatchDate, isProgressAdvancing = true)
                 }

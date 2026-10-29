@@ -22,11 +22,13 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun updateEpisodeDatesAndWatchDate(id: Long, episodeDates: String?, newWatchedAt: String) =
         watchHistoryDao.updateEpisodeDatesAndWatchDate(id, episodeDates, newWatchedAt)
 
-    suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String = "movie"): List<WatchHistoryEntity> =
-        watchHistoryDao.getWatchHistoryForMovie(movieId, mediaType)
+    suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String? = null): List<WatchHistoryEntity> =
+        if (mediaType.isNullOrBlank()) watchHistoryDao.getWatchHistoryForMovie(movieId)
+        else watchHistoryDao.getWatchHistoryForMovie(movieId, mediaType)
 
-    fun getWatchHistoryForMovieFlow(movieId: Long, mediaType: String = "movie"): Flow<List<WatchHistoryEntity>> =
-        watchHistoryDao.getWatchHistoryForMovieFlow(movieId, mediaType)
+    fun getWatchHistoryForMovieFlow(movieId: Long, mediaType: String? = null): Flow<List<WatchHistoryEntity>> =
+        if (mediaType.isNullOrBlank()) watchHistoryDao.getWatchHistoryForMovieFlow(movieId)
+        else watchHistoryDao.getWatchHistoryForMovieFlow(movieId, mediaType)
 
     fun getAllWatchHistoryFlow(): Flow<List<WatchHistoryEntity>> =
         watchHistoryDao.getAllWatchHistoryFlow()
@@ -43,12 +45,22 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun deleteWatchHistory(history: WatchHistoryEntity) =
         watchHistoryDao.markDeleted(history.id)
 
-    suspend fun deleteWatchHistoryByMovieId(movieId: Long, mediaType: String = "movie") =
-        watchHistoryDao.deleteByMovieId(movieId, mediaType)
+    suspend fun deleteWatchHistoryByMovieId(movieId: Long, mediaType: String? = null) {
+        if (mediaType.isNullOrBlank()) {
+            watchHistoryDao.deleteByMovieId(movieId)
+        } else {
+            watchHistoryDao.deleteByMovieId(movieId, mediaType)
+        }
+    }
 
-    suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String = "movie") {
-        watchHistoryDao.deleteByMovieId(movieId, mediaType)
-        watchHistoryDao.purgeHistoryForMovie(movieId, mediaType)
+    suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String? = null) {
+        if (mediaType.isNullOrBlank()) {
+            watchHistoryDao.deleteByMovieId(movieId)
+            watchHistoryDao.purgeHistoryForMovie(movieId)
+        } else {
+            watchHistoryDao.deleteByMovieId(movieId, mediaType)
+            watchHistoryDao.purgeHistoryForMovie(movieId, mediaType)
+        }
     }
 
     suspend fun countDuplicateRewatches(): Int {
