@@ -139,6 +139,14 @@ fun TrophyUnlockBanner(
                         }
                     }
                 }
+                .bounceClick(
+                    scaleDown = 0.95f,
+                    shape = RoundedCornerShape(26.dp)
+                ) {
+                    isVisible = false
+                    val targetBadgeId = (current as? TrophyUnlockBannerEvent.SingleBadge)?.badgeId
+                    onNavigateToTrophyRoom(targetBadgeId)
+                }
                 .clip(RoundedCornerShape(26.dp))
                 .hazeGlass(
                     state = hazeState,
@@ -159,11 +167,6 @@ fun TrophyUnlockBanner(
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .bounceClick {
-                        isVisible = false
-                        val targetBadgeId = (current as? TrophyUnlockBannerEvent.SingleBadge)?.badgeId
-                        onNavigateToTrophyRoom(targetBadgeId)
-                    }
                     .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                     .padding(horizontal = 16.dp, vertical = 11.dp)
             ) {
