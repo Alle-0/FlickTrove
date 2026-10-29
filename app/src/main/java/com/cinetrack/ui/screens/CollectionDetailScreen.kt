@@ -252,6 +252,7 @@ fun CollectionDetailScreenContent(
                 modifier = Modifier
                     .fillMaxSize()
                     .haze(rootHazeState, style = HazeStyles.PremiumDark)
+                    .background(animatedBgColor)
             ) {
                 // Hero Header Section (Edge-to-Edge backdrop + Header Content)
                 item {

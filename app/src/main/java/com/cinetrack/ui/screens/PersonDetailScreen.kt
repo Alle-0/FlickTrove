@@ -379,7 +379,8 @@ fun PersonDetailScreenContent(
                             state = scrollState,
                             modifier = Modifier
                                 .fillMaxSize()
-                                .haze(localHazeState, style = HazeStyles.PremiumDark),
+                                .haze(localHazeState, style = HazeStyles.PremiumDark)
+                                .background(Color(0xFF0A0A0A)),
                             contentPadding = paddingValues
                         ) {
                             item {

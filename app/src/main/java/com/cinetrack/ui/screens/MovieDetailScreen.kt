@@ -441,7 +441,13 @@ fun MovieDetailScreenContent(
             onDelete = { movie -> viewModel.onEvent(DetailEvent.DeleteMovieItem(movie)) }
         ) { actionsState ->
             Box(modifier = Modifier.fillMaxSize()) {
-                Box(modifier = Modifier.fillMaxSize().background(PremiumBackground).background(animatedBgColor).haze(rootHazeState, style = HazeStyles.PremiumDark)) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .haze(rootHazeState, style = HazeStyles.PremiumDark)
+                        .background(PremiumBackground)
+                        .background(animatedBgColor)
+                ) {
         
         AnimatedContent(
             targetState = when (uiState) {
@@ -500,6 +506,7 @@ fun MovieDetailScreenContent(
                                 modifier = Modifier
                                     .fillMaxSize()
                                     .haze(localHazeState, style = HazeStyles.PremiumDark)
+                                    .background(animatedBgColor)
                                     .verticalScroll(scrollState)
                             ) {
                                 Box(
