@@ -399,6 +399,7 @@ fun BoxOfficeHeroWinnerCard(
 ) {
     val movie = item.movie
     val imageQuality = LocalImageQuality.current
+    val cardHazeState = remember { HazeState() }
 
     val backdropUrl = remember(movie.backdropPath, movie.posterPath, imageQuality) {
         val path = movie.backdropPath ?: movie.posterPath
@@ -417,45 +418,57 @@ fun BoxOfficeHeroWinnerCard(
             .clip(heroCardShape)
             .border(1.dp, Color.White.copy(alpha = 0.08f), heroCardShape)
     ) {
-        // Backdrop Image
-        if (backdropUrl != null) {
-            AsyncImage(
-                model = backdropUrl,
-                contentDescription = movie.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF1F1F24))
-            )
-        }
-
-        // Gradient overlay
+        // Backdrop & Scrim as Haze Source
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.2f),
-                            Color.Black.copy(alpha = 0.5f),
-                            Color.Black.copy(alpha = 0.92f)
+                .haze(cardHazeState)
+        ) {
+            // Backdrop Image
+            if (backdropUrl != null) {
+                AsyncImage(
+                    model = backdropUrl,
+                    contentDescription = movie.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF1F1F24))
+                )
+            }
+
+            // Gradient overlay
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.2f),
+                                Color.Black.copy(alpha = 0.5f),
+                                Color.Black.copy(alpha = 0.92f)
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
         // Top Badge: Champion / Winner Pill
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(12.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.6f))
-                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                .hazeGlass(
+                    state = cardHazeState,
+                    shape = CircleShape,
+                    containerColor = Color.Black.copy(alpha = 0.35f),
+                    blurRadius = 16.dp,
+                    borderWidth = 1.dp,
+                    borderColor = Color.White.copy(alpha = 0.15f)
+                )
                 .padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -539,9 +552,14 @@ fun BoxOfficeHeroWinnerCard(
                 if (item.formattedRevenue.isNotBlank()) {
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(Color.Black.copy(alpha = 0.6f))
-                            .border(1.dp, Color(0xFF10B981).copy(alpha = 0.5f), CircleShape)
+                            .hazeGlass(
+                                state = cardHazeState,
+                                shape = CircleShape,
+                                containerColor = Color.Black.copy(alpha = 0.35f),
+                                blurRadius = 16.dp,
+                                borderWidth = 1.dp,
+                                borderColor = Color(0xFF10B981).copy(alpha = 0.4f)
+                            )
                             .padding(horizontal = 10.dp, vertical = 5.dp)
                     ) {
                         Text(
