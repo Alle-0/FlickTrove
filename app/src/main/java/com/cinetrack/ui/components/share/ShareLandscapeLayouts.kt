@@ -1,8 +1,18 @@
 package com.cinetrack.ui.components.share
 
+import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Arrangement
@@ -117,13 +127,17 @@ internal fun ShareLandscapePosterLayout(
             }
 
             // Vibe icons floating sul poster
-            if (showVibesOnPoster) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showVibesOnPoster,
+                enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.75f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)),
+                exit = fadeOut(animationSpec = tween(160)) + scaleOut(targetScale = 0.75f, animationSpec = tween(160)),
+                modifier = Modifier
+                    .align(Alignment.TopEnd)
+                    .padding(10.dp)
+            ) {
                 ShareVibesPill(
                     vibes = state.vibes,
                     cardHazeState = posterHazeState,
-                    modifier = Modifier
-                        .align(Alignment.TopEnd)
-                        .padding(10.dp),
                     iconSize = 14.dp,
                     horizontalPadding = 7.dp,
                     verticalPadding = 4.dp
@@ -131,18 +145,22 @@ internal fun ShareLandscapePosterLayout(
             }
 
             // MVP badge in basso a destra sul poster con real frosted glass blur
-            if (showMvpOnPoster) {
-                val cardOffsetX = 20.dp
-                val cardOffsetY = 14.dp
+            val cardOffsetX = 20.dp
+            val cardOffsetY = 14.dp
+            androidx.compose.animation.AnimatedVisibility(
+                visible = showMvpOnPoster,
+                enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.75f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)) + slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { it / 4 },
+                exit = fadeOut(animationSpec = tween(160)) + scaleOut(targetScale = 0.75f, animationSpec = tween(160)) + slideOutVertically(animationSpec = tween(160)) { it / 4 },
+                modifier = Modifier
+                    .align(Alignment.BottomEnd)
+                    .offset(x = cardOffsetX, y = cardOffsetY)
+            ) {
                 MvpMiniCard(
                     actorName = actorName.orEmpty(),
                     characterName = state.movie.favoriteActorCharacter,
                     profilePath = profilePath,
                     accentColor = state.accentColor,
-                    hazeState = posterHazeState,
-                    modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .offset(x = cardOffsetX, y = cardOffsetY)
+                    hazeState = posterHazeState
                 )
             }
         }
@@ -215,7 +233,11 @@ internal fun ShareLandscapePosterLayout(
             }
 
             // Hero Rating /10
-            if (state.hasRating) {
+            AnimatedVisibility(
+                visible = state.hasRating,
+                enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.85f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)) + expandVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)),
+                exit = fadeOut(animationSpec = tween(160)) + scaleOut(targetScale = 0.85f, animationSpec = tween(160)) + shrinkVertically(animationSpec = tween(160))
+            ) {
                 ShareHeroRating(
                     rating = state.effectiveRating,
                     accentColor = state.accentColor,
@@ -230,7 +252,11 @@ internal fun ShareLandscapePosterLayout(
             }
 
             // User profile in basso a destra
-            if (state.config.showProfile && !state.userDisplayName.isNullOrBlank()) {
+            AnimatedVisibility(
+                visible = state.config.showProfile && !state.userDisplayName.isNullOrBlank(),
+                enter = fadeIn(animationSpec = tween(220)) + expandVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) + slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { it / 3 },
+                exit = fadeOut(animationSpec = tween(160)) + shrinkVertically(animationSpec = tween(160)) + slideOutVertically(animationSpec = tween(160)) { it / 3 }
+            ) {
                 ShareSimpleProfileRow(
                     userDisplayName = state.userDisplayName.orEmpty(),
                     userPhotoUrl = state.userPhotoUrl,
@@ -269,7 +295,11 @@ internal fun ShareLandscapeBackdropLayout(
                 isSquare = false
             )
 
-            if (state.config.showVibe && state.vibes.isNotEmpty()) {
+            AnimatedVisibility(
+                visible = state.config.showVibe && state.vibes.isNotEmpty(),
+                enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.75f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)),
+                exit = fadeOut(animationSpec = tween(160)) + scaleOut(targetScale = 0.75f, animationSpec = tween(160))
+            ) {
                 ShareVibesPill(
                     vibes = state.vibes,
                     cardHazeState = state.cardHazeState,
@@ -289,7 +319,9 @@ internal fun ShareLandscapeBackdropLayout(
         ) {
             // Blocco Sinistra
             Column(
-                modifier = Modifier.weight(1f, fill = false),
+                modifier = Modifier
+                    .weight(1f, fill = false)
+                    .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)),
                 verticalArrangement = Arrangement.spacedBy(6.dp),
                 horizontalAlignment = Alignment.Start
             ) {
@@ -338,7 +370,11 @@ internal fun ShareLandscapeBackdropLayout(
                     )
                 }
 
-                if (state.hasRating) {
+                AnimatedVisibility(
+                    visible = state.hasRating,
+                    enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.85f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)) + expandVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)),
+                    exit = fadeOut(animationSpec = tween(160)) + scaleOut(targetScale = 0.85f, animationSpec = tween(160)) + shrinkVertically(animationSpec = tween(160))
+                ) {
                     ShareHeroRating(
                         rating = state.effectiveRating,
                         accentColor = state.accentColor,
@@ -355,12 +391,17 @@ internal fun ShareLandscapeBackdropLayout(
 
             // Blocco Destra (MVP + Profilo)
             Column(
+                modifier = Modifier.animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)),
                 horizontalAlignment = Alignment.End,
                 verticalArrangement = Arrangement.spacedBy(8.dp)
             ) {
                 val actorName = state.movie.favoriteActorName
                 val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-                if (state.config.showMvp && !actorName.isNullOrBlank()) {
+                AnimatedVisibility(
+                    visible = state.config.showMvp && !actorName.isNullOrBlank(),
+                    enter = fadeIn(animationSpec = tween(220)) + scaleIn(initialScale = 0.75f, animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioMediumBouncy)) + expandVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)),
+                    exit = fadeOut(animationSpec = tween(160)) + scaleOut(targetScale = 0.75f, animationSpec = tween(160)) + shrinkVertically(animationSpec = tween(160))
+                ) {
                     MvpMiniCard(
                         actorName = actorName.orEmpty(),
                         characterName = state.movie.favoriteActorCharacter,
@@ -370,9 +411,13 @@ internal fun ShareLandscapeBackdropLayout(
                     )
                 }
 
-                if (state.config.showProfile && !state.userDisplayName.isNullOrBlank()) {
+                AnimatedVisibility(
+                    visible = state.config.showProfile && !state.userDisplayName.isNullOrBlank(),
+                    enter = fadeIn(animationSpec = tween(220)) + expandVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) + slideInVertically(animationSpec = spring(stiffness = Spring.StiffnessMediumLow)) { it / 3 },
+                    exit = fadeOut(animationSpec = tween(160)) + shrinkVertically(animationSpec = tween(160)) + slideOutVertically(animationSpec = tween(160)) { it / 3 }
+                ) {
                     SharePillProfileRow(
-                        userDisplayName = state.userDisplayName,
+                        userDisplayName = state.userDisplayName.orEmpty(),
                         userPhotoUrl = state.userPhotoUrl,
                         accentColor = state.accentColor,
                         cardHazeState = state.cardHazeState,
