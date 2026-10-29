@@ -225,8 +225,8 @@ private fun SymbiontFluidCanvas(
                     val stretch = pull.coerceIn(0f, 1.15f)
                     val t = stretch.coerceIn(0f, 1f)
 
-                    if (stretch <= 0.001f && !isRetracting) {
-                        return Outline.Generic(path)
+                    if ((stretch <= 0.001f && !isRetracting) || (isRetracting && pull <= 0.001f)) {
+                        return Outline.Rectangle(Rect.Zero)
                     }
 
                     val rBottomRaw = if (isRetracting) {
@@ -313,6 +313,10 @@ private fun SymbiontFluidCanvas(
                             bottom = orbY + currentRadius
                         )
                     )
+                }
+                val bounds = path.getBounds()
+                if (bounds.width <= 0.5f || bounds.height <= 0.5f) {
+                    return Outline.Rectangle(Rect.Zero)
                 }
                 return Outline.Generic(path)
             }

@@ -127,7 +127,15 @@ fun DetailMorphingTopBar(
             val pillHeight = size.height
             val radius = with(density) { modalCorner.toPx() }
 
-            if (progress <= 0.01f && pillHeight <= with(density) { 45.dp.toPx() }) return@GenericShape
+            if (progress <= 0.01f && pillHeight <= with(density) { 45.dp.toPx() }) {
+                addRoundRect(
+                    androidx.compose.ui.geometry.RoundRect(
+                        left = 0f, top = 0f, right = pillWidth, bottom = pillHeight,
+                        cornerRadius = androidx.compose.ui.geometry.CornerRadius(radius)
+                    )
+                )
+                return@GenericShape
+            }
 
             val stretchWidth = circleSize + (pillWidth / 2f - circleSize) * progress
             val p4 = progress * progress * progress * progress
