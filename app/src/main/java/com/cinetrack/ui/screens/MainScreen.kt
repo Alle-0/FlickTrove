@@ -523,6 +523,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             // Overlay Globale Simbionte (Renderizzato sopra top bar, filtri e categorie)
                             SymbiontGlobalIndicator(
                                 state = symbiontPullState,
+                                hazeState = contentHazeState,
                                 modifier = Modifier
                                     .align(Alignment.TopCenter)
                                     .zIndex(200f)

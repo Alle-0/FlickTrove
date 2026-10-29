@@ -10,12 +10,18 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.unit.Density
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
+import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.components.glass.hazeGlass
+import dev.chrisbanes.haze.HazeState
 
 /**
  * Stato condiviso per l'indicatore di pull-to-refresh globale del Simbionte.
@@ -43,11 +49,14 @@ val LocalSymbiontPullState = staticCompositionLocalOf { SymbiontPullState() }
 @Composable
 fun SymbiontGlobalIndicator(
     state: SymbiontPullState,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hazeState: HazeState? = null
 ) {
+    val effectiveHazeState = hazeState ?: LocalHazeState.current
     SymbiontFluidCanvas(
         progress = state.progress,
         isRefreshing = state.isRefreshing,
+        hazeState = effectiveHazeState,
         modifier = modifier
     )
 }
@@ -60,11 +69,14 @@ fun SymbiontGlobalIndicator(
 fun BoxScope.SymbiontPullToRefreshIndicator(
     state: PullToRefreshState,
     isRefreshing: Boolean,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hazeState: HazeState? = null
 ) {
+    val effectiveHazeState = hazeState ?: LocalHazeState.current
     SymbiontFluidCanvas(
         progress = state.distanceFraction,
         isRefreshing = isRefreshing,
+        hazeState = effectiveHazeState,
         modifier = modifier.align(Alignment.TopCenter)
     )
 }
@@ -73,6 +85,7 @@ fun BoxScope.SymbiontPullToRefreshIndicator(
 private fun SymbiontFluidCanvas(
     progress: Float,
     isRefreshing: Boolean,
+    hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
     val density = LocalDensity.current
@@ -189,7 +202,124 @@ private fun SymbiontFluidCanvas(
 
     val floatingRestYPx = with(density) { 92.dp.toPx() }
 
-    Canvas(
+    val symbioteShape = remember(
+        isDetached,
+        isRetracting,
+        springPull,
+        detachedProgress,
+        pulseScale,
+        filamentRecoil,
+        density
+    ) {
+        object : Shape {
+            override fun createOutline(
+                size: Size,
+                layoutDirection: LayoutDirection,
+                density: Density
+            ): Outline {
+                val path = Path()
+                val centerX = size.width / 2f
+
+                if (!isDetached || isRetracting) {
+                    val pull = springPull
+                    val stretch = pull.coerceIn(0f, 1.15f)
+                    val t = stretch.coerceIn(0f, 1f)
+
+                    if (stretch <= 0.001f && !isRetracting) {
+                        return Outline.Generic(path)
+                    }
+
+                    val rBottomRaw = if (isRetracting) {
+                        with(density) { (22.dp * pull).toPx() }
+                    } else {
+                        with(density) { (2.dp + 20.dp * stretch.coerceIn(0f, 1f)).toPx() }
+                    }
+                    val rBottom = rBottomRaw.coerceAtLeast(0.1f)
+
+                    val rTop = with(density) { (1.8.dp + 2.dp * (1f - stretch * 0.50f)).toPx() }
+                    val dropY = if (isRetracting) {
+                        floatingRestYPx * pull
+                    } else {
+                        with(density) { (105.dp * stretch).toPx() }
+                    }
+
+                    val alphaTop = (70f - 40f * t) * (Math.PI.toFloat() / 180f)
+                    val xTop = rTop * kotlin.math.sin(alphaTop)
+                    val yTop = rTop * kotlin.math.cos(alphaTop)
+
+                    val waistHalfWidth = (xTop.coerceAtMost(rBottom) * (1f - t * 0.72f))
+                        .coerceAtLeast(with(density) { 1.2.dp.toPx() })
+
+                    val distY = (dropY - yTop).coerceAtLeast(1f)
+                    val c1Y = yTop + distY * 0.35f
+
+                    val pointedness = 0.3f + 0.9f * t
+                    val c2Y = (dropY - rBottom * pointedness).coerceAtLeast(c1Y + distY * 0.1f)
+                    val c1X = centerX + waistHalfWidth * 1.15f
+
+                    path.apply {
+                        moveTo(centerX - xTop, yTop)
+                        cubicTo(
+                            x1 = centerX - xTop * 0.7f, y1 = 0f,
+                            x2 = centerX + xTop * 0.7f, y2 = 0f,
+                            x3 = centerX + xTop, y3 = yTop
+                        )
+                        cubicTo(
+                            x1 = c1X, y1 = c1Y,
+                            x2 = centerX + rBottom, y2 = c2Y,
+                            x3 = centerX + rBottom, y3 = dropY
+                        )
+                        arcTo(
+                            rect = Rect(
+                                left = centerX - rBottom,
+                                top = dropY - rBottom,
+                                right = centerX + rBottom,
+                                bottom = dropY + rBottom
+                            ),
+                            startAngleDegrees = 0f,
+                            sweepAngleDegrees = 180f,
+                            forceMoveTo = false
+                        )
+                        cubicTo(
+                            x1 = centerX - rBottom, y1 = c2Y,
+                            x2 = centerX - (c1X - centerX), y2 = c1Y,
+                            x3 = centerX - xTop, y3 = yTop
+                        )
+                        close()
+                    }
+                } else {
+                    val orbY = androidx.compose.ui.util.lerp(
+                        start = with(density) { 120.dp.toPx() },
+                        stop = floatingRestYPx,
+                        fraction = detachedProgress
+                    )
+                    val baseRadius = with(density) { 22.dp.toPx() }
+                    val currentRadius = baseRadius * (if (isRefreshing) pulseScale else 1f)
+
+                    if (filamentRecoil > 0.02f) {
+                        val snapHeight = with(density) { 14.dp.toPx() } * filamentRecoil
+                        val snapWidth = with(density) { 2.dp.toPx() } * filamentRecoil
+                        path.moveTo(centerX - snapWidth, 0f)
+                        path.lineTo(centerX + snapWidth, 0f)
+                        path.lineTo(centerX, snapHeight)
+                        path.close()
+                    }
+
+                    path.addOval(
+                        Rect(
+                            left = centerX - currentRadius,
+                            top = orbY - currentRadius,
+                            right = centerX + currentRadius,
+                            bottom = orbY + currentRadius
+                        )
+                    )
+                }
+                return Outline.Generic(path)
+            }
+        }
+    }
+
+    Box(
         modifier = modifier
             .fillMaxWidth()
             .height(220.dp)
@@ -198,128 +328,124 @@ private fun SymbiontFluidCanvas(
                 scaleX = animScale
                 scaleY = animScale
             }
+            .hazeGlass(
+                state = hazeState,
+                shape = symbioteShape,
+                containerColor = Color.Black.copy(alpha = 0.40f),
+                blurRadius = 16.dp,
+                borderWidth = 0.dp
+            )
     ) {
-        val centerX = size.width / 2f
+        Canvas(
+            modifier = Modifier.fillMaxSize()
+        ) {
+            val centerX = size.width / 2f
 
-        if (!isDetached || isRetracting) {
-            val pull = springPull
-            val stretch = pull.coerceIn(0f, 1.15f)
-            val t = stretch.coerceIn(0f, 1f)
+            if (!isDetached || isRetracting) {
+                val pull = springPull
+                val stretch = pull.coerceIn(0f, 1.15f)
+                val t = stretch.coerceIn(0f, 1f)
 
-            val rBottomRaw = if (isRetracting) {
-                with(density) { (22.dp * pull).toPx() }
-            } else {
-                with(density) { (2.dp + 20.dp * stretch.coerceIn(0f, 1f)).toPx() }
-            }
-            val rBottom = rBottomRaw.coerceAtLeast(0.1f)
-            
-            val rTop = with(density) { (1.8.dp + 2.dp * (1f - stretch * 0.50f)).toPx() }
-            val dropY = if (isRetracting) {
-                floatingRestYPx * pull
-            } else {
-                with(density) { (105.dp * stretch).toPx() }
-            }
+                if (stretch > 0.001f || isRetracting) {
+                    val rBottomRaw = if (isRetracting) {
+                        with(density) { (22.dp * pull).toPx() }
+                    } else {
+                        with(density) { (2.dp + 20.dp * stretch.coerceIn(0f, 1f)).toPx() }
+                    }
+                    val rBottom = rBottomRaw.coerceAtLeast(0.1f)
 
-            val alphaTop = (70f - 40f * t) * (Math.PI.toFloat() / 180f)
-            val xTop = rTop * kotlin.math.sin(alphaTop)
-            val yTop = rTop * kotlin.math.cos(alphaTop)
+                    val rTop = with(density) { (1.8.dp + 2.dp * (1f - stretch * 0.50f)).toPx() }
+                    val dropY = if (isRetracting) {
+                        floatingRestYPx * pull
+                    } else {
+                        with(density) { (105.dp * stretch).toPx() }
+                    }
 
-            val waistHalfWidth = (xTop.coerceAtMost(rBottom) * (1f - t * 0.72f))
-                .coerceAtLeast(with(density) { 1.2.dp.toPx() })
+                    val alphaTop = (70f - 40f * t) * (Math.PI.toFloat() / 180f)
+                    val xTop = rTop * kotlin.math.sin(alphaTop)
+                    val yTop = rTop * kotlin.math.cos(alphaTop)
 
-            val distY = (dropY - yTop).coerceAtLeast(1f)
-            val c1Y = yTop + distY * 0.35f
-            
-            // Pointedness shapes the teardrop: round at t=0, sharp cone at t=1
-            val pointedness = 0.3f + 0.9f * t
-            val c2Y = (dropY - rBottom * pointedness).coerceAtLeast(c1Y + distY * 0.1f)
-            val c1X = centerX + waistHalfWidth * 1.15f
+                    val waistHalfWidth = (xTop.coerceAtMost(rBottom) * (1f - t * 0.72f))
+                        .coerceAtLeast(with(density) { 1.2.dp.toPx() })
 
-            val symbiotePath = Path().apply {
-                // 1. Calotta morbida a soffitto (Y = 0)
-                moveTo(centerX - xTop, yTop)
-                cubicTo(
-                    x1 = centerX - xTop * 0.7f, y1 = 0f,
-                    x2 = centerX + xTop * 0.7f, y2 = 0f,
-                    x3 = centerX + xTop, y3 = yTop
-                )
+                    val distY = (dropY - yTop).coerceAtLeast(1f)
+                    val c1Y = yTop + distY * 0.35f
 
-                // 2. Ponte liquido destro (collegamento tangenziale all'equatore della goccia)
-                cubicTo(
-                    x1 = c1X, y1 = c1Y,
-                    x2 = centerX + rBottom, y2 = c2Y,
-                    x3 = centerX + rBottom, y3 = dropY
-                )
+                    val pointedness = 0.3f + 0.9f * t
+                    val c2Y = (dropY - rBottom * pointedness).coerceAtLeast(c1Y + distY * 0.1f)
+                    val c1X = centerX + waistHalfWidth * 1.15f
 
-                // 3. Fondo arrotondato della sfera (arco perfetto di 180 gradi)
-                arcTo(
-                    rect = Rect(
-                        left = centerX - rBottom,
-                        top = dropY - rBottom,
-                        right = centerX + rBottom,
-                        bottom = dropY + rBottom
-                    ),
-                    startAngleDegrees = 0f,
-                    sweepAngleDegrees = 180f,
-                    forceMoveTo = false
-                )
+                    val symbiotePath = Path().apply {
+                        moveTo(centerX - xTop, yTop)
+                        cubicTo(
+                            x1 = centerX - xTop * 0.7f, y1 = 0f,
+                            x2 = centerX + xTop * 0.7f, y2 = 0f,
+                            x3 = centerX + xTop, y3 = yTop
+                        )
+                        cubicTo(
+                            x1 = c1X, y1 = c1Y,
+                            x2 = centerX + rBottom, y2 = c2Y,
+                            x3 = centerX + rBottom, y3 = dropY
+                        )
+                        arcTo(
+                            rect = Rect(
+                                left = centerX - rBottom,
+                                top = dropY - rBottom,
+                                right = centerX + rBottom,
+                                bottom = dropY + rBottom
+                            ),
+                            startAngleDegrees = 0f,
+                            sweepAngleDegrees = 180f,
+                            forceMoveTo = false
+                        )
+                        cubicTo(
+                            x1 = centerX - rBottom, y1 = c2Y,
+                            x2 = centerX - (c1X - centerX), y2 = c1Y,
+                            x3 = centerX - xTop, y3 = yTop
+                        )
+                        close()
+                    }
 
-                // 4. Ritorno ponte liquido sinistro verso il soffitto
-                cubicTo(
-                    x1 = centerX - rBottom, y1 = c2Y,
-                    x2 = centerX - (c1X - centerX), y2 = c1Y,
-                    x3 = centerX - xTop, y3 = yTop
-                )
-                close()
-            }
-
-            // CORPO IN NERO PROFONDO / ASSOLUTO (Pitch Black ad alto alpha)
-            val retractAlpha = if (isRetracting) (retractAnim.value / 0.10f).coerceIn(0f, 1f) else 1f
-            drawPath(
-                path = symbiotePath,
-                color = Color.Black.copy(alpha = 0.96f * retractAlpha)
-            )
-            drawPath(
-                path = symbiotePath,
-                color = Color.White.copy(alpha = 0.08f * retractAlpha),
-                style = Stroke(width = with(density) { 1.dp.toPx() })
-            )
-
-        } else {
-            val orbY = androidx.compose.ui.util.lerp(
-                start = with(density) { 120.dp.toPx() },
-                stop = floatingRestYPx,
-                fraction = detachedProgress
-            )
-            val baseRadius = with(density) { 22.dp.toPx() }
-            val currentRadius = baseRadius * (if (isRefreshing) pulseScale else 1f)
-
-            // 1. Ritrazione del filamento residuo verso il soffitto dopo la rottura
-            if (filamentRecoil > 0.02f) {
-                val snapHeight = with(density) { 14.dp.toPx() } * filamentRecoil
-                val snapWidth = with(density) { 2.dp.toPx() } * filamentRecoil
-                val filamentPath = Path().apply {
-                    moveTo(centerX - snapWidth, 0f)
-                    lineTo(centerX + snapWidth, 0f)
-                    lineTo(centerX, snapHeight)
-                    close()
+                    val retractAlpha = if (isRetracting) (retractAnim.value / 0.10f).coerceIn(0f, 1f) else 1f
+                    drawPath(
+                        path = symbiotePath,
+                        color = Color.White.copy(alpha = 0.22f * retractAlpha),
+                        style = Stroke(width = with(density) { 0.85.dp.toPx() })
+                    )
                 }
-                drawPath(filamentPath, color = Color.Black.copy(alpha = 0.96f))
-                drawPath(filamentPath, color = Color.White.copy(alpha = 0.08f), style = Stroke(width = with(density) { 1.dp.toPx() }))
-            }
+            } else {
+                val orbY = androidx.compose.ui.util.lerp(
+                    start = with(density) { 120.dp.toPx() },
+                    stop = floatingRestYPx,
+                    fraction = detachedProgress
+                )
+                val baseRadius = with(density) { 22.dp.toPx() }
+                val currentRadius = baseRadius * (if (isRefreshing) pulseScale else 1f)
 
-            // 2. Sfera del Simbionte in nero assoluto ad alto alpha
-            drawCircle(
-                color = Color.Black.copy(alpha = 0.96f),
-                radius = currentRadius,
-                center = Offset(centerX, orbY)
-            )
-            drawCircle(
-                color = Color.White.copy(alpha = 0.08f),
-                radius = currentRadius,
-                center = Offset(centerX, orbY),
-                style = Stroke(width = with(density) { 1.dp.toPx() })
-            )
+                // 1. Ritrazione del filamento residuo verso il soffitto dopo la rottura
+                if (filamentRecoil > 0.02f) {
+                    val snapHeight = with(density) { 14.dp.toPx() } * filamentRecoil
+                    val snapWidth = with(density) { 2.dp.toPx() } * filamentRecoil
+                    val filamentPath = Path().apply {
+                        moveTo(centerX - snapWidth, 0f)
+                        lineTo(centerX + snapWidth, 0f)
+                        lineTo(centerX, snapHeight)
+                        close()
+                    }
+                    drawPath(
+                        filamentPath,
+                        color = Color.White.copy(alpha = 0.18f),
+                        style = Stroke(width = with(density) { 0.85.dp.toPx() })
+                    )
+                }
+
+                // 2. Cerchio di contorno satinato bianco della sfera
+                drawCircle(
+                    color = Color.White.copy(alpha = 0.25f),
+                    radius = currentRadius,
+                    center = Offset(centerX, orbY),
+                    style = Stroke(width = with(density) { 1.dp.toPx() })
+                )
 
             // 3. DIAFRAMMA CINEMATOGRAFICO MINIMAL (CAMERA IRIS ESSENTIAL)
             if (isRefreshing) {
@@ -413,4 +539,5 @@ private fun SymbiontFluidCanvas(
             }
         }
     }
+}
 }
