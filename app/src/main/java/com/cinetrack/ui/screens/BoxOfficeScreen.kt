@@ -332,37 +332,25 @@ fun BoxOfficeScreenContent(
                             val pos = coords.positionInWindow()
                             filterButtonBounds = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                         }
+                        .bounceClick(scaleDown = 0.90f) {
+                            isYearFilterModalVisible = true
+                        }
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = CircleShape,
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = false,
+                            borderWidth = if (hasActiveFilter) 1.5.dp else 1.dp,
+                            borderColor = if (hasActiveFilter) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    // Glass Background
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = false,
-                                borderWidth = if (hasActiveFilter) 1.5.dp else 1.dp,
-                                borderColor = if (hasActiveFilter) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                            )
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                        contentDescription = stringResource(R.string.home_cd_filters),
+                        tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary else Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
-
-                    // Interactive Content Layer
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick(scaleDown = 0.92f) {
-                                isYearFilterModalVisible = true
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                            contentDescription = stringResource(R.string.home_cd_filters),
-                            tint = if (hasActiveFilter) MaterialTheme.colorScheme.primary else Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
                 }
             }
         }
