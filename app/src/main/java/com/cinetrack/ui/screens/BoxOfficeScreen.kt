@@ -32,8 +32,6 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
-import com.cinetrack.ui.components.stats.YearSelectionModal
-import com.cinetrack.ui.viewmodel.TimeRange
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
@@ -168,11 +166,9 @@ fun BoxOfficeScreenContent(
         )
         val selectedIndex = if (uiState.activeTab == BoxOfficeCategory.WEEKEND) 0 else 1
 
-        var isYearFilterModalVisible by remember { mutableStateOf(false) }
+        val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
         var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
         val hasActiveFilter = uiState.selectedYear != null
-        val currentYear = remember { java.time.LocalDate.now().year }
-        val availableYears = remember(currentYear) { (currentYear downTo 2010).toList() }
 
         val isCurrentLoading = when (uiState.activeTab) {
             BoxOfficeCategory.WEEKEND -> uiState.isLoadingWeekend
@@ -333,7 +329,7 @@ fun BoxOfficeScreenContent(
                             filterButtonBounds = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                         }
                         .bounceClick(scaleDown = 0.90f) {
-                            isYearFilterModalVisible = true
+                            filterRequest?.invoke(filterButtonBounds)
                         }
                         .hazeGlass(
                             state = hazeState,
@@ -354,28 +350,6 @@ fun BoxOfficeScreenContent(
                 }
             }
         }
-
-        // Year Selection Modal
-        YearSelectionModal(
-            isVisible = isYearFilterModalVisible,
-            onDismiss = { isYearFilterModalVisible = false },
-            currentRange = if (uiState.selectedYear == null) TimeRange.AllTime else TimeRange.Year(uiState.selectedYear!!),
-            availableYears = availableYears,
-            hazeState = hazeState,
-            triggerBounds = filterButtonBounds,
-            titleRes = R.string.stats_period,
-            allTimeLabelRes = R.string.box_office_filter_all_years,
-            onYearSelected = { year ->
-                viewModel.selectYear(year)
-                viewModel.switchTab(BoxOfficeCategory.ALL_TIME)
-                isYearFilterModalVisible = false
-            },
-            onAllTimeSelected = {
-                viewModel.selectYear(null)
-                viewModel.switchTab(BoxOfficeCategory.ALL_TIME)
-                isYearFilterModalVisible = false
-            }
-        )
     }
 }
 

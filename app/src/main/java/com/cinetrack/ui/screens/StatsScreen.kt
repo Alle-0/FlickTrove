@@ -157,8 +157,7 @@ object StatsTab : Tab {
         val tabNavigator = LocalTabNavigator.current
         val navigator = LocalNavigator.currentOrThrow.parent ?: LocalNavigator.currentOrThrow
 
-        var isYearPickerVisible by remember { mutableStateOf(false) }
-        var yearPickerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+        val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
         val statsUiState by viewModel.uiState.collectAsStateWithLifecycle()
 
         StatsScreenContent(
@@ -166,31 +165,15 @@ object StatsTab : Tab {
             paddingValues = paddingValues,
             hazeState = activeHazeState,
             onToggleYearPicker = { visible, bounds ->
-                isYearPickerVisible = visible
-                yearPickerButtonBounds = bounds
+                if (visible) {
+                    filterRequest?.invoke(bounds)
+                }
             },
             onPersonClick = { personId, profilePath ->
                 navigator.push(PersonDetailScreen(personId, profilePath))
             },
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
-            }
-        )
-
-        YearSelectionModal(
-            isVisible = isYearPickerVisible,
-            onDismiss = { isYearPickerVisible = false },
-            currentRange = statsUiState.timeRange,
-            availableYears = statsUiState.availableYears,
-            hazeState = activeHazeState,
-            triggerBounds = yearPickerButtonBounds,
-            onYearSelected = { year ->
-                viewModel.setTimeRange(TimeRange.Year(year))
-                isYearPickerVisible = false
-            },
-            onAllTimeSelected = {
-                viewModel.setTimeRange(TimeRange.AllTime)
-                isYearPickerVisible = false
             }
         )
     }

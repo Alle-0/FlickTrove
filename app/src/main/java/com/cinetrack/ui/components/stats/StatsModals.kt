@@ -48,6 +48,7 @@ import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
 import kotlin.math.roundToInt
 import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 
 // ════════════════════════════════════════════════════════════════════
@@ -307,14 +308,15 @@ fun YearSelectionModal(
                 .graphicsLayer(
                     alpha = contentAlpha,
                     compositingStrategy = CompositingStrategy.Offscreen
-                ),
+                )
+                .padding(bottom = 20.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(top = 24.dp, bottom = 8.dp),
+                    .padding(top = 20.dp, bottom = 12.dp, start = 24.dp, end = 20.dp),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -323,6 +325,10 @@ fun YearSelectionModal(
                     fontWeight = FontWeight.Black,
                     letterSpacing = 3.sp,
                     color = Color.White
+                )
+                ModalCloseButton(
+                    modifier = Modifier.align(Alignment.CenterEnd),
+                    onClick = onDismiss
                 )
             }
 
@@ -373,27 +379,6 @@ fun YearSelectionModal(
 
                 Spacer(Modifier.height(8.dp))
             }
-
-            // Close Button
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(start = 24.dp, end = 24.dp, top = 8.dp, bottom = 20.dp)
-                    .height(48.dp)
-                    .bounceClick { onDismiss() }
-                    .clip(RoundedCornerShape(14.dp))
-                    .background(Color.White.copy(alpha = 0.05f))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(14.dp)),
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    stringResource(R.string.settings_close).uppercase(),
-                    style = MaterialTheme.typography.labelLarge,
-                    fontWeight = FontWeight.Black,
-                    color = Color.White.copy(alpha = 0.7f),
-                    letterSpacing = 1.sp
-                )
-            }
         }
     }
 }
@@ -409,7 +394,7 @@ fun ModalItem(
             .fillMaxWidth()
             .clip(RoundedCornerShape(12.dp))
             .background(if (isSelected) MaterialTheme.colorScheme.primary.copy(alpha = 0.1f) else Color.Transparent)
-            .clickable(onClick = onClick)
+            .bounceClick(scaleDown = 0.96f) { onClick() }
             .padding(vertical = 12.dp, horizontal = 16.dp),
         contentAlignment = Alignment.CenterStart
     ) {

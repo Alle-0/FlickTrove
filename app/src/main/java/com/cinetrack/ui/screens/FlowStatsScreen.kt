@@ -42,7 +42,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.components.stats.YearSelectionButton
-import com.cinetrack.ui.components.stats.YearSelectionModal
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.TimeRange
 
@@ -74,9 +73,7 @@ object FlowStatsTab : Tab {
         val activity = currentContext as? androidx.activity.ComponentActivity
         val viewModel = activity?.let { androidx.hilt.navigation.compose.hiltViewModel<FlowViewModel>(it) }
         val flowUiState by (viewModel?.uiState ?: kotlinx.coroutines.flow.MutableStateFlow(com.cinetrack.ui.viewmodel.FlowUiState())).collectAsStateWithLifecycle()
-
-        var isYearPickerVisible by remember { mutableStateOf(false) }
-        var yearPickerButtonBounds by remember { mutableStateOf<androidx.compose.ui.geometry.Rect?>(null) }
+        val filterRequest = com.cinetrack.ui.LocalFilterRequest.current
 
         Box(
             modifier = Modifier
@@ -118,8 +115,9 @@ object FlowStatsTab : Tab {
                         YearSelectionButton(
                             currentRange = flowUiState.timeRange,
                             onToggle = { visible, bounds ->
-                                isYearPickerVisible = visible
-                                yearPickerButtonBounds = bounds
+                                if (visible) {
+                                    filterRequest?.invoke(bounds)
+                                }
                             },
                             modifier = Modifier.align(Alignment.CenterEnd)
                         )
@@ -183,23 +181,6 @@ object FlowStatsTab : Tab {
                 }
             }
         }
-        
-        YearSelectionModal(
-            isVisible = isYearPickerVisible,
-            onDismiss = { isYearPickerVisible = false },
-            currentRange = flowUiState.timeRange,
-            availableYears = flowUiState.availableYears,
-            hazeState = activeHazeState,
-            triggerBounds = yearPickerButtonBounds,
-            onYearSelected = { year ->
-                viewModel?.setTimeRange(TimeRange.Year(year))
-                isYearPickerVisible = false
-            },
-            onAllTimeSelected = {
-                viewModel?.setTimeRange(TimeRange.AllTime)
-                isYearPickerVisible = false
-            }
-        )
     }
 }
 

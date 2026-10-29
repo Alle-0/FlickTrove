@@ -22,6 +22,10 @@ import com.cinetrack.ui.screens.FolderDetailTab
 import com.cinetrack.ui.screens.HomeTab
 import com.cinetrack.ui.screens.StatsTab
 import com.cinetrack.ui.screens.VistiTab
+import com.cinetrack.ui.screens.BoxOfficeTab
+import com.cinetrack.ui.screens.FlowStatsTab
+import com.cinetrack.ui.viewmodel.BoxOfficeCategory
+import com.cinetrack.ui.viewmodel.BoxOfficeViewModel
 import com.cinetrack.ui.viewmodel.DiscoverViewModel
 import com.cinetrack.ui.viewmodel.HomeViewModel
 import com.cinetrack.ui.viewmodel.StatsViewModel
@@ -135,14 +139,25 @@ fun MainModalsContainer(
             val statsUiState by statsViewModel.uiState.collectAsStateWithLifecycle()
             Box(modifier = Modifier.zIndex(70000f)) {
                 YearSelectionModal(
-                    isVisible = isYearPickerVisible,
-                    onDismiss = onYearPickerDismiss,
+                    isVisible = isFilterModalVisible || isYearPickerVisible,
+                    onDismiss = {
+                        onFilterModalDismiss()
+                        onYearPickerDismiss()
+                    },
                     currentRange = statsUiState.timeRange,
                     availableYears = statsUiState.availableYears,
                     hazeState = globalHazeState,
-                    triggerBounds = yearPickerButtonBounds,
-                    onYearSelected = { year -> statsViewModel.setTimeRange(TimeRange.Year(year)) },
-                    onAllTimeSelected = { statsViewModel.setTimeRange(TimeRange.AllTime) }
+                    triggerBounds = filterButtonBounds ?: yearPickerButtonBounds,
+                    onYearSelected = { year ->
+                        statsViewModel.setTimeRange(TimeRange.Year(year))
+                        onFilterModalDismiss()
+                        onYearPickerDismiss()
+                    },
+                    onAllTimeSelected = {
+                        statsViewModel.setTimeRange(TimeRange.AllTime)
+                        onFilterModalDismiss()
+                        onYearPickerDismiss()
+                    }
                 )
             }
         } else if (currentTab is FolderDetailTab) {
@@ -267,6 +282,68 @@ fun MainModalsContainer(
                 triggerBounds = filterButtonBounds,
                 hazeState = globalHazeState
             )
+        } else if (currentTab is FlowStatsTab) {
+            val flowViewModel = if (activity != null) {
+                hiltViewModel<FlowViewModel>(activity)
+            } else {
+                with(screen) { getViewModel<FlowViewModel>() }
+            }
+            val flowUiState by flowViewModel.uiState.collectAsStateWithLifecycle()
+            Box(modifier = Modifier.zIndex(70000f)) {
+                YearSelectionModal(
+                    isVisible = isFilterModalVisible || isYearPickerVisible,
+                    onDismiss = {
+                        onFilterModalDismiss()
+                        onYearPickerDismiss()
+                    },
+                    currentRange = flowUiState.timeRange,
+                    availableYears = flowUiState.availableYears,
+                    hazeState = globalHazeState,
+                    triggerBounds = filterButtonBounds ?: yearPickerButtonBounds,
+                    onYearSelected = { year ->
+                        flowViewModel.setTimeRange(TimeRange.Year(year))
+                        onFilterModalDismiss()
+                        onYearPickerDismiss()
+                    },
+                    onAllTimeSelected = {
+                        flowViewModel.setTimeRange(TimeRange.AllTime)
+                        onFilterModalDismiss()
+                        onYearPickerDismiss()
+                    }
+                )
+            }
+        } else if (currentTab is BoxOfficeTab) {
+            val boxOfficeViewModel = if (activity != null) {
+                hiltViewModel<BoxOfficeViewModel>(activity)
+            } else {
+                with(screen) { getViewModel<BoxOfficeViewModel>() }
+            }
+            val boxOfficeUiState by boxOfficeViewModel.uiState.collectAsStateWithLifecycle()
+            val currentYear = remember { java.time.LocalDate.now().year }
+            val availableYears = remember(currentYear) { (currentYear downTo 2010).toList() }
+
+            Box(modifier = Modifier.zIndex(70000f)) {
+                YearSelectionModal(
+                    isVisible = isFilterModalVisible,
+                    onDismiss = onFilterModalDismiss,
+                    currentRange = if (boxOfficeUiState.selectedYear == null) TimeRange.AllTime else TimeRange.Year(boxOfficeUiState.selectedYear!!),
+                    availableYears = availableYears,
+                    hazeState = globalHazeState,
+                    triggerBounds = filterButtonBounds,
+                    titleRes = com.cinetrack.R.string.stats_period,
+                    allTimeLabelRes = com.cinetrack.R.string.box_office_filter_all_years,
+                    onYearSelected = { year ->
+                        boxOfficeViewModel.selectYear(year)
+                        boxOfficeViewModel.switchTab(BoxOfficeCategory.ALL_TIME)
+                        onFilterModalDismiss()
+                    },
+                    onAllTimeSelected = {
+                        boxOfficeViewModel.selectYear(null)
+                        boxOfficeViewModel.switchTab(BoxOfficeCategory.ALL_TIME)
+                        onFilterModalDismiss()
+                    }
+                )
+            }
         }
     }
     
