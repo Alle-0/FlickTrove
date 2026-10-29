@@ -85,21 +85,14 @@ internal fun ShareLandscapePosterLayout(
             val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
             val showMvpOnPoster = state.config.showMvp && !actorName.isNullOrBlank()
-            val showPosterHaze = showVibesOnPoster || showMvpOnPoster
-            val posterHazeState = remember(state.config) { HazeState() }
+            val posterHazeState = remember { HazeState() }
 
             Box(
                 modifier = Modifier
                     .fillMaxSize()
                     .shadow(elevation = 28.dp, shape = posterShape)
                     .clip(posterShape)
-                    .then(
-                        if (showPosterHaze) {
-                            Modifier.haze(state = posterHazeState, style = HazeStyles.PremiumDark)
-                        } else {
-                            Modifier
-                        }
-                    )
+                    .haze(state = posterHazeState, style = HazeStyles.PremiumDark)
                     .border(1.dp, Color.White.copy(alpha = 0.22f), posterShape)
             ) {
                 if (state.posterUrl != null) {
