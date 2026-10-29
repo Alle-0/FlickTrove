@@ -64,37 +64,6 @@ fun DetailMorphingTopBar(
     val scope = rememberCoroutineScope()
     val density = LocalDensity.current
 
-    // ── Press states for top bar buttons ──────────────────────────────────────
-    var isBackPressed by remember { mutableStateOf(false) }
-    val backIconScale by animateFloatAsState(
-        targetValue = if (isBackPressed) 0.88f else 1f,
-        animationSpec = spring(
-            stiffness = if (isBackPressed) 10000f else Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy
-        ),
-        label = "BackIconScale"
-    )
-
-    var isFolderButtonPressed by remember { mutableStateOf(false) }
-    val folderIconScale by animateFloatAsState(
-        targetValue = if (isFolderButtonPressed) 0.88f else 1f,
-        animationSpec = spring(
-            stiffness = if (isFolderButtonPressed) 10000f else Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy
-        ),
-        label = "FolderIconScale"
-    )
-
-    var isShareButtonPressed by remember { mutableStateOf(false) }
-    val shareIconScale by animateFloatAsState(
-        targetValue = if (isShareButtonPressed) 0.88f else 1f,
-        animationSpec = spring(
-            stiffness = if (isShareButtonPressed) 10000f else Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy
-        ),
-        label = "ShareIconScale"
-    )
-
     // ── Folder color brush ─────────────────────────────────────────────────────
     val movieInFolders = successState?.folders?.filter { folder ->
         val itemId = "${viewModel.mediaType}_${viewModel.movieId}"
@@ -248,42 +217,27 @@ fun DetailMorphingTopBar(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onPress = {
-                                            isBackPressed = true
-                                            try { awaitRelease() } finally { isBackPressed = false }
-                                        },
-                                        onTap = {
-                                            if (showFolderPicker) onFolderPickerChange(false)
-                                            else onBackClick()
-                                        }
-                                    )
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (currentEffectiveProgress <= 0.01f) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .hazeGlass(
+                                .bounceClick(scaleDown = 0.90f) {
+                                    if (showFolderPicker) onFolderPickerChange(false)
+                                    else onBackClick()
+                                }
+                                .then(
+                                    if (currentEffectiveProgress <= 0.01f) {
+                                        Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
                                             blurRadius = HazeStyles.SmallGlassBlurRadius,
                                             useOffscreenStrategy = true
                                         )
-                                )
-                            }
+                                    } else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
                             androidx.compose.material3.Icon(
                                 imageVector = GraphicsLayerVector(R.drawable.ic_left),
                                 contentDescription = stringResource(R.string.detail_content_desc_back),
                                 tint = Color.White,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .graphicsLayer {
-                                        scaleX = backIconScale
-                                        scaleY = backIconScale
-                                    }
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
@@ -391,72 +345,63 @@ fun DetailMorphingTopBar(
                                 .alpha(if (successState != null) 1f else 0f)
                                 .then(
                                     if (successState != null) {
-                                        Modifier.pointerInput(Unit) {
-                                            detectTapGestures(
-                                                onPress = {
-                                                    isShareButtonPressed = true
-                                                    try { awaitRelease() } finally { isShareButtonPressed = false }
-                                                },
-                                                onTap = {
-                                                    scope.launch(Dispatchers.IO) {
-                                                        val imageUrl = buildTmdbImageUrl(
-                                                            successState.movieEntry.posterPath ?: successState.movieEntry.backdropPath,
-                                                            ImageType.POSTER,
-                                                            currentImageQuality
-                                                        )
-                                                        val fileUri = if (imageUrl != null) {
-                                                            val request = coil.request.ImageRequest.Builder(context)
-                                                                .data(imageUrl).build()
-                                                            val result = context.imageLoader.execute(request)
-                                                            if (result is coil.request.SuccessResult) {
-                                                                val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
-                                                                val imagesDir = java.io.File(context.cacheDir, "images")
-                                                                imagesDir.mkdirs()
-                                                                val file = java.io.File(imagesDir, "share_poster.jpg")
-                                                                val fos = java.io.FileOutputStream(file)
-                                                                bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
-                                                                fos.close()
-                                                                androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
-                                                            } else null
+                                        Modifier
+                                            .bounceClick(scaleDown = 0.90f) {
+                                                scope.launch(Dispatchers.IO) {
+                                                    val imageUrl = buildTmdbImageUrl(
+                                                        successState.movieEntry.posterPath ?: successState.movieEntry.backdropPath,
+                                                        ImageType.POSTER,
+                                                        currentImageQuality
+                                                    )
+                                                    val fileUri = if (imageUrl != null) {
+                                                        val request = coil.request.ImageRequest.Builder(context)
+                                                            .data(imageUrl).build()
+                                                        val result = context.imageLoader.execute(request)
+                                                        if (result is coil.request.SuccessResult) {
+                                                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                                                            val imagesDir = java.io.File(context.cacheDir, "images")
+                                                            imagesDir.mkdirs()
+                                                            val file = java.io.File(imagesDir, "share_poster.jpg")
+                                                            val fos = java.io.FileOutputStream(file)
+                                                            bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 90, fos)
+                                                            fos.close()
+                                                            androidx.core.content.FileProvider.getUriForFile(context, "${context.packageName}.fileprovider", file)
                                                         } else null
+                                                    } else null
 
-                                                        withContext(Dispatchers.Main) {
-                                                            val sendIntent = android.content.Intent().apply {
-                                                                action = android.content.Intent.ACTION_SEND
-                                                                val titleParam = android.net.Uri.encode(successState.movieEntry.displayName)
-                                                                val posterParam = successState.movieEntry.posterPath?.let { "&p=${android.net.Uri.encode(it)}" } ?: ""
-                                                                val link = "https://alle-0.github.io/FlickTrove/open.html?type=${successState.movieEntry.mediaType}&id=${successState.movieEntry.id}&t=$titleParam$posterParam"
-                                                                putExtra(android.content.Intent.EXTRA_TEXT, context.getString(R.string.detail_share_text, successState.movieEntry.displayName, link))
-                                                                if (fileUri != null) {
-                                                                    putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
-                                                                    type = "image/jpeg"
-                                                                    addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
-                                                                } else {
-                                                                    type = "text/plain"
-                                                                }
+                                                    withContext(Dispatchers.Main) {
+                                                        val sendIntent = android.content.Intent().apply {
+                                                            action = android.content.Intent.ACTION_SEND
+                                                            val titleParam = android.net.Uri.encode(successState.movieEntry.displayName)
+                                                            val posterParam = successState.movieEntry.posterPath?.let { "&p=${android.net.Uri.encode(it)}" } ?: ""
+                                                            val link = "https://alle-0.github.io/FlickTrove/open.html?type=${successState.movieEntry.mediaType}&id=${successState.movieEntry.id}&t=$titleParam$posterParam"
+                                                            putExtra(android.content.Intent.EXTRA_TEXT, context.getString(R.string.detail_share_text, successState.movieEntry.displayName, link))
+                                                            if (fileUri != null) {
+                                                                putExtra(android.content.Intent.EXTRA_STREAM, fileUri)
+                                                                type = "image/jpeg"
+                                                                addFlags(android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                                            } else {
+                                                                type = "text/plain"
                                                             }
-                                                            context.startActivity(android.content.Intent.createChooser(sendIntent, null))
                                                         }
+                                                        context.startActivity(android.content.Intent.createChooser(sendIntent, null))
                                                     }
                                                 }
+                                            }
+                                            .then(
+                                                if (currentEffectiveProgress <= 0.01f) {
+                                                    Modifier.hazeGlass(
+                                                        state = localHazeState,
+                                                        shape = CircleShape,
+                                                        blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                                        useOffscreenStrategy = true
+                                                    )
+                                                } else Modifier
                                             )
-                                        }
                                     } else Modifier
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (currentEffectiveProgress <= 0.01f && successState != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .hazeGlass(
-                                            state = localHazeState,
-                                            shape = CircleShape,
-                                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                            useOffscreenStrategy = true
-                                        )
-                                )
-                            }
                             androidx.compose.material3.Icon(
                                 imageVector = GraphicsLayerVector(R.drawable.ic_share),
                                 contentDescription = stringResource(R.string.detail_content_desc_share),
@@ -464,10 +409,6 @@ fun DetailMorphingTopBar(
                                 modifier = Modifier
                                     .offset(x = (-0.5).dp)
                                     .size(15.dp)
-                                    .graphicsLayer {
-                                        scaleX = shareIconScale
-                                        scaleY = shareIconScale
-                                    }
                             )
                         }
 
@@ -478,41 +419,30 @@ fun DetailMorphingTopBar(
                                 .alpha(if (successState != null) 1f else 0f)
                                 .then(
                                     if (successState != null) {
-                                        Modifier.pointerInput(Unit) {
-                                            detectTapGestures(
-                                                onPress = {
-                                                    isFolderButtonPressed = true
-                                                    try { awaitRelease() } finally { isFolderButtonPressed = false }
-                                                },
-                                                onTap = { onFolderPickerChange(!showFolderPicker) }
+                                        Modifier
+                                            .bounceClick(scaleDown = 0.90f) {
+                                                onFolderPickerChange(!showFolderPicker)
+                                            }
+                                            .then(
+                                                if (currentEffectiveProgress <= 0.01f) {
+                                                    Modifier.hazeGlass(
+                                                        state = localHazeState,
+                                                        shape = CircleShape,
+                                                        blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                                        useOffscreenStrategy = true
+                                                    )
+                                                } else Modifier
                                             )
-                                        }
                                     } else Modifier
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
-                            if (currentEffectiveProgress <= 0.01f && successState != null) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .hazeGlass(
-                                            state = localHazeState,
-                                            shape = CircleShape,
-                                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                            useOffscreenStrategy = true
-                                        )
-                                )
-                            }
                             androidx.compose.material3.Icon(
                                 imageVector = GraphicsLayerVector(R.drawable.ic_cartella_piena),
                                 contentDescription = stringResource(R.string.detail_content_desc_folder),
                                 modifier = Modifier
                                     .size(24.dp)
                                     .graphicsLayer(alpha = 0.99f)
-                                    .graphicsLayer {
-                                        scaleX = folderIconScale
-                                        scaleY = folderIconScale
-                                    }
                                     .drawWithCache {
                                         onDrawWithContent {
                                             drawContent()

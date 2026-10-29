@@ -45,29 +45,23 @@ fun LayoutToggleButton(
     modifier: Modifier = Modifier,
     contentDescription: String = stringResource(R.string.folder_detail_change_columns)
 ) {
-    Box(modifier = modifier.size(36.dp)) {
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .hazeGlass(
-                    state = hazeState,
-                    shape = CircleShape,
-                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                    useOffscreenStrategy = false
-                )
+    Box(
+        modifier = modifier
+            .size(36.dp)
+            .bounceClick(scaleDown = 0.92f, onClick = onToggle)
+            .hazeGlass(
+                state = hazeState,
+                shape = CircleShape,
+                blurRadius = HazeStyles.SmallGlassBlurRadius,
+                useOffscreenStrategy = false
+            ),
+        contentAlignment = Alignment.Center
+    ) {
+        Icon(
+            imageVector = layoutToggleIcon(columns),
+            contentDescription = contentDescription,
+            tint = Color.White,
+            modifier = Modifier.size(18.dp)
         )
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .bounceClick(scaleDown = 0.92f, onClick = onToggle),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = layoutToggleIcon(columns),
-                contentDescription = contentDescription,
-                tint = Color.White,
-                modifier = Modifier.size(18.dp)
-            )
-        }
     }
 }

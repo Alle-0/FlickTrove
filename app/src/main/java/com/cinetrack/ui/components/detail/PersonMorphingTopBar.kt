@@ -3,7 +3,6 @@ package com.cinetrack.ui.components.detail
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
-import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -34,7 +33,6 @@ import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
@@ -68,26 +66,6 @@ fun SimpleMorphingTopBar(
 ) {
     val density = LocalDensity.current
 
-    // ── Press states for top bar buttons ──────────────────────────────────────
-    var isBackPressed by remember { mutableStateOf(false) }
-    val backIconScale by animateFloatAsState(
-        targetValue = if (isBackPressed) 0.88f else 1f,
-        animationSpec = spring(
-            stiffness = if (isBackPressed) 10000f else Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy
-        ),
-        label = "BackIconScale"
-    )
-
-    var isShareButtonPressed by remember { mutableStateOf(false) }
-    val shareIconScale by animateFloatAsState(
-        targetValue = if (isShareButtonPressed) 0.88f else 1f,
-        animationSpec = spring(
-            stiffness = if (isShareButtonPressed) 10000f else Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioNoBouncy
-        ),
-        label = "ShareIconScale"
-    )
 
     // ── Morphing transition ────────────────────────────────────────────────────
     val configuration = LocalConfiguration.current
@@ -197,41 +175,26 @@ fun SimpleMorphingTopBar(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onPress = {
-                                            isBackPressed = true
-                                            try { awaitRelease() } finally { isBackPressed = false }
-                                        },
-                                        onTap = {
-                                            onBackClick()
-                                        }
-                                    )
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (currentEffectiveProgress <= 0.01f) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .hazeGlass(
+                                .bounceClick(scaleDown = 0.90f) {
+                                    onBackClick()
+                                }
+                                .then(
+                                    if (currentEffectiveProgress <= 0.01f) {
+                                        Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
                                             blurRadius = HazeStyles.SmallGlassBlurRadius,
                                             useOffscreenStrategy = true
                                         )
-                                )
-                            }
+                                    } else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_left),
                                 contentDescription = stringResource(R.string.detail_content_desc_back),
                                 tint = Color.White,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .graphicsLayer {
-                                        scaleX = backIconScale
-                                        scaleY = backIconScale
-                                    }
+                                modifier = Modifier.size(20.dp)
                             )
                         }
 
@@ -318,58 +281,37 @@ fun SimpleMorphingTopBar(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         if (onFilterClick != null) {
-                            var isFilterPressed by remember { mutableStateOf(false) }
-                            val filterIconScale by animateFloatAsState(
-                                targetValue = if (isFilterPressed) 0.88f else 1f,
-                                animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-                                label = "filterIconScale"
-                            )
                             var filterCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
                             Box(
                                 modifier = Modifier
                                     .size(44.dp)
                                     .onGloballyPositioned { filterCoordinates = it }
-                                    .pointerInput(Unit) {
-                                        detectTapGestures(
-                                            onPress = {
-                                                isFilterPressed = true
-                                                try { awaitRelease() } finally { isFilterPressed = false }
-                                            },
-                                            onTap = {
-                                                val bounds = filterCoordinates?.let { coords ->
-                                                    if (coords.isAttached) {
-                                                        val pos = coords.positionInWindow()
-                                                        Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
-                                                    } else null
-                                                }
-                                                onFilterClick(bounds)
-                                            }
-                                        )
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (currentEffectiveProgress <= 0.01f) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .hazeGlass(
+                                    .bounceClick(scaleDown = 0.90f) {
+                                        val bounds = filterCoordinates?.let { coords ->
+                                            if (coords.isAttached) {
+                                                val pos = coords.positionInWindow()
+                                                Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
+                                            } else null
+                                        }
+                                        onFilterClick(bounds)
+                                    }
+                                    .then(
+                                        if (currentEffectiveProgress <= 0.01f) {
+                                            Modifier.hazeGlass(
                                                 state = localHazeState,
                                                 shape = CircleShape,
                                                 blurRadius = HazeStyles.SmallGlassBlurRadius,
                                                 useOffscreenStrategy = true
                                             )
-                                    )
-                                }
+                                        } else Modifier
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
                                 Icon(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_filtri),
                                     contentDescription = stringResource(R.string.filter_title),
                                     tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
-                                    modifier = Modifier
-                                        .size(20.dp)
-                                        .graphicsLayer {
-                                            scaleX = filterIconScale
-                                            scaleY = filterIconScale
-                                        }
+                                    modifier = Modifier.size(20.dp)
                                 )
                                 if (hasActiveFilters) {
                                     Box(
@@ -388,41 +330,26 @@ fun SimpleMorphingTopBar(
                         Box(
                             modifier = Modifier
                                 .size(44.dp)
-                                .pointerInput(Unit) {
-                                    detectTapGestures(
-                                        onPress = {
-                                            isShareButtonPressed = true
-                                            try { awaitRelease() } finally { isShareButtonPressed = false }
-                                        },
-                                        onTap = {
-                                            onShareClick()
-                                        }
-                                    )
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (currentEffectiveProgress <= 0.01f) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .hazeGlass(
+                                .bounceClick(scaleDown = 0.90f) {
+                                    onShareClick()
+                                }
+                                .then(
+                                    if (currentEffectiveProgress <= 0.01f) {
+                                        Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
                                             blurRadius = HazeStyles.SmallGlassBlurRadius,
                                             useOffscreenStrategy = true
                                         )
-                                )
-                            }
+                                    } else Modifier
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(R.drawable.ic_share),
                                 contentDescription = stringResource(R.string.detail_content_desc_share),
                                 tint = Color.White,
-                                modifier = Modifier
-                                    .size(20.dp)
-                                    .graphicsLayer {
-                                        scaleX = shareIconScale
-                                        scaleY = shareIconScale
-                                    }
+                                modifier = Modifier.size(20.dp)
                             )
                         }
                     }

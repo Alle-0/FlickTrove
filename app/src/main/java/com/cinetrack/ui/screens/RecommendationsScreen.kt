@@ -596,33 +596,26 @@ fun RecommendationsScreenContent(
                     )
                 }
 
-                Box(modifier = Modifier.size(36.dp)) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeGlass(state = localHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                Box(
+                    modifier = Modifier
+                        .size(36.dp)
+                        .bounceClick(scaleDown = 0.92f) {
+                            isFlickMode = !isFlickMode
+                        }
+                        .hazeGlass(
+                            state = localHazeState, 
+                            shape = CircleShape, 
+                            blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                            useOffscreenStrategy = false
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = if (isFlickMode) ImageVector.vectorResource(id = R.drawable.ic_grid) else ImageVector.vectorResource(id = R.drawable.ic_temi),
+                        contentDescription = stringResource(R.string.recommendations_flick_mode),
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
-    
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .graphicsLayer { }
-                            .bounceClick(scaleDown = 0.92f) {
-                                isFlickMode = !isFlickMode
-                            }
-                            .border(
-                                BorderStroke(1.dp, Color.White.copy(alpha = 0.05f)),
-                                CircleShape
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = if (isFlickMode) ImageVector.vectorResource(id = R.drawable.ic_grid) else ImageVector.vectorResource(id = R.drawable.ic_temi),
-                            contentDescription = stringResource(R.string.recommendations_flick_mode),
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
                 }
             }
         }

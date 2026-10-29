@@ -524,37 +524,25 @@ fun HomeScreenContent(
                                 val pos = coords.positionInWindow()
                                 filterButtonBounds[0] = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
                             }
+                            .bounceClick(scaleDown = 0.92f) { 
+                                onToggleFilter(true, filterButtonBounds[0]) 
+                            }
+                            .hazeGlass(
+                                state = activeHazeState, 
+                                shape = CircleShape, 
+                                blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                                useOffscreenStrategy = false,
+                                borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
+                                borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                            ),
+                        contentAlignment = Alignment.Center
                     ) {
-                        // Background Layer
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .hazeGlass(
-                                    state = activeHazeState, 
-                                    shape = CircleShape, 
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                    useOffscreenStrategy = false,
-                                    borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                                    borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                                )
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                            contentDescription = stringResource(id = R.string.home_cd_filters),
+                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                            modifier = Modifier.size(18.dp)
                         )
-
-                        // Interactive Content Layer
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .bounceClick(scaleDown = 0.92f) { 
-                                    onToggleFilter(true, filterButtonBounds[0]) 
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                                contentDescription = stringResource(id = R.string.home_cd_filters),
-                                tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
                     }
                 }
                 }

@@ -148,17 +148,16 @@ fun BoxScope.MainSearchFab(
                         pos.y + size.height / 2f
                     )
                 }
-                .clip(fabShape)
-                .hazeGlass(
-                    state = contentHazeState,
-                    shape = fabShape
-                )
-                .bounceClick(scaleDown = 0.9f, enabled = !isDimmed) {
+                .bounceClick(scaleDown = 0.90f, enabled = !isDimmed) {
                     val center = fabCenter[0]
                     val startX = center?.x ?: 540f
                     val startY = center?.y ?: 1140f
                     onSearchClick(Offset(startX, startY))
-                },
+                }
+                .hazeGlass(
+                    state = contentHazeState,
+                    shape = fabShape
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -257,18 +256,10 @@ fun BoxScope.MainScrollToTopFab(
 
     val arrowOffsetY = remember { Animatable(0f) }
     val arrowAlpha = remember { Animatable(1f) }
-    val interactionSource = remember { MutableInteractionSource() }
-    val isPressed by interactionSource.collectIsPressedAsState()
     val animatedDimAlpha by animateFloatAsState(
         targetValue = if (isDimmed) 0.7f else 0f,
         animationSpec = tween(durationMillis = 300),
         label = "ScrollToTopDimAlpha"
-    )
-
-    val arrowPressScale by animateFloatAsState(
-        targetValue = if (isPressed) 0.85f else 1f,
-        animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
-        label = "arrowScale"
     )
     if (p <= 0.005f && !visible) return
 
@@ -475,13 +466,7 @@ fun BoxScope.MainScrollToTopFab(
                     .size(48.dp)
                     .graphicsLayer {
                         alpha = overallAlpha
-                    }
-                    .clickable(
-                        enabled = visible && !isDimmed,
-                        interactionSource = interactionSource,
-                        indication = null,
-                        onClick = triggerScroll
-                    ),
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Box(
@@ -489,7 +474,9 @@ fun BoxScope.MainScrollToTopFab(
                         .offset(y = bounceOffsetY.value.dp)
                         .scale(bounceScale.value)
                         .size(34.dp)
-                        .clip(CircleShape)
+                        .bounceClick(scaleDown = 0.90f, enabled = visible && !isDimmed) {
+                            triggerScroll()
+                        }
                         .hazeGlass(
                             state = contentHazeState,
                             shape = CircleShape
@@ -502,7 +489,6 @@ fun BoxScope.MainScrollToTopFab(
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
                             .size(20.dp)
-                            .scale(arrowPressScale)
                             .offset(y = arrowOffsetY.value.dp)
                             .alpha(iconAlpha)
                             .rotate(-90f)

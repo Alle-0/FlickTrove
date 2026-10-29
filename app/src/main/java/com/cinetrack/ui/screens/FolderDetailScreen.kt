@@ -705,41 +705,31 @@ fun FolderDetailScreenContent(
 
                                 // Circular Filter Button
                                 Box(
-                                        modifier = Modifier
-                                            .size(36.dp)
-                                            .onGloballyPositioned { coords: LayoutCoordinates ->
-                                                val pos = coords.positionInWindow()
-                                                filterButtonBounds.rect = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
-                                            }                              ) {
-                                    // Background Layer
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .hazeGlass(
-                                                state = internalHazeState, 
-                                                shape = androidx.compose.foundation.shape.RoundedCornerShape(50), 
-                                                blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                                useOffscreenStrategy = false,
-                                                borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                                                borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                                            )
+                                    modifier = Modifier
+                                        .size(36.dp)
+                                        .onGloballyPositioned { coords: LayoutCoordinates ->
+                                            val pos = coords.positionInWindow()
+                                            filterButtonBounds.rect = Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
+                                        }
+                                        .bounceClick(scaleDown = 0.92f) {
+                                            onToggleFilter(true, filterButtonBounds.rect)
+                                        }
+                                        .hazeGlass(
+                                            state = internalHazeState, 
+                                            shape = CircleShape, 
+                                            blurRadius = HazeStyles.SmallGlassBlurRadius, 
+                                            useOffscreenStrategy = false,
+                                            borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
+                                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                        ),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                                        contentDescription = stringResource(R.string.folder_detail_filters),
+                                        tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                                        modifier = Modifier.size(20.dp)
                                     )
-                                    // Icon Layer
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .bounceClick(scaleDown = 0.92f) {
-                                                onToggleFilter(true, filterButtonBounds.rect)
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                                            contentDescription = stringResource(R.string.folder_detail_filters),
-                                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                    }
                                     
                                     if (hasActiveFilters) {
                                         Box(
