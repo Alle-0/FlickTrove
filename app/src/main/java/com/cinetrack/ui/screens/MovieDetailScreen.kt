@@ -39,6 +39,7 @@ import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.PathOperation
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInParent
 import androidx.compose.ui.layout.boundsInRoot
@@ -501,24 +502,48 @@ fun MovieDetailScreenContent(
                                     .haze(localHazeState, style = HazeStyles.PremiumDark)
                                     .verticalScroll(scrollState)
                             ) {
-                                Box(modifier = Modifier.fillMaxWidth()) {
-                                    DetailBackdrop(
-                                        scrollState = scrollState,
-                                        backdropPath = activeMovie.customBackdropPath ?: activeMovie.backdropPath,
-                                        posterPath = activeMovie.posterPath,
-                                        accentColor = accentColor,
-                                        backgroundColor = animatedBgColor,
-                                        isOffline = isOffline,
-                                        modifier = Modifier
-                                            .haze(backdropHazeState, style = HazeStyles.PremiumDark)
-                                            .pointerInput(Unit) {
-                                                detectTapGestures(
-                                                    onLongPress = {
-                                                        showCoverSelectionSheet = true
-                                                    }
-                                                )
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .layout { measurable, constraints ->
+                                            val placeable = measurable.measure(constraints)
+                                            // Preserva esattamente 480.dp alla colonna di scroll affinché
+                                            // il layout e la posizione di DetailHeader restino invariati
+                                            layout(placeable.width, 480.dp.roundToPx()) {
+                                                placeable.place(0, 0)
                                             }
-                                    )
+                                        }
+                                ) {
+                                    Column(
+                                        modifier = Modifier
+                                            .fillMaxWidth()
+                                            .haze(backdropHazeState)
+                                            .background(animatedBgColor)
+                                    ) {
+                                        DetailBackdrop(
+                                            scrollState = scrollState,
+                                            backdropPath = activeMovie.customBackdropPath ?: activeMovie.backdropPath,
+                                            posterPath = activeMovie.posterPath,
+                                            accentColor = accentColor,
+                                            backgroundColor = animatedBgColor,
+                                            isOffline = isOffline,
+                                            modifier = Modifier
+                                                .pointerInput(Unit) {
+                                                    detectTapGestures(
+                                                        onLongPress = {
+                                                            showCoverSelectionSheet = true
+                                                        }
+                                                    )
+                                                }
+                                        )
+                                        // Estensione di sfondo continua dietro DetailHeader per prevenire il taglio netto
+                                        Spacer(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(260.dp)
+                                                .background(animatedBgColor)
+                                        )
+                                    }
                                 }
 
                                 Column(

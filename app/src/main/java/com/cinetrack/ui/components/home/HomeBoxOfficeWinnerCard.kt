@@ -29,6 +29,9 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
+import com.cinetrack.ui.components.glass.hazeGlass
 
 @Composable
 fun HomeBoxOfficeWinnerCard(
@@ -38,6 +41,7 @@ fun HomeBoxOfficeWinnerCard(
 ) {
     val movie = item.movie
     val imageQuality = LocalImageQuality.current
+    val cardHazeState = remember { HazeState() }
 
     val backdropUrl = remember(movie.backdropPath, movie.posterPath, imageQuality) {
         val path = movie.backdropPath ?: movie.posterPath
@@ -57,45 +61,56 @@ fun HomeBoxOfficeWinnerCard(
             .clip(cardShape)
             .border(1.dp, Color.White.copy(alpha = 0.08f), cardShape)
     ) {
-        // Backdrop
-        if (backdropUrl != null) {
-            AsyncImage(
-                model = backdropUrl,
-                contentDescription = movie.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier.fillMaxSize()
-            )
-        } else {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color(0xFF1B1B26))
-            )
-        }
-
-        // Dark Gradient Scrim
+        // Backdrop & Scrim as Haze Source
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .background(
-                    Brush.verticalGradient(
-                        colors = listOf(
-                            Color.Black.copy(alpha = 0.2f),
-                            Color.Black.copy(alpha = 0.45f),
-                            Color.Black.copy(alpha = 0.92f)
+                .haze(cardHazeState)
+        ) {
+            if (backdropUrl != null) {
+                AsyncImage(
+                    model = backdropUrl,
+                    contentDescription = movie.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF1B1B26))
+                )
+            }
+
+            // Dark Gradient Scrim
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(
+                        Brush.verticalGradient(
+                            colors = listOf(
+                                Color.Black.copy(alpha = 0.2f),
+                                Color.Black.copy(alpha = 0.45f),
+                                Color.Black.copy(alpha = 0.92f)
+                            )
                         )
                     )
-                )
-        )
+            )
+        }
 
         // Top Badge: #1 Box Office Pill
         Row(
             modifier = Modifier
                 .align(Alignment.TopStart)
                 .padding(12.dp)
-                .clip(CircleShape)
-                .background(Color.Black.copy(alpha = 0.6f))
-                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
+                .hazeGlass(
+                    state = cardHazeState,
+                    shape = CircleShape,
+                    containerColor = Color.Black.copy(alpha = 0.35f),
+                    blurRadius = 16.dp,
+                    borderWidth = 1.dp,
+                    borderColor = Color.White.copy(alpha = 0.15f)
+                )
                 .padding(horizontal = 10.dp, vertical = 5.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(5.dp)
@@ -121,9 +136,14 @@ fun HomeBoxOfficeWinnerCard(
                 modifier = Modifier
                     .align(Alignment.TopEnd)
                     .padding(12.dp)
-                    .clip(CircleShape)
-                    .background(Color.Black.copy(alpha = 0.6f))
-                    .border(1.dp, Color(0xFF10B981).copy(alpha = 0.5f), CircleShape)
+                    .hazeGlass(
+                        state = cardHazeState,
+                        shape = CircleShape,
+                        containerColor = Color.Black.copy(alpha = 0.35f),
+                        blurRadius = 16.dp,
+                        borderWidth = 1.dp,
+                        borderColor = Color(0xFF10B981).copy(alpha = 0.4f)
+                    )
                     .padding(horizontal = 10.dp, vertical = 5.dp)
             ) {
                 Text(

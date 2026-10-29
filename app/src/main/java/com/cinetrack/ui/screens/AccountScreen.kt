@@ -283,8 +283,8 @@ object AccountTab : Tab {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .background(animatedBgColor)
                     .haze(state = backgroundHazeState)
+                    .background(animatedBgColor)
             ) {
                 Box(
                     modifier = Modifier
