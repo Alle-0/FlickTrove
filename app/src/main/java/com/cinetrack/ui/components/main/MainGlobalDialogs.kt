@@ -42,6 +42,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.dialog.GithubUpdateDialog
 import com.cinetrack.ui.components.dialog.OnboardingDialog
 import com.cinetrack.ui.components.dialog.WhatsNewDialog
+import com.cinetrack.ui.components.shared.DeleteFolderDialog
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.FolderEditDialog
 import com.cinetrack.ui.components.shared.FolderEditMode
@@ -106,7 +107,8 @@ fun MainGlobalDialogs(
         FlickTroveModal(
             isVisible = true,
             onDismissRequest = { onExitConfirmationChange(false) },
-            hazeState = globalHazeState
+            hazeState = globalHazeState,
+            contentPadding = PaddingValues(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 16.dp)
         ) {
             Text(
                 text = stringResource(R.string.main_exit_title),
@@ -123,9 +125,7 @@ fun MainGlobalDialogs(
                 modifier = Modifier.padding(bottom = 24.dp)
             )
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 4.dp),
+                modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
@@ -134,9 +134,9 @@ fun MainGlobalDialogs(
                         .weight(1f)
                         .height(48.dp)
                         .bounceClick { onExitConfirmationChange(false) }
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -151,7 +151,7 @@ fun MainGlobalDialogs(
                         .weight(1f)
                         .height(48.dp)
                         .bounceClick { onExitConfirmationChange(false); activity?.finish() }
-                        .clip(CircleShape)
+                        .clip(RoundedCornerShape(16.dp))
                         .background(MaterialTheme.colorScheme.primary),
                     contentAlignment = Alignment.Center
                 ) {
@@ -195,71 +195,21 @@ fun MainGlobalDialogs(
         val folder = folderFlow.value?.find { it.id == folderId }
         
         if (folder != null) {
-            FlickTroveModal(
-                isVisible = true,
-                onDismissRequest = { onFolderDeleteConfirmChange(false) },
-                hazeState = globalHazeState
-            ) {
-                Text(
-                    text = stringResource(R.string.folder_delete_title),
-                    style = MaterialTheme.typography.titleLarge,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(bottom = 8.dp)
-                )
-                Text(
-                    text = stringResource(R.string.folder_delete_confirm_prefix_2) + "\"${folder.name}\"" + stringResource(R.string.folder_delete_confirm_suffix),
-                    style = MaterialTheme.typography.bodyMedium,
-                    color = Color.White.copy(alpha = 0.7f),
-                    textAlign = TextAlign.Center,
-                    modifier = Modifier.padding(bottom = 24.dp)
-                )
-                Row(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(horizontal = 4.dp),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .bounceClick { onFolderDeleteConfirmChange(false) }
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(R.string.folder_delete_cancel),
-                            color = Color.White,
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 15.sp
-                        )
-                    }
-                    Box(
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(48.dp)
-                            .bounceClick { 
-                                onFolderDeleteConfirmChange(false)
-                                foldersViewModel.deleteFolder(folderId)
-                                tabNavigator.current = FoldersTab
-                            }
-                            .clip(CircleShape)
-                            .background(Color(0xFFFF3B30)),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(
-                            text = stringResource(R.string.folder_delete_short),
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 15.sp
-                        )
-                    }
+            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+            val isLeave = folder.isShared && (folder.ownerUid != currentUserId)
+            DeleteFolderDialog(
+                folderName = folder.name,
+                isLeave = isLeave,
+                hazeState = globalHazeState,
+                onConfirm = {
+                    onFolderDeleteConfirmChange(false)
+                    foldersViewModel.deleteFolder(folderId)
+                    tabNavigator.current = FoldersTab
+                },
+                onDismiss = {
+                    onFolderDeleteConfirmChange(false)
                 }
-            }
+            )
         }
     }
 

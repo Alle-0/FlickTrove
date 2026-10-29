@@ -43,7 +43,7 @@ fun DeleteFolderDialog(
         hazeState = hazeState,
         maxWidth = 440.dp,
         maxWidthFraction = 0.92f,
-        contentPadding = PaddingValues(horizontal = 22.dp, vertical = 24.dp)
+        contentPadding = PaddingValues(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 16.dp)
     ) {
         // Destructive icon
         Box(
