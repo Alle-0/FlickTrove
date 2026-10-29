@@ -42,9 +42,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import com.cinetrack.ui.components.glass.hazeGlass
-import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
@@ -191,8 +188,6 @@ fun HeroSpotlightCarousel(
                 lerp(animatedColor, baseDarkColor, 0.72f)
             }
 
-            val cardHazeState = remember { HazeState() }
-
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -223,47 +218,41 @@ fun HeroSpotlightCarousel(
                         shape = RoundedCornerShape(36.dp)
                     )
             ) {
-                // Backdrop Image & Scrim come Haze Source
+                // Backdrop Image
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(backdropUrl)
+                        .crossfade(true)
+                        .allowHardware(false)
+                        .build(),
+                    contentDescription = movie.title ?: movie.name,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize(),
+                    onSuccess = { result ->
+                        val bitmap = result.result.drawable.toBitmap()
+                        coroutineScope.launch {
+                            val cardWidthDp = configuration.screenWidthDp - 64f
+                            val cardAspectRatio = cardWidthDp / 460f
+                            val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = cardAspectRatio)
+                            if (color != Color.Unspecified) dominantColor = color
+                        }
+                    }
+                )
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .haze(cardHazeState)
-                ) {
-                    AsyncImage(
-                        model = ImageRequest.Builder(context)
-                            .data(backdropUrl)
-                            .crossfade(true)
-                            .allowHardware(false)
-                            .build(),
-                        contentDescription = movie.title ?: movie.name,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier.fillMaxSize(),
-                        onSuccess = { result ->
-                            val bitmap = result.result.drawable.toBitmap()
-                            coroutineScope.launch {
-                                val cardWidthDp = configuration.screenWidthDp - 64f
-                                val cardAspectRatio = cardWidthDp / 460f
-                                val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = cardAspectRatio)
-                                if (color != Color.Unspecified) dominantColor = color
-                            }
-                        }
-                    )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .background(
-                                Brush.verticalGradient(
-                                    0.0f to Color.Transparent,
-                                    0.3f to Color.Transparent,
-                                    0.5f to cardBottomColor.copy(alpha = 0.35f),
-                                    0.7f to cardBottomColor.copy(alpha = 0.75f),
-                                    0.85f to cardBottomColor.copy(alpha = 0.92f),
-                                    1.0f to cardBottomColor
-                                )
+                        .background(
+                            Brush.verticalGradient(
+                                0.0f to Color.Transparent,
+                                0.3f to Color.Transparent,
+                                0.5f to cardBottomColor.copy(alpha = 0.35f),
+                                0.7f to cardBottomColor.copy(alpha = 0.75f),
+                                0.85f to cardBottomColor.copy(alpha = 0.92f),
+                                1.0f to cardBottomColor
                             )
-                    )
-                }
+                        )
+                )
 
                     // Titolo e anno
                     Column(
@@ -346,15 +335,9 @@ fun HeroSpotlightCarousel(
                                     Box(
                                         modifier = Modifier
                                             .align(Alignment.CenterVertically)
-                                            .hazeGlass(
-                                                state = cardHazeState,
-                                                shape = CircleShape,
-                                                containerColor = Color.Black.copy(alpha = 0.35f),
-                                                blurRadius = 16.dp,
-                                                borderWidth = 0.5.dp,
-                                                borderColor = Color.White.copy(alpha = 0.20f)
-                                            )
-                                            .padding(horizontal = 9.dp, vertical = 4.dp)
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.2f))
+                                            .padding(horizontal = 8.dp, vertical = 4.dp)
                                     ) {
                                         Text(
                                             text = genreName,
