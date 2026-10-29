@@ -15,7 +15,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.cinetrack.ui.components.glass.hazeGlass
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
@@ -67,6 +71,7 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
     }
 
     val cardShape = RoundedCornerShape(24.dp)
+    val cardHazeState = remember { HazeState() }
 
     Box(
         modifier = Modifier
@@ -79,22 +84,26 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
             .clip(cardShape)
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), cardShape)
     ) {
-        // Immagine di sfondo
-        if (article.imageUrl != null) {
-            AsyncImage(
-                model = article.imageUrl,
-                contentDescription = article.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(cardShape)
-            )
-        } else {
-            Spacer(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.DarkGray)
-            )
+        // Immagine di sfondo come Haze Source
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(cardHazeState)
+        ) {
+            if (article.imageUrl != null) {
+                AsyncImage(
+                    model = article.imageUrl,
+                    contentDescription = article.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color.DarkGray)
+                )
+            }
         }
 
         // Gradient in basso
@@ -137,13 +146,19 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
             )
         }
 
-        // Badge "External link" in alto a destra a pillola
+        // Badge "External link" in alto a destra a pillola con hazeGlass
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(6.dp)
-                .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
-                .border(0.5.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
+                .hazeGlass(
+                    state = cardHazeState,
+                    shape = CircleShape,
+                    containerColor = Color.Black.copy(alpha = 0.35f),
+                    blurRadius = 16.dp,
+                    borderWidth = 0.5.dp,
+                    borderColor = Color.White.copy(alpha = 0.25f)
+                )
                 .padding(horizontal = 8.dp, vertical = 3.5.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {

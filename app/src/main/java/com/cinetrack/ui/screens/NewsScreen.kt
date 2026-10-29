@@ -9,7 +9,9 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.material3.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
@@ -239,6 +241,7 @@ fun NewsScreenContent(
 @Composable
 fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
     val cardShape = RoundedCornerShape(28.dp)
+    val cardHazeState = remember { HazeState() }
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -247,23 +250,39 @@ fun NewsCard(item: NewsItemUi, onClick: () -> Unit) {
             .clip(cardShape)
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), cardShape)
     ) {
-        item.imageUrl?.let { imgUrl ->
-            AsyncImage(
-                model = imgUrl,
-                contentDescription = item.title,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .clip(cardShape)
-            )
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(cardHazeState)
+        ) {
+            if (item.imageUrl != null) {
+                AsyncImage(
+                    model = item.imageUrl,
+                    contentDescription = item.title,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(Color(0xFF1B1B26))
+                )
+            }
         }
         
         Box(
             modifier = Modifier
                 .align(Alignment.TopEnd)
                 .padding(12.dp)
-                .background(Color.Black.copy(alpha = 0.55f), RoundedCornerShape(50))
-                .border(0.5.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(50))
+                .hazeGlass(
+                    state = cardHazeState,
+                    shape = CircleShape,
+                    containerColor = Color.Black.copy(alpha = 0.35f),
+                    blurRadius = 16.dp,
+                    borderWidth = 0.5.dp,
+                    borderColor = Color.White.copy(alpha = 0.25f)
+                )
                 .padding(horizontal = 10.dp, vertical = 4.5.dp)
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
