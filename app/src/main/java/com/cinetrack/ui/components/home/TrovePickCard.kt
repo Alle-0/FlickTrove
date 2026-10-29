@@ -43,6 +43,9 @@ import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.toComposeColor
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
+import com.cinetrack.ui.components.glass.hazeGlass
+import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 
 /**
  * "The Trove's Pick" — card asimmetrica premium che mette in evidenza
@@ -57,6 +60,7 @@ fun TrovePickCard(
 ) {
     val context = LocalContext.current
     val imageQuality = com.cinetrack.util.LocalImageQuality.current
+    val cardHazeState = remember { HazeState() }
 
     var localLogoPath by remember(movie.id, movie.logoPath) { mutableStateOf(movie.logoPath) }
     androidx.compose.runtime.LaunchedEffect(movie.id, movie.logoPath) {
@@ -167,51 +171,57 @@ fun TrovePickCard(
                         RoundedCornerShape(32.dp)
                     )
             ) {
-                // Backdrop di sfondo visibile e nitido
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(backdropUrl)
-                        .crossfade(true)
-                        .allowHardware(false)
-                        .build(),
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-
-                // Overlay gradiente orizzontale: sfumatura più scura a sinistra (0.80f che sfuma verso destra)
+                // Backdrop di sfondo e overlay gradienti come sorgente Haze
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .background(
-                            Brush.horizontalGradient(
-                                colorStops = arrayOf(
-                                    0.0f to Color.Black.copy(alpha = 0.80f),
-                                    0.40f to Color.Black.copy(alpha = 0.42f),
-                                    0.75f to Color.Transparent,
-                                    1.0f to Color.Transparent
-                                )
-                            )
-                        )
-                )
+                        .haze(cardHazeState)
+                ) {
+                    AsyncImage(
+                        model = ImageRequest.Builder(context)
+                            .data(backdropUrl)
+                            .crossfade(true)
+                            .allowHardware(false)
+                            .build(),
+                        contentDescription = null,
+                        contentScale = ContentScale.Crop,
+                        modifier = Modifier.fillMaxSize()
+                    )
 
-                // Overlay gradiente verticale: velatura in alto (0.58f) e nero profondo e solido in basso (fino a 1.0f)
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .background(
-                            Brush.verticalGradient(
-                                colorStops = arrayOf(
-                                    0.0f to Color.Black.copy(alpha = 0.58f),
-                                    0.22f to Color.Black.copy(alpha = 0.22f),
-                                    0.42f to Color.Transparent,
-                                    0.55f to Color.Black.copy(alpha = 0.60f),
-                                    0.75f to Color.Black.copy(alpha = 0.92f),
-                                    1.0f to Color.Black
+                    // Overlay gradiente orizzontale: sfumatura più scura a sinistra (0.80f che sfuma verso destra)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.horizontalGradient(
+                                    colorStops = arrayOf(
+                                        0.0f to Color.Black.copy(alpha = 0.80f),
+                                        0.40f to Color.Black.copy(alpha = 0.42f),
+                                        0.75f to Color.Transparent,
+                                        1.0f to Color.Transparent
+                                    )
                                 )
                             )
-                        )
-                )
+                    )
+
+                    // Overlay gradiente verticale: velatura in alto (0.58f) e nero profondo e solido in basso (fino a 1.0f)
+                    Box(
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(
+                                Brush.verticalGradient(
+                                    colorStops = arrayOf(
+                                        0.0f to Color.Black.copy(alpha = 0.58f),
+                                        0.22f to Color.Black.copy(alpha = 0.22f),
+                                        0.42f to Color.Transparent,
+                                        0.55f to Color.Black.copy(alpha = 0.60f),
+                                        0.75f to Color.Black.copy(alpha = 0.92f),
+                                        1.0f to Color.Black
+                                    )
+                                )
+                            )
+                    )
+                }
 
                 // Contenuto: Poster a sinistra + Colonna Dettagli a destra
                 Row(
@@ -249,20 +259,16 @@ fun TrovePickCard(
                             .fillMaxHeight(),
                         verticalArrangement = Arrangement.SpaceBetween
                     ) {
-                        // Badge "CURATED FOR YOU" ancorato in cima con finitura satin glass
+                        // Badge "CURATED FOR YOU" ancorato in cima con finitura frosted hazeGlass
                         Box(
                             modifier = Modifier
-                                .clip(CircleShape)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
-                                .border(
-                                    0.5.dp,
-                                    Brush.verticalGradient(
-                                        listOf(
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.55f),
-                                            MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
-                                        )
-                                    ),
-                                    CircleShape
+                                .hazeGlass(
+                                    state = cardHazeState,
+                                    shape = CircleShape,
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                                    blurRadius = 16.dp,
+                                    borderWidth = 0.5.dp,
+                                    borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
                                 )
                                 .padding(horizontal = 9.dp, vertical = 3.5.dp)
                         ) {
@@ -378,17 +384,13 @@ fun TrovePickCard(
                                 if (matchScore != null && matchScore > 0) {
                                     Box(
                                         modifier = Modifier
-                                            .clip(CircleShape)
-                                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.16f))
-                                            .border(
-                                                0.5.dp,
-                                                Brush.verticalGradient(
-                                                    listOf(
-                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.50f),
-                                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.20f)
-                                                    )
-                                                ),
-                                                CircleShape
+                                            .hazeGlass(
+                                                state = cardHazeState,
+                                                shape = CircleShape,
+                                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                                                blurRadius = 16.dp,
+                                                borderWidth = 0.5.dp,
+                                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
                                             )
                                             .padding(horizontal = 8.dp, vertical = 3.dp)
                                     ) {
