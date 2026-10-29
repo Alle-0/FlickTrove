@@ -616,7 +616,21 @@ fun GlassyTopBar(
                     }
                 }
 
-                if (onUpdatesClick == null && onFilterClick == null && onDeleteClick == null && !isSyncing && onLayoutToggleClick == null && onFolderOptionsClick == null && onStatsRewatchToggle == null && onSettingsClick == null && customActions == null) {
+                val hasRightActions = onUpdatesClick != null ||
+                    onFilterClick != null ||
+                    onDeleteClick != null ||
+                    isSyncing ||
+                    (onLayoutToggleClick != null && layoutColumns != null) ||
+                    onFolderOptionsClick != null ||
+                    (isStatsRewatchesEnabled != null && onStatsRewatchToggle != null) ||
+                    onSettingsClick != null ||
+                    onRefreshClick != null ||
+                    onEditBackdropClick != null ||
+                    customActions != null ||
+                    isOffline ||
+                    isPoor
+
+                if (!hasRightActions) {
                     Spacer(modifier = Modifier.size(48.dp))
                 }
             }
