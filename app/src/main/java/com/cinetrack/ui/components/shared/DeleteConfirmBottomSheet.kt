@@ -92,7 +92,8 @@ fun DeleteConfirmBottomSheet(
 
                 Text(
                     text = buildAnnotatedString {
-                        append(stringResource(R.string.folder_delete_confirm_prefix_2))
+                        append(stringResource(R.string.folder_delete_confirm_prefix_2).trimEnd())
+                        append(" ")
                         withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
                             append("\"$folderName\"")
                         }

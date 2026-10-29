@@ -81,7 +81,8 @@ fun DeleteFolderDialog(
                 }
             } else {
                 buildAnnotatedString {
-                    append(stringResource(R.string.folder_delete_confirm_prefix))
+                    append(stringResource(R.string.folder_delete_confirm_prefix).trimEnd())
+                    append(" ")
                     withStyle(style = SpanStyle(color = Color.White, fontWeight = FontWeight.Bold)) {
                         append("\"$folderName\"")
                     }
