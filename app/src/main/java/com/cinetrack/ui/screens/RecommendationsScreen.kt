@@ -229,6 +229,42 @@ fun RecommendationsScreenContent(
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
     val stickyHeaderHeight = 60.dp
 
+    val haptic = LocalHapticFeedback.current
+    val swipeOffsetX = remember { Animatable(0f) }
+    val swipeOffsetY = remember { Animatable(0f) }
+
+    LaunchedEffect(topCardIndex) {
+        swipeOffsetX.snapTo(0f)
+        swipeOffsetY.snapTo(0f)
+    }
+
+    val movies = uiState.recommendedMovies
+
+    LaunchedEffect(topCardIndex, movies.size, uiState.isLoading, uiState.isNextPageLoading, uiState.isEndReached) {
+        if (topCardIndex >= movies.size - 4 && !uiState.isLoading && !uiState.isNextPageLoading && !uiState.isEndReached) {
+            viewModel.loadNextPage()
+        }
+    }
+
+    val swipeRight = { movie: Movie ->
+        scope.launch {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            swipeOffsetX.animateTo(1000f, tween(250, easing = FastOutSlowInEasing))
+            viewModel.toggleFavorite(movie) {
+                topCardIndex = maxOf(0, topCardIndex - 1)
+            }
+            topCardIndex++
+        }
+    }
+
+    val swipeLeft = {
+        scope.launch {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            swipeOffsetX.animateTo(-1000f, tween(250, easing = FastOutSlowInEasing))
+            topCardIndex++
+        }
+    }
+
     Box(modifier = Modifier.fillMaxSize()) {
         // Haze source: covers CinematicBackground and content
         Box(
@@ -268,43 +304,6 @@ fun RecommendationsScreenContent(
                         }
                     )
                 } else {
-                    val movies = uiState.recommendedMovies
-                    val scope = rememberCoroutineScope()
-                    val haptic = LocalHapticFeedback.current
-
-                    val swipeOffsetX = remember { Animatable(0f) }
-                    val swipeOffsetY = remember { Animatable(0f) }
-
-                    LaunchedEffect(topCardIndex) {
-                        swipeOffsetX.snapTo(0f)
-                        swipeOffsetY.snapTo(0f)
-                    }
-
-                    LaunchedEffect(topCardIndex, movies.size, uiState.isLoading, uiState.isNextPageLoading, uiState.isEndReached) {
-                        if (topCardIndex >= movies.size - 4 && !uiState.isLoading && !uiState.isNextPageLoading && !uiState.isEndReached) {
-                            viewModel.loadNextPage()
-                        }
-                    }
-
-                    val swipeRight = { movie: Movie ->
-                        scope.launch {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            swipeOffsetX.animateTo(1000f, tween(250, easing = FastOutSlowInEasing))
-                            viewModel.toggleFavorite(movie) {
-                                topCardIndex = maxOf(0, topCardIndex - 1)
-                            }
-                            topCardIndex++
-                        }
-                    }
-
-                    val swipeLeft = {
-                        scope.launch {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            swipeOffsetX.animateTo(-1000f, tween(250, easing = FastOutSlowInEasing))
-                            topCardIndex++
-                        }
-                    }
-
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
@@ -389,32 +388,6 @@ fun RecommendationsScreenContent(
                                     }
                                 )
                             }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .align(Alignment.BottomCenter)
-                                .zIndex(1f)
-                        ) {
-                            FlickControls(
-                                onPass = {
-                                    if (topCardIndex < movies.size) {
-                                        swipeLeft()
-                                    }
-                                },
-                                onInfo = {
-                                    if (topCardIndex < movies.size) {
-                                        onMovieClick(movies[topCardIndex])
-                                    }
-                                },
-                                onLike = {
-                                    if (topCardIndex < movies.size) {
-                                        val movie = movies[topCardIndex]
-                                        swipeRight(movie)
-                                    }
-                                }
-                            )
                         }
                     }
                 }
@@ -543,6 +516,40 @@ fun RecommendationsScreenContent(
             }
         }
         } // end inner haze-source Box
+
+        if (isFlickMode && !uiState.isLoading && movies.isNotEmpty() && topCardIndex < movies.size) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .align(Alignment.BottomCenter)
+                    .zIndex(1f)
+                    .padding(
+                        bottom = paddingValues.calculateBottomPadding() + 8.dp,
+                        start = 20.dp,
+                        end = 20.dp
+                    )
+            ) {
+                FlickControls(
+                    hazeState = localHazeState,
+                    onPass = {
+                        if (topCardIndex < movies.size) {
+                            swipeLeft()
+                        }
+                    },
+                    onInfo = {
+                        if (topCardIndex < movies.size) {
+                            onMovieClick(movies[topCardIndex])
+                        }
+                    },
+                    onLike = {
+                        if (topCardIndex < movies.size) {
+                            val movie = movies[topCardIndex]
+                            swipeRight(movie)
+                        }
+                    }
+                )
+            }
+        }
 
         Box(
             modifier = Modifier

@@ -109,6 +109,7 @@ fun FlickMovieCard(
     )
 
     val baseDarkColor = remember { Color(0xFF09090D) }
+    val cardHazeState = remember { HazeState() }
     val cardBottomColor = remember(animatedAccent) {
         androidx.compose.ui.graphics.lerp(animatedAccent, baseDarkColor, 0.78f)
     }
@@ -153,7 +154,9 @@ fun FlickMovieCard(
             ) { onActionClick() }
     ) {
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(cardHazeState)
         ) {
             val backdropUrl = buildTmdbImageUrl(
                 movie.backdropPath ?: movie.posterPath,
@@ -235,22 +238,23 @@ fun FlickMovieCard(
                             rotationZ = -15f
                             this.alpha = dragProgress.coerceIn(0f, 1f)
                         }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                            .border(width = 2.5.dp, color = Color(0xFF22C55E), shape = CircleShape)
-                    )
-                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
-                        Text(
-                            text = stringResource(R.string.recommendations_add),
-                            color = Color(0xFF22C55E),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp
+                        .hazeGlass(
+                            state = cardHazeState,
+                            shape = CircleShape,
+                            containerColor = Color.Black.copy(alpha = 0.45f),
+                            blurRadius = 16.dp,
+                            borderWidth = 2.dp,
+                            borderColor = Color(0xFF22C55E)
                         )
-                    }
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.recommendations_add),
+                        color = Color(0xFF22C55E),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
                 }
             }
 
@@ -264,22 +268,23 @@ fun FlickMovieCard(
                             rotationZ = 15f
                             this.alpha = absoluteProgress.coerceIn(0f, 1f)
                         }
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .background(Color.Black.copy(alpha = 0.6f), CircleShape)
-                            .border(width = 2.5.dp, color = Color(0xFFEF4444), shape = CircleShape)
-                    )
-                    Box(modifier = Modifier.padding(horizontal = 20.dp, vertical = 8.dp)) {
-                        Text(
-                            text = stringResource(R.string.recommendations_pass),
-                            color = Color(0xFFEF4444),
-                            fontSize = 20.sp,
-                            fontWeight = FontWeight.Bold,
-                            letterSpacing = 2.sp
+                        .hazeGlass(
+                            state = cardHazeState,
+                            shape = CircleShape,
+                            containerColor = Color.Black.copy(alpha = 0.45f),
+                            blurRadius = 16.dp,
+                            borderWidth = 2.dp,
+                            borderColor = Color(0xFFEF4444)
                         )
-                    }
+                        .padding(horizontal = 20.dp, vertical = 8.dp)
+                ) {
+                    Text(
+                        text = stringResource(R.string.recommendations_pass),
+                        color = Color(0xFFEF4444),
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = 2.sp
+                    )
                 }
             }
         }
@@ -336,13 +341,18 @@ fun FlickMovieCard(
                 verticalAlignment = Alignment.CenterVertically,
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Match Score Pill — sfondo più pieno per leggibilità su qualsiasi backdrop
+                // Match Score Pill — finitura frosted glass coordinata con l'accent
                 if (matchScore != null && matchScore > 0) {
                     Box(
                         modifier = Modifier
-                            .clip(CircleShape)
-                            .background(animatedAccent.copy(alpha = 0.30f))
-                            .border(0.5.dp, animatedAccent.copy(alpha = 0.75f), CircleShape)
+                            .hazeGlass(
+                                state = cardHazeState,
+                                shape = CircleShape,
+                                containerColor = animatedAccent.copy(alpha = 0.18f),
+                                blurRadius = 16.dp,
+                                borderWidth = 0.5.dp,
+                                borderColor = animatedAccent.copy(alpha = 0.75f)
+                            )
                             .padding(horizontal = 9.dp, vertical = 4.dp)
                     ) {
                         Row(verticalAlignment = Alignment.CenterVertically) {
@@ -473,10 +483,12 @@ fun FlickMovieCard(
 fun FlickControls(
     onPass: () -> Unit,
     onInfo: () -> Unit,
-    onLike: () -> Unit
+    onLike: () -> Unit,
+    modifier: Modifier = Modifier,
+    hazeState: HazeState? = null
 ) {
     Row(
-        modifier = Modifier
+        modifier = modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 12.dp),
         horizontalArrangement = Arrangement.spacedBy(16.dp, Alignment.CenterHorizontally),
@@ -485,9 +497,15 @@ fun FlickControls(
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .background(Color(0xFF1C1C1E).copy(alpha = 0.75f), CircleShape)
-                .border(BorderStroke(1.5.dp, Color(0xFFEF4444).copy(alpha = 0.5f)), CircleShape)
-                .bounceClick(scaleDown = 0.88f) { onPass() },
+                .bounceClick(scaleDown = 0.88f) { onPass() }
+                .hazeGlass(
+                    state = hazeState,
+                    shape = CircleShape,
+                    containerColor = Color(0xFF1C1C1E).copy(alpha = 0.55f),
+                    blurRadius = 16.dp,
+                    borderWidth = 1.dp,
+                    borderColor = Color(0xFFEF4444).copy(alpha = 0.65f)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -501,9 +519,15 @@ fun FlickControls(
         Box(
             modifier = Modifier
                 .size(48.dp)
-                .background(Color(0xFF1C1C1E).copy(alpha = 0.75f), CircleShape)
-                .border(BorderStroke(1.dp, Color(0xFF3B82F6).copy(alpha = 0.5f)), CircleShape)
-                .bounceClick(scaleDown = 0.9f) { onInfo() },
+                .bounceClick(scaleDown = 0.9f) { onInfo() }
+                .hazeGlass(
+                    state = hazeState,
+                    shape = CircleShape,
+                    containerColor = Color(0xFF1C1C1E).copy(alpha = 0.55f),
+                    blurRadius = 16.dp,
+                    borderWidth = 1.dp,
+                    borderColor = Color(0xFF3B82F6).copy(alpha = 0.65f)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -517,9 +541,15 @@ fun FlickControls(
         Box(
             modifier = Modifier
                 .size(56.dp)
-                .background(Color(0xFF1C1C1E).copy(alpha = 0.75f), CircleShape)
-                .border(BorderStroke(1.5.dp, Color(0xFF22C55E).copy(alpha = 0.5f)), CircleShape)
-                .bounceClick(scaleDown = 0.88f) { onLike() },
+                .bounceClick(scaleDown = 0.88f) { onLike() }
+                .hazeGlass(
+                    state = hazeState,
+                    shape = CircleShape,
+                    containerColor = Color(0xFF1C1C1E).copy(alpha = 0.55f),
+                    blurRadius = 16.dp,
+                    borderWidth = 1.dp,
+                    borderColor = Color(0xFF22C55E).copy(alpha = 0.65f)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(
