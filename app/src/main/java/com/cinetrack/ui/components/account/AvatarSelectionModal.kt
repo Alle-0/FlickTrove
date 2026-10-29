@@ -47,7 +47,6 @@ import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.repository.MovieRepository
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton

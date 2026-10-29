@@ -51,7 +51,6 @@ import com.cinetrack.ui.viewmodel.NewsUiState
 import com.cinetrack.ui.viewmodel.NewsViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.shared.shimmerEffect
 
 object NewsTab : Tab {

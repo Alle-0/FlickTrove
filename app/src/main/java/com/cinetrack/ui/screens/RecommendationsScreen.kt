@@ -84,7 +84,6 @@ import com.cinetrack.ui.components.recommendations.lerp
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import kotlin.math.abs
 
 import cafe.adriel.voyager.core.screen.Screen

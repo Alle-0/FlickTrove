@@ -87,7 +87,7 @@ class HistoryViewModel @Inject constructor(
 
         val entries = rawRecords.flatMap { rec ->
             if (rec.mediaType == "tv") {
-                val epMap: Map<String, List<Int>> = if (rec.isRewatch && !rec.historicalEpisodes.isNullOrBlank()) {
+                val epMap: Map<String, List<Int>> = if (!rec.historicalEpisodes.isNullOrBlank()) {
                     try {
                         Json.decodeFromString(rec.historicalEpisodes)
                     } catch (e: Exception) {
@@ -404,6 +404,7 @@ class HistoryViewModel @Inject constructor(
                                         val parsedMap: Map<String, List<Int>> = Json.decodeFromString(latest.historicalEpisodes)
                                         val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
                                         updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
+                                        watchHistoryRepository.updateWatchHistory(latest.copy(historicalEpisodes = null))
                                     } catch (e: Exception) {
                                         updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
                                     }

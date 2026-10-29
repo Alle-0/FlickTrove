@@ -214,9 +214,21 @@ fun WatchHistoryBottomSheet(
     } // End of Box
 
     if (currentEditingTvHistory != null) {
+        val sortedHistory = history.sortedBy { it.watchedAt }
+        val firstViewing = sortedHistory.firstOrNull()
+        val rewatches = if (sortedHistory.size > 1) sortedHistory.drop(1).sortedByDescending { it.watchedAt } else emptyList()
+        val rewatchIndex = rewatches.indexOfFirst { it.id == currentEditingTvHistory.id }
+        val sessionLabel = if (currentEditingTvHistory.isRewatch || (rewatches.isNotEmpty() && currentEditingTvHistory != firstViewing)) {
+            val num = if (rewatchIndex >= 0) rewatches.size - rewatchIndex else 1
+            "${stringResource(id = R.string.watch_history_rewatch)} $num"
+        } else {
+            stringResource(id = R.string.watch_history_first_watch)
+        }
+
         EpisodeWatchDatesModal(
             movie = movie,
             history = currentEditingTvHistory,
+            sessionLabel = sessionLabel,
             accentColor = accentColor,
             hazeState = hazeState,
             onDismiss = { editingTvHistoryId = null },

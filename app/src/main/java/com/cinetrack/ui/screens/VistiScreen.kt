@@ -56,7 +56,6 @@ import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.viewmodel.VistiViewModel
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.fastScrollToTop
-import dev.chrisbanes.haze.hazeChild
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle

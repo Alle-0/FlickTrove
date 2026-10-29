@@ -79,10 +79,7 @@ object FlowTab : Tab {
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .haze(
-                            state = activeHazeState,
-                            style = HazeStyle(blurRadius = 24.dp, tint = Color.Black.copy(alpha = 0.5f))
-                        )
+                        .haze(state = activeHazeState)
                 ) {
                     Column(
                         modifier = Modifier

@@ -48,6 +48,7 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.blur.HazeColorEffect
 import kotlin.math.roundToInt
 
 /**
@@ -258,16 +259,15 @@ fun MorphGlassModal(
                 val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
 
                 val currentTintAlpha = if (triggerBounds != null) {
-                    lerp(0.48f, style.tint.alpha, sizeProgress)
+                    lerp(0.48f, 0.58f, sizeProgress)
                 } else {
-                    style.tint.alpha
+                    0.58f
                 }
-                // Keep blurRadius constant at style.blurRadius to avoid GPU shader re-allocations during animation
+                // Keep blur constant to avoid GPU shader re-allocations during animation
                 val animatedStyle = remember(style, currentTintAlpha) {
-                    style.copy(
-                        tint = style.tint.copy(alpha = currentTintAlpha),
-                        blurRadius = style.blurRadius
-                    )
+                    style.then {
+                        colorEffects(listOf(HazeColorEffect.tint(Color.Black.copy(alpha = currentTintAlpha))))
+                    }
                 }
                 val borderAlpha = if (triggerBounds != null) {
                     lerp(HazeStyles.ModalBorderAlphaStart, HazeStyles.ModalBorderAlpha, sizeProgress)

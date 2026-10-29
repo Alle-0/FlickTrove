@@ -85,7 +85,6 @@ import com.cinetrack.R
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -280,8 +279,12 @@ class CommsUniCommentsScreen(
                     topBar = {
                 TopAppBar(
                     modifier = Modifier
-                        .clip(androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp))
-                        .hazeChild(state = hazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp), style = dev.chrisbanes.haze.HazeStyle(tint = Color.Black.copy(alpha = 0.7f), blurRadius = 20.dp)),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
+                            containerColor = Color.Black.copy(alpha = 0.7f),
+                            blurRadius = 20.dp
+                        ),
                     title = { Text(if (mediaTitle.isNotBlank()) stringResource(R.string.comments_screen_title_with_media, mediaTitle) else stringResource(R.string.comments_screen_title), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
                     navigationIcon = {
                         Box(

@@ -2,7 +2,8 @@ package com.cinetrack.ui.theme
 
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.HazeColorEffect
 
 object HazeStyles {
     // Core Glass Alphas for UI consistency
@@ -35,17 +36,23 @@ object HazeStyles {
      * Unified haze style for all glassmorphism effects in the app.
      * Uses a deep black tint to ensure readability and high contrast.
      */
-    val PremiumDark = HazeStyle(
-        blurRadius = GlassBlurRadius,
-        tint = GlassColor.copy(alpha = GlassAlpha),
-        noiseFactor = NoiseFactorDefault
-    )
+    val PremiumDark = HazeBlurStyle {
+        blurRadius(GlassBlurRadius)
+        noiseFactor(NoiseFactorDefault)
+        backgroundColor(Color.Black)
+        colorEffects(
+            listOf(HazeColorEffect.tint(GlassColor.copy(alpha = GlassAlpha)))
+        )
+    }
 
     /**
      * Style for dialogs to ensure high contrast against background content.
      */
-    val glassmorphicDialog = PremiumDark.copy(
-        blurRadius = 24.dp,
-        tint = Color.Black.copy(alpha = 0.58f)
-    )
+    val glassmorphicDialog = PremiumDark.then {
+        blurRadius(24.dp)
+        colorEffects(
+            listOf(HazeColorEffect.tint(Color.Black.copy(alpha = 0.58f)))
+        )
+    }
 }
+

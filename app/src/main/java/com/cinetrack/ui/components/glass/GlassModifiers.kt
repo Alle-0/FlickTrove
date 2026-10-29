@@ -2,26 +2,24 @@ package com.cinetrack.ui.components.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.Composable
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.theme.HazeStyles
+import dev.chrisbanes.haze.HazeInput
+import dev.chrisbanes.haze.HazePerformanceMode
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.hazeChild
-import androidx.compose.ui.graphics.Shape
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.layout.layout
-
-import androidx.compose.ui.unit.coerceAtLeast
+import dev.chrisbanes.haze.blur.HazeBlurStyle
+import dev.chrisbanes.haze.blur.HazeColorEffect
+import dev.chrisbanes.haze.blur.hazeBlur
 
 /**
  * A standardized glassmorphic modifier that integrates with Haze for high-quality background blur.
@@ -29,13 +27,13 @@ import androidx.compose.ui.unit.coerceAtLeast
  *
  * @param state The HazeState from the container that should be blurred.
  * @param shape The shape of the glass element.
- * @param style The HazeStyle to apply (defaults to HazeStyles.PremiumDark).
+ * @param style The HazeBlurStyle to apply (defaults to HazeStyles.PremiumDark).
  * @param useOffscreenStrategy Whether to use CompositingStrategy.Offscreen to fix text rendering.
  */
 fun Modifier.hazeGlass(
     state: HazeState?,
     shape: Shape,
-    style: HazeStyle? = null,
+    style: HazeBlurStyle? = null,
     blurRadius: Dp = HazeStyles.GlassBlurRadius,
     containerColor: Color? = null,
     useOffscreenStrategy: Boolean = false,
@@ -45,23 +43,15 @@ fun Modifier.hazeGlass(
 ): Modifier = composed {
     val finalStyle = remember(blurRadius, containerColor, style, alpha) {
         val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
-        style?.let { 
-            // If custom style is provided, attempt to scale it by alpha
-            val safeStyleBlurRadius = (it.blurRadius * alpha).coerceAtLeast(0.1.dp)
-            it.copy(
-                blurRadius = safeStyleBlurRadius,
-                tint = it.tint.copy(alpha = it.tint.alpha * alpha)
-            )
-        } ?: if (containerColor != null) {
-            HazeStyles.PremiumDark.copy(
-                blurRadius = safeBlurRadius,
-                tint = containerColor.copy(alpha = (if (containerColor.alpha != 1f) containerColor.alpha else HazeStyles.GlassAlpha) * alpha)
-            )
-        } else {
-            HazeStyles.PremiumDark.copy(
-                blurRadius = safeBlurRadius,
-                tint = HazeStyles.PremiumDark.tint.copy(alpha = HazeStyles.PremiumDark.tint.alpha * alpha)
-            )
+        val baseStyle = style ?: HazeStyles.PremiumDark
+        baseStyle.then {
+            blurRadius(safeBlurRadius)
+            if (containerColor != null && containerColor != Color.Unspecified) {
+                val targetAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else HazeStyles.GlassAlpha) * alpha
+                colorEffects(listOf(HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))))
+            } else if (style == null && alpha != 1f) {
+                colorEffects(listOf(HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = HazeStyles.GlassAlpha * alpha))))
+            }
         }
     }
     
@@ -71,20 +61,34 @@ fun Modifier.hazeGlass(
         .clip(shape)
         .then(
             if (state != null && advancedEffectsEnabled) {
-                // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeChild.
-                // We use the lambda-less version to be extremely explicit and avoid property-vs-parameter confusion.
+                // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeBlur.
                 if (useOffscreenStrategy) {
                     Modifier
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
-                        .hazeChild(state = state, shape = shape, style = finalStyle)
+                        .hazeBlur(
+                            input = HazeInput.Sources(state),
+                            style = finalStyle,
+                            performanceMode = HazePerformanceMode.Default,
+                            expandLayerBounds = false
+                        )
                 } else {
                     if (alpha < 1f) {
                         Modifier
                             .graphicsLayer(alpha = alpha)
-                            .hazeChild(state = state, shape = shape, style = finalStyle)
+                            .hazeBlur(
+                                input = HazeInput.Sources(state),
+                                style = finalStyle,
+                                performanceMode = HazePerformanceMode.Default,
+                                expandLayerBounds = false
+                            )
                     } else {
                         Modifier
-                            .hazeChild(state = state, shape = shape, style = finalStyle)
+                            .hazeBlur(
+                                input = HazeInput.Sources(state),
+                                style = finalStyle,
+                                performanceMode = HazePerformanceMode.Default,
+                                expandLayerBounds = false
+                            )
                     }
                 }
             } else {
@@ -155,3 +159,4 @@ fun Modifier.glassOverlay(
         brush = borderBrush ?: SolidColor(borderColor),
         shape = shape
     )
+

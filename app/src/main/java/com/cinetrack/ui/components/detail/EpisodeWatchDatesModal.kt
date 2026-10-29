@@ -72,6 +72,7 @@ fun EpisodeWatchDatesModal(
     onDismiss: () -> Unit,
     onUpdateEpisodeDate: (seasonNumber: Int, episodeNumber: Int, newDateIso: String) -> Unit,
     onUpdateSeasonDate: (seasonNumber: Int, episodeNumbers: List<Int>, newDateIso: String) -> Unit,
+    sessionLabel: String? = null,
     hazeState: HazeState? = null
 ) {
     var activeEdit by remember { mutableStateOf<TargetEdit?>(null) }
@@ -143,8 +144,16 @@ fun EpisodeWatchDatesModal(
                                 color = Color.White
                             )
                         )
+                        val subtitle = remember(movie.name, movie.title, sessionLabel) {
+                            val title = movie.name ?: movie.title ?: ""
+                            if (!sessionLabel.isNullOrBlank()) {
+                                if (title.isNotBlank()) "$title • $sessionLabel" else sessionLabel
+                            } else {
+                                title
+                            }
+                        }
                         Text(
-                            text = movie.name ?: movie.title ?: "",
+                            text = subtitle,
                             style = MaterialTheme.typography.bodyMedium,
                             color = Color.White.copy(alpha = 0.6f),
                             maxLines = 1,
@@ -250,7 +259,7 @@ fun EpisodeWatchDatesModal(
                                             Spacer(modifier = Modifier.width(4.dp))
 
                                             Text(
-                                                text = "${movie.seasons?.find { it.seasonNumber == seasonNum }?.name?.takeIf { it.isNotBlank() } ?: "Stagione $seasonNum"} (${eps.size} ep)",
+                                                text = "${movie.seasons?.find { it.seasonNumber == seasonNum }?.name?.takeIf { it.isNotBlank() } ?: stringResource(id = R.string.episodes_season_n, seasonNum)} (${eps.size} ep)",
                                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                                 color = accentColor,
                                                 maxLines = 1,

@@ -60,7 +60,6 @@ import com.cinetrack.ui.utils.ProviderConstants
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.utils.horizontalFadingEdges
 import kotlin.math.roundToInt

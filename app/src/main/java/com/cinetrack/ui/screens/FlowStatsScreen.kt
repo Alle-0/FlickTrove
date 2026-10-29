@@ -41,7 +41,6 @@ import com.cinetrack.ui.viewmodel.FlowViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.stats.YearSelectionButton
 import com.cinetrack.ui.components.stats.YearSelectionModal
 import com.cinetrack.ui.utils.bounceClick

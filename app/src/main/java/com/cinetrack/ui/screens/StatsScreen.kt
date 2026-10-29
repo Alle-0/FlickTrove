@@ -90,7 +90,6 @@ import coil.compose.AsyncImage
 import androidx.compose.ui.platform.LocalContext
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.theme.DarkSurface

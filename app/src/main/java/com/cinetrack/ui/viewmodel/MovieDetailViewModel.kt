@@ -173,6 +173,19 @@ class MovieDetailViewModel @Inject constructor(
 
                 repository.getWatchHistoryForMovieFlow(movieId, mediaType).collect { history ->
                     _watchHistory.value = history
+                    if (mediaType == "tv" && history.size > 1) {
+                        val sorted = history.sortedBy { parseToEpochMillis(it.watchedAt) }
+                        val latest = sorted.last()
+                        // Self-healing: if the active latest rewatch has historicalEpisodes set, but previous session does not,
+                        // it was created with the previous inverted bug where archived episodes were stashed into the new rewatch.
+                        if (!latest.historicalEpisodes.isNullOrBlank()) {
+                            val prev = sorted[sorted.size - 2]
+                            if (prev.historicalEpisodes.isNullOrBlank()) {
+                                repository.updateWatchHistory(prev.copy(historicalEpisodes = latest.historicalEpisodes))
+                                repository.updateWatchHistory(latest.copy(historicalEpisodes = null))
+                            }
+                        }
+                    }
                 }
             }
 
@@ -877,13 +890,36 @@ class MovieDetailViewModel @Inject constructor(
                     }
                 } else null
                 
+                // If TV series, archive current watchedEpisodes into the previous active session
+                if (local?.mediaType == "tv") {
+                    val previousActiveSession = if (allHistory.any { it.isRewatch }) {
+                        allHistory.filter { it.isRewatch }.maxByOrNull { parseToEpochMillis(it.watchedAt) }
+                    } else {
+                        allHistory.find { !it.isRewatch }
+                    }
+                    if (previousActiveSession != null) {
+                        repository.updateWatchHistory(previousActiveSession.copy(historicalEpisodes = historicalEpisodesJson))
+                    } else if (!historicalEpisodesJson.isNullOrBlank()) {
+                        repository.insertWatchHistory(
+                            com.cinetrack.data.local.entities.WatchHistoryEntity(
+                                movieId = movieId,
+                                mediaType = mediaType,
+                                watchedAt = local.watchedAt ?: java.time.Instant.now().toString(),
+                                isRewatch = false,
+                                historicalEpisodes = historicalEpisodesJson
+                            )
+                        )
+                    }
+                }
+
+                // Insert the new rewatch session: it is now the active session, so historicalEpisodes is null
                 repository.insertWatchHistory(
                     com.cinetrack.data.local.entities.WatchHistoryEntity(
                         movieId = movieId,
                         mediaType = mediaType,
                         watchedAt = watchedDate,
                         isRewatch = true,
-                        historicalEpisodes = historicalEpisodesJson
+                        historicalEpisodes = null
                     )
                 )
                 
@@ -960,16 +996,26 @@ class MovieDetailViewModel @Inject constructor(
                         )
                         
                         if (mediaType == "tv") {
-                            if (history.historicalEpisodes != null) {
-                                try {
-                                    val parsedMap: Map<String, List<Int>> = Json.decodeFromString(history.historicalEpisodes)
-                                    val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
-                                    updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
-                                } catch (e: Exception) {
+                            val deletedEpoch = parseToEpochMillis(history.watchedAt)
+                            val remainingLatestEpoch = parseToEpochMillis(latest?.watchedAt)
+                            val wasDeletedSessionActive = deletedEpoch >= remainingLatestEpoch
+
+                            if (wasDeletedSessionActive && latest != null) {
+                                val episodesJsonToRestore = latest.historicalEpisodes ?: history.historicalEpisodes
+                                if (!episodesJsonToRestore.isNullOrBlank()) {
+                                    try {
+                                        val parsedMap: Map<String, List<Int>> = Json.decodeFromString(episodesJsonToRestore)
+                                        val intMap = parsedMap.mapKeys { it.key.toIntOrNull() ?: 0 }
+                                        updatedLocal = updateEpisodesUseCase.batchUpdate(updatedLocal, intMap)
+                                        if (latest.historicalEpisodes != null) {
+                                            repository.updateWatchHistory(latest.copy(historicalEpisodes = null))
+                                        }
+                                    } catch (e: Exception) {
+                                        updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
+                                    }
+                                } else if (allHistory.none { it.isRewatch }) {
                                     updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
                                 }
-                            } else if (allHistory.none { it.isRewatch }) {
-                                updatedLocal = updateEpisodesUseCase.markAllWatched(updatedLocal)
                             }
                         } else {
                             updatedLocal = updatedLocal.copy(watched = true)

@@ -75,7 +75,7 @@ import com.cinetrack.ui.viewmodel.FilterPill
 import com.cinetrack.ui.viewmodel.SearchViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import dev.chrisbanes.haze.hazeChild
+import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
@@ -462,13 +462,13 @@ fun SearchScreenContent(
                     ) {
                         Box(
                             modifier = Modifier
-                                .clip(RoundedCornerShape(50))
-                                .hazeChild(
+                                .hazeGlass(
                                     state = internalHazeState,
                                     shape = RoundedCornerShape(50),
-                                    style = dev.chrisbanes.haze.HazeStyle(tint = Color(0xFF1E1E1E).copy(alpha = 0.85f), blurRadius = 15.dp)
+                                    containerColor = Color(0xFF1E1E1E).copy(alpha = 0.85f),
+                                    blurRadius = 15.dp,
+                                    borderColor = Color.White.copy(alpha = 0.15f)
                                 )
-                                .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(50))
                         ) {
                             Row(
                                 modifier = Modifier.padding(horizontal = 16.dp, vertical = 10.dp),
