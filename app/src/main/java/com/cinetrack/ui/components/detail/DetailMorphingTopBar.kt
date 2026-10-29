@@ -262,6 +262,7 @@ fun DetailMorphingTopBar(
                                         scaleX = homeButtonScale
                                         scaleY = homeButtonScale
                                     }
+                                    .bounceClick(scaleDown = 0.90f) { onHomeClick() }
                                     .then(
                                         if (currentEffectiveProgress <= 0.01f) {
                                             Modifier.hazeGlass(
@@ -271,8 +272,7 @@ fun DetailMorphingTopBar(
                                                 useOffscreenStrategy = true
                                             )
                                         } else Modifier
-                                    )
-                                    .bounceClick { onHomeClick() },
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 androidx.compose.material3.Icon(

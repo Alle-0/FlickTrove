@@ -217,34 +217,26 @@ fun SimpleMorphingTopBar(
                                         alpha = homeButtonAlpha
                                         scaleX = homeButtonScale
                                         scaleY = homeButtonScale
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (currentEffectiveProgress <= 0.01f) {
-                                    Box(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .hazeGlass(
+                                    }
+                                    .bounceClick(scaleDown = 0.90f) { onHomeClick() }
+                                    .then(
+                                        if (currentEffectiveProgress <= 0.01f) {
+                                            Modifier.hazeGlass(
                                                 state = localHazeState,
                                                 shape = CircleShape,
                                                 blurRadius = HazeStyles.SmallGlassBlurRadius,
                                                 useOffscreenStrategy = true
                                             )
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .bounceClick { onHomeClick() },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(R.drawable.ic_home),
-                                        contentDescription = stringResource(R.string.detail_content_desc_home),
-                                        tint = Color.White,
-                                        modifier = Modifier.size(18.dp)
-                                    )
-                                }
+                                        } else Modifier
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(R.drawable.ic_home),
+                                    contentDescription = stringResource(R.string.detail_content_desc_home),
+                                    tint = Color.White,
+                                    modifier = Modifier.size(18.dp)
+                                )
                             }
                         }
                     }

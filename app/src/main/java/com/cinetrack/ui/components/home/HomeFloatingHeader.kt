@@ -93,44 +93,34 @@ fun HomeFloatingHeader(
                     modifier = Modifier
                         .size(36.dp)
                         .onGloballyPositioned { wandCoords[0] = it }
+                        .bounceClick(scaleDown = 0.90f) {
+                            val rect = wandCoords[0]?.let {
+                                val pos = it.positionInWindow()
+                                Rect(
+                                    pos.x,
+                                    pos.y,
+                                    pos.x + it.size.width,
+                                    pos.y + it.size.height
+                                )
+                            }
+                            onSurpriseMeClick?.invoke(rect)
+                        }
+                        .hazeGlass(
+                            state = activeHazeState,
+                            shape = CircleShape,
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = false,
+                            borderWidth = 1.dp,
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                        ),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeGlass(
-                                state = activeHazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = false,
-                                borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                            )
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_bacchetta),
+                        contentDescription = "Surprise Me",
+                        tint = Color.White,
+                        modifier = Modifier.size(18.dp)
                     )
-
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick(scaleDown = 0.92f) {
-                                val rect = wandCoords[0]?.let {
-                                    val pos = it.positionInWindow()
-                                    Rect(
-                                        pos.x,
-                                        pos.y,
-                                        pos.x + it.size.width,
-                                        pos.y + it.size.height
-                                    )
-                                }
-                                onSurpriseMeClick?.invoke(rect)
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_bacchetta),
-                            contentDescription = "Surprise Me",
-                            tint = Color.White,
-                            modifier = Modifier.size(18.dp)
-                        )
-                    }
                 }
             }
         }

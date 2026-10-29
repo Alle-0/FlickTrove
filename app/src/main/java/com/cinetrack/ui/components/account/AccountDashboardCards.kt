@@ -548,10 +548,10 @@ fun YourFlowCard(
                 // Action Pill
                 Row(
                     modifier = Modifier
+                        .bounceClick(scaleDown = 0.90f) { onFlowStatsClick() }
                         .clip(RoundedCornerShape(50))
                         .background(Color.White.copy(alpha = 0.1f))
-                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(50))
-                        .bounceClick { onFlowStatsClick() },
+                        .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(50)),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Stats Button ONLY

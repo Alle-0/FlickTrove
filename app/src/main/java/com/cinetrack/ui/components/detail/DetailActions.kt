@@ -17,6 +17,7 @@ import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
+import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.ui.draw.rotate
 import dev.chrisbanes.haze.HazeStyle
 import kotlinx.coroutines.launch
@@ -199,20 +200,6 @@ fun DetailActions(
         label = "ProgressBorderAnim"
     )
 
-    // Interaction state for main pill content scale
-    val pillInteractionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-    val isPillPressed by pillInteractionSource.collectIsPressedAsState()
-    LaunchedEffect(isPillPressed) {
-        if (isPillPressed) haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-    }
-
-    val pillContentScale by animateFloatAsState(
-        targetValue = if (isPillPressed) 0.96f else 1f,
-        animationSpec = if (isPillPressed) spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
-                        else spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
-        label = "PillContentScale"
-    )
-
     // For movies, when they become WATCHED they disappear, so we don't want to show the "VISTO" label/icon transition
     val displayWatchState = optimisticWatchState
 
@@ -335,47 +322,46 @@ fun DetailActions(
                         alpha = mainPillAlpha
                         transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
                     }
+                    .bounceClick(
+                        scaleDown = 0.95f,
+                        onClick = {
+                            if (!movie.isReleased) {
+                                // Simple toggle for unreleased movies and tv series
+                                val next = if (optimisticWatchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
+                                if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
+                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
+                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
+                                }
+                                optimisticWatchState = next
+                                currentOnStateChange(next)
+                            } else if (movie.mediaType == "tv") {
+                                if (optimisticWatchState == WatchState.NONE) {
+                                    optimisticWatchState = WatchState.BOOKMARKED
+                                    currentOnStateChange(WatchState.BOOKMARKED)
+                                } else {
+                                    currentOnEpisodesClick?.invoke()
+                                }
+                            } else {
+                                if (optimisticWatchState == WatchState.WATCHED) {
+                                    currentOnManageRewatches?.invoke()
+                                } else {
+                                    val next = when (optimisticWatchState) {
+                                        WatchState.NONE -> WatchState.BOOKMARKED
+                                        WatchState.BOOKMARKED -> WatchState.WATCHED
+                                        WatchState.WATCHED -> WatchState.NONE
+                                        WatchState.DROPPED -> WatchState.BOOKMARKED
+                                    }
+                                    optimisticWatchState = next
+                                    currentOnStateChange(next)
+                                }
+                            }
+                        }
+                    )
                     .hazeGlass(
                         state = hazeState,
                         shape = RoundedCornerShape(28.dp),
                         borderColor = if (optimisticWatchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                     )
-                .clickable(
-                    interactionSource = pillInteractionSource,
-                    indication = null,
-                    onClick = {
-                        if (!movie.isReleased) {
-                            // Simple toggle for unreleased movies and tv series
-                            val next = if (optimisticWatchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
-                            if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
-                                ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                                permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                            }
-                            optimisticWatchState = next
-                            currentOnStateChange(next)
-                        } else if (movie.mediaType == "tv") {
-                            if (optimisticWatchState == WatchState.NONE) {
-                                optimisticWatchState = WatchState.BOOKMARKED
-                                currentOnStateChange(WatchState.BOOKMARKED)
-                            } else {
-                                currentOnEpisodesClick?.invoke()
-                            }
-                        } else {
-                            if (optimisticWatchState == WatchState.WATCHED) {
-                                currentOnManageRewatches?.invoke()
-                            } else {
-                                val next = when (optimisticWatchState) {
-                                    WatchState.NONE -> WatchState.BOOKMARKED
-                                    WatchState.BOOKMARKED -> WatchState.WATCHED
-                                    WatchState.WATCHED -> WatchState.NONE
-                                    WatchState.DROPPED -> WatchState.BOOKMARKED
-                                }
-                                optimisticWatchState = next
-                                currentOnStateChange(next)
-                            }
-                        }
-                    }
-                )
                 .drawBehind {
                     val w = size.width
                     val h = size.height
@@ -415,12 +401,7 @@ fun DetailActions(
         ) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .padding(horizontal = 16.dp)
-                    .graphicsLayer {
-                        scaleX = pillContentScale
-                        scaleY = pillContentScale
-                    }
+                modifier = Modifier.padding(horizontal = 16.dp)
             ) {
                 val bellRotation = remember { Animatable(0f) }
                 
@@ -610,6 +591,10 @@ fun DetailActions(
                     Box(
                         modifier = Modifier
                             .size(56.dp)
+                            .graphicsLayer {
+                                scaleX = sideButtonScale
+                                scaleY = sideButtonScale
+                            }
                             .pointerInput(Unit) {
                                 var dragAccumulator = 0f
                                 var hasActionFired = false
