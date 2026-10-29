@@ -322,15 +322,12 @@ object AccountTab : Tab {
             Box(
                 modifier = Modifier.fillMaxSize()
             ) {
-                androidx.compose.runtime.CompositionLocalProvider(
-                    androidx.compose.foundation.LocalOverscrollFactory provides null
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .verticalScroll(rememberScrollState())
+                        .padding(bottom = paddingValues.calculateBottomPadding() + 80.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .verticalScroll(rememberScrollState())
-                            .padding(bottom = paddingValues.calculateBottomPadding() + 80.dp)
-                    ) {
                     // Top Spacer for Status Bar & padding + GlassyTopBar clearance
                     Spacer(
                         modifier = Modifier
@@ -541,8 +538,6 @@ object AccountTab : Tab {
                     
                     Spacer(modifier = Modifier.height(32.dp))
 
-
-                }
                 }
             }
             // Removed local AvatarSelectionModal usage
