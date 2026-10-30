@@ -778,7 +778,15 @@ private fun TroveHoldToUnsealOverlay(
             if (hasTeaserData) {
                 Box(
                     modifier = Modifier
-                        .background(Color.Black.copy(alpha = 0.52f), CircleShape)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    Color(0xFF16161A).copy(alpha = 0.88f),
+                                    Color(0xFF0A0A0C).copy(alpha = 0.84f)
+                                )
+                            ),
+                            CircleShape
+                        )
                         .border(
                             0.5.dp,
                             if (isHolding) primaryColor.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f),
@@ -914,6 +922,11 @@ private fun TroveGravitationalBubbles(
         val borderFadeDistPx = 6.dp.toPx() // Distanza di transizione sfocatura / scomparsa bordo
         val minDist = 14.dp.toPx() // Scompare sotto il disco scuro
 
+        // Dimensioni e posizione della pillola teaser dei metadati
+        val pillCenterY = center.y + 58.dp.toPx()
+        val pillHalfWidth = 92.dp.toPx()
+        val pillCornerRadius = 14.dp.toPx()
+
         // All'aumentare della carica col tocco, il flusso accelera naturalmente
         val speedBoost = 1f + chargeProgress * 2.0f
         val masterAlpha = (chargeProgress / 0.08f).coerceIn(0f, 1f)
@@ -937,19 +950,28 @@ private fun TroveGravitationalBubbles(
             val stretchFactor: Float
             val compressFactor: Float
             if (dist > deformThreshold) {
-                // In viaggio nello spazio aperto: la bolla è PERFETTAMENTE TONDA!
                 stretchFactor = 1.0f
                 compressFactor = 1.0f
             } else {
-                // Sotto i 52dp (vicino all'anello): si deforma e si allunga come una goccia verso il centro
                 val t = ((deformThreshold - dist) / (deformThreshold - minDist)).coerceIn(0f, 1f)
                 stretchFactor = 1.0f + t * (1.8f + chargeProgress * 0.7f)
                 compressFactor = (1.0f - t * 0.40f).coerceAtLeast(0.55f)
             }
 
-            // Calcolo sfocatura e scomparsa del bordo netto quando la bolla entra sotto il disco
-            val strokeAlpha = ((dist - diskRadiusPx) / borderFadeDistPx).coerceIn(0f, 1f)
-            val underDiskT = ((diskRadiusPx + borderFadeDistPx - dist) / (diskRadiusPx + borderFadeDistPx - minDist)).coerceIn(0f, 1f)
+            // Calcolo sfocatura:
+            // 1. Sotto il disco centrale
+            val diskDist = kotlin.math.hypot(bx - center.x, by - center.y)
+            val diskT = ((diskRadiusPx + borderFadeDistPx - diskDist) / borderFadeDistPx).coerceIn(0f, 1f)
+
+            // 2. Sotto la pillola teaser dei metadati (capsula)
+            val pillDx = (kotlin.math.abs(bx - center.x) - (pillHalfWidth - pillCornerRadius)).coerceAtLeast(0f)
+            val pillDy = kotlin.math.abs(by - pillCenterY)
+            val pillDist = kotlin.math.hypot(pillDx, pillDy)
+            val pillT = ((pillCornerRadius + borderFadeDistPx - pillDist) / borderFadeDistPx).coerceIn(0f, 1f)
+
+            // Fattore unificato di sfocatura (attivo sia sotto il disco che sotto la pillola teaser)
+            val blurT = maxOf(diskT, pillT)
+            val strokeAlpha = (1f - blurT).coerceIn(0f, 1f)
 
             val r = bubble.baseRadiusDp.dp.toPx()
             val fadeIn = (progress / 0.12f).coerceIn(0f, 1f)
@@ -958,94 +980,63 @@ private fun TroveGravitationalBubbles(
 
             if (alpha <= 0.01f) continue
 
-            if (stretchFactor == 1.0f) {
-                // ── 1. Bolla sferica trasparente e nitida (in volo verso il centro) ──
-                // Bagliore soffice
-                drawCircle(
-                    color  = bubble.color.copy(alpha = alpha * 0.22f),
-                    radius = r * 1.5f,
-                    center = Offset(bx, by)
-                )
-                // Interno traslucido tipo sapone / energia
-                drawCircle(
-                    brush  = Brush.radialGradient(
-                        colors = listOf(
-                            bubble.color.copy(alpha = alpha * 0.15f),
-                            bubble.color.copy(alpha = alpha * 0.40f)
-                        ),
-                        center = Offset(bx, by),
-                        radius = r
-                    ),
-                    radius = r,
-                    center = Offset(bx, by)
-                )
-                // Bordo nitido e brillante della bolla
-                drawCircle(
-                    color  = bubble.color.copy(alpha = alpha * 0.90f),
-                    radius = r,
-                    center = Offset(bx, by),
-                    style  = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3.dp.toPx())
-                )
-            } else {
-                // ── 2. Bolla deformata a goccia (risucchiata e sfocata sotto il medaglione) ──
-                val rx = r * stretchFactor
-                val ry = r * compressFactor
-                val angleDeg = Math.toDegrees(angle.toDouble()).toFloat()
+            val rx = r * stretchFactor
+            val ry = r * compressFactor
+            val angleDeg = if (stretchFactor != 1.0f) Math.toDegrees(angle.toDouble()).toFloat() else 0f
 
-                rotate(degrees = angleDeg, pivot = Offset(bx, by)) {
-                    // Quando la bolla entra sotto il disco, disegna una sfocatura nativa diffusa (BlurMaskFilter)
-                    if (underDiskT > 0.05f) {
-                        drawIntoCanvas { canvas ->
-                            val blurPx = (6.dp.toPx() + underDiskT * 12.dp.toPx())
-                            val paint = android.graphics.Paint().apply {
-                                isAntiAlias = true
-                                color = bubble.color.toArgb()
-                                this.alpha = (alpha * (0.35f + underDiskT * 0.35f) * 255).toInt().coerceIn(0, 255)
-                                maskFilter = BlurMaskFilter(blurPx, BlurMaskFilter.Blur.NORMAL)
-                            }
-                            canvas.nativeCanvas.drawOval(
-                                bx - rx * (1.1f + underDiskT * 0.4f),
-                                by - ry * (1.1f + underDiskT * 0.4f),
-                                bx + rx * (1.1f + underDiskT * 0.4f),
-                                by + ry * (1.1f + underDiskT * 0.4f),
-                                paint
-                            )
+            rotate(degrees = angleDeg, pivot = Offset(bx, by)) {
+                // Se la bolla passa sotto il disco o sotto la pillola teaser, applica sfocatura gaussiana diffusa
+                if (blurT > 0.04f) {
+                    drawIntoCanvas { canvas ->
+                        val blurPx = (6.dp.toPx() + blurT * 12.dp.toPx())
+                        val paint = android.graphics.Paint().apply {
+                            isAntiAlias = true
+                            color = bubble.color.toArgb()
+                            this.alpha = (alpha * (0.35f + blurT * 0.35f) * 255).toInt().coerceIn(0, 255)
+                            maskFilter = BlurMaskFilter(blurPx, BlurMaskFilter.Blur.NORMAL)
                         }
-                    }
-
-                    // Bagliore soffice (si espande e ammorbidisce sotto il disco)
-                    val glowExpand = 1.35f + underDiskT * 0.8f
-                    drawOval(
-                        color   = bubble.color.copy(alpha = alpha * (0.20f + underDiskT * 0.15f)),
-                        topLeft = Offset(bx - rx * glowExpand, by - ry * glowExpand),
-                        size    = Size(rx * glowExpand * 2f, ry * glowExpand * 2f)
-                    )
-
-                    // Interno traslucido sfumato
-                    val bodyExpand = 1f + underDiskT * 0.4f
-                    drawOval(
-                        brush   = Brush.radialGradient(
-                            colors = listOf(
-                                bubble.color.copy(alpha = alpha * (0.18f + underDiskT * 0.15f)),
-                                bubble.color.copy(alpha = alpha * 0.45f * (1f - underDiskT * 0.6f)),
-                                Color.Transparent
-                            ),
-                            center = Offset(bx, by),
-                            radius = rx * bodyExpand
-                        ),
-                        topLeft = Offset(bx - rx * bodyExpand, by - ry * bodyExpand),
-                        size    = Size(rx * bodyExpand * 2f, ry * bodyExpand * 2f)
-                    )
-
-                    // Bordo deformato (sfuma e scompare COMPLETAMENTE quando la bolla entra sotto il disco!)
-                    if (strokeAlpha > 0.01f) {
-                        drawOval(
-                            color   = bubble.color.copy(alpha = alpha * 0.90f * strokeAlpha),
-                            topLeft = Offset(bx - rx, by - ry),
-                            size    = Size(rx * 2f, ry * 2f),
-                            style   = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3.dp.toPx() * strokeAlpha)
+                        canvas.nativeCanvas.drawOval(
+                            bx - rx * (1.1f + blurT * 0.4f),
+                            by - ry * (1.1f + blurT * 0.4f),
+                            bx + rx * (1.1f + blurT * 0.4f),
+                            by + ry * (1.1f + blurT * 0.4f),
+                            paint
                         )
                     }
+                }
+
+                // Bagliore soffice
+                val glowExpand = 1.35f + blurT * 0.8f
+                drawOval(
+                    color   = bubble.color.copy(alpha = alpha * (0.20f + blurT * 0.15f)),
+                    topLeft = Offset(bx - rx * glowExpand, by - ry * glowExpand),
+                    size    = Size(rx * glowExpand * 2f, ry * glowExpand * 2f)
+                )
+
+                // Interno traslucido sfumato
+                val bodyExpand = 1f + blurT * 0.4f
+                drawOval(
+                    brush   = Brush.radialGradient(
+                        colors = listOf(
+                            bubble.color.copy(alpha = alpha * (0.18f + blurT * 0.15f)),
+                            bubble.color.copy(alpha = alpha * 0.45f * (1f - blurT * 0.6f)),
+                            Color.Transparent
+                        ),
+                        center = Offset(bx, by),
+                        radius = rx * bodyExpand
+                    ),
+                    topLeft = Offset(bx - rx * bodyExpand, by - ry * bodyExpand),
+                    size    = Size(rx * bodyExpand * 2f, ry * bodyExpand * 2f)
+                )
+
+                // Bordo netto della bolla: sfuma fino a sparire COMPLETAMENTE sotto il disco o la pillola
+                if (strokeAlpha > 0.01f) {
+                    drawOval(
+                        color   = bubble.color.copy(alpha = alpha * 0.90f * strokeAlpha),
+                        topLeft = Offset(bx - rx, by - ry),
+                        size    = Size(rx * 2f, ry * 2f),
+                        style   = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3.dp.toPx() * strokeAlpha)
+                    )
                 }
             }
         }
