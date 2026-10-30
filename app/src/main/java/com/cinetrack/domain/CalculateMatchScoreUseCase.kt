@@ -41,11 +41,17 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         99L,     // Documentary
         10402L,  // Music / Musical
         37L,     // Western
-        10770L   // TV Movie
+        10770L,  // TV Movie
+        10762L,  // Kids (TV)
+        10764L,  // Reality (TV)
+        10766L,  // Soap (TV)
+        10767L   // Talk (TV)
     )
 
     fun buildUserProfile(localMovies: List<Movie>): UserGenreProfile? {
-        val watchedMovies = localMovies.filter { it.watched || it.favorite || (it.personalRating ?: 0.0) > 0.0 }
+        val watchedMovies = localMovies.filter {
+            it.watched || it.favorite || it.dropped || (it.personalRating ?: 0.0) > 0.0
+        }
         if (watchedMovies.size < 3) return null
 
         val genreScores = mutableMapOf<Long, Float>()
@@ -93,11 +99,13 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
             movieGenreIds.forEach { id ->
                 if (isDisliked || isDropped) {
-                    negativeScores[id] = (negativeScores[id] ?: 0f) + (if (isDropped) 0.9f else (6.0f - (rating?.toFloat() ?: 5f)) * 0.4f)
+                    val rawPenalty = if (isDropped) 0.9f else (6.0f - (rating?.toFloat() ?: 5f)) * 0.4f
+                    negativeScores[id] = (negativeScores[id] ?: 0f) + (rawPenalty * recencyMultiplier)
+                    if (!isDropped) genreCounts[id] = (genreCounts[id] ?: 0) + 1
                 } else {
                     genreScores[id] = (genreScores[id] ?: 0f) + ratingWeight
+                    genreCounts[id] = (genreCounts[id] ?: 0) + 1
                 }
-                genreCounts[id] = (genreCounts[id] ?: 0) + 1
             }
 
             // Micro-Clusters: Track 2-genre combinations for taste synergies
@@ -147,12 +155,13 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         }
 
         // Guilty Pleasure Protection (Engagement > Low Rating)
-        // If a user watches a lot of a genre (e.g. > 12%), it's a guilty pleasure. We bypass repulsion.
+        // If a user watches a lot of a genre (e.g. >= 12% and >= 4 titles), it's a guilty pleasure. We bypass repulsion.
         val adjustedNegativeScores = negativeScores.mapValues { (id, score) ->
             val freq = genreFrequencies[id] ?: 0f
+            val count = genreCounts[id] ?: 0
             when {
-                freq >= 0.12f -> 0f       // Pure guilty pleasure, completely remove repulsion
-                freq >= 0.08f -> score * 0.4f // Partial mitigation
+                count >= 4 && freq >= 0.12f -> 0f       // Pure guilty pleasure, completely remove repulsion
+                count >= 3 && freq >= 0.08f -> score * 0.4f // Partial mitigation
                 else -> score
             }
         }.filterValues { it > 0f }
@@ -315,7 +324,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         val filteredMovies = localMovies.filter { 
             if (isTv) it.mediaType == "tv" else it.mediaType != "tv" 
         }
-        val profile = buildUserProfile(filteredMovies) ?: return null
+        val profile = buildUserProfile(filteredMovies) ?: buildUserProfile(localMovies) ?: return null
         return calculateScore(currentMovie, profile)
     }
 
@@ -328,13 +337,16 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
     private fun parseEpoch(dateStr: String): Long? {
         return try {
-            java.time.Instant.parse(dateStr).toEpochMilli()
-        } catch (_: Exception) {
-            try {
-                java.time.LocalDate.parse(dateStr.take(10)).atStartOfDay(java.time.ZoneOffset.UTC).toInstant().toEpochMilli()
-            } catch (_: Exception) {
-                null
+            if (dateStr.length > 10 && dateStr.contains('T')) {
+                java.time.Instant.parse(dateStr).toEpochMilli()
+            } else {
+                java.time.LocalDate.parse(dateStr.take(10))
+                    .atStartOfDay(java.time.ZoneOffset.UTC)
+                    .toInstant()
+                    .toEpochMilli()
             }
+        } catch (_: Exception) {
+            null
         }
     }
 }
