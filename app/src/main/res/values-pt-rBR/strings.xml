@@ -1314,8 +1314,8 @@
     <string name="home_trove_pick_reset">Selar novamente</string>
     <string name="home_trove_pick_badge">ESCOLHIDO PARA VOCÊ</string>
     <string name="home_trove_pick_sealed_badge">Escolha do Dia</string>
-    <string name="home_trove_pick_sealed_cta">Toque para revelar o Trove de hoje</string>
-    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
+    <string name="home_trove_pick_sealed_cta">Pressione e segure para revelar o Trove de hoje</string>
+    <string name="home_trove_pick_affinity">%1$d%% %2$s</string>
     <string name="surprise_subtitle">Da sua watchlist</string>
     <string name="settings_default_start_feed">HOME</string>
     <string name="error_feed_title">Ops! Não foi possível carregar o feed.</string>

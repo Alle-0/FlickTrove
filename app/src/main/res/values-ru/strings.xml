@@ -1315,8 +1315,8 @@
     <string name="home_trove_pick_reset">Скрыть снова</string>
     <string name="home_trove_pick_badge">ВЫБРАНО ДЛЯ ВАС</string>
     <string name="home_trove_pick_sealed_badge">Выбор Дня</string>
-    <string name="home_trove_pick_sealed_cta">Нажмите, чтобы открыть Trove дня</string>
-    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
+    <string name="home_trove_pick_sealed_cta">Удерживайте, чтобы открыть Trove дня</string>
+    <string name="home_trove_pick_affinity">%1$d%% %2$s</string>
     <string name="surprise_subtitle">Из вашего списка</string>
     <string name="settings_default_start_feed">ГЛАВНАЯ</string>
     <string name="error_feed_title">Ой! Не удалось загрузить ленту.</string>

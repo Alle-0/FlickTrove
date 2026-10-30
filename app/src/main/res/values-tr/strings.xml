@@ -8,8 +8,8 @@
     <string name="home_trove_pick_reset">Yeniden mühürle</string>
     <string name="home_trove_pick_badge">SİZİN İÇİN SEÇİLDİ</string>
     <string name="home_trove_pick_sealed_badge">Günün Seçimi</string>
-    <string name="home_trove_pick_sealed_cta">Bugünün Trove\'unu açmak için dokunun</string>
-    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
+    <string name="home_trove_pick_sealed_cta">Bugünün Trove\'unu açmak için basılı tutun</string>
+    <string name="home_trove_pick_affinity">%1$d%% %2$s</string>
     <string name="shortcut_search_short">Ara</string>
     <string name="shortcut_search_long">Başlık Ara</string>
     <string name="shortcut_visti_short">Listeniz</string>

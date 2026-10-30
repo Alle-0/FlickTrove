@@ -154,8 +154,8 @@ fun TrovePickCard(
         label = "TroveReveal"
     )
 
-    // Blur radius della nebbia: 36dp → 0dp
-    val blurRadius = ((1f - revealProgress) * 36f).dp.coerceAtLeast(0.1.dp)
+    // Blur radius della nebbia teaser: 14dp → 0dp (sfoca testo e dettagli preservando le cromie del poster)
+    val blurRadius = ((1f - revealProgress) * 14f).dp.coerceAtLeast(0.1.dp)
 
     // ── Entry animation ────────────────────────────────────────────────────────
     val hasAnimated = rememberSaveable { mutableStateOf(false) }
@@ -244,15 +244,23 @@ fun TrovePickCard(
                     .fillMaxWidth()
                     .height(255.dp)
                     .padding(horizontal = 16.dp)
-                    .bounceClick(scaleDown = 0.96f) {
+                    .bounceClick(
+                        scaleDown = 0.96f,
+                        onLongClick = {
+                            if (!isRevealedToday && !isUnsealing) {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                isUnsealing = true
+                            }
+                        }
+                    ) {
                         if (isRevealedToday) {
                             val movieWithLogo = if (!localLogoPath.isNullOrEmpty() && movie.logoPath == null) {
                                 movie.copy().apply { this.logoPath = localLogoPath }
                             } else movie
                             onMovieClick(movieWithLogo)
-                        } else if (!isUnsealing) {
-                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                            isUnsealing = true
+                        } else {
+                            // Feedback tattile al tap rapido per ricordare la pressione prolungata
+                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         }
                     }
                     .clip(RoundedCornerShape(32.dp))
@@ -267,11 +275,11 @@ fun TrovePickCard(
                     val sealedStyle = remember(blurRadius, revealProgress) {
                         HazeBlurStyle {
                             blurRadius(blurRadius)
-                            noiseFactor((0.12f * (1f - revealProgress)).coerceAtLeast(0f))
+                            noiseFactor((0.02f * (1f - revealProgress)).coerceAtLeast(0f))
                             colorEffects(
                                 listOf(
                                     HazeColorEffect.tint(
-                                        TroveSeal.copy(alpha = (0.55f * (1f - revealProgress)).coerceAtLeast(0f))
+                                        TroveSeal.copy(alpha = (0.22f * (1f - revealProgress)).coerceAtLeast(0f))
                                     )
                                 )
                             )
@@ -561,17 +569,17 @@ private fun TroveSealedOverlay(
         modifier         = Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha },
         contentAlignment = Alignment.Center
     ) {
-        // Vignettatura radiale: centro semitrasparente per far trasparire la sfocatura
-        // cromatica del poster sottostante, bordi scuri per massimo contrasto
+        // Vignettatura radiale: centro trasparente per far risplendere le tonalità del poster,
+        // con bordi satinati scuri per massimo contrasto
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .background(
                     Brush.radialGradient(
                         colorStops = arrayOf(
-                            0.00f to Color.Black.copy(alpha = 0.28f),
-                            0.55f to Color.Black.copy(alpha = 0.65f),
-                            1.00f to Color.Black.copy(alpha = 0.88f)
+                            0.00f to Color.Transparent,
+                            0.50f to Color.Black.copy(alpha = 0.30f),
+                            1.00f to Color.Black.copy(alpha = 0.72f)
                         ),
                         radius = 700f
                     )

@@ -8,8 +8,8 @@
     <string name="home_trove_pick_reset">重新封印精选</string>
     <string name="home_trove_pick_badge">为您精选</string>
     <string name="home_trove_pick_sealed_badge">今日精选</string>
-    <string name="home_trove_pick_sealed_cta">点击揭晓今日 Trove</string>
-    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
+    <string name="home_trove_pick_sealed_cta">长按揭晓今日 Trove</string>
+    <string name="home_trove_pick_affinity">%1$d%% %2$s</string>
     <string name="shortcut_search_short">搜索</string>
     <string name="shortcut_search_long">搜索片名/剧名</string>
     <string name="shortcut_visti_short">我的片单</string>
