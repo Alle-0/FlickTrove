@@ -18,12 +18,15 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.theme.HazeStyles
+import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazePerformanceMode
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.HazeColorEffect
 import dev.chrisbanes.haze.blur.hazeBlur
+import dev.chrisbanes.haze.glass.GlassStyle
+import dev.chrisbanes.haze.glass.hazeGlass as hazeGlassEffect
 
 /**
  * Wraps a Shape to prevent Compose's BorderModifierNode from crashing with
@@ -54,7 +57,9 @@ fun safeShape(shape: Shape): Shape = object : Shape {
  * @param shape The shape of the glass element.
  * @param style The HazeBlurStyle to apply (defaults to HazeStyles.PremiumDark).
  * @param useOffscreenStrategy Whether to use CompositingStrategy.Offscreen to fix text rendering.
+ * @param useRefraction Whether to use Haze 2.0's official glass refraction and specular optics.
  */
+@OptIn(ExperimentalHazeApi::class)
 fun Modifier.hazeGlass(
     state: HazeState?,
     shape: Shape,
@@ -64,10 +69,13 @@ fun Modifier.hazeGlass(
     useOffscreenStrategy: Boolean = false,
     borderColor: Color = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
     borderWidth: Dp = 1.dp,
-    alpha: Float = 1f
+    alpha: Float = 1f,
+    useRefraction: Boolean = false
 ): Modifier = composed {
     val effectiveShape = remember(shape) { safeShape(shape) }
-    val finalStyle = remember(blurRadius, containerColor, style, alpha) {
+    val shouldUseRefraction = useRefraction || (blurRadius <= HazeStyles.SmallGlassBlurRadius && style == null)
+
+    val finalBlurStyle = remember(blurRadius, containerColor, style, alpha) {
         val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
         val baseStyle = style ?: HazeStyles.PremiumDark
         baseStyle.then {
@@ -87,13 +95,31 @@ fun Modifier.hazeGlass(
         .clip(effectiveShape)
         .then(
             if (state != null && advancedEffectsEnabled) {
-                // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeBlur.
-                if (useOffscreenStrategy) {
+                if (shouldUseRefraction) {
+                    val glassStyle = remember(alpha, containerColor) {
+                        GlassStyle.clear.then {
+                            if (containerColor != null && containerColor != Color.Unspecified) {
+                                tint(containerColor.copy(alpha = (if (containerColor.alpha != 1f) containerColor.alpha else 0.20f) * alpha))
+                            } else {
+                                tint(HazeStyles.GlassColor.copy(alpha = 0.25f * alpha))
+                            }
+                            specularIntensity(0.5f)
+                            fresnelExponent(2.8f)
+                            chromaticAberrationStrength(0.35f)
+                        }
+                    }
+                    Modifier.hazeGlassEffect(
+                        input = HazeInput.Sources(state),
+                        style = glassStyle,
+                        performanceMode = HazePerformanceMode.Default
+                    )
+                } else if (useOffscreenStrategy) {
+                    // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeBlur.
                     Modifier
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
                         .hazeBlur(
                             input = HazeInput.Sources(state),
-                            style = finalStyle,
+                            style = finalBlurStyle,
                             performanceMode = HazePerformanceMode.Default,
                             expandLayerBounds = false
                         )
@@ -103,7 +129,7 @@ fun Modifier.hazeGlass(
                             .graphicsLayer(alpha = alpha)
                             .hazeBlur(
                                 input = HazeInput.Sources(state),
-                                style = finalStyle,
+                                style = finalBlurStyle,
                                 performanceMode = HazePerformanceMode.Default,
                                 expandLayerBounds = false
                             )
@@ -111,7 +137,7 @@ fun Modifier.hazeGlass(
                         Modifier
                             .hazeBlur(
                                 input = HazeInput.Sources(state),
-                                style = finalStyle,
+                                style = finalBlurStyle,
                                 performanceMode = HazePerformanceMode.Default,
                                 expandLayerBounds = false
                             )
@@ -135,7 +161,22 @@ fun Modifier.hazeGlass(
                 }
             }
         )
-        .glassOverlay(effectiveShape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))
+        .then(
+            if (shouldUseRefraction && borderColor == HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)) {
+                Modifier.glassOverlay(
+                    shape = effectiveShape,
+                    borderWidth = borderWidth,
+                    borderBrush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.35f * alpha),
+                            Color.White.copy(alpha = 0.08f * alpha)
+                        )
+                    )
+                )
+            } else {
+                Modifier.glassOverlay(effectiveShape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))
+            }
+        )
         
     modifierChain
 }

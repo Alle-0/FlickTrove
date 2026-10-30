@@ -360,7 +360,8 @@ fun DetailActions(
                     .hazeGlass(
                         state = hazeState,
                         shape = RoundedCornerShape(28.dp),
-                        borderColor = if (optimisticWatchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                        borderColor = if (optimisticWatchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                        useRefraction = true
                     )
                 .drawBehind {
                     val w = size.width
@@ -642,7 +643,8 @@ fun DetailActions(
                                     SideAction.TRASH -> trashColor
                                     SideAction.REWATCH -> displayColor
                                     SideAction.DROP -> Color.White
-                                }.copy(alpha = 0.75f)
+                                }.copy(alpha = 0.75f),
+                                useRefraction = true
                             ),
                         contentAlignment = Alignment.Center
                     ) {

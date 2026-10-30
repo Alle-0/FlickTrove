@@ -291,7 +291,8 @@ fun ZoomableImageViewerDialog(
                             blurRadius = 20.dp,
                             containerColor = Color.Black.copy(alpha = 0.28f),
                             borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.20f)
+                            borderColor = Color.White.copy(alpha = 0.20f),
+                            useRefraction = true
                         ),
                     contentAlignment = Alignment.Center
                 ) {

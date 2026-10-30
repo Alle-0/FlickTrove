@@ -38,7 +38,8 @@ fun GlassyButton(
                 state = hazeState,
                 shape = RoundedCornerShape(16.dp),
                 containerColor = containerColor,
-                alpha = alpha
+                alpha = alpha,
+                useRefraction = true
             )
             .bounceClick { onClick() },
         contentAlignment = Alignment.Center
