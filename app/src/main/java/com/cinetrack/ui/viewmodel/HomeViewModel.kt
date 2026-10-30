@@ -288,7 +288,6 @@ class HomeViewModel @Inject constructor(
     fun resetTroveRevealed() {
         val isTv = _activeTab.value == "tv"
         _troveRevealedToday.value = false
-        rotateTrovePickInMemory()
         viewModelScope.launch(Dispatchers.IO) {
             preferenceRepository.resetTroveRevealed(isTV = isTv)
         }

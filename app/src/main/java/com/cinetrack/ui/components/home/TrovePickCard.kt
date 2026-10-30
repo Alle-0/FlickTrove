@@ -28,6 +28,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -60,6 +61,7 @@ import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
 import coil.request.ImageRequest
 import com.cinetrack.R
+import kotlinx.coroutines.launch
 import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -142,17 +144,23 @@ fun TrovePickCard(
     val backdropUrl = buildTmdbImageUrl(movie.backdropPath ?: movie.posterPath, ImageType.BACKDROP, imageQuality)
     val posterUrl   = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, imageQuality)
 
-    // ── Stato apertura ────────────────────────────────────────────────────────
-    var isUnsealing by rememberSaveable { mutableStateOf(false) }
-
-    // Se isRevealedToday torna false (es. nuovo giorno), resettiamo isUnsealing
-    LaunchedEffect(isRevealedToday) {
-        if (!isRevealedToday) isUnsealing = false
-    }
+    // ── Coroutine scope ────────────────────────────────────────────────────────
+    val scope = rememberCoroutineScope()
 
     // ── Carica progressiva con pressione prolungata (Hold-to-Charge) ────────────
     var isHolding by remember { mutableStateOf(false) }
     val chargeProgress = remember { Animatable(0f) }
+
+    // ── Stato apertura ────────────────────────────────────────────────────────
+    var isUnsealing by rememberSaveable(movie.id) { mutableStateOf(false) }
+
+    // Se isRevealedToday torna false (es. risigilla o nuovo giorno), resettiamo isUnsealing e la carica
+    LaunchedEffect(isRevealedToday) {
+        if (!isRevealedToday) {
+            isUnsealing = false
+            chargeProgress.snapTo(0f)
+        }
+    }
 
     LaunchedEffect(isHolding, isUnsealing) {
         if (isUnsealing) return@LaunchedEffect
@@ -180,6 +188,7 @@ fun TrovePickCard(
         animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing),
         finishedListener = { value ->
             if (value >= 1f && isUnsealing && !isRevealedToday) {
+                isUnsealing = false
                 onReveal(movie.id)
             }
         },
@@ -250,7 +259,11 @@ fun TrovePickCard(
             if (com.cinetrack.BuildConfig.DEBUG && isRevealedToday && onResetReveal != null) {
                 Spacer(Modifier.width(10.dp))
                 androidx.compose.material3.IconButton(
-                    onClick  = onResetReveal,
+                    onClick  = {
+                        isUnsealing = false
+                        scope.launch { chargeProgress.snapTo(0f) }
+                        onResetReveal()
+                    },
                     modifier = Modifier.size(28.dp)
                 ) {
                     Icon(
@@ -1020,7 +1033,7 @@ private fun TroveGravitationalBubbles(
 @Composable
 private fun TroveUnsealBurstCanvas(progress: Float) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val center = Offset(size.width / 2f, size.height / 2f)
+        val center = Offset(size.width / 2f, size.height / 2f - 35.dp.toPx())
         val maxDist = size.maxDimension * 0.65f
 
         // 1. Flash centrale a dissolvenza rapida
