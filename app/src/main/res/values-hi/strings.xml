@@ -1311,6 +1311,9 @@
     <string name="home_section_trove_pick">ट्रोव की पसंद</string>
     <string name="home_trove_pick_reset">फिर से सील करें</string>
     <string name="home_trove_pick_badge">आपके लिए चुना गया</string>
+    <string name="home_trove_pick_sealed_badge">आज का खास चुनाव</string>
+    <string name="home_trove_pick_sealed_cta">आज का Trove देखने के लिए टैप करें</string>
+    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
     <string name="surprise_subtitle">आपकी वॉचलिस्ट से</string>
     <string name="settings_default_start_feed">होम</string>
     <string name="error_feed_title">उफ़! फ़ीड लोड करने में असमर्थ.</string>

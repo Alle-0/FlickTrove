@@ -1355,6 +1355,9 @@
     <string name="home_section_trove_pick">La Selezione di Trove</string>
     <string name="home_trove_pick_reset">Risigilla Pick</string>
     <string name="home_trove_pick_badge">SCELTO PER TE</string>
+    <string name="home_trove_pick_sealed_badge">Consiglio del Giorno</string>
+    <string name="home_trove_pick_sealed_cta">Tocca per scoprire il Trove di oggi</string>
+    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
     <string name="surprise_subtitle">Dalla tua watchlist</string>
     <string name="error_feed_title">Oops! Impossibile caricare il feed.</string>
     <string name="error_feed_subtitle">Controlla la connessione e riprova.</string>

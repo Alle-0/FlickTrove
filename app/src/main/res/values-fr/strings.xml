@@ -1313,6 +1313,9 @@
     <string name="home_section_trove_pick">La Sélection du Trove</string>
     <string name="home_trove_pick_reset">Resceller le Pick</string>
     <string name="home_trove_pick_badge">SÉLECTIONNÉ POUR VOUS</string>
+    <string name="home_trove_pick_sealed_badge">Sélection du Jour</string>
+    <string name="home_trove_pick_sealed_cta">Appuyez pour révéler le Trove du jour</string>
+    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
     <string name="surprise_subtitle">De votre watchlist</string>
     <string name="settings_default_start_feed">HOME</string>
     <string name="error_feed_title">Oups ! Impossible de charger le flux.</string>

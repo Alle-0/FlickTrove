@@ -547,79 +547,151 @@ private fun TroveSealedOverlay(
         animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing)),
         label         = "TroveSweepAngle"
     )
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue  = 0.96f,
+        targetValue   = 1.04f,
+        animationSpec = infiniteRepeatable(
+            animation  = tween(1800, easing = FastOutSlowInEasing),
+            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
+        ),
+        label         = "TrovePulse"
+    )
 
     Box(
         modifier         = Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha },
         contentAlignment = Alignment.Center
     ) {
-        // Fondo scuro radiale
+        // Vignettatura radiale: centro semitrasparente per far trasparire la sfocatura
+        // cromatica del poster sottostante, bordi scuri per massimo contrasto
         Box(
-            modifier = Modifier.fillMaxSize().background(
-                Brush.radialGradient(
-                    colors = listOf(TroveSeal.copy(alpha = 0.55f), Color.Black.copy(alpha = 0.72f)),
-                    radius = 800f
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.00f to Color.Black.copy(alpha = 0.28f),
+                            0.55f to Color.Black.copy(alpha = 0.65f),
+                            1.00f to Color.Black.copy(alpha = 0.88f)
+                        ),
+                        radius = 700f
+                    )
                 )
-            )
         )
 
-        // Bordo sweep animato ciano/oro
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val strokeWidth = 2.dp.toPx()
-            val radius      = (size.minDimension / 2f) - strokeWidth / 2f
-            val center      = Offset(size.width / 2f, size.height / 2f)
-            drawArc(
-                brush       = Brush.sweepGradient(
-                    colorStops = arrayOf(
-                        0.0f to TroveCyan.copy(alpha = 0f),
-                        0.5f to TroveCyan.copy(alpha = 0.9f),
-                        1.0f to TroveGold.copy(alpha = 0.6f)
-                    ),
-                    center = center
-                ),
-                startAngle  = sweepAngle,
-                sweepAngle  = 220f,
-                useCenter   = false,
-                topLeft     = Offset(center.x - radius, center.y - radius),
-                size        = Size(radius * 2, radius * 2),
-                style       = androidx.compose.ui.graphics.drawscope.Stroke(
-                    width = strokeWidth,
-                    cap   = StrokeCap.Round
-                )
-            )
-        }
-
-        // Gem centrale + CTA + pillole indizio
+        // Struttura a 3 livelli: Badge in cima, Sigillo + CTA al centro, Pillole indizio in basso
         Column(
+            modifier            = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
+            // 1. TOP: Badge di stato dello scrigno
             Box(
                 modifier = Modifier
-                    .size(64.dp)
-                    .background(
-                        Brush.radialGradient(listOf(TroveCyan.copy(alpha = 0.22f), Color.Black.copy(alpha = 0.60f))),
-                        CircleShape
-                    )
-                    .border(1.dp, TroveCyan.copy(alpha = 0.55f), CircleShape),
-                contentAlignment = Alignment.Center
+                    .background(Color.White.copy(alpha = 0.08f), CircleShape)
+                    .border(0.5.dp, TroveCyan.copy(alpha = 0.40f), CircleShape)
+                    .padding(horizontal = 11.dp, vertical = 4.5.dp)
             ) {
-                Icon(
-                    painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
-                    contentDescription = null,
-                    tint               = TroveCyan,
-                    modifier           = Modifier.size(30.dp)
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(5.dp)
+                ) {
+                    Icon(
+                        painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
+                        contentDescription = null,
+                        tint               = TroveCyan,
+                        modifier           = Modifier.size(11.dp)
+                    )
+                    Text(
+                        text          = stringResource(R.string.home_trove_pick_sealed_badge).uppercase(),
+                        color         = TroveCyan,
+                        fontSize      = 10.sp,
+                        fontWeight    = FontWeight.Bold,
+                        letterSpacing = 1.1.sp
+                    )
+                }
+            }
+
+            // 2. CENTER: Sigillo mistico + CTA
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.spacedBy(10.dp)
+            ) {
+                Box(
+                    modifier         = Modifier.size(80.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    // Alone morbido radiale pulsante
+                    Box(
+                        modifier = Modifier
+                            .size(76.dp)
+                            .graphicsLayer {
+                                scaleX = pulseScale * 1.05f
+                                scaleY = pulseScale * 1.05f
+                            }
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(TroveCyan.copy(alpha = 0.24f), Color.Transparent)
+                                ),
+                                CircleShape
+                            )
+                    )
+
+                    // Anello orbitale sottile a 360° continuo rotante (nessuna discontinuità visiva)
+                    Box(
+                        modifier = Modifier
+                            .size(72.dp)
+                            .graphicsLayer { rotationZ = sweepAngle }
+                            .border(
+                                width = 1.dp,
+                                brush = Brush.sweepGradient(
+                                    listOf(
+                                        TroveCyan.copy(alpha = 0.85f),
+                                        TroveGold.copy(alpha = 0.65f),
+                                        TroveCyan.copy(alpha = 0.15f),
+                                        TroveCyan.copy(alpha = 0.85f)
+                                    )
+                                ),
+                                shape = CircleShape
+                            )
+                    )
+
+                    // Gemma centrale con finitura glass scura
+                    Box(
+                        modifier = Modifier
+                            .size(56.dp)
+                            .graphicsLayer {
+                                scaleX = pulseScale
+                                scaleY = pulseScale
+                            }
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(Color(0xFF0D2E28), Color(0xFF05100E))
+                                ),
+                                CircleShape
+                            )
+                            .border(1.dp, TroveCyan.copy(alpha = 0.55f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
+                            contentDescription = null,
+                            tint               = TroveCyan,
+                            modifier           = Modifier.size(26.dp)
+                        )
+                    }
+                }
+
+                Text(
+                    text          = stringResource(R.string.home_trove_pick_sealed_cta),
+                    color         = Color.White,
+                    fontSize      = 13.5.sp,
+                    fontWeight    = FontWeight.SemiBold,
+                    textAlign     = TextAlign.Center,
+                    letterSpacing = 0.1.sp
                 )
             }
 
-            Text(
-                text      = "Tocca per scoprire il Trove di oggi",
-                color     = Color.White.copy(alpha = 0.82f),
-                fontSize  = 12.sp,
-                fontWeight = FontWeight.Medium,
-                textAlign  = TextAlign.Center,
-                maxLines   = 1
-            )
-
+            // 3. BOTTOM: Pillole indizio localizzate
             TroveHintPills(affinityPct = affinityPct, year = year, genres = genres)
         }
     }
@@ -635,18 +707,22 @@ private fun TroveHintPills(
     year: String,
     genres: List<String>
 ) {
+    val matchScoreLabel = stringResource(R.string.match_score)
     Row(
         horizontalArrangement = Arrangement.spacedBy(8.dp),
         verticalAlignment     = Alignment.CenterVertically
     ) {
         if (affinityPct != null && affinityPct > 0) {
-            HintPill("🎯 ${affinityPct}% Affinità", TroveCyan)
+            HintPill(
+                label = stringResource(R.string.home_trove_pick_affinity, affinityPct, matchScoreLabel),
+                tint  = TroveCyan
+            )
         }
         if (year.isNotEmpty()) {
-            HintPill(year, Color.White.copy(alpha = 0.7f))
+            HintPill(year, Color.White.copy(alpha = 0.85f))
         }
         if (genres.isNotEmpty()) {
-            HintPill(genres.joinToString(" • "), Color.White.copy(alpha = 0.6f))
+            HintPill(genres.joinToString(" • "), Color.White.copy(alpha = 0.75f))
         }
     }
 }
@@ -655,14 +731,14 @@ private fun TroveHintPills(
 private fun HintPill(label: String, tint: Color) {
     Box(
         modifier = Modifier
-            .background(Color.White.copy(alpha = 0.09f), CircleShape)
+            .background(Color.White.copy(alpha = 0.08f), CircleShape)
             .border(0.5.dp, tint.copy(alpha = 0.35f), CircleShape)
-            .padding(horizontal = 10.dp, vertical = 4.dp)
+            .padding(horizontal = 11.dp, vertical = 4.5.dp)
     ) {
         Text(
             text       = label,
             color      = tint,
-            fontSize   = 10.sp,
+            fontSize   = 10.5.sp,
             fontWeight = FontWeight.SemiBold,
             maxLines   = 1,
             overflow   = TextOverflow.Ellipsis

@@ -7,6 +7,9 @@
     <string name="home_section_trove_pick">Troveのイチオシ</string>
     <string name="home_trove_pick_reset">再度封印する</string>
     <string name="home_trove_pick_badge">あなたへのおすすめ</string>
+    <string name="home_trove_pick_sealed_badge">今日のおすすめ</string>
+    <string name="home_trove_pick_sealed_cta">タップして今日のTroveを見る</string>
+    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
     <string name="shortcut_search_short">検索</string>
     <string name="shortcut_search_long">タイトルを検索</string>
     <string name="shortcut_visti_short">マイリスト</string>

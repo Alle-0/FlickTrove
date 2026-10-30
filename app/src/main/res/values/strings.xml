@@ -7,6 +7,9 @@
     <string name="home_section_trove_pick">The Trove\'s Pick</string>
     <string name="home_trove_pick_reset">Reseal Pick</string>
     <string name="home_trove_pick_badge">CURATED FOR YOU</string>
+    <string name="home_trove_pick_sealed_badge">Mystery Pick</string>
+    <string name="home_trove_pick_sealed_cta">Tap to reveal today\'s Trove</string>
+    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
     <string name="shortcut_search_short">Search</string>
     <string name="shortcut_search_long">Search Title</string>
     <string name="shortcut_visti_short">Your List</string>

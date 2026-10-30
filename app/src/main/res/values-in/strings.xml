@@ -7,6 +7,9 @@
     <string name="home_section_trove_pick">Pilihan Trove</string>
     <string name="home_trove_pick_reset">Segel kembali</string>
     <string name="home_trove_pick_badge">DIKURASI UNTUK ANDA</string>
+    <string name="home_trove_pick_sealed_badge">Pilihan Hari Ini</string>
+    <string name="home_trove_pick_sealed_cta">Ketuk untuk membuka Trove hari ini</string>
+    <string name="home_trove_pick_affinity">🎯 %1$d%% %2$s</string>
     <string name="shortcut_search_short">Cari</string>
     <string name="shortcut_search_long">Cari Judul</string>
     <string name="shortcut_visti_short">Daftar Anda</string>
