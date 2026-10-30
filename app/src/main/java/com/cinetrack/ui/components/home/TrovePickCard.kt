@@ -967,12 +967,6 @@ private fun TroveGravitationalBubbles(
                     center = Offset(bx, by),
                     style  = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3.dp.toPx())
                 )
-                // Riflesso speculare bianco
-                drawCircle(
-                    color  = Color.White.copy(alpha = alpha * 0.95f),
-                    radius = r * 0.28f,
-                    center = Offset(bx - r * 0.32f, by - r * 0.32f)
-                )
             } else {
                 // ── 2. Bolla deformata a goccia (risucchiata sotto il medaglione) ──
                 val rx = r * stretchFactor
@@ -1005,12 +999,6 @@ private fun TroveGravitationalBubbles(
                         topLeft = Offset(bx - rx, by - ry),
                         size    = Size(rx * 2f, ry * 2f),
                         style   = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.3.dp.toPx())
-                    )
-                    // Riflesso speculare nella testa della goccia rivolta verso il centro
-                    drawCircle(
-                        color  = Color.White.copy(alpha = alpha * 0.95f),
-                        radius = ry * 0.32f,
-                        center = Offset(bx - rx * 0.35f, by)
                     )
                 }
             }
