@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -343,6 +344,7 @@ fun TrovePickCard(
                             matchScore    = matchScore,
                             rating        = rating,
                             cardHazeState = cardHazeState,
+                            detailsAlpha  = if (isRevealedToday) 1f else (revealProgress * 1.5f).coerceIn(0f, 1f),
                             modifier      = Modifier.fillMaxSize()
                         )
                     }
@@ -379,6 +381,9 @@ fun TrovePickCard(
                         isHolding      = isHolding,
                         alpha          = overlayAlpha,
                         scale          = overlayScale,
+                        matchScore     = matchScore,
+                        year           = year,
+                        genres         = genres,
                         modifier       = Modifier.fillMaxSize()
                     )
                 }
@@ -408,6 +413,7 @@ private fun ActualTroveCardContent(
     matchScore: Int?,
     rating: Double?,
     cardHazeState: HazeState,
+    detailsAlpha: Float = 1f,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -478,7 +484,10 @@ private fun ActualTroveCardContent(
 
             // Colonna dettagli
             Column(
-                modifier            = Modifier.weight(1f).fillMaxHeight(),
+                modifier            = Modifier
+                    .weight(1f)
+                    .fillMaxHeight()
+                    .graphicsLayer { alpha = detailsAlpha },
                 verticalArrangement = Arrangement.SpaceBetween
             ) {
                 // Badge "SCELTO PER TE"
@@ -596,6 +605,9 @@ private fun TroveHoldToUnsealOverlay(
     isHolding: Boolean,
     alpha: Float,
     scale: Float,
+    matchScore: Int?,
+    year: String,
+    genres: List<String>,
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -608,7 +620,8 @@ private fun TroveHoldToUnsealOverlay(
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(12.dp)
+            verticalArrangement = Arrangement.spacedBy(8.dp),
+            modifier            = Modifier.offset(y = (-8).dp)
         ) {
             // Sigillo circolare con indicatore di carica energetica
             Box(
@@ -727,26 +740,82 @@ private fun TroveHoldToUnsealOverlay(
                 }
             }
 
-            // Pillola CTA satinata: "Tieni premuto per scoprire il Trove di oggi"
-            Box(
-                modifier = Modifier
-                    .background(Color.Black.copy(alpha = 0.58f), CircleShape)
-                    .border(
-                        0.5.dp,
-                        if (isHolding) TroveCyan.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.16f),
-                        CircleShape
-                    )
-                    .padding(horizontal = 14.dp, vertical = 5.5.dp)
-            ) {
-                Text(
-                    text          = stringResource(R.string.home_trove_pick_sealed_cta),
-                    color         = if (isHolding) TroveCyan else Color.White.copy(alpha = 0.90f),
-                    fontSize      = 11.5.sp,
-                    fontWeight    = FontWeight.SemiBold,
-                    textAlign     = TextAlign.Center,
-                    letterSpacing = 0.3.sp
-                )
+            // ── Esca psicologica: micro-indizio metadati (Affinità • Anno • Genere) ──
+            val hasTeaserData = (matchScore != null && matchScore > 0) || year.isNotEmpty() || genres.isNotEmpty()
+            if (hasTeaserData) {
+                Box(
+                    modifier = Modifier
+                        .background(Color.Black.copy(alpha = 0.52f), CircleShape)
+                        .border(
+                            0.5.dp,
+                            if (isHolding) TroveCyan.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f),
+                            CircleShape
+                        )
+                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Rounded.Lock,
+                            contentDescription = null,
+                            tint = if (isHolding) TroveCyan else TroveGold.copy(alpha = 0.90f),
+                            modifier = Modifier.size(11.dp)
+                        )
+
+                        if (matchScore != null && matchScore > 0) {
+                            Text(
+                                text = "${matchScore}% ${stringResource(R.string.match_score)}",
+                                color = TroveCyan,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                letterSpacing = 0.3.sp
+                            )
+                        }
+
+                        if (year.isNotEmpty()) {
+                            if (matchScore != null && matchScore > 0) {
+                                Text(
+                                    text = "•",
+                                    color = Color.White.copy(alpha = 0.35f),
+                                    fontSize = 10.sp
+                                )
+                            }
+                            Text(
+                                text = year,
+                                color = Color.White.copy(alpha = 0.85f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Medium
+                            )
+                        }
+
+                        if (genres.isNotEmpty()) {
+                            Text(
+                                text = "•",
+                                color = Color.White.copy(alpha = 0.35f),
+                                fontSize = 10.sp
+                            )
+                            Text(
+                                text = genres.first(),
+                                color = Color.White.copy(alpha = 0.70f),
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Normal
+                            )
+                        }
+                    }
+                }
             }
+
+            // ── Call-To-Action: "Tieni premuto per scoprire il Trove di oggi" ──
+            Text(
+                text = stringResource(R.string.home_trove_pick_sealed_cta),
+                color = if (isHolding) TroveCyan else Color.White.copy(alpha = 0.78f),
+                fontSize = 11.sp,
+                fontWeight = FontWeight.Medium,
+                textAlign = TextAlign.Center,
+                letterSpacing = 0.25.sp
+            )
         }
     }
 }
