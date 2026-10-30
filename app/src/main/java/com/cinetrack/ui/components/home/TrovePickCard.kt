@@ -3,6 +3,7 @@ package com.cinetrack.ui.components.home
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
@@ -37,6 +38,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.drawscope.rotate
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -628,6 +630,16 @@ private fun TroveHoldToUnsealOverlay(
                 modifier         = Modifier.size(86.dp),
                 contentAlignment = Alignment.Center
             ) {
+                // 0. Bolle gravitazionali che convergono e si deformano venendo risucchiate sotto il cerchio centrale
+                if (chargeProgress > 0.005f) {
+                    TroveGravitationalBubbles(
+                        chargeProgress = chargeProgress,
+                        modifier       = Modifier
+                            .size(280.dp)
+                            .graphicsLayer { clip = false }
+                    )
+                }
+
                 // Backing satinato scuro
                 Box(
                     modifier = Modifier
@@ -816,6 +828,160 @@ private fun TroveHoldToUnsealOverlay(
                 textAlign = TextAlign.Center,
                 letterSpacing = 0.25.sp
             )
+        }
+    }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Bolle gravitazionali deformate in convergenza verso il centro (implosione)
+// ─────────────────────────────────────────────────────────────────────────────
+
+private data class TroveGravitationalBubble(
+    val baseAngle: Float,
+    val speed: Float,
+    val phaseOffset: Float,
+    val baseSize: Float,
+    val color: Color,
+    val distMultiplier: Float
+)
+
+@Composable
+private fun TroveGravitationalBubbles(
+    chargeProgress: Float,
+    modifier: Modifier = Modifier
+) {
+    val infiniteTransition = rememberInfiniteTransition(label = "TroveBubblesInf")
+    val phase by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue  = 1f,
+        animationSpec = infiniteRepeatable(
+            animation  = tween(durationMillis = 1600, easing = LinearEasing),
+            repeatMode = RepeatMode.Restart
+        ),
+        label = "TroveBubblePhase"
+    )
+
+    // Palette energetica cosmica: Cyan, Oro, Smeraldo, Azzurro elettrico, Viola stellare, Menta
+    val bubbles = remember {
+        val colors = listOf(
+            TroveCyan,
+            TroveGold,
+            Color(0xFF10B981), // Smeraldo
+            Color(0xFF38BDF8), // Azzurro elettrico
+            Color(0xFFA78BFA), // Viola stellare
+            Color(0xFF34D399), // Menta brillante
+            Color(0xFFF472B6)  // Quarzo rosa energetico
+        )
+        val count = 24
+        List(count) { i ->
+            val angle = (2.0 * PI * i / count).toFloat() + (((i * 13) % 7) - 3) * 0.09f
+            val speed = 0.85f + ((i * 17) % 9) * 0.06f
+            val offset = (i * 0.173f) % 1f
+            val size = 5.5f + ((i * 7) % 6) * 1.3f // 5.5dp .. 12dp
+            val color = colors[i % colors.size]
+            val distMult = 0.82f + ((i * 23) % 9) * 0.045f
+            TroveGravitationalBubble(
+                baseAngle      = angle,
+                speed          = speed,
+                phaseOffset    = offset,
+                baseSize       = size,
+                color          = color,
+                distMultiplier = distMult
+            )
+        }
+    }
+
+    Canvas(modifier = modifier) {
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val maxDist = (size.minDimension / 2f) * 0.95f
+        val minDist = 18.dp.toPx() // Scompare ben sotto il cerchio centrale (raggio 41dp)
+
+        // All'aumentare della carica, il risucchio gravitazionale accelera progressivamente
+        val speedBoost = 1f + chargeProgress * 2.2f
+
+        for (bubble in bubbles) {
+            // Progresso ciclico verso il centro: 0 = bordo esterno, 1 = risucchiato al centro
+            val progress = ((phase * bubble.speed * speedBoost + bubble.phaseOffset) % 1f)
+
+            // Movimento accelerato gravitazionale verso il centro
+            val dProgress = progress.pow(1.6f)
+            val dist = maxDist * bubble.distMultiplier - (maxDist * bubble.distMultiplier - minDist) * dProgress
+
+            if (dist < minDist) continue
+
+            val angle = bubble.baseAngle
+            val bx = center.x + dist * cos(angle)
+            val by = center.y + dist * sin(angle)
+
+            // Deformazione gravitazionale (spaghettificazione verso il centro):
+            // Lontano dal centro: bolla soffice e rotonda (stretch = 1, compress = 1)
+            // Più è vicina al centro: la trazione gravitazionale la allunga radialmente e la comprime ai lati
+            val closeness = (1f - (dist - minDist) / (maxDist * bubble.distMultiplier - minDist)).coerceIn(0f, 1f)
+            val stretchFactor = 1f + closeness.pow(1.5f) * (3.0f + chargeProgress * 1.8f)
+            val compressFactor = (1f - closeness.pow(1.2f) * 0.52f).coerceAtLeast(0.42f)
+
+            val baseRadiusPx = bubble.baseSize.dp.toPx()
+            val rx = baseRadiusPx * stretchFactor
+            val ry = baseRadiusPx * compressFactor
+
+            // Dissolvenza: morbida apparizione ai bordi, brillantezza viva durante il volo, sfuma sotto il medaglione
+            val fadeIn = (progress / 0.14f).coerceIn(0f, 1f)
+            val fadeOut = ((1f - progress) / 0.12f).coerceIn(0f, 1f)
+            val bubbleAlpha = (fadeIn * fadeOut * (0.45f + chargeProgress * 0.55f)).coerceIn(0f, 1f)
+
+            if (bubbleAlpha <= 0.01f) continue
+
+            // Angolo dell'ellisse: la sua asse maggiore si orienta perfettamente lungo il raggio di trazione
+            val angleDeg = Math.toDegrees(angle.toDouble()).toFloat()
+
+            // Direzione verso il centro per il punto focale luminoso
+            val headDirX = -cos(angle)
+            val headDirY = -sin(angle)
+            val specularOffset = Offset(
+                bx + headDirX * (rx * 0.22f),
+                by + headDirY * (rx * 0.22f)
+            )
+
+            rotate(degrees = angleDeg, pivot = Offset(bx, by)) {
+                // 1. Alone/Glow esterno soffice della bolla
+                drawOval(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            bubble.color.copy(alpha = bubbleAlpha * 0.65f),
+                            bubble.color.copy(alpha = bubbleAlpha * 0.22f),
+                            Color.Transparent
+                        ),
+                        center = Offset(bx, by),
+                        radius = rx * 1.35f
+                    ),
+                    topLeft = Offset(bx - rx * 1.35f, by - ry * 1.35f),
+                    size = Size(rx * 2.7f, ry * 2.7f)
+                )
+
+                // 2. Corpo principale della bolla deformata
+                drawOval(
+                    brush = Brush.radialGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = bubbleAlpha * 0.90f),
+                            bubble.color.copy(alpha = bubbleAlpha * 0.85f),
+                            bubble.color.copy(alpha = bubbleAlpha * 0.35f)
+                        ),
+                        center = specularOffset,
+                        radius = rx
+                    ),
+                    topLeft = Offset(bx - rx, by - ry),
+                    size = Size(rx * 2f, ry * 2f)
+                )
+
+                // 3. Nucleo speculare brillante rivolto verso il centro di gravità
+                val coreRx = rx * 0.40f
+                val coreRy = ry * 0.32f
+                drawOval(
+                    color = Color.White.copy(alpha = bubbleAlpha * 0.88f),
+                    topLeft = Offset(specularOffset.x - coreRx, specularOffset.y - coreRy),
+                    size = Size(coreRx * 2f, coreRy * 2f)
+                )
+            }
         }
     }
 }
