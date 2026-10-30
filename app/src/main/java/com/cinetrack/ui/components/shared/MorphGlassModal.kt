@@ -259,9 +259,9 @@ fun MorphGlassModal(
                 val currentShape = RoundedCornerShape(with(density) { currentCornerRadius.toDp() })
 
                 val currentTintAlpha = if (triggerBounds != null) {
-                    lerp(0.25f, 0.38f, sizeProgress)
+                    lerp(0.48f, 0.58f, sizeProgress)
                 } else {
-                    0.38f
+                    0.58f
                 }
                 // Keep blur constant to avoid GPU shader re-allocations during animation
                 val animatedStyle = remember(style, currentTintAlpha) {

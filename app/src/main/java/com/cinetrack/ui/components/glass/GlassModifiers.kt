@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.glass
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.composed
@@ -9,6 +10,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
+import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
@@ -16,7 +18,6 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.theme.HazeStyles
-import dev.chrisbanes.haze.ExperimentalHazeApi
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazePerformanceMode
 import dev.chrisbanes.haze.HazeState
@@ -46,10 +47,14 @@ fun safeShape(shape: Shape): Shape = object : Shape {
 }
 
 /**
- * Modifier glassmorfico standardizzato che utilizza [hazeBlur] per una sfocatura
- * omogenea, morbida e ad alte prestazioni su qualsiasi superficie (modali, controlli, card, badge).
+ * A standardized glassmorphic modifier that integrates with Haze for high-quality background blur.
+ * Pairs HazeStyles.PremiumDark with consistent background overlays and borders.
+ *
+ * @param state The HazeState from the container that should be blurred.
+ * @param shape The shape of the glass element.
+ * @param style The HazeBlurStyle to apply (defaults to HazeStyles.PremiumDark).
+ * @param useOffscreenStrategy Whether to use CompositingStrategy.Offscreen to fix text rendering.
  */
-@OptIn(ExperimentalHazeApi::class)
 fun Modifier.hazeGlass(
     state: HazeState?,
     shape: Shape,
@@ -63,9 +68,7 @@ fun Modifier.hazeGlass(
     useRefraction: Boolean = false
 ): Modifier = composed {
     val effectiveShape = remember(shape) { safeShape(shape) }
-    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
-
-    val finalBlurStyle = remember(blurRadius, containerColor, style, alpha) {
+    val finalStyle = remember(blurRadius, containerColor, style, alpha) {
         val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
         val baseStyle = style ?: HazeStyles.PremiumDark
         baseStyle.then {
@@ -78,24 +81,47 @@ fun Modifier.hazeGlass(
             }
         }
     }
-
-    this
+    
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+    
+    val modifierChain = this
         .clip(effectiveShape)
         .then(
             if (state != null && advancedEffectsEnabled) {
-                val baseModifier = if (useOffscreenStrategy) {
-                    Modifier.graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
-                } else if (alpha < 1f) {
-                    Modifier.graphicsLayer(alpha = alpha)
-                } else {
+                // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeBlur.
+                if (useOffscreenStrategy) {
                     Modifier
+                        .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
+                        .hazeBlur(
+                            input = HazeInput.Sources(state),
+                            style = finalStyle,
+                            performanceMode = HazePerformanceMode.Default,
+                            expandLayerBounds = false
+                        )
+                } else {
+                    if (alpha < 1f) {
+                        Modifier
+                            .graphicsLayer(alpha = alpha)
+                            .hazeBlur(
+                                input = HazeInput.Sources(state),
+                                style = finalStyle,
+                                performanceMode = HazePerformanceMode.Default,
+                                expandLayerBounds = false
+                            )
+                    } else {
+                        Modifier
+                            .hazeBlur(
+                                input = HazeInput.Sources(state),
+                                style = finalStyle,
+                                performanceMode = HazePerformanceMode.Default,
+                                expandLayerBounds = false
+                            )
+                    }
                 }
-                baseModifier.hazeBlur(
-                    input = HazeInput.Sources(state),
-                    style = finalBlurStyle,
-                    performanceMode = HazePerformanceMode.Default,
-                )
             } else {
+                // When blur/effects are disabled, fallback to a solid/semi-translucent dark glass surface.
+                // If containerColor was a light highlight tint (e.g. Color.White with low alpha), we MUST NOT
+                // turn the whole card into 95% solid white. Instead, use HazeStyles.GlassColor as the base.
                 val fallbackBaseColor = if (containerColor != null && containerColor.luminance() > 0.4f) {
                     HazeStyles.GlassColor
                 } else {
@@ -111,6 +137,8 @@ fun Modifier.hazeGlass(
             }
         )
         .glassOverlay(effectiveShape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))
+        
+    modifierChain
 }
 
 fun Modifier.glassmorphic(
@@ -169,6 +197,7 @@ fun Modifier.glassOverlay(
         withShimmer
     }
 }
+
 
 
 
