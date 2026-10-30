@@ -129,6 +129,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.haze)
     implementation(libs.haze.blur)
+    implementation(libs.haze.glass)
     implementation(libs.liquid)
     
     // Glance AppWidget

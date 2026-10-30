@@ -44,6 +44,7 @@ liquid = { group = "io.github.fletchmckee.liquid", name = "liquid", version.ref 
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haZe" }
 haze-blur = { group = "dev.chrisbanes.haze", name = "haze-blur", version.ref = "haZe" }
+haze-glass = { group = "dev.chrisbanes.haze", name = "haze-glass", version.ref = "haZe" }
 androidx-material-icons-extended = { group = "androidx.compose.material", name = "material-icons-extended" }
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
 androidx-lifecycle-runtime-ktx = { group = "androidx.lifecycle", name = "lifecycle-runtime-ktx", version.ref = "lifecycleRuntimeKtx" }
