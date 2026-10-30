@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.home
 
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.Spring
@@ -12,6 +13,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -36,6 +38,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
@@ -70,6 +73,7 @@ import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.haze
 import kotlin.math.PI
 import kotlin.math.cos
+import kotlin.math.pow
 import kotlin.math.sin
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -142,7 +146,31 @@ fun TrovePickCard(
         if (!isRevealedToday) isUnsealing = false
     }
 
-    // revealProgress: 0f = sigillato, 1f = rivelato
+    // ── Carica progressiva con pressione prolungata (Hold-to-Charge) ────────────
+    var isHolding by remember { mutableStateOf(false) }
+    val chargeProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(isHolding, isUnsealing) {
+        if (isUnsealing) return@LaunchedEffect
+        if (isHolding) {
+            val remaining = ((1f - chargeProgress.value) * 750).toInt().coerceAtLeast(10)
+            chargeProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = remaining, easing = LinearEasing)
+            )
+            if (chargeProgress.value >= 1f && isHolding && !isUnsealing) {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                isUnsealing = true
+            }
+        } else {
+            chargeProgress.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing)
+            )
+        }
+    }
+
+    // revealProgress: 0f = sigillato, 1f = rivelato (650ms con easing deciso)
     val revealProgress by animateFloatAsState(
         targetValue = if (isRevealedToday || isUnsealing) 1f else 0f,
         animationSpec = tween(durationMillis = 650, easing = FastOutSlowInEasing),
@@ -154,8 +182,8 @@ fun TrovePickCard(
         label = "TroveReveal"
     )
 
-    // Blur radius della nebbia teaser: 14dp → 0dp (sfoca testo e dettagli preservando le cromie del poster)
-    val blurRadius = ((1f - revealProgress) * 14f).dp.coerceAtLeast(0.1.dp)
+    // Blur radius della nebbia: da 16dp a 0dp man mano che l'onda d'urto spazza via il velo
+    val blurRadius = ((1f - revealProgress) * 16f).dp.coerceAtLeast(0.1.dp)
 
     // ── Entry animation ────────────────────────────────────────────────────────
     val hasAnimated = rememberSaveable { mutableStateOf(false) }
@@ -172,7 +200,7 @@ fun TrovePickCard(
         label         = "TroveEntryY"
     )
 
-    // ── Metadati per l'overlay "sigillato" ────────────────────────────────────
+    // ── Metadati della card ──────────────────────────────────────────────────
     val currentLang = context.resources.configuration.locales[0].language
     val year = (movie.releaseDate ?: movie.firstAirDate)?.take(4) ?: ""
     val genres = movie.genreIds?.mapNotNull { id ->
@@ -239,30 +267,39 @@ fun TrovePickCard(
                 .graphicsLayer { clip = false },
             contentAlignment = Alignment.Center
         ) {
+            val cardScale = if (isRevealedToday) 1f else (1f - chargeProgress.value * 0.04f)
+
+            val cardTouchModifier = if (isRevealedToday) {
+                Modifier.bounceClick(scaleDown = 0.96f) {
+                    val movieWithLogo = if (!localLogoPath.isNullOrEmpty() && movie.logoPath == null) {
+                        movie.copy().apply { this.logoPath = localLogoPath }
+                    } else movie
+                    onMovieClick(movieWithLogo)
+                }
+            } else {
+                Modifier
+                    .graphicsLayer {
+                        scaleX = cardScale
+                        scaleY = cardScale
+                    }
+                    .pointerInput(isUnsealing) {
+                        if (isUnsealing) return@pointerInput
+                        detectTapGestures(
+                            onPress = {
+                                isHolding = true
+                                tryAwaitRelease()
+                                isHolding = false
+                            }
+                        )
+                    }
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(255.dp)
                     .padding(horizontal = 16.dp)
-                    .bounceClick(
-                        scaleDown = 0.96f,
-                        onLongClick = {
-                            if (!isRevealedToday && !isUnsealing) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                isUnsealing = true
-                            }
-                        }
-                    ) {
-                        if (isRevealedToday) {
-                            val movieWithLogo = if (!localLogoPath.isNullOrEmpty() && movie.logoPath == null) {
-                                movie.copy().apply { this.logoPath = localLogoPath }
-                            } else movie
-                            onMovieClick(movieWithLogo)
-                        } else {
-                            // Feedback tattile al tap rapido per ricordare la pressione prolungata
-                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                        }
-                    }
+                    .then(cardTouchModifier)
                     .clip(RoundedCornerShape(32.dp))
                     .border(
                         androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.14f)),
@@ -270,7 +307,7 @@ fun TrovePickCard(
                     )
             ) {
 
-                // ── Layer 1: Card reale con blur progressivo ─────────────────
+                // ── Layer 1: Vera card sotto (sempre presente e perfettamente posizionata) ──
                 if (revealProgress < 0.99f) {
                     val sealedStyle = remember(blurRadius, revealProgress) {
                         HazeBlurStyle {
@@ -279,7 +316,7 @@ fun TrovePickCard(
                             colorEffects(
                                 listOf(
                                     HazeColorEffect.tint(
-                                        TroveSeal.copy(alpha = (0.22f * (1f - revealProgress)).coerceAtLeast(0f))
+                                        TroveSeal.copy(alpha = (0.20f * (1f - revealProgress)).coerceAtLeast(0f))
                                     )
                                 )
                             )
@@ -324,18 +361,29 @@ fun TrovePickCard(
                     )
                 }
 
-                // ── Layer 2: Overlay scrigno sigillato ───────────────────────
+                // ── Layer 2: Sigillo magico che si carica e scompare nell'esplosione ───────
                 if (revealProgress < 0.99f) {
-                    TroveSealedOverlay(
-                        affinityPct = matchScore,
-                        year        = year,
-                        genres      = genres,
-                        alpha       = (1f - revealProgress).coerceIn(0f, 1f)
+                    val overlayAlpha = if (isUnsealing) {
+                        (1f - revealProgress * 3.5f).coerceIn(0f, 1f)
+                    } else 1f
+
+                    val overlayScale = if (isUnsealing) {
+                        1f + revealProgress * 0.35f
+                    } else {
+                        1f + chargeProgress.value * 0.10f
+                    }
+
+                    TroveHoldToUnsealOverlay(
+                        chargeProgress = chargeProgress.value,
+                        isHolding      = isHolding,
+                        alpha          = overlayAlpha,
+                        scale          = overlayScale,
+                        modifier       = Modifier.fillMaxSize()
                     )
                 }
 
-                // ── Layer 3: Burst di particelle durante la transizione ───────
-                if (revealProgress in 0.01f..0.98f) {
+                // ── Layer 3: Esplosione a 36 particelle + onde d'urto luminose ─────────────
+                if (revealProgress in 0.01f..0.99f) {
                     TroveUnsealBurstCanvas(progress = revealProgress)
                 }
             }
@@ -538,258 +586,255 @@ private fun ActualTroveCardContent(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Overlay "Scrigno Sigillato"
+// Overlay "Sigillo Mistico" con anello di carica a pressione prolungata
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TroveSealedOverlay(
-    affinityPct: Int?,
-    year: String,
-    genres: List<String>,
-    alpha: Float
+private fun TroveHoldToUnsealOverlay(
+    chargeProgress: Float,
+    isHolding: Boolean,
+    alpha: Float,
+    scale: Float,
+    modifier: Modifier = Modifier
 ) {
-    val infiniteTransition = rememberInfiniteTransition(label = "TroveSweep")
-    val sweepAngle by infiniteTransition.animateFloat(
-        initialValue  = 0f,
-        targetValue   = 360f,
-        animationSpec = infiniteRepeatable(tween(4000, easing = LinearEasing)),
-        label         = "TroveSweepAngle"
-    )
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue  = 0.96f,
-        targetValue   = 1.04f,
-        animationSpec = infiniteRepeatable(
-            animation  = tween(1800, easing = FastOutSlowInEasing),
-            repeatMode = androidx.compose.animation.core.RepeatMode.Reverse
-        ),
-        label         = "TrovePulse"
-    )
-
     Box(
-        modifier         = Modifier.fillMaxSize().graphicsLayer { this.alpha = alpha },
+        modifier         = modifier.graphicsLayer {
+            this.alpha  = alpha
+            this.scaleX = scale
+            this.scaleY = scale
+        },
         contentAlignment = Alignment.Center
     ) {
-        // Vignettatura radiale: centro trasparente per far risplendere le tonalità del poster,
-        // con bordi satinati scuri per massimo contrasto
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(
-                    Brush.radialGradient(
-                        colorStops = arrayOf(
-                            0.00f to Color.Transparent,
-                            0.50f to Color.Black.copy(alpha = 0.30f),
-                            1.00f to Color.Black.copy(alpha = 0.72f)
-                        ),
-                        radius = 700f
-                    )
-                )
-        )
-
-        // Struttura a 3 livelli: Badge in cima, Sigillo + CTA al centro, Pillole indizio in basso
         Column(
-            modifier            = Modifier.fillMaxSize().padding(horizontal = 16.dp, vertical = 18.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.SpaceBetween
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 1. TOP: Badge di stato dello scrigno
+            // Sigillo circolare con indicatore di carica energetica
             Box(
-                modifier = Modifier
-                    .background(Color.White.copy(alpha = 0.08f), CircleShape)
-                    .border(0.5.dp, TroveCyan.copy(alpha = 0.40f), CircleShape)
-                    .padding(horizontal = 11.dp, vertical = 4.5.dp)
+                modifier         = Modifier.size(86.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Row(
-                    verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(5.dp)
-                ) {
-                    Icon(
-                        painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
-                        contentDescription = null,
-                        tint               = TroveCyan,
-                        modifier           = Modifier.size(11.dp)
-                    )
-                    Text(
-                        text          = stringResource(R.string.home_trove_pick_sealed_badge).uppercase(),
-                        color         = TroveCyan,
-                        fontSize      = 10.sp,
-                        fontWeight    = FontWeight.Bold,
-                        letterSpacing = 1.1.sp
-                    )
-                }
-            }
-
-            // 2. CENTER: Sigillo mistico + CTA
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
+                // Backing satinato scuro
                 Box(
-                    modifier         = Modifier.size(80.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    // Alone morbido radiale pulsante
-                    Box(
-                        modifier = Modifier
-                            .size(76.dp)
-                            .graphicsLayer {
-                                scaleX = pulseScale * 1.05f
-                                scaleY = pulseScale * 1.05f
-                            }
-                            .background(
-                                Brush.radialGradient(
-                                    listOf(TroveCyan.copy(alpha = 0.24f), Color.Transparent)
-                                ),
-                                CircleShape
-                            )
+                    modifier = Modifier
+                        .size(82.dp)
+                        .background(Color.Black.copy(alpha = 0.55f), CircleShape)
+                        .border(0.5.dp, Color.White.copy(alpha = 0.18f), CircleShape)
+                )
+
+                // Alone radiale di accumulo energetico che cresce con la carica
+                val auraAlpha = 0.16f + chargeProgress * 0.55f
+                val auraSize = (50 + chargeProgress * 36).dp
+                Box(
+                    modifier = Modifier
+                        .size(auraSize)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    TroveCyan.copy(alpha = auraAlpha),
+                                    TroveGold.copy(alpha = auraAlpha * 0.45f),
+                                    Color.Transparent
+                                )
+                            ),
+                            CircleShape
+                        )
+                )
+
+                // Canvas dell'anello di carica (Track 360° + Arco attivo + Glow Tip)
+                Canvas(modifier = Modifier.size(76.dp)) {
+                    val strokeWidth = 3.dp.toPx()
+                    val radius = (size.minDimension / 2f) - strokeWidth / 2f
+                    val center = Offset(size.width / 2f, size.height / 2f)
+
+                    // 1. Traccia passiva
+                    drawCircle(
+                        color  = Color.White.copy(alpha = 0.14f),
+                        radius = radius,
+                        center = center,
+                        style  = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
                     )
 
-                    // Anello orbitale sottile a 360° continuo rotante (nessuna discontinuità visiva)
-                    Box(
-                        modifier = Modifier
-                            .size(72.dp)
-                            .graphicsLayer { rotationZ = sweepAngle }
-                            .border(
-                                width = 1.dp,
-                                brush = Brush.sweepGradient(
-                                    listOf(
-                                        TroveCyan.copy(alpha = 0.85f),
-                                        TroveGold.copy(alpha = 0.65f),
-                                        TroveCyan.copy(alpha = 0.15f),
-                                        TroveCyan.copy(alpha = 0.85f)
-                                    )
+                    // 2. Arco attivo proporzionale alla carica (0° -> 360°)
+                    if (chargeProgress > 0.005f) {
+                        val sweep = chargeProgress * 360f
+                        drawArc(
+                            brush      = Brush.sweepGradient(
+                                colorStops = arrayOf(
+                                    0.0f to TroveCyan.copy(alpha = 0.85f),
+                                    0.7f to TroveGold.copy(alpha = 0.95f),
+                                    1.0f to Color.White
                                 ),
-                                shape = CircleShape
+                                center     = center
+                            ),
+                            startAngle = -90f,
+                            sweepAngle = sweep,
+                            useCenter  = false,
+                            topLeft    = Offset(strokeWidth / 2f, strokeWidth / 2f),
+                            size       = Size(radius * 2, radius * 2),
+                            style      = androidx.compose.ui.graphics.drawscope.Stroke(
+                                width = strokeWidth,
+                                cap   = StrokeCap.Round
                             )
-                    )
+                        )
 
-                    // Gemma centrale con finitura glass scura
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .graphicsLayer {
-                                scaleX = pulseScale
-                                scaleY = pulseScale
-                            }
-                            .background(
-                                Brush.radialGradient(
-                                    listOf(Color(0xFF0D2E28), Color(0xFF05100E))
-                                ),
-                                CircleShape
-                            )
-                            .border(1.dp, TroveCyan.copy(alpha = 0.55f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
-                            contentDescription = null,
-                            tint               = TroveCyan,
-                            modifier           = Modifier.size(26.dp)
+                        // 3. Testa luminosa dell'arco (glow tip che segue la rotazione)
+                        val angleRad = Math.toRadians((-90.0 + sweep)).toFloat()
+                        val dotX = center.x + radius * cos(angleRad)
+                        val dotY = center.y + radius * sin(angleRad)
+
+                        drawCircle(
+                            color  = Color.White,
+                            radius = 3.dp.toPx(),
+                            center = Offset(dotX, dotY)
+                        )
+                        drawCircle(
+                            color  = TroveCyan.copy(alpha = 0.65f),
+                            radius = 6.dp.toPx(),
+                            center = Offset(dotX, dotY)
                         )
                     }
                 }
 
-                Text(
-                    text          = stringResource(R.string.home_trove_pick_sealed_cta),
-                    color         = Color.White,
-                    fontSize      = 13.5.sp,
-                    fontWeight    = FontWeight.SemiBold,
-                    textAlign     = TextAlign.Center,
-                    letterSpacing = 0.1.sp
-                )
+                // Gemma centrale con finitura smeraldo
+                Box(
+                    modifier = Modifier
+                        .size(56.dp)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(Color(0xFF0F322B), Color(0xFF061411))
+                            ),
+                            CircleShape
+                        )
+                        .border(
+                            width = 1.dp,
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    TroveCyan.copy(alpha = 0.65f + chargeProgress * 0.35f),
+                                    TroveGold.copy(alpha = 0.40f)
+                                )
+                            ),
+                            shape = CircleShape
+                        ),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
+                        contentDescription = null,
+                        tint               = if (chargeProgress > 0.85f) Color.White else TroveCyan,
+                        modifier           = Modifier.size(26.dp)
+                    )
+                }
             }
 
-            // 3. BOTTOM: Pillole indizio localizzate
-            TroveHintPills(affinityPct = affinityPct, year = year, genres = genres)
+            // Pillola CTA satinata: "Tieni premuto per scoprire il Trove di oggi"
+            Box(
+                modifier = Modifier
+                    .background(Color.Black.copy(alpha = 0.58f), CircleShape)
+                    .border(
+                        0.5.dp,
+                        if (isHolding) TroveCyan.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.16f),
+                        CircleShape
+                    )
+                    .padding(horizontal = 14.dp, vertical = 5.5.dp)
+            ) {
+                Text(
+                    text          = stringResource(R.string.home_trove_pick_sealed_cta),
+                    color         = if (isHolding) TroveCyan else Color.White.copy(alpha = 0.90f),
+                    fontSize      = 11.5.sp,
+                    fontWeight    = FontWeight.SemiBold,
+                    textAlign     = TextAlign.Center,
+                    letterSpacing = 0.3.sp
+                )
+            }
         }
     }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Pillole indizio
-// ─────────────────────────────────────────────────────────────────────────────
-
-@Composable
-private fun TroveHintPills(
-    affinityPct: Int?,
-    year: String,
-    genres: List<String>
-) {
-    val matchScoreLabel = stringResource(R.string.match_score)
-    Row(
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-        verticalAlignment     = Alignment.CenterVertically
-    ) {
-        if (affinityPct != null && affinityPct > 0) {
-            HintPill(
-                label = stringResource(R.string.home_trove_pick_affinity, affinityPct, matchScoreLabel),
-                tint  = TroveCyan
-            )
-        }
-        if (year.isNotEmpty()) {
-            HintPill(year, Color.White.copy(alpha = 0.85f))
-        }
-        if (genres.isNotEmpty()) {
-            HintPill(genres.joinToString(" • "), Color.White.copy(alpha = 0.75f))
-        }
-    }
-}
-
-@Composable
-private fun HintPill(label: String, tint: Color) {
-    Box(
-        modifier = Modifier
-            .background(Color.White.copy(alpha = 0.08f), CircleShape)
-            .border(0.5.dp, tint.copy(alpha = 0.35f), CircleShape)
-            .padding(horizontal = 11.dp, vertical = 4.5.dp)
-    ) {
-        Text(
-            text       = label,
-            color      = tint,
-            fontSize   = 10.5.sp,
-            fontWeight = FontWeight.SemiBold,
-            maxLines   = 1,
-            overflow   = TextOverflow.Ellipsis
-        )
-    }
-}
-
-// ─────────────────────────────────────────────────────────────────────────────
-// Canvas burst (particelle radiali durante l'apertura)
+// Canvas burst (esplosione cinematografica con 36 particelle + onde d'urto)
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
 private fun TroveUnsealBurstCanvas(progress: Float) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val numParticles = 18
-        val center       = Offset(size.width / 2f, size.height / 2f)
-        val maxRadius    = size.minDimension * 0.48f
-        val fadeIn       = (progress / 0.35f).coerceIn(0f, 1f)
-        val fadeOut      = ((1f - progress) / 0.50f).coerceIn(0f, 1f)
-        val particleAlpha = fadeIn * fadeOut
+        val center = Offset(size.width / 2f, size.height / 2f)
+        val maxDist = size.maxDimension * 0.65f
 
-        for (i in 0 until numParticles) {
-            val angle  = (2.0 * PI * i / numParticles).toFloat()
-            val dist   = maxRadius * progress
-            val x      = center.x + dist * cos(angle)
-            val y      = center.y + dist * sin(angle)
-            val color  = if (i % 3 == 0) TroveGold else TroveCyan
-            val radius = (3.dp.toPx() * (1f - progress * 0.5f)).coerceAtLeast(0.5.dp.toPx())
+        // 1. Flash centrale a dissolvenza rapida
+        val flashAlpha = ((1f - progress / 0.28f).coerceIn(0f, 1f)) * 0.80f
+        if (flashAlpha > 0f) {
+            val flashRadius = 45.dp.toPx() * (1f + progress * 2.5f)
             drawCircle(
-                color  = color.copy(alpha = particleAlpha * 0.85f),
-                radius = radius,
-                center = Offset(x, y)
+                brush = Brush.radialGradient(
+                    colors = listOf(
+                        Color.White.copy(alpha = flashAlpha),
+                        TroveCyan.copy(alpha = flashAlpha * 0.5f),
+                        Color.Transparent
+                    ),
+                    center = center,
+                    radius = flashRadius
+                ),
+                radius = flashRadius,
+                center = center
             )
         }
 
-        // Onda d'urto luminosa
-        val ringAlpha  = (fadeIn * fadeOut * 0.55f).coerceIn(0f, 1f)
-        val ringRadius = maxRadius * progress
-        drawCircle(
-            color  = TroveCyan.copy(alpha = ringAlpha),
-            radius = ringRadius,
-            center = center,
-            style  = androidx.compose.ui.graphics.drawscope.Stroke(width = 2.dp.toPx())
-        )
+        // 2. Doppia onda d'urto ad anello
+        val wave1Dist = maxDist * (progress.pow(0.7f))
+        val wave1Alpha = ((1f - progress) * 0.9f).coerceIn(0f, 1f)
+        if (wave1Alpha > 0f) {
+            drawCircle(
+                color  = TroveCyan.copy(alpha = wave1Alpha),
+                radius = wave1Dist,
+                center = center,
+                style  = androidx.compose.ui.graphics.drawscope.Stroke(
+                    width = (3.dp.toPx() * (1f - progress * 0.5f)).coerceAtLeast(1.dp.toPx())
+                )
+            )
+        }
+
+        val delayedProgress = (progress - 0.08f).coerceAtLeast(0f) / 0.92f
+        if (delayedProgress > 0f) {
+            val wave2Dist = maxDist * 0.85f * (delayedProgress.pow(0.8f))
+            val wave2Alpha = ((1f - delayedProgress) * 0.6f).coerceIn(0f, 1f)
+            if (wave2Alpha > 0f) {
+                drawCircle(
+                    color  = TroveGold.copy(alpha = wave2Alpha),
+                    radius = wave2Dist,
+                    center = center,
+                    style  = androidx.compose.ui.graphics.drawscope.Stroke(
+                        width = (2.dp.toPx() * (1f - delayedProgress)).coerceAtLeast(0.8.dp.toPx())
+                    )
+                )
+            }
+        }
+
+        // 3. Particelle stellari ed energetiche organiche (36 particelle con velocità e dimensioni variegate)
+        val numParticles = 36
+        val particleFade = ((1f - progress.pow(1.3f))).coerceIn(0f, 1f)
+        for (i in 0 until numParticles) {
+            val baseAngle = (2.0 * PI * i / numParticles).toFloat()
+            val jitter = (((i * 17) % 11) - 5) * 0.035f
+            val angle = baseAngle + jitter
+
+            val speedFactor = 0.45f + (((i * 23) % 10) / 10f) * 0.65f
+            val dist = maxDist * speedFactor * (progress.pow(0.72f))
+
+            val x = center.x + dist * cos(angle)
+            val y = center.y + dist * sin(angle)
+
+            val pRadius = ((1.5f + (i % 4) * 0.9f).dp.toPx() * (1f - progress * 0.55f)).coerceAtLeast(0.5.dp.toPx())
+            val pColor = when (i % 3) {
+                0 -> TroveCyan
+                1 -> TroveGold
+                else -> Color.White
+            }
+
+            drawCircle(
+                color  = pColor.copy(alpha = particleFade * 0.90f),
+                radius = pRadius,
+                center = Offset(x, y)
+            )
+        }
     }
 }
