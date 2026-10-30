@@ -44,6 +44,8 @@ import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -149,6 +151,11 @@ fun TrovePickCard(
     // ── Carica progressiva con pressione prolungata (Hold-to-Charge) ────────────
     var isHolding by remember { mutableStateOf(false) }
     val chargeProgress = remember { Animatable(0f) }
+
+    // Coordinate dinamiche per agganciare l'origine dell'esplosione al centro esatto del sigillo
+    var cardCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var medallionCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var burstCenterOffset by remember { mutableStateOf(Offset.Zero) }
 
     // ── Stato apertura ────────────────────────────────────────────────────────
     var isUnsealing by rememberSaveable(movie.id) { mutableStateOf(false) }
@@ -315,6 +322,17 @@ fun TrovePickCard(
                     .fillMaxWidth()
                     .height(255.dp)
                     .padding(horizontal = 16.dp)
+                    .onGloballyPositioned {
+                        cardCoordinates = it
+                        val medallion = medallionCoordinates
+                        if (it.isAttached && medallion != null && medallion.isAttached) {
+                            val centerInMedallion = Offset(
+                                medallion.size.width / 2f,
+                                medallion.size.height / 2f
+                            )
+                            burstCenterOffset = it.localPositionOf(medallion, centerInMedallion)
+                        }
+                    }
                     .then(cardTouchModifier)
                     .clip(RoundedCornerShape(32.dp))
                     .border(
@@ -398,13 +416,27 @@ fun TrovePickCard(
                         matchScore     = matchScore,
                         year           = year,
                         genres         = genres,
+                        onMedallionPositioned = { coords ->
+                            medallionCoordinates = coords
+                            val card = cardCoordinates
+                            if (card != null && card.isAttached && coords.isAttached) {
+                                val centerInMedallion = Offset(
+                                    coords.size.width / 2f,
+                                    coords.size.height / 2f
+                                )
+                                burstCenterOffset = card.localPositionOf(coords, centerInMedallion)
+                            }
+                        },
                         modifier       = Modifier.fillMaxSize()
                     )
                 }
 
                 // ── Layer 3: Esplosione a 36 particelle + onde d'urto luminose ─────────────
                 if (revealProgress in 0.01f..0.99f) {
-                    TroveUnsealBurstCanvas(progress = revealProgress)
+                    TroveUnsealBurstCanvas(
+                        progress = revealProgress,
+                        burstCenter = burstCenterOffset
+                    )
                 }
             }
         }
@@ -622,6 +654,7 @@ private fun TroveHoldToUnsealOverlay(
     matchScore: Int?,
     year: String,
     genres: List<String>,
+    onMedallionPositioned: (LayoutCoordinates) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     Box(
@@ -639,7 +672,9 @@ private fun TroveHoldToUnsealOverlay(
         ) {
             // Sigillo circolare con indicatore di carica energetica
             Box(
-                modifier         = Modifier.size(86.dp),
+                modifier         = Modifier
+                    .size(86.dp)
+                    .onGloballyPositioned { onMedallionPositioned(it) },
                 contentAlignment = Alignment.Center
             ) {
                 // 0. Bolle gravitazionali che convergono e si deformano venendo risucchiate sotto il cerchio centrale
@@ -1011,9 +1046,16 @@ private fun TroveGravitationalBubbles(
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
-private fun TroveUnsealBurstCanvas(progress: Float) {
+private fun TroveUnsealBurstCanvas(
+    progress: Float,
+    burstCenter: Offset = Offset.Zero
+) {
     Canvas(modifier = Modifier.fillMaxSize()) {
-        val center = Offset(size.width / 2f, size.height / 2f - 35.dp.toPx())
+        val center = if (burstCenter != Offset.Zero) {
+            burstCenter
+        } else {
+            Offset(size.width / 2f, size.height * 0.30f)
+        }
         val maxDist = size.maxDimension * 0.65f
 
         // 1. Flash centrale a dissolvenza rapida
