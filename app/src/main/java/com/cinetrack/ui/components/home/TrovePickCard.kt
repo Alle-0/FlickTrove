@@ -37,6 +37,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
@@ -654,18 +655,18 @@ private fun TroveHoldToUnsealOverlay(
                         style  = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
                     )
 
-                    // 2. Arco attivo proporzionale alla carica (0° -> 360°)
+                    // 2. Arco attivo continuo e uniforme: il colore dell'energia si scalda progressivamente
+                    // da TroveCyan a TroveGold man mano che si carica, senza tagli netti (niente discontinuità di shader)
                     if (chargeProgress > 0.005f) {
                         val sweep = chargeProgress * 360f
+                        val energyColor = lerp(
+                            TroveCyan,
+                            TroveGold,
+                            (chargeProgress * 1.15f).coerceIn(0f, 1f)
+                        )
+
                         drawArc(
-                            brush      = Brush.sweepGradient(
-                                colorStops = arrayOf(
-                                    0.0f to TroveCyan.copy(alpha = 0.85f),
-                                    0.7f to TroveGold.copy(alpha = 0.95f),
-                                    1.0f to Color.White
-                                ),
-                                center     = center
-                            ),
+                            color      = energyColor,
                             startAngle = -90f,
                             sweepAngle = sweep,
                             useCenter  = false,
@@ -677,19 +678,19 @@ private fun TroveHoldToUnsealOverlay(
                             )
                         )
 
-                        // 3. Testa luminosa dell'arco (glow tip che segue la rotazione)
+                        // 3. Testa luminosa dell'arco (glow tip che segue fluidamente la rotazione)
                         val angleRad = Math.toRadians((-90.0 + sweep)).toFloat()
                         val dotX = center.x + radius * cos(angleRad)
                         val dotY = center.y + radius * sin(angleRad)
 
                         drawCircle(
-                            color  = Color.White,
-                            radius = 3.dp.toPx(),
+                            color  = energyColor.copy(alpha = 0.65f),
+                            radius = 6.dp.toPx(),
                             center = Offset(dotX, dotY)
                         )
                         drawCircle(
-                            color  = TroveCyan.copy(alpha = 0.65f),
-                            radius = 6.dp.toPx(),
+                            color  = Color.White,
+                            radius = 3.dp.toPx(),
                             center = Offset(dotX, dotY)
                         )
                     }
