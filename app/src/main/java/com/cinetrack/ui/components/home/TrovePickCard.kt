@@ -243,8 +243,8 @@ fun TrovePickCard(
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold)
             )
-            // Pulsante "Risigilla" — visibile solo quando lo scrigno è già stato aperto oggi
-            if (isRevealedToday && onResetReveal != null) {
+            // Pulsante "Risigilla" — visibile esclusivamente nelle build di debug per test interni
+            if (com.cinetrack.BuildConfig.DEBUG && isRevealedToday && onResetReveal != null) {
                 Spacer(Modifier.width(10.dp))
                 androidx.compose.material3.IconButton(
                     onClick  = onResetReveal,

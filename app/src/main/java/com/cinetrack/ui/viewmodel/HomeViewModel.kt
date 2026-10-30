@@ -12,6 +12,7 @@ import com.cinetrack.domain.usecase.GetHomeFeedUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -197,8 +198,8 @@ class HomeViewModel @Inject constructor(
         if (list.size > 1) {
             val maxScore = list.maxOfOrNull { it.matchScore ?: 0 } ?: 0
             val topCandidates = list
-                .takeWhile { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(70) }
-                .take(4)
+                .filter { (it.matchScore ?: 0) >= (maxScore - 8).coerceAtLeast(70) }
+                .ifEmpty { list.take(5) }
             if (topCandidates.size > 1) {
                 val currentPickId = list.first().id
                 val otherCandidates = topCandidates.filter { it.id != currentPickId }
@@ -215,22 +216,55 @@ class HomeViewModel @Inject constructor(
             }
         }
     }
-    
+
+    private fun alignDailyTrovePick(isTv: Boolean, savedDay: Long, savedMovieId: Long) {
+        val current = _feedState.value
+        val list = if (isTv) current.recommendedTv else current.recommendedMovies
+        if (list.isEmpty()) return
+
+        val today = LocalDate.now().toEpochDay()
+        val chosenPick: Movie? = if (savedDay == today && savedMovieId > 0L) {
+            list.find { it.id == savedMovieId } ?: list.firstOrNull()
+        } else {
+            val maxScore = list.maxOfOrNull { it.matchScore ?: 0 } ?: 0
+            val candidates = list
+                .filter { (it.matchScore ?: 0) >= (maxScore - 8).coerceAtLeast(70) }
+                .ifEmpty { list.take(5) }
+            val dailyIndex = (Math.floorMod(today, candidates.size.toLong())).toInt()
+            candidates.getOrNull(dailyIndex) ?: list.firstOrNull()
+        }
+
+        if (chosenPick != null && list.firstOrNull()?.id != chosenPick.id) {
+            val reordered = (listOf(chosenPick) + list.filter { it.id != chosenPick.id }).toImmutableList()
+            _feedState.value = if (isTv) {
+                current.copy(recommendedTv = reordered)
+            } else {
+                current.copy(recommendedMovies = reordered)
+            }
+            viewModelScope.launch {
+                resolveMovieLogo(chosenPick)
+            }
+        }
+    }
 
     // -------------------------------------------------------------------------
     // Scrigno del Trove – logica giornaliera
     // -------------------------------------------------------------------------
 
     /**
-     * Carica lo stato di apertura dello scrigno dal DataStore.
-     * Da chiamare all'avvio e al cambio di tab.
+     * Carica lo stato di apertura dello scrigno dal DataStore e allinea il pick del giorno.
+     * Da chiamare all'avvio, al caricamento del feed e al cambio di tab.
      */
     fun loadTroveRevealState() {
         val isTv = _activeTab.value == "tv"
         viewModelScope.launch(Dispatchers.IO) {
-            val today = java.time.LocalDate.now().toEpochDay()
-            val (savedDay, _) = preferenceRepository.getTroveRevealState(isTv)
-            _troveRevealedToday.value = (savedDay == today)
+            val today = LocalDate.now().toEpochDay()
+            val (savedDay, savedMovieId) = preferenceRepository.getTroveRevealState(isTv)
+            val isRevealed = (savedDay == today)
+            withContext(Dispatchers.Main) {
+                _troveRevealedToday.value = isRevealed
+                alignDailyTrovePick(isTv, savedDay, savedMovieId)
+            }
         }
     }
 
@@ -240,7 +274,7 @@ class HomeViewModel @Inject constructor(
      */
     fun markTroveRevealed(movieId: Long) {
         val isTv = _activeTab.value == "tv"
-        val today = java.time.LocalDate.now().toEpochDay()
+        val today = LocalDate.now().toEpochDay()
         _troveRevealedToday.value = true
         viewModelScope.launch(Dispatchers.IO) {
             preferenceRepository.markTroveRevealed(isTV = isTv, movieId = movieId, epochDay = today)
@@ -248,11 +282,13 @@ class HomeViewModel @Inject constructor(
     }
 
     /**
-     * Ripristina lo stato dello scrigno a non scoperto (sigillato).
+     * Ripristina lo stato dello scrigno a non scoperto (sigillato) per test interni.
+     * Ruota inoltre il pick in memoria per testare titoli diversi.
      */
     fun resetTroveRevealed() {
         val isTv = _activeTab.value == "tv"
         _troveRevealedToday.value = false
+        rotateTrovePickInMemory()
         viewModelScope.launch(Dispatchers.IO) {
             preferenceRepository.resetTroveRevealed(isTV = isTv)
         }
@@ -304,6 +340,7 @@ class HomeViewModel @Inject constructor(
         val cachedData = repository.getCachedHomeFeed()
         if (cachedData != null) {
             _feedState.value = cachedData.toFeedState()
+            loadTroveRevealState()
         } else if (!_feedState.value.isLoaded) {
             _feedState.value = FeedState(isLoaded = false, hasError = false)
         }
@@ -321,6 +358,7 @@ class HomeViewModel @Inject constructor(
         try {
             val freshFeed = getHomeFeedUseCase()
             _feedState.value = freshFeed
+            loadTroveRevealState()
             // Salva nella cache Room per i successivi accessi
             repository.saveCachedHomeFeed(com.cinetrack.data.model.CachedFeedData.fromFeedState(freshFeed))
         } catch (e: Exception) {

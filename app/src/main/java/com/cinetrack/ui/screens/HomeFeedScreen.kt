@@ -503,7 +503,7 @@ fun HomeFeedScreenContent(
                                             isRevealedToday = troveRevealedToday,
                                             onReveal        = { id -> viewModel.markTroveRevealed(id) },
                                             onMovieClick    = onMovieClick,
-                                            onResetReveal   = { viewModel.resetTroveRevealed() },
+                                            onResetReveal   = if (com.cinetrack.BuildConfig.DEBUG) { { viewModel.resetTroveRevealed() } } else null,
                                             onResolveLogo   = { movie -> viewModel.resolveMovieLogo(movie) }
                                         )
                                     }
