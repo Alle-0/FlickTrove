@@ -164,7 +164,7 @@ fun TrovePickCard(
     LaunchedEffect(isHolding, isUnsealing) {
         if (isUnsealing) return@LaunchedEffect
         if (isHolding) {
-            val remaining = ((1f - chargeProgress.value) * 750).toInt().coerceAtLeast(10)
+            val remaining = ((1f - chargeProgress.value) * 1100).toInt().coerceAtLeast(10)
             chargeProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(durationMillis = remaining, easing = LinearEasing)
@@ -176,7 +176,7 @@ fun TrovePickCard(
         } else {
             chargeProgress.animateTo(
                 targetValue = 0f,
-                animationSpec = tween(durationMillis = 240, easing = FastOutSlowInEasing)
+                animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing)
             )
         }
     }
