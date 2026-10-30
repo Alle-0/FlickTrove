@@ -84,14 +84,6 @@ import kotlin.math.pow
 import kotlin.math.sin
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Colori tematici dello Scrigno
-// ─────────────────────────────────────────────────────────────────────────────
-
-private val TroveCyan = Color(0xFF2CE5B5)
-private val TroveGold = Color(0xFFE2AC28)
-private val TroveSeal = Color(0xFF0A1412)
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Entry-point pubblico
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -350,7 +342,7 @@ fun TrovePickCard(
                             colorEffects(
                                 listOf(
                                     HazeColorEffect.tint(
-                                        TroveSeal.copy(alpha = (0.20f * (1f - revealProgress)).coerceAtLeast(0f))
+                                        Color(0xFF0A0A0A).copy(alpha = (0.22f * (1f - revealProgress)).coerceAtLeast(0f))
                                     )
                                 )
                             )
@@ -657,6 +649,8 @@ private fun TroveHoldToUnsealOverlay(
     onMedallionPositioned: (LayoutCoordinates) -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val primaryColor = MaterialTheme.colorScheme.primary
+
     Box(
         modifier         = modifier.graphicsLayer {
             this.alpha  = alpha
@@ -670,75 +664,65 @@ private fun TroveHoldToUnsealOverlay(
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier            = Modifier.offset(y = (-8).dp)
         ) {
-            // Sigillo circolare con indicatore di carica energetica
+            // Sigillo circolare minimale e coordinato con il tema dell'app
             Box(
                 modifier         = Modifier
-                    .size(86.dp)
+                    .size(76.dp)
                     .onGloballyPositioned { onMedallionPositioned(it) },
                 contentAlignment = Alignment.Center
             ) {
-                // 0. Bolle gravitazionali che convergono e si deformano venendo risucchiate sotto il cerchio centrale
+                // 0. Bolle gravitazionali che convergono venendo risucchiate sotto il disco centrale
                 if (chargeProgress > 0.005f) {
                     TroveGravitationalBubbles(
                         chargeProgress = chargeProgress,
                         modifier       = Modifier
-                            .size(86.dp)
+                            .size(76.dp)
                             .graphicsLayer { clip = false }
                     )
                 }
 
-                // Backing satinato scuro
+                // 1. Unico disco satinato scuro glassmorphism
                 Box(
                     modifier = Modifier
-                        .size(82.dp)
-                        .background(Color.Black.copy(alpha = 0.55f), CircleShape)
-                        .border(0.5.dp, Color.White.copy(alpha = 0.18f), CircleShape)
-                )
-
-                // Alone radiale di accumulo energetico che cresce con la carica
-                val auraAlpha = 0.16f + chargeProgress * 0.55f
-                val auraSize = (50 + chargeProgress * 36).dp
-                Box(
-                    modifier = Modifier
-                        .size(auraSize)
-                        .background(
-                            Brush.radialGradient(
-                                listOf(
-                                    TroveCyan.copy(alpha = auraAlpha),
-                                    TroveGold.copy(alpha = auraAlpha * 0.45f),
-                                    Color.Transparent
-                                )
-                            ),
-                            CircleShape
+                        .size(68.dp)
+                        .background(Color.Black.copy(alpha = 0.58f), CircleShape)
+                        .border(
+                            width = 1.dp,
+                            color = primaryColor.copy(alpha = if (isHolding) 0.45f else 0.18f),
+                            shape = CircleShape
                         )
                 )
 
-                // Canvas dell'anello di carica (Track 360° + Arco attivo + Glow Tip)
-                Canvas(modifier = Modifier.size(76.dp)) {
-                    val strokeWidth = 3.dp.toPx()
+                // 2. Alone morbido a tema che pulsa dolcemente durante la carica
+                if (chargeProgress > 0.01f) {
+                    val auraAlpha = (chargeProgress * 0.35f).coerceIn(0f, 0.35f)
+                    val auraSize = (50 + chargeProgress * 26).dp
+                    Box(
+                        modifier = Modifier
+                            .size(auraSize)
+                            .background(
+                                Brush.radialGradient(
+                                    listOf(
+                                        primaryColor.copy(alpha = auraAlpha),
+                                        Color.Transparent
+                                    )
+                                ),
+                                CircleShape
+                            )
+                    )
+                }
+
+                // 3. Anello di carica fluido disegnato sul perimetro del disco
+                Canvas(modifier = Modifier.size(68.dp)) {
+                    val strokeWidth = 2.5.dp.toPx()
                     val radius = (size.minDimension / 2f) - strokeWidth / 2f
                     val center = Offset(size.width / 2f, size.height / 2f)
 
-                    // 1. Traccia passiva
-                    drawCircle(
-                        color  = Color.White.copy(alpha = 0.14f),
-                        radius = radius,
-                        center = center,
-                        style  = androidx.compose.ui.graphics.drawscope.Stroke(width = strokeWidth)
-                    )
-
-                    // 2. Arco attivo continuo e uniforme: il colore dell'energia si scalda progressivamente
-                    // da TroveCyan a TroveGold man mano che si carica, senza tagli netti (niente discontinuità di shader)
                     if (chargeProgress > 0.005f) {
                         val sweep = chargeProgress * 360f
-                        val energyColor = lerp(
-                            TroveCyan,
-                            TroveGold,
-                            (chargeProgress * 1.15f).coerceIn(0f, 1f)
-                        )
 
                         drawArc(
-                            color      = energyColor,
+                            color      = primaryColor,
                             startAngle = -90f,
                             sweepAngle = sweep,
                             useCenter  = false,
@@ -750,53 +734,31 @@ private fun TroveHoldToUnsealOverlay(
                             )
                         )
 
-                        // 3. Testa luminosa dell'arco (glow tip che segue fluidamente la rotazione)
+                        // Testa luminosa dell'arco che segue la rotazione
                         val angleRad = Math.toRadians((-90.0 + sweep)).toFloat()
                         val dotX = center.x + radius * cos(angleRad)
                         val dotY = center.y + radius * sin(angleRad)
 
                         drawCircle(
-                            color  = energyColor.copy(alpha = 0.65f),
-                            radius = 6.dp.toPx(),
+                            color  = primaryColor.copy(alpha = 0.60f),
+                            radius = 5.dp.toPx(),
                             center = Offset(dotX, dotY)
                         )
                         drawCircle(
                             color  = Color.White,
-                            radius = 3.dp.toPx(),
+                            radius = 2.5.dp.toPx(),
                             center = Offset(dotX, dotY)
                         )
                     }
                 }
 
-                // Gemma centrale con finitura smeraldo
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(
-                            Brush.radialGradient(
-                                listOf(Color(0xFF0F322B), Color(0xFF061411))
-                            ),
-                            CircleShape
-                        )
-                        .border(
-                            width = 1.dp,
-                            brush = Brush.verticalGradient(
-                                listOf(
-                                    TroveCyan.copy(alpha = 0.65f + chargeProgress * 0.35f),
-                                    TroveGold.copy(alpha = 0.40f)
-                                )
-                            ),
-                            shape = CircleShape
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
-                        contentDescription = null,
-                        tint               = if (chargeProgress > 0.85f) Color.White else TroveCyan,
-                        modifier           = Modifier.size(26.dp)
-                    )
-                }
+                // 4. Icona scintillio centrale pulita, coordinata con il tema
+                Icon(
+                    painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
+                    contentDescription = null,
+                    tint               = if (chargeProgress > 0.85f) Color.White else primaryColor,
+                    modifier           = Modifier.size(24.dp)
+                )
             }
 
             // ── Esca psicologica: micro-indizio metadati (Affinità • Anno • Genere) ──
@@ -807,7 +769,7 @@ private fun TroveHoldToUnsealOverlay(
                         .background(Color.Black.copy(alpha = 0.52f), CircleShape)
                         .border(
                             0.5.dp,
-                            if (isHolding) TroveCyan.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f),
+                            if (isHolding) primaryColor.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f),
                             CircleShape
                         )
                         .padding(horizontal = 12.dp, vertical = 4.dp)
@@ -819,7 +781,7 @@ private fun TroveHoldToUnsealOverlay(
                         if (matchScore != null && matchScore > 0) {
                             Text(
                                 text = "${matchScore}% ${stringResource(R.string.match_score)}",
-                                color = TroveCyan,
+                                color = primaryColor,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 letterSpacing = 0.3.sp
@@ -862,7 +824,7 @@ private fun TroveHoldToUnsealOverlay(
             // ── Call-To-Action: "Tieni premuto per scoprire il Trove di oggi" ──
             Text(
                 text = stringResource(R.string.home_trove_pick_sealed_cta),
-                color = if (isHolding) TroveCyan else Color.White.copy(alpha = 0.78f),
+                color = if (isHolding) primaryColor else Color.White.copy(alpha = 0.78f),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,
@@ -901,14 +863,18 @@ private fun TroveGravitationalBubbles(
         label = "TroveBubblePhase"
     )
 
-    // Palette cromatica gioiello: Cyan, Oro, Smeraldo, Azzurro, Viola cosmico
-    val bubbles = remember {
+    val primary = MaterialTheme.colorScheme.primary
+    val secondary = MaterialTheme.colorScheme.secondary
+    val tertiary = MaterialTheme.colorScheme.tertiary
+
+    // Palette cromatica armonica basata sul tema dell'app (Primary, Secondary, Tertiary, White)
+    val bubbles = remember(primary, secondary, tertiary) {
         val colors = listOf(
-            TroveCyan,
-            TroveGold,
-            Color(0xFF38BDF8), // Azzurro elettrico
-            Color(0xFF10B981), // Smeraldo
-            Color(0xFFA78BFA)  // Viola stellare
+            primary,
+            secondary,
+            primary.copy(alpha = 0.85f),
+            tertiary,
+            Color.White.copy(alpha = 0.90f)
         )
         val count = 10 // Pochi elementi nitidi e visibili, non ammassati
         List(count) { i ->
@@ -931,8 +897,8 @@ private fun TroveGravitationalBubbles(
 
     Canvas(modifier = modifier) {
         val center = Offset(size.width / 2f, size.height / 2f) // Baricentro perfetto del medaglione
-        val deformThreshold = 62.dp.toPx() // Oltre 62dp (fuori dal disco da 43dp di raggio) la bolla è 100% sferica
-        val minDist = 18.dp.toPx() // Scompare ben sotto il cerchio scuro (raggio 41dp)
+        val deformThreshold = 52.dp.toPx() // Sotto i 52dp si deforma venendo risucchiata sotto il disco da 34dp di raggio
+        val minDist = 14.dp.toPx() // Scompare sotto il disco scuro
 
         // All'aumentare della carica col tocco, il flusso accelera naturalmente
         val speedBoost = 1f + chargeProgress * 2.0f
@@ -1050,6 +1016,9 @@ private fun TroveUnsealBurstCanvas(
     progress: Float,
     burstCenter: Offset = Offset.Zero
 ) {
+    val primary = MaterialTheme.colorScheme.primary
+    val secondary = MaterialTheme.colorScheme.secondary
+
     Canvas(modifier = Modifier.fillMaxSize()) {
         val center = if (burstCenter != Offset.Zero) {
             burstCenter
@@ -1066,7 +1035,7 @@ private fun TroveUnsealBurstCanvas(
                 brush = Brush.radialGradient(
                     colors = listOf(
                         Color.White.copy(alpha = flashAlpha),
-                        TroveCyan.copy(alpha = flashAlpha * 0.5f),
+                        primary.copy(alpha = flashAlpha * 0.5f),
                         Color.Transparent
                     ),
                     center = center,
@@ -1082,7 +1051,7 @@ private fun TroveUnsealBurstCanvas(
         val wave1Alpha = ((1f - progress) * 0.9f).coerceIn(0f, 1f)
         if (wave1Alpha > 0f) {
             drawCircle(
-                color  = TroveCyan.copy(alpha = wave1Alpha),
+                color  = primary.copy(alpha = wave1Alpha),
                 radius = wave1Dist,
                 center = center,
                 style  = androidx.compose.ui.graphics.drawscope.Stroke(
@@ -1097,7 +1066,7 @@ private fun TroveUnsealBurstCanvas(
             val wave2Alpha = ((1f - delayedProgress) * 0.6f).coerceIn(0f, 1f)
             if (wave2Alpha > 0f) {
                 drawCircle(
-                    color  = TroveGold.copy(alpha = wave2Alpha),
+                    color  = secondary.copy(alpha = wave2Alpha),
                     radius = wave2Dist,
                     center = center,
                     style  = androidx.compose.ui.graphics.drawscope.Stroke(
@@ -1123,8 +1092,8 @@ private fun TroveUnsealBurstCanvas(
 
             val pRadius = ((1.5f + (i % 4) * 0.9f).dp.toPx() * (1f - progress * 0.55f)).coerceAtLeast(0.5.dp.toPx())
             val pColor = when (i % 3) {
-                0 -> TroveCyan
-                1 -> TroveGold
+                0 -> primary
+                1 -> secondary
                 else -> Color.White
             }
 
