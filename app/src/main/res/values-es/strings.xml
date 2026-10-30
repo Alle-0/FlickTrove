@@ -1315,6 +1315,7 @@
     <string name="home_section_top_10">Top 10 FlickTrove (Últimos 30 días)</string>
     <string name="home_section_see_all">Ver todo</string>
     <string name="home_section_trove_pick">La Joya del Trove</string>
+    <string name="home_trove_pick_reset">Volver a sellar</string>
     <string name="home_trove_pick_badge">ELEGIDO PARA TI</string>
     <string name="surprise_subtitle">De tu watchlist</string>
     <string name="settings_default_start_feed">HOME</string>

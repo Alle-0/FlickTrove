@@ -5,6 +5,7 @@
     <string name="hero_details">상세정보</string>
     <string name="home_hero_featured">주요 콘텐츠</string>
     <string name="home_section_trove_pick">Trove의 추천작</string>
+    <string name="home_trove_pick_reset">다시 봉인하기</string>
     <string name="home_trove_pick_badge">당신을 위한 맞춤 추천</string>
     <string name="shortcut_search_short">검색</string>
     <string name="shortcut_search_long">작품 검색</string>

@@ -7,6 +7,7 @@ import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
@@ -31,6 +32,12 @@ class PreferenceRepository @Inject constructor(
         get() = startupPrefs?.getString("default_start_media", "movie") ?: "movie"
 
     private object PreferencesKeys {
+        // --- Scrigno del Trove: stato giornaliero di sblocco ---
+        val TROVE_LAST_EPOCH_DAY_MOVIE = longPreferencesKey("trove_last_epoch_day_movie")
+        val TROVE_REVEALED_MOVIE_ID    = longPreferencesKey("trove_revealed_movie_id")
+        val TROVE_LAST_EPOCH_DAY_TV    = longPreferencesKey("trove_last_epoch_day_tv")
+        val TROVE_REVEALED_TV_ID       = longPreferencesKey("trove_revealed_tv_id")
+
         val HOME_SORT = stringPreferencesKey("home_sort")
         val VISTI_SORT = stringPreferencesKey("visti_sort")
         val FOLDERS_SORT = stringPreferencesKey("folders_sort")
@@ -444,6 +451,56 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateDisabledBadges(badges: Set<String>) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.DISABLED_BADGES] = badges
+        }
+    }
+
+
+    // -------------------------------------------------------------------------
+    // Scrigno del Trove – lettura e scrittura stato giornaliero (zero-net cost)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Legge epochDay + movieId salvati per il tab indicato.
+     * Ritorna Pair(epochDay, movieId). epochDay = 0 se mai rivelato.
+     */
+    suspend fun getTroveRevealState(isTV: Boolean): Pair<Long, Long> {
+        val prefs = dataStore.data.first()
+        return if (isTV) {
+            Pair(
+                prefs[PreferencesKeys.TROVE_LAST_EPOCH_DAY_TV] ?: 0L,
+                prefs[PreferencesKeys.TROVE_REVEALED_TV_ID]    ?: 0L
+            )
+        } else {
+            Pair(
+                prefs[PreferencesKeys.TROVE_LAST_EPOCH_DAY_MOVIE] ?: 0L,
+                prefs[PreferencesKeys.TROVE_REVEALED_MOVIE_ID]    ?: 0L
+            )
+        }
+    }
+
+    /** Segna lo scrigno come "aperto oggi" per il pick con id [movieId]. */
+    suspend fun markTroveRevealed(isTV: Boolean, movieId: Long, epochDay: Long) {
+        dataStore.edit { prefs ->
+            if (isTV) {
+                prefs[PreferencesKeys.TROVE_LAST_EPOCH_DAY_TV] = epochDay
+                prefs[PreferencesKeys.TROVE_REVEALED_TV_ID]    = movieId
+            } else {
+                prefs[PreferencesKeys.TROVE_LAST_EPOCH_DAY_MOVIE] = epochDay
+                prefs[PreferencesKeys.TROVE_REVEALED_MOVIE_ID]    = movieId
+            }
+        }
+    }
+
+    /** Ripristina lo stato dello scrigno a "non scoperto / sigillato". */
+    suspend fun resetTroveRevealed(isTV: Boolean) {
+        dataStore.edit { prefs ->
+            if (isTV) {
+                prefs.remove(PreferencesKeys.TROVE_LAST_EPOCH_DAY_TV)
+                prefs.remove(PreferencesKeys.TROVE_REVEALED_TV_ID)
+            } else {
+                prefs.remove(PreferencesKeys.TROVE_LAST_EPOCH_DAY_MOVIE)
+                prefs.remove(PreferencesKeys.TROVE_REVEALED_MOVIE_ID)
+            }
         }
     }
 

@@ -1353,6 +1353,7 @@
     <string name="home_section_top_10">Top 10 FlickTrove (Ultimi 30 giorni)</string>
     <string name="home_section_see_all">Vedi tutto</string>
     <string name="home_section_trove_pick">La Selezione di Trove</string>
+    <string name="home_trove_pick_reset">Risigilla Pick</string>
     <string name="home_trove_pick_badge">SCELTO PER TE</string>
     <string name="surprise_subtitle">Dalla tua watchlist</string>
     <string name="error_feed_title">Oops! Impossibile caricare il feed.</string>

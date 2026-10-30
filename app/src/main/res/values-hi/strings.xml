@@ -1309,6 +1309,7 @@
     <string name="home_section_top_10">टॉप 10 FlickTrove (पिछले 30 दिन)</string>
     <string name="home_section_see_all">सभी देखें</string>
     <string name="home_section_trove_pick">ट्रोव की पसंद</string>
+    <string name="home_trove_pick_reset">फिर से सील करें</string>
     <string name="home_trove_pick_badge">आपके लिए चुना गया</string>
     <string name="surprise_subtitle">आपकी वॉचलिस्ट से</string>
     <string name="settings_default_start_feed">होम</string>

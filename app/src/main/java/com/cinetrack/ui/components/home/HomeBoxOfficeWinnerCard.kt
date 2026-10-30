@@ -9,7 +9,11 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -17,14 +21,17 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.BoxOfficeMovie
+import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
@@ -37,11 +44,24 @@ import com.cinetrack.ui.components.glass.hazeGlass
 fun HomeBoxOfficeWinnerCard(
     item: BoxOfficeMovie,
     onMovieClick: () -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onResolveLogo: (suspend (Movie) -> String?)? = null
 ) {
     val movie = item.movie
     val imageQuality = LocalImageQuality.current
     val cardHazeState = remember { HazeState() }
+
+    var localLogoPath by remember(movie.id, movie.logoPath) { mutableStateOf(movie.logoPath) }
+    LaunchedEffect(movie.id, movie.logoPath) {
+        if (localLogoPath.isNullOrEmpty() && onResolveLogo != null) {
+            val fetched = onResolveLogo(movie)
+            if (!fetched.isNullOrEmpty()) {
+                localLogoPath = fetched
+            }
+        } else {
+            localLogoPath = movie.logoPath
+        }
+    }
 
     val backdropUrl = remember(movie.backdropPath, movie.posterPath, imageQuality) {
         val path = movie.backdropPath ?: movie.posterPath
@@ -162,16 +182,33 @@ fun HomeBoxOfficeWinnerCard(
                 .fillMaxWidth()
                 .padding(14.dp)
         ) {
-            Text(
-                text = movie.title ?: "",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.White
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            val activeLogo = localLogoPath ?: movie.logoPath
+            if (!activeLogo.isNullOrEmpty()) {
+                val logoUrl = buildTmdbImageUrl(activeLogo, ImageType.LOGO, imageQuality)
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(logoUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = movie.title,
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.CenterStart,
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .heightIn(min = 28.dp, max = 42.dp)
+                )
+            } else {
+                Text(
+                    text = movie.title ?: "",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color.White
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Spacer(modifier = Modifier.height(4.dp))
 

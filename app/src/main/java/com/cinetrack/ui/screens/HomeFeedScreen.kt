@@ -182,6 +182,7 @@ fun HomeFeedScreenContent(
     val tabNavigator = LocalTabNavigator.current    
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
+    val troveRevealedToday by viewModel.troveRevealedToday.collectAsStateWithLifecycle()
     val pullToRefreshState = rememberPullToRefreshState()
     val configuration = LocalConfiguration.current
     
@@ -402,7 +403,8 @@ fun HomeFeedScreenContent(
                                             )
                                             HomeBoxOfficeWinnerCard(
                                                 item = winner,
-                                                onMovieClick = { onMovieClick(winner.movie) }
+                                                onMovieClick = { onMovieClick(winner.movie) },
+                                                onResolveLogo = { movie -> viewModel.resolveMovieLogo(movie) }
                                             )
                                         }
                                     }
@@ -497,9 +499,12 @@ fun HomeFeedScreenContent(
                                 item(key = "section_trove_pick_${if (isTv) "tv" else "movie"}") {
                                     AnimatedHomeSection {
                                         TrovePickCard(
-                                            movie = trovePick,
-                                            onMovieClick = onMovieClick,
-                                            onResolveLogo = { movie -> viewModel.resolveMovieLogo(movie) }
+                                            movie           = trovePick,
+                                            isRevealedToday = troveRevealedToday,
+                                            onReveal        = { id -> viewModel.markTroveRevealed(id) },
+                                            onMovieClick    = onMovieClick,
+                                            onResetReveal   = { viewModel.resetTroveRevealed() },
+                                            onResolveLogo   = { movie -> viewModel.resolveMovieLogo(movie) }
                                         )
                                     }
                                 }

@@ -244,4 +244,18 @@ class BoxOfficeViewModel @Inject constructor(
     fun emitMessage(uiText: UiText) {
         actionFeedbackManager.emit(uiText)
     }
+
+    suspend fun resolveMovieLogo(movie: Movie): String? {
+        if (!movie.logoPath.isNullOrEmpty()) return movie.logoPath
+        return try {
+            val isTv = movie.mediaType == "tv"
+            val logo = repository.getMovieLogo(movie.id, isTv)
+            if (logo != null) {
+                movie.logoPath = logo
+            }
+            logo
+        } catch (e: Exception) {
+            null
+        }
+    }
 }

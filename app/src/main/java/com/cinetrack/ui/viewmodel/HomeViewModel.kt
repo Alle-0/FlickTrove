@@ -96,6 +96,18 @@ class HomeViewModel @Inject constructor(
     val animatedMovieIds = mutableSetOf<String>()
     val updatingShowIds = mutableStateMapOf<Long, Boolean>()
 
+
+    // -------------------------------------------------------------------------
+    // Scrigno del Trove – stato in-memory (veloce, read-only per la UI)
+    // -------------------------------------------------------------------------
+
+    /**
+     * Espone se lo scrigno del pick corrente è già stato aperto oggi.
+     * 	rue → card mostrata in chiaro;  alse → card sigillata.
+     * Cambio di tab (movie / tv) aggiorna automaticamente il valore.
+     */
+    private val _troveRevealedToday = MutableStateFlow(false)
+    val troveRevealedToday: StateFlow<Boolean> = _troveRevealedToday.asStateFlow()
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
 
@@ -104,9 +116,8 @@ class HomeViewModel @Inject constructor(
     fun pullToRefresh() {
         val now = System.currentTimeMillis()
         if (now - lastRefreshTimestamp < 5_000L) {
-            // Cooldown anti-spam (5s): evita di bombardare le API esterne ma ruota comunque il pick
+            // Cooldown anti-spam (5s): evita di bombardare le API esterne
             _isRefreshing.value = true
-            rotateTrovePickInMemory()
             viewModelScope.launch {
                 kotlinx.coroutines.delay(600)
                 _isRefreshing.value = false
@@ -115,9 +126,6 @@ class HomeViewModel @Inject constructor(
         }
         lastRefreshTimestamp = now
         _isRefreshing.value = true
-
-        // 1. Ruota istantaneamente il pick in memoria per dare feedback visivo immediato
-        rotateTrovePickInMemory()
 
         viewModelScope.launch {
             try {
@@ -208,6 +216,48 @@ class HomeViewModel @Inject constructor(
         }
     }
     
+
+    // -------------------------------------------------------------------------
+    // Scrigno del Trove – logica giornaliera
+    // -------------------------------------------------------------------------
+
+    /**
+     * Carica lo stato di apertura dello scrigno dal DataStore.
+     * Da chiamare all'avvio e al cambio di tab.
+     */
+    fun loadTroveRevealState() {
+        val isTv = _activeTab.value == "tv"
+        viewModelScope.launch(Dispatchers.IO) {
+            val today = java.time.LocalDate.now().toEpochDay()
+            val (savedDay, _) = preferenceRepository.getTroveRevealState(isTv)
+            _troveRevealedToday.value = (savedDay == today)
+        }
+    }
+
+    /**
+     * Chiude il sigillo: memorizza il pick aperto e aggiorna la UI.
+     * Da chiamare al termine dell'animazione di apertura (finishedListener).
+     */
+    fun markTroveRevealed(movieId: Long) {
+        val isTv = _activeTab.value == "tv"
+        val today = java.time.LocalDate.now().toEpochDay()
+        _troveRevealedToday.value = true
+        viewModelScope.launch(Dispatchers.IO) {
+            preferenceRepository.markTroveRevealed(isTV = isTv, movieId = movieId, epochDay = today)
+        }
+    }
+
+    /**
+     * Ripristina lo stato dello scrigno a non scoperto (sigillato).
+     */
+    fun resetTroveRevealed() {
+        val isTv = _activeTab.value == "tv"
+        _troveRevealedToday.value = false
+        viewModelScope.launch(Dispatchers.IO) {
+            preferenceRepository.resetTroveRevealed(isTV = isTv)
+        }
+    }
+
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
     }
@@ -227,6 +277,11 @@ class HomeViewModel @Inject constructor(
         }
         fetchFeed()
         loadBoxOfficeWinner()
+        loadTroveRevealState()
+        // Ricarica lo stato Scrigno quando si cambia tab (Movie <-> TV)
+        viewModelScope.launch {
+            _activeTab.collect { loadTroveRevealState() }
+        }
         viewModelScope.launch(Dispatchers.IO) {
             repository.healMissingPosters()
         }
@@ -418,6 +473,36 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+
+    fun toggleReminder(movie: Movie) {
+        val title = movie.title ?: movie.name ?: ""
+        viewModelScope.launch {
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                val previousState = current.copy()
+
+                val newReminder = !current.reminder
+                val updatedMovie = current.copy(
+                    reminder = newReminder,
+                    favorite = if (newReminder) false else current.favorite,
+                    watched = if (newReminder) false else current.watched
+                )
+                repository.saveMovie(updatedMovie)
+
+                val msgRes = if (newReminder) R.string.msg_action_reminder else R.string.msg_action_removed
+                actionFeedbackManager.emit(UiText.StringResource(msgRes, title)) {
+                    try {
+                        repository.saveMovie(previousState)
+                    } catch (e: Exception) {
+                        // ignore
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
+            }
+        }
+    }
     fun toggleWatched(movie: Movie) {
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {

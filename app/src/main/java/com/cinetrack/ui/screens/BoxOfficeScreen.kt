@@ -46,6 +46,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import coil.compose.AsyncImage
+import coil.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.model.BoxOfficeMovie
 import com.cinetrack.data.model.Movie
@@ -251,7 +252,8 @@ fun BoxOfficeScreenContent(
                         item(key = "hero_winner_${winner.movie.id}") {
                             BoxOfficeHeroWinnerCard(
                                 item = winner,
-                                onClick = { onMovieClick(winner.movie) }
+                                onClick = { onMovieClick(winner.movie) },
+                                onResolveLogo = { movie -> viewModel.resolveMovieLogo(movie) }
                             )
                         }
 
@@ -357,11 +359,25 @@ fun BoxOfficeScreenContent(
 @androidx.compose.runtime.Composable
 fun BoxOfficeHeroWinnerCard(
     item: BoxOfficeMovie,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    onResolveLogo: (suspend (Movie) -> String?)? = null
 ) {
     val movie = item.movie
     val imageQuality = LocalImageQuality.current
     val cardHazeState = remember { HazeState() }
+
+    var localLogoPath by remember(movie.id, movie.logoPath) { mutableStateOf(movie.logoPath) }
+    LaunchedEffect(movie.id, movie.logoPath) {
+        if (localLogoPath.isNullOrEmpty() && onResolveLogo != null) {
+            val fetched = onResolveLogo(movie)
+            if (!fetched.isNullOrEmpty()) {
+                localLogoPath = fetched
+            }
+        } else {
+            localLogoPath = movie.logoPath
+        }
+    }
 
     val backdropUrl = remember(movie.backdropPath, movie.posterPath, imageQuality) {
         val path = movie.backdropPath ?: movie.posterPath
@@ -457,16 +473,33 @@ fun BoxOfficeHeroWinnerCard(
                 .fillMaxWidth()
                 .padding(14.dp)
         ) {
-            Text(
-                text = movie.title ?: "",
-                style = MaterialTheme.typography.titleMedium.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp,
-                    color = Color.White
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
+            val activeLogo = localLogoPath ?: movie.logoPath
+            if (!activeLogo.isNullOrEmpty()) {
+                val logoUrl = buildTmdbImageUrl(activeLogo, ImageType.LOGO, imageQuality)
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data(logoUrl)
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = movie.title,
+                    contentScale = ContentScale.Fit,
+                    alignment = Alignment.CenterStart,
+                    modifier = Modifier
+                        .fillMaxWidth(0.72f)
+                        .heightIn(min = 28.dp, max = 42.dp)
+                )
+            } else {
+                Text(
+                    text = movie.title ?: "",
+                    style = MaterialTheme.typography.titleMedium.copy(
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 18.sp,
+                        color = Color.White
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
 
             Spacer(modifier = Modifier.height(6.dp))
 

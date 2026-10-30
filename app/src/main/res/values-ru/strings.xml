@@ -1312,6 +1312,7 @@
     <string name="home_section_top_10">Топ 10 FlickTrove (Последние 30 дней)</string>
     <string name="home_section_see_all">Смотреть все</string>
     <string name="home_section_trove_pick">Выбор Trove</string>
+    <string name="home_trove_pick_reset">Скрыть снова</string>
     <string name="home_trove_pick_badge">ВЫБРАНО ДЛЯ ВАС</string>
     <string name="surprise_subtitle">Из вашего списка</string>
     <string name="settings_default_start_feed">ГЛАВНАЯ</string>
