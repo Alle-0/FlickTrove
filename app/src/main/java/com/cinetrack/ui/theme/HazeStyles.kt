@@ -29,7 +29,7 @@ object HazeStyles {
     const val GlassShimmerAlpha = 0.05f
 
     val GlassColor = Color(0xFF010103)
-    val GlassBlurRadius = 16.dp
+    val GlassBlurRadius = 20.dp
     val SmallGlassBlurRadius = 8.dp
 
     /**
