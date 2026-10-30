@@ -122,9 +122,20 @@ fun MainDeepLinkHandler(
                 val mediaId = intent.getStringExtra("mediaId")?.toLongOrNull()
                 val mediaType = intent.getStringExtra("mediaType")
                 val commentId = intent.getStringExtra("commentId")
+                val seasonNumber = intent.getStringExtra("seasonNumber")?.toIntOrNull()
+                val episodeNumber = intent.getStringExtra("episodeNumber")?.toIntOrNull()
                 if (mediaId != null && mediaType != null) {
                     when (mediaType) {
-                        "movie", "tv" -> rootNavigator.push(MovieDetailScreen(mediaId, mediaType, openComments = true, targetCommentId = commentId))
+                        "movie", "tv" -> rootNavigator.push(
+                            MovieDetailScreen(
+                                movieId = mediaId,
+                                mediaType = mediaType,
+                                openComments = true,
+                                targetCommentId = commentId,
+                                targetSeasonNumber = seasonNumber,
+                                targetEpisodeNumber = episodeNumber
+                            )
+                        )
                     }
                 }
             }

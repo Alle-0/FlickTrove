@@ -644,6 +644,9 @@
     <string name="updates_social_replied_multiple">ha risposto %1$d volte</string>
     <string name="updates_social_liked_plural">hanno messo mi piace ai tuoi commenti</string>
     <string name="updates_social_replied_plural">hanno risposto ai tuoi commenti</string>
+    <string name="updates_social_mentioned">ti ha menzionato in un commento</string>
+    <string name="updates_social_mentioned_multiple">ti ha menzionato %1$d volte</string>
+    <string name="updates_social_mentioned_plural">ti hanno menzionato nei commenti</string>
     <string name="updates_your_reminders">I tuoi Promemoria</string>
     <string name="updates_waiting_count">%1$d in attesa</string>
     <string name="updates_no_notifications">Nessuna notifica recente.</string>

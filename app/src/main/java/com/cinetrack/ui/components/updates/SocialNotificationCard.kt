@@ -60,10 +60,10 @@ fun SocialNotificationCard(
         R.drawable.ic_comment
     }
     
-    val iconColor = if (notification.type == "like") {
-        Color(0xFFFF375F)
-    } else {
-        MaterialTheme.colorScheme.primary
+    val iconColor = when (notification.type) {
+        "like" -> Color(0xFFFF375F)
+        "mention" -> Color(0xFFFF9F0A)
+        else -> MaterialTheme.colorScheme.primary
     }
 
     val notificationText = remember(notification, context) {
@@ -90,26 +90,26 @@ fun SocialNotificationCard(
                     }
                 }
                 append(" ")
-                if (notification.type == "like") {
-                    append(context.getString(R.string.updates_social_liked_plural))
-                } else {
-                    append(context.getString(R.string.updates_social_replied_plural))
+                when (notification.type) {
+                    "like" -> append(context.getString(R.string.updates_social_liked_plural))
+                    "mention" -> append(context.getString(R.string.updates_social_mentioned_plural))
+                    else -> append(context.getString(R.string.updates_social_replied_plural))
                 }
             } else if (totalCount > 1) {
                 // Same sender, multiple actions on the same movie
                 append(" ")
-                if (notification.type == "like") {
-                    append(context.getString(R.string.updates_social_liked_multiple, totalCount))
-                } else {
-                    append(context.getString(R.string.updates_social_replied_multiple, totalCount))
+                when (notification.type) {
+                    "like" -> append(context.getString(R.string.updates_social_liked_multiple, totalCount))
+                    "mention" -> append(context.getString(R.string.updates_social_mentioned_multiple, totalCount))
+                    else -> append(context.getString(R.string.updates_social_replied_multiple, totalCount))
                 }
             } else {
                 // Single interaction
                 append(" ")
-                if (notification.type == "like") {
-                    append(context.getString(R.string.updates_social_liked))
-                } else {
-                    append(context.getString(R.string.updates_social_replied))
+                when (notification.type) {
+                    "like" -> append(context.getString(R.string.updates_social_liked))
+                    "mention" -> append(context.getString(R.string.updates_social_mentioned))
+                    else -> append(context.getString(R.string.updates_social_replied))
                 }
             }
 
@@ -118,6 +118,9 @@ fun SocialNotificationCard(
             append(" ")
             withStyle(SpanStyle(fontWeight = FontWeight.SemiBold, color = Color.White.copy(alpha = alpha))) {
                 append(notification.mediaTitle)
+                if (notification.seasonNumber != null && notification.episodeNumber != null) {
+                    append(" (S${notification.seasonNumber} • Ep ${notification.episodeNumber})")
+                }
             }
         }
     }
@@ -162,8 +165,14 @@ fun SocialNotificationCard(
             Box(
                 modifier = Modifier.width(44.dp).height(58.dp)
             ) {
+                val posterUrl = com.cinetrack.util.buildTmdbImageUrl(
+                    notification.mediaImage,
+                    com.cinetrack.util.ImageType.POSTER,
+                    com.cinetrack.util.LocalImageQuality.current
+                ) ?: notification.mediaImage
+
                 AsyncImage(
-                    model = notification.mediaImage,
+                    model = posterUrl,
                     contentDescription = null,
                     contentScale = ContentScale.Crop,
                     modifier = Modifier

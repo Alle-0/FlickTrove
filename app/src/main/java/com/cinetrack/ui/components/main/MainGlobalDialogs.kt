@@ -320,8 +320,17 @@ fun MainGlobalDialogs(
             onMovieClick = { movie ->
                 rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },
-            onSocialNotificationClick = { movie, commentId ->
-                rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType, openComments = true, targetCommentId = commentId))
+            onSocialNotificationClick = { movie, commentId, seasonNumber, episodeNumber ->
+                rootNavigator.push(
+                    MovieDetailScreen(
+                        movieId = movie.id,
+                        mediaType = movie.mediaType,
+                        openComments = true,
+                        targetCommentId = commentId,
+                        targetSeasonNumber = seasonNumber,
+                        targetEpisodeNumber = episodeNumber
+                    )
+                )
             },
             onNavigateToTrophyRoom = { targetBadgeId ->
                 onUpdatesOverlayClose()

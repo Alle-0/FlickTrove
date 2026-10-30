@@ -271,7 +271,12 @@ class CommsUniViewModel @Inject constructor(
         if (!title.isNullOrBlank()) {
             currentTitle = title
         }
-        val normalizedType = if (entityType.lowercase() in listOf("tv", "series", "show")) "show" else "movie"
+        val normalizedType = when {
+            seasonNumber != null && episodeNumber != null -> "episode"
+            seasonNumber != null -> "season"
+            entityType.lowercase() in listOf("tv", "series", "show") -> "show"
+            else -> "movie"
+        }
         if (tvdbId != null && tvdbId > 0) {
             val entityId = commsUniRepository.buildEntityId(tvdbId, seasonNumber, episodeNumber)
             if (currentEntityId == entityId && currentEntityType == normalizedType) return
@@ -283,7 +288,7 @@ class CommsUniViewModel @Inject constructor(
         } else {
             _isLoading.value = true
             viewModelScope.launch {
-                val searchType = if (normalizedType == "show") "series" else "movie"
+                val searchType = if (normalizedType in listOf("show", "season", "episode")) "series" else "movie"
                 val resolvedTvdbId = (if (!imdbId.isNullOrBlank()) {
                     tvdbRepository.resolveTvdbIdByRemoteId(imdbId, searchType)
                 } else null) ?: (if (rawMediaId.isNotBlank()) {

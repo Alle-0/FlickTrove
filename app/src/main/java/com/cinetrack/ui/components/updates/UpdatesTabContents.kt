@@ -154,7 +154,7 @@ fun SocialTabContent(
     paddingValues: PaddingValues,
     socialNotifications: List<GroupedSocialNotification>,
     onMarkAllAsRead: () -> Unit,
-    onNotificationClick: (Movie, String?) -> Unit,
+    onNotificationClick: (Movie, String?, Int?, Int?) -> Unit,
     onMarkAsRead: (GroupedSocialNotification) -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -213,10 +213,10 @@ fun SocialTabContent(
                                             id = notif.mediaId.toLongOrNull() ?: 0L,
                                             mediaType = notif.mediaType,
                                             title = notif.mediaTitle,
-                                            posterPath = null,
+                                            posterPath = notif.mediaImage,
                                             backdropPath = null
                                         )
-                                        onNotificationClick(movie, notif.commentId.ifBlank { null })
+                                        onNotificationClick(movie, notif.commentId.ifBlank { null }, notif.seasonNumber, notif.episodeNumber)
                                     }
                                 },
                                 onMarkRead = {
@@ -246,10 +246,10 @@ fun SocialTabContent(
                                             id = notif.mediaId.toLongOrNull() ?: 0L,
                                             mediaType = notif.mediaType,
                                             title = notif.mediaTitle,
-                                            posterPath = null,
+                                            posterPath = notif.mediaImage,
                                             backdropPath = null
                                         )
-                                        onNotificationClick(movie, notif.commentId.ifBlank { null })
+                                        onNotificationClick(movie, notif.commentId.ifBlank { null }, notif.seasonNumber, notif.episodeNumber)
                                     }
                                 },
                                 onMarkRead = {}

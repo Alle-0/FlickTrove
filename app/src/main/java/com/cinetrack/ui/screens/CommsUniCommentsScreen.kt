@@ -108,6 +108,8 @@ class CommsUniCommentsScreen(
     private val tvdbId: Int? = null,
     private val mediaId: String = "",
     private val mediaType: String = "movie",
+    private val seasonNumber: Int? = null,
+    private val episodeNumber: Int? = null,
     private val accentColorValue: Long = 0L,
     private val mediaTitle: String = "",
     private val mediaImage: String? = null,
@@ -139,10 +141,12 @@ class CommsUniCommentsScreen(
             getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
         
-        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear, mediaId, imdbId) {
+        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear, mediaId, imdbId, seasonNumber, episodeNumber) {
             viewModel.init(
                 tvdbId = tvdbId,
                 entityType = mediaType,
+                seasonNumber = seasonNumber,
+                episodeNumber = episodeNumber,
                 title = mediaTitle,
                 year = releaseYear,
                 rawMediaId = mediaId,

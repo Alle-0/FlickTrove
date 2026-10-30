@@ -1381,6 +1381,9 @@
     <string name="updates_social_replied_multiple">replied %1$d times</string>
     <string name="updates_social_liked_plural">liked your comments</string>
     <string name="updates_social_replied_plural">replied to your comments</string>
+    <string name="updates_social_mentioned">mentioned you in a comment</string>
+    <string name="updates_social_mentioned_multiple">mentioned you %1$d times</string>
+    <string name="updates_social_mentioned_plural">mentioned you in comments</string>
     <string name="comment_banned_permanent">You cannot comment. You have been permanently suspended.</string>
     <string name="comment_banned_temporary">You cannot comment. You have been suspended until %1$s.</string>
     <string name="comment_cooldown_wait">Wait %1$d seconds before commenting again.</string>

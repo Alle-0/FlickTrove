@@ -125,7 +125,7 @@ class UpdatesViewModel @Inject constructor(
     private fun groupSocialNotifications(rawNotifs: List<SocialNotification>): ImmutableList<GroupedSocialNotification> {
         if (rawNotifs.isEmpty()) return persistentListOf()
 
-        val grouped = rawNotifs.groupBy { "${it.type}_${it.mediaId}_${it.isRead}" }
+        val grouped = rawNotifs.groupBy { "${it.type}_${it.mediaId}_${it.seasonNumber}_${it.episodeNumber}_${it.isRead}" }
 
         val result = grouped.map { (_, groupItems) ->
             val sortedItems = groupItems.sortedByDescending { it.createdAt?.seconds ?: 0L }
@@ -142,6 +142,8 @@ class UpdatesViewModel @Inject constructor(
                 mediaTitle = latest.mediaTitle,
                 mediaImage = latest.mediaImage,
                 commentId = latest.commentId,
+                seasonNumber = latest.seasonNumber,
+                episodeNumber = latest.episodeNumber,
                 senders = senders,
                 count = sortedItems.size,
                 latestTimestamp = latest.createdAt,

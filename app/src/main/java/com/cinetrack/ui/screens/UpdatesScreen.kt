@@ -97,7 +97,7 @@ fun UpdatesScreen(
     onBack: () -> Unit,
     onClosing: () -> Unit = {},
     onMovieClick: (Movie) -> Unit,
-    onSocialNotificationClick: ((Movie, String?) -> Unit)? = null,
+    onSocialNotificationClick: ((Movie, String?, Int?, Int?) -> Unit)? = null,
     onNavigateToTrophyRoom: ((String?) -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
@@ -320,9 +320,9 @@ fun UpdatesScreen(
                     paddingValues = paddingValues,
                     socialNotifications = uiState.socialNotifications,
                     onMarkAllAsRead = { viewModel.markAllSocialNotificationsAsRead() },
-                    onNotificationClick = { movie, commentId ->
+                    onNotificationClick = { movie, commentId, seasonNumber, episodeNumber ->
                         if (onSocialNotificationClick != null) {
-                            onSocialNotificationClick(movie, commentId)
+                            onSocialNotificationClick(movie, commentId, seasonNumber, episodeNumber)
                         } else {
                             onMovieClick(movie)
                         }
