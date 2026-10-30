@@ -19,7 +19,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Lock
 import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
@@ -782,13 +781,6 @@ private fun TroveHoldToUnsealOverlay(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.spacedBy(6.dp)
                     ) {
-                        Icon(
-                            imageVector = Icons.Rounded.Lock,
-                            contentDescription = null,
-                            tint = if (isHolding) TroveCyan else TroveGold.copy(alpha = 0.90f),
-                            modifier = Modifier.size(11.dp)
-                        )
-
                         if (matchScore != null && matchScore > 0) {
                             Text(
                                 text = "${matchScore}% ${stringResource(R.string.match_score)}",
