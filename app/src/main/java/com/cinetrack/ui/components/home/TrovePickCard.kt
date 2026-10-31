@@ -72,6 +72,7 @@ import kotlinx.coroutines.launch
 import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.utils.CinematicHaptics
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
@@ -175,6 +176,7 @@ fun TrovePickCard(
                 animationSpec = tween(durationMillis = remaining, easing = LinearEasing)
             )
             if (chargeProgress.value >= 1f && isHolding && !isUnsealing) {
+                CinematicHaptics.unsealThud(context)
                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                 isUnsealing = true
             }
@@ -199,7 +201,7 @@ fun TrovePickCard(
         label = "TroveReveal"
     )
 
-    // Micro-click aptici alle tappe della messa a fuoco (33% e 66%) per simulare gli scatti meccanici della ghiera
+    // Micro-click aptici a ghiera meccanica di precisione (8 step progressivi verso il fuoco ottico)
     var lastHapticMilestone by remember { mutableStateOf(0) }
     LaunchedEffect(isHolding) {
         if (!isHolding) {
@@ -207,9 +209,16 @@ fun TrovePickCard(
         }
     }
     LaunchedEffect(chargeProgress.value) {
-        val currentMilestone = (chargeProgress.value * 3).toInt()
-        if (isHolding && currentMilestone > lastHapticMilestone && currentMilestone in 1..2) {
+        val totalSteps = 8
+        val currentMilestone = (chargeProgress.value * totalSteps).toInt()
+        if (isHolding && currentMilestone > lastHapticMilestone && currentMilestone in 1 until totalSteps) {
             lastHapticMilestone = currentMilestone
+            if (currentMilestone == totalSteps / 2) {
+                CinematicHaptics.mechanicalClick(context, intensity = 0.65f)
+            } else {
+                val stepIntensity = 0.35f + (currentMilestone.toFloat() / totalSteps) * 0.45f
+                CinematicHaptics.mechanicalTick(context, intensity = stepIntensity)
+            }
             haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
         }
     }
