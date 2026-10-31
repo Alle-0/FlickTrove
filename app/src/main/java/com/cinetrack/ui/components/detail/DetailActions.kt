@@ -81,6 +81,7 @@ fun DetailActions(
     onRemove: () -> Unit,
     onEpisodesClick: (() -> Unit)? = null,
     onManageRewatches: (() -> Unit)? = null,
+    onPreviewWatch: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -97,6 +98,7 @@ fun DetailActions(
     val currentOnRemove by rememberUpdatedState(onRemove)
     val currentOnEpisodesClick by rememberUpdatedState(onEpisodesClick)
     val currentOnManageRewatches by rememberUpdatedState(onManageRewatches)
+    val currentOnPreviewWatch by rememberUpdatedState(onPreviewWatch)
     
     // Use a single transition for all coordinated animations
     val transition = updateTransition(targetState = optimisticWatchState, label = "DetailActionsTransition")
@@ -107,6 +109,7 @@ fun DetailActions(
         label = "DisplayColor"
     ) { state ->
         when {
+            state == WatchState.WATCHED -> accentColor
             !movie.isReleased && state != WatchState.NONE -> accentColor
             state == WatchState.NONE -> accentColor.copy(alpha = 0.9f)
             else -> accentColor
@@ -124,7 +127,7 @@ fun DetailActions(
             }
         },
         label = "TrashWidth"
-    ) { if (it != WatchState.NONE && movie.isReleased) 68.dp else 0.dp }
+    ) { if (it != WatchState.NONE && (movie.isReleased || it == WatchState.WATCHED)) 68.dp else 0.dp }
 
     val mainPillWeight by transition.animateFloat(
         transitionSpec = {
@@ -155,7 +158,7 @@ fun DetailActions(
     }
 
     val isPillVisible = !(optimisticWatchState == WatchState.WATCHED && movie.mediaType != "tv")
-    val isTrashVisible = optimisticWatchState != WatchState.NONE && movie.isReleased
+    val isTrashVisible = optimisticWatchState != WatchState.NONE && (movie.isReleased || optimisticWatchState == WatchState.WATCHED)
 
     val spacing by transition.animateDp(
         transitionSpec = {
@@ -173,7 +176,7 @@ fun DetailActions(
             else tween(150) 
         },
         label = "TrashAlpha"
-    ) { if (it != WatchState.NONE && movie.isReleased) 1f else 0f }
+    ) { if (it != WatchState.NONE && (movie.isReleased || it == WatchState.WATCHED)) 1f else 0f }
 
     // Offset animation for trash button to avoid graphicsLayer lag with Haze
     val trashOffset by transition.animateDp(
@@ -185,7 +188,7 @@ fun DetailActions(
             }
         },
         label = "TrashOffset"
-    ) { if (it != WatchState.NONE && movie.isReleased) 0.dp else 16.dp }
+    ) { if (it != WatchState.NONE && (movie.isReleased || it == WatchState.WATCHED)) 0.dp else 16.dp }
 
     val trashColor by transition.animateColor(
         transitionSpec = { tween(400) },
@@ -204,6 +207,10 @@ fun DetailActions(
     val displayWatchState = optimisticWatchState
 
     val icon = when {
+        displayWatchState == WatchState.WATCHED -> {
+            if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_lista)
+            else ImageVector.vectorResource(id = R.drawable.ic_ricarica)
+        }
         !movie.isReleased -> {
             if (displayWatchState != WatchState.NONE) ImageVector.vectorResource(id = R.drawable.ic_bell_piena)
             else ImageVector.vectorResource(id = R.drawable.ic_bell)
@@ -214,14 +221,11 @@ fun DetailActions(
             if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_lista)
             else ImageVector.vectorResource(id = R.drawable.ic_eye)
         }
-        displayWatchState == WatchState.WATCHED -> {
-            if (movie.mediaType == "tv") ImageVector.vectorResource(id = R.drawable.ic_lista)
-            else ImageVector.vectorResource(id = R.drawable.ic_ricarica)
-        }
         else -> ImageVector.vectorResource(id = R.drawable.ic_lista_plus)
     }
     
     val label = when {
+        displayWatchState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
         !movie.isReleased -> {
             if (displayWatchState != WatchState.NONE) stringResource(R.string.action_reminder_active)
             else stringResource(R.string.action_remind_me)
@@ -229,7 +233,6 @@ fun DetailActions(
         displayWatchState == WatchState.NONE -> if (movie.mediaType == "tv") stringResource(R.string.action_to_watch_tv) else stringResource(R.string.action_to_watch_movie)
         displayWatchState == WatchState.DROPPED -> stringResource(R.string.action_dropped)
         displayWatchState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_mark_as_watched)
-        displayWatchState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
         else -> ""
     }
 
@@ -324,6 +327,11 @@ fun DetailActions(
                     }
                     .bounceClick(
                         scaleDown = 0.95f,
+                        onLongClick = if (!movie.isReleased && movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) {
+                            {
+                                currentOnPreviewWatch?.invoke()
+                            }
+                        } else null,
                         onClick = {
                             if (!movie.isReleased) {
                                 // Simple toggle for unreleased movies and tv series
@@ -407,7 +415,7 @@ fun DetailActions(
                 val bellRotation = remember { Animatable(0f) }
                 
                 LaunchedEffect(displayWatchState) {
-                    if (!movie.isReleased && displayWatchState != WatchState.NONE) {
+                    if (!movie.isReleased && displayWatchState != WatchState.NONE && displayWatchState != WatchState.WATCHED) {
                         delay(150)
                         bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
                         bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
@@ -454,7 +462,7 @@ fun DetailActions(
                         targetState = displayWatchState,
                         transitionSpec = {
                             val slideDirection = if (targetState > initialState) 1 else -1
-                            if (!movie.isReleased) {
+                            if (!movie.isReleased && targetState != WatchState.WATCHED && initialState != WatchState.WATCHED) {
                                 (fadeIn(tween(250)) + slideInVertically(tween(350)) { -slideDirection * it / 2 })
                                     .togetherWith(fadeOut(tween(200)) + slideOutVertically(tween(300)) { slideDirection * it / 2 })
                             } else {
@@ -465,6 +473,7 @@ fun DetailActions(
                         label = "TextAnim"
                     ) { targetState ->
                         val targetLabel = when {
+                            targetState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
                             !movie.isReleased -> {
                                 if (targetState != WatchState.NONE) stringResource(R.string.action_reminder_active)
                                 else stringResource(R.string.action_remind_me)
@@ -472,7 +481,6 @@ fun DetailActions(
                             targetState == WatchState.NONE -> if (movie.mediaType == "tv") stringResource(R.string.action_to_watch_tv) else stringResource(R.string.action_to_watch_movie)
                             targetState == WatchState.DROPPED -> stringResource(R.string.action_dropped)
                             targetState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_mark_as_watched)
-                            targetState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
                             else -> ""
                         }
 

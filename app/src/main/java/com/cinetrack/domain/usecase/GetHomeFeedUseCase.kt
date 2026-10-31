@@ -214,21 +214,109 @@ class GetHomeFeedUseCase @Inject constructor(
                 (candidate.genreIds ?: emptyList()).intersect((anchor.genreIds ?: emptyList()).toSet()).size
             }
         } else null
-        val usedTwo = setOfNotNull(anchor?.id, second?.id)
-        val third = topPool.filter { it.id !in usedTwo }.randomOrNull()
-        val seeds = listOfNotNull(anchor, second, third)
+        val seeds = listOfNotNull(anchor, second)
         val usedSeedIds = seeds.map { it.id }.toSet()
 
+        val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
+
+        // Estrazione vettori chiave dal profilo per query mirate TMDB Discover
+        val topGenrePairKey = userProfile?.genrePairAffinities?.maxByOrNull { it.value }?.key
+        val genrePairStr = if (topGenrePairKey != null) {
+            val genreA = (topGenrePairKey shr 32)
+            val genreB = (topGenrePairKey and 0xFFFFFFFFL)
+            "$genreA,$genreB"
+        } else null
+
+        val topForeignCountry = userProfile?.countryFrequencies?.entries
+            ?.filter { it.key != "US" && it.value >= 0.18f }
+            ?.maxByOrNull { it.value }?.key
+
+        val excludedGenresList = mutableListOf<Long>()
+        calculateMatchScoreUseCase.nicheFormatGenres.forEach { nicheId ->
+            if ((userProfile?.genreFrequencies?.get(nicheId) ?: 0f) == 0f) {
+                excludedGenresList.add(nicheId)
+            }
+        }
+        userProfile?.negativeGenreScores?.forEach { (negId, negScore) ->
+            if (negScore >= 0.5f && (userProfile.genreFrequencies[negId] ?: 0f) == 0f) {
+                excludedGenresList.add(negId)
+            }
+        }
+        val excludedGenresStr = if (excludedGenresList.isNotEmpty()) {
+            excludedGenresList.distinct().joinToString(",")
+        } else null
+
+        val topDirectorId = if (type == "movie") {
+            userProfile?.directorAffinities?.maxByOrNull { it.value }?.key
+        } else null
+
+        val topSingleGenre = userProfile?.genreAffinities?.maxByOrNull { it.value }?.key
+
         val localCompositeIds = localMovies.map { it.compositeId }.toSet()
+
         val rawData = coroutineScope {
-            seeds.map { seed ->
+            // Stream 1 & 2: Seed Recommendations tradizionali (Anchor + Diversified)
+            val seedDeferred = seeds.map { seed ->
                 async {
                     runCatching {
                         if (type == "movie") repository.getMovieRecommendations(seed.id)
                         else repository.getTVRecommendations(seed.id)
                     }.getOrDefault(emptyList())
                 }
-            }.awaitAll().flatten()
+            }
+
+            // Stream 3: Discover Micro-Cluster & Culture (Synergy + Country)
+            val discoverSynergyDeferred = async {
+                runCatching {
+                    val params = mutableMapOf<String, String>(
+                        "vote_count.gte" to "120",
+                        "vote_average.gte" to "6.8",
+                        "sort_by" to "popularity.desc"
+                    )
+                    genrePairStr?.let { params["with_genres"] = it }
+                    excludedGenresStr?.let { params["without_genres"] = it }
+                    topForeignCountry?.let { params["with_origin_country"] = it }
+
+                    if (type == "movie") repository.discoverMoviesWithParams(options = params)
+                    else repository.discoverTVWithParams(options = params)
+                }.getOrDefault(emptyList())
+            }
+
+            // Stream 4: Auteur Boost o Indie Gem Discover
+            val discoverAuteurOrIndieDeferred = async {
+                runCatching {
+                    if (type == "movie" && topDirectorId != null) {
+                        val params = mutableMapOf<String, String>(
+                            "with_crew" to topDirectorId.toString(),
+                            "vote_count.gte" to "50",
+                            "sort_by" to "vote_average.desc"
+                        )
+                        excludedGenresStr?.let { params["without_genres"] = it }
+                        repository.discoverMoviesWithParams(options = params).onEach { movie ->
+                            movie.directorId = topDirectorId
+                        }
+                    } else if (topSingleGenre != null) {
+                        val params = mutableMapOf<String, String>(
+                            "with_genres" to topSingleGenre.toString(),
+                            "vote_count.gte" to "80",
+                            "vote_count.lte" to "3500",
+                            "vote_average.gte" to "7.3",
+                            "sort_by" to "vote_average.desc"
+                        )
+                        excludedGenresStr?.let { params["without_genres"] = it }
+                        if (type == "movie") repository.discoverMoviesWithParams(options = params)
+                        else repository.discoverTVWithParams(options = params)
+                    } else {
+                        emptyList()
+                    }
+                }.getOrDefault(emptyList())
+            }
+
+            val seedResults = seedDeferred.awaitAll().flatten()
+            val synergyResults = discoverSynergyDeferred.await()
+            val auteurOrIndieResults = discoverAuteurOrIndieDeferred.await()
+
+            seedResults + synergyResults + auteurOrIndieResults
         }
 
         // Quality gate: filter out low-quality or posterless results
@@ -238,7 +326,6 @@ class GetHomeFeedUseCase @Inject constructor(
             movie.posterPath != null
         }
 
-        val userProfile = calculateMatchScoreUseCase.buildUserProfile(matching)
         var results = qualityData
             .distinctBy { it.id }
             .filter { movie -> !localCompositeIds.contains("${type}_${movie.id}") }
@@ -284,12 +371,17 @@ class GetHomeFeedUseCase @Inject constructor(
 
         val finalOrdered = if (sortedResults.isNotEmpty()) {
             val maxScore = sortedResults.first().matchScore ?: 0
-            // Candidati per il Trove's Pick: titoli eccellenti (entro 6 punti dal miglior match, o i primi 4)
+            // Rotazione giornaliera deterministica del Trove's Pick tra i titoli top-tier
             val topCandidates = sortedResults
-                .takeWhile { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(70) }
-                .take(4)
-            val pick = if (topCandidates.size > 1) topCandidates.random() else sortedResults.first()
-            // Posiziona il pick al primo posto per The Trove's Pick, lasciando il resto ordinato per punteggio
+                .takeWhile { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(78) }
+                .ifEmpty { listOf(sortedResults.first()) }
+                .take(5)
+
+            val epochDay = java.time.LocalDate.now().toEpochDay()
+            val pickIndex = (epochDay.rem(topCandidates.size).toInt()).coerceIn(0, topCandidates.lastIndex)
+            val pick = topCandidates[pickIndex]
+
+            // Il Trove's Pick viene posizionato al primo posto e rimosso dalla coda per evitare duplicati nella riga consigliati
             listOf(pick) + sortedResults.filter { it.id != pick.id }
         } else {
             sortedResults

@@ -94,7 +94,8 @@ fun WatchDatePromptModal(
                     onClick = { onDateSelected(null) }
                 )
 
-                if (releaseDate != null) {
+                val isFutureRelease = releaseDate != null && releaseDate.isAfter(Instant.now())
+                if (releaseDate != null && !isFutureRelease) {
                     Spacer(modifier = Modifier.height(12.dp))
                     WatchDateOption(
                         iconRes = R.drawable.ic_calendario,

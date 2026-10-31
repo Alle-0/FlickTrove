@@ -44,7 +44,7 @@ data class UserGenreProfile(
 class CalculateMatchScoreUseCase @Inject constructor() {
 
     // Niche/Format genres on TMDB that represent distinctive visual/stylistic mediums rather than universal themes
-    private val nicheFormatGenres = setOf(
+    val nicheFormatGenres = setOf(
         16L,     // Animation
         99L,     // Documentary
         10402L,  // Music / Musical

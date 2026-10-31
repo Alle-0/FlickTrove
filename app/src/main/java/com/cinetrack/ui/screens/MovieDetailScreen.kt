@@ -263,6 +263,7 @@ fun MovieDetailScreenContent(
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
     val autoOpenVibeOnWatch by settingsViewModel.autoOpenVibeOnWatch.collectAsStateWithLifecycle()
     var showWatchDatePrompt by remember { mutableStateOf(false) }
+    var isPreviewWatchPrompt by remember { mutableStateOf(false) }
     var showTrailerModal by remember { mutableStateOf(false) }
     var trailerTriggerBounds by remember { mutableStateOf<Rect?>(null) }
 
@@ -812,6 +813,7 @@ fun MovieDetailScreenContent(
                                         hazeState = localHazeState,
                                         onStateChange = { newState ->
                                             if (newState == WatchState.WATCHED && promptWatchDateOnDetail && activeMovie.mediaType == "movie") {
+                                                isPreviewWatchPrompt = false
                                                 showWatchDatePrompt = true
                                             } else {
                                                 viewModel.onEvent(DetailEvent.SetWatchState(newState))
@@ -819,7 +821,11 @@ fun MovieDetailScreenContent(
                                         },
                                         onRemove = { viewModel.onEvent(DetailEvent.DeleteMovie) },
                                         onEpisodesClick = { showEpisodesSheet = true },
-                                        onManageRewatches = { showWatchHistorySheet = true }
+                                        onManageRewatches = { showWatchHistorySheet = true },
+                                        onPreviewWatch = {
+                                            isPreviewWatchPrompt = true
+                                            showWatchDatePrompt = true
+                                        }
                                     )
                                 }
                             }
@@ -867,10 +873,14 @@ fun MovieDetailScreenContent(
                                     },
                                     onDismiss = {
                                         showWatchDatePrompt = false
-                                        viewModel.onEvent(DetailEvent.SetWatchState(WatchState.WATCHED, null))
+                                        if (!isPreviewWatchPrompt) {
+                                            viewModel.onEvent(DetailEvent.SetWatchState(WatchState.WATCHED, null))
+                                        }
+                                        isPreviewWatchPrompt = false
                                     },
                                     onDateSelected = { customDate ->
                                         showWatchDatePrompt = false
+                                        isPreviewWatchPrompt = false
                                         viewModel.onEvent(DetailEvent.SetWatchState(WatchState.WATCHED, customDate))
                                     }
                                 )
