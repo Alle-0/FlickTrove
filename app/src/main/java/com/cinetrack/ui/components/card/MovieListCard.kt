@@ -424,7 +424,7 @@ fun MovieListCard(
                         rippleState.trigger(Offset(rippleX, rippleY))
 
                         val isReleased = movie.isReleased
-                        if (!isReleased) {
+                        if (!isReleased && !isEffectiveWatched) {
                             if (!isWatched && !isFavorite && !isReminder) onAction(movie)
                             else onMessage(context.getString(R.string.card_hint_manage_reminder))
                         } else if (isTv) {
@@ -445,7 +445,7 @@ fun MovieListCard(
                 val isQuickWatch = isTv && !isEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
                 val appAccent = MaterialTheme.colorScheme.primary
                 val isReleased = movie.isReleased
-                val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
+                val isPromemoriaAttiva = !isReleased && !isEffectiveWatched && (isReminder || isFavorite)
                 val isOcchio = !isQuickWatch && isReleased && !isEffectiveWatched && (isReminder || isFavorite)
 
                 val circularBar = com.cinetrack.LocalCircularProgressBar.current
@@ -487,7 +487,7 @@ fun MovieListCard(
                     else -> Color.White
                 }
 
-                val isBellOutlined = !isReleased && !(isReminder || isFavorite)
+                val isBellOutlined = !isReleased && !isEffectiveWatched && !(isReminder || isFavorite)
                 val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
                 var bellHasInitialized by remember { mutableStateOf(false) }
 

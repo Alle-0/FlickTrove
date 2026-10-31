@@ -491,7 +491,7 @@ fun MovieCard(
                                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
 
                                 val isReleased = movie.isReleased
-                                if (!isReleased) {
+                                if (!isReleased && !isWatched) {
                                     if (!isWatched && !isFavorite && !isReminder) onAction(movie)
                                     else if (showActionHint) {
                                         onMessage(hintReminder)
@@ -510,7 +510,7 @@ fun MovieCard(
                     ) {
                         val appAccent = MaterialTheme.colorScheme.primary
                         val isReleased = movie.isReleased
-                        val isPromemoriaAttiva = !isReleased && (isReminder || isFavorite)
+                        val isPromemoriaAttiva = !isReleased && !isWatched && (isReminder || isFavorite)
                         val isOcchio = isReleased && !isWatched && (isReminder || isFavorite)
 
                         val circularBar = com.cinetrack.LocalCircularProgressBar.current
@@ -549,7 +549,7 @@ fun MovieCard(
                             else -> Color.White
                         }
 
-                        val isBellOutlined = !isReleased && !(isReminder || isFavorite)
+                        val isBellOutlined = !isReleased && !isWatched && !(isReminder || isFavorite)
                         val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
                         var bellHasInitialized by remember { mutableStateOf(false) }
 
