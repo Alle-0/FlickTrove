@@ -89,14 +89,16 @@ android {
     }
     sourceSets {
         getByName("main") {
-            res.srcDirs(
-                "src/main/res",
-                "src/main/res-badges",
-                "src/main/res-logos",
-                "src/main/res-mock",
-                "src/main/res-onboarding",
-                "src/main/res-launcher",
-                "src/main/res-widgets"
+            res.directories.addAll(
+                listOf(
+                    "src/main/res",
+                    "src/main/res-badges",
+                    "src/main/res-logos",
+                    "src/main/res-mock",
+                    "src/main/res-onboarding",
+                    "src/main/res-launcher",
+                    "src/main/res-widgets"
+                )
             )
         }
     }
@@ -212,6 +214,12 @@ composeCompiler {
 kotlin {
     compilerOptions {
         jvmTarget.set(org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17)
+    }
+}
+
+baselineProfile {
+    warnings {
+        maxAgpVersion = false
     }
 }
 
