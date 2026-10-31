@@ -48,6 +48,7 @@ class FirebaseSyncCoordinator @Inject constructor(
     private val folderRepository: FolderRepository,
     private val watchHistoryRepository: WatchHistoryRepository,
     private val preferenceRepository: PreferenceRepository,
+    private val syncTasteVectorUseCase: com.cinetrack.domain.usecase.SyncTasteVectorUseCase,
     @ApplicationContext private val context: Context
 ) {
     private val syncScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
@@ -196,6 +197,13 @@ class FirebaseSyncCoordinator @Inject constructor(
             emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
             syncPreferencesWithFirebase()
             preferenceRepository.updateLastSyncTimestamp(now)
+
+            // 5. Monthly Lazy Sync of TasteVector (Zero-waste Spark tier)
+            try {
+                syncTasteVectorUseCase()
+            } catch (e: Exception) {
+                android.util.Log.w("FirebaseSyncCoordinator", "TasteVector lazy sync ignored: " + e.message)
+            }
             
             emit(UiText.StringResource(R.string.sync_msg_completed), 1f)
         } catch (e: Exception) {

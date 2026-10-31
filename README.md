@@ -215,7 +215,7 @@ Once the app is launched:
 
 FlickTrove is constantly evolving. In the future, the app will expand beyond a personal tracker into an even richer cinephile ecosystem:
 
-- [ ] **Match with friends:** See movies you and your friends have watched, and get recommendations based on your combined tastes.
+- [ ] **Match with friends (Cine-Match):** See movies you and your friends have watched, and get recommendations based on your combined tastes (powered by the pre-computed 360° `TasteVector` matrix).
 - [ ] **Media Server Live Scrobbling (Jellyfin, Plex, Emby):** Real-time automated scrobbling and episode tracking from self-hosted home media servers via serverless cloud webhooks at zero cost.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.

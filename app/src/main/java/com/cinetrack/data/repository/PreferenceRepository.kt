@@ -80,6 +80,7 @@ class PreferenceRepository @Inject constructor(
         val SHOW_HOME_BECAUSE_YOU_WATCHED = booleanPreferencesKey("show_home_because_you_watched")
         val HOME_SECTION_ORDER = stringPreferencesKey("home_section_order")
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
+        val LAST_TASTE_VECTOR_SYNC_TIMESTAMP = longPreferencesKey("last_taste_vector_sync_timestamp")
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -501,6 +502,17 @@ class PreferenceRepository @Inject constructor(
                 prefs.remove(PreferencesKeys.TROVE_LAST_EPOCH_DAY_MOVIE)
                 prefs.remove(PreferencesKeys.TROVE_REVEALED_MOVIE_ID)
             }
+        }
+    }
+
+    suspend fun getLastTasteVectorSyncTimestamp(): Long {
+        val prefs = dataStore.data.first()
+        return prefs[PreferencesKeys.LAST_TASTE_VECTOR_SYNC_TIMESTAMP] ?: 0L
+    }
+
+    suspend fun updateLastTasteVectorSyncTimestamp(timestamp: Long) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.LAST_TASTE_VECTOR_SYNC_TIMESTAMP] = timestamp
         }
     }
 

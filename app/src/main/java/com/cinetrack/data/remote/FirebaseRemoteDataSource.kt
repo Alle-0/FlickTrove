@@ -447,6 +447,22 @@ class FirebaseRemoteDataSource @Inject constructor(
             .await()
     }
 
+    suspend fun saveTasteVector(tasteVector: com.cinetrack.data.model.TasteVector): Boolean {
+        val uid = userId ?: return false
+        return try {
+            kotlinx.coroutines.withTimeoutOrNull(10_000L) {
+                firestore.collection("users").document(uid)
+                    .collection("profile").document("taste_vector")
+                    .set(tasteVector, SetOptions.merge())
+                    .await()
+                true
+            } ?: false
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error saving TasteVector for user " + uid + ": " + e.message, e)
+            false
+        }
+    }
+
     suspend fun fetchUserPreferences(): Map<String, Any>? {
         val uid = userId
         if (uid == null) return null

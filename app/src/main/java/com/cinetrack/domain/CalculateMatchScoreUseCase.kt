@@ -3,6 +3,7 @@ package com.cinetrack.domain
 import com.cinetrack.data.model.Movie
 import javax.inject.Inject
 import kotlin.math.pow
+import kotlin.math.roundToInt
 
 data class UserGenreProfile(
     val genreAffinities: Map<Long, Float>,
@@ -13,6 +14,9 @@ data class UserGenreProfile(
     val negativeGenreScores: Map<Long, Float> = emptyMap(),
     val decadeCounts: Map<Int, Int> = emptyMap(),
     val countryFrequencies: Map<String, Float> = emptyMap(),
+    val directorAffinities: Map<Long, Float> = emptyMap(),
+    val actorAffinities: Map<Long, Float> = emptyMap(),
+    val isIndieSeeker: Boolean = false,
     val totalWatchedCount: Int = 0,
     val averageUserRating: Float = 7.0f
 ) {
@@ -23,16 +27,18 @@ data class UserGenreProfile(
 }
 
 /**
- * Advanced Netflix-Grade Recommendation Engine
+ * Advanced Netflix-Grade Recommendation Engine (v3 - Multi-Vector Taste Matrix)
  *
  * Implements:
  * 1. Multi-Vector Taste Profile with Recency Decay (Half-Life weighting).
- * 2. Micro-Cluster Synergy: Combinatorial Genre Pairs ("Action+Sci-Fi" vs "Action+Comedy").
- * 3. Repulsive Negative Vectors: Active damping for genres with low user ratings or dropped shows.
- * 4. Bayesian Weighted Quality (IMDb/Rotten Tomatoes Bayesian Mean Score).
- * 5. Organic Niche-Format Damping: Generalized TF-IDF penalty for unwatched formats (Animation, Documentary, Western, Musical)
- *    without arbitrary hardcoded exceptions.
- * 6. Era / Decade Affinity Modulation.
+ * 2. Director & Star Auteur Boost: Learns favorite directors and actors from library history (up to +8 pts).
+ * 3. Implicit Watchlist Intent: Short-term mood boost from recent watchlist additions (half-life of 21 days).
+ * 4. Micro-Cluster Synergy: Combinatorial Genre Pairs ("Action+Sci-Fi" vs "Action+Comedy").
+ * 5. Repulsive Negative Vectors: Active damping for genres with low user ratings or dropped shows.
+ * 6. Arthouse vs Blockbuster Calibration: Rewarding indie gems (80..2500 votes, rating >= 7.2) for cinephiles (up to +4 pts).
+ * 7. Bayesian Weighted Quality (IMDb/Rotten Tomatoes Bayesian Mean Score).
+ * 8. Continuous Lerp Curves (Anti-Cliff): Eliminating integer step jumps in Country, Decade, and Niche Damping to prevent mass ties.
+ * 9. Era / Decade Affinity Modulation.
  */
 class CalculateMatchScoreUseCase @Inject constructor() {
 
@@ -62,6 +68,10 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         val pairCounts = mutableMapOf<Long, Int>()
         val decadeCounts = mutableMapOf<Int, Int>()
         val countryCounts = mutableMapOf<String, Int>()
+        val directorScores = mutableMapOf<Long, Float>()
+        val directorCounts = mutableMapOf<Long, Int>()
+        val actorScores = mutableMapOf<Long, Float>()
+        val actorCounts = mutableMapOf<Long, Int>()
 
         val nowEpoch = System.currentTimeMillis()
 
@@ -145,6 +155,53 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                     }
                 }
             }
+
+            // Vettore 1: Autore & Cast Affinity (Director & Top Cast)
+            if (!isDisliked && !isDropped && ratingWeight > 0f) {
+                val dirId = m.directorId
+                if (dirId != null && dirId > 0L) {
+                    directorScores[dirId] = (directorScores[dirId] ?: 0f) + ratingWeight
+                    directorCounts[dirId] = (directorCounts[dirId] ?: 0) + 1
+                }
+                m.topCastData?.take(3)?.forEach { actor ->
+                    if (actor.id > 0L && actor.name.isNotBlank()) {
+                        actorScores[actor.id] = (actorScores[actor.id] ?: 0f) + (ratingWeight * 0.7f)
+                        actorCounts[actor.id] = (actorCounts[actor.id] ?: 0) + 1
+                    }
+                }
+            }
+        }
+
+        // Vettore 2: Segnale di Intento Implicito dalla Watchlist ("Mood" a Breve Termine)
+        // Analizza gli ultimi 20 titoli aggiunti in watchlist non ancora visti e non droppati
+        val watchlistMovies = localMovies.filter { !it.watched && !it.dropped }
+            .sortedByDescending { it.clientUpdatedAt.takeIf { t -> t > 0L } ?: (parseEpoch(it.createdAt ?: "") ?: 0L) }
+            .take(20)
+
+        watchlistMovies.forEach { m ->
+            val addedTime = m.clientUpdatedAt.takeIf { it > 0L } ?: parseEpoch(m.createdAt ?: "")
+            val intentRecency = if (addedTime != null && addedTime > 0L) {
+                val daysAgo = ((nowEpoch - addedTime) / (1000L * 60L * 60L * 24L)).coerceAtLeast(0L)
+                // Emivita rapida di 21 giorni (3 settimane)
+                (0.5f.pow(daysAgo / 21f)).coerceIn(0.05f, 1.0f)
+            } else 0.5f
+
+            val intentWeight = 0.18f * intentRecency
+            val movieGenreIds = (m.genres?.map { it.id } ?: m.genreIds ?: emptyList()).distinct()
+            movieGenreIds.forEach { id ->
+                genreScores[id] = (genreScores[id] ?: 0f) + intentWeight
+            }
+            // Pair synergy per la watchlist
+            if (movieGenreIds.size >= 2) {
+                for (i in 0 until movieGenreIds.size) {
+                    for (j in i + 1 until movieGenreIds.size) {
+                        val minId = minOf(movieGenreIds[i], movieGenreIds[j])
+                        val maxId = maxOf(movieGenreIds[i], movieGenreIds[j])
+                        val pairKey = (minId shl 32) or (maxId and 0xFFFFFFFFL)
+                        pairScores[pairKey] = (pairScores[pairKey] ?: 0f) + intentWeight
+                    }
+                }
+            }
         }
 
         if (genreScores.isEmpty()) return null
@@ -178,6 +235,31 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             (score / count) * confidence
         }
 
+        // Director & Star Normalized Affinities with Shrinkage
+        val directorAffinities = directorScores.mapValues { (dirId, score) ->
+            val count = directorCounts[dirId] ?: 1
+            val confidence = count.toFloat() / (count + 1.5f)
+            (score / count) * confidence
+        }
+
+        val actorAffinities = actorScores.mapValues { (actId, score) ->
+            val count = actorCounts[actId] ?: 1
+            val confidence = count.toFloat() / (count + 2.0f)
+            (score / count) * confidence
+        }
+
+        // Vettore 3: Indice Arthouse vs Blockbuster (Mediana voteCount sui film amati con voto >= 8.0)
+        val highRatedVotes = watchedMovies.filter {
+            val r = it.personalRating ?: 0.0
+            r >= 8.0 || (it.favorite && r >= 7.0)
+        }.mapNotNull { it.voteCount?.takeIf { v -> v > 30 } }
+
+        val isIndieSeeker = if (highRatedVotes.size >= 3) {
+            val sortedVotes = highRatedVotes.sorted()
+            val medianVote = sortedVotes[sortedVotes.size / 2]
+            medianVote <= 3500
+        } else false
+
         // Guilty Pleasure Protection (Engagement > Low Rating)
         // If a user watches a lot of a genre (e.g. >= 12% and >= 4 titles), it's a guilty pleasure. We bypass repulsion.
         val adjustedNegativeScores = negativeScores.mapValues { (id, score) ->
@@ -201,6 +283,9 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             negativeGenreScores = adjustedNegativeScores,
             decadeCounts = decadeCounts,
             countryFrequencies = countryFrequencies,
+            directorAffinities = directorAffinities,
+            actorAffinities = actorAffinities,
+            isIndieSeeker = isIndieSeeker,
             totalWatchedCount = totalCompleted,
             averageUserRating = avgUserRating
         )
@@ -235,8 +320,6 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             val avgGenreAffinity = sumGenreAffinity / currentMovieGenreIds.size
 
             // Multi-Genre Saturation ("Minestrone Effect"):
-            // If candidate has 4+ genres and over half have low/zero affinity,
-            // reduce max-affinity dominance from 65% to 45% and lean more on the average (55%).
             val isMinestrone = currentMovieGenreIds.size >= 4 && lowAffinityCount > (currentMovieGenreIds.size / 2)
             val maxWeight = if (isMinestrone) 0.45f else 0.65f
             val avgWeight = if (isMinestrone) 0.55f else 0.35f
@@ -249,7 +332,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             }
         }
 
-        // 3. Micro-Cluster Synergy: Bonus for recognized genre pairs (up to +8 points)
+        // 3. Micro-Cluster Synergy: Bonus for recognized genre pairs (up to +10 points)
         var pairSynergyBonus = 0f
         if (currentMovieGenreIds.size >= 2) {
             var highestPairScore = 0f
@@ -265,7 +348,6 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 }
             }
             if (highestPairScore > 0f) {
-                // Increased pair synergy bonus to 10 points
                 pairSynergyBonus = ((highestPairScore / profile.maxAffinity) * 10f).coerceIn(0f, 10f)
             }
         }
@@ -283,27 +365,24 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             }
         }
 
-        // 5. Organic Niche-Format Damping (TF-IDF based):
+        // 5. Upgrade 4: Organic Niche-Format Damping (Curva Continua senza scalini)
         // Automatically protects against dominating niche formats (Animation, Documentary, Western, Musical)
-        // when the user has minimal or zero history with that format.
+        // Curva continua convessa: da -35pt (allo 0%) fino a 0pt (all'8% di frequenza)
         var formatDamping = 0f
         if (profile.totalWatchedCount >= 6) {
             currentMovieGenreIds.forEach { nicheGenreId ->
                 if (nicheGenreId !in nicheFormatGenres) return@forEach
                 val freq = profile.genreFrequencies[nicheGenreId] ?: 0f
-                val penaltyForNiche = when {
-                    freq == 0f -> 35f          // Zero history: full damping
-                    freq < 0.04f -> 25f        // Extremely rare (e.g. 1 in 30): strong damping
-                    freq < 0.08f -> 14f        // Occasional (e.g. 1 in 15): moderate damping
-                    else -> 0f                 // Genuine interest: no penalty
-                }
+                val penaltyForNiche = if (freq < 0.08f) {
+                    35f * (1f - (freq / 0.08f)).pow(1.4f)
+                } else 0f
                 if (penaltyForNiche > formatDamping) {
                     formatDamping = penaltyForNiche
                 }
             }
         }
 
-        // 6. Era / Decade Modulation (Decade Affinity)
+        // 6. Upgrade 4: Era / Decade Modulation (Curva Continua Lerp)
         var eraBonus = 0f
         val candidateYear = extractYear(currentMovie)
         val totalWithDecade = profile.decadeCounts.values.sum()
@@ -316,16 +395,14 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             } else 0
 
             eraBonus = when {
-                decadeRatio >= 0.25f -> 6.0f
-                decadeRatio >= 0.10f -> 3.0f
-                decadeRatio > 0f -> 1.0f
-                minDecadeDiff >= 30 && profile.totalWatchedCount >= 15 -> -4.0f
-                minDecadeDiff >= 20 && profile.totalWatchedCount >= 15 -> -2.0f
+                decadeRatio > 0f -> (decadeRatio / 0.28f * 6.0f).coerceIn(0.5f, 6.0f)
+                minDecadeDiff >= 20 && profile.totalWatchedCount >= 15 ->
+                    -((minDecadeDiff - 15f) / 20f * 4.0f).coerceIn(1.0f, 4.0f)
                 else -> 0f
             }
         }
 
-        // 7. Country / Cultural Affinity Bonus (e.g. K-Drama, Anime, French / Italian Cinema)
+        // 7. Upgrade 4: Country / Cultural Affinity Bonus (Curva Continua Lerp)
         var countryBonus = 0f
         val rawCountries = currentMovie.originCountry?.takeIf { it.isNotEmpty() }
             ?: com.cinetrack.data.mapper.MovieMapper.fallbackCountryFromLanguage(currentMovie.originalLanguage)
@@ -335,16 +412,22 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 .filter { it != "US" }
                 .maxOfOrNull { profile.countryFrequencies[it] ?: 0f } ?: 0f
 
-            countryBonus = when {
-                maxFreq >= 0.30f -> 5.0f
-                maxFreq >= 0.20f -> 4.0f
-                maxFreq >= 0.15f -> 3.0f
-                else -> 0f
-            }
+            countryBonus = if (maxFreq > 0.05f) {
+                (((maxFreq - 0.05f) / 0.30f) * 5.0f).coerceIn(0f, 5.0f)
+            } else 0f
         }
 
-        // 8. Bayesian True Quality Score (IMDb Weighted Mean Formula)
-        // Eliminates artificial 10.0 ratings with 2 votes while rewarding universally praised films
+        // 8. Upgrade 1: Il Vettore "Autore & Star" (Auteur / Cast Boost fino a +8 pt)
+        var auteurBoost = 0f
+        val dirAff = currentMovie.directorId?.let { profile.directorAffinities[it] } ?: 0f
+        val bestActorAff = currentMovie.topCastData?.take(3)?.mapNotNull { profile.actorAffinities[it.id] }?.maxOrNull() ?: 0f
+        if (dirAff > 0f || bestActorAff > 0f) {
+            val dirComponent = (dirAff / 0.5f) * 6.0f
+            val actorComponent = (bestActorAff / 0.5f) * 4.0f
+            auteurBoost = (dirComponent + actorComponent).coerceIn(0f, 8.0f)
+        }
+
+        // 9. Bayesian True Quality Score (IMDb Weighted Mean Formula)
         val rawTmdbRating = currentMovie.voteAverage ?: 0.0
         val voteCount = currentMovie.voteCount ?: 0
 
@@ -358,15 +441,19 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             0.0
         }
 
-        // Base quality score reduced to 30 points (prevents popular but irrelevant movies from taking over)
         val baseScore = ((effectiveRating / 8.6) * 30.0).toFloat().coerceIn(0f, 30f)
 
-        // Composite calculation
-        val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus + countryBonus
-        val totalNegative = repulsionPenalty + formatDamping
-        val finalScore = (totalPositive - totalNegative).toInt()
+        // 10. Upgrade 3: Indice "Arthouse vs Blockbuster" (Indie Gem Boost fino a +4 pt)
+        val indieGemBonus = if (profile.isIndieSeeker && voteCount in 80..2500 && rawTmdbRating >= 7.2) {
+            (((rawTmdbRating.toFloat() - 7.2f) / 1.6f) * 4.0f).coerceIn(1.5f, 4.0f)
+        } else 0f
 
-        // 9. Predictive Cap at 95%: Scores 96%-99% reserved for user's personal 10/10 ratings
+        // Composite calculation con arrotondamento finale (Zero pareggi di massa)
+        val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus + countryBonus + auteurBoost + indieGemBonus
+        val totalNegative = repulsionPenalty + formatDamping
+        val finalScore = (totalPositive - totalNegative).roundToInt()
+
+        // Predictive Cap at 95%: Scores 96%-99% reserved for user's personal 10/10 ratings
         return finalScore.coerceIn(10, 95)
     }
 

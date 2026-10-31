@@ -22,6 +22,9 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontStyle
@@ -199,7 +202,7 @@ fun SocialNotificationCard(
                     )
                 }
 
-                // Cumulative counter badge (+N) if multiple
+                // Cumulative counter badge (+N) with centered text lifted up
                 if (notification.count > 1) {
                     Box(
                         modifier = Modifier
@@ -215,10 +218,19 @@ fun SocialNotificationCard(
                             text = "+${notification.count}",
                             color = Color(0xFF0A1815),
                             fontSize = 9.sp,
-                            fontWeight = FontWeight.Black
+                            fontWeight = FontWeight.Black,
+                            style = TextStyle(
+                                platformStyle = PlatformTextStyle(
+                                    includeFontPadding = false
+                                ),
+                                textAlign = TextAlign.Center
+                            ),
+                            modifier = Modifier.offset(y = (-1).dp)
                         )
                     }
                 }
+
+
             }
 
             Spacer(modifier = Modifier.width(14.dp))
