@@ -366,20 +366,23 @@ class GetHomeFeedUseCase @Inject constructor(
                 degraded
             }
         } else {
-            results.sortedByDescending { it.matchScore ?: 0 }
+            results.sortedWith(
+                compareByDescending<Movie> { it.matchScore ?: 0 }
+                    .thenBy { it.id }
+            )
         }
 
         val finalOrdered = if (sortedResults.isNotEmpty()) {
             val maxScore = sortedResults.first().matchScore ?: 0
             // Rotazione giornaliera deterministica del Trove's Pick tra i titoli top-tier
             val topCandidates = sortedResults
-                .takeWhile { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(78) }
-                .ifEmpty { listOf(sortedResults.first()) }
+                .filter { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(78) }
                 .take(5)
+                .ifEmpty { listOf(sortedResults.first()) }
 
             val epochDay = java.time.LocalDate.now().toEpochDay()
-            val pickIndex = (epochDay.rem(topCandidates.size).toInt()).coerceIn(0, topCandidates.lastIndex)
-            val pick = topCandidates[pickIndex]
+            val pickIndex = (Math.floorMod(epochDay, topCandidates.size.toLong())).toInt()
+            val pick = topCandidates.getOrNull(pickIndex) ?: sortedResults.first()
 
             // Il Trove's Pick viene posizionato al primo posto e rimosso dalla coda per evitare duplicati nella riga consigliati
             listOf(pick) + sortedResults.filter { it.id != pick.id }

@@ -196,10 +196,15 @@ class HomeViewModel @Inject constructor(
         val isTv = _activeTab.value == "tv"
         val list = if (isTv) current.recommendedTv else current.recommendedMovies
         if (list.size > 1) {
-            val maxScore = list.maxOfOrNull { it.matchScore ?: 0 } ?: 0
-            val topCandidates = list
-                .filter { (it.matchScore ?: 0) >= (maxScore - 8).coerceAtLeast(70) }
-                .ifEmpty { list.take(5) }
+            val canonicalList = list.sortedWith(
+                compareByDescending<Movie> { it.matchScore ?: 0 }
+                    .thenBy { it.id }
+            )
+            val maxScore = canonicalList.firstOrNull()?.matchScore ?: 0
+            val topCandidates = canonicalList
+                .filter { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(78) }
+                .take(5)
+                .ifEmpty { listOf(canonicalList.first()) }
             if (topCandidates.size > 1) {
                 val currentPickId = list.first().id
                 val otherCandidates = topCandidates.filter { it.id != currentPickId }
@@ -226,12 +231,17 @@ class HomeViewModel @Inject constructor(
         val chosenPick: Movie? = if (savedDay == today && savedMovieId > 0L) {
             list.find { it.id == savedMovieId } ?: list.firstOrNull()
         } else {
-            val maxScore = list.maxOfOrNull { it.matchScore ?: 0 } ?: 0
-            val candidates = list
-                .filter { (it.matchScore ?: 0) >= (maxScore - 8).coerceAtLeast(70) }
-                .ifEmpty { list.take(5) }
+            val canonicalList = list.sortedWith(
+                compareByDescending<Movie> { it.matchScore ?: 0 }
+                    .thenBy { it.id }
+            )
+            val maxScore = canonicalList.firstOrNull()?.matchScore ?: 0
+            val candidates = canonicalList
+                .filter { (it.matchScore ?: 0) >= (maxScore - 6).coerceAtLeast(78) }
+                .take(5)
+                .ifEmpty { listOf(canonicalList.first()) }
             val dailyIndex = (Math.floorMod(today, candidates.size.toLong())).toInt()
-            candidates.getOrNull(dailyIndex) ?: list.firstOrNull()
+            candidates.getOrNull(dailyIndex) ?: canonicalList.firstOrNull()
         }
 
         if (chosenPick != null && list.firstOrNull()?.id != chosenPick.id) {
