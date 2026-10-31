@@ -197,8 +197,26 @@ fun TrovePickCard(
         label = "TroveReveal"
     )
 
-    // Blur radius della nebbia: da 16dp a 0dp man mano che l'onda d'urto spazza via il velo
-    val blurRadius = ((1f - revealProgress) * 16f).dp.coerceAtLeast(0.1.dp)
+    // Micro-click aptici alle tappe della messa a fuoco (33% e 66%) per simulare gli scatti meccanici della ghiera
+    var lastHapticMilestone by remember { mutableStateOf(0) }
+    LaunchedEffect(isHolding) {
+        if (!isHolding) {
+            lastHapticMilestone = 0
+        }
+    }
+    LaunchedEffect(chargeProgress.value) {
+        val currentMilestone = (chargeProgress.value * 3).toInt()
+        if (isHolding && currentMilestone > lastHapticMilestone && currentMilestone in 1..2) {
+            lastHapticMilestone = currentMilestone
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
+
+    // Blur radius: durante la carica prolungata l'obiettivo mette progressivamente a fuoco la scena (da 16dp a ~4.5dp).
+    // All'esplosione dell'onda d'urto (revealProgress) il blur si azzera nitidamente a 0dp.
+    val focusBlurFactor = (1f - (chargeProgress.value * 0.72f)).coerceIn(0.28f, 1f)
+    val unsealBlurFactor = (1f - revealProgress)
+    val blurRadius = (16f * focusBlurFactor * unsealBlurFactor).dp.coerceAtLeast(0.1.dp)
 
     // ── Entry animation ────────────────────────────────────────────────────────
     val hasAnimated = rememberSaveable { mutableStateOf(false) }
@@ -638,7 +656,7 @@ private fun ActualTroveCardContent(
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Overlay "Sigillo Mistico" con anello di carica a pressione prolungata
+// Overlay "Obiettivo Cinema" con messa a fuoco a pressione prolungata (Cinema Lens)
 // ─────────────────────────────────────────────────────────────────────────────
 
 @Composable
@@ -655,6 +673,18 @@ private fun TroveHoldToUnsealOverlay(
 ) {
     val primaryColor = MaterialTheme.colorScheme.primary
 
+    // Respiro ottico a riposo (3.2 secondi) che dà vita all'obiettivo prima del tocco
+    val infiniteTransition = rememberInfiniteTransition(label = "TroveLensIdle")
+    val idlePulse by infiniteTransition.animateFloat(
+        initialValue = 0f,
+        targetValue  = 1f,
+        animationSpec = infiniteRepeatable(
+            animation  = tween(durationMillis = 3200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "TroveLensIdlePulse"
+    )
+
     Box(
         modifier         = modifier.graphicsLayer {
             this.alpha  = alpha
@@ -663,19 +693,34 @@ private fun TroveHoldToUnsealOverlay(
         },
         contentAlignment = Alignment.Center
     ) {
+        // Sottile vignettatura radiale di sala al centro per far risaltare l'ottica e il teaser dal blur
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .background(
+                    Brush.radialGradient(
+                        colorStops = arrayOf(
+                            0.00f to Color.Black.copy(alpha = 0.50f),
+                            0.55f to Color.Black.copy(alpha = 0.35f),
+                            1.00f to Color.Transparent
+                        )
+                    )
+                )
+        )
+
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(8.dp),
             modifier            = Modifier.offset(y = (-8).dp)
         ) {
-            // Sigillo circolare minimale e coordinato con il tema dell'app
+            // Obiettivo Cinema con ghiera di messa a fuoco
             Box(
                 modifier         = Modifier
                     .size(76.dp)
                     .onGloballyPositioned { onMedallionPositioned(it) },
                 contentAlignment = Alignment.Center
             ) {
-                // 0. Bolle gravitazionali che convergono venendo risucchiate sotto il disco centrale
+                // 0. Bolle gravitazionali che convergono venendo risucchiate nel fuoco dell'obiettivo
                 if (chargeProgress > 0.005f) {
                     TroveGravitationalBubbles(
                         chargeProgress = chargeProgress,
@@ -685,51 +730,97 @@ private fun TroveHoldToUnsealOverlay(
                     )
                 }
 
-                // 1. Unico disco satinato scuro glassmorphism
+                // 1. Alone luminoso dell'ottica: delicato respiro in idle, fascio focalizzato durante la carica
+                val baseAuraAlpha = if (chargeProgress > 0.01f) {
+                    (chargeProgress * 0.38f).coerceIn(0f, 0.38f)
+                } else {
+                    0.08f + idlePulse * 0.12f
+                }
+                val auraSize = if (chargeProgress > 0.01f) {
+                    (52 + chargeProgress * 28).dp
+                } else {
+                    (56 + idlePulse * 10).dp
+                }
+                Box(
+                    modifier = Modifier
+                        .size(auraSize)
+                        .background(
+                            Brush.radialGradient(
+                                listOf(
+                                    primaryColor.copy(alpha = baseAuraAlpha),
+                                    Color.Transparent
+                                )
+                            ),
+                            CircleShape
+                        )
+                )
+
+                // 2. Corpo lente in vetro ottico multistrato con finitura antiriflesso cinema
                 Box(
                     modifier = Modifier
                         .size(68.dp)
                         .background(
                             Brush.radialGradient(
-                                listOf(
-                                    Color(0xFF16161A).copy(alpha = 0.88f),
-                                    Color(0xFF0A0A0C).copy(alpha = 0.84f)
+                                colorStops = arrayOf(
+                                    0.00f to Color(0xFF1C2028).copy(alpha = 0.94f),
+                                    0.55f to Color(0xFF0F1116).copy(alpha = 0.92f),
+                                    0.90f to Color(0xFF060709).copy(alpha = 0.96f),
+                                    1.00f to primaryColor.copy(alpha = 0.18f)
                                 )
                             ),
                             CircleShape
                         )
                         .border(
                             width = 1.dp,
-                            color = primaryColor.copy(alpha = if (isHolding) 0.45f else 0.18f),
+                            brush = Brush.verticalGradient(
+                                listOf(
+                                    Color.White.copy(alpha = if (isHolding) 0.50f else 0.28f),
+                                    primaryColor.copy(alpha = if (isHolding) 0.60f else 0.20f)
+                                )
+                            ),
                             shape = CircleShape
                         )
                 )
 
-                // 2. Alone morbido a tema che pulsa dolcemente durante la carica
-                if (chargeProgress > 0.01f) {
-                    val auraAlpha = (chargeProgress * 0.35f).coerceIn(0f, 0.35f)
-                    val auraSize = (50 + chargeProgress * 26).dp
-                    Box(
-                        modifier = Modifier
-                            .size(auraSize)
-                            .background(
-                                Brush.radialGradient(
-                                    listOf(
-                                        primaryColor.copy(alpha = auraAlpha),
-                                        Color.Transparent
-                                    )
-                                ),
-                                CircleShape
-                            )
-                    )
-                }
-
-                // 3. Anello di carica fluido disegnato sul perimetro del disco
+                // 3. Ghiera di messa a fuoco con tacche di calibrazione e anello di carica progressivo
                 Canvas(modifier = Modifier.size(68.dp)) {
                     val strokeWidth = 2.5.dp.toPx()
                     val radius = (size.minDimension / 2f) - strokeWidth / 2f
                     val center = Offset(size.width / 2f, size.height / 2f)
 
+                    // Tacche millimetriche della ghiera di messa a fuoco (12 tacche a 30°)
+                    // Ruotano leggermente mentre si mette a fuoco
+                    val ringRotation = chargeProgress * 45f
+                    val tickRadiusInner = radius - 4.dp.toPx()
+                    val tickRadiusOuter = radius - 1.5.dp.toPx()
+                    val tickColor = Color.White.copy(alpha = if (isHolding) 0.35f else 0.18f)
+
+                    for (i in 0 until 12) {
+                        val angleDeg = (i * 30f) + ringRotation
+                        val angleRad = Math.toRadians(angleDeg.toDouble()).toFloat()
+                        val cosA = cos(angleRad)
+                        val sinA = sin(angleRad)
+                        val isMajor = (i % 3 == 0)
+                        val rIn = if (isMajor) tickRadiusInner - 1.5.dp.toPx() else tickRadiusInner
+
+                        drawLine(
+                            color       = if (isMajor) primaryColor.copy(alpha = 0.50f) else tickColor,
+                            start       = Offset(center.x + rIn * cosA, center.y + rIn * sinA),
+                            end         = Offset(center.x + tickRadiusOuter * cosA, center.y + tickRadiusOuter * sinA),
+                            strokeWidth = if (isMajor) 1.5.dp.toPx() else 1.dp.toPx(),
+                            cap         = StrokeCap.Round
+                        )
+                    }
+
+                    // Anello interno di guida del diaframma
+                    drawCircle(
+                        color  = Color.White.copy(alpha = 0.06f),
+                        radius = radius * 0.62f,
+                        center = center,
+                        style  = androidx.compose.ui.graphics.drawscope.Stroke(width = 1.dp.toPx())
+                    )
+
+                    // Arco di messa a fuoco attivo (Focus Arc)
                     if (chargeProgress > 0.005f) {
                         val sweep = chargeProgress * 360f
 
@@ -746,7 +837,7 @@ private fun TroveHoldToUnsealOverlay(
                             )
                         )
 
-                        // Testa luminosa dell'arco che segue la rotazione
+                        // Testa luminosa dell'arco che segue la rotazione della messa a fuoco
                         val angleRad = Math.toRadians((-90.0 + sweep)).toFloat()
                         val dotX = center.x + radius * cos(angleRad)
                         val dotY = center.y + radius * sin(angleRad)
@@ -764,12 +855,18 @@ private fun TroveHoldToUnsealOverlay(
                     }
                 }
 
-                // 4. Icona scintillio centrale pulita, coordinata con il tema
+                // 4. Icona scintillio al centro dell'ottica: brilla ed entra in pieno fuoco (> 0.85f)
+                val iconScale = 1f + chargeProgress * 0.12f
                 Icon(
                     painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_sparkle),
                     contentDescription = null,
                     tint               = if (chargeProgress > 0.85f) Color.White else primaryColor,
-                    modifier           = Modifier.size(24.dp)
+                    modifier           = Modifier
+                        .size(24.dp)
+                        .graphicsLayer {
+                            scaleX = iconScale
+                            scaleY = iconScale
+                        }
                 )
             }
 
@@ -779,20 +876,20 @@ private fun TroveHoldToUnsealOverlay(
                 Box(
                     modifier = Modifier
                         .background(
-                            Brush.radialGradient(
+                            Brush.verticalGradient(
                                 listOf(
-                                    Color(0xFF16161A).copy(alpha = 0.88f),
-                                    Color(0xFF0A0A0C).copy(alpha = 0.84f)
+                                    Color(0xFF161A22).copy(alpha = 0.90f),
+                                    Color(0xFF0C0E13).copy(alpha = 0.86f)
                                 )
                             ),
                             CircleShape
                         )
                         .border(
                             0.5.dp,
-                            if (isHolding) primaryColor.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.14f),
+                            if (isHolding) primaryColor.copy(alpha = 0.50f) else Color.White.copy(alpha = 0.16f),
                             CircleShape
                         )
-                        .padding(horizontal = 12.dp, vertical = 4.dp)
+                        .padding(horizontal = 12.dp, vertical = 4.5.dp)
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
@@ -844,7 +941,7 @@ private fun TroveHoldToUnsealOverlay(
             // ── Call-To-Action: "Tieni premuto per scoprire il Trove di oggi" ──
             Text(
                 text = stringResource(R.string.home_trove_pick_sealed_cta),
-                color = if (isHolding) primaryColor else Color.White.copy(alpha = 0.78f),
+                color = if (isHolding) primaryColor else Color.White.copy(alpha = 0.82f),
                 fontSize = 11.sp,
                 fontWeight = FontWeight.Medium,
                 textAlign = TextAlign.Center,

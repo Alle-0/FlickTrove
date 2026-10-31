@@ -95,7 +95,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 } else 0.85f
             }
 
-            val isDisliked = rating != null && rating in 1.0f..5.0f
+            val isDisliked = rating != null && rating > 0f && rating <= (neutralPivot - 0.4f).coerceAtLeast(5.0f)
             val isDropped = m.dropped
 
             val baseWeight = when {
@@ -178,6 +178,9 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             .sortedByDescending { it.clientUpdatedAt.takeIf { t -> t > 0L } ?: (parseEpoch(it.createdAt ?: "") ?: 0L) }
             .take(20)
 
+        val intentGenreScores = mutableMapOf<Long, Float>()
+        val intentPairScores = mutableMapOf<Long, Float>()
+
         watchlistMovies.forEach { m ->
             val addedTime = m.clientUpdatedAt.takeIf { it > 0L } ?: parseEpoch(m.createdAt ?: "")
             val intentRecency = if (addedTime != null && addedTime > 0L) {
@@ -189,7 +192,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             val intentWeight = 0.18f * intentRecency
             val movieGenreIds = (m.genres?.map { it.id } ?: m.genreIds ?: emptyList()).distinct()
             movieGenreIds.forEach { id ->
-                genreScores[id] = (genreScores[id] ?: 0f) + intentWeight
+                intentGenreScores[id] = ((intentGenreScores[id] ?: 0f) + intentWeight).coerceAtMost(0.25f)
             }
             // Pair synergy per la watchlist
             if (movieGenreIds.size >= 2) {
@@ -198,24 +201,25 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                         val minId = minOf(movieGenreIds[i], movieGenreIds[j])
                         val maxId = maxOf(movieGenreIds[i], movieGenreIds[j])
                         val pairKey = (minId shl 32) or (maxId and 0xFFFFFFFFL)
-                        pairScores[pairKey] = (pairScores[pairKey] ?: 0f) + intentWeight
+                        intentPairScores[pairKey] = ((intentPairScores[pairKey] ?: 0f) + intentWeight).coerceAtMost(0.20f)
                     }
                 }
             }
         }
 
-        if (genreScores.isEmpty()) return null
+        if (genreScores.isEmpty() && intentGenreScores.isEmpty()) return null
 
         // Esclude i titoli droppati dal denominatore per allinearsi a genreCounts
         val totalCompleted = watchedMovies.count { !it.dropped }.coerceAtLeast(1)
 
         // 2. Bayesian Genre Affinity with Shrinkage
-        val genreAffinities = genreScores.mapValues { (id, totalScore) ->
-            val count = genreCounts[id] ?: 1
-            val rawAvg = totalScore / count
-            // Saturation curve: confidence increases with volume (1 movie = 25%, 3 = 50%, 9 = 75%)
-            val confidence = count.toFloat() / (count + 3f)
-            (rawAvg * confidence).coerceAtLeast(0f)
+        val genreAffinities = (genreScores.keys + intentGenreScores.keys).associateWith { id ->
+            val totalScore = genreScores[id] ?: 0f
+            val count = genreCounts[id] ?: 0
+            val watchedComponent = if (count > 0) {
+                (totalScore / count) * (count.toFloat() / (count + 3f))
+            } else 0f
+            (watchedComponent + (intentGenreScores[id] ?: 0f)).coerceAtLeast(0f)
         }
 
         // Relative Genre Frequencies (TF-IDF vector)
@@ -229,10 +233,13 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         }
 
         // Micro-Cluster Normalized Affinities
-        val pairAffinities = pairScores.mapValues { (pairKey, score) ->
-            val count = pairCounts[pairKey] ?: 1
-            val confidence = count.toFloat() / (count + 2f)
-            (score / count) * confidence
+        val pairAffinities = (pairScores.keys + intentPairScores.keys).associateWith { pairKey ->
+            val score = pairScores[pairKey] ?: 0f
+            val count = pairCounts[pairKey] ?: 0
+            val watchedComponent = if (count > 0) {
+                (score / count) * (count.toFloat() / (count + 2f))
+            } else 0f
+            watchedComponent + (intentPairScores[pairKey] ?: 0f)
         }
 
         // Director & Star Normalized Affinities with Shrinkage
