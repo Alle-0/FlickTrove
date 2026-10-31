@@ -1,5 +1,7 @@
 package com.cinetrack.widget
 
+import coil3.toBitmap
+
 import androidx.glance.LocalContext
 import com.cinetrack.R
 import com.cinetrack.util.buildTmdbImageUrl
@@ -48,8 +50,9 @@ import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
 import androidx.glance.ColorFilter
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import kotlinx.coroutines.flow.first
 import com.cinetrack.di.dataStore
 import com.cinetrack.MainActivity
@@ -124,12 +127,12 @@ class FlickTroveListWidget : GlanceAppWidget() {
                     try {
                         val request = ImageRequest.Builder(context)
                             .data(buildTmdbImageUrl(posterPath, ImageType.POSTER, ImageQuality.LOW))
-                            .size(104, 156)
-                            .bitmapConfig(Bitmap.Config.RGB_565)
+                            .size(coil3.size.Size(104, 156))
+
                             .allowHardware(false)
                             .build()
                         val result = context.imageLoader.execute(request)
-                        bitmap = result.drawable?.toBitmap(width = 104, height = 156, config = Bitmap.Config.RGB_565)
+                        bitmap = result.image?.toBitmap(width = 104, height = 156, config = Bitmap.Config.RGB_565)
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }

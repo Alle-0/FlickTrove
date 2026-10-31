@@ -63,8 +63,10 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.cinetrack.R
 import kotlinx.coroutines.launch
 import com.cinetrack.data.model.GenreConstants

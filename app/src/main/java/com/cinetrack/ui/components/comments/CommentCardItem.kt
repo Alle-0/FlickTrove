@@ -43,9 +43,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.ImageLoader
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.ImageLoader
+import coil3.network.httpHeaders
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cinetrack.R
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.ui.utils.bounceClick
@@ -433,8 +435,13 @@ fun CommentCardItem(
                                         .crossfade(true)
                                         .apply {
                                             if (mediaUrl.contains("commsuni.tv")) {
-                                                addHeader("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
-                                                addHeader("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                                httpHeaders(
+                                                    coil3.network.NetworkHeaders.Builder()
+                                                        .set("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
+                                                        .set("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                                        .build()
+                                                )
+
                                             }
                                         }
                                         .build(),

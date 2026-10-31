@@ -55,7 +55,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.ui.components.glass.glassmorphic

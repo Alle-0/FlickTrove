@@ -167,8 +167,9 @@ dependencies {
     ksp(libs.room.compiler)
     implementation(libs.room.paging)
 
-    // Coil
+    // Coil 3
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
     implementation(libs.coil.gif)
     implementation(libs.coil.svg)
 

@@ -86,7 +86,7 @@ import com.cinetrack.ui.viewmodel.StatsUiState
 import com.cinetrack.ui.viewmodel.TimeRange
 import com.cinetrack.ui.viewmodel.StatsViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import androidx.compose.ui.platform.LocalContext
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze

@@ -59,10 +59,10 @@ fun buildTmdbImageUrl(path: String?, type: ImageType, quality: ImageQuality): St
  * and converts their dark pixels into crisp white, while leaving colored logos
  * (like Marvel, Netflix, Warner Bros, Universal) completely untouched.
  */
-class WhiteLogoTransformation : coil.transform.Transformation {
+class WhiteLogoTransformation : coil3.transform.Transformation() {
     override val cacheKey: String = "WhiteLogoTransformation_v1"
 
-    override suspend fun transform(input: android.graphics.Bitmap, size: coil.size.Size): android.graphics.Bitmap {
+    override suspend fun transform(input: android.graphics.Bitmap, size: coil3.size.Size): android.graphics.Bitmap {
         val width = input.width
         val height = input.height
         if (width <= 0 || height <= 0) return input

@@ -34,7 +34,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.model.GroupedSocialNotification
 import java.time.ZoneId

@@ -1,5 +1,9 @@
 package com.cinetrack.util
 
+import coil3.toBitmap
+
+import coil3.request.allowHardware
+
 import android.Manifest
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -450,13 +454,13 @@ object NotificationHelper {
         if (posterPath.isNullOrBlank()) return null
         return try {
             val url = buildTmdbImageUrl(posterPath, ImageType.POSTER, ImageQuality.MEDIUM) ?: return null
-            val request = coil.request.ImageRequest.Builder(context)
+            val request = coil3.request.ImageRequest.Builder(context)
                 .data(url)
-                .size(300)
+                .size(coil3.size.Size(300, 300))
                 .allowHardware(false)
                 .build()
-            val result = coil.Coil.imageLoader(context).execute(request)
-            result.drawable?.toBitmap()
+            val result = coil3.SingletonImageLoader.get(context).execute(request)
+            result.image?.toBitmap()
         } catch (e: Exception) {
             e.printStackTrace()
             null

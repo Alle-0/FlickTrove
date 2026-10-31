@@ -27,7 +27,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.card.MovieListCard

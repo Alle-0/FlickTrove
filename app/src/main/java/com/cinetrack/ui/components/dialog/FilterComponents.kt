@@ -52,8 +52,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.round
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.util.lerp
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.ui.components.glass.hazeGlass

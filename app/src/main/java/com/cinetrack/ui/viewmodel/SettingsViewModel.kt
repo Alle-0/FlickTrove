@@ -8,7 +8,7 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.imageLoader
+import coil3.imageLoader
 import com.cinetrack.data.repository.BackupRepository
 import com.cinetrack.data.repository.FeedbackRepository
 import com.cinetrack.data.repository.SettingsRepository
@@ -959,7 +959,7 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    @OptIn(coil.annotation.ExperimentalCoilApi::class)
+    @OptIn(coil3.annotation.ExperimentalCoilApi::class)
     fun clearImageCache() {
         viewModelScope.launch {
             context.imageLoader.diskCache?.clear()

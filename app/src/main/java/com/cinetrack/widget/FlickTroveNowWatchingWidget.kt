@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import coil3.toBitmap
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -45,8 +46,9 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import kotlinx.coroutines.flow.first
 import com.cinetrack.R
 import com.cinetrack.MainActivity
@@ -139,12 +141,12 @@ class FlickTroveNowWatchingWidget : GlanceAppWidget() {
                 try {
                     val req = ImageRequest.Builder(context)
                         .data(buildTmdbImageUrl(path, ImageType.POSTER, ImageQuality.LOW))
-                        .size(104, 156)
-                        .bitmapConfig(Bitmap.Config.RGB_565)
+                        .size(coil3.size.Size(104, 156))
+
                         .allowHardware(false)
                         .build()
-                    val drawable = context.imageLoader.execute(req).drawable
-                    posterCache[show.id] = drawable?.toBitmap(width = 104, height = 156, config = Bitmap.Config.RGB_565)
+                    val img = context.imageLoader.execute(req).image
+                    posterCache[show.id] = img?.toBitmap(width = 104, height = 156, config = Bitmap.Config.RGB_565)
                 } catch (_: Exception) {}
             }
 

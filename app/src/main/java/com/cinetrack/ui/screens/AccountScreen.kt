@@ -42,7 +42,7 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.LocalTabNavigator
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
@@ -85,9 +85,11 @@ import com.cinetrack.ui.screens.HistoryTab
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.platform.LocalContext
 import dagger.hilt.android.EntryPointAccessors
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.SuccessResult
+import coil3.toBitmap
 import android.graphics.drawable.BitmapDrawable
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.draw.drawWithContent
@@ -260,7 +262,7 @@ object AccountTab : Tab {
                     .build()
                 val result = loader.execute(request)
                 if (result is SuccessResult) {
-                    val bitmap = (result.drawable as BitmapDrawable).bitmap
+                    val bitmap = result.image.toBitmap()
                     val color = ColorUtils.extractAccentColor(bitmap)
                     if (color != Color.Unspecified) {
                         rawExtractedColor = color

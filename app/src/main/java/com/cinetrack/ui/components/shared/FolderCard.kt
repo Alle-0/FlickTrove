@@ -34,8 +34,8 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.Movie
@@ -121,7 +121,7 @@ fun FolderCard(
                             .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(10.dp))
                             .zIndex((topItems.size - index).toFloat())
                     ) {
-                        coil.compose.AsyncImage(
+                        coil3.compose.AsyncImage(
                             model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
                             contentDescription = null,
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop,

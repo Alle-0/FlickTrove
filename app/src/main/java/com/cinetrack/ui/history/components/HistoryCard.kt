@@ -28,8 +28,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.utils.parseMarkdown
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.shared.LocalMovieActions

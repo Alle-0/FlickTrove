@@ -44,7 +44,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.zIndex
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState

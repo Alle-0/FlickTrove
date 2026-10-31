@@ -1,5 +1,7 @@
 package com.cinetrack.ui.screens
 
+import coil3.toBitmap
+
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
@@ -39,7 +41,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.imageLoader
+import coil3.imageLoader
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -72,7 +74,7 @@ import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlin.math.max
-import coil.imageLoader
+import coil3.imageLoader
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -513,11 +515,11 @@ fun CollectionDetailScreenContent(
                     currentImageQuality
                 )
                 val fileUri = if (imageUrl != null) {
-                    val request = coil.request.ImageRequest.Builder(context)
+                    val request = coil3.request.ImageRequest.Builder(context)
                         .data(imageUrl).build()
                     val result = context.imageLoader.execute(request)
-                    if (result is coil.request.SuccessResult) {
-                        val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                    if (result is coil3.request.SuccessResult) {
+                        val bitmap = result.image.toBitmap()
                         val imagesDir = java.io.File(context.cacheDir, "images")
                         imagesDir.mkdirs()
                         val file = java.io.File(imagesDir, "share_collection.jpg")

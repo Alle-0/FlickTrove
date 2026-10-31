@@ -42,7 +42,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 
 import com.cinetrack.data.api.Video
 import androidx.compose.foundation.clickable

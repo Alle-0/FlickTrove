@@ -34,7 +34,7 @@ import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
 import androidx.compose.animation.SharedTransitionScope
 import androidx.compose.animation.core.spring
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import androidx.compose.ui.layout.ContentScale
 
 @OptIn(ExperimentalSharedTransitionApi::class)

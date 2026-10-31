@@ -31,7 +31,7 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.material.icons.Icons
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.ColorUtils

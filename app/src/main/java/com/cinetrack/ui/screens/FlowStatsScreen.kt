@@ -30,8 +30,9 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cinetrack.R
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.ui.LocalAppPadding
@@ -302,7 +303,7 @@ fun TopMvpsSection(
             ) {
                 Box {
                     if (imageUrl != null) {
-                        coil.compose.SubcomposeAsyncImage(
+                        coil3.compose.SubcomposeAsyncImage(
                             model = ImageRequest.Builder(context)
                                 .data(imageUrl)
                                 .crossfade(true)

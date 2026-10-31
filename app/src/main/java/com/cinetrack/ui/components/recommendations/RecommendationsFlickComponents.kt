@@ -43,8 +43,11 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.toBitmap
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
@@ -178,7 +181,7 @@ fun FlickMovieCard(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                     onSuccess = { result ->
-                        val bitmap = result.result.drawable.toBitmap()
+                        val bitmap = result.result.image.toBitmap()
                         coroutineScope.launch {
                             val color = ColorUtils.extractAccentColor(bitmap, useBottomHalf = true)
                             if (color != Color.Unspecified) {

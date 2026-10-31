@@ -5,10 +5,12 @@ import androidx.compose.ui.graphics.Color
 import androidx.core.graphics.drawable.toBitmap
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import coil.Coil
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.SingletonImageLoader
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.SuccessResult
+import coil3.toBitmap
 import com.cinetrack.R
 import com.cinetrack.data.api.CollectionResponse
 import com.cinetrack.data.model.Movie
@@ -116,7 +118,7 @@ class CollectionDetailViewModel @Inject constructor(
         if (forceReload || _extractedColor.value == null) {
             viewModelScope.launch(Dispatchers.Default) {
                 try {
-                    val loader = Coil.imageLoader(context)
+                    val loader = SingletonImageLoader.get(context)
                     val request = ImageRequest.Builder(context)
                         .data(imageUrl)
                         .allowHardware(false)
@@ -124,7 +126,7 @@ class CollectionDetailViewModel @Inject constructor(
 
                     val result = loader.execute(request)
                     if (result is SuccessResult) {
-                        val bitmap = result.drawable.toBitmap()
+                        val bitmap = result.image.toBitmap()
                         if (bitmap.width > 0 && bitmap.height > 0) {
                             val color = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
                             if (color != Color.Unspecified) {

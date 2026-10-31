@@ -8,9 +8,12 @@ import dagger.hilt.android.HiltAndroidApp
 import javax.inject.Inject
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import coil3.PlatformContext
+import coil3.SingletonImageLoader
+import okio.Path.Companion.toOkioPath
 
 @HiltAndroidApp
-class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageLoaderFactory {
+class FlickTroveApplication : Application(), Configuration.Provider, SingletonImageLoader.Factory {
 
     @Inject
     lateinit var workerFactory: HiltWorkerFactory
@@ -20,7 +23,7 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
             .setWorkerFactory(workerFactory)
             .build()
 
-    override fun newImageLoader(): coil.ImageLoader {
+    override fun newImageLoader(context: PlatformContext): coil3.ImageLoader {
         val okHttpClient = okhttp3.OkHttpClient.Builder()
             .addInterceptor { chain ->
                 val request = chain.request()
@@ -36,28 +39,29 @@ class FlickTroveApplication : Application(), Configuration.Provider, coil.ImageL
             }
             .build()
 
-        return coil.ImageLoader.Builder(this)
-            .okHttpClient(okHttpClient)
+        return coil3.ImageLoader.Builder(context)
+
             .memoryCache {
-                coil.memory.MemoryCache.Builder(this)
-                    .maxSizePercent(0.25)
+                coil3.memory.MemoryCache.Builder()
+                    .maxSizePercent(context, 0.25)
                     .build()
             }
             .diskCache {
-                coil.disk.DiskCache.Builder()
-                    .directory(cacheDir.resolve("image_cache"))
+                coil3.disk.DiskCache.Builder()
+                    .directory(cacheDir.resolve("image_cache").toOkioPath())
                     .maxSizeBytes(150L * 1024 * 1024)
                     .build()
             }
             .components {
-                add(coil.decode.SvgDecoder.Factory())
+                add(coil3.network.okhttp.OkHttpNetworkFetcherFactory(callFactory = { okHttpClient }))
+                add(coil3.svg.SvgDecoder.Factory())
                 if (android.os.Build.VERSION.SDK_INT >= 28) {
-                    add(coil.decode.ImageDecoderDecoder.Factory())
+                    add(coil3.gif.AnimatedImageDecoder.Factory())
                 } else {
-                    add(coil.decode.GifDecoder.Factory())
+                    add(coil3.gif.GifDecoder.Factory())
                 }
             }
-            .respectCacheHeaders(false)
+
             .build()
     }
 

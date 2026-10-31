@@ -1,7 +1,9 @@
 package com.cinetrack.ui.components.detail
 
 import androidx.compose.foundation.Image
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
+import coil3.request.crossfade
+import coil3.network.httpHeaders
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -476,14 +478,19 @@ private fun CommentCard(
 
                         if (mediaUrls.isNotEmpty()) {
                             mediaUrls.forEach { mediaUrl ->
-                                coil.compose.AsyncImage(
-                                    model = coil.request.ImageRequest.Builder(context)
+                                coil3.compose.AsyncImage(
+                                    model = coil3.request.ImageRequest.Builder(context)
                                         .data(mediaUrl)
                                         .crossfade(true)
                                         .apply {
                                             if (mediaUrl.contains("commsuni.tv")) {
-                                                addHeader("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
-                                                addHeader("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                                httpHeaders(
+                                                    coil3.network.NetworkHeaders.Builder()
+                                                        .set("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
+                                                        .set("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                                        .build()
+                                                )
+
                                             }
                                         }
                                         .build(),

@@ -56,8 +56,8 @@ import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
 import androidx.compose.ui.layout.ContentScale
 import java.util.Locale
 

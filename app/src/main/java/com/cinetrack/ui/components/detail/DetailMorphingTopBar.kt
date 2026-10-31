@@ -42,9 +42,10 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import coil.imageLoader
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.SuccessResult
+import coil3.toBitmap
 
 @Composable
 fun DetailMorphingTopBar(
@@ -362,11 +363,11 @@ fun DetailMorphingTopBar(
                                                         currentImageQuality
                                                     )
                                                     val fileUri = if (imageUrl != null) {
-                                                        val request = coil.request.ImageRequest.Builder(context)
+                                                        val request = coil3.request.ImageRequest.Builder(context)
                                                             .data(imageUrl).build()
                                                         val result = context.imageLoader.execute(request)
-                                                        if (result is coil.request.SuccessResult) {
-                                                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                                                        if (result is coil3.request.SuccessResult) {
+                                                            val bitmap = result.image.toBitmap()
                                                             val imagesDir = java.io.File(context.cacheDir, "images")
                                                             imagesDir.mkdirs()
                                                             val file = java.io.File(imagesDir, "share_poster.jpg")

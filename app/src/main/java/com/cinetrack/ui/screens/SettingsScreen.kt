@@ -95,8 +95,8 @@ import androidx.compose.ui.platform.LocalContext
 import kotlinx.coroutines.launch
 import java.io.OutputStreamWriter
 import java.io.File
-import coil.compose.AsyncImage
-import coil.imageLoader
+import coil3.compose.AsyncImage
+import coil3.imageLoader
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import androidx.compose.ui.layout.ContentScale
@@ -352,7 +352,7 @@ fun SettingsScreenContent(
 
     var cacheSizeString by remember { mutableStateOf("0 MB") }
     
-    @kotlin.OptIn(coil.annotation.ExperimentalCoilApi::class)
+    @kotlin.OptIn(coil3.annotation.ExperimentalCoilApi::class)
     fun updateCacheSize() {
         scope.launch(Dispatchers.IO) {
             val sizeBytes = context.imageLoader.diskCache?.size ?: 0L

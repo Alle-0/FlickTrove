@@ -6,7 +6,7 @@ import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import coil.imageLoader
+import coil3.imageLoader
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.parseSimpleMarkdown
 import com.cinetrack.ui.utils.MarkdownVisualTransformation
@@ -54,7 +54,7 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.model.filterDeletedWithoutReplies
 import com.cinetrack.ui.viewmodel.CommentsViewModel

@@ -18,7 +18,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.PersonStat
 import com.cinetrack.util.ImageType

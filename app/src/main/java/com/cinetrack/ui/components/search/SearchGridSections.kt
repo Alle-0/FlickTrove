@@ -37,8 +37,8 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.style.TextOverflow
 import com.cinetrack.data.model.UserPreferences
-import coil.compose.AsyncImage
-import coil.compose.SubcomposeAsyncImage
+import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import com.cinetrack.ui.components.shared.ImagePlaceholder
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality

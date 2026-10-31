@@ -32,7 +32,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.bounceClick
-import coil.compose.AsyncImage
+import coil3.compose.AsyncImage
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.CrewMember
 import androidx.compose.animation.AnimatedVisibilityScope

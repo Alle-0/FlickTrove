@@ -42,8 +42,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.toBitmap
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.crossfade
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
@@ -229,7 +232,7 @@ fun HeroSpotlightCarousel(
                     contentScale = ContentScale.Crop,
                     modifier = Modifier.fillMaxSize(),
                     onSuccess = { result ->
-                        val bitmap = result.result.drawable.toBitmap()
+                        val bitmap = result.result.image.toBitmap()
                         coroutineScope.launch {
                             val cardWidthDp = configuration.screenWidthDp - 64f
                             val cardAspectRatio = cardWidthDp / 460f

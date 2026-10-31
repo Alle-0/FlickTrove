@@ -48,8 +48,9 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.composed
-import coil.request.ImageRequest
-import coil.compose.SubcomposeAsyncImageContent
+import coil3.request.ImageRequest
+import coil3.request.crossfade
+import coil3.compose.SubcomposeAsyncImageContent
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.viewmodel.ExternalRatings
 import androidx.compose.foundation.BorderStroke
@@ -214,7 +215,7 @@ fun DetailHeader(
                         .crossfade(500)
                         .build()
                 }
-                coil.compose.SubcomposeAsyncImage(
+                coil3.compose.SubcomposeAsyncImage(
                     model = request,
                     contentDescription = movie.title ?: movie.name ?: "",
                     contentScale = ContentScale.Fit,
@@ -224,8 +225,8 @@ fun DetailHeader(
                         .padding(bottom = 8.dp),
                     alignment = Alignment.CenterStart
                 ) {
-                    val state = painter.state
-                    if (state is coil.compose.AsyncImagePainter.State.Error) {
+                    val state by painter.state.collectAsState()
+                    if (state is coil3.compose.AsyncImagePainter.State.Error) {
                         FallbackTitleText()
                     } else {
                         SubcomposeAsyncImageContent()

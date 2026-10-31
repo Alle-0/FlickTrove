@@ -53,7 +53,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.request.ImageRequest
+import coil3.request.ImageRequest
 import com.cinetrack.R
 import com.cinetrack.data.api.ImagesResponse
 import com.cinetrack.data.model.Movie
@@ -127,7 +127,7 @@ fun ShareStoryCardModal(
         val backdropUrl = backdropPath?.let {
             buildTmdbImageUrl(it, ImageType.BACKDROP, ImageQuality.HIGH)
         }
-        val imageLoader = coil.Coil.imageLoader(context)
+        val imageLoader = coil3.SingletonImageLoader.get(context)
         posterUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
         backdropUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
     }

@@ -34,9 +34,11 @@ import android.content.Context
 import android.graphics.drawable.BitmapDrawable
 import androidx.core.graphics.drawable.toBitmap
 import androidx.compose.ui.graphics.Color
-import coil.Coil
-import coil.request.ImageRequest
-import coil.request.SuccessResult
+import coil3.SingletonImageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
+import coil3.request.SuccessResult
+import coil3.toBitmap
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.toHexString
 import dagger.hilt.android.qualifiers.ApplicationContext
@@ -1339,14 +1341,14 @@ class MovieDetailViewModel @Inject constructor(
     private suspend fun preloadAccentColor(imageUrl: String, targetAspectRatio: Float? = null) {
         kotlinx.coroutines.withTimeoutOrNull(1200L) {
             try {
-                val loader = Coil.imageLoader(context)
+                val loader = SingletonImageLoader.get(context)
                 val request = ImageRequest.Builder(context)
                     .data(imageUrl)
                     .allowHardware(false)
                     .build()
                 val result = loader.execute(request)
                 if (result is SuccessResult) {
-                    val bitmap = result.drawable.toBitmap()
+                    val bitmap = result.image.toBitmap()
                     val finalColor = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
                     if (finalColor != Color.Unspecified) {
                         _extractedColor.value = finalColor
@@ -1365,7 +1367,7 @@ class MovieDetailViewModel @Inject constructor(
     fun fetchAccentColor(imageUrl: String, movie: Movie, forceReload: Boolean = false, targetAspectRatio: Float? = null) {
         viewModelScope.launch(kotlinx.coroutines.Dispatchers.Default) {
             try {
-                val loader = Coil.imageLoader(context)
+                val loader = SingletonImageLoader.get(context)
                 val request = ImageRequest.Builder(context)
                     .data(imageUrl)
                     .allowHardware(false)
@@ -1373,7 +1375,7 @@ class MovieDetailViewModel @Inject constructor(
 
                 val result = loader.execute(request)
                 if (result is SuccessResult) {
-                    val bitmap = result.drawable.toBitmap()
+                    val bitmap = result.image.toBitmap()
                     val finalColor = ColorUtils.extractAccentColor(bitmap, targetAspectRatio = targetAspectRatio)
                     if (finalColor != Color.Unspecified) {
                         _extractedColor.value = finalColor

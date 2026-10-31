@@ -42,8 +42,9 @@ import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
+import coil3.compose.AsyncImage
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.tasks.await

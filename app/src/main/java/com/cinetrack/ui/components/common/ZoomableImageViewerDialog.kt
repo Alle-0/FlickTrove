@@ -36,10 +36,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
-import coil.compose.AsyncImagePainter
-import coil.compose.SubcomposeAsyncImage
-import coil.compose.SubcomposeAsyncImageContent
-import coil.request.ImageRequest
+import coil3.compose.AsyncImagePainter
+import coil3.network.httpHeaders
+import coil3.compose.SubcomposeAsyncImage
+import coil3.compose.SubcomposeAsyncImageContent
+import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cinetrack.BuildConfig
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.glassmorphic
@@ -183,8 +185,13 @@ fun ZoomableImageViewerDialog(
                         .crossfade(true)
                         .apply {
                             if (imageUrl.contains("commsuni.tv")) {
-                                addHeader("Authorization", "Bearer ${BuildConfig.COMMSUNI_API_KEY}")
-                                addHeader("User-Agent", "FlickTrove-Android/${BuildConfig.VERSION_NAME}")
+                                httpHeaders(
+                                    coil3.network.NetworkHeaders.Builder()
+                                        .set("Authorization", "Bearer ${BuildConfig.COMMSUNI_API_KEY}")
+                                        .set("User-Agent", "FlickTrove-Android/${BuildConfig.VERSION_NAME}")
+                                        .build()
+                                )
+
                             }
                         }
                         .build(),
@@ -202,7 +209,7 @@ fun ZoomableImageViewerDialog(
                         }
                         .clip(RoundedCornerShape(20.dp))
                 ) {
-                    when (painter.state) {
+                    when (painter.state.collectAsState().value) {
                         is AsyncImagePainter.State.Loading -> {
                             Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
                                 CircularProgressIndicator(

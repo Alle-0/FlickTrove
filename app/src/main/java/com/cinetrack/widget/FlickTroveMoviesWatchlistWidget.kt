@@ -15,6 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.core.graphics.drawable.toBitmap
+import coil3.toBitmap
 import androidx.glance.GlanceId
 import androidx.glance.GlanceModifier
 import androidx.glance.Image
@@ -43,8 +44,9 @@ import androidx.glance.layout.width
 import androidx.glance.text.FontWeight
 import androidx.glance.text.Text
 import androidx.glance.text.TextStyle
-import coil.imageLoader
-import coil.request.ImageRequest
+import coil3.imageLoader
+import coil3.request.ImageRequest
+import coil3.request.allowHardware
 import com.cinetrack.MainActivity
 import com.cinetrack.R
 import com.cinetrack.data.local.database.FlickTroveDatabase
@@ -144,11 +146,11 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                             try {
                                 val req = ImageRequest.Builder(context)
                                     .data(buildTmdbImageUrl(backdropPath, ImageType.BACKDROP, ImageQuality.MEDIUM))
-                                    .size(720, 240)
+                                    .size(coil3.size.Size(720, 240))
                                     .allowHardware(false)
                                     .build()
-                                val drawable = context.imageLoader.execute(req).drawable
-                                backdropRaw = drawable?.toBitmap()
+                                val img = context.imageLoader.execute(req).image
+                                backdropRaw = img?.toBitmap()
                             } catch (_: Exception) {}
                         }
 
@@ -159,11 +161,11 @@ class FlickTroveMoviesWatchlistWidget : GlanceAppWidget() {
                             if (!logoPath.isNullOrEmpty()) {
                                 val logoReq = ImageRequest.Builder(context)
                                     .data(buildTmdbImageUrl(logoPath, ImageType.LOGO, ImageQuality.MEDIUM))
-                                    .size(480, 180)
+                                    .size(coil3.size.Size(480, 180))
                                     .allowHardware(false)
                                     .build()
-                                val drawable = context.imageLoader.execute(logoReq).drawable
-                                logoRaw = drawable?.toBitmap()
+                                val logoImg = context.imageLoader.execute(logoReq).image
+                                logoRaw = logoImg?.toBitmap()
                             }
                         } catch (_: Exception) {}
 

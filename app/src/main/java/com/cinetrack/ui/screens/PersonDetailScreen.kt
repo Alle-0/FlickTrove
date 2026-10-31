@@ -1,5 +1,7 @@
 package com.cinetrack.ui.screens
 
+import coil3.toBitmap
+
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalSharedTransitionApi
@@ -56,7 +58,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import coil.imageLoader
+import coil3.imageLoader
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.core.screen.ScreenKey
@@ -83,7 +85,7 @@ import com.cinetrack.ui.viewmodel.PersonDetailViewModel
 import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
-import coil.imageLoader
+import coil3.imageLoader
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -479,11 +481,11 @@ fun PersonDetailScreenContent(
                         currentImageQuality
                     )
                     val fileUri = if (imageUrl != null) {
-                        val request = coil.request.ImageRequest.Builder(context)
+                        val request = coil3.request.ImageRequest.Builder(context)
                             .data(imageUrl).build()
                         val result = context.imageLoader.execute(request)
-                        if (result is coil.request.SuccessResult) {
-                            val bitmap = (result.drawable as android.graphics.drawable.BitmapDrawable).bitmap
+                        if (result is coil3.request.SuccessResult) {
+                            val bitmap = result.image.toBitmap()
                             val imagesDir = java.io.File(context.cacheDir, "images")
                             imagesDir.mkdirs()
                             val file = java.io.File(imagesDir, "share_person.jpg")

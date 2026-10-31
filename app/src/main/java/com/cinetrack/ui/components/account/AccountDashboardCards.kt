@@ -430,7 +430,7 @@ fun FolderPreviewItem(
                             .border(1.dp, Color(0xFF13151A), RoundedCornerShape(8.dp))
                             .zIndex((topItems.size - index).toFloat())
                     ) {
-                        coil.compose.AsyncImage(
+                        coil3.compose.AsyncImage(
                             model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
                             contentDescription = null,
                             contentScale = androidx.compose.ui.layout.ContentScale.Crop,
@@ -824,7 +824,7 @@ fun HistoryDiaryCard(
                                     .background(Color(0xFF1E1E24))
                                     .border(1.dp, Color.White.copy(alpha = 0.2f), RoundedCornerShape(6.dp))
                             ) {
-                                coil.compose.AsyncImage(
+                                coil3.compose.AsyncImage(
                                     model = "https://image.tmdb.org/t/p/w185${item.posterPath}",
                                     contentDescription = null,
                                     contentScale = androidx.compose.ui.layout.ContentScale.Crop,
