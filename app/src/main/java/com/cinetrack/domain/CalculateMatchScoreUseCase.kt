@@ -114,7 +114,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
             movieGenreIds.forEach { id ->
                 if (isDisliked || isDropped) {
-                    val rawPenalty = if (isDropped) 0.9f else (6.0f - (rating ?: 5f)) * 0.4f
+                    val rawPenalty = if (isDropped) 0.9f else (neutralPivot - (rating ?: 5f)).coerceAtLeast(0.2f) * 0.4f
                     negativeScores[id] = (negativeScores[id] ?: 0f) + (rawPenalty * recencyMultiplier)
                     if (!isDropped) genreCounts[id] = (genreCounts[id] ?: 0) + 1
                 } else {
