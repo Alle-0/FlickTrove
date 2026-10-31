@@ -396,6 +396,12 @@ data class Movie(
     @Ignore
     var matchScore: Int? = null
 
+    @SerialName("original_language")
+    @Ignore
+    @get:Exclude
+    @set:Exclude
+    var originalLanguage: String? = null
+
     // --- Computed Properties ---
 
     @get:Exclude

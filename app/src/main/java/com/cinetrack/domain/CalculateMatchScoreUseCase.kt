@@ -136,7 +136,9 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
             // Origin Country tracking: solo per i titoli non odiati e non droppati!
             if (!isDisliked && !isDropped) {
-                m.originCountry?.forEach { c ->
+                val countries = m.originCountry?.takeIf { it.isNotEmpty() }
+                    ?: com.cinetrack.data.mapper.MovieMapper.fallbackCountryFromLanguage(m.originalLanguage)
+                countries?.forEach { c ->
                     val code = c.trim().uppercase()
                     if (code.isNotEmpty()) {
                         countryCounts[code] = (countryCounts[code] ?: 0) + 1
@@ -325,18 +327,19 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
         // 7. Country / Cultural Affinity Bonus (e.g. K-Drama, Anime, French / Italian Cinema)
         var countryBonus = 0f
-        val candidateCountries = currentMovie.originCountry?.map { it.trim().uppercase() } ?: emptyList()
+        val rawCountries = currentMovie.originCountry?.takeIf { it.isNotEmpty() }
+            ?: com.cinetrack.data.mapper.MovieMapper.fallbackCountryFromLanguage(currentMovie.originalLanguage)
+        val candidateCountries = rawCountries?.map { it.trim().uppercase() } ?: emptyList()
         if (candidateCountries.isNotEmpty() && profile.totalWatchedCount >= 5) {
-            val matchingCountry = candidateCountries.firstOrNull { code ->
-                code != "US" && (profile.countryFrequencies[code] ?: 0f) >= 0.15f
-            }
-            if (matchingCountry != null) {
-                val freq = profile.countryFrequencies[matchingCountry] ?: 0f
-                countryBonus = when {
-                    freq >= 0.30f -> 5.0f
-                    freq >= 0.20f -> 4.0f
-                    else -> 3.0f
-                }
+            val maxFreq = candidateCountries
+                .filter { it != "US" }
+                .maxOfOrNull { profile.countryFrequencies[it] ?: 0f } ?: 0f
+
+            countryBonus = when {
+                maxFreq >= 0.30f -> 5.0f
+                maxFreq >= 0.20f -> 4.0f
+                maxFreq >= 0.15f -> 3.0f
+                else -> 0f
             }
         }
 

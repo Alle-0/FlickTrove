@@ -92,7 +92,9 @@ object MovieMapper {
             directorData = effectiveDirectors,
             directorId = mainDirector?.id,
             directorName = mainDirector?.name,
-            originCountry = response.originCountry ?: response.productionCountries?.mapNotNull { it.iso31661 },
+            originCountry = response.originCountry 
+                ?: response.productionCountries?.mapNotNull { it.iso31661 }?.ifEmpty { null }
+                ?: fallbackCountryFromLanguage(response.originalLanguage),
             productionCompanies = if (type == "tv") {
                 val networks = response.networks?.map { StudioData(it.id, it.name, it.logoPath, it.originCountry) } ?: emptyList()
                 val prodCompanies = response.productionCompanies?.map { StudioData(it.id, it.name, it.logoPath, it.originCountry) } ?: emptyList()
@@ -100,7 +102,31 @@ object MovieMapper {
             } else {
                 response.productionCompanies?.map { StudioData(it.id, it.name, it.logoPath, it.originCountry) }?.distinctBy { it.name.trim().lowercase() }?.ifEmpty { null }
             }
-        )
+        ).apply {
+            this.originalLanguage = response.originalLanguage
+        }
+    }
+
+    fun fallbackCountryFromLanguage(lang: String?): List<String>? {
+        if (lang.isNullOrBlank()) return null
+        return when (lang.trim().lowercase()) {
+            "ko" -> listOf("KR")
+            "ja" -> listOf("JP")
+            "it" -> listOf("IT")
+            "fr" -> listOf("FR")
+            "de" -> listOf("DE")
+            "es" -> listOf("ES")
+            "zh", "cn" -> listOf("CN")
+            "hi" -> listOf("IN")
+            "ru" -> listOf("RU")
+            "da" -> listOf("DK")
+            "sv" -> listOf("SE")
+            "no" -> listOf("NO")
+            "pl" -> listOf("PL")
+            "nl" -> listOf("NL")
+            "tr" -> listOf("TR")
+            else -> null
+        }
     }
 
     fun mapMovieToResponse(movie: Movie): MovieDetailResponse {
