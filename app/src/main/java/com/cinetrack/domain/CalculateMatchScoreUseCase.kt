@@ -11,6 +11,7 @@ data class UserGenreProfile(
     val genreCounts: Map<Long, Int> = emptyMap(),
     val genreFrequencies: Map<Long, Float> = emptyMap(),
     val genrePairAffinities: Map<Long, Float> = emptyMap(),
+    val maxPairAffinity: Float = 1f,
     val negativeGenreScores: Map<Long, Float> = emptyMap(),
     val decadeCounts: Map<Int, Int> = emptyMap(),
     val countryFrequencies: Map<String, Float> = emptyMap(),
@@ -212,14 +213,15 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         // Esclude i titoli droppati dal denominatore per allinearsi a genreCounts
         val totalCompleted = watchedMovies.count { !it.dropped }.coerceAtLeast(1)
 
-        // 2. Bayesian Genre Affinity with Shrinkage
+        // 2. Bayesian Genre Affinity with Shrinkage & IDF Specificity Weights
         val genreAffinities = (genreScores.keys + intentGenreScores.keys).associateWith { id ->
             val totalScore = genreScores[id] ?: 0f
             val count = genreCounts[id] ?: 0
             val watchedComponent = if (count > 0) {
                 (totalScore / count) * (count.toFloat() / (count + 3f))
             } else 0f
-            (watchedComponent + (intentGenreScores[id] ?: 0f)).coerceAtLeast(0f)
+            val rawAffinity = (watchedComponent + (intentGenreScores[id] ?: 0f)).coerceAtLeast(0f)
+            rawAffinity * genreSpecificityWeight(id)
         }
 
         // Relative Genre Frequencies (TF-IDF vector)
@@ -280,6 +282,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         }.filterValues { it > 0f }
 
         val maxAffinity = genreAffinities.values.maxOrNull()?.coerceAtLeast(0.1f) ?: 1f
+        val maxPairAffinity = pairAffinities.values.maxOrNull()?.coerceAtLeast(0.15f) ?: 1f
 
         return UserGenreProfile(
             genreAffinities = genreAffinities,
@@ -287,6 +290,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             genreCounts = genreCounts,
             genreFrequencies = genreFrequencies,
             genrePairAffinities = pairAffinities,
+            maxPairAffinity = maxPairAffinity,
             negativeGenreScores = adjustedNegativeScores,
             decadeCounts = decadeCounts,
             countryFrequencies = countryFrequencies,
@@ -355,7 +359,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 }
             }
             if (highestPairScore > 0f) {
-                pairSynergyBonus = ((highestPairScore / profile.maxAffinity) * 10f).coerceIn(0f, 10f)
+                pairSynergyBonus = ((highestPairScore / profile.maxPairAffinity) * 10f).coerceIn(0f, 10f)
             }
         }
 
@@ -455,13 +459,27 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             (((rawTmdbRating.toFloat() - 7.2f) / 1.6f) * 4.0f).coerceIn(1.5f, 4.0f)
         } else 0f
 
-        // Composite calculation con arrotondamento finale (Zero pareggi di massa)
+        // Composite calculation con Soft-Knee Cap asintotico sopra gli 80 pt
         val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus + countryBonus + auteurBoost + indieGemBonus
         val totalNegative = repulsionPenalty + formatDamping
-        val finalScore = (totalPositive - totalNegative).roundToInt()
+        val rawFinal = totalPositive - totalNegative
+
+        val compressedScore = if (rawFinal > 80f) {
+            val excess = rawFinal - 80f
+            80f + 15f * (excess / (excess + 12f))
+        } else {
+            rawFinal
+        }
 
         // Predictive Cap at 95%: Scores 96%-99% reserved for user's personal 10/10 ratings
-        return finalScore.coerceIn(10, 95)
+        return compressedScore.roundToInt().coerceIn(10, 95)
+    }
+
+    private fun genreSpecificityWeight(genreId: Long): Float = when (genreId) {
+        18L -> 0.88f   // Drama (onnipresente su TMDB)
+        35L, 28L -> 0.94f // Comedy, Action
+        878L, 9648L, 27L, 36L, 10752L, 80L -> 1.12f // Sci-Fi, Mystery, Horror, History, War, Crime
+        else -> 1.0f
     }
 
     operator fun invoke(currentMovie: Movie, localMovies: List<Movie>): Int? {
