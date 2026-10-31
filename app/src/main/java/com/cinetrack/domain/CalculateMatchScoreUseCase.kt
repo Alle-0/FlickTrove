@@ -12,6 +12,7 @@ data class UserGenreProfile(
     val genrePairAffinities: Map<Long, Float> = emptyMap(),
     val negativeGenreScores: Map<Long, Float> = emptyMap(),
     val decadeCounts: Map<Int, Int> = emptyMap(),
+    val countryFrequencies: Map<String, Float> = emptyMap(),
     val totalWatchedCount: Int = 0,
     val averageUserRating: Float = 7.0f
 ) {
@@ -60,20 +61,21 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         val pairScores = mutableMapOf<Long, Float>()
         val pairCounts = mutableMapOf<Long, Int>()
         val decadeCounts = mutableMapOf<Int, Int>()
-        var totalRatingSum = 0f
-        var ratedMoviesCount = 0
+        val countryCounts = mutableMapOf<String, Int>()
 
         val nowEpoch = System.currentTimeMillis()
 
+        // Pre-calcolo della media voti reale dell'utente per calibrare la severità
+        val ratedList = watchedMovies.mapNotNull { it.personalRating?.toFloat()?.takeIf { r -> r > 0f } }
+        val avgUserRating = if (ratedList.isNotEmpty()) ratedList.average().toFloat() else 7.0f
+        // Pivot neutro dinamico: 6.0 di default, ma scende per i critici severi e sale per i votanti generosi
+        val neutralPivot = (avgUserRating - 0.8f).coerceIn(5.2f, 6.6f)
+
         // 1. Process all watched titles with Temporal Decay and Negative/Positive Split
         watchedMovies.forEach { m ->
-            val rating = m.personalRating
-            if (rating != null && rating > 0) {
-                totalRatingSum += rating.toFloat()
-                ratedMoviesCount++
-            }
+            val rating = m.personalRating?.toFloat()
 
-            // Recency Half-Life Decay: recent watches (past 6 months) have higher momentum
+            // Recency Half-Life Decay: recent watches (past 6-8 months) have higher momentum
             val recencyMultiplier = run {
                 val watchedTime = m.watchedAt?.let { parseEpoch(it) } ?: m.clientUpdatedAt.takeIf { it > 0 }
                 if (watchedTime != null && watchedTime > 0) {
@@ -83,23 +85,26 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 } else 0.85f
             }
 
-            val isDisliked = rating != null && rating in 1.0..5.0
+            val isDisliked = rating != null && rating in 1.0f..5.0f
             val isDropped = m.dropped
 
-            val ratingWeight = when {
+            val baseWeight = when {
                 isDropped -> -0.8f
-                rating != null && rating >= 8.5 -> ((rating.toFloat() - 6.0f) / 3.5f) * 1.35f
-                rating != null && rating >= 6.5 -> ((rating.toFloat() - 5.5f) / 4.0f)
-                rating != null && rating > 0 -> ((rating.toFloat() - 6.0f) / 4.0f) // negative if < 6
-                m.favorite -> 1.25f
+                rating != null && rating >= 8.5f -> ((rating - neutralPivot) / 3.5f) * 1.35f
+                rating != null && rating >= 6.5f -> ((rating - (neutralPivot - 0.3f)) / 4.0f)
+                rating != null && rating > 0f -> ((rating - neutralPivot) / 4.0f)
+                m.favorite -> 1.15f
                 else -> 0.35f
-            } * recencyMultiplier
+            }
+            // Il cuore dei Preferiti ora aggiunge un boost reale anche ai film già votati!
+            val favoriteBonus = if (m.favorite && rating != null && !isDropped) 0.25f else 0f
+            val ratingWeight = (baseWeight + favoriteBonus) * recencyMultiplier
 
             val movieGenreIds = (m.genres?.map { it.id } ?: m.genreIds ?: emptyList()).distinct()
 
             movieGenreIds.forEach { id ->
                 if (isDisliked || isDropped) {
-                    val rawPenalty = if (isDropped) 0.9f else (6.0f - (rating?.toFloat() ?: 5f)) * 0.4f
+                    val rawPenalty = if (isDropped) 0.9f else (6.0f - (rating ?: 5f)) * 0.4f
                     negativeScores[id] = (negativeScores[id] ?: 0f) + (rawPenalty * recencyMultiplier)
                     if (!isDropped) genreCounts[id] = (genreCounts[id] ?: 0) + 1
                 } else {
@@ -112,8 +117,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             if (movieGenreIds.size >= 2 && !isDisliked && !isDropped && ratingWeight > 0f) {
                 for (i in 0 until movieGenreIds.size) {
                     for (j in i + 1 until movieGenreIds.size) {
-                        val minId = if (movieGenreIds[i] < movieGenreIds[j]) movieGenreIds[i] else movieGenreIds[j]
-                        val maxId = if (movieGenreIds[i] > movieGenreIds[j]) movieGenreIds[i] else movieGenreIds[j]
+                        val minId = minOf(movieGenreIds[i], movieGenreIds[j])
+                        val maxId = maxOf(movieGenreIds[i], movieGenreIds[j])
                         val pairKey = (minId shl 32) or (maxId and 0xFFFFFFFFL)
                         pairScores[pairKey] = (pairScores[pairKey] ?: 0f) + ratingWeight
                         pairCounts[pairKey] = (pairCounts[pairKey] ?: 0) + 1
@@ -121,17 +126,29 @@ class CalculateMatchScoreUseCase @Inject constructor() {
                 }
             }
 
-            // Decade tracking
-            extractYear(m)?.let { year ->
-                val decade = (year / 10) * 10
-                decadeCounts[decade] = (decadeCounts[decade] ?: 0) + 1
+            // Decade tracking: solo per i titoli non odiati e non droppati!
+            if (!isDisliked && !isDropped) {
+                extractYear(m)?.let { year ->
+                    val decade = (year / 10) * 10
+                    decadeCounts[decade] = (decadeCounts[decade] ?: 0) + 1
+                }
+            }
+
+            // Origin Country tracking: solo per i titoli non odiati e non droppati!
+            if (!isDisliked && !isDropped) {
+                m.originCountry?.forEach { c ->
+                    val code = c.trim().uppercase()
+                    if (code.isNotEmpty()) {
+                        countryCounts[code] = (countryCounts[code] ?: 0) + 1
+                    }
+                }
             }
         }
 
         if (genreScores.isEmpty()) return null
 
-        val totalWatched = watchedMovies.size
-        val avgUserRating = if (ratedMoviesCount > 0) totalRatingSum / ratedMoviesCount else 7.0f
+        // Esclude i titoli droppati dal denominatore per allinearsi a genreCounts
+        val totalCompleted = watchedMovies.count { !it.dropped }.coerceAtLeast(1)
 
         // 2. Bayesian Genre Affinity with Shrinkage
         val genreAffinities = genreScores.mapValues { (id, totalScore) ->
@@ -144,7 +161,12 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
         // Relative Genre Frequencies (TF-IDF vector)
         val genreFrequencies = genreCounts.mapValues { (_, count) ->
-            count.toFloat() / totalWatched.toFloat()
+            count.toFloat() / totalCompleted.toFloat()
+        }
+
+        // Relative Country Frequencies
+        val countryFrequencies = countryCounts.mapValues { (_, count) ->
+            count.toFloat() / totalCompleted.toFloat()
         }
 
         // Micro-Cluster Normalized Affinities
@@ -160,7 +182,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             val freq = genreFrequencies[id] ?: 0f
             val count = genreCounts[id] ?: 0
             when {
-                count >= 4 && freq >= 0.12f -> 0f       // Pure guilty pleasure, completely remove repulsion
+                count >= 4 && freq >= 0.12f -> 0f           // Pure guilty pleasure, completely remove repulsion
                 count >= 3 && freq >= 0.08f -> score * 0.4f // Partial mitigation
                 else -> score
             }
@@ -176,7 +198,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             genrePairAffinities = pairAffinities,
             negativeGenreScores = adjustedNegativeScores,
             decadeCounts = decadeCounts,
-            totalWatchedCount = totalWatched,
+            countryFrequencies = countryFrequencies,
+            totalWatchedCount = totalCompleted,
             averageUserRating = avgUserRating
         )
     }
@@ -198,13 +221,25 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         if (currentMovieGenreIds.isNotEmpty()) {
             var maxGenreAffinity = 0f
             var sumGenreAffinity = 0f
+            var lowAffinityCount = 0
             currentMovieGenreIds.forEach { id ->
                 val aff = profile.genreAffinities[id] ?: 0f
                 if (aff > maxGenreAffinity) maxGenreAffinity = aff
                 sumGenreAffinity += aff
+                if (aff < profile.maxAffinity * 0.15f) {
+                    lowAffinityCount++
+                }
             }
             val avgGenreAffinity = sumGenreAffinity / currentMovieGenreIds.size
-            val blendedAffinity = (maxGenreAffinity * 0.65f) + (avgGenreAffinity * 0.35f)
+
+            // Multi-Genre Saturation ("Minestrone Effect"):
+            // If candidate has 4+ genres and over half have low/zero affinity,
+            // reduce max-affinity dominance from 65% to 45% and lean more on the average (55%).
+            val isMinestrone = currentMovieGenreIds.size >= 4 && lowAffinityCount > (currentMovieGenreIds.size / 2)
+            val maxWeight = if (isMinestrone) 0.45f else 0.65f
+            val avgWeight = if (isMinestrone) 0.55f else 0.35f
+
+            val blendedAffinity = (maxGenreAffinity * maxWeight) + (avgGenreAffinity * avgWeight)
 
             if (blendedAffinity > 0f) {
                 // Scaled up to 50 points (prioritizing personal taste over global rating)
@@ -288,7 +323,24 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             }
         }
 
-        // 7. Bayesian True Quality Score (IMDb Weighted Mean Formula)
+        // 7. Country / Cultural Affinity Bonus (e.g. K-Drama, Anime, French / Italian Cinema)
+        var countryBonus = 0f
+        val candidateCountries = currentMovie.originCountry?.map { it.trim().uppercase() } ?: emptyList()
+        if (candidateCountries.isNotEmpty() && profile.totalWatchedCount >= 5) {
+            val matchingCountry = candidateCountries.firstOrNull { code ->
+                code != "US" && (profile.countryFrequencies[code] ?: 0f) >= 0.15f
+            }
+            if (matchingCountry != null) {
+                val freq = profile.countryFrequencies[matchingCountry] ?: 0f
+                countryBonus = when {
+                    freq >= 0.30f -> 5.0f
+                    freq >= 0.20f -> 4.0f
+                    else -> 3.0f
+                }
+            }
+        }
+
+        // 8. Bayesian True Quality Score (IMDb Weighted Mean Formula)
         // Eliminates artificial 10.0 ratings with 2 votes while rewarding universally praised films
         val rawTmdbRating = currentMovie.voteAverage ?: 0.0
         val voteCount = currentMovie.voteCount ?: 0
@@ -307,11 +359,11 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         val baseScore = ((effectiveRating / 8.6) * 30.0).toFloat().coerceIn(0f, 30f)
 
         // Composite calculation
-        val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus
+        val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus + countryBonus
         val totalNegative = repulsionPenalty + formatDamping
         val finalScore = (totalPositive - totalNegative).toInt()
 
-        // 8. Predictive Cap at 95%: Scores 96%-99% reserved for user's personal 10/10 ratings
+        // 9. Predictive Cap at 95%: Scores 96%-99% reserved for user's personal 10/10 ratings
         return finalScore.coerceIn(10, 95)
     }
 
