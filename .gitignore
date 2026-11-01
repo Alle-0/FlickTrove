@@ -109,3 +109,5 @@ scratch/
 .markdownlint.json
 *PLAN.md
 /plans/
+
+RELEASE_NOTES*.md
