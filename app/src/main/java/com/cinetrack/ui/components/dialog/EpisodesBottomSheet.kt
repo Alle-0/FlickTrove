@@ -423,12 +423,6 @@ fun EpisodesBottomSheet(
                 EpisodeInfoModal(
                     episode = ep,
                     onDismiss = { selectedEpisodeForInfo = null },
-                    onCommentsClick = onEpisodeCommentsClick?.let {
-                        {
-                            val sNum = if (ep.seasonNumber > 0) ep.seasonNumber else selectedSeasonNumber
-                            handleEpisodeCommentsClick(sNum, ep)
-                        }
-                    },
                     hazeState = sheetHazeState
                 )
             }

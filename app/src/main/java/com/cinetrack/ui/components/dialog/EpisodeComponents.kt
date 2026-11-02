@@ -195,7 +195,6 @@ internal fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, 
 internal fun EpisodeInfoModal(
     episode: Episode,
     onDismiss: () -> Unit,
-    onCommentsClick: (() -> Unit)? = null,
     hazeState: HazeState? = null
 ) {
     FlickTroveModal(
@@ -321,38 +320,6 @@ internal fun EpisodeInfoModal(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = runtimeText,
-                            fontSize = 12.sp,
-                            fontWeight = FontWeight.SemiBold,
-                            color = Color.White.copy(alpha = 0.9f)
-                        )
-                    }
-                }
-            }
-
-            if (onCommentsClick != null) {
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .bounceClick {
-                            onDismiss()
-                            onCommentsClick()
-                        }
-                        .padding(horizontal = 12.dp, vertical = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_comment),
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.7f),
-                            modifier = Modifier.size(14.dp)
-                        )
-                        Spacer(modifier = Modifier.width(6.dp))
-                        Text(
-                            text = stringResource(R.string.comments_screen_title),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White.copy(alpha = 0.9f)
