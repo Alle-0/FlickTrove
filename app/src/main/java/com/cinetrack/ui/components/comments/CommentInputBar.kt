@@ -67,6 +67,7 @@ import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -93,6 +94,7 @@ fun CommentInputBar(
     onSpoilerChanged: (Boolean) -> Unit,
     attachedMedia: List<String>,
     onAttachedMediaChanged: (List<String>) -> Unit,
+    onRemoveMedia: ((String) -> Unit)? = null,
     isUploadingImage: Boolean,
     onPickImage: () -> Unit,
     onPickGif: () -> Unit = {},
@@ -310,7 +312,12 @@ fun CommentInputBar(
                     ) {
                         items(attachedMedia.size) { index ->
                             val url = attachedMedia[index]
-                            Box(modifier = Modifier.size(58.dp)) {
+                            val itemHazeState = remember { HazeState() }
+                            Box(
+                                modifier = Modifier
+                                    .size(58.dp)
+                                    .clip(RoundedCornerShape(14.dp))
+                            ) {
                                 AsyncImage(
                                     model = ImageRequest.Builder(context).data(url).build(),
                                     imageLoader = imageLoader,
@@ -318,17 +325,25 @@ fun CommentInputBar(
                                     contentScale = ContentScale.Crop,
                                     modifier = Modifier
                                         .fillMaxSize()
-                                        .clip(RoundedCornerShape(14.dp))
+                                        .haze(itemHazeState)
                                 )
                                 Box(
                                     modifier = Modifier
                                         .align(Alignment.TopEnd)
                                         .padding(4.dp)
                                         .size(20.dp)
-                                        .bounceClick { onAttachedMediaChanged(attachedMedia.filter { it != url }) }
-                                        .clip(CircleShape)
-                                        .background(Color.Black.copy(alpha = 0.72f))
-                                        .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
+                                        .bounceClick(scaleDown = 0.88f) {
+                                            onRemoveMedia?.invoke(url)
+                                            onAttachedMediaChanged(attachedMedia.filter { it != url })
+                                        }
+                                        .hazeGlass(
+                                            state = itemHazeState,
+                                            shape = CircleShape,
+                                            containerColor = Color.Black.copy(alpha = 0.50f),
+                                            blurRadius = 10.dp,
+                                            borderColor = Color.White.copy(alpha = 0.20f),
+                                            borderWidth = 1.dp
+                                        ),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -613,7 +628,7 @@ fun CommentInputBar(
                                 .padding(top = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Foto
+                            // Foto (Doppia funzione: Scatta foto o Galleria)
                             Box(
                                 modifier = Modifier
                                     .size(32.dp)
@@ -630,7 +645,7 @@ fun CommentInputBar(
                                     val fotoAlpha = if (attachedMedia.isEmpty()) 0.75f else 0.25f
                                     Icon(
                                         painter = painterResource(id = R.drawable.ic_image),
-                                        contentDescription = "Foto",
+                                        contentDescription = stringResource(R.string.comment_pick_gallery),
                                         tint = Color.White.copy(alpha = fotoAlpha),
                                         modifier = Modifier.size(16.dp)
                                     )

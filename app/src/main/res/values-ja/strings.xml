@@ -724,6 +724,9 @@
     <string name="widget_movies_watchlist_empty">観たい映画はありません</string>
     <string name="comments_screen_title">ディスカッション</string>
     <string name="comments_screen_title_with_media">ディスカッション: %1$s</string>
+    <string name="episodes_discussions_title">エピソードのディスカッション</string>
+    <string name="episodes_discussions_all_series">メインディスカッション (シリーズ)</string>
+    <string name="episodes_discussions_pill">エピソード</string>
     <string name="comment_translate">翻訳</string>
     <string name="comment_translated_label">翻訳済み</string>
     <string name="comment_show_original">原文を表示</string>
@@ -1844,6 +1847,15 @@
     <string name="history_screen_subtitle">あなたのシネマの軌跡</string>
     <string name="history_view_timeline">タイムライン</string>
     <string name="history_view_calendar">カレンダー</string>
+    <string name="panorama_activity_title">視聴アクティビティ</string>
+    <string name="panorama_watches_across_days">%1$d日間で視聴</string>
+    <string name="panorama_day_streak">%1$d日連続</string>
+    <string name="panorama_current_streak_label">現在の連続</string>
+    <string name="panorama_best_streak_label">最長連続</string>
+    <string name="panorama_active_days_label">アクティブ日数</string>
+    <string name="panorama_active_days_ratio">%1$d/%2$d日</string>
+    <string name="history_activity_scope_month">月</string>
+    <string name="history_activity_scope_year">年</string>
     <string name="history_filter_all">すべて</string>
     <string name="history_filter_movies">映画</string>
     <string name="history_filter_tv">ドラマ</string>

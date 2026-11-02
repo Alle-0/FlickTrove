@@ -356,9 +356,9 @@ fun WrappedBannerPill(
                             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            WrappedSmallStat(stringResource(R.string.stats_movies), stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_ciak), Modifier.weight(1f).fillMaxHeight())
+                            WrappedSmallStat(stringResource(R.string.stats_movies), stats.moviesWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_film), Modifier.weight(1f).fillMaxHeight())
                             WrappedSmallStat(stringResource(R.string.stats_series), stats.tvWatched.toString(), ImageVector.vectorResource(id = R.drawable.ic_tv), Modifier.weight(1.1f).fillMaxHeight())
-                            WrappedSmallStat(stringResource(R.string.stats_top_directors), stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_videocamera), Modifier.weight(1.9f).fillMaxHeight())
+                            WrappedSmallStat(stringResource(R.string.stats_top_directors), stats.topDirectors.firstOrNull()?.name ?: "---", ImageVector.vectorResource(id = R.drawable.ic_director_chair), Modifier.weight(1.9f).fillMaxHeight())
                         }
                     }
 

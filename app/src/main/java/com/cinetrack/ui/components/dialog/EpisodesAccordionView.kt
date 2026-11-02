@@ -37,6 +37,7 @@ fun EpisodesAccordionView(
     localWatchedEpisodes: Map<String, List<Int>>,
     onUpdateWatchedEpisodes: (Map<String, List<Int>>) -> Unit,
     onEpisodeInfoClick: (Episode) -> Unit,
+    onEpisodeCommentsClick: ((seasonNumber: Int, episode: Episode) -> Unit)? = null,
     isDropped: Boolean,
     nestedScrollConnection: NestedScrollConnection,
     modifier: Modifier = Modifier
@@ -287,7 +288,8 @@ fun EpisodesAccordionView(
                     }
                     onUpdateWatchedEpisodes(localWatchedEpisodes + (sNum.toString() to currentWatched))
                 },
-                onEpisodeInfoClick = onEpisodeInfoClick
+                onEpisodeInfoClick = onEpisodeInfoClick,
+                onEpisodeCommentsClick = onEpisodeCommentsClick
             )
         }
     }

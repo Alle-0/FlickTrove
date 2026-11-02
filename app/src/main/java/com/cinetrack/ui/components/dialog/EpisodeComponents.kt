@@ -1,6 +1,7 @@
 package com.cinetrack.ui.components.dialog
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -43,17 +44,22 @@ internal fun EpisodeCard(
     isWatched: Boolean,
     onToggle: () -> Unit,
     onInfoClick: () -> Unit,
+    onCommentsClick: (() -> Unit)? = null,
     fallbackBackdropPath: String? = null
 ) {
-    Surface(
+    Box(
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(
                 onLongClick = { onInfoClick() }
-            ) { onToggle() },
-        color = if (isWatched) Color(0xFF00E676).copy(alpha = 0.05f) else Color.White.copy(alpha = 0.03f),
-        shape = RoundedCornerShape(20.dp),
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (isWatched) Color(0xFF00E676).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f))
+            ) { onToggle() }
+            .clip(RoundedCornerShape(20.dp))
+            .background(if (isWatched) Color(0xFF00E676).copy(alpha = 0.05f) else Color.White.copy(alpha = 0.03f))
+            .border(
+                1.dp,
+                if (isWatched) Color(0xFF00E676).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f),
+                RoundedCornerShape(20.dp)
+            )
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
             val thumbModel = episode.stillPath?.let {
@@ -119,16 +125,46 @@ internal fun EpisodeCard(
                 )
             }
 
-            Surface(
-                modifier = Modifier.size(28.dp),
-                color = if (isWatched) Color(0xFF00E676) else Color.Transparent,
-                shape = CircleShape,
-                border = androidx.compose.foundation.BorderStroke(1.5.dp, if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f))
+            if (onCommentsClick != null) {
+                Box(
+                    modifier = Modifier
+                        .size(28.dp)
+                        .bounceClick(scaleDown = 0.88f) { onCommentsClick() }
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.05f))
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_comment),
+                        contentDescription = stringResource(R.string.comments_screen_title),
+                        tint = Color.White.copy(alpha = 0.70f),
+                        modifier = Modifier.size(13.dp)
+                    )
+                }
+                Spacer(modifier = Modifier.width(8.dp))
+            }
+
+            Box(
+                modifier = Modifier
+                    .size(28.dp)
+                    .bounceClick(scaleDown = 0.88f) { onToggle() }
+                    .clip(CircleShape)
+                    .background(if (isWatched) Color(0xFF00E676) else Color.Transparent)
+                    .border(
+                        1.5.dp,
+                        if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
+                        CircleShape
+                    ),
+                contentAlignment = Alignment.Center
             ) {
                 if (isWatched) {
-                    Box(contentAlignment = Alignment.Center) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_tick), contentDescription = null, tint = Color.Black, modifier = Modifier.size(14.dp))
-                    }
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                        contentDescription = null,
+                        tint = Color.Black,
+                        modifier = Modifier.size(14.dp)
+                    )
                 }
             }
         }
@@ -159,6 +195,7 @@ internal fun isSeasonFullyWatched(localWatchedEpisodes: Map<String, List<Int>>, 
 internal fun EpisodeInfoModal(
     episode: Episode,
     onDismiss: () -> Unit,
+    onCommentsClick: (() -> Unit)? = null,
     hazeState: HazeState? = null
 ) {
     FlickTroveModal(
@@ -284,6 +321,38 @@ internal fun EpisodeInfoModal(
                         Spacer(modifier = Modifier.width(6.dp))
                         Text(
                             text = runtimeText,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = Color.White.copy(alpha = 0.9f)
+                        )
+                    }
+                }
+            }
+
+            if (onCommentsClick != null) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .bounceClick {
+                            onDismiss()
+                            onCommentsClick()
+                        }
+                        .padding(horizontal = 12.dp, vertical = 8.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_comment),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.7f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(6.dp))
+                        Text(
+                            text = stringResource(R.string.comments_screen_title),
                             fontSize = 12.sp,
                             fontWeight = FontWeight.SemiBold,
                             color = Color.White.copy(alpha = 0.9f)

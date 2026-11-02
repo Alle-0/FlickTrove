@@ -508,7 +508,7 @@ fun YourFlowCard(
                     .bounceClick { onFlowClick() }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_sparkle),
+                    painter = painterResource(id = R.drawable.ic_film),
                     contentDescription = "Your Flow",
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)
@@ -765,7 +765,7 @@ fun HistoryDiaryCard(
                     .bounceClick { onClick() }
             ) {
                 Icon(
-                    painter = painterResource(id = R.drawable.ic_calendario),
+                    painter = painterResource(id = R.drawable.ic_ticket),
                     contentDescription = stringResource(R.string.history_account_card_title),
                     tint = Color.White,
                     modifier = Modifier.size(24.dp)

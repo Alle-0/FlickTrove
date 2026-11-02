@@ -2,6 +2,7 @@ package com.cinetrack.data.repository
 
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.model.CommentReport
+import com.cinetrack.data.model.isSameMediaType
 import com.google.firebase.Timestamp
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.DocumentSnapshot
@@ -31,13 +32,15 @@ class CommentRepository @Inject constructor(
         limit: Long = 10,
         sortBy: String = "createdAt",
         direction: Query.Direction = Query.Direction.DESCENDING,
-        lastVisible: DocumentSnapshot? = null
+        lastVisible: DocumentSnapshot? = null,
+        mediaType: String? = null
     ): Pair<List<AppComment>, DocumentSnapshot?> {
         return try {
+            val fetchLimit = if (!mediaType.isNullOrBlank()) (limit * 2).coerceAtLeast(limit) else limit
             var query = getMediaCommentsCollection(mediaId)
                 .whereEqualTo("depth", 0)
                 .orderBy(sortBy, direction)
-                .limit(limit)
+                .limit(fetchLimit)
 
             if (lastVisible != null) {
                 query = query.startAfter(lastVisible)
@@ -45,8 +48,14 @@ class CommentRepository @Inject constructor(
 
             val snapshot = query.get().await()
 
-            val comments = snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
+            val allComments = snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
                 appComment.copy(id = snapshot.documents[index].id)
+            }
+
+            val comments = if (!mediaType.isNullOrBlank()) {
+                allComments.filter { isSameMediaType(it.mediaType, mediaType) }.take(limit.toInt())
+            } else {
+                allComments.take(limit.toInt())
             }
 
             val newLastVisible = if (snapshot.size() > 0) snapshot.documents[snapshot.size() - 1] else null
@@ -80,19 +89,29 @@ class CommentRepository @Inject constructor(
 
     suspend fun getTopCommentsForMediaPreview(
         mediaId: String,
-        limit: Long = 5
+        limit: Long = 5,
+        mediaType: String? = null
     ): List<AppComment> {
         return try {
+            val fetchLimit = if (!mediaType.isNullOrBlank()) (limit * 2).coerceAtLeast(limit) else limit
             val snapshot = getMediaCommentsCollection(mediaId)
                 .whereEqualTo("depth", 0)
                 .orderBy("likesCount", Query.Direction.DESCENDING)
-                .limit(limit)
+                .limit(fetchLimit)
                 .get()
                 .await()
 
-            snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
+            val allComments = snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
                 appComment.copy(id = snapshot.documents[index].id)
             }
+
+            val comments = if (!mediaType.isNullOrBlank()) {
+                allComments.filter { isSameMediaType(it.mediaType, mediaType) }.take(limit.toInt())
+            } else {
+                allComments.take(limit.toInt())
+            }
+
+            comments
         } catch (e: Exception) {
             e.printStackTrace()
             emptyList()

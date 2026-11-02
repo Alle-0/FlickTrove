@@ -59,6 +59,7 @@ internal fun SeasonAccordionCard(
     onBatchLongClick: () -> Unit,
     onEpisodeToggle: (Int) -> Unit,
     onEpisodeInfoClick: (Episode) -> Unit,
+    onEpisodeCommentsClick: ((seasonNumber: Int, episode: Episode) -> Unit)? = null,
     fallbackBackdropPath: String? = null
 ) {
     val sNum = season.seasonNumber
@@ -142,28 +143,28 @@ internal fun SeasonAccordionCard(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 // Quick Batch Season Checkmark: 28.dp Circle (matching EpisodeCard)
-                Surface(
+                Box(
                     modifier = Modifier
                         .size(28.dp)
+                        .clip(CircleShape)
+                        .background(if (isFullyWatched) Color(0xFF00E676) else Color.Transparent)
+                        .border(
+                            1.5.dp,
+                            if (isFullyWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
+                            CircleShape
+                        )
                         .bounceClick(
                             onLongClick = { onBatchLongClick() }
                         ) { onBatchToggle() },
-                    color = if (isFullyWatched) Color(0xFF00E676) else Color.Transparent,
-                    shape = CircleShape,
-                    border = BorderStroke(
-                        1.5.dp,
-                        if (isFullyWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f)
-                    )
+                    contentAlignment = Alignment.Center
                 ) {
                     if (isFullyWatched) {
-                        Box(contentAlignment = Alignment.Center) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
-                                contentDescription = null,
-                                tint = Color.Black,
-                                modifier = Modifier.size(14.dp)
-                            )
-                        }
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                            contentDescription = null,
+                            tint = Color.Black,
+                            modifier = Modifier.size(14.dp)
+                        )
                     }
                 }
             }
@@ -198,11 +199,15 @@ internal fun SeasonAccordionCard(
                     ) {
                         if (seasonData?.episodes != null) {
                             seasonData.episodes.forEach { episode ->
+                                val effectiveSeasonNum = if (episode.seasonNumber > 0) episode.seasonNumber else sNum
                                 EpisodeCard(
                                     episode = episode,
                                     isWatched = watchedList.contains(episode.episodeNumber),
                                     onToggle = { onEpisodeToggle(episode.episodeNumber) },
                                     onInfoClick = { onEpisodeInfoClick(episode) },
+                                    onCommentsClick = onEpisodeCommentsClick?.let {
+                                        { it(effectiveSeasonNum, episode) }
+                                    },
                                     fallbackBackdropPath = fallbackBackdropPath
                                 )
                             }

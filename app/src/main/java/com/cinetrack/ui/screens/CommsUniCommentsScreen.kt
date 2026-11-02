@@ -165,6 +165,13 @@ class CommsUniCommentsScreen(
         val banExpiration: String? = null
         val availableSources by viewModel.availableSources.collectAsStateWithLifecycle()
         val conversationStats by viewModel.conversationStats.collectAsStateWithLifecycle()
+        val showSeasons by viewModel.showSeasons.collectAsStateWithLifecycle()
+        val seasonEpisodes by viewModel.seasonEpisodes.collectAsStateWithLifecycle()
+        val isLoadingSeasonEpisodes by viewModel.isLoadingSeasonEpisodes.collectAsStateWithLifecycle()
+        var showEpisodePickerSheet by remember { mutableStateOf(false) }
+        val isTvSeries = remember(mediaType, seasonNumber, showSeasons) {
+            mediaType.lowercase() in listOf("tv", "series", "show", "episode") || seasonNumber != null || showSeasons.isNotEmpty()
+        }
         val accentColor = Color(accentColorValue.toULong())
 
         var replyingTo by remember { mutableStateOf<AppComment?>(null) }
@@ -198,6 +205,7 @@ class CommsUniCommentsScreen(
         var showCommsUniInfo by remember { mutableStateOf(false) }
         var sortButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var commsUniButtonBounds by remember { mutableStateOf<Rect?>(null) }
+        var episodesButtonBounds by remember { mutableStateOf<Rect?>(null) }
 
         LaunchedEffect(sortOption, sortOrder, sourceFilters, languageFilters) {
             val sortString = if (sortOption == CommentSortOption.DATE) (if (sortOrder == CommentSortOrder.DESC) "most_recent" else "oldest") else "most_liked"
@@ -216,25 +224,76 @@ class CommsUniCommentsScreen(
         var showGiphyPicker by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         val imageLoader = context.imageLoader
         
-        val photoPickerLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
-            contract = androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia(),
-            onResult = { uri ->
-                if (uri != null) {
-                    isUploadingImage = true
-                    viewModel.uploadCommentImage(
-                        imageUri = uri,
-                        onSuccess = { url ->
-                            isUploadingImage = false
-                            attachedMedia = listOf(url.toString())
-                        },
-                        onError = { error ->
-                            isUploadingImage = false
-                            android.widget.Toast.makeText(context, error, android.widget.Toast.LENGTH_SHORT).show()
-                        }
-                    )
+        var pendingCameraFile by remember { mutableStateOf<java.io.File?>(null) }
+        var pendingCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }
+
+        val mediaChooserLauncher = androidx.activity.compose.rememberLauncherForActivityResult(
+            contract = androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult(),
+            onResult = { result ->
+                if (result.resultCode == android.app.Activity.RESULT_OK) {
+                    val galleryUri = result.data?.data
+                    val photoFile = pendingCameraFile
+                    val finalUri = if (galleryUri != null) {
+                        photoFile?.delete()
+                        galleryUri
+                    } else if (photoFile != null && photoFile.exists() && photoFile.length() > 0) {
+                        pendingCameraUri
+                    } else {
+                        null
+                    }
+
+                    if (finalUri != null) {
+                        isUploadingImage = true
+                        viewModel.uploadCommentImage(
+                            imageUri = finalUri,
+                            onSuccess = { url ->
+                                isUploadingImage = false
+                                attachedMedia = listOf(url.toString())
+                            },
+                            onError = { error ->
+                                isUploadingImage = false
+                                android.widget.Toast.makeText(context, error, android.widget.Toast.LENGTH_SHORT).show()
+                            }
+                        )
+                    }
+                } else {
+                    pendingCameraFile?.let { if (it.exists() && it.length() == 0L) it.delete() }
                 }
             }
         )
+
+        val launchMediaChooser: () -> Unit = {
+            try {
+                val cacheDir = java.io.File(context.cacheDir, "camera_photos").apply { mkdirs() }
+                val photoFile = java.io.File(cacheDir, "camera_${System.currentTimeMillis()}.jpg")
+                val cameraUri = androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    photoFile
+                )
+                pendingCameraFile = photoFile
+                pendingCameraUri = cameraUri
+
+                val captureIntent = android.content.Intent(android.provider.MediaStore.ACTION_IMAGE_CAPTURE).apply {
+                    putExtra(android.provider.MediaStore.EXTRA_OUTPUT, cameraUri)
+                    addFlags(android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION or android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+
+                val pickIntent = android.content.Intent(android.content.Intent.ACTION_GET_CONTENT).apply {
+                    type = "image/*"
+                    addCategory(android.content.Intent.CATEGORY_OPENABLE)
+                }
+
+                val chooserTitle = context.getString(R.string.comment_attach_image_title)
+                val chooserIntent = android.content.Intent.createChooser(pickIntent, chooserTitle).apply {
+                    putExtra(android.content.Intent.EXTRA_INITIAL_INTENTS, arrayOf(captureIntent))
+                }
+
+                mediaChooserLauncher.launch(chooserIntent)
+            } catch (e: Exception) {
+                android.widget.Toast.makeText(context, context.getString(R.string.comment_camera_error), android.widget.Toast.LENGTH_SHORT).show()
+            }
+        }
 
         LaunchedEffect(Unit) {
             if (focusInputOnLaunch) {
@@ -289,7 +348,30 @@ class CommsUniCommentsScreen(
                             containerColor = Color.Black.copy(alpha = 0.7f),
                             blurRadius = 20.dp
                         ),
-                    title = { Text(if (mediaTitle.isNotBlank()) stringResource(R.string.comments_screen_title_with_media, mediaTitle) else stringResource(R.string.comments_screen_title), fontWeight = FontWeight.Bold, color = Color.White, maxLines = 1) },
+                    title = {
+                        val displayTitle = remember(mediaTitle, seasonNumber, episodeNumber) {
+                            if (seasonNumber != null && episodeNumber != null) {
+                                val epCode = "${seasonNumber}x${String.format(java.util.Locale.US, "%02d", episodeNumber)}"
+                                if (mediaTitle.isNotBlank()) "$mediaTitle ($epCode)" else epCode
+                            } else if (seasonNumber != null) {
+                                val sCode = "S$seasonNumber"
+                                if (mediaTitle.isNotBlank()) "$mediaTitle ($sCode)" else sCode
+                            } else {
+                                mediaTitle
+                            }
+                        }
+                        Text(
+                            text = if (displayTitle.isNotBlank()) {
+                                stringResource(R.string.comments_screen_title_with_media, displayTitle)
+                            } else {
+                                stringResource(R.string.comments_screen_title)
+                            },
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
+                        )
+                    },
                     navigationIcon = {
                         Box(
                             modifier = Modifier
@@ -307,7 +389,49 @@ class CommsUniCommentsScreen(
                     actions = {
                         val sortCoords = remember { arrayOf<LayoutCoordinates?>(null) }
                         val commsUniCoords = remember { arrayOf<LayoutCoordinates?>(null) }
+                        val episodesCoords = remember { arrayOf<LayoutCoordinates?>(null) }
                         Row(verticalAlignment = Alignment.CenterVertically) {
+                            if (isTvSeries) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(end = 6.dp)
+                                        .onGloballyPositioned { episodesCoords[0] = it }
+                                        .bounceClick {
+                                            episodesButtonBounds = episodesCoords[0]?.let {
+                                                val pos = it.positionInWindow()
+                                                Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                            }
+                                            showEpisodePickerSheet = true
+                                        }
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.08f))
+                                        .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_tv),
+                                            contentDescription = stringResource(R.string.episodes_discussions_pill),
+                                            tint = Color.White.copy(alpha = 0.85f),
+                                            modifier = Modifier.size(13.dp)
+                                        )
+                                        Text(
+                                            text = if (seasonNumber != null && episodeNumber != null) {
+                                                "${seasonNumber}x${String.format(java.util.Locale.US, "%02d", episodeNumber)}"
+                                            } else {
+                                                stringResource(R.string.episodes_discussions_pill)
+                                            },
+                                            color = Color.White.copy(alpha = 0.85f),
+                                            fontSize = 11.sp,
+                                            fontWeight = FontWeight.Bold
+                                        )
+                                    }
+                                }
+                            }
                             Box(
                                 modifier = Modifier
                                     .padding(end = 6.dp)
@@ -565,12 +689,9 @@ class CommsUniCommentsScreen(
                     destinationToggleEnabled = replyingTo == null,
                     attachedMedia = attachedMedia,
                     onAttachedMediaChanged = { attachedMedia = it },
+                    onRemoveMedia = { removedUrl -> viewModel.deleteDraftCommentImage(removedUrl) },
                     isUploadingImage = isUploadingImage,
-                    onPickImage = {
-                        photoPickerLauncher.launch(
-                            androidx.activity.result.PickVisualMediaRequest(androidx.activity.result.contract.ActivityResultContracts.PickVisualMedia.ImageOnly)
-                        )
-                    },
+                    onPickImage = launchMediaChooser,
                     onPickGif = { showGiphyPicker = true },
                     onSendComment = {
                         if (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) {
@@ -730,10 +851,70 @@ class CommsUniCommentsScreen(
                 hazeState = globalHazeState
             )
 
+            val baseShowId = remember(mediaId) {
+                if (mediaId.contains("_s")) mediaId.substringBefore("_s") else mediaId
+            }
+            com.cinetrack.ui.components.comments.EpisodeDiscussionPickerModal(
+                isVisible = showEpisodePickerSheet,
+                showSeasons = showSeasons,
+                seasonEpisodes = seasonEpisodes,
+                isLoadingEpisodes = isLoadingSeasonEpisodes,
+                currentSeason = seasonNumber,
+                currentEpisode = episodeNumber,
+                fallbackBackdropPath = backdropUrl,
+                onLoadSeasonEpisodes = { sNum -> viewModel.loadSeasonEpisodes(sNum) },
+                onSelectEpisode = { sNum, ep ->
+                    showEpisodePickerSheet = false
+                    val epStill = ep.stillPath?.let {
+                        com.cinetrack.util.buildTmdbImageUrl(it, com.cinetrack.util.ImageType.BACKDROP, com.cinetrack.util.ImageQuality.HIGH)
+                    }
+                    navigator.push(
+                        CommsUniCommentsScreen(
+                            tvdbId = tvdbId,
+                            mediaId = baseShowId,
+                            mediaType = "episode",
+                            seasonNumber = sNum,
+                            episodeNumber = ep.episodeNumber,
+                            accentColorValue = accentColorValue,
+                            mediaTitle = mediaTitle,
+                            mediaImage = epStill ?: mediaImage,
+                            backdropUrl = epStill ?: backdropUrl,
+                            releaseYear = ep.airDate?.take(4) ?: releaseYear,
+                            focusInputOnLaunch = false,
+                            imdbId = imdbId
+                        )
+                    )
+                },
+                onSelectMainDiscussion = {
+                    showEpisodePickerSheet = false
+                    navigator.push(
+                        CommsUniCommentsScreen(
+                            tvdbId = tvdbId,
+                            mediaId = baseShowId,
+                            mediaType = "tv",
+                            seasonNumber = null,
+                            episodeNumber = null,
+                            accentColorValue = accentColorValue,
+                            mediaTitle = mediaTitle,
+                            mediaImage = mediaImage,
+                            backdropUrl = backdropUrl,
+                            releaseYear = releaseYear,
+                            focusInputOnLaunch = false,
+                            imdbId = imdbId
+                        )
+                    )
+                },
+                onDismiss = { showEpisodePickerSheet = false },
+                accentColor = accentColor,
+                hazeState = globalHazeState,
+                triggerBounds = episodesButtonBounds
+            )
+
             androidx.activity.compose.BackHandler(
-                enabled = pendingExternalUrl != null || userToBlock != null || commentToReport != null || commentToDelete != null
+                enabled = showEpisodePickerSheet || pendingExternalUrl != null || userToBlock != null || commentToReport != null || commentToDelete != null
             ) {
                 when {
+                    showEpisodePickerSheet -> showEpisodePickerSheet = false
                     pendingExternalUrl != null -> pendingExternalUrl = null
                     userToBlock != null -> userToBlock = null
                     commentToReport != null -> commentToReport = null

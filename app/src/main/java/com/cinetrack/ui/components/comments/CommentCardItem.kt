@@ -573,25 +573,29 @@ fun CommentCardItem(
                             text = stringResource(R.string.comment_reply_btn),
                             color = accentColor,
                             style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier.bounceClick {
-                                if (isUserAnonymous) onTriggerGuestAuth()
-                                else onReply()
-                            }
+                            modifier = Modifier
+                                .bounceClick {
+                                    if (isUserAnonymous) onTriggerGuestAuth()
+                                    else onReply()
+                                }
+                                .padding(vertical = 6.dp, horizontal = 4.dp)
                         )
-                        Spacer(modifier = Modifier.width(16.dp))
+                        Spacer(modifier = Modifier.width(4.dp))
                         Row(
-                            modifier = Modifier.bounceClick {
-                                if (isUserAnonymous) onTriggerGuestAuth()
-                                else onToggleLike()
-                            },
+                            modifier = Modifier
+                                .bounceClick(scaleDown = 0.90f) {
+                                    if (isUserAnonymous) onTriggerGuestAuth()
+                                    else onToggleLike()
+                                }
+                                .padding(horizontal = 8.dp, vertical = 6.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             LiquidStarIcon(
                                 isLiked = isLiked,
                                 accentColor = accentColor,
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier.size(17.dp)
                             )
-                            Spacer(modifier = Modifier.width(4.dp))
+                            Spacer(modifier = Modifier.width(5.dp))
                             Text(
                                 text = "${comment.likesCount}",
                                 color = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
@@ -599,18 +603,23 @@ fun CommentCardItem(
                             )
                         }
                         if (!isOwner) {
-                            Spacer(modifier = Modifier.width(16.dp))
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_flag),
-                                contentDescription = stringResource(R.string.comment_report_title),
-                                tint = Color.White.copy(alpha = 0.5f),
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Box(
                                 modifier = Modifier
-                                    .size(14.dp)
+                                    .size(32.dp)
                                     .bounceClick {
                                         if (isUserAnonymous) onTriggerGuestAuth()
                                         else onReport()
-                                    }
-                            )
+                                    },
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_flag),
+                                    contentDescription = stringResource(R.string.comment_report_title),
+                                    tint = Color.White.copy(alpha = 0.5f),
+                                    modifier = Modifier.size(14.dp)
+                                )
+                            }
                         }
 
                         Spacer(modifier = Modifier.weight(1f))

@@ -136,7 +136,8 @@ class CommentsViewModel @Inject constructor(
                 limit = 10,
                 sortBy = sortBy,
                 direction = direction,
-                lastVisible = null
+                lastVisible = null,
+                mediaType = currentMediaType
             )
             _comments.value = result.first
             lastVisibleComment = result.second
@@ -158,7 +159,8 @@ class CommentsViewModel @Inject constructor(
                 limit = 10,
                 sortBy = sortBy,
                 direction = direction,
-                lastVisible = lastVisibleComment
+                lastVisible = lastVisibleComment,
+                mediaType = currentMediaType
             )
             
             val newComments = result.first

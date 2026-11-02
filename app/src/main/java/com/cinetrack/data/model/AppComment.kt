@@ -167,3 +167,15 @@ fun List<AppComment>.deduplicateComments(): List<AppComment> {
     return result
 }
 
+fun normalizeMediaType(type: String?): String {
+    return when (type?.lowercase()?.trim()) {
+        "tv", "show", "series", "season", "episode" -> "tv"
+        else -> "movie"
+    }
+}
+
+fun isSameMediaType(typeA: String?, typeB: String?): Boolean {
+    if (typeA.isNullOrBlank() || typeB.isNullOrBlank()) return true
+    return normalizeMediaType(typeA) == normalizeMediaType(typeB)
+}
+

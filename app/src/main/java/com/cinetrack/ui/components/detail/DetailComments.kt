@@ -381,30 +381,34 @@ private fun CommentCard(
                     }
                 }
                 
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.bounceClick(scaleDown = 0.8f) { onLikeClick(comment.id) }
-                ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
                     val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid }
                     val isLiked = currentUserId != null && comment.likedBy.contains(currentUserId)
 
-                    com.cinetrack.ui.components.comments.LiquidStarIcon(
-                        isLiked = isLiked,
-                        accentColor = accentColor,
-                        modifier = Modifier.size(12.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Text(
-                        text = "${comment.likesCount}",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 12.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.7f)
-                    )
-                    
-                    Spacer(modifier = Modifier.width(10.dp))
-                    
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        modifier = Modifier
+                            .bounceClick(scaleDown = 0.88f) { onLikeClick(comment.id) }
+                            .padding(horizontal = 6.dp, vertical = 6.dp)
+                    ) {
+                        com.cinetrack.ui.components.comments.LiquidStarIcon(
+                            isLiked = isLiked,
+                            accentColor = accentColor,
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${comment.likesCount}",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 12.sp
+                            ),
+                            color = if (isLiked) accentColor else Color.White.copy(alpha = 0.7f)
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(8.dp))
+
                     // Translate button in top right with progressive filling download bar
                     com.cinetrack.ui.components.comments.TranslationProgressIndicator(
                         translationState = translationState,

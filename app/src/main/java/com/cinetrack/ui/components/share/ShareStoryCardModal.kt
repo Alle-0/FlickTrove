@@ -404,7 +404,7 @@ fun ShareStoryCardModal(
                                 coverTab = if (config.coverStyle == ShareCoverStyle.BACKDROP_FULL) 1 else 0
                                 isSelectingCover = true
                             }
-                            .clip(RoundedCornerShape(50))
+                            .clip(CircleShape)
                             .background(
                                 if (hasCustomImage) accentColor.copy(alpha = 0.20f)
                                 else Color.White.copy(alpha = 0.06f)
@@ -413,9 +413,12 @@ fun ShareStoryCardModal(
                                 1.dp,
                                 if (hasCustomImage) accentColor.copy(alpha = 0.65f)
                                 else Color.White.copy(alpha = 0.12f),
-                                RoundedCornerShape(50)
+                                CircleShape
                             )
-                            .padding(horizontal = 12.dp),
+                            .padding(
+                                start = 12.dp,
+                                end = if (hasCustomImage) 7.dp else 12.dp
+                            ),
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.SpaceBetween
                     ) {
@@ -644,12 +647,12 @@ private fun ShareGridToggleCard(
                     onToggle(!checked)
                 }
             }
-            .clip(RoundedCornerShape(50))
+            .clip(CircleShape)
             .background(Color.White.copy(alpha = if (enabled) 0.06f else 0.02f))
             .border(
                 1.dp,
                 Color.White.copy(alpha = if (enabled) 0.12f else 0.05f),
-                RoundedCornerShape(50)
+                CircleShape
             )
             .padding(start = 12.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

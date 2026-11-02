@@ -297,8 +297,13 @@ fun PersonBioAndInfoSection(
                 )
             }
             Column(modifier = Modifier.weight(1f)) {
+                val knownForIcon = if (person.knownForDepartment?.equals("Directing", ignoreCase = true) == true) {
+                    ImageVector.vectorResource(id = R.drawable.ic_director_chair)
+                } else {
+                    ImageVector.vectorResource(id = R.drawable.ic_documento)
+                }
                 PersonInfoItem(
-                    ImageVector.vectorResource(id = R.drawable.ic_documento),
+                    knownForIcon,
                     stringResource(R.string.person_known_for),
                     person.knownForDepartment ?: stringResource(R.string.person_nd)
                 )

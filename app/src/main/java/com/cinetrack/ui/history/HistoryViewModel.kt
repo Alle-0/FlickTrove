@@ -129,7 +129,7 @@ class HistoryViewModel @Inject constructor(
                             latestItem.iso.take(10)
                         }
 
-                        val displayTime = if (hasExplicitTime && latestItem.time != null) {
+                        val displayTime = if (hasExplicitTime) {
                             try {
                                 latestItem.time.format(DateTimeFormatter.ofPattern("HH:mm", Locale.getDefault()))
                             } catch (e: Exception) {

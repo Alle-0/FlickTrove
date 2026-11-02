@@ -1,40 +1,48 @@
 package com.cinetrack.ui.history.components
 
-import com.cinetrack.ui.components.shared.calendar.CalendarMonthWidget
-import androidx.compose.animation.*
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material3.*
-import androidx.compose.runtime.*
+import androidx.compose.material3.Text
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.components.common.CategoryTabSelector
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.shared.calendar.CalendarMonthWidget
 import com.cinetrack.ui.components.updates.formatReleaseDate
 import com.cinetrack.ui.history.model.WatchTimelineEntry
 import com.cinetrack.ui.theme.HazeStyles
-import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
-import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
-import java.time.format.TextStyle
-import java.util.Locale
 
 @Composable
 fun HistoryCalendarView(
@@ -42,38 +50,92 @@ fun HistoryCalendarView(
     calendarEntriesByDate: Map<LocalDate, List<WatchTimelineEntry>>,
     selectedDate: LocalDate?,
     onDateSelected: (LocalDate) -> Unit,
+    onMonthChanged: (YearMonth) -> Unit,
     onPreviousMonth: () -> Unit,
     onNextMonth: () -> Unit,
-    onMonthChanged: (YearMonth) -> Unit,
-    onMovieClick: (movieId: Long, mediaType: String) -> Unit,
-    onEditDate: (entry: WatchTimelineEntry) -> Unit,
-    onDeleteSession: (entry: WatchTimelineEntry) -> Unit,
-    onShowMonthPicker: () -> Unit = {},
-    hazeState: HazeState? = null,
+    onShowMonthPicker: () -> Unit,
+    onMovieClick: (Long, String) -> Unit,
+    onEditDate: (WatchTimelineEntry) -> Unit,
+    onDeleteSession: (WatchTimelineEntry) -> Unit,
+    hazeState: HazeState?,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp)
 ) {
+    // 0 = Vista Mese (default), 1 = Vista Anno (heatmap stile GitHub)
+    var selectedScopeIndex by rememberSaveable { mutableIntStateOf(0) }
+
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPadding,
-            verticalArrangement = Arrangement.spacedBy(10.dp)
+            contentPadding = contentPadding
         ) {
-            // Authentic FlickTrove CalendarWidget
-            item(key = "calendar_widget") {
-                HistoryCalendarWidget(
-                    currentMonth = calendarMonth,
-                    selectedDate = selectedDate,
-                    onDateSelected = onDateSelected,
-                    onPreviousMonth = onPreviousMonth,
-                    onNextMonth = onNextMonth,
-                    onShowMonthPicker = onShowMonthPicker,
-                    entriesByDate = calendarEntriesByDate,
-                    internalHazeState = hazeState
-                )
+            // ── Selettore stile film/serie (Mese | Anno) ────────────────────
+            item(key = "calendar_scope_selector") {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp, bottom = 16.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Box(
+                        modifier = Modifier.wrapContentSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Spacer(
+                            modifier = Modifier
+                                .matchParentSize()
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = CircleShape,
+                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
+                                    useOffscreenStrategy = false
+                                )
+                        )
+                        CategoryTabSelector(
+                            options = listOf(
+                                stringResource(R.string.history_activity_scope_month),
+                                stringResource(R.string.history_activity_scope_year)
+                            ),
+                            selectedIndex = selectedScopeIndex,
+                            onOptionClick = { index -> selectedScopeIndex = index },
+                            tabWidth = 100.dp
+                        )
+                    }
+                }
             }
 
-            // Entries section below the calendar
+            // ── Calendario Mensile OPPURE Heatmap Annuale ────────────────────
+            item(key = "calendar_or_heatmap") {
+                AnimatedContent(
+                    targetState = selectedScopeIndex,
+                    transitionSpec = { fadeIn(tween(220)) togetherWith fadeOut(tween(180)) },
+                    label = "CalendarOrHeatmapTransition"
+                ) { scopeIndex ->
+                    if (scopeIndex == 0) {
+                        HistoryCalendarWidget(
+                            currentMonth = calendarMonth,
+                            selectedDate = selectedDate,
+                            onDateSelected = onDateSelected,
+                            onPreviousMonth = onPreviousMonth,
+                            onNextMonth = onNextMonth,
+                            onShowMonthPicker = onShowMonthPicker,
+                            entriesByDate = calendarEntriesByDate,
+                            internalHazeState = hazeState
+                        )
+                    } else {
+                        HistoryYearHeatmapWidget(
+                            currentYear = calendarMonth.year,
+                            selectedDate = selectedDate,
+                            onDateSelected = onDateSelected,
+                            onPreviousYear = { onMonthChanged(calendarMonth.minusYears(1)) },
+                            onNextYear = { onMonthChanged(calendarMonth.plusYears(1)) },
+                            entriesByDate = calendarEntriesByDate
+                        )
+                    }
+                }
+            }
+
+            // ── Dettaglio visioni del giorno selezionato ─────────────────────
             if (selectedDate != null) {
                 val displayedEntries = calendarEntriesByDate[selectedDate].orEmpty()
 
@@ -134,6 +196,10 @@ fun HistoryCalendarView(
         }
     }
 }
+
+// ══════════════════════════════════════════════════════════════════════════════
+// 1. Calendario Mensile
+// ══════════════════════════════════════════════════════════════════════════════
 
 @Composable
 private fun HistoryCalendarWidget(

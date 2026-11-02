@@ -835,7 +835,42 @@ fun MovieDetailScreenContent(
                                     movie = activeMovie,
                                     viewModel = viewModel,
                                     hazeState = localHazeState,
-                                    onDismiss = { showEpisodesSheet = false }
+                                    onDismiss = { showEpisodesSheet = false },
+                                    onEpisodeCommentsClick = { seasonNumber, episode ->
+                                        val epStill = episode.stillPath?.let {
+                                            buildTmdbImageUrl(it, ImageType.BACKDROP, ImageQuality.HIGH)
+                                        }
+                                        val seasonPoster = state.seasonDetails[seasonNumber]?.posterPath?.let {
+                                            buildTmdbImageUrl(it, ImageType.POSTER, ImageQuality.HIGH)
+                                        }
+                                        val image = epStill ?: seasonPoster ?: buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
+                                        val backdrop = epStill ?: buildTmdbImageUrl(
+                                            state.movieEntry.customBackdropPath ?: state.movieEntry.backdropPath ?: state.details.backdropPath ?: state.details.posterPath,
+                                            ImageType.BACKDROP,
+                                            ImageQuality.HIGH
+                                        )
+                                        val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
+                                        val imdbId = state.details.externalIds?.imdbId
+                                        val releaseYear = episode.airDate?.take(4) ?: (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
+                                        val seriesTitle = state.details.name ?: state.details.title ?: ""
+
+                                        navigator.push(
+                                            com.cinetrack.ui.screens.CommsUniCommentsScreen(
+                                                tvdbId = tvdbId,
+                                                mediaId = viewModel.movieId.toString(),
+                                                mediaType = viewModel.mediaType,
+                                                seasonNumber = seasonNumber,
+                                                episodeNumber = episode.episodeNumber,
+                                                accentColorValue = globalAccentColor.value.toLong(),
+                                                mediaTitle = seriesTitle,
+                                                mediaImage = image,
+                                                backdropUrl = backdrop,
+                                                releaseYear = releaseYear,
+                                                focusInputOnLaunch = false,
+                                                imdbId = imdbId
+                                            )
+                                        )
+                                    }
                                 )
                             }
                             

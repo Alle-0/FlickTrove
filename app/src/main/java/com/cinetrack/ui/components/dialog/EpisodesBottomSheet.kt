@@ -84,7 +84,8 @@ fun EpisodesBottomSheet(
     movie: Movie,
     viewModel: MovieDetailViewModel,
     hazeState: HazeState? = null,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onEpisodeCommentsClick: ((seasonNumber: Int, episode: Episode) -> Unit)? = null
 ) {
     val state by viewModel.uiState.collectAsStateWithLifecycle()
     val successState = state as? DetailUiState.Success
@@ -130,6 +131,18 @@ fun EpisodesBottomSheet(
             if (!sheetState.isVisible) {
                 viewModel.onEvent(DetailEvent.SyncWatchedEpisodes(localWatchedEpisodes))
                 onDismiss()
+            }
+        }
+    }
+
+    val handleEpisodeCommentsClick: (Int, Episode) -> Unit = { seasonNum, ep ->
+        viewModel.onEvent(DetailEvent.SyncWatchedEpisodes(localWatchedEpisodes))
+        scope.launch {
+            try {
+                sheetState.hide()
+            } finally {
+                onDismiss()
+                onEpisodeCommentsClick?.invoke(seasonNum, ep)
             }
         }
     }
@@ -253,6 +266,9 @@ fun EpisodesBottomSheet(
                         localWatchedEpisodes = localWatchedEpisodes,
                         onUpdateWatchedEpisodes = { localWatchedEpisodes = it },
                         onEpisodeInfoClick = { selectedEpisodeForInfo = it },
+                        onEpisodeCommentsClick = onEpisodeCommentsClick?.let {
+                            { sNum, ep -> handleEpisodeCommentsClick(sNum, ep) }
+                        },
                         isDropped = isDropped,
                         nestedScrollConnection = nestedScrollConnection,
                         modifier = Modifier.fillMaxSize()
@@ -392,6 +408,9 @@ fun EpisodesBottomSheet(
                                         localWatchedEpisodes = localWatchedEpisodes + (selectedSeasonNumber.toString() to currentWatched)
                                     },
                                     onInfoClick = { selectedEpisodeForInfo = episode },
+                                    onCommentsClick = onEpisodeCommentsClick?.let {
+                                        { handleEpisodeCommentsClick(selectedSeasonNumber, episode) }
+                                    },
                                     fallbackBackdropPath = currentSeasonData?.posterPath ?: movie.backdropPath ?: movie.posterPath
                                 )
                             }
@@ -404,6 +423,12 @@ fun EpisodesBottomSheet(
                 EpisodeInfoModal(
                     episode = ep,
                     onDismiss = { selectedEpisodeForInfo = null },
+                    onCommentsClick = onEpisodeCommentsClick?.let {
+                        {
+                            val sNum = if (ep.seasonNumber > 0) ep.seasonNumber else selectedSeasonNumber
+                            handleEpisodeCommentsClick(sNum, ep)
+                        }
+                    },
                     hazeState = sheetHazeState
                 )
             }

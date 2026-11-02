@@ -5,6 +5,7 @@ import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.model.deduplicateComments
 import com.cinetrack.data.model.isSameAuthor
 import com.cinetrack.data.model.isSameCommentText
+import com.cinetrack.data.model.isSameMediaType
 import com.cinetrack.data.model.mergeComments
 import com.cinetrack.data.repository.BadgeRepository
 import com.cinetrack.data.repository.BlockedAuthorsManager
@@ -79,7 +80,7 @@ class MovieDetailCommentsDelegate @Inject constructor(
                 val firestoreDeferred = async {
                     if (movieId != 0L) {
                         try {
-                            commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 5)
+                            commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 5, mediaType)
                         } catch (e: Exception) {
                             emptyList()
                         }
@@ -142,6 +143,7 @@ class MovieDetailCommentsDelegate @Inject constructor(
                     }
 
                 val combined = (mergedCommsUni + remainingFirestore)
+                    .filter { isSameMediaType(it.mediaType, mediaType) }
                     .filterNot { blockedAuthorsManager.isAuthorBlocked(it.userId, it.userDisplayName) }
                     .deduplicateComments()
                     .filterNot { it.isEffectivelyDeleted }
@@ -201,7 +203,7 @@ class MovieDetailCommentsDelegate @Inject constructor(
             )
             if (success) {
                 badgeRepository.recordCommentWritten()
-                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString())
+                _appComments.value = commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 5, mediaType)
             }
         }
     }

@@ -724,6 +724,9 @@
     <string name="widget_movies_watchlist_empty">Tidak ada film untuk ditonton</string>
     <string name="comments_screen_title">Diskusi</string>
     <string name="comments_screen_title_with_media">Diskusi: %1$s</string>
+    <string name="episodes_discussions_title">Diskusi Episode</string>
+    <string name="episodes_discussions_all_series">Diskusi Utama (Serial)</string>
+    <string name="episodes_discussions_pill">Episode</string>
     <string name="comment_translate">Terjemahkan</string>
     <string name="comment_translated_label">Diterjemahkan</string>
     <string name="comment_show_original">Tampilkan yang asli</string>
@@ -1843,6 +1846,15 @@
     <string name="history_screen_subtitle">Perjalanan sinema Anda</string>
     <string name="history_view_timeline">Linimasa</string>
     <string name="history_view_calendar">Kalender</string>
+    <string name="panorama_activity_title">Aktivitas Menonton</string>
+    <string name="panorama_watches_across_days">tontonan dalam %1$d hari</string>
+    <string name="panorama_day_streak">Streak %1$d hari</string>
+    <string name="panorama_current_streak_label">Streak Saat Ini</string>
+    <string name="panorama_best_streak_label">Streak Terpanjang</string>
+    <string name="panorama_active_days_label">Hari Aktif</string>
+    <string name="panorama_active_days_ratio">%1$d/%2$d hr</string>
+    <string name="history_activity_scope_month">Bulan</string>
+    <string name="history_activity_scope_year">Tahun</string>
     <string name="history_filter_all">Semua</string>
     <string name="history_filter_movies">Film</string>
     <string name="history_filter_tv">Serial TV</string>

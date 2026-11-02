@@ -259,7 +259,7 @@ fun EpisodeWatchDatesModal(
                                             Spacer(modifier = Modifier.width(4.dp))
 
                                             Text(
-                                                text = "${movie.seasons?.find { it.seasonNumber == seasonNum }?.name?.takeIf { it.isNotBlank() } ?: stringResource(id = R.string.episodes_season_n, seasonNum)} (${eps.size} ep)",
+                                                text = "${stringResource(id = R.string.episodes_season_n, seasonNum)} (${eps.size} ep)",
                                                 style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
                                                 color = accentColor,
                                                 maxLines = 1,

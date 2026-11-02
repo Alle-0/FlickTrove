@@ -495,7 +495,7 @@ fun StatsScreenContent(
                                 var dirExpanded by rememberSaveable { mutableStateOf(false) }
                                 Column(modifier = Modifier.padding(horizontal = 16.dp)) {
                                     StatsSectionHeader(
-                                        icon = ImageVector.vectorResource(id = R.drawable.ic_megafono),
+                                        icon = ImageVector.vectorResource(id = R.drawable.ic_director_chair),
                                         title = stringResource(R.string.stats_top_directors),
                                         count = null
                                     )

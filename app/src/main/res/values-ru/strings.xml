@@ -647,6 +647,9 @@
     <string name="widget_movies_watchlist_empty">Нет фильмов к просмотру</string>
     <string name="comments_screen_title">Обсуждение</string>
     <string name="comments_screen_title_with_media">Обсуждение: %1$s</string>
+    <string name="episodes_discussions_title">Обсуждения серий</string>
+    <string name="episodes_discussions_all_series">Основное обсуждение (Сериал)</string>
+    <string name="episodes_discussions_pill">Серии</string>
     <string name="comment_translate">Перевести</string>
     <string name="comment_translated_label">Переведено</string>
     <string name="comment_show_original">Показать оригинал</string>
@@ -1838,6 +1841,15 @@
     <string name="history_screen_subtitle">Ваш киноманский путь</string>
     <string name="history_view_timeline">Хроника</string>
     <string name="history_view_calendar">Календарь</string>
+    <string name="panorama_activity_title">Активность просмотров</string>
+    <string name="panorama_watches_across_days">просмотров за %1$d дней</string>
+    <string name="panorama_day_streak">Серия: %1$d дн.</string>
+    <string name="panorama_current_streak_label">Текущая серия</string>
+    <string name="panorama_best_streak_label">Лучшая серия</string>
+    <string name="panorama_active_days_label">Активные дни</string>
+    <string name="panorama_active_days_ratio">%1$d/%2$d дн.</string>
+    <string name="history_activity_scope_month">Месяц</string>
+    <string name="history_activity_scope_year">Год</string>
     <string name="history_filter_all">Все</string>
     <string name="history_filter_movies">Фильмы</string>
     <string name="history_filter_tv">Сериалы</string>

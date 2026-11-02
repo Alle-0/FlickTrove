@@ -647,6 +647,9 @@
     <string name="widget_movies_watchlist_empty">Nenhum filme para ver</string>
     <string name="comments_screen_title">Discussão</string>
     <string name="comments_screen_title_with_media">Discussão: %1$s</string>
+    <string name="episodes_discussions_title">Discussões dos episódios</string>
+    <string name="episodes_discussions_all_series">Discussão principal (Série)</string>
+    <string name="episodes_discussions_pill">Episódios</string>
     <string name="comment_translate">Traduzir</string>
     <string name="comment_translated_label">Traduzido</string>
     <string name="comment_show_original">Mostrar original</string>
@@ -1836,6 +1839,15 @@
     <string name="history_screen_subtitle">Sua jornada cinéfila</string>
     <string name="history_view_timeline">Linha do Tempo</string>
     <string name="history_view_calendar">Calendário</string>
+    <string name="panorama_activity_title">Atividade de visualização</string>
+    <string name="panorama_watches_across_days">visualizações em %1$d dias</string>
+    <string name="panorama_day_streak">Sequência de %1$d dias</string>
+    <string name="panorama_current_streak_label">Sequência atual</string>
+    <string name="panorama_best_streak_label">Melhor sequência</string>
+    <string name="panorama_active_days_label">Dias ativos</string>
+    <string name="panorama_active_days_ratio">%1$d/%2$d d</string>
+    <string name="history_activity_scope_month">Mês</string>
+    <string name="history_activity_scope_year">Ano</string>
     <string name="history_filter_all">Todos</string>
     <string name="history_filter_movies">Filmes</string>
     <string name="history_filter_tv">Séries</string>

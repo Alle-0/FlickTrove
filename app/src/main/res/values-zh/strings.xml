@@ -724,6 +724,9 @@
     <string name="widget_movies_watchlist_empty">暂无待看电影</string>
     <string name="comments_screen_title">讨论区</string>
     <string name="comments_screen_title_with_media">讨论区：%1$s</string>
+    <string name="episodes_discussions_title">分集讨论</string>
+    <string name="episodes_discussions_all_series">主讨论 (剧集)</string>
+    <string name="episodes_discussions_pill">剧集</string>
     <string name="comment_translate">翻译</string>
     <string name="comment_translated_label">已翻译</string>
     <string name="comment_show_original">显示原文</string>
@@ -1844,6 +1847,15 @@
     <string name="history_screen_subtitle">您的影迷歷程</string>
     <string name="history_view_timeline">時間線</string>
     <string name="history_view_calendar">日曆</string>
+    <string name="panorama_activity_title">观影动态</string>
+    <string name="panorama_watches_across_days">%1$d天内观影</string>
+    <string name="panorama_day_streak">连续 %1$d 天</string>
+    <string name="panorama_current_streak_label">当前连续</string>
+    <string name="panorama_best_streak_label">最长连续</string>
+    <string name="panorama_active_days_label">活跃天数</string>
+    <string name="panorama_active_days_ratio">%1$d/%2$d天</string>
+    <string name="history_activity_scope_month">月</string>
+    <string name="history_activity_scope_year">年</string>
     <string name="history_filter_all">全部</string>
     <string name="history_filter_movies">電影</string>
     <string name="history_filter_tv">影集</string>

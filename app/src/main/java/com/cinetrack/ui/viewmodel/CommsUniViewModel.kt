@@ -9,6 +9,7 @@ import com.cinetrack.data.model.deduplicateComments
 import com.cinetrack.data.model.mergeComments
 import com.cinetrack.data.model.isSameAuthor
 import com.cinetrack.data.model.isSameCommentText
+import com.cinetrack.data.model.isSameMediaType
 import com.cinetrack.data.api.CommsUniConversationStats
 import com.cinetrack.data.api.CommsUniOrigin
 import com.cinetrack.data.repository.CommsUniRepository
@@ -48,6 +49,7 @@ class CommsUniViewModel @Inject constructor(
     private val tvdbRepository: com.cinetrack.data.repository.TvdbRepository,
     private val storageRepository: com.cinetrack.data.repository.StorageRepository,
     private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
+    private val movieRepository: com.cinetrack.data.repository.MovieRepository,
     @dagger.hilt.android.qualifiers.ApplicationContext private val context: android.content.Context
 ) : ViewModel() {
 
@@ -210,6 +212,34 @@ class CommsUniViewModel @Inject constructor(
     private var currentEntityType: String = ""
     private var currentTitle: String? = null
 
+    private val _showSeasons = MutableStateFlow<List<com.cinetrack.data.model.Season>>(emptyList())
+    val showSeasons: StateFlow<List<com.cinetrack.data.model.Season>> = _showSeasons.asStateFlow()
+
+    private val _seasonEpisodes = MutableStateFlow<Map<Int, List<com.cinetrack.data.model.Episode>>>(emptyMap())
+    val seasonEpisodes: StateFlow<Map<Int, List<com.cinetrack.data.model.Episode>>> = _seasonEpisodes.asStateFlow()
+
+    private val _isLoadingSeasonEpisodes = MutableStateFlow(false)
+    val isLoadingSeasonEpisodes: StateFlow<Boolean> = _isLoadingSeasonEpisodes.asStateFlow()
+
+    private var targetTvShowId: Long? = null
+
+    fun loadSeasonEpisodes(seasonNumber: Int) {
+        val showId = targetTvShowId ?: return
+        if (_seasonEpisodes.value.containsKey(seasonNumber)) return
+        viewModelScope.launch {
+            _isLoadingSeasonEpisodes.value = true
+            try {
+                val detailedSeason = movieRepository.fetchSeasonDetails(showId, seasonNumber)
+                val episodes = detailedSeason.episodes ?: emptyList()
+                _seasonEpisodes.value = _seasonEpisodes.value + (seasonNumber to episodes)
+            } catch (e: Exception) {
+                // Ignore offline
+            } finally {
+                _isLoadingSeasonEpisodes.value = false
+            }
+        }
+    }
+
     // Translation State (Identical logic to old CommentsViewModel)
     // Uses CommentsViewModel.TranslationState for compatibility with UI components
 
@@ -266,7 +296,12 @@ class CommsUniViewModel @Inject constructor(
         imdbId: String? = null
     ) {
         if (rawMediaId.isNotBlank()) {
-            currentRawMediaId = rawMediaId
+            val effectiveRawMediaId = when {
+                seasonNumber != null && episodeNumber != null && !rawMediaId.contains("_s") -> "${rawMediaId}_s${seasonNumber}e${episodeNumber}"
+                seasonNumber != null && !rawMediaId.contains("_s") -> "${rawMediaId}_s${seasonNumber}"
+                else -> rawMediaId
+            }
+            currentRawMediaId = effectiveRawMediaId
         }
         if (!title.isNullOrBlank()) {
             currentTitle = title
@@ -277,6 +312,37 @@ class CommsUniViewModel @Inject constructor(
             entityType.lowercase() in listOf("tv", "series", "show") -> "show"
             else -> "movie"
         }
+        val baseIdStr = if (rawMediaId.contains("_s")) rawMediaId.substringBefore("_s") else rawMediaId
+        val showId = baseIdStr.toLongOrNull()
+        if (showId != null && showId > 0 && normalizedType in listOf("show", "season", "episode")) {
+            targetTvShowId = showId
+            viewModelScope.launch {
+                try {
+                    val cachedLocal = movieRepository.getMovie(showId, "tv")
+                    val localSeasons = cachedLocal?.seasons?.filter { (it.seasonNumber) > 0 }
+                    if (!localSeasons.isNullOrEmpty()) {
+                        _showSeasons.value = localSeasons
+                        localSeasons.forEach { s ->
+                            if (!s.episodes.isNullOrEmpty()) {
+                                _seasonEpisodes.value = _seasonEpisodes.value + (s.seasonNumber to s.episodes)
+                            }
+                        }
+                    }
+                    movieRepository.getMovieDetailsFlow(showId, true).collect { response ->
+                        val seasons = response.seasons?.filter { (it.seasonNumber) > 0 } ?: emptyList()
+                        if (seasons.isNotEmpty()) {
+                            _showSeasons.value = seasons
+                        }
+                    }
+                } catch (e: Exception) {
+                    // Ignore offline
+                }
+            }
+            if (seasonNumber != null) {
+                loadSeasonEpisodes(seasonNumber)
+            }
+        }
+
         if (tvdbId != null && tvdbId > 0) {
             val entityId = commsUniRepository.buildEntityId(tvdbId, seasonNumber, episodeNumber)
             if (currentEntityId == entityId && currentEntityType == normalizedType) return
@@ -459,7 +525,8 @@ class CommsUniViewModel @Inject constructor(
                         try {
                             val (fComments, _) = commentRepository.getCommentsForMedia(
                                 mediaId = currentRawMediaId,
-                                limit = 50
+                                limit = 50,
+                                mediaType = currentEntityType
                             )
                             fComments
                         } catch (e: Exception) {
@@ -469,8 +536,7 @@ class CommsUniViewModel @Inject constructor(
                 }
 
                 val commsUniResult = commsUniDeferred.await()
-                val firestoreComments = firestoreDeferred.await()
-
+                val firestoreComments = firestoreDeferred.await().filter { isSameMediaType(it.mediaType, currentEntityType) }
                 var commsUniList = emptyList<com.cinetrack.data.model.AppComment>()
                 if (commsUniResult != null) {
                     commsUniResult.onSuccess { response ->
@@ -627,6 +693,19 @@ class CommsUniViewModel @Inject constructor(
                 onSuccess(android.net.Uri.parse(url))
             }.onFailure { e ->
                 onError(e.message ?: "Upload fallito")
+            }
+        }
+    }
+
+    fun deleteDraftCommentImage(imageUrl: String) {
+        if (imageUrl.contains("supabase.co") || imageUrl.contains("supabase")) {
+            viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+                val result = storageRepository.deleteCommentImage(imageUrl)
+                result.onSuccess {
+                    android.util.Log.d("CommsUniViewModel", "Successfully deleted draft image from Supabase: $imageUrl")
+                }.onFailure { e ->
+                    android.util.Log.e("CommsUniViewModel", "Failed to delete draft image from Supabase: $imageUrl", e)
+                }
             }
         }
     }

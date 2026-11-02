@@ -96,7 +96,7 @@ object FlowTab : Tab {
                             ) {
                                 Column(horizontalAlignment = Alignment.CenterHorizontally, modifier = Modifier.padding(top = 80.dp)) {
                                     Icon(
-                                        painter = androidx.compose.ui.res.painterResource(id = if (flowUiState.filterConfig.hasActiveFilters) com.cinetrack.R.drawable.ic_filtri else com.cinetrack.R.drawable.ic_sparkle),
+                                        painter = androidx.compose.ui.res.painterResource(id = if (flowUiState.filterConfig.hasActiveFilters) com.cinetrack.R.drawable.ic_filtri else com.cinetrack.R.drawable.ic_film),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.5f),
                                         modifier = Modifier.size(48.dp)

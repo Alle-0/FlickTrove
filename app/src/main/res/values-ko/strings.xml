@@ -724,6 +724,9 @@
     <string name="widget_movies_watchlist_empty">볼 영화가 없습니다</string>
     <string name="comments_screen_title">커뮤니티 토론</string>
     <string name="comments_screen_title_with_media">토론: %1$s</string>
+    <string name="episodes_discussions_title">에피소드 토론</string>
+    <string name="episodes_discussions_all_series">메인 토론 (시리즈)</string>
+    <string name="episodes_discussions_pill">에피소드</string>
     <string name="comment_translate">번역</string>
     <string name="comment_translated_label">번역됨</string>
     <string name="comment_show_original">원문 보기</string>
@@ -1844,6 +1847,15 @@
     <string name="history_screen_subtitle">나만의 시네마 여정</string>
     <string name="history_view_timeline">타임라인</string>
     <string name="history_view_calendar">캘린더</string>
+    <string name="panorama_activity_title">시청 활동</string>
+    <string name="panorama_watches_across_days">%1$d일 동안 시청</string>
+    <string name="panorama_day_streak">%1$d일 연속</string>
+    <string name="panorama_current_streak_label">현재 연속</string>
+    <string name="panorama_best_streak_label">최장 연속</string>
+    <string name="panorama_active_days_label">활동 일수</string>
+    <string name="panorama_active_days_ratio">%1$d/%2$d일</string>
+    <string name="history_activity_scope_month">월</string>
+    <string name="history_activity_scope_year">년</string>
     <string name="history_filter_all">전체</string>
     <string name="history_filter_movies">영화</string>
     <string name="history_filter_tv">시리즈</string>
