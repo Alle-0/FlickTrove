@@ -1,5 +1,6 @@
-package com.cinetrack.ui.components.shared
+package com.cinetrack.ui.components.folder
 
+import com.cinetrack.ui.components.shared.ModalCloseButton
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 

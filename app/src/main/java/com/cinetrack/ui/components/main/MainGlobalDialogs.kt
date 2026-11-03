@@ -42,12 +42,12 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.dialog.GithubUpdateDialog
 import com.cinetrack.ui.components.dialog.OnboardingDialog
 import com.cinetrack.ui.components.dialog.WhatsNewDialog
-import com.cinetrack.ui.components.shared.DeleteFolderDialog
+import com.cinetrack.ui.components.folder.DeleteFolderDialog
 import com.cinetrack.ui.components.shared.FlickTroveModal
-import com.cinetrack.ui.components.shared.FolderEditDialog
-import com.cinetrack.ui.components.shared.FolderEditMode
-import com.cinetrack.ui.components.shared.FolderShareModal
-import com.cinetrack.ui.components.shared.FolderMembersModal
+import com.cinetrack.ui.components.folder.FolderEditDialog
+import com.cinetrack.ui.components.folder.FolderEditMode
+import com.cinetrack.ui.components.folder.FolderShareModal
+import com.cinetrack.ui.components.folder.FolderMembersModal
 import com.cinetrack.ui.screens.FolderDetailTab
 import com.cinetrack.ui.screens.FoldersTab
 import com.cinetrack.ui.screens.MovieDetailScreen

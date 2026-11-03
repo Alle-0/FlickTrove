@@ -42,7 +42,7 @@ import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.input.pointer.pointerInput
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.shared.FolderEditMode
+import com.cinetrack.ui.components.folder.FolderEditMode
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 

@@ -1,5 +1,6 @@
-package com.cinetrack.ui.components.shared
+package com.cinetrack.ui.components.folder
 
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 import com.cinetrack.ui.utils.ColorUtils

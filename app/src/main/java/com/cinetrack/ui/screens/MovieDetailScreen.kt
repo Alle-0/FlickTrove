@@ -60,7 +60,7 @@ import androidx.compose.ui.draw.drawWithCache
 import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.lerp
-import com.cinetrack.ui.components.shared.FolderPickerModalContent
+import com.cinetrack.ui.components.folder.FolderPickerModalContent
 import com.cinetrack.ui.utils.bounceClick
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid

@@ -26,7 +26,6 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
@@ -42,11 +41,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.repository.BadgeRepository
-import com.cinetrack.data.repository.BadgeRepositoryEntryPoint
-import com.cinetrack.ui.theme.Gold
 import com.cinetrack.ui.utils.bounceClick
 import com.google.firebase.auth.FirebaseAuth
-import dagger.hilt.android.EntryPointAccessors
 import kotlinx.coroutines.launch
 
 @Composable
@@ -55,38 +51,16 @@ fun ExecutiveProducerDonationSection(
     onVerifySupporter: (suspend (String) -> BadgeRepository.SupporterVerificationResult)?,
     modifier: Modifier = Modifier,
     onExpandedChange: ((Boolean) -> Unit)? = null,
-    onFocusField: (() -> Unit)? = null,
-    onUpdateCreditSettings: (suspend (String, Boolean) -> Boolean)? = null,
-    onGetCreditSettings: (() -> Pair<String, Boolean>)? = null,
-    onFetchSupporters: (suspend () -> List<String>)? = null
+    onFocusField: (() -> Unit)? = null
 ) {
     val scope = rememberCoroutineScope()
     val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
     val haptic = LocalHapticFeedback.current
-    val context = LocalContext.current
-
-    val badgeRepo = remember {
-        try {
-            EntryPointAccessors.fromApplication(
-                context.applicationContext,
-                BadgeRepositoryEntryPoint::class.java
-            ).badgeRepository()
-        } catch (_: Exception) {
-            null
-        }
-    }
 
     var emailInput by remember { mutableStateOf("") }
     var isVerifying by remember { mutableStateOf(false) }
     var verificationResult by remember { mutableStateOf<BadgeRepository.SupporterVerificationResult?>(null) }
-    var showCreditsModal by remember { mutableStateOf(false) }
-
-    // Preferenze Titoli di Coda
-    var creditNameInput by remember { mutableStateOf("") }
-    var showInCredits by remember { mutableStateOf(true) }
-    var isSavingCredits by remember { mutableStateOf(false) }
-    var creditsSavedFeedback by remember { mutableStateOf(false) }
 
     val currentUser = FirebaseAuth.getInstance().currentUser
     val currentEmail = currentUser?.email
@@ -95,22 +69,6 @@ fun ExecutiveProducerDonationSection(
         if (!currentEmail.isNullOrBlank() && emailInput.isBlank()) {
             emailInput = currentEmail
         }
-
-        val settings = onGetCreditSettings?.invoke() ?: badgeRepo?.getSupporterCreditSettings()
-        if (settings != null) {
-            creditNameInput = settings.first
-            showInCredits = settings.second
-        }
-    }
-
-    if (showCreditsModal) {
-        CinemaCreditsModal(
-            isVisible = true,
-            onDismissRequest = { showCreditsModal = false },
-            onFetchSupporters = {
-                onFetchSupporters?.invoke() ?: badgeRepo?.fetchPublicCreditsSupporters().orEmpty()
-            }
-        )
     }
 
     Column(modifier = modifier.fillMaxWidth()) {
@@ -161,170 +119,6 @@ fun ExecutiveProducerDonationSection(
                         color = Color.White.copy(alpha = 0.75f),
                         textAlign = TextAlign.Center
                     )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            // Sezione GDPR-Compliant: Gestione Presenza nei Titoli di Coda
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White.copy(alpha = 0.04f))
-                    .border(1.dp, Color.White.copy(alpha = 0.10f), RoundedCornerShape(16.dp))
-                    .padding(14.dp)
-            ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
-                    Text(
-                        text = stringResource(R.string.trophy_producer_credits_title),
-                        style = MaterialTheme.typography.titleSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 13.5.sp
-                        ),
-                        color = Gold
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.trophy_producer_credits_desc),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 11.5.sp,
-                            lineHeight = 16.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.65f)
-                    )
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Switch Opt-in
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.trophy_producer_credits_switch),
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = Color.White.copy(alpha = 0.85f),
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = showInCredits,
-                            onCheckedChange = { showInCredits = it },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.Black,
-                                checkedTrackColor = Gold,
-                                uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
-                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
-                            )
-                        )
-                    }
-
-                    if (showInCredits) {
-                        Spacer(modifier = Modifier.height(10.dp))
-                        OutlinedTextField(
-                            value = creditNameInput,
-                            onValueChange = {
-                                if (it.length <= 30) {
-                                    creditNameInput = it
-                                    creditsSavedFeedback = false
-                                }
-                            },
-                            placeholder = {
-                                Text(
-                                    text = stringResource(R.string.trophy_producer_credits_nickname_hint),
-                                    color = Color.White.copy(alpha = 0.35f),
-                                    fontSize = 12.5.sp
-                                )
-                            },
-                            singleLine = true,
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clip(RoundedCornerShape(12.dp)),
-                            shape = RoundedCornerShape(12.dp),
-                            colors = OutlinedTextFieldDefaults.colors(
-                                focusedContainerColor = Color.White.copy(alpha = 0.03f),
-                                unfocusedContainerColor = Color.White.copy(alpha = 0.03f),
-                                unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                                focusedBorderColor = Gold.copy(alpha = 0.80f),
-                                focusedTextColor = Color.White,
-                                unfocusedTextColor = Color.White,
-                                cursorColor = Gold
-                            ),
-                            textStyle = MaterialTheme.typography.bodyMedium.copy(fontSize = 13.sp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        // Bottone Salva
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(40.dp)
-                                .bounceClick(enabled = !isSavingCredits) {
-                                    focusManager.clearFocus()
-                                    isSavingCredits = true
-                                    scope.launch {
-                                        val success = onUpdateCreditSettings?.invoke(creditNameInput, showInCredits)
-                                            ?: badgeRepo?.updateSupporterCreditSettings(creditNameInput, showInCredits)
-                                            ?: true
-                                        isSavingCredits = false
-                                        creditsSavedFeedback = success
-                                        if (success) {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                        }
-                                    }
-                                }
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Gold),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isSavingCredits) {
-                                CircularProgressIndicator(
-                                    modifier = Modifier.size(16.dp),
-                                    color = Color.Black,
-                                    strokeWidth = 2.dp
-                                )
-                            } else {
-                                Text(
-                                    text = if (creditsSavedFeedback) stringResource(R.string.trophy_producer_credits_saved) else stringResource(R.string.trophy_producer_credits_save_btn),
-                                    style = MaterialTheme.typography.labelMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.5.sp
-                                    ),
-                                    color = Color.Black
-                                )
-                            }
-                        }
-
-                        // Bottone Guarda i Titoli di Coda
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .height(40.dp)
-                                .bounceClick {
-                                    focusManager.clearFocus()
-                                    showCreditsModal = true
-                                }
-                                .clip(RoundedCornerShape(10.dp))
-                                .background(Color.White.copy(alpha = 0.08f))
-                                .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(10.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.trophy_producer_view_credits),
-                                style = MaterialTheme.typography.labelMedium.copy(
-                                    fontWeight = FontWeight.Medium,
-                                    fontSize = 12.sp
-                                ),
-                                color = Color.White
-                            )
-                        }
-                    }
                 }
             }
         } else {

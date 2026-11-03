@@ -55,7 +55,7 @@ import com.cinetrack.ui.viewmodel.FolderDetailViewModel
 import com.cinetrack.ui.viewmodel.FolderDetailUiState
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.common.CinematicBackground
-import com.cinetrack.ui.components.shared.DeleteFolderDialog
+import com.cinetrack.ui.components.folder.DeleteFolderDialog
 import com.cinetrack.ui.LocalModalHost
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -102,7 +102,7 @@ data class FolderDetailTab(
 
         var showDeleteConfirm by remember { mutableStateOf(false) }
         var showEditDialog by remember { mutableStateOf(false) }
-        var folderEditMode by remember { mutableStateOf(com.cinetrack.ui.components.shared.FolderEditMode.NAME) }
+        var folderEditMode by remember { mutableStateOf(com.cinetrack.ui.components.folder.FolderEditMode.NAME) }
 
         @OptIn(androidx.compose.animation.ExperimentalSharedTransitionApi::class)
         FolderDetailScreenContent(
@@ -142,7 +142,7 @@ fun FolderDetailScreenContent(
     onShowDeleteConfirmChange: (Boolean) -> Unit = {},
     showEditDialog: Boolean = false,
     onShowEditDialogChange: (Boolean) -> Unit = {},
-    folderEditMode: com.cinetrack.ui.components.shared.FolderEditMode = com.cinetrack.ui.components.shared.FolderEditMode.NAME,
+    folderEditMode: com.cinetrack.ui.components.folder.FolderEditMode = com.cinetrack.ui.components.folder.FolderEditMode.NAME,
     onFolderUpdated: (String, String) -> Unit = { _, _ -> },
     onMovieClick: (Movie) -> Unit = {},
     onToggleFilter: (Boolean, androidx.compose.ui.geometry.Rect?) -> Unit = { _, _ -> },
@@ -614,7 +614,7 @@ fun FolderDetailScreenContent(
                             LaunchedEffect(showEditDialog) {
                                 if (showEditDialog) {
                                     modalHost.show {
-                                        com.cinetrack.ui.components.shared.FolderEditDialog(
+                                        com.cinetrack.ui.components.folder.FolderEditDialog(
                                             initialName = state.folder.name,
                                             initialColor = state.folder.color ?: "#FFFFFF",
                                             initialDescription = state.folder.description,

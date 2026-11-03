@@ -27,7 +27,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import com.cinetrack.ui.components.shared.FolderPickerModalContent
+import com.cinetrack.ui.components.folder.FolderPickerModalContent
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.DetailEvent

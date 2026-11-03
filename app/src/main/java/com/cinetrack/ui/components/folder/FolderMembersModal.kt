@@ -1,4 +1,8 @@
-package com.cinetrack.ui.components.shared
+package com.cinetrack.ui.components.folder
+
+import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.shared.ModalCloseButton
+import com.cinetrack.ui.components.shared.ColorWheel
 
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.SizeTransform

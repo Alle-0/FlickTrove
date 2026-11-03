@@ -65,7 +65,7 @@ import com.cinetrack.ui.components.main.MainModalsContainer
 import com.cinetrack.ui.components.main.MainSearchFab
 import com.cinetrack.ui.components.main.MainScrollToTopFab
 import com.cinetrack.ui.components.navigation.GlassyTopBar
-import com.cinetrack.ui.components.shared.FolderEditMode
+import com.cinetrack.ui.components.folder.FolderEditMode
 import com.cinetrack.ui.components.shared.LocalMovieActions
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.viewmodel.DiscoverViewModel

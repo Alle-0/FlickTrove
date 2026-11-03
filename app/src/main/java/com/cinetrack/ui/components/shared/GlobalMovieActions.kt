@@ -9,7 +9,7 @@ import androidx.compose.foundation.layout.Box
 import com.cinetrack.ui.components.card.MovieActionsPopup
 import com.cinetrack.ui.components.shared.QuickRatingModal
 import com.cinetrack.ui.components.shared.QuickNoteModal
-import com.cinetrack.ui.components.shared.QuickFolderModal
+import com.cinetrack.ui.components.folder.QuickFolderModal
 import dev.chrisbanes.haze.HazeState
 
 /**
