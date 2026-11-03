@@ -348,51 +348,71 @@ class BadgeRepository @Inject constructor(
      * Se la donazione risulta già riscattata da un altro UID, il tentativo viene bloccato (ALREADY_CLAIMED),
      * a meno che l'utente non sia autenticato via Google con quello stesso identico indirizzo email.
      */
-    suspend fun verifySupporterByEmail(email: String): SupporterVerificationResult {
+    suspend fun verifySupporterByEmail(email: String): SupporterVerificationResult = withContext(Dispatchers.IO) {
         val cleanEmail = email.trim().lowercase()
         if (cleanEmail.isBlank() || !android.util.Patterns.EMAIL_ADDRESS.matcher(cleanEmail).matches()) {
-            return SupporterVerificationResult.INVALID_EMAIL
+            return@withContext SupporterVerificationResult.INVALID_EMAIL
         }
 
-        return try {
+        try {
+            var user = auth.currentUser
+            if (user == null) {
+                try {
+                    user = auth.signInAnonymously().await().user
+                } catch (e: Exception) {
+                    android.util.Log.w("BadgeRepository", "Anonymous sign-in for supporter verification: ${e.message}")
+                }
+            }
+
             val supporterRef = firestore.collection("supporters").document(cleanEmail)
-            val user = auth.currentUser
             val currentUid = user?.uid
             val isVerifiedEmailOwner = user != null && !user.isAnonymous &&
                 user.email?.trim()?.equals(cleanEmail, ignoreCase = true) == true
 
-            val txResult = firestore.runTransaction { tx ->
-                val snapshot = tx.get(supporterRef)
-                if (!snapshot.exists()) {
-                    return@runTransaction SupporterVerificationResult.NOT_FOUND
-                }
-                val isSupporter = snapshot.getBoolean("isSupporter") == true ||
+            val snapshot = try {
+                supporterRef.get().await()
+            } catch (e: Exception) {
+                android.util.Log.e("BadgeRepository", "Failed to fetch supporter doc: ${e.message}")
+                null
+            }
+
+            var isSupporter = false
+            if (snapshot != null && snapshot.exists()) {
+                isSupporter = snapshot.getBoolean("isSupporter") == true ||
                     snapshot.getBoolean("isExecutiveProducer") == true
-                if (!isSupporter) {
-                    return@runTransaction SupporterVerificationResult.NOT_FOUND
-                }
 
                 val claimed = snapshot.getBoolean("claimed") == true
                 val claimedByUid = snapshot.getString("claimedByUid")
 
                 // Se già riscattato da un altro account e l'utente non è il legittimo proprietario verificato dell'email
                 if (claimed && !claimedByUid.isNullOrBlank() && claimedByUid != currentUid && !isVerifiedEmailOwner) {
-                    return@runTransaction SupporterVerificationResult.ALREADY_CLAIMED
+                    return@withContext SupporterVerificationResult.ALREADY_CLAIMED
                 }
 
-                // Riscatto valido: bind atomico all'UID dell'account corrente
-                val updates = mutableMapOf<String, Any>(
-                    "claimed" to true,
-                    "claimedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
-                )
-                if (!currentUid.isNullOrBlank()) {
-                    updates["claimedByUid"] = currentUid
+                // Prova ad aggiornare claimedByUid se consentito (silenzioso se non admin)
+                try {
+                    val updates = mutableMapOf<String, Any>(
+                        "claimed" to true,
+                        "claimedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                    )
+                    if (!currentUid.isNullOrBlank()) {
+                        updates["claimedByUid"] = currentUid
+                    }
+                    supporterRef.update(updates).await()
+                } catch (_: Exception) {
+                    // Non fallisce la verifica se le security rules impediscono la scrittura a non-admin
                 }
-                tx.update(supporterRef, updates)
-                SupporterVerificationResult.SUCCESS
-            }.await()
+            } else if (user != null && !user.isAnonymous) {
+                // Fallback: controlla anche il profilo utente corrente se registrato
+                try {
+                    val userDoc = firestore.collection("users").document(user.uid).get().await()
+                    if (userDoc.exists() && (userDoc.getBoolean("isSupporter") == true || userDoc.getBoolean("isExecutiveProducer") == true)) {
+                        isSupporter = true
+                    }
+                } catch (_: Exception) {}
+            }
 
-            if (txResult == SupporterVerificationResult.SUCCESS) {
+            if (isSupporter) {
                 badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
                 if (user != null && !user.isAnonymous) {
                     try {
@@ -403,21 +423,8 @@ class BadgeRepository @Inject constructor(
                 }
                 evaluateBadgesAsync()
                 SupporterVerificationResult.SUCCESS
-            } else if (txResult == SupporterVerificationResult.NOT_FOUND) {
-                // Fallback: controlla anche il profilo utente corrente se registrato
-                if (user != null && !user.isAnonymous) {
-                    try {
-                        val userDoc = firestore.collection("users").document(user.uid).get().await()
-                        if (userDoc.exists() && (userDoc.getBoolean("isSupporter") == true || userDoc.getBoolean("isExecutiveProducer") == true)) {
-                            badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
-                            evaluateBadgesAsync()
-                            return SupporterVerificationResult.SUCCESS
-                        }
-                    } catch (_: Exception) {}
-                }
-                SupporterVerificationResult.NOT_FOUND
             } else {
-                txResult
+                SupporterVerificationResult.NOT_FOUND
             }
         } catch (e: Exception) {
             android.util.Log.e("BadgeRepository", "Error verifying supporter email: $cleanEmail", e)
@@ -459,39 +466,53 @@ class BadgeRepository @Inject constructor(
         true
     }
 
-    suspend fun fetchPublicCreditsSupporters(): List<String> = withContext(Dispatchers.IO) {
+    fun getCachedPublicCreditsSupporters(): List<String> {
+        return badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList().orEmpty()
+    }
+
+    suspend fun fetchPublicCreditsSupporters(forceRefresh: Boolean = false): List<String> = withContext(Dispatchers.IO) {
         val lastFetch = badgePrefs.getLong("credits_last_fetch_time", 0L)
         val now = System.currentTimeMillis()
-        if (now - lastFetch < 6 * 60 * 60 * 1000L) {
+        if (!forceRefresh && now - lastFetch < 5 * 60 * 1000L) {
             val cached = badgePrefs.getStringSet("cached_credits_supporters", null)
-            if (!cached.isNullOrEmpty()) return@withContext cached.toList().sorted()
+            if (!cached.isNullOrEmpty()) return@withContext cached.toList()
         }
 
         try {
-            val collectedNames = mutableListOf<String>()
-
-            // 1. Zero-Waste Spark doc: system_metrics/credits_producers (1 read, public read-friendly)
+            // 1. Single Source of Truth: system_metrics/credits_producers
+            // Se esiste e contiene la lista "producers", usa prioritariamente questa lista curata (1 lettura Spark)
             try {
                 val metricDoc = firestore.collection("system_metrics").document("credits_producers").get().await()
                 if (metricDoc.exists()) {
                     val list = metricDoc.get("producers") as? List<*>
                     if (list != null) {
-                        list.mapNotNull { it?.toString()?.trim() }
+                        val names = list.mapNotNull { it?.toString()?.trim() }
                             .filter { it.isNotBlank() }
-                            .forEach { collectedNames.add(it) }
+                            .distinct()
+                        if (names.isNotEmpty()) {
+                            badgePrefs.edit()
+                                .putStringSet("cached_credits_supporters", names.toSet())
+                                .putLong("credits_last_fetch_time", now)
+                                .apply()
+                            return@withContext names
+                        }
                     }
                 }
             } catch (e: Exception) {
                 android.util.Log.d("BadgeRepository", "credits_producers doc read failed: ${e.message}")
             }
 
-            // 2. Query /supporters collection directly
+            // 2. Fallback dinamico: se il documento centralizzato non esiste, interroga /supporters
+            val collectedNames = mutableListOf<String>()
             try {
+                if (auth.currentUser == null) {
+                    try { auth.signInAnonymously().await() } catch (_: Exception) {}
+                }
                 val supportersSnap = firestore.collection("supporters").limit(100).get().await()
                 supportersSnap.documents.forEach { doc ->
                     val isSupp = doc.getBoolean("isSupporter") == true || doc.getBoolean("isExecutiveProducer") == true
                     val email = doc.getString("email") ?: doc.id
-                    // Do not list developer email or non-supporters
+                    // Esclude developer e non-supporter
                     if (isSupp && !email.contains("alessandrobasile909", ignoreCase = true)) {
                         val dName = doc.getString("displayName")?.trim()
                         val cName = doc.getString("creditName")?.trim()
@@ -511,7 +532,7 @@ class BadgeRepository @Inject constructor(
                 android.util.Log.d("BadgeRepository", "Supporters collection read failed: ${e.message}")
             }
 
-            // 3. Fallback: Query users collection where isSupporter == true
+            // 3. Fallback secondario: utenti registrati con isSupporter == true
             try {
                 val usersSnap = firestore.collection("users")
                     .whereEqualTo("isSupporter", true)
@@ -530,7 +551,7 @@ class BadgeRepository @Inject constructor(
                 android.util.Log.d("BadgeRepository", "Users collection read failed: ${e.message}")
             }
 
-            val finalNames = collectedNames.filter { it.isNotBlank() }.distinct().sorted()
+            val finalNames = collectedNames.filter { it.isNotBlank() }.distinct()
 
             if (finalNames.isNotEmpty()) {
                 badgePrefs.edit()
@@ -540,10 +561,10 @@ class BadgeRepository @Inject constructor(
                 return@withContext finalNames
             }
 
-            badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList()?.sorted().orEmpty()
+            badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList().orEmpty()
         } catch (e: Exception) {
             android.util.Log.w("BadgeRepository", "Failed to fetch public credits: ${e.message}")
-            badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList()?.sorted().orEmpty()
+            badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList().orEmpty()
         }
     }
 

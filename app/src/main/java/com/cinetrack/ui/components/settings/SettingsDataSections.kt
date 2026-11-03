@@ -630,11 +630,18 @@ fun SettingsEndCreditsBox(
         }
     }
 
-    var supporters by remember { mutableStateOf<List<String>>(emptyList()) }
-    var isLoadingSupporters by remember { mutableStateOf(true) }
+    var supporters by remember {
+        mutableStateOf(badgeRepo?.getCachedPublicCreditsSupporters().orEmpty())
+    }
+    var isLoadingSupporters by remember {
+        mutableStateOf(supporters.isEmpty())
+    }
 
     LaunchedEffect(Unit) {
-        supporters = badgeRepo?.fetchPublicCreditsSupporters().orEmpty()
+        val list = badgeRepo?.fetchPublicCreditsSupporters(forceRefresh = true).orEmpty()
+        if (list.isNotEmpty()) {
+            supporters = list
+        }
         isLoadingSupporters = false
     }
 

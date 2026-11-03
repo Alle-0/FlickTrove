@@ -532,7 +532,7 @@ fun ExecutiveProducerDonationSection(
                                             }
                                         }
                                     }
-                                    .clip(CircleShape)
+                                    .clip(RoundedCornerShape(12.dp))
                                     .background(
                                         if (isButtonEnabled) {
                                             Color.White
