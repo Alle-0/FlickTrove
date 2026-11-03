@@ -638,20 +638,45 @@ fun SettingsEndCreditsBox(
         isLoadingSupporters = false
     }
 
+    val primaryColor = MaterialTheme.colorScheme.primary
+
+    val specialBorderBrush = remember(primaryColor) {
+        Brush.linearGradient(
+            colors = listOf(
+                primaryColor.copy(alpha = 0.55f),
+                primaryColor.copy(alpha = 0.20f),
+                Color.White.copy(alpha = 0.08f)
+            )
+        )
+    }
+
+    val specialGlowBrush = remember(primaryColor) {
+        Brush.radialGradient(
+            colors = listOf(
+                primaryColor.copy(alpha = 0.08f),
+                Color.Transparent
+            ),
+            radius = 800f,
+            center = androidx.compose.ui.geometry.Offset(0f, 0f)
+        )
+    }
+
     SettingsSection(
         title = stringResource(R.string.credits_producers_role),
-        icon = ImageVector.vectorResource(id = R.drawable.ic_film)
+        icon = ImageVector.vectorResource(id = R.drawable.ic_film),
+        borderBrush = specialBorderBrush,
+        backgroundBrush = specialGlowBrush
     ) {
         if (isLoadingSupporters) {
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(vertical = 12.dp),
+                    .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = MaterialTheme.colorScheme.primary,
+                    color = primaryColor,
                     strokeWidth = 2.dp
                 )
             }
@@ -666,31 +691,56 @@ fun SettingsEndCreditsBox(
                 modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
             )
         } else {
-            androidx.compose.foundation.layout.FlowRow(
+            Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 4.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp),
-                verticalArrangement = Arrangement.spacedBy(8.dp)
+                    .padding(horizontal = 4.dp, vertical = 4.dp)
             ) {
-                supporters.forEach { name ->
-                    Surface(
-                        shape = RoundedCornerShape(12.dp),
-                        color = Color.White.copy(alpha = 0.05f),
-                        border = androidx.compose.foundation.BorderStroke(
-                            1.dp,
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
-                        )
-                    ) {
-                        Text(
-                            text = name,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
-                                fontSize = 13.5.sp
-                            ),
-                            color = Color.White,
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
-                        )
+                Text(
+                    text = stringResource(R.string.credits_producers_desc),
+                    style = MaterialTheme.typography.bodySmall.copy(
+                        fontSize = 12.sp,
+                        lineHeight = 17.sp,
+                        color = Color.White.copy(alpha = 0.68f)
+                    ),
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+
+                androidx.compose.foundation.layout.FlowRow(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
+                    verticalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    supporters.forEach { name ->
+                        Surface(
+                            shape = RoundedCornerShape(12.dp),
+                            color = Color.White.copy(alpha = 0.06f),
+                            border = androidx.compose.foundation.BorderStroke(
+                                1.dp,
+                                primaryColor.copy(alpha = 0.35f)
+                            )
+                        ) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .size(6.dp)
+                                        .clip(CircleShape)
+                                        .background(primaryColor)
+                                )
+                                Spacer(modifier = Modifier.width(8.dp))
+                                Text(
+                                    text = name,
+                                    style = MaterialTheme.typography.bodyMedium.copy(
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
+                                        fontSize = 13.5.sp
+                                    ),
+                                    color = Color.White
+                                )
+                            }
+                        }
                     }
                 }
             }

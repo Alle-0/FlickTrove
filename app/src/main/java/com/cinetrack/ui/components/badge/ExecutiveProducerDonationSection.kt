@@ -328,217 +328,83 @@ fun ExecutiveProducerDonationSection(
                 }
             }
         } else {
-            // STATO BLOCCATO: Call To Action Cinematografica ad Alta Conversione
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            listOf(
-                                Color(0xFF1E1E26),
-                                Color(0xFF121217)
-                            )
-                        )
-                    )
-                    .border(
-                        1.dp,
-                        Brush.linearGradient(
-                            listOf(
-                                Gold.copy(alpha = 0.50f),
-                                Color.White.copy(alpha = 0.10f)
-                            )
-                        ),
-                        RoundedCornerShape(16.dp)
-                    )
-                    .padding(16.dp)
+            // Pulsanti compatti e discreti per sostenere su Ko-fi o PayPal
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                Column(modifier = Modifier.fillMaxWidth()) {
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(38.dp)
+                        .bounceClick {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            uriHandler.openUri("https://ko-fi.com/alle0")
+                        }
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFFFF5E5B).copy(alpha = 0.16f))
+                        .border(1.dp, Color(0xFFFF5E5B).copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
+                        horizontalArrangement = Arrangement.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .size(40.dp)
-                                .clip(CircleShape)
-                                .background(Gold.copy(alpha = 0.16f))
-                                .border(1.dp, Gold.copy(alpha = 0.40f), CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
-                                contentDescription = null,
-                                tint = Gold,
-                                modifier = Modifier.size(20.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.trophy_producer_cta_title),
-                                style = MaterialTheme.typography.titleMedium.copy(
-                                    fontWeight = FontWeight.ExtraBold,
-                                    fontSize = 15.sp
-                                ),
-                                color = Color.White
-                            )
-                            Text(
-                                text = "Cinema d'autore indipendente",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontSize = 10.5.sp,
-                                    fontWeight = FontWeight.Medium
-                                ),
-                                color = Gold
-                            )
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Text(
-                        text = stringResource(R.string.trophy_producer_cta_desc),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 12.sp,
-                            lineHeight = 17.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.72f)
-                    )
-
-                    Spacer(modifier = Modifier.height(14.dp))
-
-                    // Pulsanti di Supporto Primari: Ko-fi e PayPal
-                    Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        // Ko-fi Button (Highlight Google Pay / Apple Pay / Carta)
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(46.dp)
-                                .bounceClick {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    uriHandler.openUri("https://ko-fi.com/alle0")
-                                }
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(
-                                            Color(0xFFFF5E5B),
-                                            Color(0xFFE53935)
-                                        )
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_kofi),
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(20.dp)
-                                )
-                                Spacer(modifier = Modifier.width(10.dp))
-                                Text(
-                                    text = stringResource(R.string.trophy_producer_btn_kofi),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 13.5.sp
-                                    ),
-                                    color = Color.White
-                                )
-                            }
-                        }
-
-                        // PayPal Button
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(42.dp)
-                                .bounceClick {
-                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                    uriHandler.openUri("https://paypal.me/AlessandroBasile0")
-                                }
-                                .clip(RoundedCornerShape(12.dp))
-                                .background(
-                                    Brush.horizontalGradient(
-                                        listOf(
-                                            Color(0xFF0079C1),
-                                            Color(0xFF00457C)
-                                        )
-                                    )
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_paypal),
-                                    contentDescription = null,
-                                    tint = Color.White,
-                                    modifier = Modifier.size(18.dp)
-                                )
-                                Spacer(modifier = Modifier.width(8.dp))
-                                Text(
-                                    text = stringResource(R.string.trophy_producer_btn_paypal),
-                                    style = MaterialTheme.typography.labelLarge.copy(
-                                        fontWeight = FontWeight.SemiBold,
-                                        fontSize = 13.sp
-                                    ),
-                                    color = Color.White
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(12.dp))
-
-                    // Suggerimento trasparente per sblocco automatico o manuale
-                    val tipText = if (!currentEmail.isNullOrBlank()) {
-                        stringResource(R.string.trophy_producer_tip_email, currentEmail)
-                    } else {
-                        stringResource(R.string.trophy_producer_tip_guest)
-                    }
-
-                    Text(
-                        text = tipText,
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 11.sp,
-                            lineHeight = 15.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.55f),
-                        textAlign = TextAlign.Start
-                    )
-
-                    Spacer(modifier = Modifier.height(8.dp))
-
-                    // Bottone per vedere i Titoli di Coda attuali
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .bounceClick { showCreditsModal = true }
-                            .padding(vertical = 4.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_kofi),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
                         Text(
-                            text = "🎬 " + stringResource(R.string.trophy_producer_view_credits),
-                            style = MaterialTheme.typography.labelSmall.copy(
+                            text = "Ko-fi",
+                            style = MaterialTheme.typography.labelMedium.copy(
                                 fontWeight = FontWeight.SemiBold,
-                                fontSize = 11.5.sp
+                                fontSize = 12.5.sp
                             ),
-                            color = Gold.copy(alpha = 0.90f)
+                            color = Color.White
+                        )
+                    }
+                }
+
+                Box(
+                    modifier = Modifier
+                        .weight(1f)
+                        .height(38.dp)
+                        .bounceClick {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                            uriHandler.openUri("https://paypal.me/AlessandroBasile0")
+                        }
+                        .clip(RoundedCornerShape(10.dp))
+                        .background(Color(0xFF0079C1).copy(alpha = 0.16f))
+                        .border(1.dp, Color(0xFF0079C1).copy(alpha = 0.35f), RoundedCornerShape(10.dp)),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.Center
+                    ) {
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_paypal),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(8.dp))
+                        Text(
+                            text = "PayPal",
+                            style = MaterialTheme.typography.labelMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 12.5.sp
+                            ),
+                            color = Color.White
                         )
                     }
                 }
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(10.dp))
 
             // Card Verifica Donazione Espandibile (per chi ha già donato con email differente)
             var isExpanded by remember { mutableStateOf(false) }

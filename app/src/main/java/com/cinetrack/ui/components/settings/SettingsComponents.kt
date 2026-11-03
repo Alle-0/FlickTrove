@@ -68,6 +68,8 @@ fun SettingsSection(
     icon: ImageVector? = null,
     footerText: String? = null,
     initiallyExpanded: Boolean = false,
+    borderBrush: Brush? = null,
+    backgroundBrush: Brush? = null,
     content: @Composable ColumnScope.() -> Unit
 ) {
     var isExpanded by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(initiallyExpanded) }
@@ -87,10 +89,23 @@ fun SettingsSection(
             .padding(bottom = 12.dp)
             .clip(RoundedCornerShape(32.dp))
             .background(Color.White.copy(alpha = 0.04f))
-            .border(
-                width = 1.dp,
-                color = Color.White.copy(alpha = 0.1f),
-                shape = RoundedCornerShape(32.dp)
+            .then(
+                if (backgroundBrush != null) Modifier.background(backgroundBrush) else Modifier
+            )
+            .then(
+                if (borderBrush != null) {
+                    Modifier.border(
+                        width = 1.dp,
+                        brush = borderBrush,
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                } else {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = Color.White.copy(alpha = 0.1f),
+                        shape = RoundedCornerShape(32.dp)
+                    )
+                }
             )
     ) {
         Row(
