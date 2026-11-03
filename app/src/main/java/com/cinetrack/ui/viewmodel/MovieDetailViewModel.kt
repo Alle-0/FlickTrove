@@ -372,6 +372,7 @@ class MovieDetailViewModel @Inject constructor(
                             "fr" -> "FR"
                             "es" -> "ES"
                             "pt", "pt_br", "pt-br" -> "BR"
+                            "pt-pt", "pt_pt" -> "PT"
                             "ru" -> "RU"
                             "hi" -> "IN"
                             "ja" -> "JP"
@@ -379,6 +380,16 @@ class MovieDetailViewModel @Inject constructor(
                             "zh", "zh_cn", "zh-cn" -> "CN"
                             "id", "in" -> "ID"
                             "tr" -> "TR"
+                            "pl" -> "PL"
+                            "nl" -> "NL"
+                            "cs" -> "CZ"
+                            "el" -> "GR"
+                            "hu" -> "HU"
+                            "ro" -> "RO"
+                            "sv" -> "SE"
+                            "th" -> "TH"
+                            "uk" -> "UA"
+                            "vi" -> "VN"
                             else -> java.util.Locale.getDefault().country.uppercase().ifBlank { "US" }
                         }
                     }

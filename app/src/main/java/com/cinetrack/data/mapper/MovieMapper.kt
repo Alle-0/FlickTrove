@@ -199,7 +199,10 @@ object MovieMapper {
         )
     }
 
-    val SUPPORTED_RATING_COUNTRIES = setOf("IT", "DE", "FR", "ES", "BR", "RU", "IN", "GB", "US", "JP", "KR", "ID", "TR")
+    val SUPPORTED_RATING_COUNTRIES = setOf(
+        "IT", "DE", "FR", "ES", "BR", "RU", "IN", "GB", "US", "JP", "KR", "ID", "TR",
+        "PL", "NL", "PT", "CZ", "GR", "HU", "RO", "SE", "TH", "UA", "VN"
+    )
 
     fun extractCertificationWithCountry(
         response: MovieDetailResponse, 

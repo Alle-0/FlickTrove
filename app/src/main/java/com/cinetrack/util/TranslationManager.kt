@@ -557,6 +557,16 @@ class TranslationManager @Inject constructor(
             "hi" -> TranslateLanguage.HINDI
             "tr" -> TranslateLanguage.TURKISH
             "id", "in" -> TranslateLanguage.INDONESIAN
+            "pl" -> TranslateLanguage.POLISH
+            "nl" -> TranslateLanguage.DUTCH
+            "cs" -> TranslateLanguage.CZECH
+            "el" -> TranslateLanguage.GREEK
+            "hu" -> TranslateLanguage.HUNGARIAN
+            "ro" -> TranslateLanguage.ROMANIAN
+            "sv" -> TranslateLanguage.SWEDISH
+            "th" -> TranslateLanguage.THAI
+            "uk" -> TranslateLanguage.UKRAINIAN
+            "vi" -> TranslateLanguage.VIETNAMESE
             else -> TranslateLanguage.ENGLISH
         }
     }
@@ -577,6 +587,16 @@ class TranslationManager @Inject constructor(
             TranslateLanguage.HINDI -> "hi"
             TranslateLanguage.TURKISH -> "tr"
             TranslateLanguage.INDONESIAN -> "id"
+            TranslateLanguage.POLISH -> "pl"
+            TranslateLanguage.DUTCH -> "nl"
+            TranslateLanguage.CZECH -> "cs"
+            TranslateLanguage.GREEK -> "el"
+            TranslateLanguage.HUNGARIAN -> "hu"
+            TranslateLanguage.ROMANIAN -> "ro"
+            TranslateLanguage.SWEDISH -> "sv"
+            TranslateLanguage.THAI -> "th"
+            TranslateLanguage.UKRAINIAN -> "uk"
+            TranslateLanguage.VIETNAMESE -> "vi"
             else -> mlkitLang.lowercase().take(2).ifEmpty { "en" }
         }
     }

@@ -1184,12 +1184,13 @@ class MovieRepository @Inject constructor(
                 }
             }
         } else {
-            when (rawLanguage.lowercase().substringBefore("-")) {
+            when (val code = rawLanguage.lowercase()) {
                 "it" -> "IT"
                 "es" -> "ES"
                 "fr" -> "FR"
                 "de" -> "DE"
-                "pt" -> "PT"
+                "pt-pt" -> "PT"
+                "pt", "pt-br" -> "BR"
                 "ru" -> "RU"
                 "hi" -> "IN"
                 "ja" -> "JP"
@@ -1197,7 +1198,31 @@ class MovieRepository @Inject constructor(
                 "zh" -> "CN"
                 "id", "in" -> "ID"
                 "tr" -> "TR"
-                else -> "US"
+                "pl" -> "PL"
+                "nl" -> "NL"
+                "cs" -> "CZ"
+                "el" -> "GR"
+                "hu" -> "HU"
+                "ro" -> "RO"
+                "sv" -> "SE"
+                "th" -> "TH"
+                "uk" -> "UA"
+                "vi" -> "VN"
+                else -> {
+                    when (code.substringBefore("-")) {
+                        "pl" -> "PL"
+                        "nl" -> "NL"
+                        "cs" -> "CZ"
+                        "el" -> "GR"
+                        "hu" -> "HU"
+                        "ro" -> "RO"
+                        "sv" -> "SE"
+                        "th" -> "TH"
+                        "uk" -> "UA"
+                        "vi" -> "VN"
+                        else -> "US"
+                    }
+                }
             }
         }
     }
