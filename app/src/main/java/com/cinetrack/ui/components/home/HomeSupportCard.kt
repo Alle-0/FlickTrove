@@ -23,8 +23,6 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -39,6 +37,9 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -61,6 +62,10 @@ private const val COOLDOWN_MS = 30L * 24 * 60 * 60 * 1000
  * - Nascosta per 30 giorni dopo ogni dismiss esplicito.
  */
 fun shouldShowSupportCard(context: Context): Boolean {
+    // Single Source of Truth: se l'utente è già un sostenitore verificato, nascondi la card
+    val badgePrefs = context.getSharedPreferences("flicktrove_badge_prefs", Context.MODE_PRIVATE)
+    if (badgePrefs.getBoolean("is_supporter_verified", false)) return false
+
     val prefs = context.getSharedPreferences(PREFS_SUPPORT, Context.MODE_PRIVATE)
     if (prefs.getBoolean(KEY_HAS_SUPPORTED, false)) return false
     val dismissedAt = prefs.getLong(KEY_LAST_DISMISSED_AT, 0L)
@@ -91,6 +96,7 @@ fun HomeSupportCard(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val haptic = LocalHapticFeedback.current
 
     // Stato locale volatile: si resetta a ogni sessione ma shouldShowSupportCard() fa da guard persistente
     var dismissed by remember { mutableStateOf(false) }
@@ -110,8 +116,8 @@ fun HomeSupportCard(
     ) {
         val cardShape = RoundedCornerShape(32.dp)
         val buttonShape = RoundedCornerShape(16.dp)
-        val coralAccent = Color(0xFFFF4B55)
-        val paypalBlue = Color(0xFF0070BA)
+        val kofiRed = Color(0xFFFF5E5B)
+        val paypalBlue = Color(0xFF0079C1)
 
         Box(
             modifier = Modifier
@@ -130,8 +136,8 @@ fun HomeSupportCard(
                     width = 1.dp,
                     brush = Brush.verticalGradient(
                         colors = listOf(
-                            coralAccent.copy(alpha = 0.35f),
-                            coralAccent.copy(alpha = 0.08f)
+                            Color(0xFFEAB308).copy(alpha = 0.35f),
+                            Color.White.copy(alpha = 0.06f)
                         )
                     ),
                     shape = cardShape
@@ -142,25 +148,32 @@ fun HomeSupportCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Header: Icona cerchio cuore a sinistra + Titolo & Descrizione
+                // Header: Icona cinematografica mecenate a sinistra + Titolo & Descrizione
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(end = 36.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
-                    // Icona cerchio rosso/corallo con cuore bianco pieno
                     Box(
                         modifier = Modifier
                             .size(48.dp)
                             .clip(CircleShape)
-                            .background(coralAccent),
+                            .background(
+                                Brush.linearGradient(
+                                    listOf(
+                                        Color(0xFFEAB308),
+                                        Color(0xFFCA8A04)
+                                    )
+                                )
+                            )
+                            .border(1.5.dp, Color(0xFFFDE047).copy(alpha = 0.5f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
-                            imageVector = Icons.Rounded.Favorite,
+                            painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
                             contentDescription = null,
-                            tint = Color.White,
+                            tint = Color(0xFF141419),
                             modifier = Modifier.size(24.dp)
                         )
                     }
@@ -191,19 +204,20 @@ fun HomeSupportCard(
                     modifier = Modifier.fillMaxWidth(),
                     horizontalArrangement = Arrangement.spacedBy(12.dp)
                 ) {
-                    // 1. Ko-fi Button (Corallo/Rosso)
+                    // 1. Ko-fi Button
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
                             .bounceClick {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 markSupportClicked(context)
                                 dismissed = true
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(KOFI_URL))
                                 context.startActivity(intent)
                             }
                             .clip(buttonShape)
-                            .background(coralAccent),
+                            .background(kofiRed),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
@@ -225,12 +239,13 @@ fun HomeSupportCard(
                         }
                     }
 
-                    // 2. PayPal Button (Blu PayPal)
+                    // 2. PayPal Button
                     Box(
                         modifier = Modifier
                             .weight(1f)
                             .height(48.dp)
                             .bounceClick {
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 markSupportClicked(context)
                                 dismissed = true
                                 val intent = Intent(Intent.ACTION_VIEW, Uri.parse(PAYPAL_URL))

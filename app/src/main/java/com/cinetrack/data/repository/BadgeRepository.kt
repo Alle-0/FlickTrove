@@ -20,7 +20,9 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableSharedFlow
@@ -112,6 +114,8 @@ class BadgeRepository @Inject constructor(
     }
 
     private var supporterListenerRegistration: ListenerRegistration? = null
+    private var creditSyncJob: Job? = null
+    private var lastSyncedCreditState: Boolean? = null
 
     init {
         listenToSupporterStatus()
@@ -523,45 +527,61 @@ class BadgeRepository @Inject constructor(
         return badgePrefs.getBoolean("supporter_show_in_credits", true)
     }
 
-    suspend fun setSupporterCreditEnabled(enabled: Boolean): Unit = withContext(Dispatchers.IO) {
+    fun setSupporterCreditEnabled(enabled: Boolean) {
         badgePrefs.edit().putBoolean("supporter_show_in_credits", enabled).apply()
         val name = badgePrefs.getString("supporter_credit_name", null)?.takeIf { it.isNotBlank() }
         if (!name.isNullOrBlank()) {
             val cached = badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toMutableSet() ?: mutableSetOf()
             if (enabled) {
                 cached.add(name)
-                try {
-                    firestore.collection("system_metrics").document("credits_producers")
-                        .update("producers", com.google.firebase.firestore.FieldValue.arrayUnion(name))
-                        .await()
-                } catch (_: Exception) {
-                    try {
-                        firestore.collection("system_metrics").document("credits_producers")
-                            .set(
-                                mapOf("producers" to com.google.firebase.firestore.FieldValue.arrayUnion(name)),
-                                com.google.firebase.firestore.SetOptions.merge()
-                            )
-                            .await()
-                    } catch (_: Exception) {}
-                }
             } else {
                 cached.remove(name)
-                try {
-                    firestore.collection("system_metrics").document("credits_producers")
-                        .update("producers", com.google.firebase.firestore.FieldValue.arrayRemove(name))
-                        .await()
-                } catch (_: Exception) {}
             }
             badgePrefs.edit().putStringSet("cached_credits_supporters", cached).apply()
         }
 
-        val user = auth.currentUser
-        if (user != null && !user.isAnonymous) {
+        // Zero-Waste Firebase Spark: Debounce di 1200ms per proteggere la quota da click a raffica.
+        // Se l'utente clicca lo switch 100 volte, le prime 99 chiamate vengono annullate e parte solo l'ultima stabilizzata.
+        creditSyncJob?.cancel()
+        creditSyncJob = repositoryScope.launch(Dispatchers.IO) {
+            delay(1200L)
+            if (name.isNullOrBlank()) return@launch
+            if (lastSyncedCreditState == enabled) return@launch
+
             try {
-                firestore.collection("users").document(user.uid)
-                    .update("showInCredits", enabled)
-                    .await()
-            } catch (_: Exception) {}
+                if (enabled) {
+                    try {
+                        firestore.collection("system_metrics").document("credits_producers")
+                            .update("producers", com.google.firebase.firestore.FieldValue.arrayUnion(name))
+                            .await()
+                    } catch (_: Exception) {
+                        try {
+                            firestore.collection("system_metrics").document("credits_producers")
+                                .set(
+                                    mapOf("producers" to com.google.firebase.firestore.FieldValue.arrayUnion(name)),
+                                    com.google.firebase.firestore.SetOptions.merge()
+                                )
+                                .await()
+                        } catch (_: Exception) {}
+                    }
+                } else {
+                    firestore.collection("system_metrics").document("credits_producers")
+                        .update("producers", com.google.firebase.firestore.FieldValue.arrayRemove(name))
+                        .await()
+                }
+                lastSyncedCreditState = enabled
+            } catch (e: Exception) {
+                android.util.Log.d("BadgeRepository", "Debounced credits sync error: ${e.message}")
+            }
+
+            val user = auth.currentUser
+            if (user != null && !user.isAnonymous) {
+                try {
+                    firestore.collection("users").document(user.uid)
+                        .update("showInCredits", enabled)
+                        .await()
+                } catch (_: Exception) {}
+            }
         }
     }
 

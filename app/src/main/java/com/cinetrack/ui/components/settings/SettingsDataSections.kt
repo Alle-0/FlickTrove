@@ -472,48 +472,6 @@ var creditsExpanded by remember { mutableStateOf(false) }
                         )
                     }
                 }
-
-                if (badgeRepo?.isSupporterVerified() == true) {
-                    var showInCredits by remember {
-                        mutableStateOf(badgeRepo.isSupporterCreditEnabled())
-                    }
-                    val scope = rememberCoroutineScope()
-                    val haptic = LocalHapticFeedback.current
-
-                    Spacer(modifier = Modifier.height(14.dp))
-                    HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 0.8.dp)
-                    Spacer(modifier = Modifier.height(10.dp))
-
-                    Row(
-                        modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.SpaceBetween,
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = stringResource(R.string.trophy_producer_credits_switch),
-                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
-                            color = Color.White.copy(alpha = 0.70f),
-                            modifier = Modifier.weight(1f)
-                        )
-                        Switch(
-                            checked = showInCredits,
-                            onCheckedChange = { isChecked ->
-                                showInCredits = isChecked
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                scope.launch {
-                                    badgeRepo.setSupporterCreditEnabled(isChecked)
-                                    supporters = badgeRepo.getCachedPublicCreditsSupporters()
-                                }
-                            },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.Black,
-                                checkedTrackColor = primaryColor,
-                                uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
-                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
-                            )
-                        )
-                    }
-                }
             }
         }
     }
@@ -823,10 +781,8 @@ fun SettingsEndCreditsBox(
                             onCheckedChange = { isChecked ->
                                 showInCredits = isChecked
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                scope.launch {
-                                    badgeRepo.setSupporterCreditEnabled(isChecked)
-                                    supporters = badgeRepo.getCachedPublicCreditsSupporters()
-                                }
+                                badgeRepo.setSupporterCreditEnabled(isChecked)
+                                supporters = badgeRepo.getCachedPublicCreditsSupporters()
                             },
                             colors = SwitchDefaults.colors(
                                 checkedThumbColor = Color.Black,

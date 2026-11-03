@@ -159,9 +159,7 @@ fun ExecutiveProducerDonationSection(
                     onCheckedChange = { isChecked ->
                         showInCredits = isChecked
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        scope.launch {
-                            badgeRepo?.setSupporterCreditEnabled(isChecked)
-                        }
+                        badgeRepo?.setSupporterCreditEnabled(isChecked)
                     },
                     colors = SwitchDefaults.colors(
                         checkedThumbColor = Color.Black,
