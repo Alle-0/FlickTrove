@@ -727,6 +727,12 @@
     <string name="episodes_discussions_title">分集讨论</string>
     <string name="episodes_discussions_all_series">主讨论 (剧集)</string>
     <string name="episodes_discussions_pill">剧集</string>
+    <string name="comment_attach_image_title">添加图片</string>
+    <string name="comment_take_photo">拍照</string>
+    <string name="comment_take_photo_desc">使用相机立即拍摄照片</string>
+    <string name="comment_pick_gallery">从相册选择</string>
+    <string name="comment_pick_gallery_desc">从设备中选择图片</string>
+    <string name="comment_camera_error">无法启动相机</string>
     <string name="comment_translate">翻译</string>
     <string name="comment_translated_label">已翻译</string>
     <string name="comment_show_original">显示原文</string>
@@ -826,6 +832,9 @@
     <string name="detail_collection">影视合集</string>
     <string name="detail_recommendations">猜你喜欢</string>
     <string name="detail_technical_info">技术详情</string>
+    <string name="detail_rated_all_ages_note">本片适合所有年龄段观众观看，无特殊家长指引警告。</string>
+    <string name="detail_btn_tech_specs">技术规格</string>
+    <string name="detail_btn_parents_guide">家长指南</string>
     <string name="detail_official_trailers">官方预告片</string>
     <string name="detail_official_trailer">官方预告</string>
     <string name="detail_video_title_teaser">先导预告与宣传片</string>
@@ -1346,6 +1355,9 @@
     <string name="updates_social_replied_multiple">回复了 %1$d 次</string>
     <string name="updates_social_liked_plural">赞了你的评论</string>
     <string name="updates_social_replied_plural">回复了你的评论</string>
+    <string name="updates_social_mentioned">在评论中提到了你</string>
+    <string name="updates_social_mentioned_multiple">提到了你 %1$d 次</string>
+    <string name="updates_social_mentioned_plural">在评论中提到了你</string>
     <string name="comment_banned_permanent">您已被永久禁言，无法发表评论。</string>
     <string name="comment_banned_temporary">您当前已被禁言，封禁将持续至 %1$s。</string>
     <string name="comment_cooldown_wait">请等待 %1$d 秒后再发表评论。</string>
@@ -1841,6 +1853,30 @@
     <string name="trophy_producer_verify_invalid_email">请输入有效的电子邮箱地址。</string>
     <string name="trophy_producer_verify_already_claimed">此赞助已被其他账号兑换。</string>
     <string name="trophy_producer_verify_error">验证时发生网络连接错误，请稍后重试。</string>
+    <string name="trophy_producer_cta_title">支持这部电影</string>
+    <string name="trophy_producer_cta_desc">FlickTrove 是一款独立开发的作品：无广告、无追踪、无付费限制。服务器和数据库每月都有实际成本。如果您喜爱本应用，请通过自愿捐赠帮助我们保持独立与免费！</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • 卡)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">提示：如果使用与当前账户相同的邮箱 (%1$s) 捐赠，奖杯将自动解锁！</string>
+    <string name="trophy_producer_tip_guest">提示：捐赠后，在下方输入支付邮箱即可立即解锁奖杯！</string>
+    <string name="trophy_producer_credits_title">片尾字幕（可选）</string>
+    <string name="trophy_producer_credits_desc">您是否希望将您的昵称列入应用片尾字幕的执行制片人名单中？</string>
+    <string name="trophy_producer_credits_switch">在片尾字幕中显示我的昵称</string>
+    <string name="trophy_producer_credits_nickname_hint">您的昵称（例如：电影迷99）</string>
+    <string name="trophy_producer_credits_save_btn">保存</string>
+    <string name="trophy_producer_credits_saved">偏好已保存！</string>
+    <string name="trophy_producer_view_credits">查看片尾字幕</string>
+    <string name="credits_screen_title">片尾字幕</string>
+    <string name="credits_screen_subtitle">导演、社区与赞助人</string>
+    <string name="credits_direction_role">独立开发与设计</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">执行制片人</string>
+    <string name="credits_producers_desc">衷心感谢所有支持 FlickTrove 服务器和数据库月度成本的影迷朋友。</string>
+    <string name="credits_producers_empty">支持本项目，成为第一位加入字幕的制片人！</string>
+    <string name="credits_tech_role">数据与影视伙伴</string>
+    <string name="credits_tech_desc">本产品使用 TMDB API，由 Trakt.tv 和 SIMKL 提供云端同步。</string>
+    <string name="credits_special_thanks">特别鸣谢</string>
+    <string name="credits_special_thanks_desc">感谢开源社区、Jetpack Compose 团队以及每一位使用 FlickTrove 的热爱电影的观众。</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">观影日记</string>

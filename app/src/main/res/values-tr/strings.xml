@@ -727,6 +727,12 @@
     <string name="episodes_discussions_title">Bölüm Tartışmaları</string>
     <string name="episodes_discussions_all_series">Ana Tartışma (Dizi)</string>
     <string name="episodes_discussions_pill">Bölümler</string>
+    <string name="comment_attach_image_title">Görsel Ekle</string>
+    <string name="comment_take_photo">Fotoğraf çek</string>
+    <string name="comment_take_photo_desc">Hemen bir fotoğraf çekmek için kamerayı kullanın</string>
+    <string name="comment_pick_gallery">Galeriden seç</string>
+    <string name="comment_pick_gallery_desc">Cihazınızdan bir görsel seçin</string>
+    <string name="comment_camera_error">Kamera başlatılamadı</string>
     <string name="comment_translate">Çevir</string>
     <string name="comment_translated_label">Çevrildi</string>
     <string name="comment_show_original">Orijinali göster</string>
@@ -826,6 +832,9 @@
     <string name="detail_collection">SERİ</string>
     <string name="detail_recommendations">ÖNERİLENLER</string>
     <string name="detail_technical_info">TEKNİK DETAYLAR</string>
+    <string name="detail_rated_all_ages_note">Bu yapım, ebeveyn uyarısı olmaksızın tüm izleyiciler için uygundur.</string>
+    <string name="detail_btn_tech_specs">Teknik detaylar</string>
+    <string name="detail_btn_parents_guide">Ebeveyn kılavuzu</string>
     <string name="detail_official_trailers">RESMİ FRAGMANLAR</string>
     <string name="detail_official_trailer">RESMİ FRAGMAN</string>
     <string name="detail_video_title_teaser">TEASERLAR &amp; PROMOSYONLAR</string>
@@ -1346,6 +1355,9 @@
     <string name="updates_social_replied_multiple">%1$d kez yanıt verdi</string>
     <string name="updates_social_liked_plural">yorumlarınızı beğendi</string>
     <string name="updates_social_replied_plural">yorumlarınıza yanıt verdi</string>
+    <string name="updates_social_mentioned">bir yorumda sizden bahsetti</string>
+    <string name="updates_social_mentioned_multiple">sizden %1$d kez bahsetti</string>
+    <string name="updates_social_mentioned_plural">yorumlarda sizden bahsetti</string>
     <string name="comment_banned_permanent">Yorum yapamazsınız. Hesabınız kalıcı olarak askıya alındı.</string>
     <string name="comment_banned_temporary">Yorum yapamazsınız. Hesabınız %1$s tarihine kadar askıya alındı.</string>
     <string name="comment_cooldown_wait">Tekrar yorum yapmadan önce %1$d saniye bekleyin.</string>
@@ -1841,6 +1853,30 @@
     <string name="trophy_producer_verify_invalid_email">Lütfen geçerli bir e-posta adresi girin.</string>
     <string name="trophy_producer_verify_already_claimed">Bu bağış zaten başka bir hesap tarafından talep edilmiş.</string>
     <string name="trophy_producer_verify_error">Doğrulama sırasında bağlantı hatası oluştu. Lütfen birazdan tekrar deneyin.</string>
+    <string name="trophy_producer_cta_title">Filmi Destekle</string>
+    <string name="trophy_producer_cta_desc">FlickTrove bağımsız ve özenle hazırlanmış bir projedir: reklam yok, izleyici yok, ücretli abonelik yok. Sunucu giderlerini karşılamak için bir bağışla destek olun!</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • Kart)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">İpucu: Hesabınızla aynı e-postayla (%1$s) bağış yaparsanız kupa otomatik olarak açılır!</string>
+    <string name="trophy_producer_tip_guest">İpucu: Bağış yaptıktan sonra kupayı anında açmak için aşağıya ödeme e-postanızı girin!</string>
+    <string name="trophy_producer_credits_title">Kapanış Jeneriği (İsteğe bağlı)</string>
+    <string name="trophy_producer_credits_desc">Kullanıcı adınızın uygulamanın jeneriğinde Sorumlu Yapımcılar arasında görünmesini ister misiniz?</string>
+    <string name="trophy_producer_credits_switch">Kullanıcı adımı Jenerikte göster</string>
+    <string name="trophy_producer_credits_nickname_hint">Kullanıcı adınız (örn. Sinefil99)</string>
+    <string name="trophy_producer_credits_save_btn">Kaydet</string>
+    <string name="trophy_producer_credits_saved">Tercihler kaydedildi!</string>
+    <string name="trophy_producer_view_credits">Jeneriği Görüntüle</string>
+    <string name="credits_screen_title">Kapanış Jeneriği</string>
+    <string name="credits_screen_subtitle">Yönetmen, Topluluk ve Destekçiler</string>
+    <string name="credits_direction_role">Bağımsız Yönetim ve Geliştirme</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">Sorumlu Yapımcılar</string>
+    <string name="credits_producers_desc">FlickTrove\'un sunucu ve veritabanı masraflarını karşılayan tüm sinemaseverlere sonsuz teşekkürler.</string>
+    <string name="credits_producers_empty">Projeyi destekleyerek jenerikteki ilk isim siz olun!</string>
+    <string name="credits_tech_role">Veri ve Sinema Ortakları</string>
+    <string name="credits_tech_desc">Bu ürün TMDB API\'sini kullanır ancak TMDB tarafından onaylanmamıştır. Bulut senkronizasyonu Trakt.tv ve SIMKL tarafından sağlanır.</string>
+    <string name="credits_special_thanks">Özel Teşekkürler</string>
+    <string name="credits_special_thanks_desc">Açık kaynak topluluğuna, Jetpack Compose ekibine ve sinemayı FlickTrove ile yaşayan herkese.</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">Günlük</string>

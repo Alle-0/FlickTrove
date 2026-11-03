@@ -7,6 +7,7 @@ import androidx.compose.animation.fadeOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
@@ -20,8 +21,10 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableIntStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -33,6 +36,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.zIndex
 import com.cinetrack.R
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -41,6 +45,7 @@ import com.cinetrack.ui.components.updates.formatReleaseDate
 import com.cinetrack.ui.history.model.WatchTimelineEntry
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import java.time.LocalDate
 import java.time.YearMonth
 
@@ -59,51 +64,33 @@ fun HistoryCalendarView(
     onDeleteSession: (WatchTimelineEntry) -> Unit,
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp)
+    contentPadding: PaddingValues = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
+    onScopeChanged: ((Int) -> Unit)? = null
 ) {
     // 0 = Vista Mese (default), 1 = Vista Anno (heatmap stile GitHub)
     var selectedScopeIndex by rememberSaveable { mutableIntStateOf(0) }
 
+    LaunchedEffect(selectedScopeIndex) {
+        onScopeChanged?.invoke(selectedScopeIndex)
+    }
+
+    val topClearance = contentPadding.calculateTopPadding()
+    val bottomClearance = contentPadding.calculateBottomPadding()
+    val calendarHazeState = remember { HazeState() }
+
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = contentPadding
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(calendarHazeState, style = HazeStyles.PremiumDark),
+            contentPadding = PaddingValues(
+                start = 16.dp,
+                end = 16.dp,
+                top = topClearance + 48.dp,
+                bottom = bottomClearance
+            ),
+            verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // ── Selettore stile film/serie (Mese | Anno) ────────────────────
-            item(key = "calendar_scope_selector") {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 10.dp, bottom = 16.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
-                        modifier = Modifier.wrapContentSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .matchParentSize()
-                                .hazeGlass(
-                                    state = hazeState,
-                                    shape = CircleShape,
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                    useOffscreenStrategy = false
-                                )
-                        )
-                        CategoryTabSelector(
-                            options = listOf(
-                                stringResource(R.string.history_activity_scope_month),
-                                stringResource(R.string.history_activity_scope_year)
-                            ),
-                            selectedIndex = selectedScopeIndex,
-                            onOptionClick = { index -> selectedScopeIndex = index },
-                            tabWidth = 100.dp
-                        )
-                    }
-                }
-            }
-
             // ── Calendario Mensile OPPURE Heatmap Annuale ────────────────────
             item(key = "calendar_or_heatmap") {
                 AnimatedContent(
@@ -161,7 +148,7 @@ fun HistoryCalendarView(
                             color = Color.White,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold,
-                            modifier = Modifier.padding(top = 6.dp, bottom = 4.dp, start = 4.dp)
+                            modifier = Modifier.padding(top = 8.dp, bottom = 4.dp, start = 4.dp)
                         )
                     }
 
@@ -192,6 +179,43 @@ fun HistoryCalendarView(
                         textAlign = TextAlign.Center
                     )
                 }
+            }
+        }
+
+        // ── Selettore Fisso in Alto (Floating Sticky Island stile HomeScreen / VistiScreen) ──
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = topClearance)
+                .align(Alignment.TopCenter)
+                .zIndex(10f),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .matchParentSize()
+                        .hazeGlass(
+                            state = calendarHazeState,
+                            shape = CircleShape,
+                            blurRadius = HazeStyles.SmallGlassBlurRadius,
+                            useOffscreenStrategy = false
+                        )
+                )
+                CategoryTabSelector(
+                    options = listOf(
+                        stringResource(R.string.history_activity_scope_month),
+                        stringResource(R.string.history_activity_scope_year)
+                    ),
+                    selectedIndex = selectedScopeIndex,
+                    onOptionClick = { index -> selectedScopeIndex = index },
+                    tabWidth = 100.dp
+                )
             }
         }
     }

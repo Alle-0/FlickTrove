@@ -8,7 +8,7 @@ val DarkGrey = Color(0xFF0A0A0A)
 val DarkSurface = Color(0xFF121212)
 val DeepBlack = Color(0xFF000000)
 val PremiumBackground = Color(0xFF050505)
-// `StatsBackground` removed — use `CinematicBackground` overlay instead of a separate base token
+// StatsBackground removed - use CinematicBackground overlay instead of a separate base token
 
 // Light Theme Colors
 val LightGrey = Color(0xFFF5F5FA)
@@ -23,6 +23,7 @@ val NeonPurple = Color(0xFFBB86FC) // Tertiary
 val NeonCyan = Color(0xFF00E5FF)
 val NeonBlue = Color(0xFF00B0FF)
 val NeonAmber = Color(0xFFFFB300)
+val Gold = Color(0xFFFFD700)
 val PrimaryTeal = NeonTeal
 
 // Gradients for Charts & UI

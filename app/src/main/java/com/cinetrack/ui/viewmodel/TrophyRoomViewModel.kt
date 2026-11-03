@@ -64,6 +64,18 @@ class TrophyRoomViewModel @Inject constructor(
         return badgeRepository.verifySupporterByEmail(email)
     }
 
+    fun getSupporterCreditSettings(): Pair<String, Boolean> {
+        return badgeRepository.getSupporterCreditSettings()
+    }
+
+    suspend fun updateSupporterCreditSettings(creditName: String, showInCredits: Boolean): Boolean {
+        return badgeRepository.updateSupporterCreditSettings(creditName, showInCredits)
+    }
+
+    suspend fun fetchPublicCreditsSupporters(): List<String> {
+        return badgeRepository.fetchPublicCreditsSupporters()
+    }
+
     suspend fun getUnlockingMoviesForBadge(badgeId: String): List<com.cinetrack.data.model.Movie> {
         return badgeRepository.findUnlockingMoviesForBadge(badgeId)
     }

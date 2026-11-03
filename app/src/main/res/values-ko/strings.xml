@@ -727,6 +727,12 @@
     <string name="episodes_discussions_title">에피소드 토론</string>
     <string name="episodes_discussions_all_series">메인 토론 (시리즈)</string>
     <string name="episodes_discussions_pill">에피소드</string>
+    <string name="comment_attach_image_title">이미지 추가</string>
+    <string name="comment_take_photo">사진 촬영</string>
+    <string name="comment_take_photo_desc">카메라로 지금 바로 사진을 촬영합니다</string>
+    <string name="comment_pick_gallery">갤러리에서 선택</string>
+    <string name="comment_pick_gallery_desc">기기에서 이미지를 선택합니다</string>
+    <string name="comment_camera_error">카메라를 실행할 수 없습니다</string>
     <string name="comment_translate">번역</string>
     <string name="comment_translated_label">번역됨</string>
     <string name="comment_show_original">원문 보기</string>
@@ -826,6 +832,9 @@
     <string name="detail_collection">시리즈 컬렉션</string>
     <string name="detail_recommendations">추천 작품</string>
     <string name="detail_technical_info">상세 정보</string>
+    <string name="detail_rated_all_ages_note">이 작품은 특별한 부모 주의 문구 없이 모든 연령층이 관람하기에 적합합니다.</string>
+    <string name="detail_btn_tech_specs">기술 정보</string>
+    <string name="detail_btn_parents_guide">부모 가이드</string>
     <string name="detail_official_trailers">공식 예고편</string>
     <string name="detail_official_trailer">공식 예고편</string>
     <string name="detail_video_title_teaser">티저 및 프로모</string>
@@ -1346,6 +1355,9 @@
     <string name="updates_social_replied_multiple">%1$d번 답글을 남겼습니다</string>
     <string name="updates_social_liked_plural">회원님의 댓글을 좋아합니다</string>
     <string name="updates_social_replied_plural">회원님의 댓글에 답글을 남겼습니다</string>
+    <string name="updates_social_mentioned">댓글에서 회원님을 언급했습니다</string>
+    <string name="updates_social_mentioned_multiple">회원님을 %1$d회 언급했습니다</string>
+    <string name="updates_social_mentioned_plural">댓글에서 회원님을 언급했습니다</string>
     <string name="comment_banned_permanent">댓글 작성이 제한되었습니다. 영구 정지 상태입니다.</string>
     <string name="comment_banned_temporary">댓글을 작성할 수 없습니다. 이용 정지 기간: %1$s까지.</string>
     <string name="comment_cooldown_wait">다시 댓글을 작성하려면 %1$d초 동안 기다려 주세요.</string>
@@ -1841,6 +1853,30 @@
     <string name="trophy_producer_verify_invalid_email">유효한 이메일 주소를 입력해 주세요.</string>
     <string name="trophy_producer_verify_already_claimed">이 후원은 이미 다른 계정에서 등록되었습니다.</string>
     <string name="trophy_producer_verify_error">확인 중 연결 오류가 발생했습니다. 잠시 후 다시 시도해 주세요.</string>
+    <string name="trophy_producer_cta_title">영화 후원하기</string>
+    <string name="trophy_producer_cta_desc">FlickTrove는 광고, 트래커, 유료 구독이 없는 독립 프로젝트입니다. 서버 및 DB 유지비를 위해 자유로운 후원으로 함께해 주세요!</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • 카드)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">팁: 계정 이메일(%1$s)과 동일한 이메일로 후원하시면 트로피가 자동으로 해금됩니다!</string>
+    <string name="trophy_producer_tip_guest">팁: 후원 후 아래에 결제 이메일을 입력하시면 트로피가 즉시 해금됩니다!</string>
+    <string name="trophy_producer_credits_title">엔딩 크레딧 (선택 사항)</string>
+    <string name="trophy_producer_credits_desc">앱 엔딩 크레딧의 총괄 프로듀서 명단에 닉네임을 올리시겠습니까?</string>
+    <string name="trophy_producer_credits_switch">크레딧에 닉네임 표시</string>
+    <string name="trophy_producer_credits_nickname_hint">닉네임 (예: 시네필99)</string>
+    <string name="trophy_producer_credits_save_btn">저장</string>
+    <string name="trophy_producer_credits_saved">설정이 저장되었습니다!</string>
+    <string name="trophy_producer_view_credits">크레딧 보기</string>
+    <string name="credits_screen_title">엔딩 크레딧</string>
+    <string name="credits_screen_subtitle">연출, 커뮤니티 및 후원자</string>
+    <string name="credits_direction_role">독립 개발 및 디자인</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">총괄 프로듀서</string>
+    <string name="credits_producers_desc">FlickTrove의 서버 및 DB 비용을 후원해 주신 모든 영화 팬 여러분께 진심으로 감사드립니다.</string>
+    <string name="credits_producers_empty">프로젝트를 후원하고 첫 번째 크레딧 후원자가 되어보세요!</string>
+    <string name="credits_tech_role">데이터 및 파트너</string>
+    <string name="credits_tech_desc">TMDB API를 사용합니다. Trakt.tv 및 SIMKL 클라우드 동기화.</string>
+    <string name="credits_special_thanks">특별 감사</string>
+    <string name="credits_special_thanks_desc">오픈소스 커뮤니티, Jetpack Compose 팀, 그리고 FlickTrove와 함께하는 모든 관객분들께.</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">관람 다이어리</string>

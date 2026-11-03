@@ -650,6 +650,12 @@
     <string name="episodes_discussions_title">Обсуждения серий</string>
     <string name="episodes_discussions_all_series">Основное обсуждение (Сериал)</string>
     <string name="episodes_discussions_pill">Серии</string>
+    <string name="comment_attach_image_title">Добавить фото</string>
+    <string name="comment_take_photo">Сделать снимок</string>
+    <string name="comment_take_photo_desc">Использовать камеру, чтобы сделать фото прямо сейчас</string>
+    <string name="comment_pick_gallery">Выбрать из галереи</string>
+    <string name="comment_pick_gallery_desc">Выберите изображение с вашего устройства</string>
+    <string name="comment_camera_error">Не удалось запустить камеру</string>
     <string name="comment_translate">Перевести</string>
     <string name="comment_translated_label">Переведено</string>
     <string name="comment_show_original">Показать оригинал</string>
@@ -749,6 +755,9 @@
     <string name="detail_collection">КОЛЛЕКЦИЯ</string>
     <string name="detail_recommendations">РЕКОМЕНДУЕМОЕ</string>
     <string name="detail_technical_info">ТЕХНИЧЕСКАЯ ИНФОРМАЦИЯ</string>
+    <string name="detail_rated_all_ages_note">Этот фильм подходит для любой аудитории без особых возрастных предупреждений.</string>
+    <string name="detail_btn_tech_specs">Технические детали</string>
+    <string name="detail_btn_parents_guide">Руководство для родителей</string>
     <string name="detail_official_trailers">ОФИЦИАЛЬНЫЕ ТРЕЙЛЕРЫ</string>
     <string name="detail_official_trailer">ОФИЦИАЛЬНЫЙ ТРЕЙЛЕР</string>
     <string name="detail_video_title_teaser">ТИЗЕРЫ И ПРОМО</string>
@@ -1264,6 +1273,9 @@
     <string name="updates_social_replied_multiple">ответил(а) %1$d раз</string>
     <string name="updates_social_liked_plural">оценили ваши комментарии</string>
     <string name="updates_social_replied_plural">ответили на ваши комментарии</string>
+    <string name="updates_social_mentioned">упомянул(а) вас в комментарии</string>
+    <string name="updates_social_mentioned_multiple">упомянул(а) вас %1$d раз(а)</string>
+    <string name="updates_social_mentioned_plural">упомянули вас в комментариях</string>
     <string name="comment_banned_permanent">Вы не можете комментировать. Вы были навсегда заблокированы.</string>
     <string name="comment_banned_temporary">Вы не можете комментировать. Вы заблокированы до %1$s.</string>
     <string name="comment_cooldown_wait">Подождите %1$d секунд перед отправкой нового комментария.</string>
@@ -1835,6 +1847,30 @@
     <string name="trophy_producer_verify_invalid_email">Пожалуйста, введите корректный адрес электронной почты.</string>
     <string name="trophy_producer_verify_already_claimed">Это пожертвование уже активировано другим аккаунтом.</string>
     <string name="trophy_producer_verify_error">Ошибка подключения при проверке. Пожалуйста, повторите попытку позже.</string>
+    <string name="trophy_producer_cta_title">Поддержать фильм</string>
+    <string name="trophy_producer_cta_desc">FlickTrove — это независимый проект: без рекламы, трекеров и платных подписок. Помогите покрыть расходы на серверы с помощью доната!</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • Карта)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">Подсказка: если вы донатите с email вашего аккаунта (%1$s), трофей откроется автоматически!</string>
+    <string name="trophy_producer_tip_guest">Подсказка: после доната введите платежный email ниже для мгновенного открытия.</string>
+    <string name="trophy_producer_credits_title">Титры (По желанию)</string>
+    <string name="trophy_producer_credits_desc">Хотите ли вы, чтобы ваш никнейм появился среди исполнительных продюсеров в титрах?</string>
+    <string name="trophy_producer_credits_switch">Показывать мой ник в титрах</string>
+    <string name="trophy_producer_credits_nickname_hint">Ваш ник (например, Киноман99)</string>
+    <string name="trophy_producer_credits_save_btn">Сохранить</string>
+    <string name="trophy_producer_credits_saved">Настройки сохранены!</string>
+    <string name="trophy_producer_view_credits">Смотреть титры</string>
+    <string name="credits_screen_title">Титры</string>
+    <string name="credits_screen_subtitle">Режиссура, сообщество и меценаты</string>
+    <string name="credits_direction_role">Независимая разработка и дизайн</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">Исполнительные продюсеры</string>
+    <string name="credits_producers_desc">Огромная благодарность киноманам, покрывающим расходы на серверы FlickTrove.</string>
+    <string name="credits_producers_empty">Поддержите проект, чтобы первым войти в титры!</string>
+    <string name="credits_tech_role">Данные и партнеры</string>
+    <string name="credits_tech_desc">Используется API TMDB. Синхронизация Trakt.tv и SIMKL.</string>
+    <string name="credits_special_thanks">Особая благодарность</string>
+    <string name="credits_special_thanks_desc">Сообществу open-source, команде Jetpack Compose и каждому зрителю.</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">Дневник</string>

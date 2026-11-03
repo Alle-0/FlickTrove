@@ -108,37 +108,11 @@ fun MovieListCard(
 
     val rippleState = rememberCardRippleState()
 
-    // Premium Staggered Entrance Animation States
-    val compositeId = "${movie.id}_${movie.mediaType}"
-    val hasAnimated = rememberSaveable { mutableStateOf(hasAnimatedSet?.contains(compositeId) == true) }
-
-    LaunchedEffect(movie.id) {
-        if (hasAnimated.value) return@LaunchedEffect
-        if (staggerIndex in 0..11) delay(staggerIndex * 40L)
-        hasAnimated.value = true
-        hasAnimatedSet?.add(compositeId)
-    }
-
-    val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
-    val isVisible = hasAnimated.value || staggerIndex < 0
-
-    val isExploding = movieActions.explodingMovie?.id == movie.id
-    val cardAlpha by animateFloatAsState(
-        targetValue = if (isExploding) 0f else (if (isVisible) 1f else 0f),
-        animationSpec = if (isExploding) snap() else tween(durationMillis = if (isScrollItem) 180 else 250, easing = LinearOutSlowInEasing),
-        label = "alpha"
-    )
-
-    val cardScale by animateFloatAsState(
-        targetValue = if (isVisible) 1f else 0.85f,
-        animationSpec = if (isScrollItem) snap() else spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-        label = "scale"
-    )
-
-    val cardTranslateY by animateFloatAsState(
-        targetValue = if (isVisible) 0f else 40f,
-        animationSpec = if (isScrollItem) tween(200, easing = FastOutSlowInEasing) else spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMedium),
-        label = "translateY"
+    val entranceAnim = rememberCardEntranceAnimation(
+        itemId = "${movie.id}_${movie.mediaType}",
+        staggerIndex = staggerIndex,
+        hasAnimatedSet = hasAnimatedSet,
+        isExploding = movieActions.explodingMovie?.id == movie.id
     )
 
     Card(
@@ -146,10 +120,10 @@ fun MovieListCard(
             .fillMaxWidth()
             .height(110.dp)
             .graphicsLayer {
-                alpha = cardAlpha
-                scaleX = cardScale
-                scaleY = cardScale
-                translationY = cardTranslateY * density.density
+                alpha = entranceAnim.alpha
+                scaleX = entranceAnim.scale
+                scaleY = entranceAnim.scale
+                translationY = entranceAnim.translateY * density.density
             }
             .onGloballyPositioned { coordinates -> 
                 cardPosition[0] = coordinates.positionInWindow()

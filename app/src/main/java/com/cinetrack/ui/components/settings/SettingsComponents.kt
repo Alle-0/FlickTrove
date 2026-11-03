@@ -10,6 +10,7 @@ import androidx.compose.material3.*
 import com.cinetrack.ui.components.common.FlickTroveSwitch
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -519,23 +520,22 @@ fun DonationBanner(
     val uriHandler = androidx.compose.ui.platform.LocalUriHandler.current
     val context = androidx.compose.ui.platform.LocalContext.current
     val haptic = LocalHapticFeedback.current
-    
-    // Heart pulse animation
-    val infiniteTransition = rememberInfiniteTransition(label = "pulse")
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 1f,
-        targetValue = 1.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "heartPulse"
-    )
-    
-    // Glow effect background brush
+
+    val badgeRepo = remember {
+        try {
+            dagger.hilt.android.EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                com.cinetrack.data.repository.BadgeRepositoryEntryPoint::class.java
+            ).badgeRepository()
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    // Glow effect background brush (Warm Gold / Cinema Slate)
     val glowBrush = Brush.radialGradient(
         colors = listOf(
-            Color(0xFFFF5E5B).copy(alpha = 0.15f),
+            com.cinetrack.ui.theme.Gold.copy(alpha = 0.12f),
             Color.Transparent
         ),
         radius = 800f,
@@ -547,58 +547,53 @@ fun DonationBanner(
             .fillMaxWidth()
             .clip(RoundedCornerShape(32.dp))
             .background(Color(0xFF1E1E26))
-            .background(glowBrush) // Apply glow on top of base dark color
+            .background(glowBrush)
             .border(
                 width = 1.dp,
                 brush = Brush.linearGradient(
                     colors = listOf(
-                        Color(0xFFFF5E5B).copy(alpha = 0.5f),
-                        Color.White.copy(alpha = 0.05f)
+                        com.cinetrack.ui.theme.Gold.copy(alpha = 0.45f),
+                        Color.White.copy(alpha = 0.06f)
                     )
                 ),
                 shape = RoundedCornerShape(32.dp)
             )
-            .padding(16.dp)
+            .padding(18.dp)
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {
             Row(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Animated Icon container
+                // Animated Icon container: Film Patron / Clapper Hands
                 Box(
                     modifier = Modifier
-                        .size(52.dp)
+                        .size(50.dp)
                         .clip(CircleShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
-                                    Color(0xFFFF5E5B),
-                                    Color(0xFFFF2A25)
+                                    Color(0xFFEAB308),
+                                    Color(0xFFCA8A04)
                                 )
                             )
                         )
                         .border(
                             width = 2.dp,
-                            color = Color(0xFFFF8B89).copy(alpha = 0.5f),
+                            color = com.cinetrack.ui.theme.Gold.copy(alpha = 0.6f),
                             shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
-                        imageVector = Icons.Rounded.Favorite,
-                        contentDescription = "Support",
-                        tint = Color.White,
-                        modifier = Modifier
-                            .size(26.dp)
-                            .graphicsLayer {
-                                scaleX = scale
-                                scaleY = scale
-                            }
+                        painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
+                        contentDescription = "Patron",
+                        tint = Color(0xFF141419),
+                        modifier = Modifier.size(24.dp)
                     )
                 }
                 
-                Spacer(modifier = Modifier.width(16.dp))
+                Spacer(modifier = Modifier.width(14.dp))
                 
                 Column(modifier = Modifier.weight(1f)) {
                     Text(
@@ -609,38 +604,39 @@ fun DonationBanner(
                         ),
                         color = Color.White
                     )
-                    Spacer(modifier = Modifier.height(4.dp))
+                    Spacer(modifier = Modifier.height(3.dp))
                     Text(
                         text = androidx.compose.ui.res.stringResource(id = R.string.settings_support_dev_desc),
                         style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.5.sp,
                             lineHeight = 16.sp
                         ),
-                        color = Color.White.copy(alpha = 0.7f)
+                        color = Color.White.copy(alpha = 0.72f)
                     )
                 }
             }
             
-            Spacer(modifier = Modifier.height(20.dp))
+            Spacer(modifier = Modifier.height(16.dp))
             
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Ko-fi Button (Primary)
+                // Ko-fi Button (Primary: Google Pay / Apple Pay / Carta)
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(1.15f)
                         .height(48.dp)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(14.dp))
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
                                     Color(0xFFFF5E5B),
-                                    Color(0xFFFF2A25)
+                                    Color(0xFFE53935)
                                 )
                             )
                         ),
@@ -657,24 +653,34 @@ fun DonationBanner(
                             modifier = Modifier.size(18.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "Ko-fi",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White
-                        )
+                        Column(horizontalAlignment = Alignment.Start) {
+                            Text(
+                                text = "Ko-fi",
+                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                color = Color.White
+                            )
+                            Text(
+                                text = "GPay • ApplePay • Card",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = Color.White.copy(alpha = 0.85f)
+                            )
+                        }
                     }
                 }
                 
                 // PayPal Button
                 Box(
                     modifier = Modifier
-                        .weight(1f)
+                        .weight(0.85f)
                         .height(48.dp)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://paypal.me/AlessandroBasile0")
                         }
-                        .clip(RoundedCornerShape(16.dp))
+                        .clip(RoundedCornerShape(14.dp))
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -704,6 +710,7 @@ fun DonationBanner(
                     }
                 }
             }
+
         }
     }
 }

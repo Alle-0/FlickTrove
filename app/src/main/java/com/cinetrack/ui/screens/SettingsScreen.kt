@@ -255,6 +255,7 @@ fun SettingsScreenContent(
     var showExternalMigrationDialog by remember { mutableStateOf(false) }
 
     val isBackupLoading by settingsViewModel.isBackupLoading.collectAsStateWithLifecycle()
+    val isFeedbackLoading by settingsViewModel.isFeedbackLoading.collectAsStateWithLifecycle()
     val scope = rememberCoroutineScope()
     
     val handleGoogleLink = {
@@ -629,6 +630,11 @@ fun SettingsScreenContent(
                         )
                     }
 
+                    // Section: Titoli di Coda (End Credits Box)
+                    item {
+                        com.cinetrack.ui.components.settings.SettingsEndCreditsBox()
+                    }
+
                     item {
                         SettingsFooterSection(
                             updateInfo = updateInfo,
@@ -676,306 +682,90 @@ fun SettingsScreenContent(
         } // End of haze capture Box
 
         // Custom Glassy Confirm Dialogs
-        DeleteAccountDialog(
-            visible = showDeleteDialog,
+        SettingsModalsHost(
+            showDeleteDialog = showDeleteDialog,
+            showReauthDialog = showReauthDialog,
+            reauthErrorMessage = reauthErrorMessage,
+            showCacheConfirm = showCacheConfirm,
+            showDeepSyncConfirm = showDeepSyncConfirm,
+            showLogoutConfirm = showLogoutConfirm,
+            showWipeSelectionDialog = showWipeSelectionDialog,
+            showWipeLocalDataConfirm = showWipeLocalDataConfirm,
+            showWipeTotalDataConfirm = showWipeTotalDataConfirm,
+            showCleanupRewatchesDialog = showCleanupRewatchesDialog,
+            duplicateRewatchesCount = duplicateRewatchesCount,
+            isCleaningUpRewatches = isCleaningUpRewatches,
+            showColorDialog = showColorDialog,
+            showSeasonalIconsDialog = showSeasonalIconsDialog,
+            seasonalAppIconEnabled = seasonalAppIconEnabled,
+            showLanguageDialog = showLanguageDialog,
+            contentLanguage = contentLanguage,
+            showStartScreenDialog = showStartScreenDialog,
+            defaultStartTab = defaultStartTab,
+            showStartMediaDialog = showStartMediaDialog,
+            defaultStartMedia = defaultStartMedia,
+            showFeedbackDialog = showFeedbackDialog,
+            isFeedbackLoading = isFeedbackLoading,
+            showBackupDialog = showBackupDialog,
+            isBackupLoading = isBackupLoading,
+            showExternalMigrationDialog = showExternalMigrationDialog,
+            showUnmatchedItemsModal = showUnmatchedItemsModal,
+            unmatchedMovies = unmatchedMovies,
+            showBlockedUsersModal = showBlockedUsersModal,
+            blockedUsers = blockedUsers,
+            showDashboardSettings = showDashboardSettings,
+            showHomeSectionsDialog = showHomeSectionsDialog,
+            showCardAppearanceDialog = showCardAppearanceDialog,
+            showBadgesInfoDialog = showBadgesInfoDialog,
+            disabledBadges = disabledBadges,
+            vibrationEnabled = vibrationEnabled,
+            accentColorName = accentColorName,
+            currentAccentColor = currentAccentColor,
             activeHazeState = activeHazeState,
-            onDismiss = { showDeleteDialog = false },
-            onConfirm = {
-                showDeleteDialog = false
-                viewModel.deleteAccount {
-                    // Navigation to LoginScreen is handled cleanly by LaunchedEffect observing AuthState.Unauthenticated
-                }
-            }
-        )
-
-        ReauthDeleteAccountDialog(
-            visible = showReauthDialog,
-            activeHazeState = activeHazeState,
-            errorMessage = reauthErrorMessage,
-            onDismiss = {
-                showReauthDialog = false
-                viewModel.resetProcessState()
-            },
-            onConfirm = { password ->
-                reauthErrorMessage = null
-                viewModel.deleteAccountWithReauth(password) { success ->
-                    if (!success) {
-                        // Keep dialog open and show the error from authState
-                        val state = viewModel.authState.value
-                        if (state is AuthState.Error) {
-                            reauthErrorMessage = (state.message as? com.cinetrack.ui.utils.UiText.StringResource)
-                                ?.let { context.getString(it.resId) }
-                                ?: (state.message as? com.cinetrack.ui.utils.UiText.DynamicString)?.value
-                                ?: "Incorrect password"
-                        }
-                    }
-                }
-            }
-        )
-
-        ClearCacheConfirmDialog(
-            visible = showCacheConfirm,
-            activeHazeState = activeHazeState,
-            onDismiss = { showCacheConfirm = false },
-            onConfirm = {
-                settingsViewModel.clearImageCache()
-                updateCacheSize()
-                showCacheConfirm = false
-            }
-        )
-
-        DeepSyncConfirmDialog(
-            visible = showDeepSyncConfirm,
-            activeHazeState = activeHazeState,
-            onDismiss = { showDeepSyncConfirm = false },
-            onConfirm = {
-                settingsViewModel.syncLibraryDetails()
-                showDeepSyncConfirm = false
-            }
-        )
-
-        LogoutConfirmDialog(
-            visible = showLogoutConfirm,
-            activeHazeState = activeHazeState,
-            onDismiss = { showLogoutConfirm = false },
-            onConfirm = {
-                showLogoutConfirm = false
-                viewModel.logout()
-            }
-        )
-        
-        WipeDataSelectionDialog(
-            visible = showWipeSelectionDialog,
-            activeHazeState = activeHazeState,
-            onDismiss = { showWipeSelectionDialog = false },
-            onSelectLocal = {
+            cardHazeState = cardHazeState,
+            context = context,
+            scope = scope,
+            viewModel = viewModel,
+            settingsViewModel = settingsViewModel,
+            exportLauncher = exportLauncher,
+            importLauncher = importLauncher,
+            externalMigrationLauncher = externalMigrationLauncher,
+            onDismissDeleteDialog = { showDeleteDialog = false },
+            onDismissReauthDialog = { showReauthDialog = false },
+            onReauthErrorUpdate = { reauthErrorMessage = it },
+            onDismissCacheConfirm = { showCacheConfirm = false },
+            onClearCacheConfirmed = { updateCacheSize() },
+            onDismissDeepSyncConfirm = { showDeepSyncConfirm = false },
+            onDismissLogoutConfirm = { showLogoutConfirm = false },
+            onDismissWipeSelectionDialog = { showWipeSelectionDialog = false },
+            onSelectWipeLocal = {
                 showWipeSelectionDialog = false
                 showWipeLocalDataConfirm = true
             },
-            onSelectTotal = {
+            onSelectWipeTotal = {
                 showWipeSelectionDialog = false
                 showWipeTotalDataConfirm = true
-            }
-        )
-
-        WipeDataConfirmDialog(
-            visible = showWipeLocalDataConfirm,
-            title = stringResource(id = R.string.settings_dialog_wipe_local_data_title),
-            description = stringResource(id = R.string.settings_dialog_wipe_local_data_desc),
-            buttonText = stringResource(id = R.string.settings_yes_wipe_local),
-            activeHazeState = activeHazeState,
-            onDismiss = { showWipeLocalDataConfirm = false },
-            onConfirm = {
-                showWipeLocalDataConfirm = false
-                settingsViewModel.wipeLocalData()
-            }
-        )
-
-        WipeDataConfirmDialog(
-            visible = showWipeTotalDataConfirm,
-            title = stringResource(id = R.string.settings_dialog_wipe_total_data_title),
-            description = stringResource(id = R.string.settings_dialog_wipe_total_data_desc),
-            buttonText = stringResource(id = R.string.settings_yes_wipe_total),
-            activeHazeState = activeHazeState,
-            onDismiss = { showWipeTotalDataConfirm = false },
-            onConfirm = {
-                showWipeTotalDataConfirm = false
-                settingsViewModel.wipeTotalData()
-            }
-        )
-
-        CleanupRewatchesConfirmDialog(
-            visible = showCleanupRewatchesDialog,
-            duplicateCount = duplicateRewatchesCount,
-            isLoading = isCleaningUpRewatches,
-            activeHazeState = activeHazeState,
-            onDismiss = { showCleanupRewatchesDialog = false },
-            onConfirm = {
-                isCleaningUpRewatches = true
-                settingsViewModel.cleanupRewatches { _ ->
-                    isCleaningUpRewatches = false
-                    showCleanupRewatchesDialog = false
-                }
-            }
-        )
-
-
-
-        SettingsColorSelectionDialog(
-            visible = showColorDialog,
-            activeHazeState = activeHazeState,
-            current = accentColorName,
-            onDismiss = { showColorDialog = false },
-            onSelect = { colorName, origin ->
-                showColorDialog = false
-                scope.launch {
-                    kotlinx.coroutines.delay(250) // Attende la chiusura del modal prima di avviare il reveal
-                    settingsViewModel.updateAccentColor(colorName, origin)
-                }
-            }
-        )
-
-        SeasonalIconsPreviewDialog(
-            visible = showSeasonalIconsDialog,
-            activeHazeState = activeHazeState,
-            seasonalAppIconEnabled = seasonalAppIconEnabled,
-            onDismiss = { showSeasonalIconsDialog = false }
-        )
-
-        val contentLanguage by settingsViewModel.contentLanguage.collectAsStateWithLifecycle()
-        SettingsLanguageSelectionDialog(
-            visible = showLanguageDialog,
-            activeHazeState = activeHazeState,
-            current = contentLanguage,
-            accentColor = currentAccentColor,
-            vibrationEnabled = vibrationEnabled,
-            onDismiss = { showLanguageDialog = false },
-            onSelect = { value ->
-                if (contentLanguage != value) {
-                    settingsViewModel.updateContentLanguage(value) {
-                        var actContext = context
-                        while (actContext is android.content.ContextWrapper && actContext !is android.app.Activity) {
-                            actContext = actContext.baseContext
-                        }
-                        (actContext as? android.app.Activity)?.recreate()
-                    }
-                }
-                showLanguageDialog = false
-            }
-        )
-
-        val defaultStartTab by settingsViewModel.defaultStartTab.collectAsStateWithLifecycle()
-        SettingsStartScreenSelectionDialog(
-            visible = showStartScreenDialog,
-            activeHazeState = activeHazeState,
-            current = defaultStartTab,
-            accentColor = currentAccentColor,
-            vibrationEnabled = vibrationEnabled,
-            onDismiss = { showStartScreenDialog = false },
-            onSelect = { value ->
-                if (defaultStartTab != value) {
-                    settingsViewModel.setDefaultStartTab(value)
-                }
-                showStartScreenDialog = false
-            }
-        )
-
-        SettingsStartMediaSelectionDialog(
-            visible = showStartMediaDialog,
-            activeHazeState = activeHazeState,
-            current = defaultStartMedia,
-            accentColor = currentAccentColor,
-            vibrationEnabled = vibrationEnabled,
-            onDismiss = { showStartMediaDialog = false },
-            onSelect = { value ->
-                if (defaultStartMedia != value) {
-                    settingsViewModel.setDefaultStartMedia(value)
-                }
-                showStartMediaDialog = false
-            }
-        )
-
-        val isFeedbackLoading by settingsViewModel.isFeedbackLoading.collectAsStateWithLifecycle()
-        SettingsFeedbackDialog(
-            visible = showFeedbackDialog,
-            activeHazeState = activeHazeState,
-            initialEmail = "",
-            isLoading = isFeedbackLoading,
-            onDismiss = { if (!isFeedbackLoading) showFeedbackDialog = false },
-            onSubmit = { t, d, r, e ->
-                settingsViewModel.sendFeedback(t, d, r, e) {
-                    showFeedbackDialog = false
-                }
-            }
-        )
-
-        SettingsBackupDialog(
-            visible = showBackupDialog,
-            activeHazeState = activeHazeState,
-            isBackupLoading = isBackupLoading,
-            onDismiss = { if (!isBackupLoading) showBackupDialog = false },
-            onExport = { 
-                showBackupDialog = false
-                exportLauncher.launch("FlickTrove_Backup_${System.currentTimeMillis()}.json")
             },
-            onImport = { 
-                showBackupDialog = false
-                importLauncher.launch(arrayOf("application/json", "application/zip", "application/x-zip-compressed", "application/octet-stream", "*/*"))
-            }
-        )
-
-        SettingsExternalMigrationDialog(
-            visible = showExternalMigrationDialog,
-            activeHazeState = activeHazeState,
-            onDismiss = { showExternalMigrationDialog = false },
-            onImport = {
-                showExternalMigrationDialog = false
-                externalMigrationLauncher.launch(arrayOf("application/json", "text/csv", "text/comma-separated-values", "application/zip", "application/x-zip-compressed", "application/octet-stream", "*/*"))
-            }
-        )
-
-        UnmatchedItemsModal(
-            isVisible = showUnmatchedItemsModal,
-            onClose = { showUnmatchedItemsModal = false },
-            movies = unmatchedMovies,
-            onRemoveItem = { item ->
-                settingsViewModel.deleteUnmatchedItem(item)
-            }
-        )
-
-        BlockedUsersModal(
-            isVisible = showBlockedUsersModal,
-            onClose = { showBlockedUsersModal = false },
-            blockedUsers = blockedUsers,
-            onUnblock = { authorId ->
-                settingsViewModel.unblockAuthor(authorId)
-            },
-            hazeState = activeHazeState,
-            accentColor = currentAccentColor
-        )
-
-        SettingsLoadingOverlay(
-            visible = isBackupLoading,
-            activeHazeState = activeHazeState
-        )
-        
-        SettingsDashboardSettingsDialog(
-            visible = showDashboardSettings,
-            activeHazeState = activeHazeState,
-            settingsViewModel = settingsViewModel,
-            onDismiss = { showDashboardSettings = false }
-        )
-
-        com.cinetrack.ui.components.settings.SettingsHomeSectionsOrderDialog(
-            visible = showHomeSectionsDialog,
-            activeHazeState = activeHazeState,
-            settingsViewModel = settingsViewModel,
-            onDismiss = { showHomeSectionsDialog = false }
-        )
-
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .haze(
-                    state = cardHazeState,
-                    style = HazeStyles.PremiumDark
-                )
-        ) {
-            com.cinetrack.ui.components.settings.CardAppearanceDialog(
-                visible = showCardAppearanceDialog,
-                activeHazeState = activeHazeState,
-                settingsViewModel = settingsViewModel,
-                onShowBadgesInfo = { showBadgesInfoDialog = true },
-                onDismiss = { showCardAppearanceDialog = false }
-            )
-        }
-
-        BadgesInfoDialog(
-            visible = showBadgesInfoDialog,
-            activeHazeState = if (showCardAppearanceDialog) cardHazeState else activeHazeState,
-            disabledBadges = disabledBadges,
-            onToggleBadge = { text, enabled -> settingsViewModel.toggleBadgeEnabled(text, enabled) },
-            onDismiss = { showBadgesInfoDialog = false }
+            onDismissWipeLocalConfirm = { showWipeLocalDataConfirm = false },
+            onDismissWipeTotalConfirm = { showWipeTotalDataConfirm = false },
+            onDismissCleanupRewatchesDialog = { showCleanupRewatchesDialog = false },
+            onStartCleaningUpRewatches = { isCleaningUpRewatches = true },
+            onFinishCleaningUpRewatches = { isCleaningUpRewatches = false },
+            onDismissColorDialog = { showColorDialog = false },
+            onDismissSeasonalIconsDialog = { showSeasonalIconsDialog = false },
+            onDismissLanguageDialog = { showLanguageDialog = false },
+            onDismissStartScreenDialog = { showStartScreenDialog = false },
+            onDismissStartMediaDialog = { showStartMediaDialog = false },
+            onDismissFeedbackDialog = { showFeedbackDialog = false },
+            onDismissBackupDialog = { showBackupDialog = false },
+            onDismissExternalMigrationDialog = { showExternalMigrationDialog = false },
+            onDismissUnmatchedItemsModal = { showUnmatchedItemsModal = false },
+            onDismissBlockedUsersModal = { showBlockedUsersModal = false },
+            onDismissDashboardSettings = { showDashboardSettings = false },
+            onDismissHomeSectionsDialog = { showHomeSectionsDialog = false },
+            onDismissCardAppearanceDialog = { showCardAppearanceDialog = false },
+            onOpenBadgesInfoDialog = { showBadgesInfoDialog = true },
+            onDismissBadgesInfoDialog = { showBadgesInfoDialog = false }
         )
     }
 }

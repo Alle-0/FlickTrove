@@ -727,6 +727,12 @@
     <string name="episodes_discussions_title">エピソードのディスカッション</string>
     <string name="episodes_discussions_all_series">メインディスカッション (シリーズ)</string>
     <string name="episodes_discussions_pill">エピソード</string>
+    <string name="comment_attach_image_title">画像を追加</string>
+    <string name="comment_take_photo">写真を撮る</string>
+    <string name="comment_take_photo_desc">カメラを起動して今すぐ撮影します</string>
+    <string name="comment_pick_gallery">ギャラリーから選択</string>
+    <string name="comment_pick_gallery_desc">端末から画像を選択します</string>
+    <string name="comment_camera_error">カメラを起動できません</string>
     <string name="comment_translate">翻訳</string>
     <string name="comment_translated_label">翻訳済み</string>
     <string name="comment_show_original">原文を表示</string>
@@ -826,6 +832,9 @@
     <string name="detail_collection">コレクション</string>
     <string name="detail_recommendations">おすすめ</string>
     <string name="detail_technical_info">詳細情報</string>
+    <string name="detail_rated_all_ages_note">この作品は特定の保護者向け警告がなく、全年齢に適しています。</string>
+    <string name="detail_btn_tech_specs">技術仕様</string>
+    <string name="detail_btn_parents_guide">保護者向けガイド</string>
     <string name="detail_official_trailers">公式予告編</string>
     <string name="detail_official_trailer">公式予告編</string>
     <string name="detail_video_title_teaser">特報・プロモ</string>
@@ -1346,6 +1355,9 @@
     <string name="updates_social_replied_multiple">%1$d回返信しました</string>
     <string name="updates_social_liked_plural">あなたのコメントをいいねしました</string>
     <string name="updates_social_replied_plural">あなたのコメントに返信しました</string>
+    <string name="updates_social_mentioned">コメントであなたをメンションしました</string>
+    <string name="updates_social_mentioned_multiple">あなたを%1$d回メンションしました</string>
+    <string name="updates_social_mentioned_plural">コメントであなたをメンションしました</string>
     <string name="comment_banned_permanent">コメントできません。アカウントが無期限停止されています。</string>
     <string name="comment_banned_temporary">コメントできません。アカウントは %1$s まで利用停止されています。</string>
     <string name="comment_cooldown_wait">次のコメントを投稿するまで %1$d 秒お待ちください。</string>
@@ -1841,6 +1853,30 @@
     <string name="trophy_producer_verify_invalid_email">有効なメールアドレスを入力してください。</string>
     <string name="trophy_producer_verify_already_claimed">この寄付はすでに別のアカウントによって引き換えられています。</string>
     <string name="trophy_producer_verify_error">確認中に接続エラーが発生しました。しばらくしてからもう一度お試しください。</string>
+    <string name="trophy_producer_cta_title">映画を支援する</string>
+    <string name="trophy_producer_cta_desc">FlickTroveは広告なし・追跡なし・有料サブスクなしの完全独立プロジェクトです。サーバーやデータベースの運営費用を寄付で支援してください！</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • カード)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">ヒント: アカウントと同じメール(%1$s)で寄付すると、トロフィーが自動的に解除されます！</string>
+    <string name="trophy_producer_tip_guest">ヒント: 寄付後、下記に支払いメールアドレスを入力するとすぐに解除されます。</string>
+    <string name="trophy_producer_credits_title">エンドクレジット（任意）</string>
+    <string name="trophy_producer_credits_desc">アプリのエンドクレジットに、エグゼクティブプロデューサーとして名前を載せますか？</string>
+    <string name="trophy_producer_credits_switch">クレジットにニックネームを表示する</string>
+    <string name="trophy_producer_credits_nickname_hint">ニックネーム（例: CinemaLover）</string>
+    <string name="trophy_producer_credits_save_btn">保存</string>
+    <string name="trophy_producer_credits_saved">設定を保存しました！</string>
+    <string name="trophy_producer_view_credits">クレジットを見る</string>
+    <string name="credits_screen_title">エンドクレジット</string>
+    <string name="credits_screen_subtitle">監督、コミュニティ、そして支援者の皆様</string>
+    <string name="credits_direction_role">独立開発・デザイン</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">エグゼクティブプロデューサー</string>
+    <string name="credits_producers_desc">FlickTroveの月額サーバー費用を支援してくださっている映画ファンの皆様に心より感謝いたします。</string>
+    <string name="credits_producers_empty">プロジェクトを支援して、最初のクレジットメンバーになりましょう！</string>
+    <string name="credits_tech_role">データ・パートナー</string>
+    <string name="credits_tech_desc">TMDB APIを使用しています。Trakt.tvおよびSIMKLによるクラウド同期。</string>
+    <string name="credits_special_thanks">特別な謝辞</string>
+    <string name="credits_special_thanks_desc">オープンソースコミュニティ、Jetpack Composeチーム、そして映画を愛するすべての方へ。</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">鑑賞日記</string>

@@ -641,6 +641,12 @@
     <string name="episodes_discussions_title">Discussions des épisodes</string>
     <string name="episodes_discussions_all_series">Discussion principale (Série)</string>
     <string name="episodes_discussions_pill">Épisodes</string>
+    <string name="comment_attach_image_title">Ajouter une image</string>
+    <string name="comment_take_photo">Prendre une photo</string>
+    <string name="comment_take_photo_desc">Utilisez l\'appareil photo pour prendre un cliché</string>
+    <string name="comment_pick_gallery">Choisir dans la galerie</string>
+    <string name="comment_pick_gallery_desc">Sélectionnez une image sur votre appareil</string>
+    <string name="comment_camera_error">Impossible de lancer l\'appareil photo</string>
     <string name="comment_translate">Traduire</string>
     <string name="comment_translated_label">Traduit</string>
     <string name="comment_show_original">Voir l\'original</string>
@@ -740,6 +746,9 @@
     <string name="detail_collection">COLLECTION</string>
     <string name="detail_recommendations">RECOMMANDÉ</string>
     <string name="detail_technical_info">DÉTAILS TECHNIQUES</string>
+    <string name="detail_rated_all_ages_note">Ce titre convient à tous les publics sans avertissement parental particulier.</string>
+    <string name="detail_btn_tech_specs">Détails techniques</string>
+    <string name="detail_btn_parents_guide">Guide des parents</string>
     <string name="detail_official_trailers">BANDE-ANNONCES OFFICIELLES</string>
     <string name="detail_official_trailer">BANDE-ANNONCE OFFICIELLE</string>
     <string name="detail_video_title_teaser">TEASERS ET PROMOS</string>
@@ -1255,6 +1264,9 @@
     <string name="updates_social_replied_multiple">a répondu %1$d fois</string>
     <string name="updates_social_liked_plural">ont aimé vos commentaires</string>
     <string name="updates_social_replied_plural">ont répondu à vos commentaires</string>
+    <string name="updates_social_mentioned">vous a mentionné dans un commentaire</string>
+    <string name="updates_social_mentioned_multiple">vous a mentionné %1$d fois</string>
+    <string name="updates_social_mentioned_plural">vous ont mentionné dans des commentaires</string>
     <string name="comment_banned_permanent">Vous ne pouvez pas commenter. Vous avez été suspendu définitivement.</string>
     <string name="comment_banned_temporary">Vous ne pouvez pas commenter. Vous avez été suspendu jusqu\'au %1$s.</string>
     <string name="comment_cooldown_wait">Attendez %1$d secondes avant de commenter à nouveau.</string>
@@ -1835,6 +1847,30 @@
     <string name="trophy_producer_verify_invalid_email">Veuillez saisir une adresse e-mail valide.</string>
     <string name="trophy_producer_verify_already_claimed">Ce don a déjà été réclamé par un autre compte.</string>
     <string name="trophy_producer_verify_error">Erreur de connexion lors de la vérification. Veuillez réessayer dans un instant.</string>
+    <string name="trophy_producer_cta_title">Financer le Film</string>
+    <string name="trophy_producer_cta_desc">FlickTrove est une création indépendante et artisanale : sans publicité, sans traqueurs et sans abonnement payant. Maintenir les serveurs a un coût réel. Si vous aimez l\'application, aidez-nous à la garder libre pour tous avec un don !</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • Carte)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">Astuce : en donnant avec l\'adresse e-mail de votre compte (%1$s), le trophée se débloque automatiquement !</string>
+    <string name="trophy_producer_tip_guest">Astuce : après avoir donné, saisissez votre e-mail de paiement ci-dessous pour débloquer immédiatement le trophée !</string>
+    <string name="trophy_producer_credits_title">Générique de Fin (Optionnel)</string>
+    <string name="trophy_producer_credits_desc">Souhaitez-vous voir apparaître votre pseudonyme parmi les Producteurs Exécutifs dans le générique de l\'application ?</string>
+    <string name="trophy_producer_credits_switch">Afficher mon pseudonyme au générique</string>
+    <string name="trophy_producer_credits_nickname_hint">Votre pseudo (ex. Cinéphile99)</string>
+    <string name="trophy_producer_credits_save_btn">Enregistrer</string>
+    <string name="trophy_producer_credits_saved">Préférences enregistrées !</string>
+    <string name="trophy_producer_view_credits">Voir le Générique</string>
+    <string name="credits_screen_title">Générique de Fin</string>
+    <string name="credits_screen_subtitle">Réalisation, Communauté &amp; Mécènes</string>
+    <string name="credits_direction_role">Réalisation &amp; Développement Indépendant</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">Producteurs Exécutifs</string>
+    <string name="credits_producers_desc">Profonde gratitude envers les mécènes cinéphiles qui financent l\'hébergement et les bases de données de FlickTrove.</string>
+    <string name="credits_producers_empty">Soutenez le projet pour être le premier inscrit au générique !</string>
+    <string name="credits_tech_role">Données &amp; Partenaires Cinéma</string>
+    <string name="credits_tech_desc">Ce produit utilise l\'API TMDB mais n\'est ni approuvé ni certifié par TMDB. Synchronisation cloud propulsée par Trakt.tv et SIMKL.</string>
+    <string name="credits_special_thanks">Remerciements Particuliers</string>
+    <string name="credits_special_thanks_desc">À toute la communauté open-source, à l\'équipe Jetpack Compose et à chaque passionné qui vit le cinéma avec FlickTrove.</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">Journal</string>

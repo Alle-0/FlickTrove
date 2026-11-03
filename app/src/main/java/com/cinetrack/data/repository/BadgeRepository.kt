@@ -425,6 +425,95 @@ class BadgeRepository @Inject constructor(
         }
     }
 
+    fun isSupporterVerified(): Boolean {
+        return badgePrefs.getBoolean("is_supporter_verified", false)
+    }
+
+    fun getSupporterCreditSettings(): Pair<String, Boolean> {
+        val name = badgePrefs.getString("supporter_credit_name", "") ?: ""
+        val show = badgePrefs.getBoolean("supporter_show_in_credits", true)
+        return Pair(name, show)
+    }
+
+    suspend fun updateSupporterCreditSettings(creditName: String, showInCredits: Boolean): Boolean = withContext(Dispatchers.IO) {
+        val cleanName = creditName.trim().take(30)
+        badgePrefs.edit()
+            .putString("supporter_credit_name", cleanName)
+            .putBoolean("supporter_show_in_credits", showInCredits)
+            .apply()
+
+        val user = auth.currentUser
+        if (user != null && !user.isAnonymous) {
+            try {
+                firestore.collection("users").document(user.uid)
+                    .update(
+                        mapOf(
+                            "creditName" to cleanName,
+                            "showInCredits" to showInCredits
+                        )
+                    ).await()
+            } catch (e: Exception) {
+                android.util.Log.w("BadgeRepository", "Failed to update credit name in users collection: ${e.message}")
+            }
+        }
+        true
+    }
+
+    suspend fun fetchPublicCreditsSupporters(): List<String> = withContext(Dispatchers.IO) {
+        val lastFetch = badgePrefs.getLong("credits_last_fetch_time", 0L)
+        val now = System.currentTimeMillis()
+        if (now - lastFetch < 6 * 60 * 60 * 1000L) {
+            val cached = badgePrefs.getStringSet("cached_credits_supporters", null)
+            if (cached != null) return@withContext cached.toList().sorted()
+        }
+
+        try {
+            // First check system_metrics/credits_producers (Zero-Waste Spark doc)
+            val metricDoc = firestore.collection("system_metrics").document("credits_producers").get().await()
+            if (metricDoc.exists()) {
+                val list = metricDoc.get("producers") as? List<*>
+                if (list != null) {
+                    val names = list.mapNotNull { it?.toString()?.trim() }.filter { it.isNotBlank() }.distinct()
+                    if (names.isNotEmpty()) {
+                        badgePrefs.edit()
+                            .putStringSet("cached_credits_supporters", names.toSet())
+                            .putLong("credits_last_fetch_time", now)
+                            .apply()
+                        return@withContext names.sorted()
+                    }
+                }
+            }
+
+            // Fallback: Query users with isSupporter == true and showInCredits == true (max 50)
+            val snapshot = firestore.collection("users")
+                .whereEqualTo("isSupporter", true)
+                .whereEqualTo("showInCredits", true)
+                .limit(50)
+                .get()
+                .await()
+
+            val names = snapshot.documents.mapNotNull { doc ->
+                val custom = doc.getString("creditName")
+                val displayName = doc.getString("displayName")
+                when {
+                    !custom.isNullOrBlank() -> custom.trim()
+                    !displayName.isNullOrBlank() -> displayName.trim()
+                    else -> null
+                }
+            }.filter { it.isNotBlank() }.distinct()
+
+            badgePrefs.edit()
+                .putStringSet("cached_credits_supporters", names.toSet())
+                .putLong("credits_last_fetch_time", now)
+                .apply()
+
+            names.sorted()
+        } catch (e: Exception) {
+            android.util.Log.w("BadgeRepository", "Failed to fetch public credits: ${e.message}")
+            badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList()?.sorted().orEmpty()
+        }
+    }
+
     fun recordMovieBookmarked(movieId: Long) {
         badgePrefs.edit().putLong("bookmarked_at_$movieId", System.currentTimeMillis()).apply()
     }

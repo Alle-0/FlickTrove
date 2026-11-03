@@ -11,9 +11,14 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.Orientation
 import androidx.compose.foundation.gestures.detectDragGestures
+import androidx.compose.foundation.gestures.draggable
+import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -52,15 +57,12 @@ import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.LocalModalHost
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.navigation.GlassyTopBar
-import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
-import com.cinetrack.ui.components.shared.FlickTroveModal
-import com.cinetrack.ui.components.updates.MonthYearPickerDialog
 import com.cinetrack.ui.history.HistoryViewModel
 import com.cinetrack.ui.history.components.HistoryCalendarView
 import com.cinetrack.ui.history.components.HistoryFilterModal
+import com.cinetrack.ui.history.components.HistoryModalsHost
 import com.cinetrack.ui.history.components.HistoryTimelineSkeleton
 import com.cinetrack.ui.history.components.HistoryTimelineView
 import com.cinetrack.ui.history.model.ViewMode
@@ -191,15 +193,34 @@ fun HistoryScreenContent(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                AnimatedContent(
-                    targetState = uiState.selectedViewMode,
-                    transitionSpec = {
-                        fadeIn(animationSpec = tween(240)) togetherWith fadeOut(animationSpec = tween(180))
-                    },
-                    label = "HistoryViewModeTransition"
-                ) { mode ->
-                    when (mode) {
-                        ViewMode.TIMELINE -> {
+                val pagerState = rememberPagerState(
+                    initialPage = uiState.selectedViewMode.ordinal,
+                    pageCount = { 2 }
+                )
+                val coroutineScope = rememberCoroutineScope()
+                var currentCalendarScopeIndex by remember { mutableIntStateOf(0) }
+
+                LaunchedEffect(uiState.selectedViewMode) {
+                    if (pagerState.currentPage != uiState.selectedViewMode.ordinal && !pagerState.isScrollInProgress) {
+                        pagerState.animateScrollToPage(uiState.selectedViewMode.ordinal)
+                    }
+                }
+
+                LaunchedEffect(pagerState.currentPage) {
+                    val targetMode = if (pagerState.currentPage == 0) ViewMode.TIMELINE else ViewMode.CALENDAR
+                    if (uiState.selectedViewMode != targetMode) {
+                        viewModel.setViewMode(targetMode)
+                    }
+                }
+
+                HorizontalPager(
+                    state = pagerState,
+                    modifier = Modifier.fillMaxSize(),
+                    userScrollEnabled = !(pagerState.currentPage == 1 && currentCalendarScopeIndex == 1)
+                ) { pageIndex ->
+                    when (pageIndex) {
+                        0 -> {
+                            var timelineDragX by remember { mutableFloatStateOf(0f) }
                             HistoryTimelineView(
                                 entries = uiState.filteredEntries,
                                 onMovieClick = onMovieClick,
@@ -218,10 +239,26 @@ fun HistoryScreenContent(
                                     top = topBarClearance,
                                     bottom = bottomClearance
                                 ),
-                                modifier = Modifier.fillMaxSize()
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .draggable(
+                                        state = rememberDraggableState { delta ->
+                                            timelineDragX += delta
+                                        },
+                                        orientation = Orientation.Horizontal,
+                                        onDragStarted = { timelineDragX = 0f },
+                                        onDragStopped = { velocity ->
+                                            if (timelineDragX > 60f || velocity > 350f) {
+                                                coroutineScope.launch {
+                                                    pagerState.animateScrollToPage(1)
+                                                }
+                                            }
+                                            timelineDragX = 0f
+                                        }
+                                    )
                             )
                         }
-                        ViewMode.CALENDAR -> {
+                        1 -> {
                             HistoryCalendarView(
                                 calendarMonth = uiState.selectedCalendarMonth,
                                 calendarEntriesByDate = uiState.calendarEntriesByDate,
@@ -245,7 +282,8 @@ fun HistoryScreenContent(
                                     end = 16.dp,
                                     top = topBarClearance,
                                     bottom = bottomClearance
-                                )
+                                ),
+                                onScopeChanged = { currentCalendarScopeIndex = it }
                             )
                         }
                     }
@@ -291,261 +329,40 @@ fun HistoryScreenContent(
             )
         }
 
-        val modalHost = LocalModalHost.current
-
-        // Month/Year Picker via Global ModalHost (Mounts above TopBar, BottomBar and Search FAB)
-        LaunchedEffect(showMonthPicker) {
-            if (showMonthPicker) {
-                modalHost.show {
-                    MonthYearPickerDialog(
-                        showMonthPicker = true,
-                        initialMonth = uiState.selectedCalendarMonth,
-                        onMonthSelected = { month ->
-                            viewModel.setCalendarMonth(month)
-                            showMonthPicker = false
-                            modalHost.dismiss()
-                        },
-                        onDismiss = {
-                            showMonthPicker = false
-                            modalHost.dismiss()
-                        },
-                        internalHazeState = internalHazeState,
-                        accentColor = MaterialTheme.colorScheme.primary
-                    )
+        HistoryModalsHost(
+            showMonthPicker = showMonthPicker,
+            onDismissMonthPicker = { showMonthPicker = false },
+            onMonthSelected = { month ->
+                viewModel.setCalendarMonth(month)
+                showMonthPicker = false
+            },
+            selectedCalendarMonth = uiState.selectedCalendarMonth,
+            editingEntry = editingEntry,
+            showDatePicker = showDatePicker,
+            onDismissDatePicker = {
+                showDatePicker = false
+                editingEntry = null
+            },
+            onDateSelected = { newDate ->
+                editingEntry?.let { entry ->
+                    val newIso = newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
+                    viewModel.updateWatchDate(entry.historyId, newIso)
                 }
-            }
-        }
-
-        // Edit Watch Date Modal via Global ModalHost
-        LaunchedEffect(showDatePicker, editingEntry) {
-            val entry = editingEntry
-            if (showDatePicker && entry != null) {
-                modalHost.show {
-                    FlickTroveDatePickerModal(
-                        initialDate = entry.parsedDate,
-                        isVisible = true,
-                        onDateSelected = { newDate ->
-                            val newIso = newDate.atStartOfDay(ZoneId.systemDefault()).toInstant().toString()
-                            viewModel.updateWatchDate(entry.historyId, newIso)
-                            showDatePicker = false
-                            editingEntry = null
-                            modalHost.dismiss()
-                        },
-                        onDismissRequest = {
-                            showDatePicker = false
-                            editingEntry = null
-                            modalHost.dismiss()
-                        },
-                        accentColor = MaterialTheme.colorScheme.primary,
-                        hazeState = internalHazeState
-                    )
-                }
-            }
-        }
-
-        // Confirm Delete Watch Session Modal via Global ModalHost
-        LaunchedEffect(entryToDelete) {
-            val target = entryToDelete
-            if (target != null) {
-                modalHost.show {
-                    FlickTroveModal(
-                        isVisible = true,
-                        onDismissRequest = {
-                            entryToDelete = null
-                            modalHost.dismiss()
-                        },
-                        hazeState = internalHazeState
-                    ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(16.dp)
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(48.dp)
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
-                                    contentDescription = null,
-                                    tint = MaterialTheme.colorScheme.error,
-                                    modifier = Modifier.size(24.dp)
-                                )
-                            }
-
-                            val isMultiSessionTv = target.isTvShow && target.totalSessionsInRewatch > 1
-
-                            Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                                Text(
-                                    text = stringResource(id = R.string.history_delete_session_title),
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = Color.White
-                                    )
-                                )
-                                Spacer(modifier = Modifier.height(6.dp))
-                                Text(
-                                    text = if (isMultiSessionTv) {
-                                        stringResource(
-                                            id = R.string.history_delete_session_question,
-                                            target.episodeInfo.orEmpty()
-                                        )
-                                    } else {
-                                        stringResource(id = R.string.history_delete_session_confirm)
-                                    },
-                                    style = MaterialTheme.typography.bodyMedium.copy(
-                                        color = Color.White.copy(alpha = 0.65f),
-                                        lineHeight = 19.sp
-                                    ),
-                                    textAlign = androidx.compose.ui.text.style.TextAlign.Center
-                                )
-                            }
-
-                            if (isMultiSessionTv) {
-                                Column(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    verticalArrangement = Arrangement.spacedBy(8.dp)
-                                ) {
-                                    // Button 1: Remove Session Only
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick(scaleDown = 0.96f) {
-                                                viewModel.deleteSessionEpisodes(target)
-                                                entryToDelete = null
-                                                modalHost.dismiss()
-                                            }
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(vertical = 12.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(id = R.string.history_delete_session_only),
-                                                style = MaterialTheme.typography.labelLarge.copy(
-                                                    color = Color.White,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            )
-                                        }
-                                    }
-
-                                    // Button 2: Delete Entire Rewatch
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = Color.White.copy(alpha = 0.08f),
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick(scaleDown = 0.96f) {
-                                                viewModel.deleteWatchSession(target.historyId)
-                                                entryToDelete = null
-                                                modalHost.dismiss()
-                                            }
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(vertical = 12.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(id = R.string.history_delete_entire_rewatch),
-                                                style = MaterialTheme.typography.labelLarge.copy(
-                                                    color = MaterialTheme.colorScheme.error,
-                                                    fontWeight = FontWeight.SemiBold
-                                                )
-                                            )
-                                        }
-                                    }
-
-                                    // Button 3: Cancel
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = Color.Transparent,
-                                        modifier = Modifier
-                                            .fillMaxWidth()
-                                            .bounceClick(scaleDown = 0.96f) {
-                                                entryToDelete = null
-                                                modalHost.dismiss()
-                                            }
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(vertical = 10.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(id = R.string.settings_cancel),
-                                                style = MaterialTheme.typography.labelLarge.copy(
-                                                    color = Color.White.copy(alpha = 0.65f),
-                                                    fontWeight = FontWeight.Medium
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            } else {
-                                Row(
-                                    modifier = Modifier.fillMaxWidth(),
-                                    horizontalArrangement = Arrangement.spacedBy(10.dp)
-                                ) {
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = Color.White.copy(alpha = 0.08f),
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .bounceClick(scaleDown = 0.94f) {
-                                                entryToDelete = null
-                                                modalHost.dismiss()
-                                            }
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(vertical = 12.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(id = R.string.settings_cancel),
-                                                style = MaterialTheme.typography.labelLarge.copy(
-                                                    color = Color.White.copy(alpha = 0.75f),
-                                                    fontWeight = FontWeight.SemiBold
-                                                )
-                                            )
-                                        }
-                                    }
-
-                                    Surface(
-                                        shape = RoundedCornerShape(12.dp),
-                                        color = MaterialTheme.colorScheme.error,
-                                        modifier = Modifier
-                                            .weight(1f)
-                                            .bounceClick(scaleDown = 0.94f) {
-                                                viewModel.deleteWatchSession(target.historyId)
-                                                entryToDelete = null
-                                                modalHost.dismiss()
-                                            }
-                                    ) {
-                                        Box(
-                                            modifier = Modifier.padding(vertical = 12.dp),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            Text(
-                                                text = stringResource(id = R.string.quick_action_delete),
-                                                style = MaterialTheme.typography.labelLarge.copy(
-                                                    color = Color.White,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
+                showDatePicker = false
+                editingEntry = null
+            },
+            entryToDelete = entryToDelete,
+            onDismissDeleteSession = { entryToDelete = null },
+            onDeleteSessionEpisodes = { entry ->
+                viewModel.deleteSessionEpisodes(entry)
+                entryToDelete = null
+            },
+            onDeleteWatchSession = { historyId ->
+                viewModel.deleteWatchSession(historyId)
+                entryToDelete = null
+            },
+            hazeState = internalHazeState
+        )
     }
 }
 

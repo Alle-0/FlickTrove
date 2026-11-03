@@ -1,68 +1,24 @@
 package com.cinetrack.ui.components.detail
 
-import com.cinetrack.R
-
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import kotlinx.coroutines.delay
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import android.os.Build
-import android.Manifest
-import android.content.pm.PackageManager
-import androidx.core.content.ContextCompat
-import androidx.compose.ui.platform.LocalContext
-import dev.chrisbanes.haze.HazeState
-import com.cinetrack.ui.components.glass.glassmorphic
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
-import com.cinetrack.ui.utils.bounceClick
-import androidx.compose.ui.draw.rotate
-import dev.chrisbanes.haze.HazeStyle
-import kotlinx.coroutines.launch
-import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.collectIsPressedAsState
-import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.draw.drawWithContent
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
-import androidx.compose.material.icons.automirrored.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.drawBehind
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.gestures.detectVerticalDragGestures
-import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.Path
-import androidx.compose.ui.graphics.PathMeasure
-import androidx.compose.ui.graphics.StrokeCap
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.TransformOrigin
-import androidx.compose.ui.graphics.drawscope.Stroke
-import androidx.compose.ui.graphics.drawscope.scale
-import androidx.compose.ui.graphics.PathEffect
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalHapticFeedback
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
+import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.viewmodel.WatchState
-import com.cinetrack.ui.utils.ColorUtils
-import com.cinetrack.ui.theme.HazeStyles
+import dev.chrisbanes.haze.HazeState
 
 /**
  * DetailActions
@@ -117,7 +73,6 @@ fun DetailActions(
     }
 
     // Coordinated split animation parameters
-    
     val trashWidth by transition.animateDp(
         transitionSpec = {
             if (targetState != WatchState.NONE) {
@@ -128,19 +83,6 @@ fun DetailActions(
         },
         label = "TrashWidth"
     ) { if (it != WatchState.NONE && (movie.isReleased || it == WatchState.WATCHED)) 68.dp else 0.dp }
-
-    val mainPillWeight by transition.animateFloat(
-        transitionSpec = {
-            if (targetState == WatchState.WATCHED) {
-                tween(800, easing = CubicBezierEasing(0.4f, 0.0f, 0.2f, 1.0f))
-            } else {
-                spring(dampingRatio = 0.75f, stiffness = Spring.StiffnessLow)
-            }
-        },
-        label = "MainPillWeight"
-    ) { state ->
-        if (state == WatchState.WATCHED && movie.mediaType != "tv") 0f else 1f
-    }
 
     val mainPillAlpha by transition.animateFloat(
         transitionSpec = { 
@@ -166,7 +108,7 @@ fun DetailActions(
             else spring(dampingRatio = 0.8f, stiffness = Spring.StiffnessLow)
         },
         label = "Spacing"
-    ) { state ->
+    ) {
         if (isPillVisible && isTrashVisible) 12.dp else 0.dp
     }
 
@@ -178,7 +120,6 @@ fun DetailActions(
         label = "TrashAlpha"
     ) { if (it != WatchState.NONE && (movie.isReleased || it == WatchState.WATCHED)) 1f else 0f }
 
-    // Offset animation for trash button to avoid graphicsLayer lag with Haze
     val trashOffset by transition.animateDp(
         transitionSpec = {
             if (targetState != WatchState.NONE) {
@@ -193,9 +134,7 @@ fun DetailActions(
     val trashColor by transition.animateColor(
         transitionSpec = { tween(400) },
         label = "TrashColor"
-    ) { if (it == WatchState.NONE) accentColor else Color(0xFFFF3D3D) } // More vibrant red
-
-    // trashScale removed to ensure Haze synchronization with trashWidth layout bounds.
+    ) { if (it == WatchState.NONE) accentColor else Color(0xFFFF3D3D) }
 
     val animatedProgress by animateFloatAsState(
         targetValue = progress,
@@ -203,7 +142,6 @@ fun DetailActions(
         label = "ProgressBorderAnim"
     )
 
-    // For movies, when they become WATCHED they disappear, so we don't want to show the "VISTO" label/icon transition
     val displayWatchState = optimisticWatchState
 
     val icon = when {
@@ -259,309 +197,77 @@ fun DetailActions(
             label = "PillWidth"
         )
 
-                val isTvCompletedAndEnded = movie.mediaType == "tv" && 
-                                          optimisticWatchState == WatchState.WATCHED && 
-                                          (movieStatus ?: movie.status)?.lowercase() in listOf("ended", "canceled", "cancelled")
-                
-                val availableSideActions = remember(movie.mediaType, optimisticWatchState, movie.status, movieStatus) {
-                    if (movie.mediaType == "movie") {
-                        if (optimisticWatchState == WatchState.WATCHED) listOf(SideAction.REWATCH, SideAction.TRASH)
-                        else listOf(SideAction.TRASH)
+        val isTvCompletedAndEnded = movie.mediaType == "tv" && 
+                                  optimisticWatchState == WatchState.WATCHED && 
+                                  (movieStatus ?: movie.status)?.lowercase() in listOf("ended", "canceled", "cancelled")
+        
+        val availableSideActions = remember(movie.mediaType, optimisticWatchState, movie.status, movieStatus) {
+            if (movie.mediaType == "movie") {
+                if (optimisticWatchState == WatchState.WATCHED) listOf(SideAction.REWATCH, SideAction.TRASH)
+                else listOf(SideAction.TRASH)
+            } else {
+                if (optimisticWatchState == WatchState.WATCHED) {
+                    if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
+                    else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
+                } else {
+                    listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
+                }
+            }
+        }
+        
+        var currentSideActionIndex by remember { mutableIntStateOf(0) }
+        
+        LaunchedEffect(availableSideActions) {
+            if (currentSideActionIndex >= availableSideActions.size) {
+                currentSideActionIndex = availableSideActions.size - 1
+            }
+            if (optimisticWatchState != WatchState.NONE) {
+                if (movie.mediaType == "tv") {
+                    val dropIndex = availableSideActions.indexOf(SideAction.DROP)
+                    val rewatchIndex = availableSideActions.indexOf(SideAction.REWATCH)
+                    currentSideActionIndex = if (dropIndex >= 0) {
+                        dropIndex
+                    } else if (rewatchIndex >= 0) {
+                        rewatchIndex
                     } else {
-                        if (optimisticWatchState == WatchState.WATCHED) {
-                            if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
-                            else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
-                        } else {
-                            listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
-                        }
+                        0
+                    }
+                } else {
+                    currentSideActionIndex = if (optimisticWatchState != WatchState.WATCHED) {
+                        availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
+                    } else {
+                        0
                     }
                 }
-                
-                var currentSideActionIndex by remember { mutableIntStateOf(0) }
-                
-                LaunchedEffect(availableSideActions) {
-                    if (currentSideActionIndex >= availableSideActions.size) {
-                        currentSideActionIndex = availableSideActions.size - 1
-                    }
-                    if (optimisticWatchState != WatchState.NONE) {
-                        if (movie.mediaType == "tv") {
-                            val dropIndex = availableSideActions.indexOf(SideAction.DROP)
-                            val rewatchIndex = availableSideActions.indexOf(SideAction.REWATCH)
-                            currentSideActionIndex = if (dropIndex >= 0) {
-                                dropIndex
-                            } else if (rewatchIndex >= 0) {
-                                rewatchIndex
-                            } else {
-                                0
-                            }
-                        } else {
-                            currentSideActionIndex = if (optimisticWatchState != WatchState.WATCHED) {
-                                availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
-                            } else {
-                                0
-                            }
-                        }
-                    }
-                }
-                
-                val currentSideAction = availableSideActions.getOrElse(currentSideActionIndex) { SideAction.TRASH }
-                val isTrashMode = currentSideAction == SideAction.TRASH
-                val sideButtonInteractionSource = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
-                val isSideButtonPressed by sideButtonInteractionSource.collectIsPressedAsState()
-                LaunchedEffect(isSideButtonPressed) {
-                    if (isSideButtonPressed) haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-                }
+            }
+        }
+        
+        val currentSideAction = availableSideActions.getOrElse(currentSideActionIndex) { SideAction.TRASH }
+
         Row(
             modifier = Modifier.fillMaxSize(),
             horizontalArrangement = Arrangement.Start,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Main Action Pill morphs into a circle for movies when WATCHED
-            Box(
-                modifier = Modifier
-                    .width(pillWidth)
-                    .fillMaxHeight()
-                    .graphicsLayer { 
-                        alpha = mainPillAlpha
-                        transformOrigin = TransformOrigin(0f, 0.5f) // Anchor to Left
-                    }
-                    .bounceClick(
-                        scaleDown = 0.95f,
-                        onLongClick = if (!movie.isReleased && movie.mediaType != "tv" && optimisticWatchState != WatchState.WATCHED) {
-                            {
-                                currentOnPreviewWatch?.invoke()
-                            }
-                        } else null,
-                        onClick = {
-                            if (!movie.isReleased) {
-                                // Simple toggle for unreleased movies and tv series
-                                val next = if (optimisticWatchState == WatchState.NONE) WatchState.BOOKMARKED else WatchState.NONE
-                                if (next == WatchState.BOOKMARKED && Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU && 
-                                    ContextCompat.checkSelfPermission(context, Manifest.permission.POST_NOTIFICATIONS) != PackageManager.PERMISSION_GRANTED) {
-                                    permissionLauncher.launch(Manifest.permission.POST_NOTIFICATIONS)
-                                }
-                                optimisticWatchState = next
-                                currentOnStateChange(next)
-                            } else if (movie.mediaType == "tv") {
-                                if (optimisticWatchState == WatchState.NONE) {
-                                    optimisticWatchState = WatchState.BOOKMARKED
-                                    currentOnStateChange(WatchState.BOOKMARKED)
-                                } else {
-                                    currentOnEpisodesClick?.invoke()
-                                }
-                            } else {
-                                if (optimisticWatchState == WatchState.WATCHED) {
-                                    currentOnManageRewatches?.invoke()
-                                } else {
-                                    val next = when (optimisticWatchState) {
-                                        WatchState.NONE -> WatchState.BOOKMARKED
-                                        WatchState.BOOKMARKED -> WatchState.WATCHED
-                                        WatchState.WATCHED -> WatchState.NONE
-                                        WatchState.DROPPED -> WatchState.BOOKMARKED
-                                    }
-                                    optimisticWatchState = next
-                                    currentOnStateChange(next)
-                                }
-                            }
-                        }
-                    )
-                    .hazeGlass(
-                        state = hazeState,
-                        shape = RoundedCornerShape(28.dp),
-                        borderColor = if (optimisticWatchState != WatchState.NONE) displayColor.copy(alpha = 0.75f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                        useRefraction = true
-                    )
-                .drawBehind {
-                    val w = size.width
-                    val h = size.height
-                    if (w < 1f || h < 1f) return@drawBehind
-                    
-                    // TV Progress Border
-                    if (movie.mediaType == "tv" && optimisticWatchState != WatchState.NONE && animatedProgress > 0f) {
-                        val strokeWidthPx = 4.dp.toPx()
-                        val halfStroke = strokeWidthPx / 2f
-                        val path = Path().apply {
-                            addRoundRect(
-                                androidx.compose.ui.geometry.RoundRect(
-                                    rect = androidx.compose.ui.geometry.Rect(halfStroke, halfStroke, w - halfStroke, h - halfStroke),
-                                    cornerRadius = CornerRadius(28.dp.toPx() - halfStroke)
-                                )
-                            )
-                        }
-                        val pathMeasure = PathMeasure()
-                        pathMeasure.setPath(path, false)
-                        val length = pathMeasure.length
-                        
-                        this.drawPath(
-                            path = path,
-                            color = displayColor,
-                            style = Stroke(
-                                width = strokeWidthPx,
-                                cap = StrokeCap.Round,
-                                pathEffect = PathEffect.dashPathEffect(
-                                    floatArrayOf(length * animatedProgress, length),
-                                    -length * (1 - animatedProgress)
-                                )
-                            )
-                        )
-                    }
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.padding(horizontal = 16.dp)
-            ) {
-                val bellRotation = remember { Animatable(0f) }
-                
-                LaunchedEffect(displayWatchState) {
-                    if (!movie.isReleased && displayWatchState != WatchState.NONE && displayWatchState != WatchState.WATCHED) {
-                        delay(150)
-                        bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                        bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                        bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                        bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                        bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                    }
-                }
-
-                Crossfade(targetState = icon, label = "IconCrossfade") { currentIcon ->
-                    Icon(
-                        imageVector = currentIcon,
-                        contentDescription = null,
-                        tint = displayColor,
-                        modifier = Modifier
-                            .size(24.dp)
-                            .graphicsLayer {
-                                rotationZ = bellRotation.value
-                                transformOrigin = TransformOrigin(0.5f, 0.2f) // Swing from the top
-                            }
-                    )
-                }
-
-                if (label.isNotEmpty()) {
-                    Spacer(modifier = Modifier.width(10.dp))
-                    val isTvSeries = movie.mediaType == "tv"
-                    val tvMeta = remember(movie.id, movie.numberOfEpisodes, movie.seasons, movie.episodeRunTime, movie.runtime) {
-                        if (isTvSeries) {
-                            val totalEpisodes = movie.numberOfEpisodes?.takeIf { it > 0 }
-                                ?: movie.seasons?.filter { it.seasonNumber > 0 }?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
-                                ?: movie.seasons?.sumOf { it.episodeCount ?: 0 }?.takeIf { it > 0 }
-                            val avgRuntime = movie.episodeRunTime?.filter { it > 0 }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
-                                ?: movie.runtime?.takeIf { it > 0 }
-                                ?: movie.seasons?.flatMap { it.episodes ?: emptyList() }?.mapNotNull { it.runtime?.takeIf { r -> r > 0 } }?.takeIf { it.isNotEmpty() }?.average()?.toInt()
-                            Pair(totalEpisodes, avgRuntime)
-                        } else null
-                    }
-
-                    val watchedEpisodesCount = remember(movie.watchedEpisodes) {
-                        movie.watchedEpisodes?.filterKeys { it != "0" }?.values?.sumOf { it.size } ?: 0
-                    }
-
-                    AnimatedContent(
-                        targetState = displayWatchState,
-                        transitionSpec = {
-                            val slideDirection = if (targetState > initialState) 1 else -1
-                            if (!movie.isReleased && targetState != WatchState.WATCHED && initialState != WatchState.WATCHED) {
-                                (fadeIn(tween(250)) + slideInVertically(tween(350)) { -slideDirection * it / 2 })
-                                    .togetherWith(fadeOut(tween(200)) + slideOutVertically(tween(300)) { slideDirection * it / 2 })
-                            } else {
-                                (fadeIn(tween(250)) + slideInHorizontally(tween(350)) { slideDirection * it / 3 })
-                                    .togetherWith(fadeOut(tween(200)) + slideOutHorizontally(tween(300)) { -slideDirection * it / 3 })
-                            }
-                        },
-                        label = "TextAnim"
-                    ) { targetState ->
-                        val targetLabel = when {
-                            targetState == WatchState.WATCHED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_watched)
-                            !movie.isReleased -> {
-                                if (targetState != WatchState.NONE) stringResource(R.string.action_reminder_active)
-                                else stringResource(R.string.action_remind_me)
-                            }
-                            targetState == WatchState.NONE -> if (movie.mediaType == "tv") stringResource(R.string.action_to_watch_tv) else stringResource(R.string.action_to_watch_movie)
-                            targetState == WatchState.DROPPED -> stringResource(R.string.action_dropped)
-                            targetState == WatchState.BOOKMARKED -> if (movie.mediaType == "tv") stringResource(R.string.action_select_episodes) else stringResource(R.string.action_mark_as_watched)
-                            else -> ""
-                        }
-
-                        val tvSubtitle = if (isTvSeries && targetState == WatchState.NONE && tvMeta != null) {
-                            val (totalEpisodes, avgRuntime) = tvMeta
-                            when {
-                                totalEpisodes != null && avgRuntime != null -> {
-                                    if (totalEpisodes == 1) {
-                                        stringResource(R.string.tv_info_episode_single_and_duration, avgRuntime)
-                                    } else {
-                                        stringResource(R.string.tv_info_episodes_and_duration, totalEpisodes, avgRuntime)
-                                    }
-                                }
-                                totalEpisodes != null -> {
-                                    if (totalEpisodes == 1) {
-                                        stringResource(R.string.tv_info_episode_single)
-                                    } else {
-                                        stringResource(R.string.tv_info_episodes_only, totalEpisodes)
-                                    }
-                                }
-                                avgRuntime != null -> {
-                                    stringResource(R.string.tv_info_duration_approx, avgRuntime)
-                                }
-                                else -> null
-                            }
-                        } else null
-
-                        Column(
-                            horizontalAlignment = Alignment.Start,
-                            verticalArrangement = Arrangement.Center
-                        ) {
-                            Text(
-                                text = targetLabel,
-                                style = MaterialTheme.typography.labelLarge.copy(
-                                    fontWeight = FontWeight.Black,
-                                    letterSpacing = 1.1.sp,
-                                    fontSize = if (isTvSeries && (targetState != WatchState.NONE || tvSubtitle != null)) 12.sp else 14.sp
-                                ),
-                                color = displayColor,
-                                maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                            
-                            if (tvSubtitle != null) {
-                                Text(
-                                    text = tvSubtitle.uppercase(),
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
-                                    ),
-                                    color = displayColor.copy(alpha = 0.8f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            } else if (isTvSeries && targetState != WatchState.NONE && movie.isReleased) {
-                                val percentage = (animatedProgress * 100).toInt()
-                                val totalEpisodes = tvMeta?.first
-                                val progressText = when {
-                                    percentage == 100 -> stringResource(R.string.action_completed)
-                                    totalEpisodes != null && totalEpisodes > 0 -> {
-                                        val safeWatched = minOf(watchedEpisodesCount, totalEpisodes)
-                                        "$safeWatched/$totalEpisodes • $percentage%"
-                                    }
-                                    else -> stringResource(R.string.action_percent_watched, percentage)
-                                }
-                                Text(
-                                    text = progressText,
-                                    style = MaterialTheme.typography.labelSmall.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        letterSpacing = 1.sp
-                                    ),
-                                    color = displayColor.copy(alpha = 0.8f),
-                                    maxLines = 1,
-                                    overflow = TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
+            // Main Action Pill
+            DetailMainPillButton(
+                movie = movie,
+                optimisticWatchState = optimisticWatchState,
+                pillWidth = pillWidth,
+                mainPillAlpha = mainPillAlpha,
+                displayColor = displayColor,
+                animatedProgress = animatedProgress,
+                icon = icon,
+                label = label,
+                hazeState = hazeState,
+                context = context,
+                permissionLauncher = permissionLauncher,
+                onStateChange = currentOnStateChange,
+                onEpisodesClick = currentOnEpisodesClick,
+                onManageRewatches = currentOnManageRewatches,
+                onPreviewWatch = currentOnPreviewWatch,
+                onOptimisticStateUpdate = { optimisticWatchState = it }
+            )
 
             // Filler to push TrashBox to the right when Pill shrinks
             Spacer(modifier = Modifier.weight(1f))
@@ -570,221 +276,45 @@ fun DetailActions(
                 Spacer(modifier = Modifier.width(spacing))
             }
 
-        Box(
-            modifier = Modifier
-                .width(trashWidth)
-                .fillMaxHeight()
-                .offset(x = trashOffset)
-                .graphicsLayer {
-                    alpha = trashAlpha
-                    // Scale removed for Haze sync. Alpha handles fade.
-                },
-            contentAlignment = Alignment.Center
-        ) {
-            if (trashWidth > 20.dp) {
-
-
-
-                val sideButtonScale by animateFloatAsState(
-                    targetValue = if (isSideButtonPressed) 0.86f else 1f,
-                    animationSpec = if (isSideButtonPressed) spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
-                                    else spring(dampingRatio = 0.45f, stiffness = Spring.StiffnessMediumLow),
-                    label = "SideButtonScale"
-                )
-
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .size(56.dp)
-                            .graphicsLayer {
-                                scaleX = sideButtonScale
-                                scaleY = sideButtonScale
-                            }
-                            .pointerInput(Unit) {
-                                var dragAccumulator = 0f
-                                var hasActionFired = false
-                                detectVerticalDragGestures(
-                                    onDragStart = { 
-                                        dragAccumulator = 0f 
-                                        hasActionFired = false
-                                    },
-                                    onVerticalDrag = { change, dragAmount ->
-                                        change.consume()
-                                        if (hasActionFired) return@detectVerticalDragGestures
-                                        
-                                        dragAccumulator += dragAmount
-                                        if (dragAccumulator < -40f && currentSideActionIndex < availableSideActions.size - 1) {
-                                            currentSideActionIndex++
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            hasActionFired = true
-                                        } else if (dragAccumulator > 40f && currentSideActionIndex > 0) {
-                                            currentSideActionIndex--
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                            hasActionFired = true
-                                        }
-                                    }
-                                )
-                            }
-                            .clickable(
-                                interactionSource = sideButtonInteractionSource,
-                                indication = null,
-                                onClick = { 
-                                    when (currentSideAction) {
-                                        SideAction.TRASH -> currentOnRemove()
-                                        SideAction.DROP -> {
-                                            val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
-                                            optimisticWatchState = next
-                                            currentOnStateChange(next)
-                                        }
-                                        SideAction.REWATCH -> currentOnManageRewatches?.invoke()
-                                    }
-                                }
-                            )
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = CircleShape,
-                                borderColor = when(currentSideAction) {
-                                    SideAction.TRASH -> trashColor
-                                    SideAction.REWATCH -> displayColor
-                                    SideAction.DROP -> Color.White
-                                }.copy(alpha = 0.75f),
-                                useRefraction = true
-                            ),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        AnimatedContent(
-                            targetState = currentSideAction,
-                            transitionSpec = {
-                                val targetIdx = availableSideActions.indexOf(targetState)
-                                val initialIdx = availableSideActions.indexOf(initialState)
-                                val slideDir = if (targetIdx > initialIdx) 1 else -1
-                                slideInVertically { height -> slideDir * height } + fadeIn() togetherWith slideOutVertically { height -> -slideDir * height } + fadeOut()
-                            },
-                            label = "SideButtonAnim"
-                        ) { action ->
+            // Side Action Button (Trash / Drop / Rewatch)
+            Box(
+                modifier = Modifier
+                    .width(trashWidth)
+                    .fillMaxHeight()
+                    .offset(x = trashOffset)
+                    .graphicsLayer {
+                        alpha = trashAlpha
+                    },
+                contentAlignment = Alignment.Center
+            ) {
+                if (trashWidth > 20.dp) {
+                    DetailSideActionButton(
+                        currentSideAction = currentSideAction,
+                        availableSideActions = availableSideActions,
+                        currentSideActionIndex = currentSideActionIndex,
+                        optimisticWatchState = optimisticWatchState,
+                        trashColor = trashColor,
+                        displayColor = displayColor,
+                        hazeState = hazeState,
+                        haptic = haptic,
+                        onSideActionIndexChange = { currentSideActionIndex = it },
+                        onExecuteAction = { action ->
                             when (action) {
-                                SideAction.TRASH -> {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_trash),
-                                        contentDescription = "Remove",
-                                        tint = trashColor,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .graphicsLayer {
-                                                scaleX = sideButtonScale
-                                                scaleY = sideButtonScale
-                                            }
-                                    )
-                                }
-                                SideAction.REWATCH -> {
-                                    Icon(
-                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_ricarica),
-                                        contentDescription = "Rewatch",
-                                        tint = displayColor,
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .graphicsLayer {
-                                                scaleX = sideButtonScale
-                                                scaleY = sideButtonScale
-                                            }
-                                    )
-                                }
+                                SideAction.TRASH -> currentOnRemove()
                                 SideAction.DROP -> {
-                                    // Two-layer approach: static box + animated arrow only
-                                    Box(
-                                        modifier = Modifier
-                                            .size(24.dp)
-                                            .graphicsLayer {
-                                                scaleX = sideButtonScale
-                                                scaleY = sideButtonScale
-                                            },
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        // Layer 1: static box/container - never animates
-                                        Icon(
-                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_drop_box),
-                                            contentDescription = null,
-                                            tint = Color.White.copy(alpha = 0.8f),
-                                            modifier = Modifier.size(24.dp)
-                                        )
-                                        // Layer 2: only the arrow animates, clipped to the button circle
-                                        Box(
-                                            modifier = Modifier
-                                                .size(56.dp)
-                                                .clip(CircleShape),
-                                            contentAlignment = Alignment.Center
-                                        ) {
-                                            androidx.compose.animation.AnimatedContent(
-                                                targetState = optimisticWatchState == WatchState.DROPPED,
-                                                transitionSpec = {
-                                                    if (targetState) {
-                                                        // Going DROPPED: up-arrow enters from below, down-arrow exits upward
-                                                        slideInVertically(
-                                                            animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f)
-                                                        ) { it } + fadeIn(tween(160)) togetherWith
-                                                        slideOutVertically(
-                                                            animationSpec = tween(160)
-                                                        ) { -it } + fadeOut(tween(120))
-                                                    } else {
-                                                        // Leaving DROPPED: down-arrow enters from above, up-arrow exits downward
-                                                        slideInVertically(
-                                                            animationSpec = spring(dampingRatio = 0.65f, stiffness = 500f)
-                                                        ) { -it } + fadeIn(tween(160)) togetherWith
-                                                        slideOutVertically(
-                                                            animationSpec = tween(160)
-                                                        ) { it } + fadeOut(tween(120))
-                                                    }
-                                                },
-                                                label = "DropArrowAnim"
-                                            ) { isDropped ->
-                                                Icon(
-                                                    imageVector = ImageVector.vectorResource(
-                                                        id = if (isDropped) R.drawable.ic_drop_arrow_up else R.drawable.ic_drop_arrow_down
-                                                    ),
-                                                    contentDescription = "Drop",
-                                                    tint = Color.White.copy(alpha = 0.8f),
-                                                    modifier = Modifier.size(24.dp)
-                                                )
-                                            }
-                                        }
-                                    }
+                                    val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
+                                    optimisticWatchState = next
+                                    currentOnStateChange(next)
                                 }
-                            } // closes when
-                        } // closes AnimatedContent
-                    } // closes side button Box
-                    
-                    if (optimisticWatchState != WatchState.NONE && availableSideActions.size > 1) {
-                        val activeColor by animateColorAsState(
-                            targetValue = when (currentSideAction) {
-                                SideAction.TRASH -> trashColor
-                                SideAction.REWATCH -> displayColor
-                                SideAction.DROP -> Color.White.copy(alpha = 0.8f)
-                            },
-                            label = "activeColor"
-                        )
-                        
-                        SymbiontPagerIndicator(
-                            currentPage = currentSideActionIndex,
-                            pageCount = availableSideActions.size,
-                            modifier = Modifier
-                                .padding(start = 12.dp, end = 6.dp)
-                                .rotate(90f),
-                            accentColor = activeColor,
-                            dotSize = 4.dp,
-                            spacing = 4.dp,
-                            persistPreviousDots = false
-                        )
-                    } // closes if
-                } // closes Row
-            } // closes if (trashWidth > 20.dp)
-        } // closes Box (Side Container)
-    } // closes Box (fillMaxSize)
-} // closes BoxWithConstraints
-} // closes fun DetailActions
+                                SideAction.REWATCH -> currentOnManageRewatches?.invoke()
+                            }
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
 
 enum class SideAction {
     REWATCH, DROP, TRASH

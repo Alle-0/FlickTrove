@@ -1880,6 +1880,30 @@
     <string name="trophy_producer_verify_invalid_email">Please enter a valid email address.</string>
     <string name="trophy_producer_verify_already_claimed">This donation has already been claimed by another account.</string>
     <string name="trophy_producer_verify_error">Connection error while verifying. Please try again shortly.</string>
+    <string name="trophy_producer_cta_title">Back the Film</string>
+    <string name="trophy_producer_cta_desc">FlickTrove is an artisanal, independent labor of love: no ads, no trackers, no paywalls. Servers and databases have real running costs. If you love the app, help keep it alive and free for everyone!</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • Card)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">Tip: if you donate using the same email as this account (%1$s), the trophy unlocks automatically!</string>
+    <string name="trophy_producer_tip_guest">Tip: after donating, expand the verification section below with your payment email to unlock the trophy immediately!</string>
+    <string name="trophy_producer_credits_title">End Credits (Optional)</string>
+    <string name="trophy_producer_credits_desc">Would you like your nickname to appear among the Executive Producers in the app\'s End Credits?</string>
+    <string name="trophy_producer_credits_switch">Show my nickname in End Credits</string>
+    <string name="trophy_producer_credits_nickname_hint">Your nickname (e.g. CinemaLover)</string>
+    <string name="trophy_producer_credits_save_btn">Save</string>
+    <string name="trophy_producer_credits_saved">Credit preferences saved!</string>
+    <string name="trophy_producer_view_credits">View End Credits</string>
+    <string name="credits_screen_title">End Credits</string>
+    <string name="credits_screen_subtitle">Direction, Community &amp; Patrons</string>
+    <string name="credits_direction_role">Independent Direction &amp; Code</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">Executive Producers</string>
+    <string name="credits_producers_desc">Heartfelt gratitude to our cinephile patrons who cover FlickTrove\'s monthly server &amp; database costs.</string>
+    <string name="credits_producers_empty">Support the project to join the End Credits!</string>
+    <string name="credits_tech_role">Data &amp; Cinephile Partners</string>
+    <string name="credits_tech_desc">This product uses the TMDB API but is not endorsed or certified by TMDB. Cloud synchronization powered by Trakt.tv and SIMKL.</string>
+    <string name="credits_special_thanks">Special Thanks</string>
+    <string name="credits_special_thanks_desc">To the open-source community, the Jetpack Compose team, and every single viewer watching cinema with FlickTrove.</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">Diary</string>

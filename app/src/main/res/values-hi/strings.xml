@@ -648,6 +648,12 @@
     <string name="episodes_discussions_title">एपिसोड चर्चाएं</string>
     <string name="episodes_discussions_all_series">मुख्य चर्चा (श्रृंखला)</string>
     <string name="episodes_discussions_pill">एपिसोड</string>
+    <string name="comment_attach_image_title">चित्र जोड़ें</string>
+    <string name="comment_take_photo">फ़ोटो लें</string>
+    <string name="comment_take_photo_desc">अभी फ़ोटो लेने के लिए कैमरे का उपयोग करें</string>
+    <string name="comment_pick_gallery">गैलरी से चुनें</string>
+    <string name="comment_pick_gallery_desc">अपने डिवाइस से एक छवि चुनें</string>
+    <string name="comment_camera_error">कैमरा चालू करने में असमर्थ</string>
     <string name="comment_translate">अनुवाद करें</string>
     <string name="comment_translated_label">अनुवादित</string>
     <string name="comment_show_original">मूल दिखाएँ</string>
@@ -747,6 +753,9 @@
     <string name="detail_collection">संग्रह</string>
     <string name="detail_recommendations">अनुशंसित</string>
     <string name="detail_technical_info">तकनीकी विवरण</string>
+    <string name="detail_rated_all_ages_note">यह शीर्षक बिना किसी विशिष्ट अभिभावक चेतावनी के सभी दर्शकों के लिए उपयुक्त है।</string>
+    <string name="detail_btn_tech_specs">तकनीकी विवरण</string>
+    <string name="detail_btn_parents_guide">अभिभावक गाइड</string>
     <string name="detail_official_trailers">आधिकारिक ट्रेलर</string>
     <string name="detail_official_trailer">आधिकारिक ट्रेलर</string>
     <string name="detail_video_title_teaser">टीज़र और प्रोमो</string>
@@ -1259,6 +1268,9 @@
     <string name="updates_social_replied_multiple">%1$d बार उत्तर दिया</string>
     <string name="updates_social_liked_plural">आपकी टिप्पणियों को पसंद किया</string>
     <string name="updates_social_replied_plural">आपकी टिप्पणियों का उत्तर दिया</string>
+    <string name="updates_social_mentioned">ने आपको एक टिप्पणी में उल्लेखित किया</string>
+    <string name="updates_social_mentioned_multiple">ने आपको %1$d बार उल्लेखित किया</string>
+    <string name="updates_social_mentioned_plural">ने टिप्पणियों में आपका उल्लेख किया</string>
     <string name="comment_banned_permanent">आप टिप्पणी नहीं कर सकते। आपको स्थायी रूप से निलंबित कर दिया गया है।</string>
     <string name="comment_banned_temporary">आप टिप्पणी नहीं कर सकते। आपको %1$s तक निलंबित कर दिया गया है।</string>
     <string name="comment_cooldown_wait">फिर से टिप्पणी करने से पहले %1$d सेकंड प्रतीक्षा करें।</string>
@@ -1833,6 +1845,30 @@
     <string name="trophy_producer_verify_invalid_email">कृपया एक मान्य ईमेल पता दर्ज करें।</string>
     <string name="trophy_producer_verify_already_claimed">यह दान पहले ही किसी अन्य खाते द्वारा क्लेम किया जा चुका है।</string>
     <string name="trophy_producer_verify_error">सत्यापन के दौरान कनेक्शन त्रुटि। कृपया थोड़ी देर बाद पुनः प्रयास करें।</string>
+    <string name="trophy_producer_cta_title">फ़िल्म को समर्थन दें</string>
+    <string name="trophy_producer_cta_desc">FlickTrove एक स्वतंत्र प्रोजेक्ट है: कोई विज्ञापन या शुल्क नहीं। सर्वर के खर्च के लिए अपने स्वैच्छिक दान से सहयोग करें!</string>
+    <string name="trophy_producer_btn_kofi">Ko-fi (Google Pay • कार्ड)</string>
+    <string name="trophy_producer_btn_paypal">PayPal</string>
+    <string name="trophy_producer_tip_email">सुझाव: यदि आप इस खाते (%1$s) वाले ईमेल से दान करते हैं, तो ट्रॉफी स्वतः अनलॉक हो जाएगी!</string>
+    <string name="trophy_producer_tip_guest">सुझाव: दान के बाद ट्रॉफी को तुरंत अनलॉक करने के लिए नीचे अपना भुगतान ईमेल दर्ज करें!</string>
+    <string name="trophy_producer_credits_title">अंतिम क्रेडिट (ऐच्छिक)</string>
+    <string name="trophy_producer_credits_desc">क्या आप चाहते हैं कि आपका उपनाम कार्यकारी निर्माताओं के क्रेडिट में दिखे?</string>
+    <string name="trophy_producer_credits_switch">क्रेडिट में मेरा उपनाम दिखाएं</string>
+    <string name="trophy_producer_credits_nickname_hint">आपका उपनाम (जैसे CinemaLover)</string>
+    <string name="trophy_producer_credits_save_btn">सहेजें</string>
+    <string name="trophy_producer_credits_saved">प्राथमिकताएं सहेज दी गईं!</string>
+    <string name="trophy_producer_view_credits">क्रेडिट देखें</string>
+    <string name="credits_screen_title">अंतिम क्रेडिट</string>
+    <string name="credits_screen_subtitle">निर्देशन, समुदाय और सहयोगी</string>
+    <string name="credits_direction_role">स्वतंत्र निर्देशन और कोड</string>
+    <string name="credits_direction_name">Alessandro Basile</string>
+    <string name="credits_producers_role">कार्यकारी निर्माता</string>
+    <string name="credits_producers_desc">FlickTrove के सर्वर खर्च को सहयोग देने वाले सभी सहयोगियों का आभार।</string>
+    <string name="credits_producers_empty">प्रोजेक्ट का समर्थन करें और क्रेडिट में शामिल हों!</string>
+    <string name="credits_tech_role">डेटा और सहयोगी</string>
+    <string name="credits_tech_desc">TMDB API का उपयोग किया जाता है। Trakt.tv और SIMKL द्वारा क्लाउड सिंक।</string>
+    <string name="credits_special_thanks">विशेष धन्यवाद</string>
+    <string name="credits_special_thanks_desc">ओपन-सोर्स समुदाय और सभी सिनेमा प्रेमियों को।</string>
 
     <!-- Watch Diary & History -->
     <string name="history_screen_title">डायरी</string>
