@@ -1872,7 +1872,7 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="trophy_producer_tip_guest">Wskazówka: po dokonaniu wpłaty rozwiń poniższą sekcję weryfikacji i podaj swój e-mail z płatności, aby natychmiast odblokować trofeum!</string>
     <string name="trophy_producer_credits_title">Napisy końcowe (opcjonalnie)</string>
     <string name="trophy_producer_credits_desc">Czy chcesz, aby Twój pseudonim pojawił się wśród Producentów Wykonawczych w napisach końcowych aplikacji?</string>
-    <string name="trophy_producer_credits_switch">Pokaż mój pseudonim w napisach końcowych</string>
+    <string name="trophy_producer_credits_switch">Pokaż mój pseudonim wśród producentów wykonawczych</string>
     <string name="trophy_producer_credits_nickname_hint">Twój pseudonim (np. Kinoman)</string>
     <string name="trophy_producer_credits_save_btn">Zapisz</string>
     <string name="trophy_producer_credits_saved">Preferencje napisów zostały zapisane!</string>
@@ -1883,7 +1883,7 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Producenci Wykonawczy</string>
     <string name="credits_producers_desc">Wyrazy najszczerszej wdzięczności dla naszych patronów-kinomanów, którzy pokrywają miesięczne koszty serwerów i baz danych FlickTrove.</string>
-    <string name="credits_producers_empty">Wesprzyj projekt, aby dołączyć do napisów końcowych!</string>
+    <string name="credits_producers_empty">Wesprzyj projekt, aby dołączyć do producentów wykonawczych!</string>
     <string name="credits_tech_role">Dane i partnerzy filmowi</string>
     <string name="credits_tech_desc">Ten produkt korzysta z API TMDB, ale nie jest wspierany ani certyfikowany przez TMDB. Synchronizacja w chmurze oparta na Trakt.tv i SIMKL.</string>
     <string name="credits_special_thanks">Specjalne podziękowania</string>

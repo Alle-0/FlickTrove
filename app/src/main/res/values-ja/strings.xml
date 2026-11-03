@@ -1872,7 +1872,7 @@
     <string name="trophy_producer_tip_guest">ヒント: 寄付後、下記に支払いメールアドレスを入力するとすぐに解除されます。</string>
     <string name="trophy_producer_credits_title">エンドクレジット（任意）</string>
     <string name="trophy_producer_credits_desc">アプリのエンドクレジットに、エグゼクティブプロデューサーとして名前を載せますか？</string>
-    <string name="trophy_producer_credits_switch">クレジットにニックネームを表示する</string>
+    <string name="trophy_producer_credits_switch">エグゼクティブ・プロデューサーにニックネームを表示する</string>
     <string name="trophy_producer_credits_nickname_hint">ニックネーム（例: CinemaLover）</string>
     <string name="trophy_producer_credits_save_btn">保存</string>
     <string name="trophy_producer_credits_saved">設定を保存しました！</string>
@@ -1883,7 +1883,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">エグゼクティブプロデューサー</string>
     <string name="credits_producers_desc">FlickTroveの月額サーバー費用を支援してくださっている映画ファンの皆様に心より感謝いたします。</string>
-    <string name="credits_producers_empty">プロジェクトを支援して、最初のクレジットメンバーになりましょう！</string>
+    <string name="credits_producers_empty">プロジェクトを支援して、エグゼクティブ・プロデューサーに参加しましょう！</string>
     <string name="credits_tech_role">データ・パートナー</string>
     <string name="credits_tech_desc">TMDB APIを使用しています。Trakt.tvおよびSIMKLによるクラウド同期。</string>
     <string name="credits_special_thanks">特別な謝辞</string>

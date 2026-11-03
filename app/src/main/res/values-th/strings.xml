@@ -1861,7 +1861,7 @@
     <string name="trophy_producer_tip_guest">คำแนะนำ: หลังการบริจาค ให้เปิดส่วนการตรวจสอบด้านล่างและระบุอีเมลการชำระเงินเพื่อปลดล็อกถ้วยรางวัลทันที!</string>
     <string name="trophy_producer_credits_title">เครดิตปิดท้าย (ไม่บังคับ)</string>
     <string name="trophy_producer_credits_desc">คุณต้องการให้ชื่อเล่นของคุณปรากฏในฐานะผู้อำนวยการสร้างฝ่ายบริหารในเครดิตท้ายเรื่องของแอปหรือไม่?</string>
-    <string name="trophy_producer_credits_switch">แสดงชื่อเล่นของฉันในเครดิตปิดท้าย</string>
+    <string name="trophy_producer_credits_switch">แสดงชื่อเล่นของฉันในรายชื่อ Executive Producers</string>
     <string name="trophy_producer_credits_nickname_hint">ชื่อเล่นของคุณ (เช่น CinemaLover)</string>
     <string name="trophy_producer_credits_save_btn">บันทึก</string>
     <string name="trophy_producer_credits_saved">บันทึกการตั้งค่าเครดิตแล้ว!</string>
@@ -1872,7 +1872,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">ผู้อำนวยการสร้างฝ่ายบริหาร</string>
     <string name="credits_producers_desc">ขอขอบคุณจากใจจริงสำหรับผู้อุปถัมภ์คอหนังทุกคนที่ช่วยดูแลค่าเซิร์ฟเวอร์และฐานข้อมูลรายเดือนของ FlickTrove</string>
-    <string name="credits_producers_empty">สนับสนุนโครงการเพื่อร่วมเป็นส่วนหนึ่งในเครดิตปิดท้าย!</string>
+    <string name="credits_producers_empty">สนับสนุนโครงการเพื่อร่วมเป็นส่วนหนึ่งใน Executive Producers!</string>
     <string name="credits_tech_role">ข้อมูลและพันธมิตรภาพยนตร์</string>
     <string name="credits_tech_desc">ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองหรือรับรองโดย TMDB ซิงค์ข้อมูลบนคลาวด์สนับสนุนโดย Trakt.tv และ SIMKL</string>
     <string name="credits_special_thanks">ขอขอบคุณเป็นพิเศษ</string>

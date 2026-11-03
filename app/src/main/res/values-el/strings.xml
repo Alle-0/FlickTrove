@@ -1873,7 +1873,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="trophy_producer_tip_guest">Συμβουλή: Μετά τη δωρεά, ανοίξτε την ενότητα επαλήθευσης παρακάτω με το email πληρωμής για άμεσο ξεκλείδωμα!</string>
     <string name="trophy_producer_credits_title">Τίτλοι Τέλους (Προαιρετικό)</string>
     <string name="trophy_producer_credits_desc">Θα θέλατε το ψευδώνυμό σας να εμφανίζεται ανάμεσα στους Εκτελεστικούς Παραγωγούς στους Τίτλους Τέλους της εφαρμογής;</string>
-    <string name="trophy_producer_credits_switch">Εμφάνιση του ψευδωνύμου μου στους Τίτλους Τέλους</string>
+    <string name="trophy_producer_credits_switch">Εμφάνιση του ψευδωνύμου μου στους Executive Producers</string>
     <string name="trophy_producer_credits_nickname_hint">Το ψευδώνυμό σας (π.χ. CinemaLover)</string>
     <string name="trophy_producer_credits_save_btn">Αποθήκευση</string>
     <string name="trophy_producer_credits_saved">Οι προτιμήσεις αποθηκεύτηκαν!</string>
@@ -1884,7 +1884,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Εκτελεστικοί Παραγωγοί</string>
     <string name="credits_producers_desc">Ειλικρινής ευγνωμοσύνη στους σινεφίλ υποστηρικτές που καλύπτουν τα μηνιαία έξοδα του FlickTrove για servers και databases.</string>
-    <string name="credits_producers_empty">Υποστηρίξτε το έργο για να προστεθείτε στους Τίτλους Τέλους!</string>
+    <string name="credits_producers_empty">Υποστηρίξτε το έργο για να γίνετε Executive Producer!</string>
     <string name="credits_tech_role">Δεδομένα &amp; Σινεφίλ Συνεργάτες</string>
     <string name="credits_tech_desc">Αυτό το προϊόν χρησιμοποιεί το API του TMDB, αλλά δεν έχει εγκριθεί ή πιστοποιηθεί από το TMDB. Cloud συγχρονισμός μέσω Trakt.tv και SIMKL.</string>
     <string name="credits_special_thanks">Ειδικές Ευχαριστίες</string>

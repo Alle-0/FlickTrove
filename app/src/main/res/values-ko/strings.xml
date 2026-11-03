@@ -1872,7 +1872,7 @@
     <string name="trophy_producer_tip_guest">팁: 후원 후 아래에 결제 이메일을 입력하시면 트로피가 즉시 해금됩니다!</string>
     <string name="trophy_producer_credits_title">엔딩 크레딧 (선택 사항)</string>
     <string name="trophy_producer_credits_desc">앱 엔딩 크레딧의 총괄 프로듀서 명단에 닉네임을 올리시겠습니까?</string>
-    <string name="trophy_producer_credits_switch">크레딧에 닉네임 표시</string>
+    <string name="trophy_producer_credits_switch">총괄 프로듀서(Executive Producers)에 닉네임 표시</string>
     <string name="trophy_producer_credits_nickname_hint">닉네임 (예: 시네필99)</string>
     <string name="trophy_producer_credits_save_btn">저장</string>
     <string name="trophy_producer_credits_saved">설정이 저장되었습니다!</string>
@@ -1883,7 +1883,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">총괄 프로듀서</string>
     <string name="credits_producers_desc">FlickTrove의 서버 및 DB 비용을 후원해 주신 모든 영화 팬 여러분께 진심으로 감사드립니다.</string>
-    <string name="credits_producers_empty">프로젝트를 후원하고 첫 번째 크레딧 후원자가 되어보세요!</string>
+    <string name="credits_producers_empty">프로젝트를 후원하고 총괄 프로듀서에 합류하세요!</string>
     <string name="credits_tech_role">데이터 및 파트너</string>
     <string name="credits_tech_desc">TMDB API를 사용합니다. Trakt.tv 및 SIMKL 클라우드 동기화.</string>
     <string name="credits_special_thanks">특별 감사</string>

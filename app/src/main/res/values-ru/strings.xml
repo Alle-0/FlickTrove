@@ -1866,7 +1866,7 @@
     <string name="trophy_producer_tip_guest">Подсказка: после доната введите платежный email ниже для мгновенного открытия.</string>
     <string name="trophy_producer_credits_title">Титры (По желанию)</string>
     <string name="trophy_producer_credits_desc">Хотите ли вы, чтобы ваш никнейм появился среди исполнительных продюсеров в титрах?</string>
-    <string name="trophy_producer_credits_switch">Показывать мой ник в титрах</string>
+    <string name="trophy_producer_credits_switch">Показывать мой ник в исполнительных продюсерах</string>
     <string name="trophy_producer_credits_nickname_hint">Ваш ник (например, Киноман99)</string>
     <string name="trophy_producer_credits_save_btn">Сохранить</string>
     <string name="trophy_producer_credits_saved">Настройки сохранены!</string>
@@ -1877,7 +1877,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Исполнительные продюсеры</string>
     <string name="credits_producers_desc">Огромная благодарность киноманам, покрывающим расходы на серверы FlickTrove.</string>
-    <string name="credits_producers_empty">Поддержите проект, чтобы первым войти в титры!</string>
+    <string name="credits_producers_empty">Поддержите проект, чтобы стать исполнительным продюсером!</string>
     <string name="credits_tech_role">Данные и партнеры</string>
     <string name="credits_tech_desc">Используется API TMDB. Синхронизация Trakt.tv и SIMKL.</string>
     <string name="credits_special_thanks">Особая благодарность</string>

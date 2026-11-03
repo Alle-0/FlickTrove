@@ -1851,7 +1851,7 @@
     <string name="trophy_producer_tip_guest">Mẹo: Sau khi quyên góp, mở rộng phần xác minh bên dưới với email thanh toán để mở khóa ngay lập tức!</string>
     <string name="trophy_producer_credits_title">Danh Đề Cuối Phim (Tùy chọn)</string>
     <string name="trophy_producer_credits_desc">Bạn có muốn biệt danh của mình xuất hiện trong danh sách Giám Đốc Sản Xuất ở phần Danh Đề của ứng dụng không?</string>
-    <string name="trophy_producer_credits_switch">Hiển thị biệt danh của tôi trong Danh Đề</string>
+    <string name="trophy_producer_credits_switch">Hiển thị biệt danh của tôi trong Nhà sản xuất điều hành</string>
     <string name="trophy_producer_credits_nickname_hint">Biệt danh của bạn (vd: NguoiMePhim)</string>
     <string name="trophy_producer_credits_save_btn">Lưu</string>
     <string name="trophy_producer_credits_saved">Đã lưu tùy chọn danh đề!</string>
@@ -1862,7 +1862,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Giám Đốc Sản Xuất</string>
     <string name="credits_producers_desc">Chân thành tri ân những người ủng hộ đã giúp chi trả chi phí máy chủ &amp; cơ sở dữ liệu hàng tháng cho FlickTrove.</string>
-    <string name="credits_producers_empty">Hãy ủng hộ dự án để xuất hiện trong Danh Đề Cuối Phim!</string>
+    <string name="credits_producers_empty">Hãy ủng hộ dự án để tham gia vào Nhà sản xuất điều hành!</string>
     <string name="credits_tech_role">Dữ Liệu &amp; Đối Tác Điện Ảnh</string>
     <string name="credits_tech_desc">Sản phẩm này sử dụng API của TMDB nhưng không được TMDB chứng thực. Đồng bộ đám mây hỗ trợ bởi Trakt.tv và SIMKL.</string>
     <string name="credits_special_thanks">Lời Cảm Ơn Đặc Biệt</string>

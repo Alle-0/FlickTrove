@@ -1870,7 +1870,7 @@ Prova att förenkla sökningen</string>
     <string name="trophy_producer_tip_guest">Tips: Öppna verifieringssektionen nedan med din betalnings-e-post för omedelbar upplåsning!</string>
     <string name="trophy_producer_credits_title">Eftertexter (Valfritt)</string>
     <string name="trophy_producer_credits_desc">Vill du att ditt smeknamn ska synas bland de Verkställande producenterna i eftertexterna?</string>
-    <string name="trophy_producer_credits_switch">Visa mitt smeknamn i eftertexterna</string>
+    <string name="trophy_producer_credits_switch">Visa mitt smeknamn bland Executive Producers</string>
     <string name="trophy_producer_credits_nickname_hint">Ditt smeknamn (t.ex. FilmAlskaren)</string>
     <string name="trophy_producer_credits_save_btn">Spara</string>
     <string name="trophy_producer_credits_saved">Inställningar sparade!</string>
@@ -1881,7 +1881,7 @@ Prova att förenkla sökningen</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Verkställande producenter</string>
     <string name="credits_producers_desc">Varmt tack till våra cinefila mecenater som täcker FlickTroves månatliga serverkostnader.</string>
-    <string name="credits_producers_empty">Stöd projektet för att ta plats i eftertexterna!</string>
+    <string name="credits_producers_empty">Stöd projektet för att bli en Executive Producer!</string>
     <string name="credits_tech_role">Data och cinefila partners</string>
     <string name="credits_tech_desc">Denna produkt använder TMDB API men är inte certifierad av TMDB. Molnsynkning via Trakt.tv och SIMKL.</string>
     <string name="credits_special_thanks">Särskilt tack</string>

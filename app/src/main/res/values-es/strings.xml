@@ -1868,7 +1868,7 @@
     <string name="trophy_producer_tip_guest">Consejo: tras donar, introduce abajo el correo utilizado para desbloquear el trofeo inmediatamente.</string>
     <string name="trophy_producer_credits_title">Créditos Finales (Opcional)</string>
     <string name="trophy_producer_credits_desc">¿Quieres que tu apodo aparezca entre los Productores Ejecutivos en los créditos de la aplicación?</string>
-    <string name="trophy_producer_credits_switch">Mostrar mi apodo en los Créditos</string>
+    <string name="trophy_producer_credits_switch">Mostrar mi apodo en Productores Ejecutivos</string>
     <string name="trophy_producer_credits_nickname_hint">Tu apodo (ej. Cinefilo99)</string>
     <string name="trophy_producer_credits_save_btn">Guardar</string>
     <string name="trophy_producer_credits_saved">¡Preferencias guardadas!</string>
@@ -1879,7 +1879,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Productores Ejecutivos</string>
     <string name="credits_producers_desc">Gratitud infinita a los mecenas que cubren los costes mensuales de servidores y bases de datos de FlickTrove.</string>
-    <string name="credits_producers_empty">¡Apoya el proyecto y sé el primero en aparecer en los créditos!</string>
+    <string name="credits_producers_empty">¡Apoya el proyecto y únete a los Productores Ejecutivos!</string>
     <string name="credits_tech_role">Datos y Aliados Cinematográficos</string>
     <string name="credits_tech_desc">Este producto utiliza la API de TMDB pero no está avalado ni certificado por TMDB. Sincronización en la nube impulsada por Trakt.tv y SIMKL.</string>
     <string name="credits_special_thanks">Agradecimientos Especiales</string>

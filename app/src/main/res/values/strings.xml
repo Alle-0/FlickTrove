@@ -1899,7 +1899,7 @@
     <string name="trophy_producer_tip_guest">Tip: after donating, expand the verification section below with your payment email to unlock the trophy immediately!</string>
     <string name="trophy_producer_credits_title">End Credits (Optional)</string>
     <string name="trophy_producer_credits_desc">Would you like your nickname to appear among the Executive Producers in the app\'s End Credits?</string>
-    <string name="trophy_producer_credits_switch">Show my nickname in End Credits</string>
+    <string name="trophy_producer_credits_switch">Show my nickname in Executive Producers</string>
     <string name="trophy_producer_credits_nickname_hint">Your nickname (e.g. CinemaLover)</string>
     <string name="trophy_producer_credits_save_btn">Save</string>
     <string name="trophy_producer_credits_saved">Credit preferences saved!</string>
@@ -1910,7 +1910,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Executive Producers</string>
     <string name="credits_producers_desc">Heartfelt gratitude to our cinephile patrons who cover FlickTrove\'s monthly server &amp; database costs.</string>
-    <string name="credits_producers_empty">Support the project to join the End Credits!</string>
+    <string name="credits_producers_empty">Support the project to join the Executive Producers!</string>
     <string name="credits_tech_role">Data &amp; Cinephile Partners</string>
     <string name="credits_tech_desc">This product uses the TMDB API but is not endorsed or certified by TMDB. Cloud synchronization powered by Trakt.tv and SIMKL.</string>
     <string name="credits_special_thanks">Special Thanks</string>

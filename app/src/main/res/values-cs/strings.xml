@@ -1851,7 +1851,7 @@
     <string name="trophy_producer_tip_guest">Tip: Po přispění rozbalte sekci ověření níže a zadejte svůj platební e-mail pro okamžité odemčení trofeje!</string>
     <string name="trophy_producer_credits_title">Závěrečné titulky (volitelné)</string>
     <string name="trophy_producer_credits_desc">Chcete, aby se vaše přezdívka objevila mezi Výkonnými producenty v závěrečných titulkách aplikace?</string>
-    <string name="trophy_producer_credits_switch">Zobrazit mou přezdívku v závěrečných titulkách</string>
+    <string name="trophy_producer_credits_switch">Zobrazit mou přezdívku v Executive Producers</string>
     <string name="trophy_producer_credits_nickname_hint">Vaše přezdívka (např. MilovnikFilmu)</string>
     <string name="trophy_producer_credits_save_btn">Uložit</string>
     <string name="trophy_producer_credits_saved">Nastavení titulků uloženo!</string>
@@ -1862,7 +1862,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Výkonní producenti</string>
     <string name="credits_producers_desc">Srdečné poděkování všem cinefilním mecenášům, kteří pokrývají měsíční náklady FlickTrove na servery a databáze.</string>
-    <string name="credits_producers_empty">Podpořte projekt a připojte se k závěrečným titulkům!</string>
+    <string name="credits_producers_empty">Podpořte projekt a připojte se k Executive Producers!</string>
     <string name="credits_tech_role">Data a filmoví partneři</string>
     <string name="credits_tech_desc">Tento produkt využívá rozhraní TMDB API, ale není schválen ani certifikován TMDB. Cloudová synchronizace běží na Trakt.tv a SIMKL.</string>
     <string name="credits_special_thanks">Zvláštní poděkování</string>

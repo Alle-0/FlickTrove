@@ -1868,7 +1868,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="trophy_producer_tip_guest">Порада: після донату відкрийте секцію перевірки нижче та вкажіть вашу пошту для миттєвого відкриття трофея!</string>
     <string name="trophy_producer_credits_title">Фінальні титри (Необов\'язково)</string>
     <string name="trophy_producer_credits_desc">Бажаєте, щоб ваш нікнейм з\'явився у списку Виконавчих продюсерів у фінальних титрах додатку?</string>
-    <string name="trophy_producer_credits_switch">Показувати мій нікнейм у фінальних титрах</string>
+    <string name="trophy_producer_credits_switch">Показувати мій нікнейм серед виконавчих продюсерів</string>
     <string name="trophy_producer_credits_nickname_hint">Ваш нікнейм (наприклад, CinemaLover)</string>
     <string name="trophy_producer_credits_save_btn">Зберегти</string>
     <string name="trophy_producer_credits_saved">Налаштування титрів збережено!</string>
@@ -1879,7 +1879,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Виконавчі продюсери</string>
     <string name="credits_producers_desc">Безмежна вдячність нашим кіноманам-меценатам, які покривають щомісячні витрати на сервери FlickTrove.</string>
-    <string name="credits_producers_empty">Підтримайте проєкт, щоб потрапити у фінальні титри!</string>
+    <string name="credits_producers_empty">Підтримайте проєкт, щоб приєднатися до виконавчих продюсерів!</string>
     <string name="credits_tech_role">Дані та партнери кіно</string>
     <string name="credits_tech_desc">Цей продукт використовує TMDB API, але не схвалений і не сертифікований TMDB. Хмарна синхронізація на базі Trakt.tv та SIMKL.</string>
     <string name="credits_special_thanks">Особлива подяка</string>

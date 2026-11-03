@@ -1870,7 +1870,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="trophy_producer_tip_guest">Tipp: Adományozás után nyissa meg az ellenőrzési részt a fizetési e-maillel az azonnali feloldáshoz!</string>
     <string name="trophy_producer_credits_title">Stáblista (Opcionális)</string>
     <string name="trophy_producer_credits_desc">Szeretné, ha felhasználóneve megjelenne a Vezető producerek között a stáblistában?</string>
-    <string name="trophy_producer_credits_switch">Felhasználónevem megjelenítése a stáblistában</string>
+    <string name="trophy_producer_credits_switch">Felhasználónevem megjelenítése az Executive Producer listában</string>
     <string name="trophy_producer_credits_nickname_hint">Felhasználóneve (pl. MoziBarat)</string>
     <string name="trophy_producer_credits_save_btn">Mentés</string>
     <string name="trophy_producer_credits_saved">Stáblista beállítások mentve!</string>
@@ -1881,7 +1881,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Vezető producerek</string>
     <string name="credits_producers_desc">Hálás köszönet cinefil támogatóinknak, akik fedezik a FlickTrove havi szerverköltségeit.</string>
-    <string name="credits_producers_empty">Támogassa a projektet, hogy felkerüljön a stáblistára!</string>
+    <string name="credits_producers_empty">Támogassa a projektet, hogy Executive Producer legyen!</string>
     <string name="credits_tech_role">Adatok és filmes partnerek</string>
     <string name="credits_tech_desc">Ez a termék a TMDB API-t használja, de a TMDB nem támogatja és nem tanúsítja. Felhő szinkronizálás: Trakt.tv és SIMKL.</string>
     <string name="credits_special_thanks">Külön köszönet</string>

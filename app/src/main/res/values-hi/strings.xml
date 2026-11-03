@@ -1864,7 +1864,7 @@
     <string name="trophy_producer_tip_guest">सुझाव: दान के बाद ट्रॉफी को तुरंत अनलॉक करने के लिए नीचे अपना भुगतान ईमेल दर्ज करें!</string>
     <string name="trophy_producer_credits_title">अंतिम क्रेडिट (ऐच्छिक)</string>
     <string name="trophy_producer_credits_desc">क्या आप चाहते हैं कि आपका उपनाम कार्यकारी निर्माताओं के क्रेडिट में दिखे?</string>
-    <string name="trophy_producer_credits_switch">क्रेडिट में मेरा उपनाम दिखाएं</string>
+    <string name="trophy_producer_credits_switch">कार्यकारी निर्माताओं (Executive Producers) में मेरा उपनाम दिखाएं</string>
     <string name="trophy_producer_credits_nickname_hint">आपका उपनाम (जैसे CinemaLover)</string>
     <string name="trophy_producer_credits_save_btn">सहेजें</string>
     <string name="trophy_producer_credits_saved">प्राथमिकताएं सहेज दी गईं!</string>
@@ -1875,7 +1875,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">कार्यकारी निर्माता</string>
     <string name="credits_producers_desc">FlickTrove के सर्वर खर्च को सहयोग देने वाले सभी सहयोगियों का आभार।</string>
-    <string name="credits_producers_empty">प्रोजेक्ट का समर्थन करें और क्रेडिट में शामिल हों!</string>
+    <string name="credits_producers_empty">प्रोजेक्ट का समर्थन करें और कार्यकारी निर्माताओं में शामिल हों!</string>
     <string name="credits_tech_role">डेटा और सहयोगी</string>
     <string name="credits_tech_desc">TMDB API का उपयोग किया जाता है। Trakt.tv और SIMKL द्वारा क्लाउड सिंक।</string>
     <string name="credits_special_thanks">विशेष धन्यवाद</string>

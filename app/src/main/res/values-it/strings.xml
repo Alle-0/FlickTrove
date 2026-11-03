@@ -1881,7 +1881,7 @@
     <string name="trophy_producer_tip_guest">Suggerimento: dopo aver donato, espandi la sezione di verifica qui sotto con la tua email di pagamento per sbloccare subito il trofeo!</string>
     <string name="trophy_producer_credits_title">Titoli di Coda (Opzionale)</string>
     <string name="trophy_producer_credits_desc">Vuoi che il tuo nickname compaia tra i Produttori Esecutivi nei Titoli di Coda dell\'app?</string>
-    <string name="trophy_producer_credits_switch">Mostra il mio nickname nei Titoli di Coda</string>
+    <string name="trophy_producer_credits_switch">Mostra il mio nickname in Executive Producer</string>
     <string name="trophy_producer_credits_nickname_hint">Il tuo nickname (es. Cinefilo99)</string>
     <string name="trophy_producer_credits_save_btn">Salva</string>
     <string name="trophy_producer_credits_saved">Preferenze crediti salvate!</string>
@@ -1892,7 +1892,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Produttori Esecutivi</string>
     <string name="credits_producers_desc">Gratitudine infinita ai mecenati cinefili che coprono le spese vive mensili dei server e del database di FlickTrove.</string>
-    <string name="credits_producers_empty">Sostieni il progetto e diventa il primo a unirti ai Titoli di Coda!</string>
+    <string name="credits_producers_empty">Sostieni il progetto e unisciti agli Executive Producer!</string>
     <string name="credits_tech_role">Dati &amp; Partner Cinematografici</string>
     <string name="credits_tech_desc">Questo prodotto utilizza le API di TMDB ma non è approvato o certificato da TMDB. Sincronizzazione cloud alimentata da Trakt.tv e SIMKL.</string>
     <string name="credits_special_thanks">Ringraziamenti Speciali</string>

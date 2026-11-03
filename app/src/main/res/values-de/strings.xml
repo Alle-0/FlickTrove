@@ -1869,7 +1869,7 @@
     <string name="trophy_producer_tip_guest">Tipp: Nach der Spende kannst Du unten Deine Zahlungs-E-Mail eingeben, um die Trophäe sofort freizuschalten!</string>
     <string name="trophy_producer_credits_title">Abspann (Optional)</string>
     <string name="trophy_producer_credits_desc">Möchtest Du mit Deinem Spitznamen unter den Ausführenden Produzenten im Abspann der App erscheinen?</string>
-    <string name="trophy_producer_credits_switch">Meinen Spitznamen im Abspann anzeigen</string>
+    <string name="trophy_producer_credits_switch">Meinen Spitznamen bei den Executive Producers anzeigen</string>
     <string name="trophy_producer_credits_nickname_hint">Dein Spitzname (z. B. FilmFan99)</string>
     <string name="trophy_producer_credits_save_btn">Speichern</string>
     <string name="trophy_producer_credits_saved">Einstellungen gespeichert!</string>
@@ -1880,7 +1880,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Ausführende Produzenten</string>
     <string name="credits_producers_desc">Herzlichen Dank an alle Filmfans, die mit ihren Spenden die monatlichen Server- und Datenbankkosten von FlickTrove decken.</string>
-    <string name="credits_producers_empty">Unterstütze das Projekt, um im Abspann verewigt zu werden!</string>
+    <string name="credits_producers_empty">Unterstütze das Projekt, um Executive Producer zu werden!</string>
     <string name="credits_tech_role">Daten- &amp; Filmpartner</string>
     <string name="credits_tech_desc">Dieses Produkt nutzt die TMDB-API, ist aber nicht von TMDB zertifiziert oder unterstützt. Cloud-Synchronisierung ermöglicht durch Trakt.tv und SIMKL.</string>
     <string name="credits_special_thanks">Besonderer Dank</string>

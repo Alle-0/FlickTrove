@@ -1872,7 +1872,7 @@
     <string name="trophy_producer_tip_guest">提示：捐赠后，在下方输入支付邮箱即可立即解锁奖杯！</string>
     <string name="trophy_producer_credits_title">片尾字幕（可选）</string>
     <string name="trophy_producer_credits_desc">您是否希望将您的昵称列入应用片尾字幕的执行制片人名单中？</string>
-    <string name="trophy_producer_credits_switch">在片尾字幕中显示我的昵称</string>
+    <string name="trophy_producer_credits_switch">在执行制片人名单中显示我的昵称</string>
     <string name="trophy_producer_credits_nickname_hint">您的昵称（例如：电影迷99）</string>
     <string name="trophy_producer_credits_save_btn">保存</string>
     <string name="trophy_producer_credits_saved">偏好已保存！</string>
@@ -1883,7 +1883,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">执行制片人</string>
     <string name="credits_producers_desc">衷心感谢所有支持 FlickTrove 服务器和数据库月度成本的影迷朋友。</string>
-    <string name="credits_producers_empty">支持本项目，成为第一位加入字幕的制片人！</string>
+    <string name="credits_producers_empty">支持本项目，成为执行制片人！</string>
     <string name="credits_tech_role">数据与影视伙伴</string>
     <string name="credits_tech_desc">本产品使用 TMDB API，由 Trakt.tv 和 SIMKL 提供云端同步。</string>
     <string name="credits_special_thanks">特别鸣谢</string>

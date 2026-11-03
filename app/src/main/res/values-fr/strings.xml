@@ -1866,7 +1866,7 @@
     <string name="trophy_producer_tip_guest">Astuce : après avoir donné, saisissez votre e-mail de paiement ci-dessous pour débloquer immédiatement le trophée !</string>
     <string name="trophy_producer_credits_title">Générique de Fin (Optionnel)</string>
     <string name="trophy_producer_credits_desc">Souhaitez-vous voir apparaître votre pseudonyme parmi les Producteurs Exécutifs dans le générique de l\'application ?</string>
-    <string name="trophy_producer_credits_switch">Afficher mon pseudonyme au générique</string>
+    <string name="trophy_producer_credits_switch">Afficher mon pseudonyme dans les Producteurs Exécutifs</string>
     <string name="trophy_producer_credits_nickname_hint">Votre pseudo (ex. Cinéphile99)</string>
     <string name="trophy_producer_credits_save_btn">Enregistrer</string>
     <string name="trophy_producer_credits_saved">Préférences enregistrées !</string>
@@ -1877,7 +1877,7 @@
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Producteurs Exécutifs</string>
     <string name="credits_producers_desc">Profonde gratitude envers les mécènes cinéphiles qui financent l\'hébergement et les bases de données de FlickTrove.</string>
-    <string name="credits_producers_empty">Soutenez le projet pour être le premier inscrit au générique !</string>
+    <string name="credits_producers_empty">Soutenez le projet pour rejoindre les Producteurs Exécutifs !</string>
     <string name="credits_tech_role">Données &amp; Partenaires Cinéma</string>
     <string name="credits_tech_desc">Ce produit utilise l\'API TMDB mais n\'est ni approuvé ni certifié par TMDB. Synchronisation cloud propulsée par Trakt.tv et SIMKL.</string>
     <string name="credits_special_thanks">Remerciements Particuliers</string>

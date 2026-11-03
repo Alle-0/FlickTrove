@@ -1870,7 +1870,7 @@ Introdu cel puțin 3 caractere</string>
     <string name="trophy_producer_tip_guest">Sfat: după donație, extinde secțiunea de verificare de mai jos cu e-mailul tău de plată pentru a debloca trofeul imediat!</string>
     <string name="trophy_producer_credits_title">Generic de final (Opțional)</string>
     <string name="trophy_producer_credits_desc">Dorești ca pseudonimul tău să apară printre Producătorii executivi în Genericul de final al aplicației?</string>
-    <string name="trophy_producer_credits_switch">Afișează pseudonimul meu în Genericul de final</string>
+    <string name="trophy_producer_credits_switch">Afișează pseudonimul meu la Producători Executivi</string>
     <string name="trophy_producer_credits_nickname_hint">Pseudonimul tău (ex. IubitorDeCinema)</string>
     <string name="trophy_producer_credits_save_btn">Salvează</string>
     <string name="trophy_producer_credits_saved">Preferințele pentru generic au fost salvate!</string>
@@ -1881,7 +1881,7 @@ Introdu cel puțin 3 caractere</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Producători executivi</string>
     <string name="credits_producers_desc">Recunoștință sinceră susținătorilor noștri cinefili care acoperă costurile lunare de server și bază de date pentru FlickTrove.</string>
-    <string name="credits_producers_empty">Susține proiectul pentru a te alătura Genericului de final!</string>
+    <string name="credits_producers_empty">Susține proiectul pentru a te alătura Producătorilor Executivi!</string>
     <string name="credits_tech_role">Date și Parteneri cinefili</string>
     <string name="credits_tech_desc">Acest produs folosește API-ul TMDB, dar nu este aprobat sau certificat de TMDB. Sincronizarea în cloud este susținută de Trakt.tv și SIMKL.</string>
     <string name="credits_special_thanks">Mulțumiri speciale</string>
