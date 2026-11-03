@@ -66,12 +66,8 @@ import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.FolderCard
 import com.cinetrack.ui.components.shared.NewFolderCard
 import com.cinetrack.ui.components.shared.JoinFolderCard
-import com.cinetrack.ui.components.shared.FolderCreateDialog
-import com.cinetrack.ui.components.shared.FolderJoinDialog
-import com.cinetrack.ui.components.shared.FolderEditDialog
 import com.cinetrack.ui.components.shared.FolderEditMode
-import com.cinetrack.ui.components.shared.FolderShareModal
-import com.cinetrack.ui.components.shared.FolderMembersModal
+import com.cinetrack.ui.components.shared.FolderModalsHost
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.animation.AnimatedVisibility
@@ -594,135 +590,29 @@ fun FoldersScreenContent(
     val globalHazeState = com.cinetrack.ui.LocalGlobalHazeState.current
     val dialogHazeState = globalHazeState ?: activeHazeState
 
-    LaunchedEffect(isCreateDialogOpen) {
-        if (isCreateDialogOpen) {
-            modalHost.show {
-                FolderCreateDialog(
-                    onDismiss = {
-                        isCreateDialogOpen = false
-                        modalHost.dismiss()
-                    },
-                    onCreate = { name, icon, color, description ->
-                        viewModel.createFolder(name, icon, color, description ?: "")
-                        isCreateDialogOpen = false
-                        modalHost.dismiss()
-                    },
-                    hazeState = dialogHazeState
-                )
-            }
-        }
-    }
-
-    LaunchedEffect(isJoinDialogOpen) {
-        if (isJoinDialogOpen) {
-            modalHost.show {
-                FolderJoinDialog(
-                    initialCode = joinDialogInitialCode,
-                    onDismiss = {
-                        isJoinDialogOpen = false
-                        joinDialogInitialCode = ""
-                        modalHost.dismiss()
-                    },
-                    onCheckCode = { code, callback ->
-                        viewModel.checkInvite(code, callback)
-                    },
-                    onAcceptInvite = { code, callback ->
-                        viewModel.acceptInvite(code, callback)
-                    },
-                    hazeState = dialogHazeState
-                )
-            }
-        }
-    }
-
-    LaunchedEffect(folderToDelete) {
-        val folder = folderToDelete
-        if (folder != null) {
-            val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-            val isLeave = folder.isShared && (folder.ownerUid != currentUserId)
-            modalHost.show {
-                DeleteFolderDialog(
-                    onConfirm = {
-                        viewModel.deleteFolder(folder.id)
-                        folderToDelete = null
-                        modalHost.dismiss()
-                    },
-                    onDismiss = {
-                        folderToDelete = null
-                        modalHost.dismiss()
-                    },
-                    folderName = folder.name,
-                    isLeave = isLeave,
-                    hazeState = dialogHazeState
-                )
-            }
-        }
-    }
-
-    LaunchedEffect(folderToEdit) {
-        val folder = folderToEdit
-        if (folder != null) {
-            modalHost.show {
-                FolderEditDialog(
-                    initialName = folder.name,
-                    initialColor = folder.color ?: "#FFFFFF",
-                    initialDescription = folder.description,
-                    editMode = folderEditMode,
-                    onDismiss = {
-                        folderToEdit = null
-                        modalHost.dismiss()
-                    },
-                    onSave = { newName, newColor, newDesc ->
-                        viewModel.updateFolder(folder.copy(name = newName, color = newColor, description = newDesc))
-                        folderToEdit = null
-                        modalHost.dismiss()
-                    },
-                    hazeState = dialogHazeState
-                )
-            }
-        }
-    }
-
-    LaunchedEffect(folderToShare) {
-        val folder = folderToShare
-        if (folder != null) {
-            modalHost.show {
-                FolderShareModal(
-                    folder = folder,
-                    onDismiss = {
-                        folderToShare = null
-                        modalHost.dismiss()
-                    },
-                    onCreateInvite = { durationOption, callback ->
-                        viewModel.createInviteForFolder(folder, durationOption, callback)
-                    },
-                    hazeState = dialogHazeState
-                )
-            }
-        }
-    }
-
-    LaunchedEffect(folderForMembers) {
-        val folder = folderForMembers
-        if (folder != null) {
-            modalHost.show {
-                FolderMembersModalHostContent(
-                    folder = folder,
-                    viewModel = viewModel,
-                    dialogHazeState = dialogHazeState,
-                    onDismiss = {
-                        folderForMembers = null
-                        modalHost.dismiss()
-                    },
-                    onOpenShareModal = { target ->
-                        folderForMembers = null
-                        modalHost.dismiss()
-                        folderToShare = target
-                    }
-                )
-            }
-        }
-    }
+    FolderModalsHost(
+        isCreateDialogOpen = isCreateDialogOpen,
+        isJoinDialogOpen = isJoinDialogOpen,
+        joinDialogInitialCode = joinDialogInitialCode,
+        folderToDelete = folderToDelete,
+        folderToEdit = folderToEdit,
+        folderEditMode = folderEditMode,
+        folderToShare = folderToShare,
+        folderForMembers = folderForMembers,
+        dialogHazeState = dialogHazeState,
+        modalHost = modalHost,
+        viewModel = viewModel,
+        onCloseCreateDialog = { isCreateDialogOpen = false },
+        onCloseJoinDialog = {
+            isJoinDialogOpen = false
+            joinDialogInitialCode = ""
+        },
+        onClearFolderToDelete = { folderToDelete = null },
+        onClearFolderToEdit = { folderToEdit = null },
+        onClearFolderToShare = { folderToShare = null },
+        onClearFolderForMembers = { folderForMembers = null },
+        onOpenShareModal = { folderToShare = it }
+    )
 
     var rememberedMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
     var isMenuVisible by remember { mutableStateOf(false) }
@@ -856,82 +746,5 @@ fun FoldersScreenContent(
             }
         }
     }
-}
-
-@Composable
-private fun FolderMembersModalHostContent(
-    folder: FolderEntity,
-    viewModel: FoldersViewModel,
-    dialogHazeState: HazeState?,
-    onDismiss: () -> Unit,
-    onOpenShareModal: (FolderEntity) -> Unit
-) {
-    val currentUserId = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid ?: "" }
-    val isOwner = folder.ownerUid == currentUserId
-    var members by remember(folder.sharedFolderId) {
-        mutableStateOf<List<com.cinetrack.data.model.SharedFolderMemberDto>>(emptyList())
-    }
-    var activeInvites by remember(folder.sharedFolderId) {
-        mutableStateOf<List<com.cinetrack.data.model.SharedFolderInviteDto>>(emptyList())
-    }
-
-    LaunchedEffect(folder.sharedFolderId) {
-        folder.sharedFolderId?.let { sharedId ->
-            viewModel.getFolderMembers(sharedId) { res ->
-                members = res.getOrDefault(emptyList())
-            }
-            viewModel.getFolderInvites(sharedId) { res ->
-                activeInvites = res.getOrDefault(emptyList())
-                if (isOwner) {
-                    viewModel.checkAutoRevert(folder) { didRevert ->
-                        if (didRevert) {
-                            onDismiss()
-                        }
-                    }
-                }
-            }
-        }
-    }
-
-    FolderMembersModal(
-        folder = folder,
-        members = members,
-        activeInvites = activeInvites,
-        currentUserId = currentUserId,
-        isOwner = isOwner,
-        onDismiss = onDismiss,
-        onRemoveMember = { member ->
-            viewModel.removeFolderMember(folder, member.userId) { res ->
-                if (res.isSuccess) {
-                    val didRevert = res.getOrDefault(false)
-                    if (didRevert) {
-                        onDismiss()
-                    } else {
-                        members = members.filter { it.userId != member.userId }
-                    }
-                }
-            }
-        },
-        onLeaveFolder = {
-            viewModel.deleteFolder(folder.id)
-            onDismiss()
-        },
-        onRevokeInvite = { invite ->
-            viewModel.revokeFolderInvite(folder, invite.inviteCode) { res ->
-                if (res.isSuccess) {
-                    val didRevert = res.getOrDefault(false)
-                    if (didRevert) {
-                        onDismiss()
-                    } else {
-                        activeInvites = activeInvites.filter { it.inviteCode != invite.inviteCode }
-                    }
-                }
-            }
-        },
-        onOpenShareModal = {
-            onOpenShareModal(folder)
-        },
-        hazeState = dialogHazeState
-    )
 }
 
