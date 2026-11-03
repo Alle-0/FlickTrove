@@ -19,6 +19,7 @@ import androidx.compose.material.icons.rounded.Close
 import androidx.compose.material.icons.rounded.Favorite
 import androidx.compose.material.icons.rounded.Info
 import androidx.compose.material3.*
+import com.cinetrack.ui.components.common.FlickTroveSwitch
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -776,7 +777,7 @@ fun SettingsEndCreditsBox(
                             color = Color.White.copy(alpha = 0.70f),
                             modifier = Modifier.weight(1f)
                         )
-                        Switch(
+                        FlickTroveSwitch(
                             checked = showInCredits,
                             onCheckedChange = { isChecked ->
                                 showInCredits = isChecked
@@ -784,12 +785,7 @@ fun SettingsEndCreditsBox(
                                 badgeRepo.setSupporterCreditEnabled(isChecked)
                                 supporters = badgeRepo.getCachedPublicCreditsSupporters()
                             },
-                            colors = SwitchDefaults.colors(
-                                checkedThumbColor = Color.Black,
-                                checkedTrackColor = primaryColor,
-                                uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
-                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
-                            )
+                            accentColor = primaryColor
                         )
                     }
                 }

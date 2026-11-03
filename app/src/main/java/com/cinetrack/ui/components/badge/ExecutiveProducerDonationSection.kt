@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.*
+import com.cinetrack.ui.components.common.FlickTroveSwitch
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -154,19 +155,14 @@ fun ExecutiveProducerDonationSection(
                     color = Color.White.copy(alpha = 0.70f),
                     modifier = Modifier.weight(1f)
                 )
-                Switch(
+                FlickTroveSwitch(
                     checked = showInCredits,
                     onCheckedChange = { isChecked ->
                         showInCredits = isChecked
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                         badgeRepo?.setSupporterCreditEnabled(isChecked)
                     },
-                    colors = SwitchDefaults.colors(
-                        checkedThumbColor = Color.Black,
-                        checkedTrackColor = Color(0xFFFDE047),
-                        uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
-                        uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
-                    )
+                    accentColor = Color(0xFFFDE047)
                 )
             }
         } else {

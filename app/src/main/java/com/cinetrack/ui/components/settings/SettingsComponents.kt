@@ -580,7 +580,7 @@ fun DonationBanner(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Animated Icon container: Film Patron / Clapper Hands
+                // Icona mecenate nel pallino dorato: l'icona dentro è grande e clippata dal cerchio
                 Box(
                     modifier = Modifier
                         .size(50.dp)
@@ -604,7 +604,7 @@ fun DonationBanner(
                         painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
                         contentDescription = "Patron",
                         tint = Color(0xFF141419),
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(58.dp)
                     )
                 }
                 

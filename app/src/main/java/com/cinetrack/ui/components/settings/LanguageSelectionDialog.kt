@@ -103,7 +103,18 @@ fun LanguageSelectionDialog(
             "ko" to stringResource(R.string.settings_language_ko),
             "zh" to stringResource(R.string.settings_language_zh),
             "id" to stringResource(R.string.settings_language_id),
-            "tr" to stringResource(R.string.settings_language_tr)
+            "tr" to stringResource(R.string.settings_language_tr),
+            "pl" to stringResource(R.string.settings_language_pl),
+            "nl" to stringResource(R.string.settings_language_nl),
+            "pt-PT" to stringResource(R.string.settings_language_pt_pt),
+            "cs" to stringResource(R.string.settings_language_cs),
+            "uk" to stringResource(R.string.settings_language_uk),
+            "hu" to stringResource(R.string.settings_language_hu),
+            "ro" to stringResource(R.string.settings_language_ro),
+            "sv" to stringResource(R.string.settings_language_sv),
+            "el" to stringResource(R.string.settings_language_el),
+            "vi" to stringResource(R.string.settings_language_vi),
+            "th" to stringResource(R.string.settings_language_th)
         )
         
         val scrollState = rememberScrollState()

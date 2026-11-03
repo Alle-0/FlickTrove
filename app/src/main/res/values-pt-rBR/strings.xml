@@ -218,6 +218,17 @@
     <string name="settings_language_zh">简体中文</string>
     <string name="settings_language_id">Bahasa Indonesia</string>
     <string name="settings_language_tr">Türkçe</string>
+    <string name="settings_language_pl">Polski</string>
+    <string name="settings_language_nl">Nederlands</string>
+    <string name="settings_language_pt_pt">Português (Portugal)</string>
+    <string name="settings_language_cs">Čeština</string>
+    <string name="settings_language_uk">Українська</string>
+    <string name="settings_language_hu">Magyar</string>
+    <string name="settings_language_ro">Română</string>
+    <string name="settings_language_sv">Svenska</string>
+    <string name="settings_language_el">Ελληνικά</string>
+    <string name="settings_language_vi">Tiếng Việt</string>
+    <string name="settings_language_th">ไทย</string>
     <string name="settings_default_start_tab">Tela Inicial</string>
     <string name="settings_default_start_tab_desc">Escolha a tela padrão ao abrir o aplicativo</string>
     <string name="settings_default_start_home">PARA ASSISTIR</string>

@@ -18,6 +18,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
@@ -148,7 +149,7 @@ fun HomeSupportCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Header: Icona cinematografica mecenate a sinistra + Titolo & Descrizione
+                // Header: Pallino dorato a sinistra con icona mecenate grande clippata dentro
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -174,7 +175,7 @@ fun HomeSupportCard(
                             painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
                             contentDescription = null,
                             tint = Color(0xFF141419),
-                            modifier = Modifier.size(24.dp)
+                            modifier = Modifier.size(56.dp)
                         )
                     }
 
