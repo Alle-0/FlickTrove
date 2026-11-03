@@ -801,7 +801,7 @@
     <string name="folder_delete_title">Xóa thư mục?</string>
     <string name="folder_delete_confirm_prefix">Bạn có chắc chắn muốn xóa </string>
     <string name="folder_delete_confirm_prefix_2">Bạn có chắc chắn muốn xóa thư mục </string>
-    <string name="folder_delete_confirm_suffix">? Hành động này không thể hoàn tác.</string>
+    <string name="folder_delete_confirm_suffix">\? Hành động này không thể hoàn tác.</string>
     <string name="folder_delete_action">XÓA THƯ MỤC</string>
     <string name="folder_delete_warning_long">HÀNH ĐỘNG NÀY KHÔNG THỂ HOÀN TÁC VÀ SẼ CHỈ XÓA BỘ SẮP XẾP, KHÔNG XÓA NỘI DUNG ĐÃ LƯU.</string>
     <string name="folder_delete_cancel">HỦY</string>

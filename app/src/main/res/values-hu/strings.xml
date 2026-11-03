@@ -820,7 +820,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="folder_delete_title">Mappa törlése?</string>
     <string name="folder_delete_confirm_prefix">Biztosan törölni szeretnéd ezt: </string>
     <string name="folder_delete_confirm_prefix_2">Biztosan törölni szeretnéd a mappát: </string>
-    <string name="folder_delete_confirm_suffix">? Ez a művelet nem vonható vissza.</string>
+    <string name="folder_delete_confirm_suffix">\? Ez a művelet nem vonható vissza.</string>
     <string name="folder_delete_action">MAPPA TÖRLÉSE</string>
     <string name="folder_delete_warning_long">EZ A MŰVELET NEM VONHATÓ VISSZA, ÉS CSAK A RENDSZEREZÉST TÖRLI, A MENTETT TARTALMAKAT NEM.</string>
     <string name="folder_delete_cancel">MÉGSE</string>

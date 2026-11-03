@@ -1319,10 +1319,10 @@
     <string name="comment_report_success">通報を送信しました。ご協力ありがとうございます！</string>
     <string name="comment_report_error">通報を送信できませんでした。後でもう一度お試しください。</string>
     <string name="comment_block_user_title">ユーザーをブロック</string>
-    <string name="comment_block_user_subtitle">@%1$s をブロックしますか？このユーザーのコメントや返信はアプリ全体で非表示になります。</string>
+    <string name="comment_block_user_subtitle">\@%1$s をブロックしますか？このユーザーのコメントや返信はアプリ全体で非表示になります。</string>
     <string name="comment_block_user_confirm">ブロック</string>
     <string name="comment_block_user_action">%1$s をブロック</string>
-    <string name="comment_block_user_success">@%1$s をブロックしました</string>
+    <string name="comment_block_user_success">\@%1$s をブロックしました</string>
     <string name="comment_unblock_user_btn">ブロック解除</string>
     <string name="comment_unblock_user_success">ユーザーのブロックを解除しました</string>
     <string name="comment_delete_title">削除</string>

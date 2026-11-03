@@ -1319,10 +1319,10 @@
     <string name="comment_report_success">Bildirim gönderildi. Geri bildiriminiz için teşekkürler!</string>
     <string name="comment_report_error">Bildirim gönderilemedi. Lütfen daha sonra tekrar deneyin.</string>
     <string name="comment_block_user_title">Kullanıcıyı engelle</string>
-    <string name="comment_block_user_subtitle">@%1$s adlı kullanıcıyı engellemek istiyor musunuz? Bu kullanıcının yorumları ve yanıtları uygulamada artık sizin için görünmeyecek.</string>
+    <string name="comment_block_user_subtitle">\@%1$s adlı kullanıcıyı engellemek istiyor musunuz? Bu kullanıcının yorumları ve yanıtları uygulamada artık sizin için görünmeyecek.</string>
     <string name="comment_block_user_confirm">Engelle</string>
     <string name="comment_block_user_action">%1$s adlı kullanıcıyı engelle</string>
-    <string name="comment_block_user_success">@%1$s engellendi</string>
+    <string name="comment_block_user_success">\@%1$s engellendi</string>
     <string name="comment_unblock_user_btn">Engeli kaldır</string>
     <string name="comment_unblock_user_success">Kullanıcının engeli kaldırıldı</string>
     <string name="comment_delete_title">Sil</string>

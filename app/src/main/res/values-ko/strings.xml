@@ -1319,10 +1319,10 @@
     <string name="comment_report_success">신고가 접수되었습니다. 소중한 의견 감사합니다!</string>
     <string name="comment_report_error">신고를 전송할 수 없습니다. 나중에 다시 시도해 주세요.</string>
     <string name="comment_block_user_title">사용자 차단</string>
-    <string name="comment_block_user_subtitle">@%1$s 님을 차단하시겠습니까? 해당 사용자의 댓글과 답글이 앱 전체에서 더 이상 표시되지 않습니다.</string>
+    <string name="comment_block_user_subtitle">\@%1$s 님을 차단하시겠습니까? 해당 사용자의 댓글과 답글이 앱 전체에서 더 이상 표시되지 않습니다.</string>
     <string name="comment_block_user_confirm">차단</string>
     <string name="comment_block_user_action">%1$s 차단</string>
-    <string name="comment_block_user_success">@%1$s 님을 차단했습니다</string>
+    <string name="comment_block_user_success">\@%1$s 님을 차단했습니다</string>
     <string name="comment_unblock_user_btn">차단 해제</string>
     <string name="comment_unblock_user_success">사용자 차단을 해제했습니다</string>
     <string name="comment_delete_title">삭제</string>

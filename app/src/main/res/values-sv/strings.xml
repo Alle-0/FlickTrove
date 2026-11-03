@@ -820,7 +820,7 @@ Prova att förenkla sökningen</string>
     <string name="folder_delete_title">Radera mapp?</string>
     <string name="folder_delete_confirm_prefix">Är du säker på att du vill radera </string>
     <string name="folder_delete_confirm_prefix_2">Är du säker på att du vill radera mappen </string>
-    <string name="folder_delete_confirm_suffix">? Denna åtgärd kan inte ångras.</string>
+    <string name="folder_delete_confirm_suffix">\? Denna åtgärd kan inte ångras.</string>
     <string name="folder_delete_action">RADERA MAPP</string>
     <string name="folder_delete_warning_long">DENNA ÅTGÄRD KAN INTE ÅNGRAS OCH TAR ENDAST BORT STRUKTUREN, INTE DET SPARADE INNEHÅLLET.</string>
     <string name="folder_delete_cancel">AVBRYT</string>
