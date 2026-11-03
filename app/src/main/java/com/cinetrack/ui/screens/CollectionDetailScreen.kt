@@ -56,7 +56,7 @@ import com.cinetrack.ui.components.common.PillProgressBorder
 import com.cinetrack.ui.components.detail.CollectionDetailSkeleton
 import com.cinetrack.ui.components.detail.DetailBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.boundsInRoot
 import androidx.compose.ui.geometry.Rect

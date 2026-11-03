@@ -63,7 +63,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import com.cinetrack.ui.components.search.SearchContentGrid
 import com.cinetrack.ui.components.search.SearchHeader
 import com.cinetrack.ui.components.shared.LocalMovieActions

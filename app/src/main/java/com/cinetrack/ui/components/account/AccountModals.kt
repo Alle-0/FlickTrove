@@ -581,6 +581,14 @@ fun AccountModals(
                                                     avatarUrl = currentPhotoUrl?.toString()
                                                 )
                                                 
+                                                // Se l'utente è un produttore esecutivo, aggiorna automaticamente il nome nei titoli di coda
+                                                try {
+                                                    dagger.hilt.android.EntryPointAccessors.fromApplication(
+                                                        context.applicationContext,
+                                                        com.cinetrack.data.repository.BadgeRepositoryEntryPoint::class.java
+                                                    ).badgeRepository().onUserNameChanged(nameInput)
+                                                } catch (_: Exception) {}
+                                                
                                                 showProfileMenu = false
                                             } catch (e: Exception) {
                                                 if (e is IllegalArgumentException || e.message == "NAME_TAKEN") {

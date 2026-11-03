@@ -1,4 +1,4 @@
-package com.cinetrack.ui.components.dialog
+package com.cinetrack.ui.components.folder
 
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.core.Animatable

@@ -28,7 +28,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -43,6 +45,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.common.SegmentedControl
 import com.cinetrack.ui.components.common.SegmentedOption
 import com.cinetrack.ui.theme.OnSurfaceMuted
+import kotlinx.coroutines.launch
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.VibrationHelper
@@ -469,6 +472,48 @@ var creditsExpanded by remember { mutableStateOf(false) }
                         )
                     }
                 }
+
+                if (badgeRepo?.isSupporterVerified() == true) {
+                    var showInCredits by remember {
+                        mutableStateOf(badgeRepo.isSupporterCreditEnabled())
+                    }
+                    val scope = rememberCoroutineScope()
+                    val haptic = LocalHapticFeedback.current
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 0.8.dp)
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.trophy_producer_credits_switch),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                            color = Color.White.copy(alpha = 0.70f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = showInCredits,
+                            onCheckedChange = { isChecked ->
+                                showInCredits = isChecked
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                scope.launch {
+                                    badgeRepo.setSupporterCreditEnabled(isChecked)
+                                    supporters = badgeRepo.getCachedPublicCreditsSupporters()
+                                }
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.Black,
+                                checkedTrackColor = primaryColor,
+                                uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
+                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
+                            )
+                        )
+                    }
+                }
             }
         }
     }
@@ -748,6 +793,48 @@ fun SettingsEndCreditsBox(
                                 )
                             }
                         }
+                    }
+                }
+
+                if (badgeRepo?.isSupporterVerified() == true) {
+                    var showInCredits by remember {
+                        mutableStateOf(badgeRepo.isSupporterCreditEnabled())
+                    }
+                    val scope = rememberCoroutineScope()
+                    val haptic = LocalHapticFeedback.current
+
+                    Spacer(modifier = Modifier.height(14.dp))
+                    HorizontalDivider(color = Color.White.copy(alpha = 0.08f), thickness = 0.8.dp)
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    Row(
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Text(
+                            text = stringResource(R.string.trophy_producer_credits_switch),
+                            style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                            color = Color.White.copy(alpha = 0.70f),
+                            modifier = Modifier.weight(1f)
+                        )
+                        Switch(
+                            checked = showInCredits,
+                            onCheckedChange = { isChecked ->
+                                showInCredits = isChecked
+                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                scope.launch {
+                                    badgeRepo.setSupporterCreditEnabled(isChecked)
+                                    supporters = badgeRepo.getCachedPublicCreditsSupporters()
+                                }
+                            },
+                            colors = SwitchDefaults.colors(
+                                checkedThumbColor = Color.Black,
+                                checkedTrackColor = primaryColor,
+                                uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
+                                uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
+                            )
+                        )
                     }
                 }
             }

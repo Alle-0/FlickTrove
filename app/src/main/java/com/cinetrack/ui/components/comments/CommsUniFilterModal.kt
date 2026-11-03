@@ -9,7 +9,7 @@ import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.model.CommentSortOption
 import com.cinetrack.data.model.CommentSortOrder
 import com.cinetrack.data.model.SortConfig
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import dev.chrisbanes.haze.HazeState
 
 @Composable

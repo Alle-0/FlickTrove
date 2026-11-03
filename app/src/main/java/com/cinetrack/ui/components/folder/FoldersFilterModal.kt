@@ -1,4 +1,12 @@
-package com.cinetrack.ui.components.dialog
+package com.cinetrack.ui.components.folder
+
+import com.cinetrack.ui.components.dialog.ExpandableSection
+import com.cinetrack.ui.components.dialog.SortOptionItem
+import com.cinetrack.ui.components.dialog.DirectionChip
+import com.cinetrack.ui.components.dialog.FilterChip
+import com.cinetrack.ui.components.dialog.FilterOption
+import com.cinetrack.ui.components.dialog.SeriesStatusInfoDialog
+import com.cinetrack.ui.components.dialog.ProviderItem
 
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background

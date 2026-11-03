@@ -377,9 +377,13 @@ class BadgeRepository @Inject constructor(
             }
 
             var isSupporter = false
+            var supporterDisplayName: String? = null
             if (snapshot != null && snapshot.exists()) {
                 isSupporter = snapshot.getBoolean("isSupporter") == true ||
                     snapshot.getBoolean("isExecutiveProducer") == true
+
+                supporterDisplayName = snapshot.getString("displayName")?.takeIf { !it.isNullOrBlank() }
+                    ?: snapshot.getString("creditName")?.takeIf { !it.isNullOrBlank() }
 
                 val claimed = snapshot.getBoolean("claimed") == true
                 val claimedByUid = snapshot.getString("claimedByUid")
@@ -408,16 +412,65 @@ class BadgeRepository @Inject constructor(
                     val userDoc = firestore.collection("users").document(user.uid).get().await()
                     if (userDoc.exists() && (userDoc.getBoolean("isSupporter") == true || userDoc.getBoolean("isExecutiveProducer") == true)) {
                         isSupporter = true
+                        supporterDisplayName = userDoc.getString("displayName") ?: userDoc.getString("creditName")
                     }
                 } catch (_: Exception) {}
             }
 
             if (isSupporter) {
-                badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                badgePrefs.edit()
+                    .putBoolean("is_supporter_verified", true)
+                    .putString("supporter_verified_email", cleanEmail)
+                    .apply()
+
+                // Se l'utente ha un nome utente o il mecenate ha un displayName, inseriscilo in automatico nei titoli di coda
+                val rawSupporterName = when {
+                    !auth.currentUser?.displayName.isNullOrBlank() && auth.currentUser?.displayName?.contains("@") == false -> auth.currentUser?.displayName?.trim()
+                    !supporterDisplayName.isNullOrBlank() && !supporterDisplayName.contains("@") -> supporterDisplayName.trim()
+                    else -> null
+                }
+
+                if (!rawSupporterName.isNullOrBlank()) {
+                    val formattedName = rawSupporterName.split(" ")
+                        .filter { it.isNotBlank() }
+                        .joinToString(" ") { part ->
+                            part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+                        }
+
+                    badgePrefs.edit()
+                        .putString("supporter_credit_name", formattedName)
+                        .putBoolean("supporter_show_in_credits", true)
+                        .apply()
+
+                    val currentCached = badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toMutableSet() ?: mutableSetOf()
+                    currentCached.add(formattedName)
+                    badgePrefs.edit().putStringSet("cached_credits_supporters", currentCached).apply()
+
+                    try {
+                        firestore.collection("system_metrics").document("credits_producers")
+                            .update("producers", com.google.firebase.firestore.FieldValue.arrayUnion(formattedName))
+                            .await()
+                    } catch (_: Exception) {
+                        try {
+                            firestore.collection("system_metrics").document("credits_producers")
+                                .set(
+                                    mapOf("producers" to com.google.firebase.firestore.FieldValue.arrayUnion(formattedName)),
+                                    com.google.firebase.firestore.SetOptions.merge()
+                                )
+                                .await()
+                        } catch (_: Exception) {}
+                    }
+                }
+
                 if (user != null && !user.isAnonymous) {
                     try {
+                        val userUpdates = mutableMapOf<String, Any>("isSupporter" to true)
+                        if (!rawSupporterName.isNullOrBlank()) {
+                            userUpdates["creditName"] = rawSupporterName
+                            userUpdates["showInCredits"] = true
+                        }
                         firestore.collection("users").document(user.uid)
-                            .update("isSupporter", true)
+                            .set(userUpdates, com.google.firebase.firestore.SetOptions.merge())
                             .await()
                     } catch (_: Exception) {}
                 }
@@ -466,8 +519,63 @@ class BadgeRepository @Inject constructor(
         true
     }
 
+    fun isSupporterCreditEnabled(): Boolean {
+        return badgePrefs.getBoolean("supporter_show_in_credits", true)
+    }
+
+    suspend fun setSupporterCreditEnabled(enabled: Boolean): Unit = withContext(Dispatchers.IO) {
+        badgePrefs.edit().putBoolean("supporter_show_in_credits", enabled).apply()
+        val name = badgePrefs.getString("supporter_credit_name", null)?.takeIf { it.isNotBlank() }
+        if (!name.isNullOrBlank()) {
+            val cached = badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toMutableSet() ?: mutableSetOf()
+            if (enabled) {
+                cached.add(name)
+                try {
+                    firestore.collection("system_metrics").document("credits_producers")
+                        .update("producers", com.google.firebase.firestore.FieldValue.arrayUnion(name))
+                        .await()
+                } catch (_: Exception) {
+                    try {
+                        firestore.collection("system_metrics").document("credits_producers")
+                            .set(
+                                mapOf("producers" to com.google.firebase.firestore.FieldValue.arrayUnion(name)),
+                                com.google.firebase.firestore.SetOptions.merge()
+                            )
+                            .await()
+                    } catch (_: Exception) {}
+                }
+            } else {
+                cached.remove(name)
+                try {
+                    firestore.collection("system_metrics").document("credits_producers")
+                        .update("producers", com.google.firebase.firestore.FieldValue.arrayRemove(name))
+                        .await()
+                } catch (_: Exception) {}
+            }
+            badgePrefs.edit().putStringSet("cached_credits_supporters", cached).apply()
+        }
+
+        val user = auth.currentUser
+        if (user != null && !user.isAnonymous) {
+            try {
+                firestore.collection("users").document(user.uid)
+                    .update("showInCredits", enabled)
+                    .await()
+            } catch (_: Exception) {}
+        }
+    }
+
     fun getCachedPublicCreditsSupporters(): List<String> {
-        return badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList().orEmpty()
+        val cached = badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toMutableSet() ?: mutableSetOf()
+        val myName = badgePrefs.getString("supporter_credit_name", null)?.takeIf { it.isNotBlank() }
+        if (isSupporterVerified() && isSupporterCreditEnabled()) {
+            if (!myName.isNullOrBlank()) {
+                cached.add(myName)
+            }
+        } else if (!isSupporterCreditEnabled() && !myName.isNullOrBlank()) {
+            cached.remove(myName)
+        }
+        return cached.toList()
     }
 
     suspend fun fetchPublicCreditsSupporters(forceRefresh: Boolean = false): List<String> = withContext(Dispatchers.IO) {
@@ -479,6 +587,38 @@ class BadgeRepository @Inject constructor(
         }
 
         try {
+            // Risolvi automaticamente il nome del sostenitore se verificato
+            var mySupporterName = badgePrefs.getString("supporter_credit_name", null)?.takeIf { it.isNotBlank() }
+            if (isSupporterVerified()) {
+                if (mySupporterName.isNullOrBlank()) {
+                    val authName = auth.currentUser?.displayName?.takeIf { it.isNotBlank() && !it.contains("@") }
+                    if (!authName.isNullOrBlank()) {
+                        mySupporterName = authName
+                    } else {
+                        val verifiedEmail = badgePrefs.getString("supporter_verified_email", null) ?: auth.currentUser?.email
+                        if (!verifiedEmail.isNullOrBlank()) {
+                            try {
+                                val suppDoc = firestore.collection("supporters").document(verifiedEmail.trim().lowercase()).get().await()
+                                val sName = suppDoc.getString("displayName")?.takeIf { it.isNotBlank() && !it.contains("@") }
+                                    ?: suppDoc.getString("creditName")?.takeIf { it.isNotBlank() && !it.contains("@") }
+                                if (!sName.isNullOrBlank()) {
+                                    mySupporterName = sName
+                                }
+                            } catch (_: Exception) {}
+                        }
+                    }
+                    if (!mySupporterName.isNullOrBlank()) {
+                        val formatted = mySupporterName.split(" ")
+                            .filter { it.isNotBlank() }
+                            .joinToString(" ") { part -> part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } }
+                        mySupporterName = formatted
+                        badgePrefs.edit().putString("supporter_credit_name", formatted).apply()
+                    }
+                }
+            }
+
+            val isCreditActive = isSupporterCreditEnabled()
+
             // 1. Single Source of Truth: system_metrics/credits_producers
             // Se esiste e contiene la lista "producers", usa prioritariamente questa lista curata (1 lettura Spark)
             try {
@@ -488,13 +628,29 @@ class BadgeRepository @Inject constructor(
                     if (list != null) {
                         val names = list.mapNotNull { it?.toString()?.trim() }
                             .filter { it.isNotBlank() }
-                            .distinct()
+                            .toMutableList()
+
+                        if (!mySupporterName.isNullOrBlank()) {
+                            if (isCreditActive && isSupporterVerified()) {
+                                if (!names.contains(mySupporterName)) {
+                                    names.add(mySupporterName)
+                                    try {
+                                        firestore.collection("system_metrics").document("credits_producers")
+                                            .update("producers", com.google.firebase.firestore.FieldValue.arrayUnion(mySupporterName))
+                                    } catch (_: Exception) {}
+                                }
+                            } else {
+                                names.remove(mySupporterName)
+                            }
+                        }
+
                         if (names.isNotEmpty()) {
+                            val distinctNames = names.distinct()
                             badgePrefs.edit()
-                                .putStringSet("cached_credits_supporters", names.toSet())
+                                .putStringSet("cached_credits_supporters", distinctNames.toSet())
                                 .putLong("credits_last_fetch_time", now)
                                 .apply()
-                            return@withContext names
+                            return@withContext distinctNames
                         }
                     }
                 }
@@ -504,6 +660,9 @@ class BadgeRepository @Inject constructor(
 
             // 2. Fallback dinamico: se il documento centralizzato non esiste, interroga /supporters
             val collectedNames = mutableListOf<String>()
+            if (isCreditActive && isSupporterVerified() && !mySupporterName.isNullOrBlank()) {
+                collectedNames.add(mySupporterName)
+            }
             try {
                 if (auth.currentUser == null) {
                     try { auth.signInAnonymously().await() } catch (_: Exception) {}
@@ -566,6 +725,39 @@ class BadgeRepository @Inject constructor(
             android.util.Log.w("BadgeRepository", "Failed to fetch public credits: ${e.message}")
             badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList().orEmpty()
         }
+    }
+
+    suspend fun onUserNameChanged(newDisplayName: String) = withContext(Dispatchers.IO) {
+        if (!isSupporterVerified()) return@withContext
+        val cleanName = newDisplayName.trim()
+        if (cleanName.isBlank() || cleanName.contains("@")) return@withContext
+
+        val formatted = cleanName.split(" ")
+            .filter { it.isNotBlank() }
+            .joinToString(" ") { part ->
+                part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() }
+            }
+
+        val oldName = badgePrefs.getString("supporter_credit_name", null)
+        badgePrefs.edit().putString("supporter_credit_name", formatted).apply()
+
+        // Aggiorna cache locale
+        val cached = badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toMutableSet() ?: mutableSetOf()
+        if (!oldName.isNullOrBlank()) cached.remove(oldName)
+        cached.add(formatted)
+        badgePrefs.edit().putStringSet("cached_credits_supporters", cached).apply()
+
+        // Sincronizza su Firestore
+        try {
+            if (!oldName.isNullOrBlank()) {
+                firestore.collection("system_metrics").document("credits_producers")
+                    .update("producers", com.google.firebase.firestore.FieldValue.arrayRemove(oldName))
+                    .await()
+            }
+            firestore.collection("system_metrics").document("credits_producers")
+                .update("producers", com.google.firebase.firestore.FieldValue.arrayUnion(formatted))
+                .await()
+        } catch (_: Exception) {}
     }
 
     fun recordMovieBookmarked(movieId: Long) {

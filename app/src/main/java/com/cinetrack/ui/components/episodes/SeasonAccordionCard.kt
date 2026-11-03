@@ -1,4 +1,4 @@
-package com.cinetrack.ui.components.dialog
+package com.cinetrack.ui.components.episodes
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.LinearEasing

@@ -592,7 +592,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             val currentSortOrder by foldersViewModelForSort.sortOrder.collectAsStateWithLifecycle()
                             val currentTypeFilter by foldersViewModelForSort.typeFilter.collectAsStateWithLifecycle()
 
-                            com.cinetrack.ui.components.dialog.FoldersFilterModal(
+                            com.cinetrack.ui.components.folder.FoldersFilterModal(
                                 isVisible = showFoldersSortMenu,
                                 triggerBounds = foldersFilterButtonBounds,
                                 hazeState = contentHazeState,

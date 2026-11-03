@@ -47,7 +47,7 @@ import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.viewmodel.TimeRange
 import dev.chrisbanes.haze.HazeState
 import kotlin.math.roundToInt
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 

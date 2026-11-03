@@ -69,7 +69,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import com.cinetrack.ui.components.card.MovieListCard
 
 object VistiTab : Tab {

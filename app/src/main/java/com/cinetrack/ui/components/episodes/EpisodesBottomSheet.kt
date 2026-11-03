@@ -1,4 +1,4 @@
-package com.cinetrack.ui.components.dialog
+package com.cinetrack.ui.components.episodes
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.ModalCloseButton
 

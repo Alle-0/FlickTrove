@@ -15,7 +15,7 @@ import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.tab.Tab
 import com.cinetrack.ui.FilterModalConfig
 import com.cinetrack.ui.LocalActiveFilterConfig
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import com.cinetrack.ui.components.stats.YearSelectionModal
 import com.cinetrack.ui.screens.DiscoverTab
 import com.cinetrack.ui.screens.FolderDetailTab
@@ -186,7 +186,7 @@ fun MainModalsContainer(
             val reorderConfig = com.cinetrack.ui.LocalFolderReorderConfig.current.value
             if (reorderConfig != null && reorderConfig.visible) {
                 Box(modifier = Modifier.zIndex(75000f)) {
-                    com.cinetrack.ui.components.dialog.FolderReorderModal(
+                    com.cinetrack.ui.components.folder.FolderReorderModal(
                         visible = reorderConfig.visible,
                         movies = reorderConfig.movies,
                         folderName = reorderConfig.folderName,

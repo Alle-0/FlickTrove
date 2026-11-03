@@ -50,7 +50,7 @@ import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
-import com.cinetrack.ui.components.dialog.HomeFilterModal
+import com.cinetrack.ui.components.home.HomeFilterModal
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick

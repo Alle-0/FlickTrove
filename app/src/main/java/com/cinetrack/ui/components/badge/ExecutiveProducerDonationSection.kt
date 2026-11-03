@@ -26,6 +26,7 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.platform.LocalUriHandler
@@ -57,6 +58,18 @@ fun ExecutiveProducerDonationSection(
     val focusManager = LocalFocusManager.current
     val uriHandler = LocalUriHandler.current
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+
+    val badgeRepo = remember {
+        try {
+            dagger.hilt.android.EntryPointAccessors.fromApplication(
+                context.applicationContext,
+                com.cinetrack.data.repository.BadgeRepositoryEntryPoint::class.java
+            ).badgeRepository()
+        } catch (_: Exception) {
+            null
+        }
+    }
 
     var emailInput by remember { mutableStateOf("") }
     var isVerifying by remember { mutableStateOf(false) }
@@ -120,6 +133,43 @@ fun ExecutiveProducerDonationSection(
                         textAlign = TextAlign.Center
                     )
                 }
+            }
+
+            var showInCredits by remember {
+                mutableStateOf(badgeRepo?.isSupporterCreditEnabled() ?: true)
+            }
+
+            Spacer(modifier = Modifier.height(10.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.trophy_producer_credits_switch),
+                    style = MaterialTheme.typography.bodySmall.copy(fontSize = 12.sp),
+                    color = Color.White.copy(alpha = 0.70f),
+                    modifier = Modifier.weight(1f)
+                )
+                Switch(
+                    checked = showInCredits,
+                    onCheckedChange = { isChecked ->
+                        showInCredits = isChecked
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        scope.launch {
+                            badgeRepo?.setSupporterCreditEnabled(isChecked)
+                        }
+                    },
+                    colors = SwitchDefaults.colors(
+                        checkedThumbColor = Color.Black,
+                        checkedTrackColor = Color(0xFFFDE047),
+                        uncheckedThumbColor = Color.White.copy(alpha = 0.6f),
+                        uncheckedTrackColor = Color.White.copy(alpha = 0.1f)
+                    )
+                )
             }
         } else {
             // Pulsanti compatti e discreti per sostenere su Ko-fi o PayPal

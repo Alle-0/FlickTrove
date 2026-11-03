@@ -108,7 +108,7 @@ import com.cinetrack.util.toComposeColor
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
-import com.cinetrack.ui.components.dialog.EpisodesBottomSheet
+import com.cinetrack.ui.components.episodes.EpisodesBottomSheet
 import com.cinetrack.ui.components.shared.shimmerEffect
 
 data class MovieDetailScreen(
