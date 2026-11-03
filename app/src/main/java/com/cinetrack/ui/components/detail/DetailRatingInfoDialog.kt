@@ -215,8 +215,10 @@ fun DetailRatingInfoDialog(
                                 Spacer(modifier = Modifier.height(10.dp))
                                 Column(verticalArrangement = Arrangement.spacedBy(12.dp)) {
                                     RatingLegendItem("U", Color(0xFF4CAF50), stringResource(R.string.detail_rating_in_u))
-                                    RatingLegendItem("UA", Color(0xFFFF9800), stringResource(R.string.detail_rating_in_ua))
-                                    RatingLegendItem("A", Color(0xFFF44336), stringResource(R.string.detail_rating_in_a))
+                                    RatingLegendItem("U/A", Color(0xFF8BC34A), stringResource(R.string.detail_rating_in_ua))
+                                    RatingLegendItem("U/A 13+", Color(0xFFFF9800), stringResource(R.string.rating_pg13_desc))
+                                    RatingLegendItem("U/A 16+", Color(0xFFE64A19), stringResource(R.string.rating_16_desc))
+                                    RatingLegendItem("A", Color(0xFFB71C1C), stringResource(R.string.detail_rating_in_a))
                                     RatingLegendItem("S", Color(0xFF9E9E9E), stringResource(R.string.detail_rating_in_s))
                                 }
                             }
