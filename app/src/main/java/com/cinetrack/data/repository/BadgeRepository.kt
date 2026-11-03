@@ -464,50 +464,83 @@ class BadgeRepository @Inject constructor(
         val now = System.currentTimeMillis()
         if (now - lastFetch < 6 * 60 * 60 * 1000L) {
             val cached = badgePrefs.getStringSet("cached_credits_supporters", null)
-            if (cached != null) return@withContext cached.toList().sorted()
+            if (!cached.isNullOrEmpty()) return@withContext cached.toList().sorted()
         }
 
         try {
-            // First check system_metrics/credits_producers (Zero-Waste Spark doc)
-            val metricDoc = firestore.collection("system_metrics").document("credits_producers").get().await()
-            if (metricDoc.exists()) {
-                val list = metricDoc.get("producers") as? List<*>
-                if (list != null) {
-                    val names = list.mapNotNull { it?.toString()?.trim() }.filter { it.isNotBlank() }.distinct()
-                    if (names.isNotEmpty()) {
-                        badgePrefs.edit()
-                            .putStringSet("cached_credits_supporters", names.toSet())
-                            .putLong("credits_last_fetch_time", now)
-                            .apply()
-                        return@withContext names.sorted()
+            val collectedNames = mutableListOf<String>()
+
+            // 1. Zero-Waste Spark doc: system_metrics/credits_producers (1 read, public read-friendly)
+            try {
+                val metricDoc = firestore.collection("system_metrics").document("credits_producers").get().await()
+                if (metricDoc.exists()) {
+                    val list = metricDoc.get("producers") as? List<*>
+                    if (list != null) {
+                        list.mapNotNull { it?.toString()?.trim() }
+                            .filter { it.isNotBlank() }
+                            .forEach { collectedNames.add(it) }
                     }
                 }
+            } catch (e: Exception) {
+                android.util.Log.d("BadgeRepository", "credits_producers doc read failed: ${e.message}")
             }
 
-            // Fallback: Query users with isSupporter == true and showInCredits == true (max 50)
-            val snapshot = firestore.collection("users")
-                .whereEqualTo("isSupporter", true)
-                .whereEqualTo("showInCredits", true)
-                .limit(50)
-                .get()
-                .await()
-
-            val names = snapshot.documents.mapNotNull { doc ->
-                val custom = doc.getString("creditName")
-                val displayName = doc.getString("displayName")
-                when {
-                    !custom.isNullOrBlank() -> custom.trim()
-                    !displayName.isNullOrBlank() -> displayName.trim()
-                    else -> null
+            // 2. Query /supporters collection directly
+            try {
+                val supportersSnap = firestore.collection("supporters").limit(100).get().await()
+                supportersSnap.documents.forEach { doc ->
+                    val isSupp = doc.getBoolean("isSupporter") == true || doc.getBoolean("isExecutiveProducer") == true
+                    val email = doc.getString("email") ?: doc.id
+                    // Do not list developer email or non-supporters
+                    if (isSupp && !email.contains("alessandrobasile909", ignoreCase = true)) {
+                        val dName = doc.getString("displayName")?.trim()
+                        val cName = doc.getString("creditName")?.trim()
+                        val rawName = when {
+                            !cName.isNullOrBlank() -> cName
+                            !dName.isNullOrBlank() -> dName
+                            else -> null
+                        }
+                        if (!rawName.isNullOrBlank() && !rawName.contains("@")) {
+                            val formatted = rawName.split(" ")
+                                .joinToString(" ") { part -> part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } }
+                            collectedNames.add(formatted)
+                        }
+                    }
                 }
-            }.filter { it.isNotBlank() }.distinct()
+            } catch (e: Exception) {
+                android.util.Log.d("BadgeRepository", "Supporters collection read failed: ${e.message}")
+            }
 
-            badgePrefs.edit()
-                .putStringSet("cached_credits_supporters", names.toSet())
-                .putLong("credits_last_fetch_time", now)
-                .apply()
+            // 3. Fallback: Query users collection where isSupporter == true
+            try {
+                val usersSnap = firestore.collection("users")
+                    .whereEqualTo("isSupporter", true)
+                    .limit(50)
+                    .get()
+                    .await()
+                usersSnap.documents.forEach { doc ->
+                    val dName = doc.getString("creditName") ?: doc.getString("displayName")
+                    if (!dName.isNullOrBlank() && !dName.contains("@")) {
+                        val formatted = dName.trim().split(" ")
+                            .joinToString(" ") { part -> part.replaceFirstChar { if (it.isLowerCase()) it.titlecase() else it.toString() } }
+                        collectedNames.add(formatted)
+                    }
+                }
+            } catch (e: Exception) {
+                android.util.Log.d("BadgeRepository", "Users collection read failed: ${e.message}")
+            }
 
-            names.sorted()
+            val finalNames = collectedNames.filter { it.isNotBlank() }.distinct().sorted()
+
+            if (finalNames.isNotEmpty()) {
+                badgePrefs.edit()
+                    .putStringSet("cached_credits_supporters", finalNames.toSet())
+                    .putLong("credits_last_fetch_time", now)
+                    .apply()
+                return@withContext finalNames
+            }
+
+            badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList()?.sorted().orEmpty()
         } catch (e: Exception) {
             android.util.Log.w("BadgeRepository", "Failed to fetch public credits: ${e.message}")
             badgePrefs.getStringSet("cached_credits_supporters", emptySet())?.toList()?.sorted().orEmpty()

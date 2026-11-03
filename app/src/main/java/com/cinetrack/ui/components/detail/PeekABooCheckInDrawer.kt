@@ -1,92 +1,49 @@
 package com.cinetrack.ui.components.detail
 
-import androidx.compose.animation.AnimatedVisibility
-import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.SizeTransform
-import androidx.compose.animation.togetherWith
-import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInHorizontally
-import androidx.compose.animation.slideOutHorizontally
-import androidx.compose.animation.expandHorizontally
-import androidx.compose.animation.shrinkHorizontally
-import androidx.compose.animation.scaleIn
-import androidx.compose.animation.scaleOut
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.ui.geometry.CornerRadius
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.foundation.lazy.LazyRow
-import androidx.compose.foundation.lazy.items
-import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.grid.GridCells
+import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
+import androidx.compose.foundation.lazy.grid.items
+import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
-import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
-import androidx.annotation.StringRes
-import androidx.compose.material3.Icon
-import androidx.compose.material3.MaterialTheme
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.res.vectorResource
-import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
-import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalCloseButton
-import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
-import androidx.compose.foundation.lazy.grid.GridCells
-import androidx.compose.foundation.lazy.grid.items
-import androidx.compose.foundation.lazy.grid.rememberLazyGridState
+import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.verticalFadingEdges
-import com.cinetrack.util.ImageQuality
-import com.cinetrack.util.ImageType
-import com.cinetrack.util.buildTmdbImageUrl
+import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
-import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
-import com.cinetrack.util.VibrationHelper
-import kotlin.math.cos
-import kotlin.math.sin
 import kotlin.random.Random
-
-private data class SaveBurstParticle(
-    val angle: Float,
-    val distance: Float,
-    val radius: Float,
-    val color: Color
-)
-
-
 
 /**
  * PeekABooCheckInDrawer
@@ -96,9 +53,7 @@ private data class SaveBurstParticle(
  * - State 1 (PEEKING): a small vertical tab slides in from the right edge as a subtle handle.
  *   Auto-dismisses after [peekTimeoutMs] ms if never tapped.
  * - State 2 (EXPANDED): tapping the tab springs open a full glassmorph panel with
- *   Vibe emoji selection and Cast MVP picker. The user can save or dismiss.
- *
- * The primary action ("Mark as Watched") is never blocked. This drawer is purely additive.
+ *   Rating, Vibe emoji selection and Cast MVP picker.
  */
 @Composable
 fun PeekABooCheckInDrawer(
@@ -161,7 +116,6 @@ fun PeekABooCheckInDrawer(
     // Reset and trigger peek when `visible` transitions to true
     LaunchedEffect(visible, startExpanded) {
         if (visible) {
-            // Restore selection to the saved movie state (in case they modified and dismissed previously)
             rating = movie?.personalRating ?: 0.0
             selectedVibes = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
                 findVibe(vibeString)
@@ -181,7 +135,7 @@ fun PeekABooCheckInDrawer(
         }
     }
 
-    // Auto-dismiss the peek tab after timeout (only while just peeking, not expanded)
+    // Auto-dismiss the peek tab after timeout
     LaunchedEffect(isPeeking, isExpanded) {
         if (isPeeking && !isExpanded) {
             delay(peekTimeoutMs)
@@ -229,7 +183,7 @@ fun PeekABooCheckInDrawer(
                     .clickable(
                         interactionSource = remember { MutableInteractionSource() },
                         indication = null,
-                        onClick = {} // Consume taps so they don't reach the outer box
+                        onClick = {}
                     )
             ) {
                 // Background Layer
@@ -276,10 +230,7 @@ fun PeekABooCheckInDrawer(
                                     lineHeight = 16.sp
                                 )
                             }
-                            // Close button
-                            ModalCloseButton(
-                                onClick = { dismissAll() }
-                            )
+                            ModalCloseButton(onClick = { dismissAll() })
                         }
 
                         AnimatedContent(
@@ -296,175 +247,172 @@ fun PeekABooCheckInDrawer(
                             label = "Page Transition",
                             modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
                         ) { page ->
-                            if (page == 0) {
-                                // Page 0: Rating
-                                Column(
-                                    horizontalAlignment = Alignment.CenterHorizontally,
-                                    modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
-                                ) {
-                                    com.cinetrack.ui.components.shared.FluidRatingBar(
-                                        rating = rating,
-                                        onRatingChange = { rating = it },
-                                        accentColor = accentColor,
-                                        starSize = 56.dp,
-                                        modifier = Modifier.padding(vertical = 16.dp)
-                                    )
-                                    if (rating > 0) {
-                                        Text(
-                                            text = rating.toString().removeSuffix(".0"),
-                                            color = accentColor,
-                                            style = MaterialTheme.typography.displayMedium.copy(
-                                                fontWeight = FontWeight.Black,
-                                                fontSize = 48.sp
+                            when (page) {
+                                0 -> {
+                                    // Page 0: Rating
+                                    Column(
+                                        horizontalAlignment = Alignment.CenterHorizontally,
+                                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                                    ) {
+                                        com.cinetrack.ui.components.shared.FluidRatingBar(
+                                            rating = rating,
+                                            onRatingChange = { rating = it },
+                                            accentColor = accentColor,
+                                            starSize = 56.dp,
+                                            modifier = Modifier.padding(vertical = 16.dp)
+                                        )
+                                        if (rating > 0) {
+                                            Text(
+                                                text = rating.toString().removeSuffix(".0"),
+                                                color = accentColor,
+                                                style = MaterialTheme.typography.displayMedium.copy(
+                                                    fontWeight = FontWeight.Black,
+                                                    fontSize = 48.sp
+                                                )
                                             )
-                                        )
-                                    } else {
-                                        Text(
-                                            text = stringResource(R.string.dialog_rating_remove),
-                                            color = Color.White.copy(0.5f),
-                                            style = MaterialTheme.typography.labelSmall
-                                        )
+                                        } else {
+                                            Text(
+                                                text = stringResource(R.string.dialog_rating_remove),
+                                                color = Color.White.copy(0.5f),
+                                                style = MaterialTheme.typography.labelSmall
+                                            )
+                                        }
                                     }
                                 }
-                            } else if (page == 1) {
-                                // Page 1: Vibe Grid
-                                Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                                    ALL_VIBES.chunked(3).forEach { rowVibes ->
-                                        Row(
-                                            horizontalArrangement = Arrangement.spacedBy(8.dp),
-                                            modifier = Modifier.fillMaxWidth()
-                                        ) {
-                                            rowVibes.forEach { vibe ->
-                                                val isSelected = selectedVibes.contains(vibe)
-                                                val isDisabled = !isSelected && selectedVibes.size >= 3
-                                                val originalVibes = remember(movie?.emotionalVibes) {
-                                                    movie?.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
-                                                }
-                                                val currentVibes = selectedVibes.map { it.code }.toSet()
-                                                val missingOriginalVibes = originalVibes.count { 
-                                                    (globalStats?.vibes?.get(it) ?: 0L) == 0L 
-                                                }
-                                                val baseGlobalTotal = maxOf(
-                                                    globalStats?.totalVibes ?: 0L,
-                                                    globalStats?.vibes?.values?.filter { it > 0 }?.sum() ?: 0L
-                                                )
-                                                val baselineTotal = baseGlobalTotal + missingOriginalVibes
-                                                val added = currentVibes - originalVibes
-                                                val removed = originalVibes - currentVibes
-                                                val projectedTotalVibes = maxOf(0L, baselineTotal + added.size - removed.size)
-                                                var baselineVibeCount = maxOf(0L, globalStats?.vibes?.get(vibe.code) ?: 0L)
-                                                
-                                                if (originalVibes.contains(vibe.code) && baselineVibeCount == 0L) {
-                                                    baselineVibeCount = 1L
-                                                }
-                                                
-                                                val totalVibes = projectedTotalVibes
-                                                var vibeCount = baselineVibeCount
-                                                if (added.contains(vibe.code)) vibeCount++
-                                                if (removed.contains(vibe.code)) vibeCount--
-                                                vibeCount = maxOf(0L, vibeCount)
-                                                val realPercentage = if (totalVibes > 0) ((vibeCount.toFloat() / totalVibes) * 100).toInt() else 0
+                                1 -> {
+                                    // Page 1: Vibe Grid
+                                    Column(verticalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
+                                        ALL_VIBES.chunked(3).forEach { rowVibes ->
+                                            Row(
+                                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                                                modifier = Modifier.fillMaxWidth()
+                                            ) {
+                                                rowVibes.forEach { vibe ->
+                                                    val isSelected = selectedVibes.contains(vibe)
+                                                    val isDisabled = !isSelected && selectedVibes.size >= 3
+                                                    val originalVibes = remember(movie?.emotionalVibes) {
+                                                        movie?.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+                                                    }
+                                                    val currentVibes = selectedVibes.map { it.code }.toSet()
+                                                    val missingOriginalVibes = originalVibes.count { 
+                                                        (globalStats?.vibes?.get(it) ?: 0L) == 0L 
+                                                    }
+                                                    val baseGlobalTotal = maxOf(
+                                                        globalStats?.totalVibes ?: 0L,
+                                                        globalStats?.vibes?.values?.filter { it > 0 }?.sum() ?: 0L
+                                                    )
+                                                    val baselineTotal = baseGlobalTotal + missingOriginalVibes
+                                                    val added = currentVibes - originalVibes
+                                                    val removed = originalVibes - currentVibes
+                                                    val projectedTotalVibes = maxOf(0L, baselineTotal + added.size - removed.size)
+                                                    var baselineVibeCount = maxOf(0L, globalStats?.vibes?.get(vibe.code) ?: 0L)
+                                                    
+                                                    if (originalVibes.contains(vibe.code) && baselineVibeCount == 0L) {
+                                                        baselineVibeCount = 1L
+                                                    }
+                                                    
+                                                    val totalVibes = projectedTotalVibes
+                                                    var vibeCount = baselineVibeCount
+                                                    if (added.contains(vibe.code)) vibeCount++
+                                                    if (removed.contains(vibe.code)) vibeCount--
+                                                    vibeCount = maxOf(0L, vibeCount)
+                                                    val realPercentage = if (totalVibes > 0) ((vibeCount.toFloat() / totalVibes) * 100).toInt() else 0
 
-                                                VibeChip(
-                                                    modifier = Modifier.weight(1f),
-                                                    vibe = vibe.copy(percentage = realPercentage),
-                                                    isSelected = isSelected,
-                                                    isDisabled = isDisabled,
-                                                    accentColor = accentColor,
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        selectedVibes = if (isSelected) {
-                                                            selectedVibes - vibe
-                                                        } else {
-                                                            if (selectedVibes.size < 3) selectedVibes + vibe else selectedVibes
+                                                    VibeChip(
+                                                        modifier = Modifier.weight(1f),
+                                                        vibe = vibe.copy(percentage = realPercentage),
+                                                        isSelected = isSelected,
+                                                        isDisabled = isDisabled,
+                                                        accentColor = accentColor,
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            selectedVibes = if (isSelected) {
+                                                                selectedVibes - vibe
+                                                            } else {
+                                                                if (selectedVibes.size < 3) selectedVibes + vibe else selectedVibes
+                                                            }
                                                         }
+                                                    )
+                                                }
+                                                if (rowVibes.size < 3) {
+                                                    repeat(3 - rowVibes.size) {
+                                                        Spacer(modifier = Modifier.weight(1f))
                                                     }
-                                                )
-                                            }
-                                            if (rowVibes.size < 3) {
-                                                repeat(3 - rowVibes.size) {
-                                                    Spacer(modifier = Modifier.weight(1f))
                                                 }
                                             }
                                         }
                                     }
                                 }
-                            } else {
-                                // Page 2: MVP Cast Section
-                                Column(modifier = Modifier.fillMaxWidth()) {
-                                    if (cast.isNotEmpty()) {
-                                        val castGridState = rememberLazyGridState()
+                                else -> {
+                                    // Page 2: MVP Cast Section
+                                    Column(modifier = Modifier.fillMaxWidth()) {
+                                        if (cast.isNotEmpty()) {
+                                            val castGridState = rememberLazyGridState()
 
-                                        LazyVerticalGrid(
-                                            state = castGridState,
-                                            columns = GridCells.Fixed(4),
-                                            horizontalArrangement = Arrangement.spacedBy(12.dp),
-                                            verticalArrangement = Arrangement.spacedBy(12.dp),
-                                            contentPadding = PaddingValues(horizontal = 2.dp, vertical = 12.dp),
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(300.dp)
-                                                .verticalFadingEdges(castGridState, 16.dp, 16.dp)
-                                        ) {
-                                            items(cast.take(24), key = { it.id }) { actor ->
-                                                val isMvp = selectedMvp?.id == actor.id
-                                                val charName = actor.character?.lowercase()?.trim()
-                                                val actorName = actor.name.lowercase().trim()
-                                                val charImageUrl = charName?.let { characterImages[it] } ?: characterImages[actorName]
-                                                val originalMvpId = movie?.favoriteActorId
-                                                val currentMvpId = selectedMvp?.id
-                                                var baselineMvpCount = globalStats?.mvps?.get(actor.id.toString()) ?: 0L
-                                                var totalMvpsCount = globalStats?.totalMvps ?: 0L
-                                                if (originalMvpId == actor.id && baselineMvpCount == 0L) baselineMvpCount = 1L
-                                                if (originalMvpId != null && totalMvpsCount == 0L) totalMvpsCount = 1L
-                                                
-                                                val addedMvp = if (currentMvpId == actor.id && originalMvpId != actor.id) 1L else 0L
-                                                val removedMvp = if (currentMvpId != actor.id && originalMvpId == actor.id) 1L else 0L
-                                                val totalAdded = if (currentMvpId != null && currentMvpId != originalMvpId && currentMvpId != actor.id && originalMvpId != actor.id) 1L else 0L
-                                                val totalRemoved = if (originalMvpId != null && currentMvpId != originalMvpId && currentMvpId != actor.id && originalMvpId != actor.id) 1L else 0L
-                                                
-                                                // Actually the total added/removed is just based on whether the current MVP is different from original MVP.
-                                                // Wait, if current MVP is different from original MVP, we remove 1 from total (for original) and add 1 to total (for current).
-                                                // So totalMvpsCount doesn't change unless we go from no MVP to some MVP (+1) or some MVP to no MVP (-1).
-                                                val globalTotalAdded = if (originalMvpId == null && currentMvpId != null) 1L else 0L
-                                                val globalTotalRemoved = if (originalMvpId != null && currentMvpId == null) 1L else 0L
+                                            LazyVerticalGrid(
+                                                state = castGridState,
+                                                columns = GridCells.Fixed(4),
+                                                horizontalArrangement = Arrangement.spacedBy(12.dp),
+                                                verticalArrangement = Arrangement.spacedBy(12.dp),
+                                                contentPadding = PaddingValues(horizontal = 2.dp, vertical = 12.dp),
+                                                modifier = Modifier
+                                                    .fillMaxWidth()
+                                                    .height(300.dp)
+                                                    .verticalFadingEdges(castGridState, 16.dp, 16.dp)
+                                            ) {
+                                                items(cast.take(24), key = { it.id }) { actor ->
+                                                    val isMvp = selectedMvp?.id == actor.id
+                                                    val charName = actor.character?.lowercase()?.trim()
+                                                    val actorName = actor.name.lowercase().trim()
+                                                    val charImageUrl = charName?.let { characterImages[it] } ?: characterImages[actorName]
+                                                    val originalMvpId = movie?.favoriteActorId
+                                                    val currentMvpId = selectedMvp?.id
+                                                    var baselineMvpCount = globalStats?.mvps?.get(actor.id.toString()) ?: 0L
+                                                    var totalMvpsCount = globalStats?.totalMvps ?: 0L
+                                                    if (originalMvpId == actor.id && baselineMvpCount == 0L) baselineMvpCount = 1L
+                                                    if (originalMvpId != null && totalMvpsCount == 0L) totalMvpsCount = 1L
+                                                    
+                                                    val addedMvp = if (currentMvpId == actor.id && originalMvpId != actor.id) 1L else 0L
+                                                    val removedMvp = if (currentMvpId != actor.id && originalMvpId == actor.id) 1L else 0L
+                                                    val globalTotalAdded = if (originalMvpId == null && currentMvpId != null) 1L else 0L
+                                                    val globalTotalRemoved = if (originalMvpId != null && currentMvpId == null) 1L else 0L
 
-                                                val projectedMvpCount = maxOf(0L, baselineMvpCount + addedMvp - removedMvp)
-                                                val projectedTotalMvps = maxOf(0L, totalMvpsCount + globalTotalAdded - globalTotalRemoved)
-                                                
-                                                val realPercentage = if (projectedTotalMvps > 0 && projectedMvpCount > 0) {
-                                                    ((projectedMvpCount.toFloat() / projectedTotalMvps) * 100).toInt()
-                                                } else null
+                                                    val projectedMvpCount = maxOf(0L, baselineMvpCount + addedMvp - removedMvp)
+                                                    val projectedTotalMvps = maxOf(0L, totalMvpsCount + globalTotalAdded - globalTotalRemoved)
+                                                    
+                                                    val realPercentage = if (projectedTotalMvps > 0 && projectedMvpCount > 0) {
+                                                        ((projectedMvpCount.toFloat() / projectedTotalMvps) * 100).toInt()
+                                                    } else null
 
-                                                CastMvpChip(
-                                                    actor = actor,
-                                                    isMvp = isMvp,
-                                                    accentColor = accentColor,
-                                                    characterImageUrl = charImageUrl,
-                                                    mvpPercentage = realPercentage,
-                                                    onClick = {
-                                                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                                        selectedMvp = if (isMvp) null else actor
-                                                    }
-                                                )
+                                                    CastMvpChip(
+                                                        actor = actor,
+                                                        isMvp = isMvp,
+                                                        accentColor = accentColor,
+                                                        characterImageUrl = charImageUrl,
+                                                        mvpPercentage = realPercentage,
+                                                        onClick = {
+                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            selectedMvp = if (isMvp) null else actor
+                                                        }
+                                                    )
+                                                }
                                             }
-                                        }
-                                    } else {
-                                        Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
-                                            Text(stringResource(R.string.checkin_no_cast), color = Color.White.copy(alpha = 0.5f))
+                                        } else {
+                                            Box(modifier = Modifier.fillMaxWidth().padding(vertical = 32.dp), contentAlignment = Alignment.Center) {
+                                                Text(stringResource(R.string.checkin_no_cast), color = Color.White.copy(alpha = 0.5f))
+                                            }
                                         }
                                     }
                                 }
                             }
-                        } // ends AnimatedContent
-                    } // ends inner content Column
+                        }
+                    }
 
                     // Bottom area: Pagination Dots + Buttons
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         modifier = Modifier.fillMaxWidth().padding(top = 12.dp)
                     ) {
-                        // Pagination dots (Symbiont / Worm elastico con memoria dei passi precedenti)
                         SymbiontPagerIndicator(
                             currentPage = currentPage,
                             pageCount = 3,
@@ -477,12 +425,10 @@ fun PeekABooCheckInDrawer(
                             }
                         )
 
-                        // Back + Save / Next buttons
                         Row(
                             modifier = Modifier.fillMaxWidth(),
                             horizontalArrangement = Arrangement.spacedBy(8.dp)
                         ) {
-                            // Back button (only visible on page 1 and 2)
                             AnimatedVisibility(
                                 visible = currentPage > 0,
                                 enter = fadeIn() + expandHorizontally(),
@@ -508,7 +454,6 @@ fun PeekABooCheckInDrawer(
                                 }
                             }
 
-                            // Next / Save button
                             Box(
                                 modifier = Modifier
                                     .weight(1f)
@@ -517,48 +462,10 @@ fun PeekABooCheckInDrawer(
                             ) {
                                 // Celebration Particle Burst
                                 if (isSaving && burstProgress.value > 0f) {
-                                    Canvas(
-                                        modifier = Modifier
-                                            .fillMaxSize()
-                                            .graphicsLayer { clip = false }
-                                    ) {
-                                        val p = burstProgress.value
-                                        val centerX = size.width / 2f
-                                        val centerY = size.height / 2f
-
-                                        // Expanding soft radial glow
-                                        val glowRadius = (size.width / 2f + 28.dp.toPx()) * p
-                                        val glowAlpha = (1f - p) * 0.45f
-                                        if (glowAlpha > 0.01f) {
-                                            drawCircle(
-                                                brush = Brush.radialGradient(
-                                                    colors = listOf(
-                                                        Color(0xFF10B981).copy(alpha = glowAlpha),
-                                                        Color.Transparent
-                                                    ),
-                                                    center = Offset(centerX, centerY),
-                                                    radius = glowRadius
-                                                ),
-                                                center = Offset(centerX, centerY),
-                                                radius = glowRadius
-                                            )
-                                        }
-
-                                        // Radial flying particles
-                                        for (particle in particles) {
-                                            val distPx = particle.distance.dp.toPx() * p
-                                            val px = centerX + cos(particle.angle) * distPx
-                                            val py = centerY + sin(particle.angle) * distPx
-                                            val pAlpha = (1f - p).coerceIn(0f, 1f)
-                                            val pRadius = particle.radius.dp.toPx() * (1f - p * 0.35f)
-
-                                            drawCircle(
-                                                color = particle.color.copy(alpha = pAlpha),
-                                                radius = pRadius,
-                                                center = Offset(px, py)
-                                            )
-                                        }
-                                    }
+                                    CheckInBurstCanvas(
+                                        burstProgress = burstProgress.value,
+                                        particles = particles
+                                    )
                                 }
 
                                 val saveBrush = if (isSaving) {
@@ -656,7 +563,6 @@ fun PeekABooCheckInDrawer(
                 .align(Alignment.CenterEnd)
                 .zIndex(10f)
         ) {
-            // The "handle" tab protruding from the right edge
             Box(
                 modifier = Modifier
                     .width(36.dp)
@@ -667,7 +573,6 @@ fun PeekABooCheckInDrawer(
                     },
                 contentAlignment = Alignment.Center
             ) {
-                // Background Layer
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -703,193 +608,5 @@ fun PeekABooCheckInDrawer(
                 }
             }
         }
-    }
-}
-
-// ── PRIVATE SUB-COMPOSABLES ─────────────────────────────────────────────────
-
-@Composable
-private fun VibeChip(
-    vibe: EmotionalVibe,
-    isSelected: Boolean,
-    isDisabled: Boolean = false,
-    accentColor: Color,
-    onClick: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .alpha(if (isDisabled) 0.3f else 1f)
-            .bounceClick(scaleDown = if (isDisabled) 1f else 0.90f) {
-                if (!isDisabled) onClick()
-            }
-            .clip(RoundedCornerShape(24.dp))
-            .background(
-                if (isSelected) accentColor.copy(alpha = 0.18f)
-                else Color.White.copy(alpha = 0.06f)
-            )
-            .border(
-                width = if (isSelected) 1.5.dp else 0.dp,
-                color = if (isSelected) accentColor else Color.Transparent,
-                shape = RoundedCornerShape(24.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 6.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
-        ) {
-            Icon(
-                painter = androidx.compose.ui.res.painterResource(id = vibe.iconRes),
-                contentDescription = null,
-                modifier = Modifier.size(32.dp),
-                tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.6f)
-            )
-            Text(
-                text = stringResource(vibe.labelRes),
-                fontSize = 9.sp,
-                lineHeight = 10.sp,
-                color = if (isSelected) accentColor else Color.White.copy(alpha = 0.7f),
-                fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Normal,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            // Always render the text to maintain consistent chip heights, 
-            // but make it transparent if the percentage is 0
-            Text(
-                text = "${vibe.percentage}%",
-                fontSize = 8.sp,
-                lineHeight = 9.sp,
-                color = if (vibe.percentage > 0) {
-                    if (isSelected) accentColor.copy(alpha = 0.8f) else Color.White.copy(alpha = 0.4f)
-                } else {
-                    Color.Transparent
-                },
-                fontWeight = FontWeight.Medium
-            )
-        }
-    }
-}
-
-@Composable
-private fun CastMvpChip(
-    actor: CastMember,
-    isMvp: Boolean,
-    accentColor: Color,
-    characterImageUrl: String? = null,
-    mvpPercentage: Int? = null,
-    onClick: () -> Unit
-) {
-    val mvpGold = Color(0xFFFFC800)
-
-    Column(
-        horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
-            .width(64.dp)
-            .bounceClick(scaleDown = 0.92f) { onClick() }
-    ) {
-        Box {
-        Box(
-            contentAlignment = Alignment.Center,
-            modifier = Modifier
-                .width(64.dp)
-                .height(96.dp)
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color.White.copy(alpha = 0.05f))
-                .border(
-                    width = if (isMvp) 2.dp else 1.dp,
-                    color = if (isMvp) mvpGold else Color.White.copy(alpha = 0.2f),
-                    shape = RoundedCornerShape(16.dp)
-                )
-        ) {
-            val initials = remember(actor.name) {
-                actor.name.split(" ")
-                    .filter { it.isNotBlank() }
-                    .mapNotNull { it.firstOrNull()?.toString() }
-                    .take(2)
-                    .joinToString("")
-                    .uppercase()
-            }
-            if (initials.isNotEmpty()) {
-                Text(
-                    text = initials,
-                    color = Color.White.copy(alpha = 0.4f),
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            } else {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.3f),
-                    modifier = Modifier.size(20.dp)
-                )
-            }
-
-            if (!characterImageUrl.isNullOrBlank()) {
-                AsyncImage(
-                    model = characterImageUrl,
-                    contentDescription = actor.character,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
-                )
-            } else if (!actor.profilePath.isNullOrBlank()) {
-                AsyncImage(
-                    model = buildTmdbImageUrl(actor.profilePath, ImageType.PROFILE, ImageQuality.LOW),
-                    contentDescription = actor.name,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(16.dp))
-                )
-            }
-        }
-            if (isMvp) {
-                Box(
-                    modifier = Modifier
-                        .padding(4.dp)
-                        .size(18.dp)
-                        .clip(CircleShape)
-                        .background(mvpGold)
-                        .align(Alignment.BottomEnd),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
-                        contentDescription = null,
-                        tint = Color(0xFF1A1A1A),
-                        modifier = Modifier.size(10.dp)
-                    )
-                }
-            }
-        }
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            text = actor.character ?: actor.name,
-            fontSize = 9.sp,
-            color = if (isMvp) mvpGold else Color.White.copy(alpha = 0.75f),
-            fontWeight = if (isMvp) FontWeight.Bold else FontWeight.Normal,
-            maxLines = 2,
-            lineHeight = 10.sp,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
-        if (mvpPercentage != null && mvpPercentage > 0) {
-            Text(
-                text = "$mvpPercentage%",
-                color = accentColor,
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Black,
-                modifier = Modifier.padding(top = 2.dp, bottom = 2.dp)
-            )
-        }
-        Text(
-            text = actor.name,
-            fontSize = 8.sp,
-            color = Color.Gray,
-            maxLines = 2,
-            lineHeight = 9.sp,
-            overflow = TextOverflow.Ellipsis,
-            textAlign = TextAlign.Center
-        )
     }
 }

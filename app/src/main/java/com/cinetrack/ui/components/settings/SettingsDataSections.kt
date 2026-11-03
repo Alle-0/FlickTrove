@@ -293,7 +293,7 @@ fun SettingsSupportSection(
         )
         SettingsItem(
             icon = ImageVector.vectorResource(id = R.drawable.ic_heart),
-            title = "Buy me a Coffee ☕",
+            title = "Buy me a Coffee",
             description = "Support the developer with a donation via Paypal",
             isExternal = true,
             tint = Color(0xFFFFA000),
@@ -638,118 +638,59 @@ fun SettingsEndCreditsBox(
         isLoadingSupporters = false
     }
 
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .clip(RoundedCornerShape(32.dp))
-            .background(Color(0xFF16161D))
-            .border(
-                width = 1.dp,
-                brush = Brush.linearGradient(
-                    colors = listOf(
-                        com.cinetrack.ui.theme.Gold.copy(alpha = 0.40f),
-                        Color.White.copy(alpha = 0.08f)
-                    )
-                ),
-                shape = RoundedCornerShape(32.dp)
-            )
-            .padding(18.dp)
+    SettingsSection(
+        title = stringResource(R.string.credits_producers_role),
+        icon = ImageVector.vectorResource(id = R.drawable.ic_film)
     ) {
-        Column(modifier = Modifier.fillMaxWidth()) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxWidth()
+        if (isLoadingSupporters) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(vertical = 12.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(46.dp)
-                        .clip(CircleShape)
-                        .background(com.cinetrack.ui.theme.Gold.copy(alpha = 0.16f))
-                        .border(1.dp, com.cinetrack.ui.theme.Gold.copy(alpha = 0.50f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
-                        contentDescription = null,
-                        tint = com.cinetrack.ui.theme.Gold,
-                        modifier = Modifier.size(22.dp)
-                    )
-                }
-
-                Spacer(modifier = Modifier.width(14.dp))
-
-                Column(modifier = Modifier.weight(1f)) {
-                    Text(
-                        text = stringResource(R.string.credits_producers_role),
-                        style = MaterialTheme.typography.titleMedium.copy(
-                            fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
-                            fontSize = 16.sp
-                        ),
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = stringResource(R.string.credits_producers_desc),
-                        style = MaterialTheme.typography.bodySmall.copy(
-                            fontSize = 11.5.sp,
-                            lineHeight = 15.sp
-                        ),
-                        color = Color.White.copy(alpha = 0.65f)
-                    )
-                }
-            }
-
-            Spacer(modifier = Modifier.height(14.dp))
-
-            if (isLoadingSupporters) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(vertical = 12.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    CircularProgressIndicator(
-                        modifier = Modifier.size(20.dp),
-                        color = com.cinetrack.ui.theme.Gold,
-                        strokeWidth = 2.dp
-                    )
-                }
-            } else if (supporters.isEmpty()) {
-                Text(
-                    text = stringResource(R.string.credits_producers_empty),
-                    style = MaterialTheme.typography.bodySmall.copy(
-                        fontSize = 12.sp,
-                        fontStyle = androidx.compose.ui.text.font.FontStyle.Italic,
-                        lineHeight = 16.sp
-                    ),
-                    color = Color.White.copy(alpha = 0.50f),
-                    modifier = Modifier.padding(vertical = 4.dp)
+                CircularProgressIndicator(
+                    modifier = Modifier.size(20.dp),
+                    color = MaterialTheme.colorScheme.primary,
+                    strokeWidth = 2.dp
                 )
-            } else {
-                androidx.compose.foundation.layout.FlowRow(
-                    modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    supporters.forEach { name ->
-                        Surface(
-                            shape = RoundedCornerShape(8.dp),
-                            color = Color.White.copy(alpha = 0.06f),
-                            border = androidx.compose.foundation.BorderStroke(
-                                1.dp,
-                                com.cinetrack.ui.theme.Gold.copy(alpha = 0.35f)
-                            )
-                        ) {
-                            Text(
-                                text = "🎬 $name",
-                                style = MaterialTheme.typography.labelSmall.copy(
-                                    fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                                    fontSize = 11.5.sp
-                                ),
-                                color = Color.White,
-                                modifier = Modifier.padding(horizontal = 9.dp, vertical = 5.dp)
-                            )
-                        }
+            }
+        } else if (supporters.isEmpty()) {
+            Text(
+                text = stringResource(R.string.credits_producers_empty),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 12.sp,
+                    fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
+                ),
+                color = OnSurfaceMuted,
+                modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+            )
+        } else {
+            androidx.compose.foundation.layout.FlowRow(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 4.dp, vertical = 4.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                supporters.forEach { name ->
+                    Surface(
+                        shape = RoundedCornerShape(12.dp),
+                        color = Color.White.copy(alpha = 0.05f),
+                        border = androidx.compose.foundation.BorderStroke(
+                            1.dp,
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.25f)
+                        )
+                    ) {
+                        Text(
+                            text = name,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = androidx.compose.ui.text.font.FontWeight.Medium,
+                                fontSize = 13.5.sp
+                            ),
+                            color = Color.White,
+                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                        )
                     }
                 }
             }
