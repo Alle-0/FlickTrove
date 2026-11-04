@@ -16,7 +16,10 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -288,12 +291,14 @@ fun FolderCard(
 }
 
 @Composable
-fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgress: Float = 1f) {
+fun NewFolderCard(onClick: (Rect) -> Unit, modifier: Modifier = Modifier, alphaProgress: Float = 1f) {
+    var bounds by remember { mutableStateOf<Rect?>(null) }
     Box(
         modifier = modifier
             .fillMaxWidth()
+            .onGloballyPositioned { bounds = it.boundsInWindow() }
+            .bounceClick(enabled = alphaProgress > 0.3f, scaleDown = 0.97f) { onClick(bounds ?: Rect.Zero) }
             .graphicsLayer { alpha = alphaProgress }
-            .bounceClick(enabled = alphaProgress > 0.3f, scaleDown = 0.97f) { onClick() }
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50)),
@@ -338,11 +343,13 @@ fun NewFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgr
 }
 
 @Composable
-fun JoinFolderCard(onClick: () -> Unit, modifier: Modifier = Modifier, alphaProgress: Float = 1f) {
+fun JoinFolderCard(onClick: (Rect) -> Unit, modifier: Modifier = Modifier, alphaProgress: Float = 1f) {
+    var bounds by remember { mutableStateOf<Rect?>(null) }
     Box(
         modifier = modifier
+            .onGloballyPositioned { bounds = it.boundsInWindow() }
+            .bounceClick(enabled = alphaProgress > 0.3f, scaleDown = 0.97f) { onClick(bounds ?: Rect.Zero) }
             .graphicsLayer { alpha = alphaProgress }
-            .bounceClick(enabled = alphaProgress > 0.3f, scaleDown = 0.97f) { onClick() }
             .clip(RoundedCornerShape(50))
             .background(Color.White.copy(alpha = 0.05f))
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(50)),

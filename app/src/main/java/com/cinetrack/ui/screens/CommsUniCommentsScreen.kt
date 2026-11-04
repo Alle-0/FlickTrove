@@ -142,12 +142,23 @@ class CommsUniCommentsScreen(
             getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         }
         
-        LaunchedEffect(tvdbId, mediaType, mediaTitle, releaseYear, mediaId, imdbId, seasonNumber, episodeNumber) {
+        var currentSeasonNumber by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(seasonNumber) }
+        var currentEpisodeNumber by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(episodeNumber) }
+        var currentEpTitle by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(episodeTitle) }
+        var currentBackdropUrl by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(backdropUrl) }
+
+        val currentEffectiveMediaType = remember(currentSeasonNumber, currentEpisodeNumber, mediaType) {
+            if (currentSeasonNumber != null && currentEpisodeNumber != null) "episode"
+            else if (mediaType == "episode") "tv"
+            else mediaType
+        }
+
+        LaunchedEffect(tvdbId, currentEffectiveMediaType, mediaTitle, releaseYear, mediaId, imdbId, currentSeasonNumber, currentEpisodeNumber) {
             viewModel.init(
                 tvdbId = tvdbId,
-                entityType = mediaType,
-                seasonNumber = seasonNumber,
-                episodeNumber = episodeNumber,
+                entityType = currentEffectiveMediaType,
+                seasonNumber = currentSeasonNumber,
+                episodeNumber = currentEpisodeNumber,
                 title = mediaTitle,
                 year = releaseYear,
                 rawMediaId = mediaId,
@@ -169,15 +180,15 @@ class CommsUniCommentsScreen(
         val showSeasons by viewModel.showSeasons.collectAsStateWithLifecycle()
         val seasonEpisodes by viewModel.seasonEpisodes.collectAsStateWithLifecycle()
         val isLoadingSeasonEpisodes by viewModel.isLoadingSeasonEpisodes.collectAsStateWithLifecycle()
-        val currentEpisodeTitle = remember(episodeTitle, seasonEpisodes, seasonNumber, episodeNumber) {
-            episodeTitle?.takeIf { it.isNotBlank() }
-                ?: if (seasonNumber != null && episodeNumber != null) {
-                    seasonEpisodes[seasonNumber]?.find { it.episodeNumber == episodeNumber }?.name?.takeIf { it.isNotBlank() }
+        val currentEpisodeTitle = remember(currentEpTitle, seasonEpisodes, currentSeasonNumber, currentEpisodeNumber) {
+            currentEpTitle?.takeIf { it.isNotBlank() }
+                ?: if (currentSeasonNumber != null && currentEpisodeNumber != null) {
+                    seasonEpisodes[currentSeasonNumber]?.find { it.episodeNumber == currentEpisodeNumber }?.name?.takeIf { it.isNotBlank() }
                 } else null
         }
         var showEpisodePickerSheet by remember { mutableStateOf(false) }
-        val isTvSeries = remember(mediaType, seasonNumber, showSeasons) {
-            mediaType.lowercase() in listOf("tv", "series", "show", "episode") || seasonNumber != null || showSeasons.isNotEmpty()
+        val isTvSeries = remember(mediaType, currentSeasonNumber, showSeasons) {
+            mediaType.lowercase() in listOf("tv", "series", "show", "episode") || currentSeasonNumber != null || showSeasons.isNotEmpty()
         }
         val accentColor = Color(accentColorValue.toULong())
 
@@ -186,7 +197,7 @@ class CommsUniCommentsScreen(
         val isReplyingToCommsUni = replyingTo?.isOnCommsUni == true
         // True if the parent comment lives only on local FlickTrove (Firestore)
         val isReplyingToFlickTrove = replyingTo != null && !replyingTo!!.isOnCommsUni
-        var inputText by remember { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
+        var inputText by androidx.compose.runtime.saveable.rememberSaveable(stateSaver = androidx.compose.ui.text.input.TextFieldValue.Saver) { mutableStateOf(androidx.compose.ui.text.input.TextFieldValue("")) }
         var isSpoiler by remember { mutableStateOf(false) }
         var postToCommsUni by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(true) }
 
@@ -329,7 +340,7 @@ class CommsUniCommentsScreen(
         }
 
         val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
-        val effectiveBackdrop = backdropUrl ?: mediaImage
+        val effectiveBackdrop = currentBackdropUrl ?: mediaImage
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             Box(
@@ -366,13 +377,11 @@ class CommsUniCommentsScreen(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .heightIn(min = 48.dp)
-                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                    .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 0.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
                                 Box(
                                     modifier = Modifier
-                                        .padding(4.dp)
                                         .bounceClick { navigator.pop() }
                                         .padding(8.dp)
                                 ) {
@@ -458,58 +467,80 @@ class CommsUniCommentsScreen(
                                 }
                             }
 
-                            // Livello 2: Se serie TV, pulsante per cambiare puntata
+                            // Livello 2: Se serie TV, pulsante compatto puntata + titolo episodio esterno
                             if (isTvSeries) {
-                                Box(
+                                Row(
                                     modifier = Modifier
-                                        .padding(start = 48.dp, end = 16.dp, bottom = 10.dp)
-                                        .onGloballyPositioned { episodesCoords[0] = it }
-                                        .bounceClick {
-                                            episodesButtonBounds = episodesCoords[0]?.let {
-                                                val pos = it.positionInWindow()
-                                                Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
-                                            }
-                                            showEpisodePickerSheet = true
-                                        }
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.08f))
-                                        .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
-                                        .padding(horizontal = 10.dp, vertical = 5.dp),
-                                    contentAlignment = Alignment.Center
+                                        .fillMaxWidth()
+                                        .padding(start = 44.dp, end = 16.dp, top = 0.dp, bottom = 8.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                                 ) {
-                                    Row(
-                                        verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_tv),
-                                            contentDescription = stringResource(R.string.episodes_discussions_pill),
-                                            tint = Color.White.copy(alpha = 0.85f),
-                                            modifier = Modifier.size(12.dp)
-                                        )
-                                        val pillText = if (seasonNumber != null && episodeNumber != null) {
-                                            val code = "${seasonNumber}x${String.format(java.util.Locale.US, "%02d", episodeNumber)}"
-                                            if (!currentEpisodeTitle.isNullOrBlank()) {
-                                                "$code • $currentEpisodeTitle"
-                                            } else {
-                                                code
+                                    // Pill compatta: [ 📺 1x02 > ]
+                                    Box(
+                                        modifier = Modifier
+                                            .onGloballyPositioned { episodesCoords[0] = it }
+                                            .bounceClick {
+                                                episodesButtonBounds = episodesCoords[0]?.let {
+                                                    val pos = it.positionInWindow()
+                                                    Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                                }
+                                                showEpisodePickerSheet = true
                                             }
-                                        } else {
-                                            stringResource(R.string.episodes_discussions_pill)
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                            .padding(horizontal = 9.dp, vertical = 4.5.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_tv),
+                                                contentDescription = stringResource(R.string.episodes_discussions_pill),
+                                                tint = Color.White.copy(alpha = 0.85f),
+                                                modifier = Modifier.size(12.dp)
+                                            )
+                                            val pillText = if (currentSeasonNumber != null && currentEpisodeNumber != null) {
+                                                "${currentSeasonNumber}x${String.format(java.util.Locale.US, "%02d", currentEpisodeNumber)}"
+                                            } else {
+                                                stringResource(R.string.episodes_discussions_pill)
+                                            }
+                                            Text(
+                                                text = pillText,
+                                                color = Color.White.copy(alpha = 0.90f),
+                                                fontSize = 11.sp,
+                                                fontWeight = FontWeight.Bold
+                                            )
+                                            Icon(
+                                                painter = painterResource(id = R.drawable.ic_right),
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.70f),
+                                                modifier = Modifier.size(11.dp)
+                                            )
                                         }
+                                    }
+
+                                    // Titolo episodio FUORI dal pulsante
+                                    if (!currentEpisodeTitle.isNullOrBlank()) {
                                         Text(
-                                            text = pillText,
-                                            color = Color.White.copy(alpha = 0.90f),
-                                            fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold,
+                                            text = currentEpisodeTitle,
+                                            color = Color.White.copy(alpha = 0.75f),
+                                            fontSize = 12.sp,
+                                            fontWeight = FontWeight.Medium,
                                             maxLines = 1,
-                                            overflow = TextOverflow.Ellipsis
-                                        )
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_right),
-                                            contentDescription = null,
-                                            tint = Color.White.copy(alpha = 0.70f),
-                                            modifier = Modifier.size(12.dp)
+                                            overflow = TextOverflow.Ellipsis,
+                                            modifier = Modifier
+                                                .weight(1f, fill = false)
+                                                .bounceClick {
+                                                    episodesButtonBounds = episodesCoords[0]?.let {
+                                                        val pos = it.positionInWindow()
+                                                        Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                                    }
+                                                    showEpisodePickerSheet = true
+                                                }
                                         )
                                     }
                                 }
@@ -892,51 +923,30 @@ class CommsUniCommentsScreen(
                 showSeasons = showSeasons,
                 seasonEpisodes = seasonEpisodes,
                 isLoadingEpisodes = isLoadingSeasonEpisodes,
-                currentSeason = seasonNumber,
-                currentEpisode = episodeNumber,
-                fallbackBackdropPath = backdropUrl,
+                currentSeason = currentSeasonNumber,
+                currentEpisode = currentEpisodeNumber,
+                fallbackBackdropPath = currentBackdropUrl,
                 onLoadSeasonEpisodes = { sNum -> viewModel.loadSeasonEpisodes(sNum) },
                 onSelectEpisode = { sNum, ep ->
                     showEpisodePickerSheet = false
+                    currentSeasonNumber = sNum
+                    currentEpisodeNumber = ep.episodeNumber
+                    currentEpTitle = ep.name
                     val epStill = ep.stillPath?.let {
                         com.cinetrack.util.buildTmdbImageUrl(it, com.cinetrack.util.ImageType.BACKDROP, com.cinetrack.util.ImageQuality.HIGH)
                     }
-                    navigator.replace(
-                        CommsUniCommentsScreen(
-                            tvdbId = tvdbId,
-                            mediaId = baseShowId,
-                            mediaType = "episode",
-                            seasonNumber = sNum,
-                            episodeNumber = ep.episodeNumber,
-                            accentColorValue = accentColorValue,
-                            mediaTitle = mediaTitle,
-                            mediaImage = epStill ?: mediaImage,
-                            backdropUrl = epStill ?: backdropUrl,
-                            releaseYear = ep.airDate?.take(4) ?: releaseYear,
-                            focusInputOnLaunch = false,
-                            imdbId = imdbId,
-                            episodeTitle = ep.name
-                        )
-                    )
+                    if (epStill != null) {
+                        currentBackdropUrl = epStill
+                    }
+                    replyingTo = null
                 },
                 onSelectMainDiscussion = {
                     showEpisodePickerSheet = false
-                    navigator.replace(
-                        CommsUniCommentsScreen(
-                            tvdbId = tvdbId,
-                            mediaId = baseShowId,
-                            mediaType = "tv",
-                            seasonNumber = null,
-                            episodeNumber = null,
-                            accentColorValue = accentColorValue,
-                            mediaTitle = mediaTitle,
-                            mediaImage = mediaImage,
-                            backdropUrl = backdropUrl,
-                            releaseYear = releaseYear,
-                            focusInputOnLaunch = false,
-                            imdbId = imdbId
-                        )
-                    )
+                    currentSeasonNumber = null
+                    currentEpisodeNumber = null
+                    currentEpTitle = null
+                    currentBackdropUrl = backdropUrl
+                    replyingTo = null
                 },
                 onDismiss = { showEpisodePickerSheet = false },
                 accentColor = accentColor,

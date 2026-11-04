@@ -1,8 +1,9 @@
 package com.cinetrack.ui.components.folder
 
-import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.ColorWheel
+import androidx.compose.ui.geometry.Rect
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -59,7 +60,8 @@ fun FolderJoinDialog(
     onDismiss: () -> Unit,
     onCheckCode: (String, (Result<Pair<SharedFolderInviteDto, SharedFolderDto>>) -> Unit) -> Unit,
     onAcceptInvite: (String, (Result<FolderEntity>) -> Unit) -> Unit,
-    hazeState: HazeState? = null
+    hazeState: HazeState? = null,
+    triggerBounds: Rect? = null
 ) {
     val context = androidx.compose.ui.platform.LocalContext.current
     var codeInput by remember(initialCode) { mutableStateOf(sanitizeInviteCode(initialCode)) }
@@ -70,8 +72,25 @@ fun FolderJoinDialog(
     val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
     var isFocused by remember { mutableStateOf(false) }
 
+    var isVisible by remember { mutableStateOf(false) }
+    var pendingAction by remember { mutableStateOf<(() -> Unit)?>(null) }
+
     LaunchedEffect(Unit) {
-        if (invitePreview == null && initialCode.isBlank()) {
+        isVisible = true
+    }
+
+    val focusManager = androidx.compose.ui.platform.LocalFocusManager.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
+
+    fun requestDismiss(action: (() -> Unit)? = null) {
+        keyboardController?.hide()
+        focusManager.clearFocus()
+        pendingAction = action
+        isVisible = false
+    }
+
+    LaunchedEffect(isVisible) {
+        if (isVisible && invitePreview == null && initialCode.isBlank()) {
             kotlinx.coroutines.delay(250)
             focusRequester.requestFocus()
         }
@@ -94,36 +113,46 @@ fun FolderJoinDialog(
         }
     }
 
-    FlickTroveModal(
-        isVisible = true,
-        onDismissRequest = onDismiss,
+    MorphGlassModal(
+        isVisible = isVisible,
+        onDismissRequest = { requestDismiss() },
+        onDismissFinished = {
+            pendingAction?.invoke()
+            onDismiss()
+        },
+        triggerBounds = triggerBounds,
         hazeState = hazeState,
-        maxWidth = 440.dp,
-        maxWidthFraction = 0.92f,
-        contentPadding = PaddingValues(0.dp)
-    ) {
-        // Header
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(start = 22.dp, end = 16.dp, top = 22.dp, bottom = 12.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                text = stringResource(R.string.folder_join_title),
-                style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
-                color = Color.White
-            )
-            ModalCloseButton(onClose = onDismiss)
-        }
-
+        targetMaxWidth = 440.dp,
+        targetWidthFraction = 0.92f,
+        maxModalHeightFraction = 0.85f,
+        targetCornerRadius = 32.dp,
+        zIndex = 100f
+    ) { contentAlpha ->
         Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp)
-                .padding(bottom = 16.dp)
+            modifier = Modifier.fillMaxWidth()
         ) {
+            // Header
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(start = 22.dp, end = 16.dp, top = 22.dp, bottom = 12.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.folder_join_title),
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.Black),
+                    color = Color.White
+                )
+                ModalCloseButton(onClose = { requestDismiss() })
+            }
+
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(horizontal = 16.dp)
+                    .padding(bottom = 16.dp)
+            ) {
             val buttonShape = RoundedCornerShape(16.dp)
 
             if (invitePreview == null) {
@@ -165,7 +194,7 @@ fun FolderJoinDialog(
                         },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .focusRequester(focusRequester)
+                            .then(if (contentAlpha > 0f) Modifier.focusRequester(focusRequester) else Modifier)
                             .onFocusChanged { isFocused = it.isFocused },
                         singleLine = true,
                         visualTransformation = remember { InviteCodeVisualTransformation() },
@@ -460,7 +489,7 @@ fun FolderJoinDialog(
                                 onAcceptInvite(invite.code) { result ->
                                     isJoining = false
                                     result.onSuccess {
-                                        onDismiss()
+                                        requestDismiss()
                                     }.onFailure { err ->
                                         errorMessage = when (err.message) {
                                             "MEMBER_LIMIT_REACHED" -> context.getString(R.string.folder_join_member_limit)
@@ -493,6 +522,7 @@ fun FolderJoinDialog(
             }
         }
     }
+}
 }
 
 private fun sanitizeInviteCode(input: String): String {

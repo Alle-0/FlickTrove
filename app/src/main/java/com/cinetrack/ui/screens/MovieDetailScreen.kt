@@ -248,9 +248,8 @@ fun MovieDetailScreenContent(
     var showFolderPicker by remember { mutableStateOf(false) }
     var showRatingInfoDialog by remember { mutableStateOf(false) }
     var showCoverSelectionSheet by remember { mutableStateOf(false) }
-    var showCheckInDrawer by remember { mutableStateOf(false) }
+    var showCheckInModal by remember { mutableStateOf(false) }
     var showWatchHistorySheet by remember { mutableStateOf(false) }
-    var forceExpandCheckIn by remember { mutableStateOf(false) }
     var isDetailCastSheetOpen by remember { mutableStateOf(false) }
     var showShareStoryModal by remember { mutableStateOf(false) }
     var previousWatchState by remember { mutableStateOf<WatchState?>(null) }
@@ -275,8 +274,8 @@ fun MovieDetailScreenContent(
     androidx.activity.compose.BackHandler(enabled = true) {
         if (movieActions.isAnyModalOpen) {
             movieActions.closeAll()
-        } else if (showCheckInDrawer) {
-            showCheckInDrawer = false
+        } else if (showCheckInModal) {
+            showCheckInModal = false
         } else if (showRatingInfoDialog) {
             showRatingInfoDialog = false
         } else if (showTranslationPrompt != null) {
@@ -296,23 +295,16 @@ fun MovieDetailScreenContent(
     
     val currentImageQuality = LocalImageQuality.current
     // Estrazione colore dinamica se accentColor è nullo nel database
-    // Detect NONE/BOOKMARKED → WATCHED transition to trigger the peek-a-boo drawer
+    // Detect NONE/BOOKMARKED → WATCHED transition to trigger check-in modal if enabled in settings
     LaunchedEffect(uiState) {
         val currentWatchState = (uiState as? DetailUiState.Success)?.watchState
         if (currentWatchState == WatchState.WATCHED && previousWatchState != null && previousWatchState != WatchState.WATCHED) {
-            forceExpandCheckIn = autoOpenVibeOnWatch
-            showCheckInDrawer = true
+            if (autoOpenVibeOnWatch) {
+                showCheckInModal = true
+            }
         }
         if (currentWatchState != null) {
             previousWatchState = currentWatchState
-        }
-    }
-
-    // Dismiss peek-a-boo drawer when user scrolls (only if not expanded into full modal)
-    val isScrollInProgress = scrollState.isScrollInProgress
-    LaunchedEffect(isScrollInProgress) {
-        if (isScrollInProgress && showCheckInDrawer && !forceExpandCheckIn) {
-            showCheckInDrawer = false
         }
     }
 
@@ -679,8 +671,7 @@ fun MovieDetailScreenContent(
                                         onRate = { viewModel.onEvent(DetailEvent.Rate(it)) },
                                         onNoteUpdate = { viewModel.onEvent(DetailEvent.UpdateNote(it)) },
                                         onCheckInClick = { 
-                                            forceExpandCheckIn = true
-                                            showCheckInDrawer = true 
+                                            showCheckInModal = true 
                                         },
                                         onHistoryClick = { showWatchHistorySheet = true },
                                         onShareToComments = { cardUri ->
@@ -950,16 +941,15 @@ fun MovieDetailScreenContent(
             modifier = Modifier.graphicsLayer { alpha = topBarAlpha }
         )
 
-        // Peek-a-boo Check-in Drawer (non-invasive, optional)
+        // Check-in Wizard Modal (Rating, Vibes, Cast MVP)
         if (cachedSuccess != null) {
             val checkInCast = cachedSuccess!!.cast
             val checkInAccent = com.cinetrack.ui.utils.ColorUtils.ensureVividAccent(
                 cachedSuccess!!.movieEntry.accentColor.toComposeColor(extractedColor ?: fallbackAccentColor)
             )
 
-            PeekABooCheckInDrawer(
-                visible = showCheckInDrawer,
-                startExpanded = forceExpandCheckIn,
+            CheckInModal(
+                visible = showCheckInModal,
                 movie = cachedSuccess!!.movieEntry,
                 globalStats = globalStats,
                 cast = checkInCast,
@@ -969,7 +959,7 @@ fun MovieDetailScreenContent(
                 onSave = { rating, vibes, mvp, charUrl ->
                     viewModel.onEvent(DetailEvent.SaveCheckIn(rating, vibes, mvp, charUrl))
                 },
-                onDismiss = { showCheckInDrawer = false }
+                onDismiss = { showCheckInModal = false }
             )
         }
         } // end Box (fillMaxSize background)

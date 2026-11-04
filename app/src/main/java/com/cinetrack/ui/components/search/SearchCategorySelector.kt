@@ -52,11 +52,7 @@ fun SearchCategorySelector(
                     .matchParentSize()
                     .hazeGlass(
                         state = hazeState,
-                        shape = CircleShape,
-                        blurRadius = HazeStyles.SmallGlassBlurRadius,
-                        useOffscreenStrategy = false,
-                        borderWidth = 1.dp,
-                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                        shape = CircleShape
                     )
             )
 

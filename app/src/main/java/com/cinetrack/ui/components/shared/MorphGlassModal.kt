@@ -21,11 +21,13 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.draw.clip
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Rect
@@ -64,6 +66,7 @@ import kotlin.math.roundToInt
 fun MorphGlassModal(
     isVisible: Boolean,
     onDismissRequest: () -> Unit,
+    onDismissFinished: (() -> Unit)? = null,
     triggerBounds: Rect? = null,
     hazeState: HazeState? = null,
     targetMaxWidth: Dp = 420.dp,
@@ -131,6 +134,20 @@ fun MorphGlassModal(
         },
         label = "expansionProgress"
     ) { state -> if (state) 1f else 0f }
+
+    var hasBeenVisible by remember { mutableStateOf(false) }
+    LaunchedEffect(isVisible) {
+        if (isVisible) {
+            hasBeenVisible = true
+        }
+    }
+
+    LaunchedEffect(transition.currentState, transition.targetState, isVisible) {
+        if (hasBeenVisible && !isVisible && !transition.currentState && !transition.targetState) {
+            hasBeenVisible = false
+            onDismissFinished?.invoke()
+        }
+    }
 
     if ((transition.currentState || transition.targetState) && (isVisible || progress > 0.02f)) {
         val effectiveScrimAlpha = if (!advancedEffectsEnabled) {

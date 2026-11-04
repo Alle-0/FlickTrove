@@ -159,6 +159,8 @@ fun FoldersScreenContent(
     var isCreateDialogOpen by remember { mutableStateOf(false) }
     var isJoinDialogOpen by remember { mutableStateOf(false) }
     var joinDialogInitialCode by remember { mutableStateOf("") }
+    var createTriggerBounds by remember { mutableStateOf<Rect?>(null) }
+    var joinTriggerBounds by remember { mutableStateOf<Rect?>(null) }
 
     val isGuest = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false }
 
@@ -219,6 +221,8 @@ fun FoldersScreenContent(
                             style = MaterialTheme.typography.bodyLarge
                         )
                         Spacer(Modifier.height(24.dp))
+                        var emptyCreateBounds by remember { mutableStateOf<Rect?>(null) }
+                        var emptyJoinBounds by remember { mutableStateOf<Rect?>(null) }
                         Column(
                             horizontalAlignment = Alignment.CenterHorizontally,
                             verticalArrangement = Arrangement.spacedBy(12.dp)
@@ -227,7 +231,11 @@ fun FoldersScreenContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier
-                                    .bounceClick { isCreateDialogOpen = true }
+                                    .onGloballyPositioned { emptyCreateBounds = it.boundsInWindow() }
+                                    .bounceClick {
+                                        createTriggerBounds = emptyCreateBounds
+                                        isCreateDialogOpen = true
+                                    }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f))
                                     .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
@@ -245,8 +253,14 @@ fun FoldersScreenContent(
                                 verticalAlignment = Alignment.CenterVertically,
                                 horizontalArrangement = Arrangement.Center,
                                 modifier = Modifier
+                                    .onGloballyPositioned { emptyJoinBounds = it.boundsInWindow() }
                                     .bounceClick {
-                                        if (isGuest) onGuestAuthRequired() else isJoinDialogOpen = true
+                                        if (isGuest) {
+                                            onGuestAuthRequired()
+                                        } else {
+                                            joinTriggerBounds = emptyJoinBounds
+                                            isJoinDialogOpen = true
+                                        }
                                     }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.05f))
@@ -534,13 +548,21 @@ fun FoldersScreenContent(
                                     horizontalArrangement = Arrangement.spacedBy(10.dp)
                                 ) {
                                     NewFolderCard(
-                                        onClick = { isCreateDialogOpen = true },
+                                        onClick = { bounds ->
+                                            createTriggerBounds = bounds
+                                            isCreateDialogOpen = true
+                                        },
                                         modifier = Modifier.weight(1.05f),
                                         alphaProgress = alphaProgress
                                     )
                                     JoinFolderCard(
-                                        onClick = {
-                                            if (isGuest) onGuestAuthRequired() else isJoinDialogOpen = true
+                                        onClick = { bounds ->
+                                            if (isGuest) {
+                                                onGuestAuthRequired()
+                                            } else {
+                                                joinTriggerBounds = bounds
+                                                isJoinDialogOpen = true
+                                            }
                                         },
                                         modifier = Modifier.weight(0.95f),
                                         alphaProgress = alphaProgress
@@ -591,6 +613,8 @@ fun FoldersScreenContent(
         isCreateDialogOpen = isCreateDialogOpen,
         isJoinDialogOpen = isJoinDialogOpen,
         joinDialogInitialCode = joinDialogInitialCode,
+        createTriggerBounds = createTriggerBounds,
+        joinTriggerBounds = joinTriggerBounds,
         folderToDelete = folderToDelete,
         folderToEdit = folderToEdit,
         folderEditMode = folderEditMode,
@@ -599,10 +623,14 @@ fun FoldersScreenContent(
         dialogHazeState = dialogHazeState,
         modalHost = modalHost,
         viewModel = viewModel,
-        onCloseCreateDialog = { isCreateDialogOpen = false },
+        onCloseCreateDialog = { 
+            isCreateDialogOpen = false
+            createTriggerBounds = null
+        },
         onCloseJoinDialog = {
             isJoinDialogOpen = false
             joinDialogInitialCode = ""
+            joinTriggerBounds = null
         },
         onClearFolderToDelete = { folderToDelete = null },
         onClearFolderToEdit = { folderToEdit = null },
@@ -611,61 +639,60 @@ fun FoldersScreenContent(
         onOpenShareModal = { folderToShare = it }
     )
 
-    var rememberedMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
-    var isMenuVisible by remember { mutableStateOf(false) }
+    var stableMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
+    val showFolderMenu = activeMenuFolder != null
+    if (activeMenuFolder != null) {
+        stableMenuFolder = activeMenuFolder
+    }
 
-    LaunchedEffect(activeMenuFolder) {
-        if (activeMenuFolder != null) {
-            rememberedMenuFolder = activeMenuFolder
-            isMenuVisible = true
-        } else if (isMenuVisible) {
-            isMenuVisible = false
-            kotlinx.coroutines.delay(200)
-            rememberedMenuFolder = null
+    val folderTransitionState = remember {
+        MutableTransitionState(false)
+    }
+    folderTransitionState.targetState = showFolderMenu
+
+    LaunchedEffect(folderTransitionState.currentState, folderTransitionState.targetState, folderTransitionState.isIdle) {
+        if (!folderTransitionState.targetState && folderTransitionState.isIdle) {
+            stableMenuFolder = null
         }
     }
 
-    rememberedMenuFolder?.let { folder ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .zIndex(2000f)
-                .pointerInput(Unit) { detectTapGestures { activeMenuFolder = null } }
-        ) {
-            val density = androidx.compose.ui.platform.LocalDensity.current
-            val offsetX = with(density) { activeMenuBounds.left.toDp() + 32.dp }
-            val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
-            
-            val menuAlpha by androidx.compose.animation.core.animateFloatAsState(
-                targetValue = if (isMenuVisible) 1f else 0f,
-                animationSpec = tween(200),
-                label = "menuAlpha"
-            )
-            AnimatedVisibility(
-                visible = isMenuVisible,
-                enter = expandVertically(
-                    expandFrom = Alignment.Top,
-                    animationSpec = spring(
-                        dampingRatio = 0.76f,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
-                ) + fadeIn(
-                    animationSpec = tween(120, easing = LinearOutSlowInEasing)
-                ),
-                exit = shrinkVertically(
-                    shrinkTowards = Alignment.Top,
-                    animationSpec = tween(120, easing = FastOutLinearInEasing)
-                ) + fadeOut(
-                    animationSpec = tween(110, easing = FastOutLinearInEasing)
-                ),
-                modifier = Modifier.absoluteOffset(x = offsetX, y = offsetY)
+    if (folderTransitionState.targetState || !folderTransitionState.isIdle) {
+        stableMenuFolder?.let { folder ->
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .zIndex(2000f)
+                    .pointerInput(Unit) { detectTapGestures { activeMenuFolder = null } }
             ) {
-                Column(
-                    modifier = Modifier
-                        .width(200.dp)
-                        .clip(RoundedCornerShape(24.dp))
-                        .then(Modifier.hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp), alpha = menuAlpha))
+                val density = androidx.compose.ui.platform.LocalDensity.current
+                val offsetX = with(density) { activeMenuBounds.left.toDp() + 32.dp }
+                val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
+                
+                AnimatedVisibility(
+                    visibleState = folderTransitionState,
+                    enter = expandVertically(
+                        expandFrom = Alignment.Top,
+                        animationSpec = spring(
+                            dampingRatio = 0.76f,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    ) + fadeIn(
+                        animationSpec = tween(120, easing = LinearOutSlowInEasing)
+                    ),
+                    exit = shrinkVertically(
+                        shrinkTowards = Alignment.Top,
+                        animationSpec = tween(120, easing = FastOutLinearInEasing)
+                    ) + fadeOut(
+                        animationSpec = tween(110, easing = FastOutLinearInEasing)
+                    ),
+                    modifier = Modifier.absoluteOffset(x = offsetX, y = offsetY)
                 ) {
+                    Column(
+                        modifier = Modifier
+                            .width(200.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp))
+                    ) {
                     val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                     val isOwner = !folder.isShared || (folder.ownerUid == currentUserId)
                     var itemDelay = 15
@@ -778,5 +805,6 @@ fun FoldersScreenContent(
             }
         }
     }
+}
 }
 

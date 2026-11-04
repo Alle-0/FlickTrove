@@ -531,27 +531,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         }
 
                         // --- FOLDER OPTIONS MODAL ---
-                        var rememberedShowFolderOptions by remember { mutableStateOf(false) }
-                        var isFolderMenuVisible by remember { mutableStateOf(false) }
+                        val currentFolderForMenu = activeFolderForDetail ?: if (currentTab is FolderDetailTab) allFoldersList?.find { it.id == currentTab.folderId } else null
+                        val isCurrentFolderShared = currentFolderForMenu?.isShared == true
+                        val isCurrentFolderOwner = currentFolderForMenu == null || currentFolderForMenu.ownerUid == currentUser?.uid
 
-                        LaunchedEffect(showFolderOptions, currentTab) {
-                            if (showFolderOptions && currentTab is FolderDetailTab) {
-                                rememberedShowFolderOptions = true
-                                isFolderMenuVisible = true
-                            } else if (rememberedShowFolderOptions) {
-                                isFolderMenuVisible = false
-                                kotlinx.coroutines.delay(200)
-                                rememberedShowFolderOptions = false
-                            }
-                        }
-
-                        if (rememberedShowFolderOptions) {
-                            val currentFolderForMenu = activeFolderForDetail ?: if (currentTab is FolderDetailTab) allFoldersList?.find { it.id == currentTab.folderId } else null
-                            val isCurrentFolderShared = currentFolderForMenu?.isShared == true
-                            val isCurrentFolderOwner = currentFolderForMenu == null || currentFolderForMenu.ownerUid == currentUser?.uid
-
+                        if (currentTab is FolderDetailTab || showFolderOptions) {
                             MainFolderOptionsMenu(
-                                visible = isFolderMenuVisible,
+                                visible = showFolderOptions && currentTab is FolderDetailTab,
                                 offset = folderOptionsOffset,
                                 hazeState = contentHazeState,
                                 isShared = isCurrentFolderShared,

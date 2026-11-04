@@ -652,22 +652,22 @@ fun FolderDetailScreenContent(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(stickyHeaderHeight)
-                                .padding(horizontal = 24.dp),
+                                .padding(horizontal = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                              val rightControlsInset = if (preferences.showLayoutToggle) 88.dp else 44.dp
+                            val rightControlsInset = if (preferences.showLayoutToggle) 88.dp else 44.dp
                             
                             Box(
                                 modifier = Modifier
-                                    .wrapContentSize()
-                                    .padding(end = rightControlsInset, start = 44.dp),
+                                    .fillMaxWidth()
+                                    .padding(end = rightControlsInset),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Box(modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.Center) {
                                     Spacer(
                                         modifier = Modifier
                                             .matchParentSize()
-                                            .hazeGlass(state = internalHazeState, shape = androidx.compose.foundation.shape.RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                                            .hazeGlass(state = internalHazeState, shape = CircleShape)
                                     )
                                     
                                     val options = listOf(stringResource(R.string.folder_detail_tab_all), stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))
@@ -678,6 +678,7 @@ fun FolderDetailScreenContent(
                                         options = options,
                                         counts = counts,
                                         selectedIndex = selectedIndex,
+                                        fontSize = 11.5.sp,
                                         onOptionClick = { index ->
                                             viewModel.onTabChanged(when(index) { 1 -> "movie"; 2 -> "tv"; else -> "all" })
                                             scope.launch { lazyGridState.scrollToItem(0) }
@@ -717,8 +718,6 @@ fun FolderDetailScreenContent(
                                         .hazeGlass(
                                             state = internalHazeState, 
                                             shape = CircleShape, 
-                                            blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                            useOffscreenStrategy = false,
                                             borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
                                             borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                                         ),

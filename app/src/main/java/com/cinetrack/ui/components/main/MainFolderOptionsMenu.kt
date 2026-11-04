@@ -2,35 +2,37 @@ package com.cinetrack.ui.components.main
 
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
-import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
-import androidx.compose.foundation.gestures.detectTapGestures
-import androidx.compose.foundation.layout.Box
-import androidx.compose.ui.input.pointer.pointerInput
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
@@ -47,43 +49,57 @@ fun MainFolderOptionsMenu(
     onEdit: () -> Unit,
     onReorder: () -> Unit,
     onShareOrMembers: () -> Unit = {},
-    onDelete: () -> Unit
+    onDelete: () -> Unit,
+    onDismissComplete: (() -> Unit)? = null
 ) {
-    Box(
-        modifier = Modifier
-            .fillMaxSize()
-            .zIndex(2000f)
-            .pointerInput(Unit) { detectTapGestures { onDismiss() } }
-    ) {
-        val density = LocalDensity.current
-        val offsetX = with(density) { offset.x.toDp() }
-        val offsetY = with(density) { offset.y.toDp() }
+    // Explicit MutableTransitionState ensures enter animation ALWAYS plays even if initialized with visible = true
+    val transitionState = remember {
+        MutableTransitionState(false).apply { targetState = visible }
+    }
+    transitionState.targetState = visible
 
-        AnimatedVisibility(
-            visible = visible,
-            enter = expandVertically(
-                expandFrom = Alignment.Top,
-                animationSpec = spring(
-                    dampingRatio = 0.76f,
-                    stiffness = Spring.StiffnessMediumLow
-                )
-            ) + fadeIn(
-                animationSpec = tween(120, easing = LinearOutSlowInEasing)
-            ),
-            exit = shrinkVertically(
-                shrinkTowards = Alignment.Top,
-                animationSpec = tween(120, easing = FastOutLinearInEasing)
-            ) + fadeOut(
-                animationSpec = tween(110, easing = FastOutLinearInEasing)
-            ),
-            modifier = Modifier.absoluteOffset(x = offsetX - 200.dp + 32.dp, y = offsetY + 8.dp)
+    LaunchedEffect(transitionState.currentState, transitionState.targetState, transitionState.isIdle) {
+        if (!transitionState.targetState && transitionState.isIdle) {
+            onDismissComplete?.invoke()
+        }
+    }
+
+    if (transitionState.targetState || !transitionState.isIdle) {
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .zIndex(2000f)
+                .pointerInput(Unit) { detectTapGestures { onDismiss() } }
         ) {
-            Column(
-                modifier = Modifier
-                    .width(200.dp)
-                    .clip(RoundedCornerShape(24.dp))
-                    .then(if (visible) Modifier.hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp)) else Modifier)
+            val density = LocalDensity.current
+            val offsetX = with(density) { offset.x.toDp() }
+            val offsetY = with(density) { offset.y.toDp() }
+
+            AnimatedVisibility(
+                visibleState = transitionState,
+                enter = expandVertically(
+                    expandFrom = Alignment.Top,
+                    animationSpec = spring(
+                        dampingRatio = 0.76f,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ) + fadeIn(
+                    animationSpec = tween(120, easing = LinearOutSlowInEasing)
+                ),
+                exit = shrinkVertically(
+                    shrinkTowards = Alignment.Top,
+                    animationSpec = tween(120, easing = FastOutLinearInEasing)
+                ) + fadeOut(
+                    animationSpec = tween(110, easing = FastOutLinearInEasing)
+                ),
+                modifier = Modifier.absoluteOffset(x = offsetX - 200.dp + 32.dp, y = offsetY + 8.dp)
             ) {
+                Column(
+                    modifier = Modifier
+                        .width(200.dp)
+                        .clip(RoundedCornerShape(24.dp))
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp))
+                ) {
                 var itemDelay = 15
                 val itemStep = 35
 
@@ -226,4 +242,5 @@ fun MainFolderOptionsMenu(
             }
         }
     }
+}
 }

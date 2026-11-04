@@ -346,7 +346,7 @@ fun VistiScreenContent(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(state = activeHazeState, shape = RoundedCornerShape(50), blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                            .hazeGlass(state = activeHazeState, shape = CircleShape)
                     )
                     
                     // Content Layer (Always sharp)
@@ -401,8 +401,6 @@ fun VistiScreenContent(
                         .hazeGlass(
                             state = activeHazeState, 
                             shape = CircleShape, 
-                            blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                            useOffscreenStrategy = false,
                             borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
                             borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                         ),

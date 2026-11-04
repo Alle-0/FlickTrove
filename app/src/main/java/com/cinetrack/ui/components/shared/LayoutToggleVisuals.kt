@@ -51,9 +51,7 @@ fun LayoutToggleButton(
             .bounceClick(scaleDown = 0.92f, onClick = onToggle)
             .hazeGlass(
                 state = hazeState,
-                shape = CircleShape,
-                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                useOffscreenStrategy = false
+                shape = CircleShape
             ),
         contentAlignment = Alignment.Center
     ) {

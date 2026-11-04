@@ -478,7 +478,7 @@ fun HomeScreenContent(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(state = activeHazeState, shape = CircleShape, blurRadius = HazeStyles.SmallGlassBlurRadius, useOffscreenStrategy = false)
+                            .hazeGlass(state = activeHazeState, shape = CircleShape)
                     )
                     
                     val options = listOf(stringResource(id = R.string.home_tab_movies), stringResource(id = R.string.home_tab_tv_series))
@@ -530,8 +530,6 @@ fun HomeScreenContent(
                             .hazeGlass(
                                 state = activeHazeState, 
                                 shape = CircleShape, 
-                                blurRadius = HazeStyles.SmallGlassBlurRadius, 
-                                useOffscreenStrategy = false,
                                 borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
                                 borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                             ),

@@ -5,6 +5,7 @@ import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.ColorWheel
 
 import androidx.compose.runtime.*
+import androidx.compose.ui.geometry.Rect
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.SharedFolderInviteDto
 import com.cinetrack.data.model.SharedFolderMemberDto
@@ -27,6 +28,8 @@ fun FolderModalsHost(
     isCreateDialogOpen: Boolean,
     isJoinDialogOpen: Boolean,
     joinDialogInitialCode: String,
+    createTriggerBounds: Rect? = null,
+    joinTriggerBounds: Rect? = null,
     folderToDelete: FolderEntity?,
     folderToEdit: FolderEntity?,
     folderEditMode: FolderEditMode,
@@ -54,10 +57,9 @@ fun FolderModalsHost(
                     },
                     onCreate = { name, icon, color, description ->
                         viewModel.createFolder(name, icon, color, description ?: "")
-                        onCloseCreateDialog()
-                        modalHost.dismiss()
                     },
-                    hazeState = dialogHazeState
+                    hazeState = dialogHazeState,
+                    triggerBounds = createTriggerBounds
                 )
             }
         }
@@ -79,7 +81,8 @@ fun FolderModalsHost(
                     onAcceptInvite = { code, callback ->
                         viewModel.acceptInvite(code, callback)
                     },
-                    hazeState = dialogHazeState
+                    hazeState = dialogHazeState,
+                    triggerBounds = joinTriggerBounds
                 )
             }
         }

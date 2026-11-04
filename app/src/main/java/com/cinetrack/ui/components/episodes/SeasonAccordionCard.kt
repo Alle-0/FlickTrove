@@ -143,30 +143,11 @@ internal fun SeasonAccordionCard(
                 Spacer(modifier = Modifier.width(12.dp))
 
                 // Quick Batch Season Checkmark: 28.dp Circle (matching EpisodeCard)
-                Box(
-                    modifier = Modifier
-                        .size(28.dp)
-                        .clip(CircleShape)
-                        .background(if (isFullyWatched) Color(0xFF00E676) else Color.Transparent)
-                        .border(
-                            1.5.dp,
-                            if (isFullyWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
-                            CircleShape
-                        )
-                        .bounceClick(
-                            onLongClick = { onBatchLongClick() }
-                        ) { onBatchToggle() },
-                    contentAlignment = Alignment.Center
-                ) {
-                    if (isFullyWatched) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
-                            contentDescription = null,
-                            tint = Color.Black,
-                            modifier = Modifier.size(14.dp)
-                        )
-                    }
-                }
+                EpisodeCheckmarkButton(
+                    isWatched = isFullyWatched,
+                    onToggle = onBatchToggle,
+                    onLongClick = onBatchLongClick
+                )
             }
 
             // Expanded Episode List or Shimmer Skeleton with AnimatedVisibility (smooth spring slide & fade)

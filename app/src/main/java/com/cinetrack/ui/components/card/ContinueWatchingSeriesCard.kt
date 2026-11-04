@@ -67,17 +67,26 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.NextEpisodeInfo
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.bounceClickWithOffset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.geometry.Size
+import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.onClick
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import com.cinetrack.ui.components.shared.LocalMovieActions
 import dev.chrisbanes.haze.HazeState
+import kotlin.math.pow
 
 private val UpToDateGreen = Color(0xFF10B981)
 
 /**
  * Checkmark button where the season progressive border is drawn directly ON the border of the button.
- * Eliminates outer halos or floating rings: the arc and track form the boundary of the button.
+ * Features tactile spring squeeze and pop, micro-rotation snap on the tick, and an expanding
+ * aperture shockwave ripple ring on tap without triggering card-level scale bounce.
  */
 @Composable
 private fun SeasonProgressCheckButton(
@@ -90,21 +99,130 @@ private fun SeasonProgressCheckButton(
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+
+    val buttonScale = remember { Animatable(1f) }
+    val tickScale = remember { Animatable(1f) }
+    val tickRotation = remember { Animatable(0f) }
+    val rippleProgress = remember { Animatable(0f) }
+
+    fun triggerTapAnimation() {
+        scope.launch {
+            rippleProgress.snapTo(0f)
+            rippleProgress.animateTo(1f, animationSpec = tween(420, easing = FastOutSlowInEasing))
+        }
+        scope.launch {
+            tickScale.snapTo(0.65f)
+            tickRotation.snapTo(-22f)
+            launch {
+                tickRotation.animateTo(
+                    targetValue = 0f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                )
+            }
+            tickScale.animateTo(
+                targetValue = 1f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            )
+        }
+    }
 
     Box(
         modifier = modifier
             .size(24.dp)
-            .bounceClick(
-                scaleDown = 0.85f,
-                onClick = {
+            .graphicsLayer {
+                scaleX = buttonScale.value
+                scaleY = buttonScale.value
+                clip = false
+            }
+            .semantics(mergeDescendants = true) {
+                role = Role.Button
+                this.contentDescription = contentDescription
+                this.onClick {
                     if (!isUpdating) {
+                        com.cinetrack.util.VibrationHelper.vibrateTick(context)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        triggerTapAnimation()
                         onClick()
+                        true
+                    } else false
+                }
+            }
+            .pointerInput(isUpdating) {
+                if (isUpdating) return@pointerInput
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    down.consume()
+                    scope.launch {
+                        buttonScale.animateTo(
+                            0.80f,
+                            animationSpec = spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                        )
+                    }
+                    val up = waitForUpOrCancellation()
+                    if (up != null) {
+                        up.consume()
+                        scope.launch {
+                            buttonScale.animateTo(
+                                1.15f,
+                                animationSpec = spring(stiffness = 12000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                            )
+                            buttonScale.animateTo(
+                                1.0f,
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioMediumBouncy
+                                )
+                            )
+                        }
+                        com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        triggerTapAnimation()
+                        onClick()
+                    } else {
+                        // Gesture cancelled (e.g. dragged outside)
+                        scope.launch {
+                            buttonScale.animateTo(
+                                1.0f,
+                                animationSpec = spring(
+                                    stiffness = Spring.StiffnessMediumLow,
+                                    dampingRatio = Spring.DampingRatioNoBouncy
+                                )
+                            )
+                        }
                     }
                 }
-            ),
+            },
         contentAlignment = Alignment.Center
     ) {
+        // Shockwave ripple ring expanding outward from the circle
+        val p = rippleProgress.value
+        if (p > 0f && p < 1f) {
+            Canvas(
+                modifier = Modifier
+                    .matchParentSize()
+                    .graphicsLayer { clip = false }
+            ) {
+                val ringProgress = p
+                val ringRadius = (12.dp.toPx() + 14.dp.toPx() * ringProgress)
+                val ringAlpha = (1f - ringProgress).pow(1.5f) * 0.75f
+                val strokeW = (2.dp * (1f - ringProgress)).toPx()
+                drawCircle(
+                    color = accentColor.copy(alpha = ringAlpha),
+                    radius = ringRadius,
+                    center = center,
+                    style = Stroke(width = strokeW)
+                )
+            }
+        }
+
         // Inner circular button fill & icon with progressive border directly on boundary
         Box(
             modifier = Modifier
@@ -150,9 +268,15 @@ private fun SeasonProgressCheckButton(
             } else {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick_card),
-                    contentDescription = contentDescription,
+                    contentDescription = null, // Handled by parent semantics
                     tint = accentColor,
-                    modifier = Modifier.size(10.dp)
+                    modifier = Modifier
+                        .size(10.dp)
+                        .graphicsLayer {
+                            scaleX = tickScale.value
+                            scaleY = tickScale.value
+                            rotationZ = tickRotation.value
+                        }
                 )
             }
         }
@@ -375,6 +499,20 @@ fun ContinueWatchingSeriesCard(
     val fullCardPosition = remember { arrayOf(Offset.Zero) }
     val fullCardSize = remember { arrayOf(Size.Zero) }
 
+    var cardLayoutCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+    var actionButtonBoundsInCard by remember { mutableStateOf<Rect?>(null) }
+
+    val actionButtonModifier = Modifier.onGloballyPositioned { btnCoords ->
+        val parent = cardLayoutCoordinates
+        if (parent != null && parent.isAttached && btnCoords.isAttached) {
+            val topLeft = parent.localPositionOf(btnCoords, Offset.Zero)
+            actionButtonBoundsInCard = Rect(
+                topLeft = topLeft,
+                bottomRight = Offset(topLeft.x + btnCoords.size.width, topLeft.y + btnCoords.size.height)
+            )
+        }
+    }
+
     // Premium Staggered Entrance Animation States (applies to the entire series card: poster + protrusion)
     val compositeId = "${movie.id}_${movie.mediaType}"
     val hasAnimated = rememberSaveable { mutableStateOf(hasAnimatedSet?.contains(compositeId) == true) }
@@ -419,15 +557,24 @@ fun ContinueWatchingSeriesCard(
                 clip = false
             }
             .onGloballyPositioned { coordinates ->
+                cardLayoutCoordinates = coordinates
                 fullCardPosition[0] = coordinates.positionInWindow()
                 fullCardSize[0] = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
             }
             .pointerInput(Unit) {
-                // requireUnconsumed = false: cattura il press anche se figli lo consumano
-                // In questo modo MovieCard e protrusion animano come un'unica unità
+                // If touch is on the action/check button, do NOT scale down the entire card
                 var pressJob: Job? = null
                 awaitEachGesture {
-                    awaitFirstDown(requireUnconsumed = false)
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val touchPos = down.position
+                    val isActionButtonTouch = actionButtonBoundsInCard?.let { bounds ->
+                        bounds.inflate(8.dp.toPx()).contains(touchPos)
+                    } ?: (touchPos.x >= (size.width - 48.dp.toPx()) && touchPos.y >= (size.height - 48.dp.toPx()))
+
+                    if (isActionButtonTouch) {
+                        return@awaitEachGesture
+                    }
+
                     pressJob?.cancel()
                     pressJob = coroutineScope.launch {
                         pressScale.animateTo(
@@ -594,6 +741,7 @@ fun ContinueWatchingSeriesCard(
                 Box(
                     modifier = Modifier
                         .size(24.dp)
+                        .then(actionButtonModifier)
                         .bounceClick(
                             scaleDown = 0.85f,
                             onClick = {
@@ -656,6 +804,7 @@ fun ContinueWatchingSeriesCard(
                     progress = 1f,
                     accentColor = UpToDateGreen,
                     contentDescription = stringResource(R.string.lbl_up_to_date),
+                    modifier = actionButtonModifier,
                     onClick = {
                         val msg = if (!formattedNextDate.isNullOrBlank()) {
                             context.getString(R.string.lbl_up_to_date) + " • " + context.getString(R.string.lbl_until_date, formattedNextDate)
@@ -709,6 +858,7 @@ fun ContinueWatchingSeriesCard(
                     accentColor = appAccent,
                     isUpdating = isUpdating,
                     contentDescription = stringResource(R.string.cd_mark_episode_watched, epText),
+                    modifier = actionButtonModifier,
                     onClick = { onQuickMarkWatched(movie) }
                 )
             }

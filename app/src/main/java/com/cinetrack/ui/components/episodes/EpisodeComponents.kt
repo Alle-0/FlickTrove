@@ -1,5 +1,18 @@
 package com.cinetrack.ui.components.episodes
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.animateColorAsState
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -16,6 +29,8 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
@@ -33,6 +48,7 @@ import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
+import kotlin.math.pow
 
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
@@ -145,27 +161,136 @@ internal fun EpisodeCard(
                 Spacer(modifier = Modifier.width(8.dp))
             }
 
-            Box(
+            EpisodeCheckmarkButton(
+                isWatched = isWatched,
+                onToggle = onToggle
+            )
+        }
+    }
+}
+
+/**
+ * Animated circular checkmark button for episodes and seasons with elastic spring pop,
+ * rotating tick, and expanding shockwave ripple ring.
+ */
+@Composable
+fun EpisodeCheckmarkButton(
+    isWatched: Boolean,
+    onToggle: () -> Unit,
+    onLongClick: (() -> Unit)? = null,
+    modifier: Modifier = Modifier,
+    checkedColor: Color = Color(0xFF00E676)
+) {
+    val animatedBgColor by animateColorAsState(
+        targetValue = if (isWatched) checkedColor else Color.Transparent,
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        label = "EpCheckBgColor"
+    )
+    val animatedBorderColor by animateColorAsState(
+        targetValue = if (isWatched) checkedColor else Color.White.copy(alpha = 0.15f),
+        animationSpec = tween(220, easing = FastOutSlowInEasing),
+        label = "EpCheckBorderColor"
+    )
+    val checkScale by animateFloatAsState(
+        targetValue = if (isWatched) 1.0f else 0.88f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "EpCheckScale"
+    )
+    val tickRotation by animateFloatAsState(
+        targetValue = if (isWatched) 0f else -25f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "EpTickRotation"
+    )
+
+    val rippleProgress = remember { Animatable(0f) }
+    var isInitialComposition by remember { mutableStateOf(true) }
+
+    LaunchedEffect(isWatched) {
+        if (isInitialComposition) {
+            isInitialComposition = false
+            return@LaunchedEffect
+        }
+        if (isWatched) {
+            rippleProgress.snapTo(0f)
+            rippleProgress.animateTo(1f, animationSpec = tween(450, easing = FastOutSlowInEasing))
+        } else {
+            rippleProgress.snapTo(0f)
+        }
+    }
+
+    Box(
+        modifier = modifier
+            .size(28.dp)
+            .bounceClick(
+                scaleDown = 0.88f,
+                onLongClick = onLongClick
+            ) { onToggle() },
+        contentAlignment = Alignment.Center
+    ) {
+        // Shockwave ripple ring expanding outward from the circle
+        val p = rippleProgress.value
+        if (p > 0f && p < 1f) {
+            Canvas(
                 modifier = Modifier
-                    .size(28.dp)
-                    .bounceClick(scaleDown = 0.88f) { onToggle() }
-                    .clip(CircleShape)
-                    .background(if (isWatched) Color(0xFF00E676) else Color.Transparent)
-                    .border(
-                        1.5.dp,
-                        if (isWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
-                        CircleShape
-                    ),
-                contentAlignment = Alignment.Center
+                    .matchParentSize()
+                    .graphicsLayer { clip = false }
             ) {
-                if (isWatched) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
-                        contentDescription = null,
-                        tint = Color.Black,
-                        modifier = Modifier.size(14.dp)
-                    )
+                val ringProgress = p
+                val ringRadius = (14.dp.toPx() + 14.dp.toPx() * ringProgress)
+                val ringAlpha = (1f - ringProgress).pow(1.5f) * 0.75f
+                val strokeW = (2.dp * (1f - ringProgress)).toPx()
+                drawCircle(
+                    color = checkedColor.copy(alpha = ringAlpha),
+                    radius = ringRadius,
+                    center = center,
+                    style = Stroke(width = strokeW)
+                )
+            }
+        }
+
+        // Circular background and border
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .graphicsLayer {
+                    scaleX = checkScale
+                    scaleY = checkScale
                 }
+                .clip(CircleShape)
+                .background(animatedBgColor)
+                .border(1.5.dp, animatedBorderColor, CircleShape),
+            contentAlignment = Alignment.Center
+        ) {
+            androidx.compose.animation.AnimatedVisibility(
+                visible = isWatched,
+                enter = scaleIn(
+                    initialScale = 0.2f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ) + fadeIn(tween(120)),
+                exit = scaleOut(
+                    targetScale = 0.2f,
+                    animationSpec = tween(120)
+                ) + fadeOut(tween(120))
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick),
+                    contentDescription = null,
+                    tint = Color.Black,
+                    modifier = Modifier
+                        .size(14.dp)
+                        .graphicsLayer {
+                            rotationZ = tickRotation
+                        }
+                )
             }
         }
     }

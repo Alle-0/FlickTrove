@@ -21,6 +21,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
@@ -32,6 +33,7 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import kotlinx.coroutines.launch
 import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.ui.components.glass.hazeGlass
@@ -46,19 +48,19 @@ import kotlinx.coroutines.launch
 import kotlin.random.Random
 
 /**
- * PeekABooCheckInDrawer
+ * CheckInModal (formerly PeekABooCheckInDrawer)
  *
- * A non-invasive "peek-a-boo" panel anchored to the right edge of the screen.
- * - State 0 (HIDDEN): fully off-screen, no UI shown.
- * - State 1 (PEEKING): a small vertical tab slides in from the right edge as a subtle handle.
- *   Auto-dismisses after [peekTimeoutMs] ms if never tapped.
- * - State 2 (EXPANDED): tapping the tab springs open a full glassmorph panel with
- *   Rating, Vibe emoji selection and Cast MVP picker.
+ * A clean, centered glassmorphic wizard modal for logging:
+ * - Step 0: Rating (fluid draggable stars + large score display)
+ * - Step 1: Emotional vibes (up to 3 vibes with live community percentages)
+ * - Step 2: Cast MVP selection (character/actor avatar picker)
+ *
+ * Triggered explicitly from the Personal Zone "Vibe" card, or automatically
+ * on marking as watched when `autoOpenVibeOnWatch` is enabled.
  */
 @Composable
-fun PeekABooCheckInDrawer(
+fun CheckInModal(
     visible: Boolean,
-    startExpanded: Boolean = false,
     movie: com.cinetrack.data.model.Movie? = null,
     globalStats: com.cinetrack.data.model.GlobalMovieStats? = null,
     cast: List<CastMember>,
@@ -67,17 +69,12 @@ fun PeekABooCheckInDrawer(
     hazeState: HazeState,
     onSave: (rating: Double?, vibes: List<String>, mvp: CastMember?, characterImageUrl: String?) -> Unit,
     onDismiss: () -> Unit,
-    peekTimeoutMs: Long = 6000L,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
 
-    // Drawer state machine
-    var isPeeking by remember { mutableStateOf(false) }
-    var isExpanded by remember { mutableStateOf(false) }
     var currentPage by remember { mutableIntStateOf(0) }
-
     var rating by remember(movie?.personalRating) { mutableDoubleStateOf(movie?.personalRating ?: 0.0) }
 
     // Local selection state initialized from movie if present
@@ -113,8 +110,8 @@ fun PeekABooCheckInDrawer(
         }
     }
 
-    // Reset and trigger peek when `visible` transitions to true
-    LaunchedEffect(visible, startExpanded) {
+    // Reset when `visible` transitions to true
+    LaunchedEffect(visible) {
         if (visible) {
             rating = movie?.personalRating ?: 0.0
             selectedVibes = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
@@ -122,59 +119,54 @@ fun PeekABooCheckInDrawer(
             }?.toSet() ?: emptySet()
             selectedMvp = cast.find { it.id == movie?.favoriteActorId }
             currentPage = 0
-            isExpanded = startExpanded
-            isPeeking = true
             isSaving = false
             burstProgress.snapTo(0f)
-        } else {
-            isPeeking = false
-            isExpanded = false
-            currentPage = 0
-            isSaving = false
-            burstProgress.snapTo(0f)
-        }
-    }
-
-    // Auto-dismiss the peek tab after timeout
-    LaunchedEffect(isPeeking, isExpanded) {
-        if (isPeeking && !isExpanded) {
-            delay(peekTimeoutMs)
-            if (!isExpanded) {
-                isPeeking = false
-                onDismiss()
-            }
         }
     }
 
     val dismissAll = {
-        isPeeking = false
-        isExpanded = false
         isSaving = false
         onDismiss()
     }
 
-    val boxModifier = if (isExpanded) {
-        modifier.fillMaxSize()
-            .zIndex(100f)
-            .background(Color.Black.copy(alpha = 0.5f))
-            .pointerInput(Unit) {
-                detectTapGestures(onTap = { dismissAll() })
-            }
-    } else {
-        modifier.fillMaxSize()
+    androidx.activity.compose.BackHandler(enabled = visible) {
+        dismissAll()
     }
 
-    Box(modifier = boxModifier, contentAlignment = if (isExpanded) Alignment.Center else Alignment.TopStart) {
+    val scrimAlpha by animateFloatAsState(
+        targetValue = if (visible) 0.5f else 0f,
+        animationSpec = tween(durationMillis = 200),
+        label = "CheckInScrimAlpha"
+    )
 
-        // ── EXPANDED MODAL PANEL ──────────────────────────────────────────────
-        AnimatedVisibility(
-            visible = isExpanded,
-            enter = fadeIn(tween(200)),
-            exit = fadeOut(tween(150)),
-            modifier = Modifier
-                .align(Alignment.Center)
-                .zIndex(10f)
+    if (visible || scrimAlpha > 0f) {
+        Box(
+            modifier = modifier
+                .fillMaxSize()
+                .zIndex(100f)
+                .background(Color.Black.copy(alpha = scrimAlpha))
+                .pointerInput(Unit) {
+                    detectTapGestures(onTap = { dismissAll() })
+                },
+            contentAlignment = Alignment.Center
         ) {
+            AnimatedVisibility(
+                visible = visible,
+                enter = fadeIn(tween(200)) + scaleIn(
+                    initialScale = 0.92f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
+                exit = fadeOut(tween(150)) + scaleOut(
+                    targetScale = 0.92f,
+                    animationSpec = tween(150, easing = FastOutSlowInEasing)
+                ),
+                modifier = Modifier
+                    .align(Alignment.Center)
+                    .zIndex(10f)
+            ) {
             Box(
                 modifier = Modifier
                     .width(340.dp)
@@ -254,9 +246,26 @@ fun PeekABooCheckInDrawer(
                                         horizontalAlignment = Alignment.CenterHorizontally,
                                         modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
                                     ) {
+                                        val numberScale = remember { Animatable(1f) }
+                                        val coroutineScope = rememberCoroutineScope()
+
                                         com.cinetrack.ui.components.shared.FluidRatingBar(
                                             rating = rating,
                                             onRatingChange = { rating = it },
+                                            onRatingSettled = { settledVal ->
+                                                if (settledVal > 0.0) {
+                                                    coroutineScope.launch {
+                                                        numberScale.snapTo(1.18f)
+                                                        numberScale.animateTo(
+                                                            targetValue = 1f,
+                                                            animationSpec = spring(
+                                                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                                                stiffness = Spring.StiffnessMediumLow
+                                                            )
+                                                        )
+                                                    }
+                                                }
+                                            },
                                             accentColor = accentColor,
                                             starSize = 56.dp,
                                             modifier = Modifier.padding(vertical = 16.dp)
@@ -268,7 +277,11 @@ fun PeekABooCheckInDrawer(
                                                 style = MaterialTheme.typography.displayMedium.copy(
                                                     fontWeight = FontWeight.Black,
                                                     fontSize = 48.sp
-                                                )
+                                                ),
+                                                modifier = Modifier.graphicsLayer {
+                                                    scaleX = numberScale.value
+                                                    scaleY = numberScale.value
+                                                }
                                             )
                                         } else {
                                             Text(
@@ -547,66 +560,42 @@ fun PeekABooCheckInDrawer(
                 }
             }
         }
-
-        // ── PEEK TAB ───────────────────────────────────────────────────
-        AnimatedVisibility(
-            visible = isPeeking && !isExpanded,
-            enter = slideInHorizontally(
-                animationSpec = tween(300, easing = FastOutSlowInEasing),
-                initialOffsetX = { it }
-            ) + fadeIn(tween(200)),
-            exit = slideOutHorizontally(
-                animationSpec = tween(200),
-                targetOffsetX = { it }
-            ) + fadeOut(tween(150)),
-            modifier = Modifier
-                .align(Alignment.CenterEnd)
-                .zIndex(10f)
-        ) {
-            Box(
-                modifier = Modifier
-                    .width(36.dp)
-                    .height(96.dp)
-                    .bounceClick(scaleDown = 0.94f) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                        isExpanded = true
-                    },
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(topStart = 14.dp, bottomStart = 14.dp),
-                            containerColor = Color(0xFF080B14),
-                            useOffscreenStrategy = true,
-                            borderColor = accentColor.copy(alpha = 0.6f)
-                        )
-                )
-
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier.padding(4.dp)
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(
-                        text = stringResource(R.string.checkin_vibe_tab).uppercase(),
-                        fontSize = 8.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = accentColor,
-                        textAlign = TextAlign.Center,
-                        letterSpacing = 0.5.sp
-                    )
-                }
-            }
-        }
     }
+}
+}
+
+/**
+ * Backward compatibility alias for [CheckInModal].
+ */
+@Deprecated(
+    message = "Use CheckInModal directly. Peek-a-boo tab has been phased out.",
+    replaceWith = ReplaceWith("CheckInModal(visible = visible, movie = movie, globalStats = globalStats, cast = cast, characterImages = characterImages, accentColor = accentColor, hazeState = hazeState, onSave = onSave, onDismiss = onDismiss, modifier = modifier)")
+)
+@Composable
+fun PeekABooCheckInDrawer(
+    visible: Boolean,
+    startExpanded: Boolean = true,
+    movie: com.cinetrack.data.model.Movie? = null,
+    globalStats: com.cinetrack.data.model.GlobalMovieStats? = null,
+    cast: List<CastMember>,
+    characterImages: Map<String, String> = emptyMap(),
+    accentColor: Color,
+    hazeState: HazeState,
+    onSave: (rating: Double?, vibes: List<String>, mvp: CastMember?, characterImageUrl: String?) -> Unit,
+    onDismiss: () -> Unit,
+    peekTimeoutMs: Long = 6000L,
+    modifier: Modifier = Modifier
+) {
+    CheckInModal(
+        visible = visible,
+        movie = movie,
+        globalStats = globalStats,
+        cast = cast,
+        characterImages = characterImages,
+        accentColor = accentColor,
+        hazeState = hazeState,
+        onSave = onSave,
+        onDismiss = onDismiss,
+        modifier = modifier
+    )
 }

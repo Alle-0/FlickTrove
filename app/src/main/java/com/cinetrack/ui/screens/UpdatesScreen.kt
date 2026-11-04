@@ -453,10 +453,8 @@ fun UpdatesScreen(
                                 .matchParentSize()
                                 .hazeGlass(
                                     state = internalHazeState,
-                                    shape = CircleShape,
-                                    blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = false
-                            )
+                                    shape = CircleShape
+                                )
                         )
                         AnimatedContent(
                             targetState = isRemindersSelector,

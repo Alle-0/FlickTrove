@@ -62,9 +62,7 @@ fun HomeFloatingHeader(
                         .matchParentSize()
                         .hazeGlass(
                             state = activeHazeState,
-                            shape = CircleShape,
-                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                            useOffscreenStrategy = false
+                            shape = CircleShape
                         )
                 )
 
@@ -108,8 +106,6 @@ fun HomeFloatingHeader(
                         .hazeGlass(
                             state = activeHazeState,
                             shape = CircleShape,
-                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                            useOffscreenStrategy = false,
                             borderWidth = 1.dp,
                             borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                         ),

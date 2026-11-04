@@ -306,9 +306,7 @@ fun BoxOfficeScreenContent(
                             .matchParentSize()
                             .hazeGlass(
                                 state = hazeState,
-                                shape = CircleShape,
-                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                useOffscreenStrategy = false
+                                shape = CircleShape
                             )
                     )
 
@@ -337,8 +335,6 @@ fun BoxOfficeScreenContent(
                         .hazeGlass(
                             state = hazeState,
                             shape = CircleShape,
-                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                            useOffscreenStrategy = false,
                             borderWidth = if (hasActiveFilter) 1.5.dp else 1.dp,
                             borderColor = if (hasActiveFilter) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                         ),

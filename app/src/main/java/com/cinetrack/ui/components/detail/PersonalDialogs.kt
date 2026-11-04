@@ -6,6 +6,7 @@ import com.cinetrack.ui.utils.ColorUtils
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.foundation.rememberScrollState
@@ -303,9 +304,9 @@ fun NoteEditorBox(
             modifier = Modifier
                 .fillMaxWidth()
                 .wrapContentHeight()
-                .clip(RoundedCornerShape(16.dp))
+                .clip(RoundedCornerShape(34.dp))
                 .background(Color.White.copy(alpha = 0.05f))
-                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(34.dp))
                 .padding(16.dp)
         ) {
             val scrollState = rememberScrollState()
@@ -357,7 +358,7 @@ fun NoteEditorBox(
                                 }
                                 speechLauncher.launch(intent)
                             }
-                            .clip(RoundedCornerShape(50))
+                            .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.1f)),
                         contentAlignment = Alignment.Center
                     ) {
@@ -395,9 +396,9 @@ fun NoteEditorBox(
                                         audioHelper.startPlaying(movieId, mediaType)
                                     }
                                 }
-                                .clip(RoundedCornerShape(50))
+                                .clip(CircleShape)
                                 .background(accentColor.copy(alpha = 0.2f))
-                                .border(1.dp, accentColor, RoundedCornerShape(50))
+                                .border(1.dp, accentColor, CircleShape)
                                 .padding(horizontal = 16.dp),
                             contentAlignment = Alignment.Center
                         ) {
@@ -452,7 +453,7 @@ fun NoteEditorBox(
                                         hasAudio = false
                                     }
                                 }
-                                .clip(RoundedCornerShape(50)),
+                                .clip(CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -482,9 +483,9 @@ fun NoteEditorBox(
                                     permissionLauncher.launch(Manifest.permission.RECORD_AUDIO)
                                 }
                             }
-                            .clip(RoundedCornerShape(50))
+                            .clip(CircleShape)
                             .background(if (isRecording) Color(0xFFFF3B30).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.1f))
-                            .border(1.dp, if (isRecording) Color(0xFFFF3B30) else Color.Transparent, RoundedCornerShape(50))
+                            .border(1.dp, if (isRecording) Color(0xFFFF3B30) else Color.Transparent, CircleShape)
                             .padding(horizontal = 16.dp),
                         contentAlignment = Alignment.Center
                     ) {
@@ -492,7 +493,7 @@ fun NoteEditorBox(
                             Box(
                                 modifier = Modifier
                                     .size(8.dp)
-                                    .clip(RoundedCornerShape(50))
+                                    .clip(CircleShape)
                                     .background(if (isRecording) Color(0xFFFF3B30) else Color.White.copy(alpha = 0.5f))
                             )
                             Spacer(Modifier.width(8.dp))
