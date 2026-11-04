@@ -27,6 +27,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -63,17 +64,15 @@ private data class VibeFloatItem(
     val initialX: Float,
     val targetX: Float,
     val targetY: Float,
-    val startScale: Float,
-    val peakScale: Float,
+    val sizeDp: Float,
     val rotationStart: Float,
-    val rotationEnd: Float,
-    val sizeDp: Float
+    val rotationEnd: Float
 )
 
 private val VIBE_FLOAT_ITEMS = listOf(
-    VibeFloatItem(initialX = -12f, targetX = -20f, targetY = -42f, startScale = 0.5f, peakScale = 1.0f, rotationStart = -6f, rotationEnd = -18f, sizeDp = 15f),
-    VibeFloatItem(initialX = 1f, targetX = 4f, targetY = -52f, startScale = 0.6f, peakScale = 1.25f, rotationStart = 4f, rotationEnd = -8f, sizeDp = 18f),
-    VibeFloatItem(initialX = 14f, targetX = 22f, targetY = -40f, startScale = 0.5f, peakScale = 0.95f, rotationStart = 8f, rotationEnd = 18f, sizeDp = 14f),
+    VibeFloatItem(initialX = -12f, targetX = -24f, targetY = -46f, sizeDp = 24f, rotationStart = -6f, rotationEnd = -20f),
+    VibeFloatItem(initialX = 2f, targetX = 6f, targetY = -54f, sizeDp = 28f, rotationStart = 4f, rotationEnd = -10f),
+    VibeFloatItem(initialX = 14f, targetX = 26f, targetY = -42f, sizeDp = 22f, rotationStart = 8f, rotationEnd = 22f)
 )
 
 /**
@@ -98,13 +97,15 @@ fun VibeChip(
     )
 
     val iconScale by animateFloatAsState(
-        targetValue = if (isSelected) 1.22f else 1.0f,
+        targetValue = if (isSelected) 1.25f else 1.0f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
             stiffness = Spring.StiffnessMediumLow
         ),
         label = "VibeIconScale"
     )
+
+    val iconRotation = remember { Animatable(0f) }
 
     val animatedBorderWidth by animateDpAsState(
         targetValue = if (isSelected) 1.5.dp else 0.dp,
@@ -130,8 +131,8 @@ fun VibeChip(
         label = "VibeTextColor"
     )
 
-    // Float-up reaction animation on selection
-    val floatProgress = remember { Animatable(0f) }
+    // Sparkle reaction animation on selection
+    val burstProgress = remember { Animatable(0f) }
     var isInitialComposition by remember { mutableStateOf(true) }
 
     LaunchedEffect(isSelected) {
@@ -140,38 +141,55 @@ fun VibeChip(
             return@LaunchedEffect
         }
         if (isSelected) {
-            floatProgress.snapTo(0f)
-            floatProgress.animateTo(
+            launch {
+                iconRotation.snapTo(-14f)
+                iconRotation.animateTo(
+                    targetValue = 0f,
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                )
+            }
+            burstProgress.snapTo(0f)
+            burstProgress.animateTo(
                 targetValue = 1f,
                 animationSpec = tween(durationMillis = 550, easing = FastOutSlowInEasing)
             )
         } else {
-            floatProgress.snapTo(0f)
+            burstProgress.snapTo(0f)
         }
     }
 
     Box(
         modifier = modifier
-            .zIndex(if (isSelected) 2f else 0f)
+            .zIndex(if (isSelected) 10f else 0f)
             .graphicsLayer {
                 scaleX = chipScale
                 scaleY = chipScale
+                clip = false
             }
             .alpha(if (isDisabled) 0.3f else 1f)
             .bounceClick(scaleDown = if (isDisabled) 1f else 0.90f) {
                 if (!isDisabled) onClick()
-            }
-            .clip(RoundedCornerShape(24.dp))
-            .background(animatedBgColor)
-            .border(
-                width = animatedBorderWidth,
-                color = animatedBorderColor,
-                shape = RoundedCornerShape(24.dp)
-            )
-            .padding(horizontal = 8.dp, vertical = 6.dp),
+            },
         contentAlignment = Alignment.Center
     ) {
+        // Inner capsule surface (clipped to 24dp rounded shape)
+        Box(
+            modifier = Modifier
+                .matchParentSize()
+                .clip(RoundedCornerShape(24.dp))
+                .background(animatedBgColor)
+                .border(
+                    width = animatedBorderWidth,
+                    color = animatedBorderColor,
+                    shape = RoundedCornerShape(24.dp)
+                )
+        )
+
         Column(
+            modifier = Modifier.padding(horizontal = 8.dp, vertical = 6.dp),
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.spacedBy(2.dp, Alignment.CenterVertically)
         ) {
@@ -179,10 +197,11 @@ fun VibeChip(
                 painter = painterResource(id = vibe.iconRes),
                 contentDescription = null,
                 modifier = Modifier
-                    .size(32.dp)
+                    .size(36.dp)
                     .graphicsLayer {
                         scaleX = iconScale
                         scaleY = iconScale
+                        rotationZ = iconRotation.value
                     },
                 tint = if (isSelected) accentColor else Color.White.copy(alpha = 0.6f)
             )
@@ -210,27 +229,26 @@ fun VibeChip(
             )
         }
 
-        // Floating reaction replicas rising upward on selection
-        val currentFloat = floatProgress.value
-        if (currentFloat > 0f && currentFloat < 1f) {
+        // Floating reaction emojis rising upward on selection (unclipped, rendered over everything)
+        val p = burstProgress.value
+        if (p > 0f && p < 1f) {
             Box(
                 modifier = Modifier
                     .matchParentSize()
-                    .zIndex(10f)
+                    .zIndex(20f)
                     .graphicsLayer { clip = false },
                 contentAlignment = Alignment.Center
             ) {
-                val p = currentFloat
                 val travel = 1f - (1f - p).pow(2)
-                val alpha = (1f - p).coerceIn(0f, 1f).pow(1.4f)
+                val alpha = if (p < 0.40f) 1f else ((1f - p) / 0.60f).coerceIn(0f, 1f).pow(1.3f)
 
                 VIBE_FLOAT_ITEMS.forEach { item ->
                     val curX = item.initialX + (item.targetX - item.initialX) * travel
                     val curY = item.targetY * travel
                     val scale = if (p < 0.35f) {
-                        item.startScale + (item.peakScale - item.startScale) * (p / 0.35f)
+                        0.7f + (1.18f - 0.7f) * (p / 0.35f)
                     } else {
-                        item.peakScale - (item.peakScale - item.startScale * 0.7f) * ((p - 0.35f) / 0.65f)
+                        1.18f - (1.18f - 0.95f) * ((p - 0.35f) / 0.65f)
                     }
                     val rot = item.rotationStart + (item.rotationEnd - item.rotationStart) * p
 
@@ -247,6 +265,7 @@ fun VibeChip(
                                 scaleY = scale
                                 rotationZ = rot
                                 this.alpha = alpha
+                                clip = false
                             }
                     )
                 }

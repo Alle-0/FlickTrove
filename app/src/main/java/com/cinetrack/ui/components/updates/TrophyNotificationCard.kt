@@ -59,7 +59,7 @@ fun TrophyNotificationCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(90.dp)
+            .height(96.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -78,7 +78,7 @@ fun TrophyNotificationCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 9.dp),
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             when (notification) {

@@ -509,10 +509,17 @@ fun FoldersScreenContent(
                                         }
                                         if (searchQuery.isNotEmpty()) {
                                             Spacer(Modifier.width(8.dp))
-                                            IconButton(onClick = { viewModel.updateSearchQuery("") }, modifier = Modifier.size(24.dp)) {
+                                            Box(
+                                                modifier = Modifier
+                                                    .size(24.dp)
+                                                    .bounceClick {
+                                                        viewModel.updateSearchQuery("")
+                                                    },
+                                                contentAlignment = Alignment.Center
+                                            ) {
                                                 Icon(
                                                     painter = painterResource(id = R.drawable.ic_x), 
-                                                    contentDescription = null, 
+                                                    contentDescription = stringResource(R.string.search_content_desc_clear), 
                                                     tint = Color.White.copy(alpha = 0.5f), 
                                                     modifier = Modifier.size(16.dp)
                                                 )

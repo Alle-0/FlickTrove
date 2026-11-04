@@ -2,8 +2,8 @@ package com.cinetrack.ui.components.shared
 
 import androidx.compose.animation.core.*
 import androidx.compose.foundation.Canvas
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.Star
@@ -48,6 +48,9 @@ fun FluidRatingBar(
     val gapPx = remember(density) { with(density) { 8.dp.toPx() } }
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
+    val currentOnRatingChange by rememberUpdatedState(onRatingChange)
+    val currentOnRatingSettled by rememberUpdatedState(onRatingSettled)
+
     // Settle trigger when drag or tap finishes
     var settleStarIndex by remember { mutableStateOf(-1) }
     var settleTrigger by remember { mutableStateOf(0L) }
@@ -65,38 +68,53 @@ fun FluidRatingBar(
     Box(
         modifier = modifier
             .onSizeChanged { containerSize = it }
-            .pointerInput(Unit) {
-                detectTapGestures { offset ->
-                    val newRating = calculateRatingFromX(offset.x, containerSize.width.toFloat(), maxRating, numStars, gapPx)
-                    onRatingChange(newRating)
-                    if (newRating > 0.0) {
-                        val starValue = maxRating / numStars
-                        settleStarIndex = (((newRating - 0.05) / starValue).toInt()).coerceIn(0, numStars - 1)
-                        settleTrigger = System.currentTimeMillis()
-                    }
-                    onRatingSettled?.invoke(newRating)
+            .pointerInput(numStars, maxRating) {
+                awaitEachGesture {
+                    val down = awaitFirstDown(requireUnconsumed = false)
+                    val w = containerSize.width.toFloat()
+                    if (w <= 0f) return@awaitEachGesture
+                    
+                    down.consume()
+                    // Immediately reset previous settle state on new interaction
+                    settleStarIndex = -1
+                    settleTrigger = 0L
+
+                    var curRating = calculateRatingFromX(down.position.x, w, maxRating, numStars, gapPx)
+                    currentOnRatingChange(curRating)
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                }
-            }
-            .pointerInput(Unit) {
-                detectDragGestures(
-                    onDragStart = { /* Drag in progress */ },
-                    onDragEnd = {
-                        if (rating > 0.0) {
-                            val starValue = maxRating / numStars
-                            settleStarIndex = (((rating - 0.05) / starValue).toInt()).coerceIn(0, numStars - 1)
-                            settleTrigger = System.currentTimeMillis()
+
+                    // Track drag movements
+                    while (true) {
+                        val event = awaitPointerEvent()
+                        val change = event.changes.firstOrNull { it.id == down.id } ?: break
+                        if (!change.pressed) {
+                            // Touch released!
+                            break
                         }
-                        onRatingSettled?.invoke(rating)
-                    },
-                    onDragCancel = { },
-                    onDrag = { change, _ ->
-                        change.consume()
-                        val newRating = calculateRatingFromX(change.position.x, containerSize.width.toFloat(), maxRating, numStars, gapPx)
-                        onRatingChange(newRating)
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        if (change.position != down.position) {
+                            change.consume()
+                            val newRating = calculateRatingFromX(change.position.x, w, maxRating, numStars, gapPx)
+                            if (newRating != curRating) {
+                                curRating = newRating
+                                currentOnRatingChange(curRating)
+                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                            }
+                        }
                     }
-                )
+
+                    // Finger released (whether from a quick tap or a drag)
+                    if (curRating > 0.0) {
+                        val starValue = maxRating / numStars
+                        settleStarIndex = (((curRating - 0.05) / starValue).toInt()).coerceIn(0, numStars - 1)
+                        settleTrigger = System.currentTimeMillis()
+                        currentOnRatingSettled?.invoke(curRating)
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    } else {
+                        settleStarIndex = -1
+                        settleTrigger = 0L
+                        currentOnRatingSettled?.invoke(0.0)
+                    }
+                }
             },
         contentAlignment = Alignment.Center
     ) {
@@ -160,30 +178,22 @@ fun PremiumStar(
         label = "WaveScale"
     )
 
-    // Settle animation and sparkles when releasing the rating (only once, never while dragging)
+    // Settle scale bounce when releasing the rating (only once, never while dragging)
     val settleScale = remember { Animatable(1f) }
-    val settleSparkleProgress = remember { Animatable(0f) }
 
-    LaunchedEffect(settleTrigger) {
-        if (isSettledStar && settleTrigger > 0L) {
-            launch {
-                settleScale.snapTo(1.22f)
-                settleScale.animateTo(
-                    targetValue = 1f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
-                )
-            }
-            launch {
-                settleSparkleProgress.snapTo(0f)
-                settleSparkleProgress.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 400, easing = FastOutSlowInEasing)
-                )
-            }
+    LaunchedEffect(settleTrigger, isSettledStar) {
+        if (!isSettledStar || settleTrigger <= 0L) {
+            settleScale.snapTo(1f)
+            return@LaunchedEffect
         }
+        settleScale.snapTo(1.18f)
+        settleScale.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        )
     }
 
     Box(
@@ -230,60 +240,6 @@ fun PremiumStar(
                     modifier = Modifier.fillMaxSize(),
                     tint = accentColor
                 )
-            }
-        }
-
-        // Settle Sparkles & Halo Ring on release
-        val p = settleSparkleProgress.value
-        if (p > 0f && p < 1f) {
-            Canvas(
-                modifier = Modifier
-                    .matchParentSize()
-                    .graphicsLayer { clip = false }
-            ) {
-                val cx = size.width / 2f
-                val cy = size.height / 2f
-                val alpha = (1f - p).coerceIn(0f, 1f).pow(1.5f)
-
-                // Soft expanding halo ring
-                val ringRadius = (size.width * 0.45f) + 8.dp.toPx() * p
-                drawCircle(
-                    color = accentColor.copy(alpha = alpha * 0.65f),
-                    radius = ringRadius,
-                    center = Offset(cx, cy),
-                    style = Stroke(width = (1.5.dp * (1f - p)).toPx())
-                )
-
-                // 4 diagonal sparkle rays
-                val rayDist = (size.width * 0.50f) + 6.dp.toPx() * (1f - (1f - p).pow(2))
-                val raySize = 2.8.dp.toPx() * (1f - p * 0.5f)
-                val offsets = listOf(
-                    Offset(cx - rayDist, cy - rayDist),
-                    Offset(cx + rayDist, cy - rayDist),
-                    Offset(cx - rayDist, cy + rayDist),
-                    Offset(cx + rayDist, cy + rayDist)
-                )
-                offsets.forEach { pt ->
-                    drawLine(
-                        color = accentColor.copy(alpha = alpha),
-                        start = Offset(pt.x - raySize, pt.y),
-                        end = Offset(pt.x + raySize, pt.y),
-                        strokeWidth = 1.2.dp.toPx(),
-                        cap = StrokeCap.Round
-                    )
-                    drawLine(
-                        color = accentColor.copy(alpha = alpha),
-                        start = Offset(pt.x, pt.y - raySize),
-                        end = Offset(pt.x, pt.y + raySize),
-                        strokeWidth = 1.2.dp.toPx(),
-                        cap = StrokeCap.Round
-                    )
-                    drawCircle(
-                        color = Color.White.copy(alpha = alpha),
-                        radius = raySize * 0.35f,
-                        center = pt
-                    )
-                }
             }
         }
     }

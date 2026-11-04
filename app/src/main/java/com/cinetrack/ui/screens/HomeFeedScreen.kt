@@ -332,7 +332,6 @@ fun HomeFeedScreenContent(
     }
 
     Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-        CinematicBackground(modifier = Modifier.fillMaxSize())
         val symbiontPullState = LocalSymbiontPullState.current
         val currentPullFraction = pullToRefreshState.distanceFraction
         SideEffect {
@@ -351,6 +350,7 @@ fun HomeFeedScreenContent(
                 .fillMaxSize()
                 .haze(activeHazeState, style = HazeStyles.PremiumDark)
         ) {
+            CinematicBackground(modifier = Modifier.fillMaxSize())
             PullToRefreshBox(
                 isRefreshing = isRefreshing,
                 onRefresh = { viewModel.pullToRefresh() },

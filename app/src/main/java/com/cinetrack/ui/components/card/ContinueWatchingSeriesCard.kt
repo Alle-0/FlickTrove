@@ -104,7 +104,6 @@ private fun SeasonProgressCheckButton(
 
     val buttonScale = remember { Animatable(1f) }
     val tickScale = remember { Animatable(1f) }
-    val tickRotation = remember { Animatable(0f) }
     val rippleProgress = remember { Animatable(0f) }
 
     fun triggerTapAnimation() {
@@ -114,16 +113,6 @@ private fun SeasonProgressCheckButton(
         }
         scope.launch {
             tickScale.snapTo(0.65f)
-            tickRotation.snapTo(-22f)
-            launch {
-                tickRotation.animateTo(
-                    targetValue = 0f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMediumLow
-                    )
-                )
-            }
             tickScale.animateTo(
                 targetValue = 1f,
                 animationSpec = spring(
@@ -275,7 +264,6 @@ private fun SeasonProgressCheckButton(
                         .graphicsLayer {
                             scaleX = tickScale.value
                             scaleY = tickScale.value
-                            rotationZ = tickRotation.value
                         }
                 )
             }
@@ -568,10 +556,11 @@ fun ContinueWatchingSeriesCard(
                     val down = awaitFirstDown(requireUnconsumed = false)
                     val touchPos = down.position
                     val isActionButtonTouch = actionButtonBoundsInCard?.let { bounds ->
-                        bounds.inflate(8.dp.toPx()).contains(touchPos)
-                    } ?: (touchPos.x >= (size.width - 48.dp.toPx()) && touchPos.y >= (size.height - 48.dp.toPx()))
+                        bounds.inflate(12.dp.toPx()).contains(touchPos)
+                    } ?: (touchPos.x >= (size.width - 56.dp.toPx()) && touchPos.y >= (size.height - 56.dp.toPx()))
 
                     if (isActionButtonTouch) {
+                        waitForUpOrCancellation()
                         return@awaitEachGesture
                     }
 

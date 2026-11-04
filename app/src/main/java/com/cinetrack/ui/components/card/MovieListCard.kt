@@ -5,6 +5,14 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
+import androidx.compose.foundation.gestures.waitForUpOrCancellation
+import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.role
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -374,56 +382,173 @@ fun MovieListCard(
             }
             
             // Action Button
+            val isQuickWatch = isTv && !isEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
+            val appAccent = MaterialTheme.colorScheme.primary
+            val isReleased = movie.isReleased
+            val isPromemoriaAttiva = !isReleased && !isEffectiveWatched && (isReminder || isFavorite)
+            val isOcchio = !isQuickWatch && isReleased && !isEffectiveWatched && (isReminder || isFavorite)
+            val isTick = isQuickWatch || isEffectiveWatched
+            val isPlus = !isEffectiveWatched && isReleased && !isOcchio && !isQuickWatch
+            val isBellOutlined = !isReleased && !isEffectiveWatched && !(isReminder || isFavorite)
+
+            val actionButtonScale = remember { Animatable(1f) }
+            val actionIconScale = remember { Animatable(1f) }
+            val actionScope = rememberCoroutineScope()
+
+            val bellRotation = remember { Animatable(0f) }
+            var bellHasInitialized by remember { mutableStateOf(false) }
+
+            fun triggerActionAnimation() {
+                actionScope.launch {
+                    if (isPlus) {
+                        // Shutter scale pop
+                        actionIconScale.snapTo(0.70f)
+                        actionIconScale.animateTo(
+                            1.0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
+                    } else if (isOcchio) {
+                        // Iris expansion pop
+                        actionIconScale.snapTo(0.65f)
+                        actionIconScale.animateTo(
+                            1.28f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
+                        actionIconScale.animateTo(
+                            1.0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
+                    } else if (isTick) {
+                        // Tick scale pop
+                        actionIconScale.snapTo(0.65f)
+                        actionIconScale.animateTo(
+                            1.0f,
+                            animationSpec = spring(
+                                dampingRatio = Spring.DampingRatioMediumBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            )
+                        )
+                    } else if (!isReleased) {
+                        // Bell ring wobble
+                        bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                        bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                        bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                    }
+                }
+            }
+
+            LaunchedEffect(isReminder, isFavorite) {
+                if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
+                    bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                    bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                    bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                    bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                    bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                }
+                bellHasInitialized = true
+            }
+
             Box(
                 modifier = Modifier
                     .align(Alignment.BottomEnd)
                     .padding(bottom = 12.dp, end = 12.dp)
                     .size(34.dp)
-                    .bounceClick(
-                        scaleDown = 0.85f,
-                        onLongClick = {}, // Block long press menu from opening
-                        vibrateOnLongClick = false,
-                        onPress = null
-                    ) {
-                        // Trigger ripple on the parent card from the button center on release
-                        val rippleX = if (cardSize[0].width > 0) {
-                            cardSize[0].width.toFloat() - with(density) { 29.dp.toPx() } // button size 34/2 + end padding 12 = 29
-                        } else {
-                            with(density) { 300.dp.toPx() - 29.dp.toPx() }
-                        }
-                        
-                        val rippleY = if (cardSize[0].height > 0) {
-                            cardSize[0].height.toFloat() - with(density) { 29.dp.toPx() } // bottom padding 12 + 17 = 29
-                        } else {
-                            with(density) { 110.dp.toPx() - 29.dp.toPx() }
-                        }
-                        rippleState.trigger(Offset(rippleX, rippleY))
-
-                        val isReleased = movie.isReleased
-                        if (!isReleased && !isEffectiveWatched) {
-                            if (!isWatched && !isFavorite && !isReminder) onAction(movie)
-                            else onMessage(context.getString(R.string.card_hint_manage_reminder))
-                        } else if (isTv) {
-                            if (!isWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate) {
-                                onQuickMarkWatched(movie)
-                            } else if (!isWatched && !isFavorite && !isReminder) {
-                                onAction(movie)
-                            } else {
-                                onMessage(context.getString(R.string.card_hint_manage_episodes))
+                    .graphicsLayer {
+                        scaleX = actionButtonScale.value
+                        scaleY = actionButtonScale.value
+                        clip = false
+                    }
+                    .semantics(mergeDescendants = true) {
+                        role = Role.Button
+                        this.contentDescription = "Action"
+                    }
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            val down = awaitFirstDown(requireUnconsumed = false)
+                            down.consume()
+                            actionScope.launch {
+                                actionButtonScale.animateTo(
+                                    0.80f,
+                                    animationSpec = spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                                )
                             }
-                        } else {
-                            // Normal behavior for released movies
-                            onAction(movie)
+                            val up = waitForUpOrCancellation()
+                            if (up != null) {
+                                up.consume()
+                                actionScope.launch {
+                                    actionButtonScale.animateTo(
+                                        1.15f,
+                                        animationSpec = spring(stiffness = 12000f, dampingRatio = Spring.DampingRatioNoBouncy)
+                                    )
+                                    actionButtonScale.animateTo(
+                                        1.0f,
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioMediumBouncy
+                                        )
+                                    )
+                                }
+
+                                // Trigger ripple on the parent card from the button center on release
+                                val rippleX = if (cardSize[0].width > 0) {
+                                    cardSize[0].width.toFloat() - with(density) { 29.dp.toPx() } // button size 34/2 + end padding 12 = 29
+                                } else {
+                                    with(density) { 300.dp.toPx() - 29.dp.toPx() }
+                                }
+                                
+                                val rippleY = if (cardSize[0].height > 0) {
+                                    cardSize[0].height.toFloat() - with(density) { 29.dp.toPx() } // bottom padding 12 + 17 = 29
+                                } else {
+                                    with(density) { 110.dp.toPx() - 29.dp.toPx() }
+                                }
+                                rippleState.trigger(Offset(rippleX, rippleY))
+                                com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                                haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
+
+                                triggerActionAnimation()
+
+                                if (!isReleased && !isEffectiveWatched) {
+                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                    else onMessage(context.getString(R.string.card_hint_manage_reminder))
+                                } else if (isTv) {
+                                    if (!isWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate) {
+                                        onQuickMarkWatched(movie)
+                                    } else if (!isWatched && !isFavorite && !isReminder) {
+                                        onAction(movie)
+                                    } else {
+                                        onMessage(context.getString(R.string.card_hint_manage_episodes))
+                                    }
+                                } else {
+                                    // Normal behavior for released movies
+                                    onAction(movie)
+                                }
+                            } else {
+                                // Cancelled
+                                actionScope.launch {
+                                    actionButtonScale.animateTo(
+                                        1.0f,
+                                        animationSpec = spring(
+                                            stiffness = Spring.StiffnessMediumLow,
+                                            dampingRatio = Spring.DampingRatioNoBouncy
+                                        )
+                                    )
+                                }
+                            }
                         }
                     },
                 contentAlignment = Alignment.Center
             ) {
-                val isQuickWatch = isTv && !isEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
-                val appAccent = MaterialTheme.colorScheme.primary
-                val isReleased = movie.isReleased
-                val isPromemoriaAttiva = !isReleased && !isEffectiveWatched && (isReminder || isFavorite)
-                val isOcchio = !isQuickWatch && isReleased && !isEffectiveWatched && (isReminder || isFavorite)
-
                 val circularBar = com.cinetrack.LocalCircularProgressBar.current
                 val targetCircularProgress = when (circularBar) {
                     "SEASON" -> if (seasonProgress > 0f) seasonProgress else computedProgress
@@ -463,23 +588,6 @@ fun MovieListCard(
                     else -> Color.White
                 }
 
-                val isBellOutlined = !isReleased && !isEffectiveWatched && !(isReminder || isFavorite)
-                val bellRotation = remember { androidx.compose.animation.core.Animatable(0f) }
-                var bellHasInitialized by remember { mutableStateOf(false) }
-
-                LaunchedEffect(isReminder, isFavorite) {
-                    if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
-                        bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                        bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                        bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                        bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                        bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                    }
-                    bellHasInitialized = true
-                }
-
-                val isTick = isQuickWatch || isEffectiveWatched
-                val isPlus = !isEffectiveWatched && isReleased && !isOcchio && !isQuickWatch
                 val iconSize = when {
                     isTick -> 13.dp
                     !isReleased -> if (isBellOutlined) 20.dp else 21.dp
@@ -540,8 +648,14 @@ fun MovieListCard(
                         modifier = Modifier
                             .size(iconSize)
                             .graphicsLayer {
+                                scaleX = actionIconScale.value
+                                scaleY = actionIconScale.value
+                                rotationZ = if (!isReleased && (isReminder || isFavorite)) {
+                                    bellRotation.value
+                                } else {
+                                    0f
+                                }
                                 if (!isReleased && (isReminder || isFavorite)) {
-                                    rotationZ = bellRotation.value
                                     transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
                                 }
                             }

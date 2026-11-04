@@ -648,19 +648,25 @@ fun FolderDetailScreenContent(
                             .align(Alignment.TopCenter)
                             .zIndex(1f)
                     ) {
-                        Box(
+                        BoxWithConstraints(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .height(stickyHeaderHeight)
-                                .padding(horizontal = 16.dp),
+                                .padding(horizontal = 24.dp),
                             contentAlignment = Alignment.Center
                         ) {
-                            val rightControlsInset = if (preferences.showLayoutToggle) 88.dp else 44.dp
+                            val controlsWidth = if (preferences.showLayoutToggle) 80.dp else 36.dp
+                            val tabWidth = 84.dp
+                            val pillWidth = tabWidth * 3
+                            val controlsLeft = maxWidth - controlsWidth
+                            val maxAllowedRight = controlsLeft - 8.dp
+                            val idealRight = (maxWidth / 2) + (pillWidth / 2)
+                            val centerOffset = if (idealRight > maxAllowedRight) -(idealRight - maxAllowedRight) else 0.dp
                             
                             Box(
                                 modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(end = rightControlsInset),
+                                    .offset(x = centerOffset)
+                                    .wrapContentSize(),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Box(modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.Center) {
@@ -678,7 +684,8 @@ fun FolderDetailScreenContent(
                                         options = options,
                                         counts = counts,
                                         selectedIndex = selectedIndex,
-                                        fontSize = 11.5.sp,
+                                        tabWidth = tabWidth,
+                                        fontSize = 10.5.sp,
                                         onOptionClick = { index ->
                                             viewModel.onTabChanged(when(index) { 1 -> "movie"; 2 -> "tv"; else -> "all" })
                                             scope.launch { lazyGridState.scrollToItem(0) }

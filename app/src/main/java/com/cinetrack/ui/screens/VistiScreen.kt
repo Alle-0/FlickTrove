@@ -325,22 +325,28 @@ fun VistiScreenContent(
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
         ) {
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(stickyHeaderHeight)
                     .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
-            val rightControlsInset = if (uiState.preferences.showLayoutToggle) 88.dp else 44.dp
+                val showToggle = uiState.preferences.showLayoutToggle
+                val controlsWidth = if (showToggle) 80.dp else 36.dp
+                val pillWidth = 232.dp
+                val controlsLeft = maxWidth - controlsWidth
+                val maxAllowedRight = controlsLeft - 8.dp
+                val idealRight = (maxWidth / 2) + (pillWidth / 2)
+                val centerOffset = if (idealRight > maxAllowedRight) -(idealRight - maxAllowedRight) else 0.dp
 
-            // Category Tab Selector Island (Centered with more left offset for balance)
-            Box(
-                modifier = Modifier
-                    .wrapContentSize()
-                    .padding(end = rightControlsInset),
-                contentAlignment = Alignment.Center
-            ) {
+                // Category Tab Selector Island
+                Box(
+                    modifier = Modifier
+                        .offset(x = centerOffset)
+                        .wrapContentSize(),
+                    contentAlignment = Alignment.Center
+                ) {
                 // Glassmorphic Layer (Separate from content to keep text sharp)
                 Box(modifier = Modifier.wrapContentSize(), contentAlignment = Alignment.Center) {
                     Spacer(

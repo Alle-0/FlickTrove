@@ -551,21 +551,27 @@ fun RecommendationsScreenContent(
             }
         }
 
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
-                .padding(top = topPadding + 0.dp, start = 24.dp, end = 24.dp)
+                .padding(top = topPadding, start = 24.dp, end = 24.dp)
                 .height(stickyHeaderHeight),
             contentAlignment = Alignment.Center
         ) {
-            val rightControlsInset = if (!isFlickMode && uiState.preferences.showLayoutToggle) 88.dp else 44.dp
+            val showToggle = !isFlickMode && uiState.preferences.showLayoutToggle
+            val controlsWidth = if (showToggle) 80.dp else 36.dp
+            val pillWidth = 232.dp // 2 tabs * 116.dp
+            val controlsLeft = maxWidth - controlsWidth
+            val maxAllowedRight = controlsLeft - 8.dp
+            val idealRight = (maxWidth / 2) + (pillWidth / 2)
+            val centerOffset = if (idealRight > maxAllowedRight) -(idealRight - maxAllowedRight) else 0.dp
 
             Box(
                 modifier = Modifier
-                    .wrapContentSize()
-                    .padding(end = rightControlsInset),
+                    .offset(x = centerOffset)
+                    .wrapContentSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Spacer(

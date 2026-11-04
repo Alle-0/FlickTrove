@@ -244,18 +244,59 @@ fun CheckInModal(
                                     // Page 0: Rating
                                     Column(
                                         horizontalAlignment = Alignment.CenterHorizontally,
-                                        modifier = Modifier.fillMaxWidth().padding(vertical = 24.dp)
+                                        modifier = Modifier.fillMaxWidth().padding(top = 12.dp, bottom = 20.dp)
                                     ) {
                                         val numberScale = remember { Animatable(1f) }
                                         val coroutineScope = rememberCoroutineScope()
 
+                                        // Large Rating Display on top (matching QuickRatingModal)
+                                        if (rating > 0) {
+                                            Row(
+                                                verticalAlignment = Alignment.Bottom,
+                                                horizontalArrangement = Arrangement.Center,
+                                                modifier = Modifier
+                                                    .padding(bottom = 12.dp)
+                                                    .graphicsLayer {
+                                                        scaleX = numberScale.value
+                                                        scaleY = numberScale.value
+                                                    }
+                                            ) {
+                                                Text(
+                                                    text = "%.1f".format(rating),
+                                                    style = MaterialTheme.typography.displayLarge.copy(
+                                                        fontWeight = FontWeight.Black,
+                                                        fontSize = 52.sp,
+                                                        letterSpacing = (-2).sp
+                                                    ),
+                                                    color = accentColor,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                                Text(
+                                                    text = "/ 10",
+                                                    style = MaterialTheme.typography.headlineSmall.copy(
+                                                        fontWeight = FontWeight.Bold,
+                                                        color = Color.White.copy(alpha = 0.25f)
+                                                    ),
+                                                    modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+                                                )
+                                            }
+                                        } else {
+                                            Text(
+                                                text = stringResource(R.string.dialog_rating_remove),
+                                                color = Color.White.copy(0.5f),
+                                                style = MaterialTheme.typography.labelSmall,
+                                                modifier = Modifier.padding(bottom = 24.dp, top = 8.dp)
+                                            )
+                                        }
+
+                                        // Star Rating Bar underneath
                                         com.cinetrack.ui.components.shared.FluidRatingBar(
                                             rating = rating,
                                             onRatingChange = { rating = it },
                                             onRatingSettled = { settledVal ->
                                                 if (settledVal > 0.0) {
                                                     coroutineScope.launch {
-                                                        numberScale.snapTo(1.18f)
+                                                        numberScale.snapTo(1.24f)
                                                         numberScale.animateTo(
                                                             targetValue = 1f,
                                                             animationSpec = spring(
@@ -267,29 +308,9 @@ fun CheckInModal(
                                                 }
                                             },
                                             accentColor = accentColor,
-                                            starSize = 56.dp,
-                                            modifier = Modifier.padding(vertical = 16.dp)
+                                            starSize = 54.dp,
+                                            modifier = Modifier.padding(vertical = 8.dp)
                                         )
-                                        if (rating > 0) {
-                                            Text(
-                                                text = rating.toString().removeSuffix(".0"),
-                                                color = accentColor,
-                                                style = MaterialTheme.typography.displayMedium.copy(
-                                                    fontWeight = FontWeight.Black,
-                                                    fontSize = 48.sp
-                                                ),
-                                                modifier = Modifier.graphicsLayer {
-                                                    scaleX = numberScale.value
-                                                    scaleY = numberScale.value
-                                                }
-                                            )
-                                        } else {
-                                            Text(
-                                                text = stringResource(R.string.dialog_rating_remove),
-                                                color = Color.White.copy(0.5f),
-                                                style = MaterialTheme.typography.labelSmall
-                                            )
-                                        }
                                     }
                                 }
                                 1 -> {

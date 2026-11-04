@@ -41,20 +41,25 @@ fun HomeFloatingHeader(
             .padding(top = topPadding)
             .zIndex(1f)
     ) {
-        Box(
+        BoxWithConstraints(
             modifier = Modifier
                 .fillMaxWidth()
                 .height(stickyHeaderHeight)
                 .padding(horizontal = 24.dp),
             contentAlignment = Alignment.Center
         ) {
-            val rightControlsInset = 44.dp
+            val controlsWidth = 36.dp
+            val pillWidth = 232.dp // 2 tabs * 116.dp
+            val controlsLeft = maxWidth - controlsWidth
+            val maxAllowedRight = controlsLeft - 8.dp
+            val idealRight = (maxWidth / 2) + (pillWidth / 2)
+            val centerOffset = if (idealRight > maxAllowedRight) -(idealRight - maxAllowedRight) else 0.dp
 
-            // Category Tab Selector Island
+            // Category Tab Selector Island (Dead Centered)
             Box(
                 modifier = Modifier
-                    .wrapContentSize()
-                    .padding(end = rightControlsInset),
+                    .offset(x = centerOffset)
+                    .wrapContentSize(),
                 contentAlignment = Alignment.Center
             ) {
                 Spacer(

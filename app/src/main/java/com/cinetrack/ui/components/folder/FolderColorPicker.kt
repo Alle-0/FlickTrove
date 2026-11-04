@@ -60,10 +60,22 @@ import kotlin.math.sqrt
 fun FolderColorPicker(
     selectedColor: String,
     onColorSelected: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isCustomMode: Boolean? = null,
+    onCustomModeChange: ((Boolean) -> Unit)? = null
 ) {
     val presets = listOf("#6366F1", "#EC4899", "#F59E0B", "#10B981", "#8B5CF6", "#EF4444")
-    var isCustomMode by remember { mutableStateOf(!presets.contains(selectedColor.uppercase())) }
+    var internalCustomMode by remember { mutableStateOf(!presets.contains(selectedColor.uppercase())) }
+    val effectiveCustomMode = isCustomMode ?: internalCustomMode
+    val setCustomMode: (Boolean) -> Unit = { enabled ->
+        if (onCustomModeChange != null) {
+            onCustomModeChange(enabled)
+        } else {
+            internalCustomMode = enabled
+        }
+    }
+    val focusManager = LocalFocusManager.current
+    val keyboardController = androidx.compose.ui.platform.LocalSoftwareKeyboardController.current
     
     Column(modifier = modifier.fillMaxWidth()) {
         Text(
@@ -80,13 +92,13 @@ fun FolderColorPicker(
         ) {
             presets.forEach { colorHex ->
                 val color = colorHex.toComposeColor()
-                val isSelected = !isCustomMode && selectedColor.uppercase() == colorHex.uppercase()
+                val isSelected = !effectiveCustomMode && selectedColor.uppercase() == colorHex.uppercase()
                 
                 Box(
                     modifier = Modifier
                         .size(36.dp)
                         .bounceClick { 
-                            isCustomMode = false
+                            setCustomMode(false)
                             onColorSelected(colorHex)
                         }
                         .clip(CircleShape)
@@ -103,20 +115,24 @@ fun FolderColorPicker(
             Box(
                 modifier = Modifier
                     .size(36.dp)
-                    .bounceClick { isCustomMode = true }
+                    .bounceClick { 
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                        setCustomMode(true) 
+                    }
                     .clip(CircleShape)
                     .background(
-                        if (isCustomMode) selectedColor.toComposeColor()
+                        if (effectiveCustomMode) selectedColor.toComposeColor()
                         else Color.White.copy(alpha = 0.1f)
                     )
                     .border(
-                        width = if (isCustomMode) 4.dp else 1.dp,
-                        color = if (isCustomMode) Color.White else Color.White.copy(alpha = 0.1f),
+                        width = if (effectiveCustomMode) 4.dp else 1.dp,
+                        color = if (effectiveCustomMode) Color.White else Color.White.copy(alpha = 0.1f),
                         shape = CircleShape
                     ),
                 contentAlignment = Alignment.Center
             ) {
-                if (!isCustomMode) {
+                if (!effectiveCustomMode) {
                     Icon(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_plus),
                         contentDescription = "Custom Color",
@@ -128,7 +144,7 @@ fun FolderColorPicker(
         }
         
         AnimatedVisibility(
-            visible = isCustomMode,
+            visible = effectiveCustomMode,
             enter = fadeIn() + scaleIn(initialScale = 0.95f),
             exit = fadeOut() + scaleOut(targetScale = 0.95f)
         ) {

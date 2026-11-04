@@ -30,6 +30,11 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.bounceClick
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.ui.graphics.graphicsLayer
+import kotlinx.coroutines.launch
 import com.cinetrack.ui.theme.GlassSurface
 import kotlin.math.roundToInt
 
@@ -43,6 +48,8 @@ fun QuickRatingModal(
     onDismiss: () -> Unit
 ) {
     var currentRating by remember { mutableStateOf(initialRating) }
+    val numberScale = remember { Animatable(1f) }
+    val coroutineScope = rememberCoroutineScope()
     val haptic = LocalHapticFeedback.current
 
     FlickTroveModal(
@@ -114,7 +121,12 @@ fun QuickRatingModal(
             // Large Rating Display
             Row(
                 verticalAlignment = Alignment.Bottom,
-                modifier = Modifier.padding(bottom = 16.dp)
+                modifier = Modifier
+                    .padding(bottom = 16.dp)
+                    .graphicsLayer {
+                        scaleX = numberScale.value
+                        scaleY = numberScale.value
+                    }
             ) {
                 Text(
                     text = "%.1f".format(currentRating),
@@ -141,6 +153,20 @@ fun QuickRatingModal(
             FluidRatingBar(
                 rating = currentRating,
                 onRatingChange = { currentRating = it },
+                onRatingSettled = { settledVal ->
+                    if (settledVal > 0.0) {
+                        coroutineScope.launch {
+                            numberScale.snapTo(1.24f)
+                            numberScale.animateTo(
+                                targetValue = 1f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                )
+                            )
+                        }
+                    }
+                },
                 accentColor = accentColor,
                 starSize = 48.dp,
                 modifier = Modifier

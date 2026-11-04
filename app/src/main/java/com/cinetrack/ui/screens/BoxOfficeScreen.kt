@@ -149,8 +149,6 @@ fun BoxOfficeScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
     Box(modifier = Modifier.fillMaxSize()) {
-        CinematicBackground(modifier = Modifier.fillMaxSize())
-
         val statusBarsTop = androidx.compose.foundation.layout.WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
         val cutoutTop = androidx.compose.foundation.layout.WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
         val safeDrawingTop = androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
@@ -207,14 +205,19 @@ fun BoxOfficeScreenContent(
             }
         }
 
-        LazyColumn(
-            state = listState,
+        Box(
             modifier = Modifier
                 .fillMaxSize()
-                .haze(hazeState),
-            contentPadding = PaddingValues(top = listTopInset, bottom = bottomInset, start = 16.dp, end = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(14.dp)
+                .haze(hazeState, style = HazeStyles.PremiumDark)
         ) {
+            CinematicBackground(modifier = Modifier.fillMaxSize())
+
+            LazyColumn(
+                state = listState,
+                modifier = Modifier.fillMaxSize(),
+                contentPadding = PaddingValues(top = listTopInset, bottom = bottomInset, start = 16.dp, end = 16.dp),
+                verticalArrangement = Arrangement.spacedBy(14.dp)
+            ) {
             // Main Content
             when {
                 isCurrentLoading && currentList.isEmpty() -> {
@@ -277,6 +280,7 @@ fun BoxOfficeScreenContent(
                 }
             }
         }
+        }
 
         // Fixed Floating Selector Bar Header
         Box(
@@ -286,19 +290,25 @@ fun BoxOfficeScreenContent(
                 .align(Alignment.TopCenter)
                 .zIndex(10f)
         ) {
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(stickyHeaderHeight)
                     .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                // Category Tab Selector Island (offset with right padding for visual balance with filter button)
-                val rightControlsInset = 44.dp
+                val controlsWidth = 36.dp
+                val pillWidth = 236.dp // 2 tabs * 118.dp
+                val controlsLeft = maxWidth - controlsWidth
+                val maxAllowedRight = controlsLeft - 8.dp
+                val idealRight = (maxWidth / 2) + (pillWidth / 2)
+                val centerOffset = if (idealRight > maxAllowedRight) -(idealRight - maxAllowedRight) else 0.dp
+
+                // Category Tab Selector Island (Dead Centered)
                 Box(
                     modifier = Modifier
-                        .wrapContentSize()
-                        .padding(end = rightControlsInset),
+                        .offset(x = centerOffset)
+                        .wrapContentSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Spacer(

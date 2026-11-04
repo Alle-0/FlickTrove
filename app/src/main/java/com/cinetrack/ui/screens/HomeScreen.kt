@@ -229,7 +229,6 @@ fun HomeScreenContent(
         }
 
         Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
-            CinematicBackground(modifier = Modifier.fillMaxSize())
             val symbiontPullState = LocalSymbiontPullState.current
             val currentPullFraction = pullToRefreshState.distanceFraction
             SideEffect {
@@ -248,6 +247,7 @@ fun HomeScreenContent(
                     .fillMaxSize()
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
+                CinematicBackground(modifier = Modifier.fillMaxSize())
                 PullToRefreshBox(
                     isRefreshing = isRefreshing,
                     onRefresh = { viewModel.pullToRefresh() },
@@ -459,20 +459,26 @@ fun HomeScreenContent(
                 .align(Alignment.TopCenter)
                 .zIndex(1f)
         ) {
-            Box(
+            BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(stickyHeaderHeight)
                     .padding(horizontal = 24.dp),
                 contentAlignment = Alignment.Center
             ) {
-                val rightControlsInset = if (uiState.preferences.showLayoutToggle) 88.dp else 44.dp
+                val showToggle = uiState.preferences.showLayoutToggle
+                val controlsWidth = if (showToggle) 80.dp else 36.dp
+                val pillWidth = 232.dp
+                val controlsLeft = maxWidth - controlsWidth
+                val maxAllowedRight = controlsLeft - 8.dp
+                val idealRight = (maxWidth / 2) + (pillWidth / 2)
+                val centerOffset = if (idealRight > maxAllowedRight) -(idealRight - maxAllowedRight) else 0.dp
 
-                // Category Tab Selector Island (Centered with more left offset for balance)
+                // Category Tab Selector Island
                 Box(
                     modifier = Modifier
-                        .wrapContentSize()
-                        .padding(end = rightControlsInset),
+                        .offset(x = centerOffset)
+                        .wrapContentSize(),
                     contentAlignment = Alignment.Center
                 ) {
                     Spacer(

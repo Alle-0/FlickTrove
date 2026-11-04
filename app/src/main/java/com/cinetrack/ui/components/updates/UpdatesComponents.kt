@@ -336,7 +336,7 @@ fun UpdateCard(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(90.dp)
+            .height(96.dp)
             .graphicsLayer {
                 scaleX = scale
                 scaleY = scale
@@ -355,7 +355,7 @@ fun UpdateCard(
         Row(
             modifier = Modifier
                 .fillMaxSize()
-                .padding(horizontal = 12.dp, vertical = 9.dp),
+                .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Poster
@@ -363,10 +363,10 @@ fun UpdateCard(
                 model = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current),
                 contentDescription = null,
                 modifier = Modifier
-                    .width(48.dp)
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(10.dp))
-                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(10.dp)),
+                    .width(54.dp)
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(14.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp)),
                 contentScale = ContentScale.Crop
             )
 

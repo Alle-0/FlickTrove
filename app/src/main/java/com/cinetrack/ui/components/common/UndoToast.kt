@@ -130,14 +130,20 @@ fun UndoToast(
                     modifier = Modifier
                         .hazeGlass(
                             state = hazeState,
-                            shape = RoundedCornerShape(16.dp),
+                            shape = CircleShape,
                             useOffscreenStrategy = false // We apply it more precisely to the content below
                         )
                 ) {
+                    val hasUndo = action.undoFn != null
                     Row(
                         modifier = Modifier
                             .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen } // Fix text blur precisely
-                            .padding(horizontal = 12.dp, vertical = 8.dp),
+                            .padding(
+                                start = 16.dp,
+                                top = 6.dp,
+                                bottom = 6.dp,
+                                end = if (hasUndo) 6.dp else 16.dp
+                            ),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Message

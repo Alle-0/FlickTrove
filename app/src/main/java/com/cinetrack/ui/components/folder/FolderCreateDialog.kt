@@ -35,6 +35,8 @@ fun FolderCreateDialog(
     var name by remember { mutableStateOf("") }
     var description by remember { mutableStateOf("") }
     var selectedColor by remember { mutableStateOf("#6366F1") }
+    val defaultPresets = remember { listOf("#6366F1", "#EC4899", "#F59E0B", "#10B981", "#8B5CF6", "#EF4444") }
+    var isCustomColorMode by remember { mutableStateOf(!defaultPresets.contains(selectedColor.uppercase())) }
     val focusManager = LocalFocusManager.current
     val keyboardController = LocalSoftwareKeyboardController.current
 
@@ -68,7 +70,14 @@ fun FolderCreateDialog(
         zIndex = 100f
     ) {
         val scrollState = rememberScrollState()
-        val maxScrollHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.58f).coerceAtLeast(260.dp)
+        val maxScrollHeight = (LocalConfiguration.current.screenHeightDp.dp * 0.65f).coerceAtLeast(260.dp)
+
+        LaunchedEffect(isCustomColorMode) {
+            if (isCustomColorMode) {
+                // Ensure color wheel smoothly scrolls into view when opened
+                scrollState.animateScrollTo(scrollState.maxValue)
+            }
+        }
 
         Column(
             modifier = Modifier.fillMaxWidth()
@@ -158,7 +167,9 @@ fun FolderCreateDialog(
 
                 FolderColorPicker(
                     selectedColor = selectedColor,
-                    onColorSelected = { selectedColor = it }
+                    onColorSelected = { selectedColor = it },
+                    isCustomMode = isCustomColorMode,
+                    onCustomModeChange = { isCustomColorMode = it }
                 )
 
                 Spacer(Modifier.height(12.dp))

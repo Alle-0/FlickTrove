@@ -102,23 +102,23 @@ fun HistoryCard(
             ) { _ ->
                 onClick()
             }
-            .clip(RoundedCornerShape(20.dp))
+            .clip(RoundedCornerShape(22.dp))
             .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
-            .padding(horizontal = 12.dp, vertical = 9.dp)
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(22.dp))
+            .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 12.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // Poster thumbnail (matching UpdateCard 48.dp x 72.dp)
+            // Poster thumbnail (matching UpdateCard 54.dp x 80.dp)
             Box(
                 modifier = Modifier
-                    .width(48.dp)
-                    .height(72.dp)
-                    .clip(RoundedCornerShape(10.dp))
+                    .width(54.dp)
+                    .height(80.dp)
+                    .clip(RoundedCornerShape(14.dp))
                     .background(Color(0xFF121216))
-                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(10.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(14.dp))
             ) {
                 if (posterUrl != null) {
                     AsyncImage(
