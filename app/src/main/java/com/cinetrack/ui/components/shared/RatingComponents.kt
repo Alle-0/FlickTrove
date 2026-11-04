@@ -51,10 +51,6 @@ fun FluidRatingBar(
     val currentOnRatingChange by rememberUpdatedState(onRatingChange)
     val currentOnRatingSettled by rememberUpdatedState(onRatingSettled)
 
-    // Settle trigger when drag or tap finishes
-    var settleStarIndex by remember { mutableStateOf(-1) }
-    var settleTrigger by remember { mutableStateOf(0L) }
-    
     // Animation for smooth sliding
     val animatedRating by animateFloatAsState(
         targetValue = rating.toFloat(),
@@ -75,9 +71,6 @@ fun FluidRatingBar(
                     if (w <= 0f) return@awaitEachGesture
                     
                     down.consume()
-                    // Immediately reset previous settle state on new interaction
-                    settleStarIndex = -1
-                    settleTrigger = 0L
 
                     var curRating = calculateRatingFromX(down.position.x, w, maxRating, numStars, gapPx)
                     currentOnRatingChange(curRating)
@@ -104,14 +97,9 @@ fun FluidRatingBar(
 
                     // Finger released (whether from a quick tap or a drag)
                     if (curRating > 0.0) {
-                        val starValue = maxRating / numStars
-                        settleStarIndex = (((curRating - 0.05) / starValue).toInt()).coerceIn(0, numStars - 1)
-                        settleTrigger = System.currentTimeMillis()
                         currentOnRatingSettled?.invoke(curRating)
                         haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                     } else {
-                        settleStarIndex = -1
-                        settleTrigger = 0L
                         currentOnRatingSettled?.invoke(0.0)
                     }
                 }
@@ -133,12 +121,7 @@ fun FluidRatingBar(
                     accentColor = accentColor,
                     starSize = starSize,
                     showGlow = showGlow,
-                    index = index,
-                    currentRating = rating,
-                    starCenter = starStart + starValue / 2.0,
-                    starValue = starValue,
-                    isSettledStar = (settleStarIndex == index),
-                    settleTrigger = settleTrigger
+                    index = index
                 )
             }
         }
@@ -151,49 +134,16 @@ fun PremiumStar(
     accentColor: Color,
     starSize: Dp,
     showGlow: Boolean,
-    index: Int = 0,
-    currentRating: Double = 0.0,
-    starCenter: Double = 0.0,
-    starValue: Double = 2.0,
-    isSettledStar: Boolean = false,
-    settleTrigger: Long = 0L
+    index: Int = 0
 ) {
-    // Entrance animation
+    // Smooth entrance animation without bouncy distortion
     val entranceAlpha = remember { Animatable(0f) }
-    val entranceScale = remember { Animatable(0.5f) }
+    val entranceScale = remember { Animatable(0.8f) }
     
     LaunchedEffect(Unit) {
-        kotlinx.coroutines.delay(index * 60L) // Stagger
-        launch { entranceAlpha.animateTo(1f, tween(200)) }
-        launch { entranceScale.animateTo(1f, spring(dampingRatio = Spring.DampingRatioMediumBouncy)) }
-    }
-    
-    // Wave animation based on distance from current drag
-    val distanceFromCurrent = kotlin.math.abs(currentRating - starCenter)
-    val waveScale by animateFloatAsState(
-        targetValue = if (distanceFromCurrent < starValue) {
-            1f + (0.25f * (1f - (distanceFromCurrent / starValue).toFloat()))
-        } else 1f,
-        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy),
-        label = "WaveScale"
-    )
-
-    // Settle scale bounce when releasing the rating (only once, never while dragging)
-    val settleScale = remember { Animatable(1f) }
-
-    LaunchedEffect(settleTrigger, isSettledStar) {
-        if (!isSettledStar || settleTrigger <= 0L) {
-            settleScale.snapTo(1f)
-            return@LaunchedEffect
-        }
-        settleScale.snapTo(1.18f)
-        settleScale.animateTo(
-            targetValue = 1f,
-            animationSpec = spring(
-                dampingRatio = Spring.DampingRatioMediumBouncy,
-                stiffness = Spring.StiffnessMediumLow
-            )
-        )
+        kotlinx.coroutines.delay(index * 40L) // Subtle stagger
+        launch { entranceAlpha.animateTo(1f, tween(180)) }
+        launch { entranceScale.animateTo(1f, tween(200, easing = FastOutSlowInEasing)) }
     }
 
     Box(
@@ -201,8 +151,8 @@ fun PremiumStar(
             .size(starSize)
             .graphicsLayer {
                 alpha = entranceAlpha.value
-                scaleX = entranceScale.value * waveScale * settleScale.value
-                scaleY = entranceScale.value * waveScale * settleScale.value
+                scaleX = entranceScale.value
+                scaleY = entranceScale.value
             },
         contentAlignment = Alignment.Center
     ) {
