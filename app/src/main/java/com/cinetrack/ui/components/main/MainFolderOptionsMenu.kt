@@ -1,10 +1,7 @@
 package com.cinetrack.ui.components.main
 
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.fadeIn
-import androidx.compose.animation.fadeOut
-import androidx.compose.animation.slideInVertically
-import androidx.compose.animation.slideOutVertically
+import androidx.compose.animation.*
+import androidx.compose.animation.core.*
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
@@ -19,11 +16,6 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -38,11 +30,9 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
-import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.ui.input.pointer.pointerInput
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.folder.FolderEditMode
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
@@ -71,13 +61,20 @@ fun MainFolderOptionsMenu(
 
         AnimatedVisibility(
             visible = visible,
-            enter = fadeIn() + slideInVertically(
-                initialOffsetY = { -it / 4 },
-                animationSpec = tween(250, easing = androidx.compose.animation.core.EaseOutCirc)
+            enter = expandVertically(
+                expandFrom = Alignment.Top,
+                animationSpec = spring(
+                    dampingRatio = 0.76f,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            ) + fadeIn(
+                animationSpec = tween(120, easing = LinearOutSlowInEasing)
             ),
-            exit = fadeOut() + slideOutVertically(
-                targetOffsetY = { -it / 4 },
-                animationSpec = tween(200, easing = androidx.compose.animation.core.EaseInCirc)
+            exit = shrinkVertically(
+                shrinkTowards = Alignment.Top,
+                animationSpec = tween(120, easing = FastOutLinearInEasing)
+            ) + fadeOut(
+                animationSpec = tween(110, easing = FastOutLinearInEasing)
             ),
             modifier = Modifier.absoluteOffset(x = offsetX - 200.dp + 32.dp, y = offsetY + 8.dp)
         ) {
@@ -87,9 +84,20 @@ fun MainFolderOptionsMenu(
                     .clip(RoundedCornerShape(24.dp))
                     .then(if (visible) Modifier.hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp)) else Modifier)
             ) {
+                var itemDelay = 15
+                val itemStep = 35
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateEnterExit(
+                            enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                    scaleIn(
+                                        initialScale = 0.90f,
+                                        animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                    ),
+                            exit = fadeOut(tween(100))
+                        )
                         .bounceClick {
                             onDismiss()
                             onShareOrMembers()
@@ -114,11 +122,20 @@ fun MainFolderOptionsMenu(
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )
                 }
+                itemDelay += itemStep
 
                 if (!isShared || isOwner) {
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateEnterExit(
+                                enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                        scaleIn(
+                                            initialScale = 0.90f,
+                                            animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                        ),
+                                exit = fadeOut(tween(100))
+                            )
                             .bounceClick {
                                 onDismiss()
                                 onEdit()
@@ -139,11 +156,20 @@ fun MainFolderOptionsMenu(
                             style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                         )
                     }
+                    itemDelay += itemStep
                 }
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateEnterExit(
+                            enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                    scaleIn(
+                                        initialScale = 0.90f,
+                                        animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                    ),
+                            exit = fadeOut(tween(100))
+                        )
                         .bounceClick {
                             onDismiss()
                             onReorder()
@@ -164,10 +190,19 @@ fun MainFolderOptionsMenu(
                         style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                     )
                 }
+                itemDelay += itemStep
 
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
+                        .animateEnterExit(
+                            enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                    scaleIn(
+                                        initialScale = 0.90f,
+                                        animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                    ),
+                            exit = fadeOut(tween(100))
+                        )
                         .bounceClick {
                             onDismiss()
                             onDelete()

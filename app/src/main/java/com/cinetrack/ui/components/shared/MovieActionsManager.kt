@@ -151,12 +151,12 @@ class MovieActionsManager {
         showNotesDialog = false
         showFolderDialog = false
         showActionsPopup = false
-        onEditWatchDateCallback = null
-        onDeleteWatchSessionCallback = null
     }
     
     fun clearActiveMovie() {
         activeMovie = null
+        onEditWatchDateCallback = null
+        onDeleteWatchSessionCallback = null
     }
 }
 

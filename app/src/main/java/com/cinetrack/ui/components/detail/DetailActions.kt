@@ -215,7 +215,23 @@ fun DetailActions(
             }
         }
         
-        var currentSideActionIndex by remember { mutableIntStateOf(0) }
+        val defaultSideActionIndex = remember(availableSideActions, movie.mediaType, optimisticWatchState) {
+            if (optimisticWatchState != WatchState.NONE) {
+                if (movie.mediaType == "tv") {
+                    val dropIndex = availableSideActions.indexOf(SideAction.DROP)
+                    val rewatchIndex = availableSideActions.indexOf(SideAction.REWATCH)
+                    if (dropIndex >= 0) dropIndex else if (rewatchIndex >= 0) rewatchIndex else 0
+                } else {
+                    if (optimisticWatchState != WatchState.WATCHED) {
+                        availableSideActions.indexOf(SideAction.TRASH).takeIf { it >= 0 } ?: 0
+                    } else {
+                        0
+                    }
+                }
+            } else 0
+        }
+        
+        var currentSideActionIndex by remember { mutableIntStateOf(defaultSideActionIndex) }
         
         LaunchedEffect(availableSideActions) {
             if (currentSideActionIndex >= availableSideActions.size) {

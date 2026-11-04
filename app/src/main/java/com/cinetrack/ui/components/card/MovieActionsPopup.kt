@@ -10,6 +10,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -98,8 +99,17 @@ fun MovieActionsPopup(
     isSaved: Boolean = false,
     canDelete: Boolean = isSaved && onDelete != null,
     onEditDate: (() -> Unit)? = null,
-    deleteLabel: String? = null
+    deleteLabel: String? = null,
+    onDismissComplete: (() -> Unit)? = null
 ) {
+    // Freeze layout-critical parameters for the duration of the movie popup lifecycle
+    // This prevents size/position jumps if external state is cleared on dismiss!
+    val stableOnEditDate = remember(movie.id) { onEditDate }
+    val stableDeleteLabel = remember(movie.id) { deleteLabel }
+    val stableCanDelete = remember(movie.id) { canDelete }
+    val stableCardPosition = remember(movie.id) { cardPosition }
+    val stablePressOffset = remember(movie.id) { pressOffset }
+
     // Use MutableTransitionState to precisely track the AnimatedVisibility lifecycle
     val transitionState = remember { 
         MutableTransitionState(false).apply { targetState = showMenu } 
@@ -108,69 +118,92 @@ fun MovieActionsPopup(
     // Sync the target state
     transitionState.targetState = showMenu
 
+    LaunchedEffect(transitionState.currentState, transitionState.targetState, transitionState.isIdle) {
+        if (!transitionState.targetState && transitionState.isIdle) {
+            onDismissComplete?.invoke()
+        }
+    }
+
     // Only render when visible or animating
     if (transitionState.targetState || !transitionState.isIdle) {
         val density = LocalDensity.current
         val config = LocalConfiguration.current
         
-        // Calculate the absolute touch position
-        val touchX = cardPosition.x + pressOffset.x
-        val touchY = cardPosition.y + pressOffset.y
+        // Calculate the absolute touch position using stable offsets
+        val touchX = stableCardPosition.x + stablePressOffset.x
+        val touchY = stableCardPosition.y + stablePressOffset.y
+
+        val actualMenuWidth = if (stableOnEditDate != null) 215.dp else 170.dp
+        val menuHeight = if (stableOnEditDate != null) 310.dp else 260.dp
+        
+        val menuWidthPx = with(density) { actualMenuWidth.toPx() }
+        val menuHeightPx = with(density) { menuHeight.toPx() }
+        val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
+        val screenHeightPx = with(density) { config.screenHeightDp.dp.toPx() }
+
+        val statusBarsHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+        val navBarsHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
+        
+        val topSafetyPx = with(density) { (statusBarsHeight + 16.dp).toPx() }
+        val bottomSafetyPx = with(density) { (navBarsHeight + 16.dp).toPx() }
+        val sideSafetyPx = with(density) { 16.dp.toPx() }
+
+        var xPos = touchX
+        var yPos = touchY
+
+        if (xPos + menuWidthPx > screenWidthPx - sideSafetyPx) {
+            xPos -= menuWidthPx
+        }
+        if (xPos < sideSafetyPx) xPos = sideSafetyPx
+
+        val isShiftedUp = touchY + menuHeightPx > screenHeightPx - bottomSafetyPx
+        if (isShiftedUp) {
+            yPos -= menuHeightPx
+        }
+        
+        yPos = yPos.coerceIn(topSafetyPx, (screenHeightPx - bottomSafetyPx - menuHeightPx).coerceAtLeast(topSafetyPx))
+
+        // Unroll direction: unfolds down from top in normal position, or unfolds up from bottom if near bottom of screen
+        val expandAlignment = if (isShiftedUp) Alignment.Bottom else Alignment.Top
 
         Box(
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(9999f)
         ) {
-            AnimatedVisibility(
-                visibleState = transitionState,
-                enter = fadeIn(tween(200, easing = LinearOutSlowInEasing)) + 
-                        expandVertically(expandFrom = Alignment.Top, animationSpec = tween(250, easing = FastOutSlowInEasing)),
-                exit = fadeOut(tween(200, easing = FastOutLinearInEasing)) + 
-                       shrinkVertically(shrinkTowards = Alignment.Top, animationSpec = tween(200, easing = FastOutLinearInEasing))
+            // Transparent dismiss area (does NOT darken the background)
+            Box(
+                modifier = Modifier
+                    .fillMaxSize()
+                    .bounceClick(scaleDown = 1f, onClick = onDismiss)
+            )
+
+            // Popup container offset to calculated coordinates
+            Box(
+                modifier = Modifier.offset { IntOffset(xPos.toInt(), yPos.toInt()) }
             ) {
-                Box(
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick(scaleDown = 1f, onClick = onDismiss)
+                AnimatedVisibility(
+                    visibleState = transitionState,
+                    enter = expandVertically(
+                        expandFrom = expandAlignment,
+                        animationSpec = spring(
+                            dampingRatio = 0.76f,
+                            stiffness = Spring.StiffnessMediumLow
+                        )
+                    ) + fadeIn(
+                        animationSpec = tween(120, easing = LinearOutSlowInEasing)
+                    ),
+                    exit = shrinkVertically(
+                        shrinkTowards = expandAlignment,
+                        animationSpec = tween(120, easing = FastOutLinearInEasing)
+                    ) + fadeOut(
+                        animationSpec = tween(110, easing = FastOutLinearInEasing)
                     )
-
-                    val menuWidth = if (onEditDate != null) 225.dp else 180.dp
-                    val menuHeight = if (onEditDate != null) 310.dp else 260.dp
-                    
-                    val menuWidthPx = with(density) { menuWidth.toPx() }
-                    val menuHeightPx = with(density) { menuHeight.toPx() }
-                    val screenWidthPx = with(density) { config.screenWidthDp.dp.toPx() }
-                    val screenHeightPx = with(density) { config.screenHeightDp.dp.toPx() }
-
-                    val statusBarsHeight = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
-                    val navBarsHeight = WindowInsets.navigationBars.asPaddingValues().calculateBottomPadding()
-                    
-                    val topSafetyPx = with(density) { (statusBarsHeight + 180.dp).toPx() }
-                    val bottomSafetyPx = with(density) { (navBarsHeight + 12.dp).toPx() }
-                    val sideSafetyPx = with(density) { 16.dp.toPx() }
-
-                    var xPos = touchX
-                    var yPos = touchY
-
-                    if (xPos + menuWidthPx > screenWidthPx - sideSafetyPx) {
-                        xPos -= menuWidthPx
-                    }
-                    if (xPos < sideSafetyPx) xPos = sideSafetyPx
-
-                    if (yPos + menuHeightPx > screenHeightPx - bottomSafetyPx) {
-                        yPos -= menuHeightPx
-                    }
-                    
-                    yPos = yPos.coerceIn(topSafetyPx, (screenHeightPx - bottomSafetyPx - menuHeightPx).coerceAtLeast(topSafetyPx))
-
+                ) {
                     Column(
                         modifier = Modifier
-                            .offset { IntOffset(xPos.toInt(), yPos.toInt()) }
-                            .width(if (onEditDate != null) 215.dp else 170.dp)
+                            .width(actualMenuWidth)
+                            .clip(RoundedCornerShape(24.dp))
                             .hazeGlass(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp)
@@ -182,6 +215,10 @@ fun MovieActionsPopup(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(horizontal = 10.dp, vertical = 8.dp)
+                                .animateEnterExit(
+                                    enter = fadeIn(tween(140)),
+                                    exit = fadeOut(tween(100))
+                                )
                         ) {
                             Text(
                                 text = movie.title ?: movie.name ?: "Senza titolo",
@@ -205,17 +242,25 @@ fun MovieActionsPopup(
                         
                         Spacer(modifier = Modifier.height(4.dp))
                         val accentColor = MaterialTheme.colorScheme.primary
+                        var itemDelay = 35
+                        val itemStep = 35
 
-                        if (onEditDate != null) {
+                        if (stableOnEditDate != null) {
                             MovieMenuItem(
                                 text = stringResource(R.string.history_edit_date_title),
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                                 iconColor = accentColor,
                                 modifier = Modifier.animateEnterExit(
-                                    enter = slideInVertically(tween(300, delayMillis = 20)) { it / 2 } + fadeIn(tween(300, delayMillis = 20))
+                                    enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                            scaleIn(
+                                                initialScale = 0.90f,
+                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                            ),
+                                    exit = fadeOut(tween(100))
                                 ),
-                                onClick = { onDismiss(); onEditDate() }
+                                onClick = { onDismiss(); stableOnEditDate() }
                             )
+                            itemDelay += itemStep
                         }
 
                         val canRate = if (movie.mediaType == "tv") {
@@ -230,59 +275,94 @@ fun MovieActionsPopup(
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_star),
                                 iconColor = accentColor,
                                 modifier = Modifier.animateEnterExit(
-                                    enter = slideInVertically(tween(300, delayMillis = 40)) { it / 2 } + fadeIn(tween(300, delayMillis = 40))
+                                    enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                            scaleIn(
+                                                initialScale = 0.90f,
+                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                            ),
+                                    exit = fadeOut(tween(100))
                                 ),
                                 onClick = { onDismiss(); onQuickVote(movie) }
                             )
+                            itemDelay += itemStep
                         }
+
                         MovieMenuItem(
                             text = stringResource(R.string.card_quick_note),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_pencil),
                             iconColor = accentColor,
                             modifier = Modifier.animateEnterExit(
-                                enter = slideInVertically(tween(300, delayMillis = 80)) { it / 2 } + fadeIn(tween(300, delayMillis = 80))
+                                enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                        scaleIn(
+                                            initialScale = 0.90f,
+                                            animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                        ),
+                                exit = fadeOut(tween(100))
                             ),
                             onClick = { onDismiss(); onQuickNote(movie) }
                         )
+                        itemDelay += itemStep
+
                         MovieMenuItem(
                             text = stringResource(R.string.card_folders),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_cartella),
                             iconColor = accentColor,
                             modifier = Modifier.animateEnterExit(
-                                enter = slideInVertically(tween(300, delayMillis = 120)) { it / 2 } + fadeIn(tween(300, delayMillis = 120))
+                                enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                        scaleIn(
+                                            initialScale = 0.90f,
+                                            animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                        ),
+                                exit = fadeOut(tween(100))
                             ),
                             onClick = { onDismiss(); onFolders(movie) }
                         )
+                        itemDelay += itemStep
+
                         MovieMenuItem(
                             text = stringResource(R.string.card_share),
                             icon = ImageVector.vectorResource(id = R.drawable.ic_share),
                             iconModifier = Modifier.offset(x = (-1).dp),
                             iconColor = accentColor,
                             modifier = Modifier.animateEnterExit(
-                                enter = slideInVertically(tween(300, delayMillis = 160)) { it / 2 } + fadeIn(tween(300, delayMillis = 160))
+                                enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                        scaleIn(
+                                            initialScale = 0.90f,
+                                            animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                        ),
+                                exit = fadeOut(tween(100))
                             ),
                             onClick = { onDismiss(); onShare(movie) }
                         )
+                        itemDelay += itemStep
                         
-                        if (canDelete && onDelete != null) {
+                        if (stableCanDelete && onDelete != null) {
                             Spacer(modifier = Modifier.height(4.dp))
-                            Box(modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 6.dp)
-                                .height(1.dp)
-                                .animateEnterExit(
-                                    enter = fadeIn(tween(300, delayMillis = 200))
-                                )
-                                .background(Color.White.copy(alpha = 0.1f)))
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 6.dp)
+                                    .height(1.dp)
+                                    .animateEnterExit(
+                                        enter = fadeIn(tween(120, delayMillis = itemDelay)),
+                                        exit = fadeOut(tween(100))
+                                    )
+                                    .background(Color.White.copy(alpha = 0.1f))
+                            )
                             Spacer(modifier = Modifier.height(4.dp))
                             
                             MovieMenuItem(
-                                text = deleteLabel ?: stringResource(R.string.card_remove),
+                                text = stableDeleteLabel ?: stringResource(R.string.card_remove),
                                 icon = ImageVector.vectorResource(id = R.drawable.ic_trash),
                                 iconColor = Color(0xFFE57373),
                                 isDestructive = true,
                                 modifier = Modifier.animateEnterExit(
-                                    enter = slideInVertically(tween(300, delayMillis = 240)) { it / 2 } + fadeIn(tween(300, delayMillis = 240))
+                                    enter = fadeIn(tween(120, delayMillis = itemDelay + 15)) +
+                                            scaleIn(
+                                                initialScale = 0.90f,
+                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                            ),
+                                    exit = fadeOut(tween(100))
                                 ),
                                 onClick = { onDelete(movie); onDismiss() }
                             )

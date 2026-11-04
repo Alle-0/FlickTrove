@@ -118,7 +118,8 @@ class CommsUniCommentsScreen(
     private val focusInputOnLaunch: Boolean = false,
     private val targetCommentId: String? = null,
     private val imdbId: String? = null,
-    private val initialImageUri: String? = null
+    private val initialImageUri: String? = null,
+    private val episodeTitle: String? = null
 ) : Screen {
 
     override val key: String = "CommentsScreen_${mediaType}_${mediaId}_${java.util.UUID.randomUUID()}"
@@ -168,6 +169,12 @@ class CommsUniCommentsScreen(
         val showSeasons by viewModel.showSeasons.collectAsStateWithLifecycle()
         val seasonEpisodes by viewModel.seasonEpisodes.collectAsStateWithLifecycle()
         val isLoadingSeasonEpisodes by viewModel.isLoadingSeasonEpisodes.collectAsStateWithLifecycle()
+        val currentEpisodeTitle = remember(episodeTitle, seasonEpisodes, seasonNumber, episodeNumber) {
+            episodeTitle?.takeIf { it.isNotBlank() }
+                ?: if (seasonNumber != null && episodeNumber != null) {
+                    seasonEpisodes[seasonNumber]?.find { it.episodeNumber == episodeNumber }?.name?.takeIf { it.isNotBlank() }
+                } else null
+        }
         var showEpisodePickerSheet by remember { mutableStateOf(false) }
         val isTvSeries = remember(mediaType, seasonNumber, showSeasons) {
             mediaType.lowercase() in listOf("tv", "series", "show", "episode") || seasonNumber != null || showSeasons.isNotEmpty()
@@ -340,61 +347,122 @@ class CommsUniCommentsScreen(
                             })
                         },
                     topBar = {
-                TopAppBar(
-                    modifier = Modifier
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
-                            containerColor = Color.Black.copy(alpha = 0.7f),
-                            blurRadius = 20.dp
-                        ),
-                    title = {
-                        val displayTitle = remember(mediaTitle, seasonNumber, episodeNumber) {
-                            if (seasonNumber != null && episodeNumber != null) {
-                                val epCode = "${seasonNumber}x${String.format(java.util.Locale.US, "%02d", episodeNumber)}"
-                                if (mediaTitle.isNotBlank()) "$mediaTitle ($epCode)" else epCode
-                            } else if (seasonNumber != null) {
-                                val sCode = "S$seasonNumber"
-                                if (mediaTitle.isNotBlank()) "$mediaTitle ($sCode)" else sCode
-                            } else {
-                                mediaTitle
-                            }
-                        }
-                        Text(
-                            text = if (displayTitle.isNotBlank()) {
-                                stringResource(R.string.comments_screen_title_with_media, displayTitle)
-                            } else {
-                                stringResource(R.string.comments_screen_title)
-                            },
-                            fontWeight = FontWeight.Bold,
-                            color = Color.White,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    },
-                    navigationIcon = {
-                        Box(
+                        Column(
                             modifier = Modifier
-                                .padding(12.dp)
-                                .bounceClick { navigator.pop() }
+                                .fillMaxWidth()
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
+                                    containerColor = Color.Black.copy(alpha = 0.75f),
+                                    blurRadius = 20.dp
+                                )
+                                .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                         ) {
-                            Icon(painter = painterResource(id = R.drawable.ic_left), contentDescription = stringResource(R.string.detail_content_desc_back), tint = Color.White, modifier = Modifier.size(24.dp))
-                        }
-                    },
-                    windowInsets = WindowInsets.safeDrawing.only(WindowInsetsSides.Top),
-                    colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color.Transparent,
-                        scrolledContainerColor = Color.Transparent
-                    ),
-                    actions = {
-                        val sortCoords = remember { arrayOf<LayoutCoordinates?>(null) }
-                        val commsUniCoords = remember { arrayOf<LayoutCoordinates?>(null) }
-                        val episodesCoords = remember { arrayOf<LayoutCoordinates?>(null) }
-                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            val sortCoords = remember { arrayOf<LayoutCoordinates?>(null) }
+                            val commsUniCoords = remember { arrayOf<LayoutCoordinates?>(null) }
+                            val episodesCoords = remember { arrayOf<LayoutCoordinates?>(null) }
+
+                            // Livello 1: Back, Titolo Media & Azioni (CommsUni + Filtri)
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .heightIn(min = 48.dp)
+                                    .padding(horizontal = 4.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .padding(4.dp)
+                                        .bounceClick { navigator.pop() }
+                                        .padding(8.dp)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_left),
+                                        contentDescription = stringResource(R.string.detail_content_desc_back),
+                                        tint = Color.White,
+                                        modifier = Modifier.size(24.dp)
+                                    )
+                                }
+
+                                Text(
+                                    text = mediaTitle.ifBlank { stringResource(R.string.comments_screen_title) },
+                                    style = MaterialTheme.typography.titleMedium.copy(
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 16.sp
+                                    ),
+                                    color = Color.White,
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis,
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .padding(start = 2.dp, end = 6.dp)
+                                )
+
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.padding(end = 4.dp)
+                                ) {
+                                    Box(
+                                        modifier = Modifier
+                                            .onGloballyPositioned { commsUniCoords[0] = it }
+                                            .bounceClick {
+                                                commsUniButtonBounds = commsUniCoords[0]?.let {
+                                                    val pos = it.positionInWindow()
+                                                    Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                                }
+                                                showCommsUniInfo = true
+                                            }
+                                            .clip(CircleShape)
+                                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                            .padding(horizontal = 8.dp, vertical = 5.dp),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Row(
+                                            verticalAlignment = Alignment.CenterVertically,
+                                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        ) {
+                                            Image(
+                                                painter = painterResource(id = R.drawable.ic_commsuni_logo),
+                                                contentDescription = stringResource(R.string.commsuni_info_title),
+                                                modifier = Modifier.size(15.dp)
+                                            )
+                                            Icon(
+                                                imageVector = Icons.Rounded.Info,
+                                                contentDescription = null,
+                                                tint = Color.White.copy(alpha = 0.70f),
+                                                modifier = Modifier.size(13.dp)
+                                            )
+                                        }
+                                    }
+                                    Box(
+                                        modifier = Modifier
+                                            .padding(horizontal = 2.dp)
+                                            .onGloballyPositioned { sortCoords[0] = it }
+                                            .bounceClick { 
+                                                sortButtonBounds = sortCoords[0]?.let {
+                                                    val pos = it.positionInWindow()
+                                                    Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
+                                                }
+                                                showSortMenu = true 
+                                            }
+                                            .padding(8.dp)
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_filtri),
+                                            contentDescription = stringResource(R.string.comment_sort_by),
+                                            tint = Color.White,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
+                                }
+                            }
+
+                            // Livello 2: Se serie TV, pulsante per cambiare puntata
                             if (isTvSeries) {
                                 Box(
                                     modifier = Modifier
-                                        .padding(end = 6.dp)
+                                        .padding(start = 48.dp, end = 16.dp, bottom = 10.dp)
                                         .onGloballyPositioned { episodesCoords[0] = it }
                                         .bounceClick {
                                             episodesButtonBounds = episodesCoords[0]?.let {
@@ -406,85 +474,50 @@ class CommsUniCommentsScreen(
                                         .clip(CircleShape)
                                         .background(Color.White.copy(alpha = 0.08f))
                                         .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
-                                        .padding(horizontal = 10.dp, vertical = 6.dp),
+                                        .padding(horizontal = 10.dp, vertical = 5.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Row(
                                         verticalAlignment = Alignment.CenterVertically,
-                                        horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                        horizontalArrangement = Arrangement.spacedBy(5.dp)
                                     ) {
                                         Icon(
                                             painter = painterResource(id = R.drawable.ic_tv),
                                             contentDescription = stringResource(R.string.episodes_discussions_pill),
                                             tint = Color.White.copy(alpha = 0.85f),
-                                            modifier = Modifier.size(13.dp)
+                                            modifier = Modifier.size(12.dp)
                                         )
-                                        Text(
-                                            text = if (seasonNumber != null && episodeNumber != null) {
-                                                "${seasonNumber}x${String.format(java.util.Locale.US, "%02d", episodeNumber)}"
+                                        val pillText = if (seasonNumber != null && episodeNumber != null) {
+                                            val code = "${seasonNumber}x${String.format(java.util.Locale.US, "%02d", episodeNumber)}"
+                                            if (!currentEpisodeTitle.isNullOrBlank()) {
+                                                "$code • $currentEpisodeTitle"
                                             } else {
-                                                stringResource(R.string.episodes_discussions_pill)
-                                            },
-                                            color = Color.White.copy(alpha = 0.85f),
+                                                code
+                                            }
+                                        } else {
+                                            stringResource(R.string.episodes_discussions_pill)
+                                        }
+                                        Text(
+                                            text = pillText,
+                                            color = Color.White.copy(alpha = 0.90f),
                                             fontSize = 11.sp,
-                                            fontWeight = FontWeight.Bold
+                                            fontWeight = FontWeight.Bold,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_right),
+                                            contentDescription = null,
+                                            tint = Color.White.copy(alpha = 0.70f),
+                                            modifier = Modifier.size(12.dp)
                                         )
                                     }
                                 }
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .padding(end = 6.dp)
-                                    .onGloballyPositioned { commsUniCoords[0] = it }
-                                    .bounceClick {
-                                        commsUniButtonBounds = commsUniCoords[0]?.let {
-                                            val pos = it.positionInWindow()
-                                            Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
-                                        }
-                                        showCommsUniInfo = true
-                                    }
-                                    .clip(CircleShape)
-                                    .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
-                                    .padding(horizontal = 8.dp, vertical = 4.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    Image(
-                                        painter = painterResource(id = R.drawable.ic_commsuni_logo),
-                                        contentDescription = stringResource(R.string.commsuni_info_title),
-                                        modifier = Modifier.size(15.dp)
-                                    )
-                                    Icon(
-                                        imageVector = Icons.Rounded.Info,
-                                        contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.70f),
-                                        modifier = Modifier.size(13.dp)
-                                    )
-                                }
-                            }
-                            Box {
-                                Box(
-                                    modifier = Modifier
-                                        .padding(12.dp)
-                                        .onGloballyPositioned { sortCoords[0] = it }
-                                        .bounceClick { 
-                                            sortButtonBounds = sortCoords[0]?.let {
-                                                val pos = it.positionInWindow()
-                                                Rect(pos.x, pos.y, pos.x + it.size.width, pos.y + it.size.height)
-                                            }
-                                            showSortMenu = true 
-                                        }
-                                ) {
-                                    Icon(painterResource(id = R.drawable.ic_filtri), contentDescription = stringResource(R.string.comment_sort_by), tint = Color.White)
-                                }
+                            } else {
+                                Spacer(modifier = Modifier.height(6.dp))
                             }
                         }
-                    }
-                )
-            },
+                    },
 
                     containerColor = Color.Transparent
         ) { paddingValues ->
@@ -555,7 +588,7 @@ class CommsUniCommentsScreen(
                     LazyColumn(
                         state = listState,
                         modifier = Modifier.fillMaxSize(),
-                        contentPadding = PaddingValues(top = paddingValues.calculateTopPadding() + 16.dp, bottom = 140.dp)
+                        contentPadding = PaddingValues(top = paddingValues.calculateTopPadding() + 10.dp, bottom = 140.dp)
                     ) {
                     if (isLoading) {
                         items(5) { index ->
@@ -868,7 +901,7 @@ class CommsUniCommentsScreen(
                     val epStill = ep.stillPath?.let {
                         com.cinetrack.util.buildTmdbImageUrl(it, com.cinetrack.util.ImageType.BACKDROP, com.cinetrack.util.ImageQuality.HIGH)
                     }
-                    navigator.push(
+                    navigator.replace(
                         CommsUniCommentsScreen(
                             tvdbId = tvdbId,
                             mediaId = baseShowId,
@@ -881,13 +914,14 @@ class CommsUniCommentsScreen(
                             backdropUrl = epStill ?: backdropUrl,
                             releaseYear = ep.airDate?.take(4) ?: releaseYear,
                             focusInputOnLaunch = false,
-                            imdbId = imdbId
+                            imdbId = imdbId,
+                            episodeTitle = ep.name
                         )
                     )
                 },
                 onSelectMainDiscussion = {
                     showEpisodePickerSheet = false
-                    navigator.push(
+                    navigator.replace(
                         CommsUniCommentsScreen(
                             tvdbId = tvdbId,
                             mediaId = baseShowId,

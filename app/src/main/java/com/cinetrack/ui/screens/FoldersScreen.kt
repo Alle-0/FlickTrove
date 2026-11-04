@@ -7,10 +7,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.animation.*
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.spring
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import com.cinetrack.util.VibrationHelper
 import androidx.compose.foundation.*
 import androidx.compose.foundation.layout.*
@@ -646,13 +643,20 @@ fun FoldersScreenContent(
             )
             AnimatedVisibility(
                 visible = isMenuVisible,
-                enter = fadeIn() + slideInVertically(
-                    initialOffsetY = { -it / 4 },
-                    animationSpec = tween(250, easing = EaseOutCirc)
+                enter = expandVertically(
+                    expandFrom = Alignment.Top,
+                    animationSpec = spring(
+                        dampingRatio = 0.76f,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ) + fadeIn(
+                    animationSpec = tween(120, easing = LinearOutSlowInEasing)
                 ),
-                exit = fadeOut() + slideOutVertically(
-                    targetOffsetY = { -it / 4 },
-                    animationSpec = tween(200, easing = EaseInCirc)
+                exit = shrinkVertically(
+                    shrinkTowards = Alignment.Top,
+                    animationSpec = tween(120, easing = FastOutLinearInEasing)
+                ) + fadeOut(
+                    animationSpec = tween(110, easing = FastOutLinearInEasing)
                 ),
                 modifier = Modifier.absoluteOffset(x = offsetX, y = offsetY)
             ) {
@@ -664,11 +668,21 @@ fun FoldersScreenContent(
                 ) {
                     val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                     val isOwner = !folder.isShared || (folder.ownerUid == currentUserId)
+                    var itemDelay = 15
+                    val itemStep = 35
 
                     if (folder.isShared || isOwner) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .animateEnterExit(
+                                    enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                            scaleIn(
+                                                initialScale = 0.90f,
+                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                            ),
+                                    exit = fadeOut(tween(100))
+                                )
                                 .bounceClick { 
                                     val target = folder
                                     activeMenuFolder = null
@@ -700,12 +714,21 @@ fun FoldersScreenContent(
                                 style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
                             )
                         }
+                        itemDelay += itemStep
                     }
 
                     if (isOwner) {
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
+                                .animateEnterExit(
+                                    enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                            scaleIn(
+                                                initialScale = 0.90f,
+                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                            ),
+                                    exit = fadeOut(tween(100))
+                                )
                                 .bounceClick { 
                                     activeMenuFolder = null
                                     folderEditMode = FolderEditMode.ALL
@@ -718,11 +741,20 @@ fun FoldersScreenContent(
                             Spacer(Modifier.width(12.dp))
                             Text(stringResource(R.string.folder_edit_info), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
                         }
+                        itemDelay += itemStep
                     }
 
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
+                            .animateEnterExit(
+                                enter = fadeIn(tween(120, delayMillis = itemDelay)) +
+                                        scaleIn(
+                                            initialScale = 0.90f,
+                                            animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
+                                        ),
+                                exit = fadeOut(tween(100))
+                            )
                             .bounceClick { 
                                 activeMenuFolder = null
                                 folderToDelete = folder 

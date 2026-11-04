@@ -48,6 +48,10 @@ fun DetailSideActionButton(
     val sideButtonInteractionSource = remember { MutableInteractionSource() }
     val isSideButtonPressed by sideButtonInteractionSource.collectIsPressedAsState()
 
+    val currentActionIndex by rememberUpdatedState(currentSideActionIndex)
+    val currentActions by rememberUpdatedState(availableSideActions)
+    val onActionIndexChange by rememberUpdatedState(onSideActionIndexChange)
+
     LaunchedEffect(isSideButtonPressed) {
         if (isSideButtonPressed) {
             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -89,12 +93,12 @@ fun DetailSideActionButton(
                             if (hasActionFired) return@detectVerticalDragGestures
                             
                             dragAccumulator += dragAmount
-                            if (dragAccumulator < -40f && currentSideActionIndex < availableSideActions.size - 1) {
-                                onSideActionIndexChange(currentSideActionIndex + 1)
+                            if (dragAccumulator < -40f && currentActionIndex < currentActions.size - 1) {
+                                onActionIndexChange(currentActionIndex + 1)
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 hasActionFired = true
-                            } else if (dragAccumulator > 40f && currentSideActionIndex > 0) {
-                                onSideActionIndexChange(currentSideActionIndex - 1)
+                            } else if (dragAccumulator > 40f && currentActionIndex > 0) {
+                                onActionIndexChange(currentActionIndex - 1)
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 hasActionFired = true
                             }

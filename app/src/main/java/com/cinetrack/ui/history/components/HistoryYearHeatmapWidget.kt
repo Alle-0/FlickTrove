@@ -103,10 +103,13 @@ fun rememberHeatmapStats(
             prevD = d
         }
 
-        val (displayStreak, streakDates, isCurrent) = if (currentYear == today.year && currRun.isNotEmpty()) {
-            Triple(currRun.size, currRun.toSet(), true)
+        // 3. Selezione streak da mostrare: priorità alla Longest Streak (Miglior serie dell'anno).
+        // Se la streak attuale eguaglia o supera il record dell'anno, viene segnalata come serie attuale.
+        val isCurrent = currentYear == today.year && currRun.isNotEmpty() && currRun.size >= longestRun.size
+        val (displayStreak, streakDates) = if (isCurrent) {
+            currRun.size to currRun.toSet()
         } else {
-            Triple(longestRun.size, longestRun.toSet(), false)
+            longestRun.size to longestRun.toSet()
         }
 
         HeatmapStats(

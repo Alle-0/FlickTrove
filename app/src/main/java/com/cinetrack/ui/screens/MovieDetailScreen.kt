@@ -867,7 +867,8 @@ fun MovieDetailScreenContent(
                                                 backdropUrl = backdrop,
                                                 releaseYear = releaseYear,
                                                 focusInputOnLaunch = false,
-                                                imdbId = imdbId
+                                                imdbId = imdbId,
+                                                episodeTitle = episode.name
                                             )
                                         )
                                     }

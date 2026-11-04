@@ -75,11 +75,8 @@ fun HistoryCard(
                 cardPosition[0] = coordinates.positionInWindow()
                 cardSize[0] = Size(coordinates.size.width.toFloat(), coordinates.size.height.toFloat())
             }
-            .clip(RoundedCornerShape(20.dp))
-            .background(Color.White.copy(alpha = 0.05f))
-            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
             .bounceClickWithOffset(
-                scaleDown = 0.98f,
+                scaleDown = 0.96f,
                 requireUnconsumed = false,
                 onLongClick = { offset ->
                     haptic.performHapticFeedback(HapticFeedbackType.LongPress)
@@ -105,6 +102,9 @@ fun HistoryCard(
             ) { _ ->
                 onClick()
             }
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White.copy(alpha = 0.05f))
+            .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(20.dp))
             .padding(horizontal = 12.dp, vertical = 9.dp)
     ) {
         Row(

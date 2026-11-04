@@ -11,10 +11,6 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.gestures.Orientation
-import androidx.compose.foundation.gestures.detectDragGestures
-import androidx.compose.foundation.gestures.draggable
-import androidx.compose.foundation.gestures.rememberDraggableState
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.pager.HorizontalPager
@@ -220,7 +216,6 @@ fun HistoryScreenContent(
                 ) { pageIndex ->
                     when (pageIndex) {
                         0 -> {
-                            var timelineDragX by remember { mutableFloatStateOf(0f) }
                             HistoryTimelineView(
                                 entries = uiState.filteredEntries,
                                 onMovieClick = onMovieClick,
@@ -239,23 +234,7 @@ fun HistoryScreenContent(
                                     top = topBarClearance,
                                     bottom = bottomClearance
                                 ),
-                                modifier = Modifier
-                                    .fillMaxSize()
-                                    .draggable(
-                                        state = rememberDraggableState { delta ->
-                                            timelineDragX += delta
-                                        },
-                                        orientation = Orientation.Horizontal,
-                                        onDragStarted = { timelineDragX = 0f },
-                                        onDragStopped = { velocity ->
-                                            if (timelineDragX > 60f || velocity > 350f) {
-                                                coroutineScope.launch {
-                                                    pagerState.animateScrollToPage(1)
-                                                }
-                                            }
-                                            timelineDragX = 0f
-                                        }
-                                    )
+                                modifier = Modifier.fillMaxSize()
                             )
                         }
                         1 -> {

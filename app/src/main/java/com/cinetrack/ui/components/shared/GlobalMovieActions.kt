@@ -41,14 +41,15 @@ fun GlobalMovieActions(
         }
 
         // 1. Actions Popup
-        if (manager.showActionsPopup && manager.activeMovie != null) {
+        if (manager.activeMovie != null && !manager.showRatingDialog && !manager.showNotesDialog && !manager.showFolderDialog && manager.explodingMovie == null) {
             val isSaved = movie.favorite || movie.watched || movie.reminder || (movie.personalRating ?: 0.0) > 0.0 || !movie.personalNote.isNullOrEmpty() || manager.foldersList.any { manager.isItemInFolderCallback(movie, it.id) }
             val watchSessionCallback = manager.onDeleteWatchSessionCallback
             val canDelete = (isSaved && manager.onDeleteCallback != null) || watchSessionCallback != null
             MovieActionsPopup(
                 movie = movie,
-                showMenu = true,
+                showMenu = manager.showActionsPopup,
                 onDismiss = { manager.closeAll() },
+                onDismissComplete = { manager.clearActiveMovie() },
                 pressOffset = manager.popupPressOffset,
                 cardPosition = manager.popupCardPosition,
                 hazeState = hazeState,
@@ -88,48 +89,48 @@ fun GlobalMovieActions(
             )
         }
 
-    // 2. Quick Rating Modal
-    if (manager.showRatingDialog) {
-        QuickRatingModal(
-            initialRating = movie.personalRating ?: 0.0,
-            movieTitle = movie.title ?: movie.name ?: "",
-            accentColor = MaterialTheme.colorScheme.primary,
-            hazeState = hazeState,
-            onSave = { rating ->
-                manager.onUpdateRatingCallback?.invoke(movie, rating)
-                manager.closeAll()
-            },
-            onDismiss = { manager.closeAll() }
-        )
-    }
+        // 2. Quick Rating Modal
+        if (manager.showRatingDialog) {
+            QuickRatingModal(
+                initialRating = movie.personalRating ?: 0.0,
+                movieTitle = movie.title ?: movie.name ?: "",
+                accentColor = MaterialTheme.colorScheme.primary,
+                hazeState = hazeState,
+                onSave = { rating ->
+                    manager.onUpdateRatingCallback?.invoke(movie, rating)
+                    manager.closeAll()
+                },
+                onDismiss = { manager.closeAll() }
+            )
+        }
 
-    if (manager.showNotesDialog) {
-        QuickNoteModal(
-            movieId = movie.id,
-            mediaType = movie.mediaType,
-            initialNote = movie.personalNote ?: "",
-            movieTitle = movie.title ?: movie.name ?: "",
-            accentColor = MaterialTheme.colorScheme.primary,
-            hazeState = hazeState,
-            onSave = { note ->
-                manager.onUpdateNoteCallback?.invoke(movie, note)
-                manager.closeAll()
-            },
-            onDismiss = { manager.closeAll() }
-        )
-    }
+        if (manager.showNotesDialog) {
+            QuickNoteModal(
+                movieId = movie.id,
+                mediaType = movie.mediaType,
+                initialNote = movie.personalNote ?: "",
+                movieTitle = movie.title ?: movie.name ?: "",
+                accentColor = MaterialTheme.colorScheme.primary,
+                hazeState = hazeState,
+                onSave = { note ->
+                    manager.onUpdateNoteCallback?.invoke(movie, note)
+                    manager.closeAll()
+                },
+                onDismiss = { manager.closeAll() }
+            )
+        }
 
-    // 4. Quick Folder Modal
-    if (manager.showFolderDialog) {
-        QuickFolderModal(
-            movieTitle = movie.title ?: movie.name ?: "",
-            folders = manager.foldersList,
-            accentColor = MaterialTheme.colorScheme.primary,
-            hazeState = hazeState,
-            isItemInFolder = { folderId -> manager.isItemInFolderCallback(movie, folderId) },
-            onToggleItem = { folder -> manager.onToggleFolderCallback?.invoke(movie, folder) },
-            onClose = { manager.closeAll() }
-        )
-    }
+        // 4. Quick Folder Modal
+        if (manager.showFolderDialog) {
+            QuickFolderModal(
+                movieTitle = movie.title ?: movie.name ?: "",
+                folders = manager.foldersList,
+                accentColor = MaterialTheme.colorScheme.primary,
+                hazeState = hazeState,
+                isItemInFolder = { folderId -> manager.isItemInFolderCallback(movie, folderId) },
+                onToggleItem = { folder -> manager.onToggleFolderCallback?.invoke(movie, folder) },
+                onClose = { manager.closeAll() }
+            )
+        }
     }
 }
