@@ -49,7 +49,8 @@ class CommentRepository @Inject constructor(
             val snapshot = query.get().await()
 
             val allComments = snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
-                appComment.copy(id = snapshot.documents[index].id)
+                val docId = snapshot.documents[index].id
+                appComment.copy(id = docId, firestoreId = docId)
             }
 
             val comments = if (!mediaType.isNullOrBlank()) {
@@ -79,7 +80,8 @@ class CommentRepository @Inject constructor(
                 .await()
 
             snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
-                appComment.copy(id = snapshot.documents[index].id)
+                val docId = snapshot.documents[index].id
+                appComment.copy(id = docId, firestoreId = docId)
             }
         } catch (e: Exception) {
             e.printStackTrace()
@@ -102,7 +104,8 @@ class CommentRepository @Inject constructor(
                 .await()
 
             val allComments = snapshot.toObjects(AppComment::class.java).mapIndexed { index, appComment ->
-                appComment.copy(id = snapshot.documents[index].id)
+                val docId = snapshot.documents[index].id
+                appComment.copy(id = docId, firestoreId = docId)
             }
 
             val comments = if (!mediaType.isNullOrBlank()) {
@@ -354,7 +357,20 @@ class CommentRepository @Inject constructor(
         commentSnippet: String? = null
     ): Boolean {
         val userId = auth.currentUser?.uid ?: return false
-        val docRef = getMediaCommentsCollection(mediaId).document(commentId)
+        var targetDocRef = getMediaCommentsCollection(mediaId).document(commentId)
+        try {
+            val directSnap = targetDocRef.get().await()
+            if (!directSnap.exists() && !commentSnippet.isNullOrBlank()) {
+                val querySnap = getMediaCommentsCollection(mediaId).limit(50).get().await()
+                val match = querySnap.documents.firstOrNull { doc ->
+                    val text = doc.getString("text") ?: ""
+                    com.cinetrack.data.model.isSameCommentText(text, commentSnippet)
+                }
+                if (match != null) {
+                    targetDocRef = match.reference
+                }
+            }
+        } catch (_: Exception) {}
 
         var targetOwnerId: String? = null
         var isNewLike = false
@@ -363,7 +379,7 @@ class CommentRepository @Inject constructor(
 
         return try {
             firestore.runTransaction { transaction ->
-                val snapshot = transaction.get(docRef)
+                val snapshot = transaction.get(targetDocRef)
                 if (!snapshot.exists()) return@runTransaction
 
                 val currentLikes = snapshot.get("likedBy") as? List<*> ?: emptyList<String>()
@@ -372,16 +388,16 @@ class CommentRepository @Inject constructor(
                 val commentOwnerId = snapshot.getString("userId")
 
                 if (!isLiking) {
-                    transaction.update(docRef, "likesCount", FieldValue.increment(-1))
-                    transaction.update(docRef, "likedBy", FieldValue.arrayRemove(userId))
+                    transaction.update(targetDocRef, "likesCount", FieldValue.increment(-1))
+                    transaction.update(targetDocRef, "likedBy", FieldValue.arrayRemove(userId))
                     
                     if (commentOwnerId != null && commentOwnerId != userId) {
                         targetOwnerId = commentOwnerId
                         isUnlike = true
                     }
                 } else {
-                    transaction.update(docRef, "likesCount", FieldValue.increment(1))
-                    transaction.update(docRef, "likedBy", FieldValue.arrayUnion(userId))
+                    transaction.update(targetDocRef, "likesCount", FieldValue.increment(1))
+                    transaction.update(targetDocRef, "likedBy", FieldValue.arrayUnion(userId))
 
                     if (commentOwnerId != null && commentOwnerId != userId) {
                         targetOwnerId = commentOwnerId

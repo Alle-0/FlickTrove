@@ -253,6 +253,12 @@ fun ZoomableImageViewerDialog(
                 ) {
                     Box(
                         modifier = Modifier
+                            .bounceClick(scaleDown = 0.90f) {
+                                coroutineScope.launch {
+                                    launch { scaleAnim.animateTo(1f, tween(250)) }
+                                    launch { offsetAnim.animateTo(Offset.Zero, tween(250)) }
+                                }
+                            }
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
@@ -260,27 +266,16 @@ fun ZoomableImageViewerDialog(
                                 containerColor = Color.Black.copy(alpha = 0.28f),
                                 borderWidth = 1.dp,
                                 borderColor = Color.White.copy(alpha = 0.20f)
-                            ),
+                            )
+                            .padding(horizontal = 14.dp, vertical = 7.dp),
                         contentAlignment = Alignment.Center
                     ) {
-                        Box(
-                            modifier = Modifier
-                                .bounceClick(scaleDown = 0.90f) {
-                                    coroutineScope.launch {
-                                        launch { scaleAnim.animateTo(1f, tween(250)) }
-                                        launch { offsetAnim.animateTo(Offset.Zero, tween(250)) }
-                                    }
-                                }
-                                .padding(horizontal = 14.dp, vertical = 7.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "${(scaleAnim.value * 100).roundToInt()}%",
-                                color = Color.White,
-                                fontSize = 12.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                        Text(
+                            text = "${(scaleAnim.value * 100).roundToInt()}%",
+                            color = Color.White,
+                            fontSize = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
 
@@ -288,10 +283,11 @@ fun ZoomableImageViewerDialog(
                     Spacer(modifier = Modifier.weight(1f))
                 }
 
-                // Close button con blur autentico (il vetro hazeGlass resta fisso, rimbalza solo l'icona interna)
+                // Close button con blur autentico ed effetto bounce atomico
                 Box(
                     modifier = Modifier
                         .size(42.dp)
+                        .bounceClick(scaleDown = 0.86f) { onDismiss() }
                         .hazeGlass(
                             state = hazeState,
                             shape = CircleShape,
@@ -303,19 +299,12 @@ fun ZoomableImageViewerDialog(
                         ),
                     contentAlignment = Alignment.Center
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .bounceClick(scaleDown = 0.86f) { onDismiss() },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_x),
-                            contentDescription = stringResource(R.string.settings_close),
-                            tint = Color.White,
-                            modifier = Modifier.size(20.dp)
-                        )
-                    }
+                    Icon(
+                        painter = painterResource(id = R.drawable.ic_x),
+                        contentDescription = stringResource(R.string.settings_close),
+                        tint = Color.White,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }

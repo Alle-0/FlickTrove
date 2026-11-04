@@ -312,6 +312,7 @@ class CommentsViewModel @Inject constructor(
         val currentComments = _comments.value.toMutableList()
         val index = currentComments.indexOfFirst { it.id == commentId }
         val commentSnippet = if (index != -1) currentComments[index].text else null
+        val targetFsId = if (index != -1) currentComments[index].firestoreId?.takeIf { it.isNotBlank() } ?: commentId else commentId
         if (index != -1) {
             val comment = currentComments[index]
             val isLiked = comment.likedBy.contains(uId)
@@ -327,7 +328,7 @@ class CommentsViewModel @Inject constructor(
         viewModelScope.launch {
             val success = commentRepository.toggleLike(
                 currentMediaId,
-                commentId,
+                targetFsId,
                 currentMediaType,
                 mediaTitle,
                 mediaImage,

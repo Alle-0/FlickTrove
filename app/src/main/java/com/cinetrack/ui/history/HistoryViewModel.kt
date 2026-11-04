@@ -43,6 +43,16 @@ class HistoryViewModel @Inject constructor(
     private val _selectedCalendarDate = MutableStateFlow<LocalDate?>(null)
     private val _isFilterModalOpen = MutableStateFlow(false)
 
+    init {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                watchHistoryRepository.cleanupOrphanWatchHistory()
+            } catch (e: Exception) {
+                // Background housekeeping
+            }
+        }
+    }
+
     private val rawTimelineFlow = watchHistoryRepository.getGlobalTimelineFlow()
 
     private data class CalendarFilterTuple(

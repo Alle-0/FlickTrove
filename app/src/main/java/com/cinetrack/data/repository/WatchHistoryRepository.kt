@@ -63,6 +63,14 @@ class WatchHistoryRepository @Inject constructor(
         }
     }
 
+    suspend fun cleanupOrphanWatchHistory(): Int {
+        val count = watchHistoryDao.markOrphanWatchHistoryDeleted()
+        if (count > 0) {
+            pushPendingWatchHistory()
+        }
+        return count
+    }
+
     suspend fun countDuplicateRewatches(): Int {
         val allHistory = watchHistoryDao.getAllWatchHistory()
         var duplicateCount = 0

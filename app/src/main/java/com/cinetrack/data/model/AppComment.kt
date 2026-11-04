@@ -36,6 +36,7 @@ data class AppComment(
     val attachedMedia: List<String> = emptyList(),
     val rating: Double? = null,
     val language: String? = null,
+    val firestoreId: String? = null,
     @get:PropertyName("isOnCommsUni")
     @set:PropertyName("isOnCommsUni")
     var isOnCommsUni: Boolean = false
@@ -127,8 +128,25 @@ fun mergeComments(primary: AppComment, secondary: AppComment): AppComment {
     val name = primary.userDisplayName.trim().takeIf { it.isNotBlank() }
         ?: secondary.userDisplayName.trim().takeIf { it.isNotBlank() }
         ?: ""
-    val likes = maxOf(primary.likesCount, secondary.likesCount)
     val likedBy = (primary.likedBy + secondary.likedBy).distinct()
+    var likes = maxOf(primary.likesCount, secondary.likesCount, likedBy.size)
+
+    val currentUid = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+    if (currentUid != null) {
+        val likedOnPrimary = primary.likedBy.contains(currentUid)
+        val likedOnSecondary = secondary.likedBy.contains(currentUid)
+        if (likedOnPrimary && !likedOnSecondary) {
+            likes = maxOf(likes, secondary.likesCount + 1)
+        } else if (likedOnSecondary && !likedOnPrimary) {
+            likes = maxOf(likes, primary.likesCount + 1)
+        }
+    }
+
+    val resolvedFirestoreId = primary.firestoreId?.takeIf { it.isNotBlank() }
+        ?: secondary.firestoreId?.takeIf { it.isNotBlank() }
+        ?: (if (secondary.originSlug.equals("flicktrove", ignoreCase = true) || secondary.originSlug.isBlank()) secondary.id.takeIf { it.isNotBlank() } else null)
+        ?: (if (primary.originSlug.equals("flicktrove", ignoreCase = true) || primary.originSlug.isBlank()) primary.id.takeIf { it.isNotBlank() } else null)
+
     val originSlug = primary.originSlug.takeIf { it.isNotBlank() } ?: secondary.originSlug
     val originName = primary.originName.takeIf { it.isNotBlank() } ?: secondary.originName
     val originColor = primary.originColor ?: secondary.originColor
@@ -143,6 +161,7 @@ fun mergeComments(primary: AppComment, secondary: AppComment): AppComment {
         userDisplayName = name,
         likesCount = likes,
         likedBy = likedBy,
+        firestoreId = resolvedFirestoreId,
         originSlug = if (originSlug.isBlank()) "flicktrove" else originSlug,
         originName = if (originName.isBlank()) "FlickTrove" else originName,
         originColor = originColor ?: "#2dd4bf",

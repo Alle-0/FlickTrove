@@ -208,6 +208,22 @@ class MovieRepository @Inject constructor(
         // Notify Widget of changes
         widgetNotifier.notifyWidgetUpdated()
 
+        val oldWatched = oldMovie?.watched ?: false
+        // Sincronizzazione locale della cronologia visioni (Watch History / Diario)
+        // Se un media passa da visto a NON visto (es. Undo da toast o cambio stato),
+        // rimuoviamo le sessioni orfane da watch_history preservando la Single Source of Truth
+        if (oldWatched && !movie.watched) {
+            if (movie.mediaType == "tv") {
+                if (movie.watchedEpisodes.isNullOrEmpty() && movie.watchedAt == null) {
+                    watchHistoryRepository.deleteWatchHistoryByMovieId(movieToSave.id, movieToSave.mediaType)
+                    watchHistoryRepository.pushPendingWatchHistory()
+                }
+            } else {
+                watchHistoryRepository.deleteWatchHistoryByMovieId(movieToSave.id, movieToSave.mediaType)
+                watchHistoryRepository.pushPendingWatchHistory()
+            }
+        }
+
         // Enqueue Instant Write to Trakt via WorkManager
         if (syncToTrakt) {
             val workRequests = mutableListOf<androidx.work.OneTimeWorkRequest>()
@@ -229,7 +245,6 @@ class MovieRepository @Inject constructor(
             }
 
             // Estraiamo i vecchi valori in sicurezza (se oldMovie è null, usiamo i default)
-            val oldWatched = oldMovie?.watched ?: false
             val oldRating  = oldMovie?.personalRating
             val oldFav     = oldMovie?.favorite ?: false
 

@@ -47,10 +47,33 @@ interface WatchHistoryDao {
                h.episodeDates AS episodeDates
         FROM watch_history h
         INNER JOIN favorites f ON h.movieId = f.id AND h.mediaType = f.media_type
-        WHERE f.sync_status != 'pending_delete' AND f.sync_status != 'deleted' AND h.syncStatus != 'deleted'
+        WHERE f.sync_status != 'pending_delete' 
+          AND f.sync_status != 'deleted' 
+          AND h.syncStatus != 'deleted'
+          AND (f.media_type = 'tv' OR f.watched = 1)
         ORDER BY h.watchedAt DESC
     """)
     fun getGlobalTimelineFlow(): Flow<List<RawTimelineRecord>>
+
+    @Query("""
+        UPDATE watch_history 
+        SET syncStatus = 'deleted' 
+        WHERE syncStatus != 'deleted' 
+          AND mediaType != 'tv' 
+          AND (
+              movieId IN (
+                  SELECT f.id FROM favorites f 
+                  WHERE f.media_type = watch_history.mediaType 
+                    AND f.watched = 0
+              )
+              OR movieId NOT IN (
+                  SELECT f.id FROM favorites f 
+                  WHERE f.media_type = watch_history.mediaType 
+                    AND f.sync_status NOT IN ('pending_delete', 'deleted')
+              )
+          )
+    """)
+    suspend fun markOrphanWatchHistoryDeleted(): Int
 
     @Query("SELECT * FROM watch_history WHERE movieId = :movieId AND syncStatus != 'deleted' ORDER BY watchedAt DESC")
     suspend fun getWatchHistoryForMovie(movieId: Long): List<WatchHistoryEntity>

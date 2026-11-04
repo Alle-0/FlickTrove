@@ -137,9 +137,10 @@ class MovieDetailCommentsDelegate @Inject constructor(
                 val remainingFirestore = firestoreComments
                     .filterNot { it.id in matchedFirestoreIds }
                     .map { fc ->
+                        val fsId = fc.firestoreId?.takeIf { it.isNotBlank() } ?: fc.id
                         if (fc.originSlug.isBlank()) {
-                            fc.copy(originSlug = "flicktrove", originName = "FlickTrove", originColor = "#2dd4bf")
-                        } else fc
+                            fc.copy(firestoreId = fsId, originSlug = "flicktrove", originName = "FlickTrove", originColor = "#2dd4bf")
+                        } else fc.copy(firestoreId = fsId)
                     }
 
                 val combined = (mergedCommsUni + remainingFirestore)
@@ -234,7 +235,8 @@ class MovieDetailCommentsDelegate @Inject constructor(
             scope.launch {
                 val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
                 if (isFlickTrove) {
-                    commentRepository.toggleLike(movieId.toString(), commentId, mediaType, mediaTitle, mediaImage)
+                    val targetFsId = comment.firestoreId?.takeIf { it.isNotBlank() } ?: comment.id
+                    commentRepository.toggleLike(movieId.toString(), targetFsId, mediaType, mediaTitle, mediaImage, commentSnippet = comment.text)
                 }
                 val result = if (isLiked) {
                     commsUniRepository.unlikeComment(commentId)

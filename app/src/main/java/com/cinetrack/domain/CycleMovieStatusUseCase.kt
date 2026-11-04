@@ -97,6 +97,7 @@ class CycleMovieStatusUseCase @Inject constructor(
                         repository.insertWatchHistory(
                             com.cinetrack.data.local.entities.WatchHistoryEntity(
                                 movieId = current.id,
+                                mediaType = current.mediaType,
                                 watchedAt = watchedDate,
                                 isRewatch = false
                             )

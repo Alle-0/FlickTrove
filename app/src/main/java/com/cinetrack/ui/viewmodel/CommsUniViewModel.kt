@@ -599,14 +599,16 @@ class CommsUniViewModel @Inject constructor(
                             trackMyCommentId(fc.id)
                         }
                         val isCommsUni = fc.isOnCommsUni
+                        val fsId = fc.firestoreId?.takeIf { it.isNotBlank() } ?: fc.id
                         if (fc.originSlug.isNullOrBlank()) {
                             fc.copy(
+                                firestoreId = fsId,
                                 originSlug = "flicktrove",
                                 originName = "FlickTrove",
                                 originColor = "#2dd4bf",
                                 isOnCommsUni = isCommsUni
                             )
-                        } else fc.copy(isOnCommsUni = isCommsUni)
+                        } else fc.copy(firestoreId = fsId, isOnCommsUni = isCommsUni)
                     }
 
                 val blockedIds = blockedAuthorsManager.blockedAuthorIds.value
@@ -1005,7 +1007,8 @@ class CommsUniViewModel @Inject constructor(
             // Aggiorna anche su Firestore se presente
             if (currentRawMediaId.isNotBlank()) {
                 val firestoreRes = try {
-                    commentRepository.toggleSpoiler(currentRawMediaId, commentId, targetStatus)
+                    val targetFsId = targetComment?.firestoreId?.takeIf { it.isNotBlank() } ?: commentId
+                    commentRepository.toggleSpoiler(currentRawMediaId, targetFsId, targetStatus)
                 } catch (_: Exception) {
                     false
                 }
@@ -1147,7 +1150,8 @@ class CommsUniViewModel @Inject constructor(
             // 2. Elimina anche su Firestore locale se presente
             if (currentRawMediaId.isNotBlank()) {
                 val firestoreRes = try {
-                    val res = commentRepository.deleteComment(currentRawMediaId, commentId)
+                    val targetFsId = (removed ?: targetComment)?.firestoreId?.takeIf { it.isNotBlank() } ?: commentId
+                    val res = commentRepository.deleteComment(currentRawMediaId, targetFsId)
                     res != com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.FAILED
                 } catch (_: Exception) {
                     false
@@ -1219,7 +1223,8 @@ class CommsUniViewModel @Inject constructor(
             val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
             if (isFlickTrove && currentRawMediaId.isNotBlank()) {
                 try {
-                    commentRepository.toggleLike(currentRawMediaId, commentId, currentEntityType, mediaTitle, mediaImage)
+                    val targetFsId = comment.firestoreId?.takeIf { it.isNotBlank() } ?: commentId
+                    commentRepository.toggleLike(currentRawMediaId, targetFsId, currentEntityType, mediaTitle, mediaImage, commentSnippet = comment.text)
                 } catch (_: Exception) {}
             }
             val result = if (currentEntityId.isNotBlank()) {
