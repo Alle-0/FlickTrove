@@ -260,69 +260,84 @@ internal fun TroveHoldToUnsealOverlay(
                 )
             }
 
-            // ── Esca psicologica: micro-indizio metadati (Affinità • Anno • Genere) ──
+            // ── Esca psicologica: micro-indizio metadati (Pillola Glass con Badge Inset) ──
             val hasTeaserData = (matchScore != null && matchScore > 0) || year.isNotEmpty() || genres.isNotEmpty()
             if (hasTeaserData) {
+                val hasMatch = matchScore != null && matchScore > 0
                 Box(
                     modifier = Modifier
                         .background(
                             Brush.verticalGradient(
                                 listOf(
-                                    Color(0xFF161A22).copy(alpha = 0.90f),
-                                    Color(0xFF0C0E13).copy(alpha = 0.86f)
+                                    Color(0xFF131822).copy(alpha = 0.92f),
+                                    Color(0xFF090C10).copy(alpha = 0.88f)
                                 )
                             ),
                             CircleShape
                         )
                         .border(
                             0.5.dp,
-                            if (isHolding) primaryColor.copy(alpha = 0.50f) else Color.White.copy(alpha = 0.16f),
+                            if (isHolding) primaryColor.copy(alpha = 0.60f) else Color.White.copy(alpha = 0.18f),
                             CircleShape
                         )
-                        .padding(horizontal = 12.dp, vertical = 4.5.dp)
+                        .padding(
+                            start = if (hasMatch) 4.5.dp else 12.dp,
+                            end = 12.dp,
+                            top = if (hasMatch) 4.dp else 5.dp,
+                            bottom = if (hasMatch) 4.dp else 5.dp
+                        )
                 ) {
                     Row(
                         verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        horizontalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        if (matchScore != null && matchScore > 0) {
-                            Text(
-                                text = "${matchScore}% ${stringResource(R.string.match_score)}",
-                                color = primaryColor,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Bold,
-                                letterSpacing = 0.3.sp
-                            )
+                        // Badge inset pieno teal per la percentuale di affinità
+                        if (hasMatch) {
+                            Box(
+                                modifier = Modifier
+                                    .background(primaryColor, CircleShape)
+                                    .padding(horizontal = 7.5.dp, vertical = 2.5.dp)
+                            ) {
+                                Text(
+                                    text = "${matchScore}% " + stringResource(R.string.match_score).uppercase(),
+                                    color = Color(0xFF07090E),
+                                    fontSize = 10.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 0.4.sp
+                                )
+                            }
                         }
 
-                        if (year.isNotEmpty()) {
-                            if (matchScore != null && matchScore > 0) {
+                        // Anno e Genere principale
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(6.dp)
+                        ) {
+                            if (year.isNotEmpty()) {
+                                Text(
+                                    text = year,
+                                    color = Color.White,
+                                    fontSize = 11.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                            }
+
+                            if (year.isNotEmpty() && genres.isNotEmpty()) {
                                 Text(
                                     text = "•",
                                     color = Color.White.copy(alpha = 0.35f),
                                     fontSize = 10.sp
                                 )
                             }
-                            Text(
-                                text = year,
-                                color = Color.White.copy(alpha = 0.85f),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Medium
-                            )
-                        }
 
-                        if (genres.isNotEmpty()) {
-                            Text(
-                                text = "•",
-                                color = Color.White.copy(alpha = 0.35f),
-                                fontSize = 10.sp
-                            )
-                            Text(
-                                text = genres.first(),
-                                color = Color.White.copy(alpha = 0.70f),
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Normal
-                            )
+                            if (genres.isNotEmpty()) {
+                                Text(
+                                    text = genres.first(),
+                                    color = Color.White.copy(alpha = 0.78f),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.Medium
+                                )
+                            }
                         }
                     }
                 }

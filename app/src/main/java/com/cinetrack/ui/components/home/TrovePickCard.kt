@@ -142,7 +142,6 @@ fun TrovePickCard(
 
     // ── URL immagini ──────────────────────────────────────────────────────────
     val backdropUrl = buildTmdbImageUrl(movie.backdropPath ?: movie.posterPath, ImageType.BACKDROP, imageQuality)
-    val posterUrl   = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, imageQuality)
 
     // ── Coroutine scope ────────────────────────────────────────────────────────
     val scope = rememberCoroutineScope()
@@ -392,7 +391,6 @@ fun TrovePickCard(
                     ) {
                         ActualTroveCardContent(
                             movie         = movie,
-                            posterUrl     = posterUrl,
                             backdropUrl   = backdropUrl,
                             activeLogo    = activeLogo,
                             titleText     = titleText,
@@ -408,7 +406,6 @@ fun TrovePickCard(
                 } else {
                     ActualTroveCardContent(
                         movie         = movie,
-                        posterUrl     = posterUrl,
                         backdropUrl   = backdropUrl,
                         activeLogo    = activeLogo,
                         titleText     = titleText,
@@ -475,7 +472,6 @@ fun TrovePickCard(
 @Composable
 private fun ActualTroveCardContent(
     movie: Movie,
-    posterUrl: String?,
     backdropUrl: String?,
     activeLogo: String?,
     titleText: String,
@@ -502,66 +498,48 @@ private fun ActualTroveCardContent(
                 contentScale       = ContentScale.Crop,
                 modifier           = Modifier.fillMaxSize()
             )
+            // Gradiente scuro morbido dal basso verso l'alto (senza bande grigie a metà schermo)
+            Box(
+                modifier = Modifier.fillMaxSize().background(
+                    Brush.verticalGradient(
+                        colorStops = arrayOf(
+                            0.00f to Color.Transparent,
+                            0.30f to Color.Transparent,
+                            0.60f to Color.Black.copy(alpha = 0.60f),
+                            0.82f to Color.Black.copy(alpha = 0.88f),
+                            1.00f to Color.Black
+                        )
+                    )
+                )
+            )
+            // Gradiente scuro da sinistra a destra (sfuma dolcemente lasciando limpido il soggetto a destra)
             Box(
                 modifier = Modifier.fillMaxSize().background(
                     Brush.horizontalGradient(
                         colorStops = arrayOf(
-                            0.00f to Color.Black.copy(alpha = 0.80f),
-                            0.40f to Color.Black.copy(alpha = 0.42f),
+                            0.00f to Color.Black.copy(alpha = 0.82f),
+                            0.45f to Color.Black.copy(alpha = 0.50f),
                             0.75f to Color.Transparent,
                             1.00f to Color.Transparent
                         )
                     )
                 )
             )
-            Box(
-                modifier = Modifier.fillMaxSize().background(
-                    Brush.verticalGradient(
-                        colorStops = arrayOf(
-                            0.00f to Color.Black.copy(alpha = 0.58f),
-                            0.22f to Color.Black.copy(alpha = 0.22f),
-                            0.42f to Color.Transparent,
-                            0.55f to Color.Black.copy(alpha = 0.60f),
-                            0.75f to Color.Black.copy(alpha = 0.92f),
-                            1.00f to Color.Black
-                        )
-                    )
-                )
-            )
         }
 
-        // Poster + colonna dettagli
-        Row(
-            modifier              = Modifier.fillMaxSize().padding(16.dp),
-            verticalAlignment     = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
+        // Layout 1: Bottom-Anchor (Tutto raggruppato in basso a sinistra)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(18.dp)
+                .graphicsLayer { alpha = detailsAlpha },
+            contentAlignment = Alignment.BottomStart
         ) {
-            // Poster a sinistra
-            AsyncImage(
-                model = ImageRequest.Builder(context)
-                    .data(posterUrl)
-                    .allowHardware(false)
-                    .crossfade(true)
-                    .build(),
-                contentDescription = movie.title ?: movie.name,
-                contentScale       = ContentScale.Crop,
-                modifier           = Modifier
-                    .width(136.dp)
-                    .fillMaxHeight()
-                    .shadow(8.dp, RoundedCornerShape(16.dp))
-                    .clip(RoundedCornerShape(16.dp))
-                    .border(0.5.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(16.dp))
-            )
-
-            // Colonna dettagli
             Column(
-                modifier            = Modifier
-                    .weight(1f)
-                    .fillMaxHeight()
-                    .graphicsLayer { alpha = detailsAlpha },
-                verticalArrangement = Arrangement.SpaceBetween
+                modifier            = Modifier.fillMaxWidth(0.80f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
             ) {
-                // Badge "SCELTO PER TE"
+                // Badge "SCELTO PER TE" appena sopra il titolo/logo
                 Box(
                     modifier = Modifier
                         .hazeGlass(
@@ -577,88 +555,112 @@ private fun ActualTroveCardContent(
                     Text(
                         text          = stringResource(R.string.home_trove_pick_badge).uppercase(),
                         color         = MaterialTheme.colorScheme.primary,
-                        fontSize      = 10.5.sp,
+                        fontSize      = 10.sp,
                         fontWeight    = FontWeight.Black,
                         letterSpacing = 1.2.sp,
                         maxLines      = 1
                     )
                 }
 
-                // Blocco inferiore: logo/titolo, anno•generi, score+rating
-                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-                    // Logo o titolo testuale
-                    if (!activeLogo.isNullOrEmpty()) {
-                        val logoUrl = buildTmdbImageUrl(activeLogo, ImageType.LOGO, com.cinetrack.util.ImageQuality.MEDIUM)
-                        AsyncImage(
-                            model              = ImageRequest.Builder(context).data(logoUrl).crossfade(true).build(),
-                            contentDescription = movie.title ?: movie.name,
-                            contentScale       = ContentScale.Fit,
-                            alignment          = Alignment.CenterStart,
-                            modifier           = Modifier.fillMaxWidth(0.92f).heightIn(min = 28.dp, max = 46.dp)
-                        )
-                    } else if (titleText.isNotEmpty()) {
-                        Text(
-                            text          = titleText,
-                            color         = Color.White,
-                            fontFamily    = FontFamily.Serif,
-                            fontSize      = 21.sp,
-                            fontWeight    = FontWeight.Bold,
-                            letterSpacing = 0.5.sp,
-                            lineHeight    = 25.sp,
-                            maxLines      = 2,
-                            overflow      = TextOverflow.Ellipsis
-                        )
-                    }
+                // Logo o titolo testuale
+                if (!activeLogo.isNullOrEmpty()) {
+                    val logoUrl = buildTmdbImageUrl(activeLogo, ImageType.LOGO, com.cinetrack.util.ImageQuality.MEDIUM)
+                    AsyncImage(
+                        model              = ImageRequest.Builder(context).data(logoUrl).crossfade(true).build(),
+                        contentDescription = movie.title ?: movie.name,
+                        contentScale       = ContentScale.Fit,
+                        alignment          = Alignment.CenterStart,
+                        modifier           = Modifier.fillMaxWidth().heightIn(min = 28.dp, max = 46.dp)
+                    )
+                } else if (titleText.isNotEmpty()) {
+                    Text(
+                        text          = titleText,
+                        color         = Color.White,
+                        fontFamily    = FontFamily.Serif,
+                        fontSize      = 22.sp,
+                        fontWeight    = FontWeight.Bold,
+                        letterSpacing = 0.5.sp,
+                        lineHeight    = 26.sp,
+                        maxLines      = 2,
+                        overflow      = TextOverflow.Ellipsis
+                    )
+                }
 
-                    // Anno • Generi
-                    val metaText = remember(year, genres) {
-                        buildAnnotatedString {
-                            if (year.isNotEmpty()) withStyle(SpanStyle(color = Color.White.copy(alpha = 0.95f), fontWeight = FontWeight.Bold, fontSize = 12.5.sp)) { append(year) }
-                            if (year.isNotEmpty() && genres.isNotEmpty()) withStyle(SpanStyle(color = Color.White.copy(alpha = 0.40f), fontSize = 12.5.sp)) { append("  •  ") }
-                            if (genres.isNotEmpty()) withStyle(SpanStyle(color = Color.White.copy(alpha = 0.65f), fontWeight = FontWeight.Medium, fontSize = 12.sp)) { append(genres.joinToString(", ")) }
-                        }
-                    }
-                    if (metaText.isNotEmpty()) {
-                        Text(text = metaText, maxLines = 1, overflow = TextOverflow.Ellipsis)
-                    }
-
-                    Spacer(Modifier.height(2.dp))
-
-                    // Match score + rating
-                    Row(
-                        verticalAlignment    = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.spacedBy(10.dp)
-                    ) {
-                        if (matchScore != null && matchScore > 0) {
-                            Box(
-                                modifier = Modifier
-                                    .hazeGlass(
-                                        state          = cardHazeState,
-                                        shape          = CircleShape,
-                                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
-                                        blurRadius     = 16.dp,
-                                        borderWidth    = 0.5.dp,
-                                        borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-                                    )
-                                    .padding(horizontal = 8.dp, vertical = 3.dp)
-                            ) {
-                                Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                                    Text("${matchScore}%", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                    Text(stringResource(R.string.match_score).uppercase(), color = MaterialTheme.colorScheme.primary, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
-                                }
-                            }
-                        }
-                        if (rating != null && rating > 0.0) {
-                            Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(3.dp)) {
-                                Icon(
-                                    painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
-                                    contentDescription = null,
-                                    tint               = Color(0xFFFFC107),
-                                    modifier           = Modifier.size(11.dp)
+                // Riga unificata: Match Score + Rating + Anno • Generi
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                ) {
+                    // Match score pill
+                    if (matchScore != null && matchScore > 0) {
+                        Box(
+                            modifier = Modifier
+                                .hazeGlass(
+                                    state          = cardHazeState,
+                                    shape          = CircleShape,
+                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
+                                    blurRadius     = 16.dp,
+                                    borderWidth    = 0.5.dp,
+                                    borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.50f)
                                 )
-                                Text("%.1f".format(java.util.Locale.US, rating), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                .padding(horizontal = 7.dp, vertical = 2.5.dp)
+                        ) {
+                            Row(
+                                verticalAlignment     = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(3.dp)
+                            ) {
+                                Text("${matchScore}%", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                                Text(stringResource(R.string.match_score).uppercase(), color = MaterialTheme.colorScheme.primary, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
                             }
                         }
+                    }
+
+                    // Rating
+                    if (rating != null && rating > 0.0) {
+                        Row(
+                            verticalAlignment     = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(3.dp)
+                        ) {
+                            Icon(
+                                painter            = androidx.compose.ui.res.painterResource(id = R.drawable.ic_star_piena),
+                                contentDescription = null,
+                                tint               = Color(0xFFFFC107),
+                                modifier           = Modifier.size(11.dp)
+                            )
+                            Text("%.1f".format(java.util.Locale.US, rating), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                        }
+                    }
+
+                    // Separatore dot tra punteggi e data/generi
+                    if ((matchScore != null && matchScore > 0 || rating != null && rating > 0.0) && (year.isNotEmpty() || genres.isNotEmpty())) {
+                        Text("•", color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp)
+                    }
+
+                    // Anno
+                    if (year.isNotEmpty()) {
+                        Text(
+                            text       = year,
+                            color      = Color.White,
+                            fontSize   = 11.5.sp,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+
+                    // Separatore dot tra anno e generi
+                    if (year.isNotEmpty() && genres.isNotEmpty()) {
+                        Text("•", color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp)
+                    }
+
+                    // Generi
+                    if (genres.isNotEmpty()) {
+                        Text(
+                            text       = genres.joinToString(", "),
+                            color      = Color.White.copy(alpha = 0.72f),
+                            fontSize   = 11.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines   = 1,
+                            overflow   = TextOverflow.Ellipsis
+                        )
                     }
                 }
             }
