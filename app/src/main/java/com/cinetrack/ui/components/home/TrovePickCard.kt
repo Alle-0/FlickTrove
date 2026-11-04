@@ -527,41 +527,69 @@ private fun ActualTroveCardContent(
             )
         }
 
-        // Layout 1: Bottom-Anchor (Tutto raggruppato in basso a sinistra)
-        Box(
-            modifier = Modifier
+        // Layout Opzione 3: Badge Unificato in Alto + Basso Pulito
+        Column(
+            modifier            = Modifier
                 .fillMaxSize()
                 .padding(18.dp)
                 .graphicsLayer { alpha = detailsAlpha },
-            contentAlignment = Alignment.BottomStart
+            verticalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(
-                modifier            = Modifier.fillMaxWidth(0.80f),
-                verticalArrangement = Arrangement.spacedBy(6.dp)
+            // Badge unificato in alto a sinistra: [ 87% MATCH ] SCELTO PER TE
+            val hasMatch = matchScore != null && matchScore > 0
+            Box(
+                modifier = Modifier
+                    .hazeGlass(
+                        state          = cardHazeState,
+                        shape          = CircleShape,
+                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                        blurRadius     = 16.dp,
+                        borderWidth    = 0.5.dp,
+                        borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+                    )
+                    .padding(
+                        start  = if (hasMatch) 4.dp else 10.dp,
+                        end    = 10.dp,
+                        top    = if (hasMatch) 3.5.dp else 4.5.dp,
+                        bottom = if (hasMatch) 3.5.dp else 4.5.dp
+                    )
             ) {
-                // Badge "SCELTO PER TE" appena sopra il titolo/logo
-                Box(
-                    modifier = Modifier
-                        .hazeGlass(
-                            state          = cardHazeState,
-                            shape          = CircleShape,
-                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
-                            blurRadius     = 16.dp,
-                            borderWidth    = 0.5.dp,
-                            borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-                        )
-                        .padding(horizontal = 9.dp, vertical = 3.5.dp)
+                Row(
+                    verticalAlignment     = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(7.dp)
                 ) {
+                    if (hasMatch) {
+                        Box(
+                            modifier = Modifier
+                                .background(MaterialTheme.colorScheme.primary, CircleShape)
+                                .padding(horizontal = 7.dp, vertical = 2.dp)
+                        ) {
+                            Text(
+                                text          = "${matchScore}% " + stringResource(R.string.match_score).uppercase(),
+                                color         = Color(0xFF07090E),
+                                fontSize      = 9.5.sp,
+                                fontWeight    = FontWeight.Black,
+                                letterSpacing = 0.4.sp
+                            )
+                        }
+                    }
+
                     Text(
                         text          = stringResource(R.string.home_trove_pick_badge).uppercase(),
                         color         = MaterialTheme.colorScheme.primary,
                         fontSize      = 10.sp,
                         fontWeight    = FontWeight.Black,
-                        letterSpacing = 1.2.sp,
+                        letterSpacing = 1.1.sp,
                         maxLines      = 1
                     )
                 }
+            }
 
+            // Blocco inferiore: Logo o titolo + riga pura di metadati
+            Column(
+                modifier            = Modifier.fillMaxWidth(0.78f),
+                verticalArrangement = Arrangement.spacedBy(6.dp)
+            ) {
                 // Logo o titolo testuale
                 if (!activeLogo.isNullOrEmpty()) {
                     val logoUrl = buildTmdbImageUrl(activeLogo, ImageType.LOGO, com.cinetrack.util.ImageQuality.MEDIUM)
@@ -586,36 +614,39 @@ private fun ActualTroveCardContent(
                     )
                 }
 
-                // Riga unificata: Match Score + Rating + Anno • Generi
+                // Metadati in riga pulita: Anno • Generi • ★ Voto (Zero pillole pesanti)
                 Row(
                     verticalAlignment     = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(7.dp)
+                    horizontalArrangement = Arrangement.spacedBy(6.dp)
                 ) {
-                    // Match score pill
-                    if (matchScore != null && matchScore > 0) {
-                        Box(
-                            modifier = Modifier
-                                .hazeGlass(
-                                    state          = cardHazeState,
-                                    shape          = CircleShape,
-                                    containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.18f),
-                                    blurRadius     = 16.dp,
-                                    borderWidth    = 0.5.dp,
-                                    borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.50f)
-                                )
-                                .padding(horizontal = 7.dp, vertical = 2.5.dp)
-                        ) {
-                            Row(
-                                verticalAlignment     = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.spacedBy(3.dp)
-                            ) {
-                                Text("${matchScore}%", color = MaterialTheme.colorScheme.primary, fontSize = 11.sp, fontWeight = FontWeight.Bold)
-                                Text(stringResource(R.string.match_score).uppercase(), color = MaterialTheme.colorScheme.primary, fontSize = 9.sp, fontWeight = FontWeight.SemiBold, letterSpacing = 0.4.sp)
-                            }
-                        }
+                    if (year.isNotEmpty()) {
+                        Text(
+                            text       = year,
+                            color      = Color.White,
+                            fontSize   = 12.sp,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
 
-                    // Rating
+                    if (year.isNotEmpty() && genres.isNotEmpty()) {
+                        Text("•", color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp)
+                    }
+
+                    if (genres.isNotEmpty()) {
+                        Text(
+                            text       = genres.joinToString(", "),
+                            color      = Color.White.copy(alpha = 0.72f),
+                            fontSize   = 11.5.sp,
+                            fontWeight = FontWeight.Medium,
+                            maxLines   = 1,
+                            overflow   = TextOverflow.Ellipsis
+                        )
+                    }
+
+                    if ((year.isNotEmpty() || genres.isNotEmpty()) && rating != null && rating > 0.0) {
+                        Text("•", color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp)
+                    }
+
                     if (rating != null && rating > 0.0) {
                         Row(
                             verticalAlignment     = Alignment.CenterVertically,
@@ -627,40 +658,8 @@ private fun ActualTroveCardContent(
                                 tint               = Color(0xFFFFC107),
                                 modifier           = Modifier.size(11.dp)
                             )
-                            Text("%.1f".format(java.util.Locale.US, rating), color = Color.White, fontSize = 11.sp, fontWeight = FontWeight.Bold)
+                            Text("%.1f".format(java.util.Locale.US, rating), color = Color.White, fontSize = 11.5.sp, fontWeight = FontWeight.Bold)
                         }
-                    }
-
-                    // Separatore dot tra punteggi e data/generi
-                    if ((matchScore != null && matchScore > 0 || rating != null && rating > 0.0) && (year.isNotEmpty() || genres.isNotEmpty())) {
-                        Text("•", color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp)
-                    }
-
-                    // Anno
-                    if (year.isNotEmpty()) {
-                        Text(
-                            text       = year,
-                            color      = Color.White,
-                            fontSize   = 11.5.sp,
-                            fontWeight = FontWeight.Bold
-                        )
-                    }
-
-                    // Separatore dot tra anno e generi
-                    if (year.isNotEmpty() && genres.isNotEmpty()) {
-                        Text("•", color = Color.White.copy(alpha = 0.35f), fontSize = 10.sp)
-                    }
-
-                    // Generi
-                    if (genres.isNotEmpty()) {
-                        Text(
-                            text       = genres.joinToString(", "),
-                            color      = Color.White.copy(alpha = 0.72f),
-                            fontSize   = 11.sp,
-                            fontWeight = FontWeight.Medium,
-                            maxLines   = 1,
-                            overflow   = TextOverflow.Ellipsis
-                        )
                     }
                 }
             }
