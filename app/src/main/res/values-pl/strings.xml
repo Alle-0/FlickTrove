@@ -1882,7 +1882,7 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="credits_direction_role">Niezależna reżyseria i kod</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Producenci Wykonawczy</string>
-    <string name="credits_producers_desc">Wyrazy najszczerszej wdzięczności dla naszych patronów-kinomanów, którzy pokrywają miesięczne koszty serwerów i baz danych FlickTrove.</string>
+    <string name="credits_producers_desc">Wyrazy najszczerszej wdzięczności dla naszych patronów-kinomanów, którzy wspierają rozwój FlickTrove.</string>
     <string name="credits_producers_empty">Wesprzyj projekt, aby dołączyć do producentów wykonawczych!</string>
     <string name="credits_tech_role">Dane i partnerzy filmowi</string>
     <string name="credits_tech_desc">Ten produkt korzysta z API TMDB, ale nie jest wspierany ani certyfikowany przez TMDB. Synchronizacja w chmurze oparta na Trakt.tv i SIMKL.</string>

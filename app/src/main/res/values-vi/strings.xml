@@ -1861,7 +1861,7 @@
     <string name="credits_direction_role">Đạo diễn Độc lập &amp; Lập trình</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Giám Đốc Sản Xuất</string>
-    <string name="credits_producers_desc">Chân thành tri ân những người ủng hộ đã giúp chi trả chi phí máy chủ &amp; cơ sở dữ liệu hàng tháng cho FlickTrove.</string>
+    <string name="credits_producers_desc">Chân thành tri ân những người ủng hộ đã đồng hành và hỗ trợ phát triển FlickTrove.</string>
     <string name="credits_producers_empty">Hãy ủng hộ dự án để tham gia vào Nhà sản xuất điều hành!</string>
     <string name="credits_tech_role">Dữ Liệu &amp; Đối Tác Điện Ảnh</string>
     <string name="credits_tech_desc">Sản phẩm này sử dụng API của TMDB nhưng không được TMDB chứng thực. Đồng bộ đám mây hỗ trợ bởi Trakt.tv và SIMKL.</string>

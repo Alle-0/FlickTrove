@@ -1909,7 +1909,7 @@
     <string name="credits_direction_role">Independent Direction &amp; Code</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Executive Producers</string>
-    <string name="credits_producers_desc">Heartfelt gratitude to our cinephile patrons who cover FlickTrove\'s monthly server &amp; database costs.</string>
+    <string name="credits_producers_desc">Heartfelt gratitude to our cinephile patrons who support the development of FlickTrove.</string>
     <string name="credits_producers_empty">Support the project to join the Executive Producers!</string>
     <string name="credits_tech_role">Data &amp; Cinephile Partners</string>
     <string name="credits_tech_desc">This product uses the TMDB API but is not endorsed or certified by TMDB. Cloud synchronization powered by Trakt.tv and SIMKL.</string>

@@ -1882,7 +1882,7 @@
     <string name="credits_direction_role">獨立開發與設計</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">執行製片人</string>
-    <string name="credits_producers_desc">衷心感謝所有支持 FlickTrove 伺服器與資料庫每月成本的影迷朋友。</string>
+    <string name="credits_producers_desc">衷心感谢支持 FlickTrove 开发的影迷赞助者。</string>
     <string name="credits_producers_empty">支持本專案，成為執行製作人！</string>
     <string name="credits_tech_role">資料與影視夥伴</string>
     <string name="credits_tech_desc">本產品使用 TMDB API，由 Trakt.tv 和 SIMKL 提供雲端同步。</string>

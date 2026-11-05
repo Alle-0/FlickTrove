@@ -1879,7 +1879,7 @@
     <string name="credits_direction_role">Unabhängige Regie &amp; Entwicklung</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Ausführende Produzenten</string>
-    <string name="credits_producers_desc">Herzlichen Dank an alle Filmfans, die mit ihren Spenden die monatlichen Server- und Datenbankkosten von FlickTrove decken.</string>
+    <string name="credits_producers_desc">Herzlichen Dank an alle Filmfans, die die Entwicklung von FlickTrove unterstützen.</string>
     <string name="credits_producers_empty">Unterstütze das Projekt, um Executive Producer zu werden!</string>
     <string name="credits_tech_role">Daten- &amp; Filmpartner</string>
     <string name="credits_tech_desc">Dieses Produkt nutzt die TMDB-API, ist aber nicht von TMDB zertifiziert oder unterstützt. Cloud-Synchronisierung ermöglicht durch Trakt.tv und SIMKL.</string>

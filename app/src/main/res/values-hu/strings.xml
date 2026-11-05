@@ -1880,7 +1880,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="credits_direction_role">Független rendezés és kód</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Vezető producerek</string>
-    <string name="credits_producers_desc">Hálás köszönet cinefil támogatóinknak, akik fedezik a FlickTrove havi szerverköltségeit.</string>
+    <string name="credits_producers_desc">Hálás köszönet cinefil támogatóinknak, akik támogatják a FlickTrove fejlődését.</string>
     <string name="credits_producers_empty">Támogassa a projektet, hogy Executive Producer legyen!</string>
     <string name="credits_tech_role">Adatok és filmes partnerek</string>
     <string name="credits_tech_desc">Ez a termék a TMDB API-t használja, de a TMDB nem támogatja és nem tanúsítja. Felhő szinkronizálás: Trakt.tv és SIMKL.</string>

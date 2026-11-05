@@ -1882,7 +1882,7 @@
     <string name="credits_direction_role">Bağımsız Yönetim ve Geliştirme</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Sorumlu Yapımcılar</string>
-    <string name="credits_producers_desc">FlickTrove\'un sunucu ve veritabanı masraflarını karşılayan tüm sinemaseverlere sonsuz teşekkürler.</string>
+    <string name="credits_producers_desc">FlickTrove\'un gelişimini destekleyen tüm sinemaseverlere sonsuz teşekkürler.</string>
     <string name="credits_producers_empty">Projeyi destekleyerek Yönetici Yapımcılara katılın!</string>
     <string name="credits_tech_role">Veri ve Sinema Ortakları</string>
     <string name="credits_tech_desc">Bu ürün TMDB API\'sini kullanır ancak TMDB tarafından onaylanmamıştır. Bulut senkronizasyonu Trakt.tv ve SIMKL tarafından sağlanır.</string>

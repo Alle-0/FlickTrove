@@ -1878,7 +1878,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="credits_direction_role">Незалежна режисура та код</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Виконавчі продюсери</string>
-    <string name="credits_producers_desc">Безмежна вдячність нашим кіноманам-меценатам, які покривають щомісячні витрати на сервери FlickTrove.</string>
+    <string name="credits_producers_desc">Щира вдячність усім кіноманам-меценатам, які підтримують розвиток FlickTrove.</string>
     <string name="credits_producers_empty">Підтримайте проєкт, щоб приєднатися до виконавчих продюсерів!</string>
     <string name="credits_tech_role">Дані та партнери кіно</string>
     <string name="credits_tech_desc">Цей продукт використовує TMDB API, але не схвалений і не сертифікований TMDB. Хмарна синхронізація на базі Trakt.tv та SIMKL.</string>

@@ -1876,7 +1876,7 @@
     <string name="credits_direction_role">Réalisation &amp; Développement Indépendant</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Producteurs Exécutifs</string>
-    <string name="credits_producers_desc">Profonde gratitude envers les mécènes cinéphiles qui financent l\'hébergement et les bases de données de FlickTrove.</string>
+    <string name="credits_producers_desc">Profonde gratitude envers les mécènes cinéphiles qui soutiennent le développement de FlickTrove.</string>
     <string name="credits_producers_empty">Soutenez le projet pour rejoindre les Producteurs Exécutifs !</string>
     <string name="credits_tech_role">Données &amp; Partenaires Cinéma</string>
     <string name="credits_tech_desc">Ce produit utilise l\'API TMDB mais n\'est ni approuvé ni certifié par TMDB. Synchronisation cloud propulsée par Trakt.tv et SIMKL.</string>

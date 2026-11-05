@@ -650,21 +650,22 @@ fun SettingsEndCreditsBox(
     }
 
     val primaryColor = MaterialTheme.colorScheme.primary
+    val goldColor = com.cinetrack.ui.theme.Gold
 
-    val specialBorderBrush = remember(primaryColor) {
+    val specialBorderBrush = remember {
         Brush.linearGradient(
             colors = listOf(
-                primaryColor.copy(alpha = 0.55f),
-                primaryColor.copy(alpha = 0.20f),
+                goldColor.copy(alpha = 0.55f),
+                Color(0xFFEAB308).copy(alpha = 0.22f),
                 Color.White.copy(alpha = 0.08f)
             )
         )
     }
 
-    val specialGlowBrush = remember(primaryColor) {
+    val specialGlowBrush = remember {
         Brush.radialGradient(
             colors = listOf(
-                primaryColor.copy(alpha = 0.08f),
+                Color(0xFFEAB308).copy(alpha = 0.09f),
                 Color.Transparent
             ),
             radius = 800f,
@@ -687,7 +688,7 @@ fun SettingsEndCreditsBox(
             ) {
                 CircularProgressIndicator(
                     modifier = Modifier.size(20.dp),
-                    color = primaryColor,
+                    color = goldColor,
                     strokeWidth = 2.dp
                 )
             }
@@ -723,30 +724,34 @@ fun SettingsEndCreditsBox(
                     verticalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     supporters.forEach { name ->
-                        Surface(
-                            shape = RoundedCornerShape(12.dp),
-                            color = Color.White.copy(alpha = 0.06f),
-                            border = androidx.compose.foundation.BorderStroke(
-                                1.dp,
-                                primaryColor.copy(alpha = 0.35f)
-                            )
+                        Box(
+                            modifier = Modifier
+                                .clip(CircleShape)
+                                .background(Color(0xFF1E202A))
+                                .border(
+                                    width = 1.dp,
+                                    color = Color(0xFFEAB308).copy(alpha = 0.38f),
+                                    shape = CircleShape
+                                )
+                                .padding(horizontal = 14.dp, vertical = 7.dp)
                         ) {
                             Row(
                                 verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier.padding(horizontal = 14.dp, vertical = 8.dp)
+                                horizontalArrangement = Arrangement.Center
                             ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(6.dp)
-                                        .clip(CircleShape)
-                                        .background(primaryColor)
+                                Icon(
+                                    painter = painterResource(id = R.drawable.ic_star_piena),
+                                    contentDescription = null,
+                                    tint = Color(0xFFFDE047),
+                                    modifier = Modifier.size(12.dp)
                                 )
-                                Spacer(modifier = Modifier.width(8.dp))
+                                Spacer(modifier = Modifier.width(7.dp))
                                 Text(
                                     text = name,
                                     style = MaterialTheme.typography.bodyMedium.copy(
-                                        fontWeight = androidx.compose.ui.text.font.FontWeight.SemiBold,
-                                        fontSize = 13.5.sp
+                                        fontWeight = androidx.compose.ui.text.font.FontWeight.Bold,
+                                        fontSize = 13.5.sp,
+                                        letterSpacing = 0.2.sp
                                     ),
                                     color = Color.White
                                 )
@@ -785,7 +790,7 @@ fun SettingsEndCreditsBox(
                                 badgeRepo.setSupporterCreditEnabled(isChecked)
                                 supporters = badgeRepo.getCachedPublicCreditsSupporters()
                             },
-                            accentColor = primaryColor
+                            accentColor = Color(0xFFFDE047)
                         )
                     }
                 }

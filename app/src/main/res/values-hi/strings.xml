@@ -1874,7 +1874,7 @@
     <string name="credits_direction_role">स्वतंत्र निर्देशन और कोड</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">कार्यकारी निर्माता</string>
-    <string name="credits_producers_desc">FlickTrove के सर्वर खर्च को सहयोग देने वाले सभी सहयोगियों का आभार।</string>
+    <string name="credits_producers_desc">FlickTrove के विकास में सहयोग देने वाले सभी सिनेमा प्रेमियों का आभार।</string>
     <string name="credits_producers_empty">प्रोजेक्ट का समर्थन करें और कार्यकारी निर्माताओं में शामिल हों!</string>
     <string name="credits_tech_role">डेटा और सहयोगी</string>
     <string name="credits_tech_desc">TMDB API का उपयोग किया जाता है। Trakt.tv और SIMKL द्वारा क्लाउड सिंक।</string>

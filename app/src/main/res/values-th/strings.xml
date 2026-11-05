@@ -1871,7 +1871,7 @@
     <string name="credits_direction_role">การกำกับอิสระและเขียนโค้ด</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">ผู้อำนวยการสร้างฝ่ายบริหาร</string>
-    <string name="credits_producers_desc">ขอขอบคุณจากใจจริงสำหรับผู้อุปถัมภ์คอหนังทุกคนที่ช่วยดูแลค่าเซิร์ฟเวอร์และฐานข้อมูลรายเดือนของ FlickTrove</string>
+    <string name="credits_producers_desc">ขอขอบคุณอย่างจริงใจต่อผู้สนับสนุนภาพยนตร์ทุกคนที่สนับสนุนการพัฒนา FlickTrove</string>
     <string name="credits_producers_empty">สนับสนุนโครงการเพื่อร่วมเป็นส่วนหนึ่งใน Executive Producers!</string>
     <string name="credits_tech_role">ข้อมูลและพันธมิตรภาพยนตร์</string>
     <string name="credits_tech_desc">ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองหรือรับรองโดย TMDB ซิงค์ข้อมูลบนคลาวด์สนับสนุนโดย Trakt.tv และ SIMKL</string>

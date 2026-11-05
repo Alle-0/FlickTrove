@@ -1881,7 +1881,7 @@
     <string name="credits_direction_role">Pengembangan &amp; Desain Independen</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Produser Eksekutif</string>
-    <string name="credits_producers_desc">Terima kasih tulus kepada seluruh pencinta film yang mendanai biaya bulanan server dan database FlickTrove.</string>
+    <string name="credits_producers_desc">Terima kasih tulus kepada seluruh pencinta film yang mendukung pengembangan FlickTrove.</string>
     <string name="credits_producers_empty">Dukung proyek ini untuk bergabung dengan Produser Eksekutif!</string>
     <string name="credits_tech_role">Data &amp; Mitra Sinema</string>
     <string name="credits_tech_desc">Produk ini menggunakan TMDB API. Sinkronisasi cloud didukung oleh Trakt.tv dan SIMKL.</string>

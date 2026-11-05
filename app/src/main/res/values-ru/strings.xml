@@ -1876,7 +1876,7 @@
     <string name="credits_direction_role">Независимая разработка и дизайн</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Исполнительные продюсеры</string>
-    <string name="credits_producers_desc">Огромная благодарность киноманам, покрывающим расходы на серверы FlickTrove.</string>
+    <string name="credits_producers_desc">Искренняя благодарность киноманам, поддерживающим развитие FlickTrove.</string>
     <string name="credits_producers_empty">Поддержите проект, чтобы стать исполнительным продюсером!</string>
     <string name="credits_tech_role">Данные и партнеры</string>
     <string name="credits_tech_desc">Используется API TMDB. Синхронизация Trakt.tv и SIMKL.</string>

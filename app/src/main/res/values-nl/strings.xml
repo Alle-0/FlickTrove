@@ -1872,7 +1872,7 @@
     <string name="credits_direction_role">Onafhankelijke regie &amp; code</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Uitvoerend producenten</string>
-    <string name="credits_producers_desc">Oprechte dank aan onze cinefiele begunstigers die de maandelijkse server- en databasekosten van FlickTrove dekken.</string>
+    <string name="credits_producers_desc">Oprechte dank aan onze cinefiele begunstigers die de ontwikkeling van FlickTrove ondersteunen.</string>
     <string name="credits_producers_empty">Steun het project om Executive Producer te worden!</string>
     <string name="credits_tech_role">Gegevens &amp; cinefiele partners</string>
     <string name="credits_tech_desc">Dit product maakt gebruik van de TMDB API, maar wordt niet ondersteund of gecertificeerd door TMDB. Cloudsynchronisatie mogelijk gemaakt door Trakt.tv en SIMKL.</string>

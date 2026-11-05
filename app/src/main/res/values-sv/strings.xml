@@ -1880,7 +1880,7 @@ Prova att förenkla sökningen</string>
     <string name="credits_direction_role">Oberoende regi och kod</string>
     <string name="credits_direction_name">Alessandro Basile</string>
     <string name="credits_producers_role">Verkställande producenter</string>
-    <string name="credits_producers_desc">Varmt tack till våra cinefila mecenater som täcker FlickTroves månatliga serverkostnader.</string>
+    <string name="credits_producers_desc">Varmt tack till våra cinefila mecenater som stödjer utvecklingen av FlickTrove.</string>
     <string name="credits_producers_empty">Stöd projektet för att bli en Executive Producer!</string>
     <string name="credits_tech_role">Data och cinefila partners</string>
     <string name="credits_tech_desc">Denna produkt använder TMDB API men är inte certifierad av TMDB. Molnsynkning via Trakt.tv och SIMKL.</string>
