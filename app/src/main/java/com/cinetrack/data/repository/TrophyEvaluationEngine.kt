@@ -661,8 +661,7 @@ class TrophyEvaluationEngine @Inject constructor(
 
             // 30. Sostenitore & Mecenate: Il Produttore Esecutivo
             "badge_executive_producer" -> {
-                val isSupporter = badgePrefs.getBoolean("is_supporter_verified", false) ||
-                    (prevEntity?.isUnlocked == true)
+                val isSupporter = badgePrefs.getBoolean("is_supporter_verified", false)
                 TrophyEvaluationResult(
                     currentProgress = if (isSupporter) 1 else 0,
                     targetThreshold = 1,

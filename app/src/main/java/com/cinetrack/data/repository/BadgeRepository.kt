@@ -131,44 +131,96 @@ class BadgeRepository @Inject constructor(
                 // Real-time listener on user doc
                 supporterListenerRegistration = firestore.collection("users").document(user.uid)
                     .addSnapshotListener { snapshot, error ->
-                        if (error == null && snapshot != null && snapshot.exists()) {
-                            val isSupporter = snapshot.getBoolean("isSupporter") == true ||
+                        if (error == null && snapshot != null) {
+                            val isUserDocSupporter = snapshot.exists() && (
+                                snapshot.getBoolean("isSupporter") == true ||
                                 snapshot.getBoolean("isExecutiveProducer") == true
-                            if (isSupporter) {
+                            )
+
+                            if (isUserDocSupporter) {
                                 if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
-                                    badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
+                                    badgePrefs.edit()
+                                        .putBoolean("is_supporter_verified", true)
+                                        .putString("supporter_verified_uid", user.uid)
+                                        .apply()
                                     evaluateBadgesAsync()
+                                }
+                            } else {
+                                // Controlla se l'utente ha una donazione verificata manualmente con questo UID
+                                val verifiedUid = badgePrefs.getString("supporter_verified_uid", null)
+                                val hasManualClaim = verifiedUid == user.uid && badgePrefs.getBoolean("is_supporter_verified", false)
+
+                                if (!hasManualClaim) {
+                                    // Verifica nella collection /supporters/{email}
+                                    val email = user.email
+                                    if (!email.isNullOrBlank()) {
+                                        firestore.collection("supporters").document(email.trim().lowercase())
+                                            .get()
+                                            .addOnSuccessListener { doc ->
+                                                val isSupporterDoc = doc.exists() && (
+                                                    doc.getBoolean("isSupporter") == true ||
+                                                    doc.getBoolean("isExecutiveProducer") == true
+                                                )
+                                                if (isSupporterDoc) {
+                                                    val claimed = doc.getBoolean("claimed") == true
+                                                    val claimedByUid = doc.getString("claimedByUid")
+                                                    if (!claimed || claimedByUid == user.uid) {
+                                                        if (!claimed) {
+                                                            doc.reference.update(
+                                                                mapOf(
+                                                                    "claimed" to true,
+                                                                    "claimedByUid" to user.uid,
+                                                                    "claimedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
+                                                                )
+                                                            )
+                                                        }
+                                                        if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
+                                                            badgePrefs.edit()
+                                                                .putBoolean("is_supporter_verified", true)
+                                                                .putString("supporter_verified_uid", user.uid)
+                                                                .apply()
+                                                            evaluateBadgesAsync()
+                                                        }
+                                                    }
+                                                } else {
+                                                    // Non è supporter né sul doc utente né nella collection supporters
+                                                    if (badgePrefs.getBoolean("is_supporter_verified", false)) {
+                                                        badgePrefs.edit()
+                                                            .putBoolean("is_supporter_verified", false)
+                                                            .remove("supporter_verified_uid")
+                                                            .remove("supporter_verified_email")
+                                                            .remove("supporter_credit_name")
+                                                            .apply()
+                                                        evaluateBadgesAsync()
+                                                    }
+                                                }
+                                            }
+                                    } else {
+                                        // Utente anonimo o senza email e non supporter
+                                        if (badgePrefs.getBoolean("is_supporter_verified", false)) {
+                                            badgePrefs.edit()
+                                                .putBoolean("is_supporter_verified", false)
+                                                .remove("supporter_verified_uid")
+                                                .remove("supporter_verified_email")
+                                                .remove("supporter_credit_name")
+                                                .apply()
+                                            evaluateBadgesAsync()
+                                        }
+                                    }
                                 }
                             }
                         }
                     }
-
-                // Also check /supporters/{email}
-                val email = user.email
-                if (!email.isNullOrBlank()) {
-                    firestore.collection("supporters").document(email.trim().lowercase())
-                        .get()
-                        .addOnSuccessListener { doc ->
-                            if (doc.exists() && (doc.getBoolean("isSupporter") == true || doc.getBoolean("isExecutiveProducer") == true)) {
-                                val claimed = doc.getBoolean("claimed") == true
-                                val claimedByUid = doc.getString("claimedByUid")
-                                if (!claimed || claimedByUid == user.uid) {
-                                    if (!claimed) {
-                                        doc.reference.update(
-                                            mapOf(
-                                                "claimed" to true,
-                                                "claimedByUid" to user.uid,
-                                                "claimedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
-                                            )
-                                        )
-                                    }
-                                    if (!badgePrefs.getBoolean("is_supporter_verified", false)) {
-                                        badgePrefs.edit().putBoolean("is_supporter_verified", true).apply()
-                                        evaluateBadgesAsync()
-                                    }
-                                }
-                            }
-                        }
+            } else {
+                // Logout: pulisci lo stato supporter volatile
+                if (badgePrefs.getBoolean("is_supporter_verified", false)) {
+                    badgePrefs.edit()
+                        .putBoolean("is_supporter_verified", false)
+                        .remove("supporter_verified_uid")
+                        .remove("supporter_verified_email")
+                        .remove("supporter_credit_name")
+                        .apply()
+                    evaluateBadgesAsync()
                 }
             }
         }
@@ -222,6 +274,9 @@ class BadgeRepository @Inject constructor(
             .remove("is_trophy_bootstrap_acknowledged")
             .remove("pending_trophy_badge_ids")
             .remove("is_supporter_verified")
+            .remove("supporter_verified_uid")
+            .remove("supporter_verified_email")
+            .remove("supporter_credit_name")
             .apply()
         _trophyNotificationsTrigger.value++
     }
@@ -440,6 +495,7 @@ class BadgeRepository @Inject constructor(
                 badgePrefs.edit()
                     .putBoolean("is_supporter_verified", true)
                     .putString("supporter_verified_email", cleanEmail)
+                    .putString("supporter_verified_uid", currentUid)
                     .apply()
 
                 // Se l'utente ha un nome utente o il mecenate ha un displayName, inseriscilo in automatico nei titoli di coda

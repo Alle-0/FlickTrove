@@ -46,6 +46,7 @@ sealed interface AuthState {
 class AuthViewModel @Inject constructor(
     private val auth: FirebaseAuth,
     private val movieRepository: MovieRepository,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
     private val emailValidatorUseCase: com.cinetrack.domain.EmailValidatorUseCase,
     private val commsUniRepository: CommsUniRepository,
     @ApplicationContext private val context: Context
@@ -142,6 +143,7 @@ class AuthViewModel @Inject constructor(
             val currentUser = auth.currentUser
             if (currentUser != null && currentUser.isAnonymous) {
                 // If user was a guest and logs into an EXISTING account, we clear their local guest data
+                badgeRepository.clearAllData()
                 movieRepository.clearAllData()
             }
             
@@ -438,6 +440,7 @@ class AuthViewModel @Inject constructor(
                         // Sign in to that account instead and clear local guest data.
                         viewModelScope.launch {
                             movieRepository.clearAllData()
+                            badgeRepository.clearAllData()
                             auth.signInWithCredential(credential).addOnSuccessListener { result ->
                                 val uid = auth.currentUser?.uid
                                 viewModelScope.launch {
@@ -558,6 +561,7 @@ class AuthViewModel @Inject constructor(
         viewModelScope.launch {
             auth.signOut()
             movieRepository.clearAllData()
+            badgeRepository.clearAllData()
             _processState.update { null }
         }
     }
@@ -576,6 +580,7 @@ class AuthViewModel @Inject constructor(
         if (user == null) {
             viewModelScope.launch {
                 movieRepository.clearAllData()
+                badgeRepository.clearAllData()
                 auth.signOut()
                 _processState.update { AuthState.Unauthenticated }
                 onComplete(true)
@@ -731,6 +736,7 @@ class AuthViewModel @Inject constructor(
 
         // 5. Azzeramento database locale Room & disconnessione
         movieRepository.clearAllData()
+        badgeRepository.clearAllData()
         auth.signOut()
         _processState.update { AuthState.Unauthenticated }
     }

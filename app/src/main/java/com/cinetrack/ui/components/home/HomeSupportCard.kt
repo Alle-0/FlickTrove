@@ -44,6 +44,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
@@ -117,8 +118,6 @@ fun HomeSupportCard(
     ) {
         val cardShape = RoundedCornerShape(32.dp)
         val buttonShape = RoundedCornerShape(16.dp)
-        val kofiRed = Color(0xFFFF5E5B)
-        val paypalBlue = Color(0xFF0079C1)
 
         Box(
             modifier = Modifier
@@ -149,7 +148,7 @@ fun HomeSupportCard(
                     .fillMaxWidth()
                     .padding(16.dp)
             ) {
-                // Header: Pallino dorato a sinistra con icona mecenate grande clippata dentro
+                // Header: Pallino dorato a sinistra con icona mecenate grande
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -158,7 +157,7 @@ fun HomeSupportCard(
                 ) {
                     Box(
                         modifier = Modifier
-                            .size(48.dp)
+                            .size(50.dp)
                             .clip(CircleShape)
                             .background(
                                 Brush.linearGradient(
@@ -168,14 +167,14 @@ fun HomeSupportCard(
                                     )
                                 )
                             )
-                            .border(1.5.dp, Color(0xFFFDE047).copy(alpha = 0.5f), CircleShape),
+                            .border(2.dp, Color(0xFFFDE047).copy(alpha = 0.5f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
                             painter = painterResource(id = R.drawable.ic_badge_shaking_hands),
                             contentDescription = null,
                             tint = Color(0xFF141419),
-                            modifier = Modifier.size(56.dp)
+                            modifier = Modifier.size(58.dp)
                         )
                     }
 
@@ -200,16 +199,16 @@ fun HomeSupportCard(
 
                 Spacer(modifier = Modifier.height(16.dp))
 
-                // Pulsanti Ko-fi e PayPal affiancati con raggio concentrico (32dp - 16dp = 16dp)
+                // Pulsanti Ko-fi e PayPal (Vibranti, ad alta visibilità e simmetrici)
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp)
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
                 ) {
                     // 1. Ko-fi Button
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp)
+                            .height(50.dp)
                             .bounceClick {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 markSupportClicked(context)
@@ -218,25 +217,48 @@ fun HomeSupportCard(
                                 context.startActivity(intent)
                             }
                             .clip(buttonShape)
-                            .background(kofiRed),
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFFFF5E5B),
+                                        Color(0xFFE53935)
+                                    )
+                                )
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_kofi),
+                                painter = painterResource(id = R.drawable.ic_kofi),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(19.dp)
                             )
-                            Text(
-                                text = "Ko-fi",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "Ko-fi",
+                                    color = Color.White,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "GPay • ApplePay • Card",
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.White.copy(alpha = 0.88f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
 
@@ -244,7 +266,7 @@ fun HomeSupportCard(
                     Box(
                         modifier = Modifier
                             .weight(1f)
-                            .height(48.dp)
+                            .height(50.dp)
                             .bounceClick {
                                 haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                 markSupportClicked(context)
@@ -253,25 +275,48 @@ fun HomeSupportCard(
                                 context.startActivity(intent)
                             }
                             .clip(buttonShape)
-                            .background(paypalBlue),
+                            .background(
+                                Brush.linearGradient(
+                                    colors = listOf(
+                                        Color(0xFF0079C1),
+                                        Color(0xFF00457C)
+                                    )
+                                )
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(8.dp)
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 12.dp),
+                            verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_paypal),
+                                painter = painterResource(id = R.drawable.ic_paypal),
                                 contentDescription = null,
                                 tint = Color.White,
-                                modifier = Modifier.size(18.dp)
+                                modifier = Modifier.size(19.dp)
                             )
-                            Text(
-                                text = "PayPal",
-                                color = Color.White,
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            Spacer(modifier = Modifier.width(8.dp))
+                            Column(
+                                modifier = Modifier.weight(1f),
+                                verticalArrangement = Arrangement.Center
+                            ) {
+                                Text(
+                                    text = "PayPal",
+                                    color = Color.White,
+                                    fontSize = 13.5.sp,
+                                    fontWeight = FontWeight.Bold
+                                )
+                                Text(
+                                    text = "Account • Card",
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Medium,
+                                    color = Color.White.copy(alpha = 0.88f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
+                                )
+                            }
                         }
                     }
                 }

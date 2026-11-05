@@ -33,6 +33,7 @@ import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -580,7 +581,7 @@ fun DonationBanner(
                 verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier.fillMaxWidth()
             ) {
-                // Icona mecenate nel pallino dorato: l'icona dentro è grande e clippata dal cerchio
+                // Medaglione dorato imponente mecenate
                 Box(
                     modifier = Modifier
                         .size(50.dp)
@@ -633,20 +634,22 @@ fun DonationBanner(
             
             Spacer(modifier = Modifier.height(16.dp))
             
+            val buttonShape = RoundedCornerShape(16.dp)
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.spacedBy(10.dp)
             ) {
-                // Ko-fi Button (Primary: Google Pay / Apple Pay / Carta)
+                // Ko-fi Button (Vibrante, ad alta visibilità)
                 Box(
                     modifier = Modifier
-                        .weight(1.15f)
-                        .height(48.dp)
+                        .weight(1f)
+                        .height(50.dp)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://ko-fi.com/alle0")
                         }
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(buttonShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -658,20 +661,28 @@ fun DonationBanner(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_kofi), 
-                            contentDescription = null, 
-                            tint = Color.White, 
-                            modifier = Modifier.size(18.dp)
+                            painter = painterResource(id = R.drawable.ic_kofi),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(19.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Column(horizontalAlignment = Alignment.Start) {
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.Center
+                        ) {
                             Text(
                                 text = "Ko-fi",
-                                style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.5.sp
+                                ),
                                 color = Color.White
                             )
                             Text(
@@ -680,22 +691,24 @@ fun DonationBanner(
                                     fontSize = 8.5.sp,
                                     fontWeight = FontWeight.Medium
                                 ),
-                                color = Color.White.copy(alpha = 0.85f)
+                                color = Color.White.copy(alpha = 0.88f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                         }
                     }
                 }
                 
-                // PayPal Button
+                // PayPal Button (Vibrante, simmetrico a Ko-fi)
                 Box(
                     modifier = Modifier
-                        .weight(0.85f)
-                        .height(48.dp)
+                        .weight(1f)
+                        .height(50.dp)
                         .bounceClick {
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             uriHandler.openUri("https://paypal.me/AlessandroBasile0")
                         }
-                        .clip(RoundedCornerShape(14.dp))
+                        .clip(buttonShape)
                         .background(
                             Brush.linearGradient(
                                 colors = listOf(
@@ -707,21 +720,41 @@ fun DonationBanner(
                     contentAlignment = Alignment.Center
                 ) {
                     Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         Icon(
-                            painter = painterResource(id = R.drawable.ic_paypal), 
-                            contentDescription = null, 
-                            tint = Color.White, 
-                            modifier = Modifier.size(18.dp)
+                            painter = painterResource(id = R.drawable.ic_paypal),
+                            contentDescription = null,
+                            tint = Color.White,
+                            modifier = Modifier.size(19.dp)
                         )
                         Spacer(modifier = Modifier.width(8.dp))
-                        Text(
-                            text = "PayPal",
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White
-                        )
+                        Column(
+                            modifier = Modifier.weight(1f),
+                            verticalArrangement = Arrangement.Center
+                        ) {
+                            Text(
+                                text = "PayPal",
+                                style = MaterialTheme.typography.labelMedium.copy(
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = 13.5.sp
+                                ),
+                                color = Color.White
+                            )
+                            Text(
+                                text = "Account • Card",
+                                style = MaterialTheme.typography.labelSmall.copy(
+                                    fontSize = 8.5.sp,
+                                    fontWeight = FontWeight.Medium
+                                ),
+                                color = Color.White.copy(alpha = 0.88f),
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
                     }
                 }
             }
