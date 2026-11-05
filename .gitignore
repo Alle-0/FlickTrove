@@ -111,3 +111,6 @@ scratch/
 /plans/
 
 RELEASE_NOTES*.md
+/flicktrove_templates
+/mockup*
+export*.py

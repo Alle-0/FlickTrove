@@ -1,6 +1,7 @@
 package com.cinetrack.ui.screens
 
 import androidx.compose.ui.res.stringResource
+import androidx.activity.compose.BackHandler
 import com.cinetrack.R
 
 import androidx.compose.ui.res.vectorResource
@@ -20,6 +21,9 @@ import androidx.compose.foundation.clickable
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.verticalScroll
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
@@ -92,6 +96,8 @@ fun AuthScreen(
     val hazeState = remember { HazeState() }
     val scope = rememberCoroutineScope()
     var showGuestWarning by remember { mutableStateOf(false) }
+    var showEmailAuth by remember { mutableStateOf(false) }
+    BackHandler(enabled = showEmailAuth, onBack = { showEmailAuth = false })
     val navigator = LocalNavigator.current
 
     // In-app feedback instead of Toast
@@ -148,439 +154,473 @@ fun AuthScreen(
         ) {
             CinematicBackground()
 
-            Column(
+            val handleGoogleSignIn = {
+                scope.launch {
+                    try {
+                        val activityContext = generateSequence(context) {
+                            (it as? android.content.ContextWrapper)?.baseContext
+                        }.firstOrNull { it is android.app.Activity } ?: context
+
+                        val credentialManager = CredentialManager.create(activityContext)
+                        val googleIdOption = GetGoogleIdOption.Builder()
+                            .setFilterByAuthorizedAccounts(false)
+                            .setServerClientId(Keys.getGoogleClientId())
+                            .setAutoSelectEnabled(false)
+                            .build()
+
+                        val request = GetCredentialRequest.Builder()
+                            .addCredentialOption(googleIdOption)
+                            .build()
+
+                        val result = credentialManager.getCredential(activityContext, request)
+                        val credential = result.credential
+
+                        if (credential is androidx.credentials.CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
+                            val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
+                            viewModel.signInWithGoogle(googleIdTokenCredential.idToken)
+                        } else {
+                            Log.e("AuthScreen", "Unexpected type of credential")
+                            android.widget.Toast.makeText(context, "Unexpected credential type", android.widget.Toast.LENGTH_SHORT).show()
+                        }
+                    } catch (e: Exception) {
+                        Log.e("AuthScreen", "Google Sign In Failed", e)
+                        if (e !is androidx.credentials.exceptions.GetCredentialCancellationException) {
+                            android.widget.Toast.makeText(context, "Google Sign In Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
+                        }
+                    }
+                }
+            }
+
+            val backgroundAlpha by animateFloatAsState(
+                targetValue = if (showGuestWarning) 0.35f else 1f,
+                animationSpec = tween(durationMillis = 220, easing = FastOutSlowInEasing),
+                label = "AuthBackgroundDim"
+            )
+            val googleButtonBgAlpha by animateFloatAsState(
+                targetValue = if (showGuestWarning) 0.12f else 1f,
+                animationSpec = tween(durationMillis = 200),
+                label = "GoogleBtnDim"
+            )
+
+            Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(horizontal = 28.dp)
-                    .systemBarsPadding(),
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center
+                    .systemBarsPadding()
+                    .imePadding(),
+                contentAlignment = Alignment.Center
             ) {
-                // ── Logo & Title ──────────────────────────────────────────────
                 Column(
-                    modifier = Modifier.padding(bottom = 20.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Icon(
-                        painter = painterResource(id = R.drawable.ic_flicktrove_logo),
-                        contentDescription = "FlickTrove Logo",
-                        tint = Color.Unspecified,
-                        modifier = Modifier
-                            .padding(bottom = 12.dp)
-                            .size(width = 72.dp, height = 55.dp)
-                    )
-                    Text(
-                        text = "FlickTrove",
-                        color = Color.White,
-                        fontSize = 58.sp,
-                        fontWeight = FontWeight.Black,
-                        letterSpacing = (-3).sp
-                    )
-                    Text(
-                        text = stringResource(R.string.auth_subtitle),
-                        color = Color.White.copy(alpha = 0.7f),
-                        fontSize = 10.sp,
-                        fontWeight = FontWeight.Bold,
-                        letterSpacing = 4.sp,
-                        modifier = Modifier.padding(top = 2.dp)
-                    )
-                }
-
-                // ── Streaming Disclaimer Banner ────────────────────────────────
-                Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 24.dp)
-                        .clip(RoundedCornerShape(20.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, PrimaryTeal.copy(alpha = 0.25f), RoundedCornerShape(20.dp))
-                        .padding(horizontal = 16.dp, vertical = 12.dp)
+                        .padding(horizontal = 24.dp)
+                        .graphicsLayer { alpha = backgroundAlpha }
+                        .verticalScroll(rememberScrollState()),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center
                 ) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        modifier = Modifier.fillMaxWidth()
-                    ) {
-                        Box(
-                            modifier = Modifier
-                                .size(36.dp)
-                                .background(PrimaryTeal.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Icon(
-                                painter = painterResource(id = R.drawable.ic_punto_cerchiato),
-                                contentDescription = null,
-                                tint = PrimaryTeal,
-                                modifier = Modifier.size(18.dp)
-                            )
-                        }
-                        Spacer(modifier = Modifier.width(12.dp))
-                        Column(modifier = Modifier.weight(1f)) {
-                            Text(
-                                text = stringResource(R.string.auth_disclaimer_title),
-                                color = PrimaryTeal,
-                                fontSize = 11.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 1.sp
-                            )
-                            Spacer(modifier = Modifier.height(2.dp))
-                            Text(
-                                text = stringResource(R.string.auth_disclaimer_desc),
-                                color = Color.White.copy(alpha = 0.82f),
-                                fontSize = 12.sp,
-                                lineHeight = 16.sp
-                            )
-                        }
-                    }
-                }
-
-                // ── UI States ──────────────────────────────────────────────
-                var showEmailAuth by remember { mutableStateOf(false) }
-                val context = LocalContext.current
-                val coroutineScope = rememberCoroutineScope()
-                
-                val handleGoogleSignIn = {
-                    coroutineScope.launch {
-                        try {
-                            val activityContext = generateSequence(context) {
-                                (it as? android.content.ContextWrapper)?.baseContext
-                            }.firstOrNull { it is android.app.Activity } ?: context
-
-                            val credentialManager = CredentialManager.create(activityContext)
-                            val googleIdOption = GetGoogleIdOption.Builder()
-                                .setFilterByAuthorizedAccounts(false)
-                                .setServerClientId(Keys.getGoogleClientId())
-                                .setAutoSelectEnabled(false)
-                                .build()
-
-                            val request = GetCredentialRequest.Builder()
-                                .addCredentialOption(googleIdOption)
-                                .build()
-
-                            val result = credentialManager.getCredential(activityContext, request)
-                            val credential = result.credential
-
-                            if (credential is androidx.credentials.CustomCredential && credential.type == GoogleIdTokenCredential.TYPE_GOOGLE_ID_TOKEN_CREDENTIAL) {
-                                val googleIdTokenCredential = GoogleIdTokenCredential.createFrom(credential.data)
-                                viewModel.signInWithGoogle(googleIdTokenCredential.idToken)
-                            } else {
-                                Log.e("AuthScreen", "Unexpected type of credential")
-                                android.widget.Toast.makeText(context, "Unexpected credential type", android.widget.Toast.LENGTH_SHORT).show()
-                            }
-                        } catch (e: Exception) {
-                            Log.e("AuthScreen", "Google Sign In Failed", e)
-                            if (e !is androidx.credentials.exceptions.GetCredentialCancellationException) {
-                                android.widget.Toast.makeText(context, "Google Sign In Error: ${e.message}", android.widget.Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    }
-                }
-
-                // ── Initial Buttons ───────────────────────────────────────────
-                AnimatedVisibility(
-                    visible = !showEmailAuth,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
+                    // ── Logo & Title ──────────────────────────────────────────────
                     Column(
-                        modifier = Modifier.fillMaxWidth(),
-                        verticalArrangement = Arrangement.spacedBy(16.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(bottom = 18.dp),
+                        horizontalAlignment = Alignment.CenterHorizontally
                     ) {
-                        // Continue with Email
-                        Box(
+                        Icon(
+                            painter = painterResource(id = R.drawable.ic_flicktrove_logo),
+                            contentDescription = "FlickTrove Logo",
+                            tint = Color.Unspecified,
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .bounceClick(scaleDown = 0.96f) {
-                                    showEmailAuth = true
-                                }
-                                .background(PrimaryTeal, RoundedCornerShape(20.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(R.string.auth_login) + " / " + stringResource(R.string.auth_create_account),
-                                color = Color.Black,
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-
-                        // Continue with Google
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .bounceClick(scaleDown = 0.96f) {
-                                    handleGoogleSignIn()
-                                }
-                                .background(Color.White, RoundedCornerShape(20.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center
-                            ) {
-                                androidx.compose.foundation.Image(
-                                    painter = painterResource(id = R.drawable.ic_google),
-                                    contentDescription = "Google Logo",
-                                    modifier = Modifier.size(24.dp)
-                                )
-                                Spacer(modifier = Modifier.width(12.dp))
-                                Text(
-                                    text = stringResource(R.string.auth_continue_google),
-                                    color = Color.Black,
-                                    fontSize = 16.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-
-                        // Divider
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(vertical = 8.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(1.dp)
-                                    .background(Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.08f))))
-                            )
-                            Text(
-                                stringResource(R.string.auth_or_continue_with),
-                                modifier = Modifier.padding(horizontal = 20.dp),
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 10.sp,
-                                fontWeight = FontWeight.Black,
-                                letterSpacing = 2.sp
-                            )
-                            Box(
-                                modifier = Modifier
-                                    .weight(1f)
-                                    .height(1.dp)
-                                    .background(Brush.horizontalGradient(listOf(Color.White.copy(alpha = 0.08f), Color.Transparent)))
-                            )
-                        }
-
-                        // Guest Button
-                        val isGuestUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .bounceClick(scaleDown = 0.96f) {
-                                    if (isGuestUser) {
-                                        navigator?.pop()
-                                    } else {
-                                        showGuestWarning = true
-                                    }
-                                }
-                                .border(1.dp, Color.White.copy(alpha = 0.05f), RoundedCornerShape(20.dp)),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                if (isGuestUser) stringResource(R.string.auth_guest_dialog_cancel) else stringResource(R.string.auth_btn_guest),
-                                color = Color.White.copy(alpha = 0.5f),
-                                fontSize = 16.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
+                                .padding(bottom = 10.dp)
+                                .size(width = 72.dp, height = 55.dp)
+                        )
+                        Text(
+                            text = "FlickTrove",
+                            color = Color.White,
+                            fontSize = 54.sp,
+                            fontWeight = FontWeight.Black,
+                            letterSpacing = (-2.5).sp
+                        )
+                        Text(
+                            text = stringResource(R.string.auth_subtitle),
+                            color = Color.White.copy(alpha = 0.65f),
+                            fontSize = 10.sp,
+                            fontWeight = FontWeight.ExtraBold,
+                            letterSpacing = 4.sp,
+                            modifier = Modifier.padding(top = 4.dp)
+                        )
                     }
-                }
 
-                // ── Email Auth Form ───────────────────────────────────────────
-                AnimatedVisibility(
-                    visible = showEmailAuth,
-                    enter = expandVertically() + fadeIn(),
-                    exit = shrinkVertically() + fadeOut()
-                ) {
-                    Column {
-                        val isEmailValid = remember(email) {
-                            email.isEmpty() || (email.contains("@") && email.contains(".") && email.length > 5)
-                        }
-                        val isPasswordValid = remember(password) {
-                            password.isEmpty() || password.length >= 6
-                        }
-
-                        PremiumTextField(
-                            value = email,
-                            onValueChange = { email = it },
-                            label = stringResource(R.string.auth_email),
-                            icon = androidx.compose.material.icons.Icons.Default.Email,
-                            isError = !isEmailValid && email.isNotEmpty(),
-                            errorText = if (!isEmailValid && email.isNotEmpty()) stringResource(R.string.auth_error_email_invalid) else null,
-                            enabled = authState !is AuthState.Loading
-                        )
-                        
-                        Spacer(modifier = Modifier.height(8.dp))
-
-                        PremiumTextField(
-                            value = password,
-                            onValueChange = { password = it },
-                            label = stringResource(R.string.auth_password),
-                            icon = androidx.compose.material.icons.Icons.Default.Lock,
-                            isError = !isPasswordValid && password.isNotEmpty(),
-                            errorText = if (!isPasswordValid && password.isNotEmpty()) stringResource(R.string.auth_error_password_length) else null,
-                            isPassword = true,
-                            enabled = authState !is AuthState.Loading
-                        )
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 8.dp),
-                            contentAlignment = Alignment.CenterEnd
+                    // ── Initial Buttons & Pill ────────────────────────────────────
+                    AnimatedVisibility(
+                        visible = !showEmailAuth,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
                         ) {
-                            Box(
-                                modifier = Modifier
-                                    .bounceClick(scaleDown = 0.96f) {
-                                        viewModel.resetPassword(email.trim())
-                                    }
-                                    .padding(vertical = 4.dp, horizontal = 4.dp)
+                            // ── Sleek Compact Discovery Pill (Option 1) ───────────
+                            val isItalian = java.util.Locale.getDefault().language == "it"
+                            Surface(
+                                shape = CircleShape,
+                                color = Color.White.copy(alpha = 0.05f),
+                                border = androidx.compose.foundation.BorderStroke(1.dp, Color.White.copy(alpha = 0.12f)),
+                                modifier = Modifier.padding(bottom = 20.dp)
                             ) {
-                                Text(
-                                    stringResource(R.string.auth_forgot_password),
-                                    color = Color.White.copy(alpha = 0.4f),
-                                    fontSize = 13.sp,
-                                    fontWeight = FontWeight.Medium
-                                )
+                                Row(
+                                    modifier = Modifier.padding(horizontal = 14.dp, vertical = 7.dp),
+                                    verticalAlignment = Alignment.CenterVertically
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_punto_cerchiato),
+                                        contentDescription = null,
+                                        tint = PrimaryTeal,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(8.dp))
+                                    Text(
+                                        text = stringResource(R.string.auth_disclaimer_title),
+                                        color = PrimaryTeal,
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Black,
+                                        letterSpacing = 0.8.sp
+                                    )
+                                    Text(
+                                        text = " • " + (if (isItalian) "Nessuno streaming" else "No streaming"),
+                                        color = Color.White.copy(alpha = 0.65f),
+                                        fontSize = 10.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
                             }
-                        }
 
-                        Spacer(modifier = Modifier.height(16.dp))
-                        
-                        val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
-                        AnimatedVisibility(
-                            visible = isGuestUser,
-                            enter = expandVertically() + fadeIn(),
-                            exit = shrinkVertically() + fadeOut()
-                        ) {
+                            // ── Continue with Google (Primary Pill, White) ───────────
                             Box(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .padding(bottom = 16.dp)
-                                    .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(12.dp))
-                                    .border(1.dp, PrimaryTeal.copy(alpha = 0.3f), RoundedCornerShape(12.dp))
-                                    .padding(12.dp)
+                                    .height(54.dp)
+                                    .bounceClick(scaleDown = 0.96f) {
+                                        handleGoogleSignIn()
+                                    }
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = googleButtonBgAlpha)),
+                                contentAlignment = Alignment.Center
                             ) {
-                                Row(verticalAlignment = Alignment.CenterVertically) {
-                                    Icon(
-                                        imageVector = Icons.Rounded.Info,
-                                        contentDescription = null,
-                                        tint = PrimaryTeal,
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    androidx.compose.foundation.Image(
+                                        painter = painterResource(id = R.drawable.ic_google),
+                                        contentDescription = "Google Logo",
                                         modifier = Modifier.size(20.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(12.dp))
+                                    Spacer(modifier = Modifier.width(10.dp))
                                     Text(
-                                        text = if (isLogin) 
-                                            stringResource(R.string.auth_guest_login_warning) 
-                                        else 
-                                            stringResource(R.string.auth_guest_signup_info),
-                                        color = Color.White.copy(alpha = 0.8f),
-                                        fontSize = 12.sp,
-                                        lineHeight = 16.sp
+                                        text = stringResource(R.string.auth_continue_google),
+                                        color = Color.Black,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
                                     )
                                 }
                             }
-                        }
 
-                        val canProceed = authState !is AuthState.Loading && email.isNotEmpty() && password.isNotEmpty()
+                            Spacer(modifier = Modifier.height(12.dp))
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .height(56.dp)
-                                .bounceClick(enabled = canProceed) {
-                                    if (isLogin) viewModel.login(email, password)
-                                    else viewModel.signUp(email, password)
+                            // ── Log In / Create Account with Email (Secondary Glass Pill) ─
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(54.dp)
+                                    .bounceClick(scaleDown = 0.96f) {
+                                        showEmailAuth = true
+                                    }
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.08f))
+                                    .border(1.dp, Color.White.copy(alpha = 0.16f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.Center
+                                ) {
+                                    Icon(
+                                        imageVector = Icons.Default.Email,
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.85f),
+                                        modifier = Modifier.size(18.dp)
+                                    )
+                                    Spacer(modifier = Modifier.width(10.dp))
+                                    Text(
+                                        text = stringResource(R.string.auth_login) + " / " + stringResource(R.string.auth_create_account),
+                                        color = Color.White,
+                                        fontSize = 15.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
                                 }
-                                .background(
-                                    color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.5f),
-                                    shape = RoundedCornerShape(20.dp)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (authState is AuthState.Loading) {
-                                CircularProgressIndicator(
-                                    color = Color.Black,
-                                    modifier = Modifier.size(24.dp),
-                                    strokeWidth = 3.dp
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // ── Divider ────────────────────────────────────────────────
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(vertical = 4.dp),
+                                verticalAlignment = Alignment.CenterVertically
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(1.dp)
+                                        .background(Brush.horizontalGradient(listOf(Color.Transparent, Color.White.copy(alpha = 0.08f))))
                                 )
-                            } else {
                                 Text(
-                                    text = if (isLogin) stringResource(R.string.auth_login) else stringResource(R.string.auth_create_account),
-                                    color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
-                                    fontSize = 17.sp,
+                                    text = stringResource(R.string.auth_or_continue_with),
+                                    modifier = Modifier.padding(horizontal = 16.dp),
+                                    color = Color.White.copy(alpha = 0.4f),
+                                    fontSize = 9.sp,
+                                    fontWeight = FontWeight.Black,
+                                    letterSpacing = 2.sp
+                                )
+                                Box(
+                                    modifier = Modifier
+                                        .weight(1f)
+                                        .height(1.dp)
+                                        .background(Brush.horizontalGradient(listOf(Color.White.copy(alpha = 0.08f), Color.Transparent)))
+                                )
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            // ── Guest Button (Spento come richiesto) ────────────────────
+                            val isGuestUser = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(48.dp)
+                                    .clip(CircleShape)
+                                    .bounceClick(scaleDown = 0.97f) {
+                                        if (isGuestUser) {
+                                            navigator?.pop()
+                                        } else {
+                                            showGuestWarning = true
+                                        }
+                                    }
+                                    .border(1.dp, Color.White.copy(alpha = 0.06f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isGuestUser) stringResource(R.string.auth_guest_dialog_cancel) else stringResource(R.string.auth_btn_guest),
+                                    color = Color.White.copy(alpha = 0.45f),
+                                    fontSize = 14.5.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
+                        }
+                    }
+
+                    // ── Email Auth Form ───────────────────────────────────────────
+                    AnimatedVisibility(
+                        visible = showEmailAuth,
+                        enter = expandVertically() + fadeIn(),
+                        exit = shrinkVertically() + fadeOut()
+                    ) {
+                        Column(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            val isEmailValid = remember(email) {
+                                email.isEmpty() || (email.contains("@") && email.contains(".") && email.length > 5)
+                            }
+                            val isPasswordValid = remember(password) {
+                                password.isEmpty() || password.length >= 6
+                            }
+
+                            PremiumTextField(
+                                value = email,
+                                onValueChange = { email = it },
+                                label = stringResource(R.string.auth_email),
+                                icon = androidx.compose.material.icons.Icons.Default.Email,
+                                isError = !isEmailValid && email.isNotEmpty(),
+                                errorText = if (!isEmailValid && email.isNotEmpty()) stringResource(R.string.auth_error_email_invalid) else null,
+                                enabled = authState !is AuthState.Loading
+                            )
+                            
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            PremiumTextField(
+                                value = password,
+                                onValueChange = { password = it },
+                                label = stringResource(R.string.auth_password),
+                                icon = androidx.compose.material.icons.Icons.Default.Lock,
+                                isError = !isPasswordValid && password.isNotEmpty(),
+                                errorText = if (!isPasswordValid && password.isNotEmpty()) stringResource(R.string.auth_error_password_length) else null,
+                                isPassword = true,
+                                enabled = authState !is AuthState.Loading
+                            )
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(top = 6.dp),
+                                contentAlignment = Alignment.CenterEnd
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .bounceClick(scaleDown = 0.96f) {
+                                            viewModel.resetPassword(email.trim())
+                                        }
+                                        .padding(vertical = 4.dp, horizontal = 4.dp)
+                                ) {
+                                    Text(
+                                        stringResource(R.string.auth_forgot_password),
+                                        color = Color.White.copy(alpha = 0.45f),
+                                        fontSize = 13.sp,
+                                        fontWeight = FontWeight.Medium
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(16.dp))
+                            
+                            val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
+                            AnimatedVisibility(
+                                visible = isGuestUser,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .padding(bottom = 16.dp)
+                                        .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(14.dp))
+                                        .border(1.dp, PrimaryTeal.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
+                                        .padding(12.dp)
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Rounded.Info,
+                                            contentDescription = null,
+                                            tint = PrimaryTeal,
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(12.dp))
+                                        Text(
+                                            text = if (isLogin) 
+                                                stringResource(R.string.auth_guest_login_warning) 
+                                            else 
+                                                stringResource(R.string.auth_guest_signup_info),
+                                            color = Color.White.copy(alpha = 0.8f),
+                                            fontSize = 12.sp,
+                                            lineHeight = 16.sp
+                                        )
+                                    }
+                                }
+                            }
+
+                            val canProceed = authState !is AuthState.Loading && email.isNotEmpty() && password.isNotEmpty()
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(54.dp)
+                                    .bounceClick(enabled = canProceed) {
+                                        if (isLogin) viewModel.login(email, password)
+                                        else viewModel.signUp(email, password)
+                                    }
+                                    .clip(CircleShape)
+                                    .background(
+                                        color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.5f)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (authState is AuthState.Loading) {
+                                    CircularProgressIndicator(
+                                        color = Color.Black,
+                                        modifier = Modifier.size(24.dp),
+                                        strokeWidth = 3.dp
+                                    )
+                                } else {
+                                    Text(
+                                        text = if (isLogin) stringResource(R.string.auth_login) else stringResource(R.string.auth_create_account),
+                                        color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
+                                        fontSize = 16.sp,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(10.dp))
+
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .bounceClick(scaleDown = 0.96f) {
+                                        isLogin = !isLogin
+                                        password = ""
+                                    }
+                                    .padding(vertical = 8.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = if (isLogin) stringResource(R.string.auth_switch_to_register)
+                                           else stringResource(R.string.auth_switch_to_login),
+                                    color = Color.White,
+                                    fontSize = 14.5.sp,
                                     fontWeight = FontWeight.Bold
                                 )
                             }
-                        }
-
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .bounceClick(scaleDown = 0.96f) {
-                                    isLogin = !isLogin
-                                    password = ""
-                                }
-                                .padding(vertical = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = if (isLogin) stringResource(R.string.auth_switch_to_register)
-                                       else stringResource(R.string.auth_switch_to_login),
-                                color = Color.White,
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold
-                            )
-                        }
-                        
-                        // Back to main options
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .bounceClick(scaleDown = 0.96f) {
-                                    showEmailAuth = false
-                                }
-                                .padding(bottom = 12.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = "Back",
-                                color = Color.White.copy(alpha = 0.8f),
-                                fontSize = 15.sp,
-                                fontWeight = FontWeight.Bold
-                            )
+                            
+                            // Back to main options (pill button with localized text)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .height(44.dp)
+                                    .clip(CircleShape)
+                                    .bounceClick(scaleDown = 0.97f) {
+                                        showEmailAuth = false
+                                    }
+                                    .border(1.dp, Color.White.copy(alpha = 0.08f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = stringResource(R.string.detail_content_desc_back),
+                                    color = Color.White.copy(alpha = 0.65f),
+                                    fontSize = 14.sp,
+                                    fontWeight = FontWeight.SemiBold
+                                )
+                            }
                         }
                     }
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-                // ── Legal Disclaimer ──────────────────────────────────────────
-                Text(
-                    text = buildAnnotatedString {
-                        append(stringResource(R.string.auth_terms_prefix) + " ")
-                        pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://alle-0.github.io/FlickTrove/terms.html"))
-                        withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.auth_terms_link))
-                        }
-                        pop()
-                        append(" " + stringResource(R.string.auth_terms_and) + " ")
-                        pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://alle-0.github.io/FlickTrove/privacy.html"))
-                        withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
-                            append(stringResource(R.string.auth_privacy_link))
-                        }
-                        pop()
-                        append(stringResource(R.string.auth_terms_suffix))
-                    },
-                    style = TextStyle(
-                        color = Color.White.copy(alpha = 0.75f),
-                        fontSize = 12.sp,
-                        textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                    // ── Legal Disclaimer Footer ──────────────────────────────────
+                    Text(
+                        text = buildAnnotatedString {
+                            append(stringResource(R.string.auth_terms_prefix) + " ")
+                            pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://alle-0.github.io/FlickTrove/terms.html"))
+                            withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.auth_terms_link))
+                            }
+                            pop()
+                            append(" " + stringResource(R.string.auth_terms_and) + " ")
+                            pushLink(androidx.compose.ui.text.LinkAnnotation.Url("https://alle-0.github.io/FlickTrove/privacy.html"))
+                            withStyle(style = SpanStyle(color = PrimaryTeal, fontWeight = FontWeight.Bold)) {
+                                append(stringResource(R.string.auth_privacy_link))
+                            }
+                            pop()
+                            append(stringResource(R.string.auth_terms_suffix))
+                        },
+                        style = TextStyle(
+                            color = Color.White.copy(alpha = 0.60f),
+                            fontSize = 11.5.sp,
+                            textAlign = androidx.compose.ui.text.style.TextAlign.Center
+                        )
                     )
-                )
+                }
             }
         }
 
@@ -807,7 +847,7 @@ private fun PremiumTextField(
         label = "LabelY"
     )
     val labelOffsetX by animateDpAsState(
-        targetValue = if (isFloating) 16.dp else 48.dp,
+        targetValue = if (isFloating) 20.dp else 52.dp,
         animationSpec = spring(
             stiffness = Spring.StiffnessMediumLow,
             dampingRatio = Spring.DampingRatioLowBouncy
@@ -853,9 +893,9 @@ private fun PremiumTextField(
                 .fillMaxWidth()
                 .padding(top = 20.dp)
                 .height(58.dp)
-                .background(color = containerColor, shape = RoundedCornerShape(18.dp))
-                .border(1.5.dp, borderColor, RoundedCornerShape(18.dp))
-                .padding(horizontal = 16.dp),
+                .background(color = containerColor, shape = CircleShape)
+                .border(1.5.dp, borderColor, CircleShape)
+                .padding(horizontal = 20.dp),
             contentAlignment = Alignment.CenterStart
         ) {
             Row(
