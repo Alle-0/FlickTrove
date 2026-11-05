@@ -77,7 +77,8 @@ fun TrophyUnlockBanner(
     trophyRoomViewModel: TrophyRoomViewModel,
     hazeState: HazeState? = null,
     onNavigateToTrophyRoom: (String?) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    enabled: Boolean = true
 ) {
     val context = LocalContext.current
     val eventQueue = remember { mutableStateListOf<TrophyUnlockBannerEvent>() }
@@ -91,9 +92,9 @@ fun TrophyUnlockBanner(
         }
     }
 
-    // Gestione della coda eventi (FIFO)
-    LaunchedEffect(eventQueue.size, isVisible) {
-        if (!isVisible && eventQueue.isNotEmpty()) {
+    // Gestione della coda eventi (FIFO) - attiva solo se abilitato (es. fuori dalla schermata di auth)
+    LaunchedEffect(eventQueue.size, isVisible, enabled) {
+        if (enabled && !isVisible && eventQueue.isNotEmpty()) {
             activeEvent = eventQueue.removeAt(0)
             isVisible = true
             try {
@@ -103,8 +104,8 @@ fun TrophyUnlockBanner(
     }
 
     // Timer auto-dismiss a 4500ms
-    LaunchedEffect(activeEvent, isVisible) {
-        if (isVisible && activeEvent != null) {
+    LaunchedEffect(activeEvent, isVisible, enabled) {
+        if (enabled && isVisible && activeEvent != null) {
             delay(4500L)
             isVisible = false
             delay(320L)
@@ -113,7 +114,7 @@ fun TrophyUnlockBanner(
     }
 
     AnimatedVisibility(
-        visible = isVisible && activeEvent != null,
+        visible = enabled && isVisible && activeEvent != null,
         enter = slideInVertically(
             initialOffsetY = { -it },
             animationSpec = spring(stiffness = Spring.StiffnessMediumLow, dampingRatio = Spring.DampingRatioLowBouncy)

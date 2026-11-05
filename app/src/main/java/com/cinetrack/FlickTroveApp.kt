@@ -370,7 +370,12 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                         globalHazeState = globalHazeState
                                     )
 
+                                    val isAuthScreen = navigator.lastItem is com.cinetrack.ui.screens.LoginScreen ||
+                                        navigator.lastItem is com.cinetrack.ui.screens.SplashScreen ||
+                                        showGuestAuthDialog
+
                                     com.cinetrack.ui.components.badge.TrophyUnlockBanner(
+                                        enabled = !isAuthScreen,
                                         trophyRoomViewModel = trophyRoomViewModel,
                                         hazeState = globalHazeState,
                                         onNavigateToTrophyRoom = { targetBadgeId ->

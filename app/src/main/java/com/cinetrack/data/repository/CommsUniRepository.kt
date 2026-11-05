@@ -400,7 +400,7 @@ class CommsUniRepository @Inject constructor(
     suspend fun getTopCommentsPreview(
         tvdbId: Int,
         entityType: String,
-        limit: Int = 5,
+        limit: Int = 50,
         currentUserId: String? = null
     ): List<AppComment> {
         val entityId = buildEntityId(tvdbId)

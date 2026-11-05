@@ -92,6 +92,8 @@ class MovieDetailViewModel @Inject constructor(
 
     var lastTvdbId: Int? = null
         private set
+    var lastImdbId: String? = null
+        private set
     val tvdbId: Int? get() = lastTvdbId
     private var lastTitle: String? = null
     private var lastYear: String? = null
@@ -102,7 +104,7 @@ class MovieDetailViewModel @Inject constructor(
                 _error.value = null
             }
             fetchFromTMDB(movieId, mediaType == "tv")
-            commentsDelegate.refreshComments(movieId, mediaType, lastTvdbId, lastTitle, lastYear, viewModelScope) {
+            commentsDelegate.refreshComments(movieId, mediaType, lastTvdbId, lastImdbId, lastTitle, lastYear, viewModelScope) {
                 lastTvdbId = it
             }
         }
@@ -118,6 +120,10 @@ class MovieDetailViewModel @Inject constructor(
         if (movieId == 0L && id != 0L) {
             movieId = id
             mediaType = type
+            lastTvdbId = null
+            lastImdbId = null
+            lastTitle = null
+            lastYear = null
             commentsDelegate.reset()
             // Load cached accent color instantly if available
             viewModelScope.launch {
@@ -514,6 +520,9 @@ class MovieDetailViewModel @Inject constructor(
         title: String? = null,
         year: String? = null
     ) {
+        if (!imdbId.isNullOrBlank()) {
+            lastImdbId = imdbId
+        }
         if (tvdbId != null && tvdbId > 0) {
             lastTvdbId = tvdbId
         }
@@ -525,7 +534,8 @@ class MovieDetailViewModel @Inject constructor(
                 val traktId = imdbId ?: tmdbId.toString()
                 val traktDeferred = async { repository.fetchTraktRating(traktId, mediaType == "tv") }
                 val commentsDeferred = async {
-                    commentsDelegate.fetchPreviewComments(movieId, mediaType, tvdbId, title, year) {
+                    val effectiveMovieId = if (movieId != 0L) movieId else tmdbId
+                    commentsDelegate.fetchPreviewComments(effectiveMovieId, mediaType, tvdbId, imdbId, title, year) {
                         lastTvdbId = it
                     }
                 }
@@ -1411,7 +1421,7 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     fun refreshComments() {
-        commentsDelegate.refreshComments(movieId, mediaType, lastTvdbId, lastTitle, lastYear, viewModelScope) {
+        commentsDelegate.refreshComments(movieId, mediaType, lastTvdbId, lastImdbId, lastTitle, lastYear, viewModelScope) {
             lastTvdbId = it
         }
     }

@@ -71,6 +71,7 @@ class MovieDetailCommentsDelegate @Inject constructor(
         movieId: Long,
         mediaType: String,
         tvdbId: Int?,
+        imdbId: String? = null,
         title: String?,
         year: String?,
         onTvdbIdResolved: ((Int) -> Unit)? = null
@@ -93,8 +94,13 @@ class MovieDetailCommentsDelegate @Inject constructor(
                             tvdbId
                         } else {
                             val searchType = if (mediaType == "tv") "series" else "movie"
-                            tvdbRepository.resolveTvdbIdByRemoteId(movieId.toString(), searchType)
-                                ?: if (!title.isNullOrBlank()) tvdbRepository.resolveTvdbId(title, year, searchType) else null
+                            (if (!imdbId.isNullOrBlank()) {
+                                tvdbRepository.resolveTvdbIdByRemoteId(imdbId, searchType)
+                            } else null) ?: (if (movieId != 0L) {
+                                tvdbRepository.resolveTvdbIdByRemoteId(movieId.toString(), searchType)
+                            } else null) ?: if (!title.isNullOrBlank()) {
+                                tvdbRepository.resolveTvdbId(title, year, searchType)
+                            } else null
                         }
 
                         if (resolvedTvdbId != null && resolvedTvdbId > 0) {
@@ -103,7 +109,7 @@ class MovieDetailCommentsDelegate @Inject constructor(
                             commsUniRepository.getTopCommentsPreview(
                                 tvdbId = resolvedTvdbId,
                                 entityType = if (mediaType == "tv") "show" else "movie",
-                                limit = 5,
+                                limit = 50,
                                 currentUserId = uid
                             )
                         } else {
@@ -165,13 +171,14 @@ class MovieDetailCommentsDelegate @Inject constructor(
         movieId: Long,
         mediaType: String,
         tvdbId: Int?,
+        imdbId: String? = null,
         title: String?,
         year: String?,
         scope: CoroutineScope,
         onTvdbIdResolved: ((Int) -> Unit)? = null
     ) {
         scope.launch {
-            val comments = fetchPreviewComments(movieId, mediaType, tvdbId, title, year, onTvdbIdResolved)
+            val comments = fetchPreviewComments(movieId, mediaType, tvdbId, imdbId, title, year, onTvdbIdResolved)
             if (comments.isNotEmpty() || _appComments.value.isEmpty()) {
                 _appComments.value = comments
             }

@@ -21,8 +21,8 @@ data class TvdbTokenData(
 
 @Serializable
 data class TvdbSearchResponse(
-    val status: String,
-    val data: List<TvdbSearchResult> = emptyList()
+    val status: String? = null,
+    val data: List<TvdbSearchResult>? = null
 )
 
 @Serializable
@@ -117,7 +117,7 @@ data class TvdbEpisodesData(
 @Serializable
 data class TvdbRemoteIdResponse(
     val status: String? = null,
-    val data: List<TvdbRemoteIdResult> = emptyList()
+    val data: List<TvdbRemoteIdResult>? = null
 )
 
 @Serializable

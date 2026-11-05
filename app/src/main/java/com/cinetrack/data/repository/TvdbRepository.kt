@@ -18,10 +18,12 @@ class TvdbRepository @Inject constructor(
         return try {
             // 1. Search for the movie by title + year
             val searchResponse = tvdbApi.search(query = title, year = year, type = "movie")
+            val results = searchResponse.data ?: emptyList()
             // Fallback: if year-filtered search returns nothing, retry without year
-            val tvdbId = searchResponse.data.firstOrNull()?.tvdb_id
-                ?: tvdbApi.search(query = title, type = "movie").data.firstOrNull()?.tvdb_id
+            val matched = findBestTvdbMatch(results, title, year)
+                ?: findBestTvdbMatch(tvdbApi.search(query = title, type = "movie").data ?: emptyList(), title, null)
                 ?: return emptyMap()
+            val tvdbId = matched.tvdb_id ?: matched.id?.substringAfter("-") ?: return emptyMap()
 
             // 2. Fetch extended data
             val extendedResponse = tvdbApi.getMovieExtended(id = tvdbId)
@@ -72,7 +74,8 @@ class TvdbRepository @Inject constructor(
         return try {
             val response = tvdbApi.searchByRemoteId(remoteId)
             val isShow = type.lowercase() in listOf("tv", "series", "show")
-            val first = response.data.firstOrNull() ?: return null
+            val results = response.data ?: emptyList()
+            val first = results.firstOrNull() ?: return null
             if (isShow) {
                 first.series?.id ?: first.movie?.id
             } else {
@@ -92,28 +95,75 @@ class TvdbRepository @Inject constructor(
             } else {
                 tvdbApi.search(query = title, type = searchType)
             }
-            var results = searchResponse.data
+            var results = searchResponse.data ?: emptyList()
             if (results.isEmpty() && !year.isNullOrBlank()) {
-                results = tvdbApi.search(query = title, type = searchType).data
+                results = tvdbApi.search(query = title, type = searchType).data ?: emptyList()
             }
-            if (results.isEmpty() && title.contains(":")) {
+            val matched = findBestTvdbMatch(results, title, year)
+            if (matched != null) {
+                val idStr = matched.tvdb_id ?: matched.id?.substringAfter("-")
+                return idStr?.toIntOrNull()
+            }
+            if (title.contains(":")) {
                 val cleanPrefix = title.substringBefore(":").trim()
                 if (cleanPrefix.isNotBlank()) {
-                    val fallbackSearch = tvdbApi.search(query = cleanPrefix, type = searchType).data
-                    val matched = fallbackSearch.find { it.name?.contains(title, ignoreCase = true) == true }
-                        ?: fallbackSearch.firstOrNull()
-                    if (matched != null) {
-                        val fallbackId = matched.tvdb_id ?: matched.id?.substringAfter("-")
+                    val fallbackSearch = tvdbApi.search(query = cleanPrefix, type = searchType).data ?: emptyList()
+                    val fallbackMatched = findBestTvdbMatch(fallbackSearch, cleanPrefix, year)
+                    if (fallbackMatched != null) {
+                        val fallbackId = fallbackMatched.tvdb_id ?: fallbackMatched.id?.substringAfter("-")
                         return fallbackId?.toIntOrNull()
                     }
                 }
             }
-            val firstResult = results.firstOrNull()
-            val idStr = firstResult?.tvdb_id ?: firstResult?.id?.substringAfter("-")
-            idStr?.toIntOrNull()
+            null
         } catch (e: Exception) {
             null
         }
+    }
+
+    private fun normalizeTitleForMatching(text: String): String {
+        return text.lowercase()
+            .replace(Regex("^(the|a|an|la|il|lo|le|i|gli|der|die|das|el|los|las|une|un)\\s+", RegexOption.IGNORE_CASE), "")
+            .replace(Regex("[^a-z0-9]"), "")
+            .trim()
+    }
+
+    private fun findBestTvdbMatch(
+        results: List<com.cinetrack.data.api.TvdbSearchResult>,
+        targetTitle: String,
+        targetYear: String?
+    ): com.cinetrack.data.api.TvdbSearchResult? {
+        if (results.isEmpty() || targetTitle.isBlank()) return null
+        val targetNorm = normalizeTitleForMatching(targetTitle)
+        if (targetNorm.isBlank()) return null
+
+        // 1. Exact title + exact year
+        if (!targetYear.isNullOrBlank()) {
+            val exactWithYear = results.find {
+                it.name?.trim().equals(targetTitle.trim(), ignoreCase = true) && it.year == targetYear
+            }
+            if (exactWithYear != null) return exactWithYear
+
+            // 2. Normalized title + exact year
+            val normWithYear = results.find {
+                it.name?.let { n -> normalizeTitleForMatching(n) == targetNorm } == true && it.year == targetYear
+            }
+            if (normWithYear != null) return normWithYear
+        }
+
+        // 3. Exact title regardless of year
+        val exactAny = results.find {
+            it.name?.trim().equals(targetTitle.trim(), ignoreCase = true)
+        }
+        if (exactAny != null) return exactAny
+
+        // 4. Normalized title regardless of year
+        val normAny = results.find {
+            it.name?.let { n -> normalizeTitleForMatching(n) == targetNorm } == true
+        }
+        if (normAny != null) return normAny
+
+        return null
     }
 
 

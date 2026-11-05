@@ -192,7 +192,10 @@ class BadgeRepository @Inject constructor(
     }
 
     fun dismissTrophyBootstrapNotification() {
-        badgePrefs.edit().putBoolean("is_trophy_bootstrap_acknowledged", true).apply()
+        badgePrefs.edit()
+            .putBoolean("is_trophy_bootstrap_acknowledged", true)
+            .putStringSet("pending_trophy_badge_ids", emptySet())
+            .apply()
         _trophyNotificationsTrigger.value++
     }
 
@@ -211,10 +214,22 @@ class BadgeRepository @Inject constructor(
         _trophyNotificationsTrigger.value++
     }
 
+    suspend fun clearAllData() {
+        badgeDao.clearUserBadges()
+        badgeDao.clearPersonFrequencies()
+        badgePrefs.edit()
+            .remove("is_initial_badge_evaluation_done")
+            .remove("is_trophy_bootstrap_acknowledged")
+            .remove("pending_trophy_badge_ids")
+            .remove("is_supporter_verified")
+            .apply()
+        _trophyNotificationsTrigger.value++
+    }
+
     /**
      * Flusso reattivo delle notifiche trofeo per la schermata Updates (Opzione B):
      * 1. Bootstrap storico: 1 singola card riassuntiva ("X trofei sbloccati") se non ancora convalidata.
-     * 2. Sblocchi in tempo reale successivi: card singola per ogni nuovo trofeo conquistato.
+     * 2. Sblocchi in tempo reale successivi: card singola per ogni nuovo trofeo conquistato (post-bootstrap).
      */
     fun getTrophyNotificationsFlow(): Flow<List<TrophyUpdateNotification>> {
         return combine(
@@ -225,34 +240,34 @@ class BadgeRepository @Inject constructor(
             val isBootstrapAcknowledged = badgePrefs.getBoolean("is_trophy_bootstrap_acknowledged", false)
             val unlockedBadges = userBadges.filter { it.isUnlocked }
 
-            // 1. Bootstrap Summary: se non ancora confermato ed esistono badge conquistati
+            // 1. Bootstrap Summary: se non ancora confermato ed esistono badge conquistati, mostra SOLO l'aggregato
             if (!isBootstrapAcknowledged && unlockedBadges.isNotEmpty()) {
                 result.add(TrophyUpdateNotification.BootstrapSummary(unlockedCount = unlockedBadges.size))
-            }
+            } else {
+                // 2. Notifiche singole per sblocchi successivi in tempo reale (solo dopo che il bootstrap è stato confermato)
+                val pendingIds = badgePrefs.getStringSet("pending_trophy_badge_ids", emptySet()) ?: emptySet()
+                if (pendingIds.isNotEmpty()) {
+                    val userBadgeMap = userBadges.associateBy { it.badgeId }
+                    for (id in pendingIds) {
+                        val catalogItem = OFFICIAL_TROPHY_ROOM_CATALOG.firstOrNull { it.badge.id == id } ?: continue
+                        val badge = catalogItem.badge
+                        val userEntity = userBadgeMap[id]
+                        val tier = userEntity?.let { evaluationEngine.parseTierSafe(it.currentTier, badge.fixedTier ?: badge.initialProgressiveTier) }
+                            ?: badge.fixedTier ?: badge.initialProgressiveTier
+                        val stepPhrase = badge.progressiveSteps[tier]?.milestonePhrase ?: badge.defaultDescription
 
-            // 2. Notifiche singole per sblocchi successivi in tempo reale
-            val pendingIds = badgePrefs.getStringSet("pending_trophy_badge_ids", emptySet()) ?: emptySet()
-            if (pendingIds.isNotEmpty()) {
-                val userBadgeMap = userBadges.associateBy { it.badgeId }
-                for (id in pendingIds) {
-                    val catalogItem = OFFICIAL_TROPHY_ROOM_CATALOG.firstOrNull { it.badge.id == id } ?: continue
-                    val badge = catalogItem.badge
-                    val userEntity = userBadgeMap[id]
-                    val tier = userEntity?.let { evaluationEngine.parseTierSafe(it.currentTier, badge.fixedTier ?: badge.initialProgressiveTier) }
-                        ?: badge.fixedTier ?: badge.initialProgressiveTier
-                    val stepPhrase = badge.progressiveSteps[tier]?.milestonePhrase ?: badge.defaultDescription
-
-                    result.add(
-                        TrophyUpdateNotification.SingleTrophy(
-                            badgeId = badge.id,
-                            title = badge.title,
-                            tier = tier,
-                            category = badge.category,
-                            iconKind = badge.iconKind,
-                            subtitle = stepPhrase,
-                            isFirstUnlock = userEntity?.currentTier == badge.initialProgressiveTier.name
+                        result.add(
+                            TrophyUpdateNotification.SingleTrophy(
+                                badgeId = badge.id,
+                                title = badge.title,
+                                tier = tier,
+                                category = badge.category,
+                                iconKind = badge.iconKind,
+                                subtitle = stepPhrase,
+                                isFirstUnlock = userEntity?.currentTier == badge.initialProgressiveTier.name
+                            )
                         )
-                    )
+                    }
                 }
             }
 
@@ -880,6 +895,12 @@ class BadgeRepository @Inject constructor(
         }
     }
 
+    private data class PendingUnlockData(
+        val badge: PreviewBadgeItem,
+        val tier: PreviewBadgeTier,
+        val isFirstUnlock: Boolean
+    )
+
     /**
      * Valuta l'intero catalogo dei badge locali alla luce dei dati presenti in Room:
      * - film e serie viste (`favorites`)
@@ -894,9 +915,11 @@ class BadgeRepository @Inject constructor(
         val allHistory = watchHistoryDao.getAllWatchHistory()
         val allFolders = folderDao.getAll()
         val existingBadges = badgeDao.getAllUserBadges().associateBy { it.badgeId }
+        val prevUnlockedCount = existingBadges.values.count { it.isUnlocked }
 
-        val isBootstrap = !isInitialEvaluationDone || existingBadges.isEmpty()
+        val isBootstrap = !isInitialEvaluationDone || existingBadges.isEmpty() || prevUnlockedCount == 0
         var bootstrapNewlyUnlockedCount = 0
+        val pendingLiveEvents = mutableListOf<PendingUnlockData>()
 
         val watchedMovies = allMovies.filter { it.watched && it.mediaType != "tv" && !it.dropped }
         val watchedShows = allMovies.filter { it.watched && it.mediaType == "tv" && !it.dropped }
@@ -970,22 +993,10 @@ class BadgeRepository @Inject constructor(
                 bootstrapNewlyUnlockedCount++
             }
 
-            // Emetti evento di celebrazione per nuovi sblocchi o upgrade (esclusivamente nelle sessioni live post-bootstrap)
-            if (!isBootstrap && (newlyUnlocked || tierUpgraded)) {
-                val stepPhrase = badge.progressiveSteps[calculatedTier]?.milestonePhrase
-                    ?: badge.title
-                _unlockedTierEvents.tryEmit(
-                    TrophyUnlockBannerEvent.SingleBadge(
-                        badgeId = badge.id,
-                        title = badge.title,
-                        tier = calculatedTier,
-                        category = badge.category,
-                        iconKind = badge.iconKind,
-                        milestonePhrase = stepPhrase,
-                        isFirstUnlock = newlyUnlocked
-                    )
+            if (newlyUnlocked || tierUpgraded) {
+                pendingLiveEvents.add(
+                    PendingUnlockData(badge, calculatedTier, newlyUnlocked)
                 )
-                recordPendingTrophyNotification(badge.id)
             }
         }
 
@@ -1028,35 +1039,48 @@ class BadgeRepository @Inject constructor(
                 bootstrapNewlyUnlockedCount++
             }
 
-            if (!isBootstrap && (newlyUnlocked || tierUpgraded)) {
-                val stepPhrase = badge.progressiveSteps[calculatedTier]?.milestonePhrase
-                    ?: badge.title
-                _unlockedTierEvents.tryEmit(
-                    TrophyUnlockBannerEvent.SingleBadge(
-                        badgeId = badge.id,
-                        title = badge.title,
-                        tier = calculatedTier,
-                        category = badge.category,
-                        iconKind = badge.iconKind,
-                        milestonePhrase = stepPhrase,
-                        isFirstUnlock = newlyUnlocked
-                    )
+            if (newlyUnlocked || tierUpgraded) {
+                pendingLiveEvents.add(
+                    PendingUnlockData(badge, calculatedTier, newlyUnlocked)
                 )
-                recordPendingTrophyNotification(badge.id)
             }
         }
 
         badgeDao.upsertBadges(evaluatedEntities)
 
-        // Se è il primissimo bootstrap per un utente esistente con storico, emetti 1 singolo evento celebrativo riepilogativo
-        if (isBootstrap) {
+        val totalUnlockedCount = evaluatedEntities.count { it.isUnlocked }
+        val isBulkBootstrap = isBootstrap || pendingLiveEvents.size >= 3
+
+        if (isBulkBootstrap) {
             isInitialEvaluationDone = true
-            if (bootstrapNewlyUnlockedCount > 0) {
+            // In caso di bootstrap o import massivo, pulisci notifiche singole sporche e mantieni solo l'aggregato
+            badgePrefs.edit().putStringSet("pending_trophy_badge_ids", emptySet()).apply()
+
+            if (totalUnlockedCount > 0 && !badgePrefs.getBoolean("is_trophy_bootstrap_acknowledged", false)) {
                 _unlockedTierEvents.tryEmit(
                     TrophyUnlockBannerEvent.InitialBootstrapSummary(
-                        unlockedCount = bootstrapNewlyUnlockedCount
+                        unlockedCount = totalUnlockedCount
                     )
                 )
+            }
+            _trophyNotificationsTrigger.value++
+        } else {
+            // Sblocchi live reali (1 o 2 trofei in tempo reale)
+            for (item in pendingLiveEvents) {
+                val stepPhrase = item.badge.progressiveSteps[item.tier]?.milestonePhrase
+                    ?: item.badge.title
+                _unlockedTierEvents.tryEmit(
+                    TrophyUnlockBannerEvent.SingleBadge(
+                        badgeId = item.badge.id,
+                        title = item.badge.title,
+                        tier = item.tier,
+                        category = item.badge.category,
+                        iconKind = item.badge.iconKind,
+                        milestonePhrase = stepPhrase,
+                        isFirstUnlock = item.isFirstUnlock
+                    )
+                )
+                recordPendingTrophyNotification(item.badge.id)
             }
         }
 

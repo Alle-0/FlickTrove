@@ -99,7 +99,7 @@ fun OnboardingDialog(
                 descriptionRes = R.string.onboarding_slide5_desc,
                 iconRes = R.drawable.ic_packing,
                 imageRes = R.drawable.onboarding_img_5,
-                verticalBias = 1f
+                verticalBias = 0f
             )
         )
     }

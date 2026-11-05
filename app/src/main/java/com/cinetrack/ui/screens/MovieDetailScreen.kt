@@ -165,6 +165,17 @@ data class MovieDetailScreen(
             }
         }
 
+        var wasInBackground by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
+        LaunchedEffect(navigator.lastItem) {
+            if (navigator.lastItem.key == this@MovieDetailScreen.key) {
+                if (wasInBackground) {
+                    viewModel.refreshComments()
+                }
+            } else {
+                wasInBackground = true
+            }
+        }
+
         val searchOverlay = com.cinetrack.ui.LocalSearchOverlay.current
 
         MovieDetailScreenContent(

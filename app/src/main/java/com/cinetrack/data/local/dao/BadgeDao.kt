@@ -45,6 +45,9 @@ interface BadgeDao {
     @Query("UPDATE user_badges SET sync_status = 'synced' WHERE badge_id IN (:badgeIds)")
     suspend fun markBadgesAsSynced(badgeIds: List<String>)
 
+    @Query("DELETE FROM user_badges")
+    suspend fun clearUserBadges()
+
 
     // ── STATISTICHE GLOBALI DI RARITÀ ──
 

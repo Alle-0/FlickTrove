@@ -71,7 +71,8 @@ class MovieRepository @Inject constructor(
     @Named("trakt_api_key") private val traktApiKey: String,
     private val boxOfficeRepository: javax.inject.Provider<BoxOfficeRepository>,
     private val widgetNotifier: com.cinetrack.domain.WidgetNotifier,
-    @ApplicationContext private val context: Context
+    @ApplicationContext private val context: Context,
+    private val badgeDao: com.cinetrack.data.local.dao.BadgeDao
 ) : MovieLookupService {
 
     private val repositoryScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
@@ -741,6 +742,9 @@ class MovieRepository @Inject constructor(
         favoriteDao.clearAll()
         folderRepository.clearAll()
         preferenceRepository.clearAll()
+        badgeDao.clearUserBadges()
+        badgeDao.clearPersonFrequencies()
+        context.getSharedPreferences("flicktrove_badge_prefs", Context.MODE_PRIVATE).edit().clear().apply()
     }
 
 

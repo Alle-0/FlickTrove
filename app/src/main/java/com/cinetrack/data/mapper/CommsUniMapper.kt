@@ -66,7 +66,7 @@ object CommsUniMapper {
             userAvatarUrl = resolvedAvatar,
             text = comment.text ?: "",
             createdAt = date?.let { Timestamp(it) },
-            likesCount = comment.likeCount,
+            likesCount = maxOf(comment.likeCount, comment.likes.total, comment.likes.native + comment.likes.archived),
             likedBy = if (comment.viewerLiked == true && currentUserId != null) listOf(currentUserId) else emptyList(),
             parentId = comment.parentCommentId ?: comment.inReplyToCommentId,
             parentUserId = comment.inReplyToCommentId,
