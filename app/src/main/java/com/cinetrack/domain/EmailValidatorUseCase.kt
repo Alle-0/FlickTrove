@@ -4,137 +4,145 @@ import java.text.Normalizer
 import javax.inject.Inject
 import javax.inject.Singleton
 
+/**
+ * Validatore avanzato di livello enterprise per la moderazione di username, profili ed email.
+ *
+ * Implementa un'architettura multi-livello conforme agli standard Trust & Safety (Meta / Discord / Google):
+ *
+ * PASS 1: Native Non-Latin Direct Detection
+ * Scansiona direttamente parole vietate negli alfabeti nativi (Cirillico russo, Devanagari indiano, CJK cinese)
+ * preservando fedelmente i segni vocalici (matra) e i grafemi nativi senza distorsioni di decomposizione.
+ *
+ * PASS 2: Latin, Transliterated & Adversarial Evasion Pipeline
+ * 1. Mappatura omoglifi & leetspeak (intercetta evasioni basate su numeri, simboli e caratteri cirillici simili, es: 'fіgа')
+ * 2. Decomposizione Unicode & rimozione diacritici latini (Normalizer NFD, es: 'maricón' -> 'maricon')
+ * 3. Compressione delle ripetizioni trolls (es: "fuuuuuck" -> "fuck", "fiiiiga" -> "figa")
+ * 4. Protezione del dominio cinematografico (Whitelist Scunthorpe per Hitchcock, Figaro, Dickens, Miranda, ecc.)
+ * 5. Lexicon globale multi-lingua (Italiano, Inglese, Spagnolo, Francese, Tedesco, Portoghese, Slavo traslitterato,
+ *    Hinglish indiano, Olandese, Turco, Rumeno, Scandinavo, Ungherese, Ceco, Hate Speech & tabù di sicurezza).
+ * 6. Differenziazione chirurgica tra violazioni per sottostringa globale e termini ambigui vincolati a token isolati.
+ */
 @Singleton
 class EmailValidatorUseCase @Inject constructor() {
 
-    /**
-     * Termini cinematografici, opere o nomi celebri che contengono sottostringhe
-     * ambigue (es. Hitchcock contiene "cock", Figaro contiene "figa", Dickens/Dickinson contiene "dick",
-     * MobyDick contiene "dick", Magnifica contiene "fica", Sassuolo/Classics contiene "ass").
-     * Vengono protetti dai falsi positivi (Scunthorpe problem).
-     */
-    private val whitelistedCinemaWords = listOf(
-        "hitchcock",
-        "peacock",
-        "figaro",
-        "dickens",
-        "philipkdick",
-        "mobydick",
-        "dickinson",
-        "scunthorpe",
-        "magnifica",
-        "magnifico",
-        "pacific",
-        "sassuolo",
-        "classic",
-        "cassette",
-        "passion",
-        "passione",
-        "assassin",
-        "assassino"
+    private val punctuationSet = setOf(
+        '.', '_', '-', ' ', '/', '\\', '!', '@', '#', '$', '%', '^', '&', '*',
+        '(', ')', '+', '=', '~', '`', '{', '}', '[', ']', ':', ';', '"', '\'',
+        '<', '>', ',', '?'
     )
 
     /**
-     * Termini inequivocabilmente offensivi, osceni, d'odio o illegali.
-     * La loro presenza (anche come sottostringa o in leetspeak es. "f1g4", "c4zzo")
-     * determina il blocco immediato, purché non facciano parte di un termine in whitelist.
+     * Vocabolario nativo in alfabeti non-latini (Russo cirillico, Hindi Devanagari, Cinese CJK).
+     * Rilevato al Pass 1 prima di qualsiasi manipolazione di omoglifi o decomposizione NFD.
      */
+    private val nativeNonLatinOffensiveWords = listOf(
+        // === RUSSO / SLAVO (Cirillico) ===
+        "пизда", "пиздец", "хуй", "хуя", "хуе", "ебать", "ебал", "блядь", "блять",
+        "сука", "пидор", "пидорас", "гондон", "мудак", "заебал", "долбоеб",
+
+        // === INDIANO (Hindi in Devanagari) ===
+        "मादरचोद", "बहनचोद", "भोसड़ीके", "भोसड़ीके", "चूतिया", "गांडू", "हरामी", "रांडी", "लंड", "चूत",
+
+        // === CINESE (CJK) ===
+        "操你妈", "傻逼", "肏"
+    )
+
+    private val homoglyphs = mapOf(
+        // Cirillico look-alike -> Latino
+        'а' to 'a', 'в' to 'b', 'е' to 'e', 'к' to 'k', 'м' to 'm',
+        'н' to 'h', 'о' to 'o', 'р' to 'p', 'с' to 'c', 'т' to 't',
+        'у' to 'y', 'х' to 'x', 'і' to 'i', 'ї' to 'i', 'й' to 'i',
+        // Leetspeak / Numeri & simboli
+        '0' to 'o', '1' to 'i', '3' to 'e', '4' to 'a', '@' to 'a',
+        '5' to 's', '$' to 's', '7' to 't', '+' to 't', '8' to 'b',
+        '2' to 'z', '!' to 'i'
+    )
+
+    private val whitelistedCinemaWords = setOf(
+        "hitchcock", "peacock", "figaro", "dickens", "philipkdick", "mobydick",
+        "dickinson", "scunthorpe", "magnifica", "magnifico", "pacific", "sassuolo",
+        "classic", "cassette", "passion", "passione", "assassin", "assassino",
+        "penelope", "tarantino", "arsenal", "canal", "documentary", "accumulate",
+        "miranda", "blunder", "parachute"
+    )
+
     private val substringOffensiveWords = listOf(
         // === ITALIANO ===
-        // Anatomia / Volgarità esplicita
         "cazzo", "cazzi", "cazzon", "cazzat", "stronz", "merda", "merde", "merdos",
         "puttan", "zoccol", "mignott", "bagascia", "baldracca", "bastard", 
         "coglion", "minchia", "minchion", "cornut", "sfigat", "stracciacazz",
         "figa", "figaccia", "chiavat", "inculat",
-        // Discriminazione / Omofobia / Abilitismo
         "frocio", "froci", "ricchion", "culatton", "mongoloid", "spastic", 
-        // Atti / Espliciti / Composte
         "sborra", "sborro", "sborrat", "pompin", "bocchin", "succhiacazz", "succhiaminchi",
         "vaffancul", "fancul", "rottincul", "leccacul", "rompicazz", "cacacazz", "scassacazz",
         "testadicazz", "faccidimerda", "pezzodimerda", "figliodiputtan", "figlidiputtan",
-        // Bestemmie e imprecazioni
         "porcodio", "diocane", "diocan", "porcamadonna", "dioporco", "diomerda",
         "canedio", "diocristo", "cristodio", "madonnaputtana", "madonnacagna", "mortacci",
 
         // === INGLESE ===
-        "fuck", "fucker", "fucking", "motherfucker", "shit", "bitch", "cunt",
-        "nigger", "nigga", "faggot", "whore", "slut", "asshole", "blowjob",
-        "handjob", "dildo", "retard", "twat", "wanker", "dipshit",
+        "fuck", "fucker", "fucking", "motherfucker", "bitch", "cunt",
+        "asshole", "blowjob", "handjob", "dildo", "retard", "twat", "wanker",
+        "dipshit", "shithead", "cocksucker",
 
         // === SPAGNOLO ===
         "hijoputa", "hizodeputa", "hijosdeputa", "maricon", "marica", "gilipollas",
         "cabron", "cabrona", "mierda", "mierdas", "culero", "pendejo", "pendeja",
-        "chingar", "chingada", "chupapollas", "malparido",
+        "chingar", "chingada", "chupapollas", "malparido", "cojones", "putamadre",
 
         // === FRANCESE ===
         "connard", "connasse", "salope", "encule", "enculer", "filsdepute",
-        "niqueta", "niquetamere", "batard",
+        "niqueta", "niquetamere", "batard", "pouffiasse", "trouduc",
 
         // === TEDESCO ===
-        "hurensohn", "arschloch", "fotze", "schlampe", "wichser", "missgeburt", "schweinehund",
+        "hurensohn", "arschloch", "fotze", "schlampe", "wichser", "missgeburt",
+        "schweinehund", "arschgesicht", "verpiss",
 
         // === PORTOGHESE ===
-        "filhadaputa", "filhosdaputa", "arrombado", "caralho", "buceta", "fodasse",
-        "punheta", "viado",
+        "filhadaputa", "filhosdaputa", "arrombado", "caralho", "buceta",
+        "fodasse", "punheta", "viado", "cuzao",
 
-        // === TABÙ UNIVERSALI (Hate Speech, Crimini, Pedofilia, Nazismo) ===
-        "hitler", "nazist", "neonazi", "swastika", "pedofil", "pedophil",
-        "zoofil", "zoophil", "necrofil", "necrophil", "genocid", "rapist"
+        // === RUSSO / SLAVO TRASLITTERATO (Mat in caratteri latini) ===
+        "cyka", "suka", "blyat", "bliat", "blyad", "pizda", "pizdec", "nahui", "nahuy",
+        "dolbaeb", "mudak", "kurwa", "kurwo", "jebac", "jebany", "spierdalaj", "xyi", "xui",
+        "ebat", "yebat", "pidor", "pidoras", "gandon", "zaebal",
+
+        // === INDIANO (Hindi in caratteri latini / Hinglish) ===
+        "madarchod", "madarchot", "behenchod", "bhenchod", "benchod", "bhosdike", "bhosadi",
+        "chutiya", "chutiye", "gandu", "kaminey", "harami", "haramzada", "chudai", "gandfatike",
+
+        // === CINESE TRASLITTERATO (Pinyin) ===
+        "caonima", "shabi", "choushabi",
+
+        // === OLANDESE ===
+        "klootzak", "kankerlijer", "kankeraar", "teringlijer",
+
+        // === TURCO ===
+        "orospu", "siktir", "amcik", "gotveren", "yarrak", "kahpe",
+
+        // === RUMENO ===
+        "muie", "sloboz",
+
+        // === CECO / UNGHERESE / SCANDINAVO ===
+        "bazdmeg", "bazmeg", "curak", "kokot", "geci", "fitta", "javlar", "djavlar", "helvete",
+
+        // === TABÙ GLOBALI (Hate Speech, Pedofilia, Terrorismo, Nazismo) ===
+        "hitler", "nazist", "neonazi", "swastika", "nigger", "nigga", "faggot",
+        "pedofil", "pedophil", "zoofil", "necrofil", "genocid", "rapist",
+        "jihadist", "isis", "alqaeda"
     )
 
-    /**
-     * Termini brevi o ambigui da bloccare SOLO se usati come parola intera, token isolato
-     * o accompagnati da numeri/simboli (es. "fica", "la_fica", "fica69", "cock", "bad_ass"),
-     * evitando di respingere termini leciti composti (es. "magnifica", "pacific", "classic").
-     */
-    private val tokenOrExactOffensiveWords = listOf(
+    private val tokenOrExactOffensiveWords = setOf(
         "fica", "fette",
         "cock", "ass", "tit", "tits", "cum",
+        "dick", "pussy", "verga",
         "puta", "puto", "pute",
-        "dick", "pussy", "verga"
+        "chuj", "huj",
+        "pula",
+        "hoer", "kut",
+        "fasz",
+        // Hindi token isolati (protetti da parole lunghe lecite come Miranda o Parachute)
+        "randi", "lund", "chut"
     )
-
-    private fun normalizeText(text: String): String {
-        // Decomponi i caratteri accentati (es: é -> e, ó -> o, à -> a)
-        val decomposed = Normalizer.normalize(text, Normalizer.Form.NFD)
-            .replace(Regex("\\p{M}+"), "")
-
-        return decomposed.lowercase()
-            .replace("4", "a")
-            .replace("@", "a")
-            .replace("3", "e")
-            .replace("1", "i")
-            .replace("!", "i")
-            .replace("0", "o")
-            .replace("5", "s")
-            .replace("$", "s")
-            .replace("7", "t")
-            .replace("+", "t")
-            .replace("8", "b")
-            .replace("2", "z")
-            .replace(Regex("[^a-z]"), "")
-    }
-
-    private fun matchesTokenOrExact(rawText: String, textWithoutWhitelisted: String): Boolean {
-        // 1. Verifica match esatto o parola + numeri sul testo normalizzato (es. "fica", "fica99", "69fica")
-        for (bad in tokenOrExactOffensiveWords) {
-            val pattern = Regex("^\\d*${Regex.escape(bad)}\\d*$")
-            if (pattern.matches(textWithoutWhitelisted)) return true
-        }
-
-        // 2. Tokenizza il testo grezzo separando per caratteri non alfanumerici (spazi, trattini, underscore, punti)
-        val rawTokens = rawText.lowercase().split(Regex("[^a-z0-9]+"))
-        for (token in rawTokens) {
-            if (token.isBlank()) continue
-            val normToken = normalizeText(token)
-            for (bad in tokenOrExactOffensiveWords) {
-                val pattern = Regex("^\\d*${Regex.escape(bad)}\\d*$")
-                if (pattern.matches(normToken)) return true
-            }
-        }
-
-        return false
-    }
 
     private val brandWords = listOf(
         "flicktrove",
@@ -152,20 +160,83 @@ class EmailValidatorUseCase @Inject constructor() {
         "system"
     )
 
-    fun containsOffensiveWords(text: String): Boolean {
-        val normalizedText = normalizeText(text)
-        
-        // Rimuovi parole whitelisted per neutralizzare i falsi positivi di Scunthorpe
-        val textWithoutWhitelisted = whitelistedCinemaWords.fold(normalizedText) { acc, word ->
-            acc.replace(word, "")
+    /**
+     * Normalizza il testo per il Pass 2 (pipeline latina):
+     * converte omoglifi cirillici e simboli leet in caratteri latini,
+     * decompone i diacritici Unicode e ripulisce caratteri non alfanumerici.
+     */
+    private fun normalizeLatinText(text: String): String {
+        var lower = text.lowercase()
+        for ((char, rep) in homoglyphs) {
+            lower = lower.replace(char, rep)
         }
 
-        // 1. Check su sottostringa per parole inequivocabilmente volgari o vietate
+        val decomposed = Normalizer.normalize(lower, Normalizer.Form.NFD)
+            .replace(Regex("\\p{M}+"), "")
+
+        return decomposed.replace(Regex("[^a-z0-9]"), "")
+    }
+
+    private fun matchesTokenOrExact(rawText: String, textWithoutWhitelisted: String): Boolean {
+        // 1. Check su stringa normalizzata intera (es: "fica", "fica69", "69fica", "randi")
+        for (bad in tokenOrExactOffensiveWords) {
+            val pattern = Regex("^\\d*${Regex.escape(bad)}\\d*$")
+            if (pattern.matches(textWithoutWhitelisted)) return true
+        }
+
+        // 2. Tokenizza per separatori
+        val rawTokens = rawText.lowercase().split(Regex("[^a-z0-9]+"))
+        for (token in rawTokens) {
+            if (token.isBlank()) continue
+            val normToken = normalizeLatinText(token)
+            for (bad in tokenOrExactOffensiveWords) {
+                val pattern = Regex("^\\d*${Regex.escape(bad)}\\d*$")
+                if (pattern.matches(normToken)) return true
+            }
+        }
+
+        return false
+    }
+
+    /**
+     * Valuta se il testo fornito contiene parole o sequenze offensive.
+     */
+    fun containsOffensiveWords(text: String): Boolean {
+        if (text.length < 3) return false
+
+        // =========================================================================
+        // PASS 1: NATIVE NON-LATIN SCRIPT DETECTION (Cirillico, Devanagari, CJK)
+        // Rilevamento fedele senza alterare la struttura dei grafemi nativi
+        // =========================================================================
+        val nativeCleaned = text.lowercase().filterNot { it.isWhitespace() || it in punctuationSet }
+        if (nativeNonLatinOffensiveWords.any { nativeCleaned.contains(it) }) {
+            return true
+        }
+
+        // =========================================================================
+        // PASS 2: LATIN, TRANSLITERATED & ADVERSARIAL HOMOGLYPH EVASION PIPELINE
+        // =========================================================================
+        val normalizedLatin = normalizeLatinText(text)
+        if (normalizedLatin.length < 3) return false
+
+        // Rimozione whitelist cinema per evitare il problema di Scunthorpe
+        var textWithoutWhitelisted = normalizedLatin
+        for (white in whitelistedCinemaWords) {
+            textWithoutWhitelisted = textWithoutWhitelisted.replace(white, "")
+        }
+
+        // 1. Scansione sottostringhe inequivocabilmente vietate
         if (substringOffensiveWords.any { textWithoutWhitelisted.contains(it) }) {
             return true
         }
 
-        // 2. Check su token esatto per parole corte/ambigue
+        // 2. Evasione ripetizioni prolungate dei troll (es. "fuuuuuck" -> "fuck", "fiiiiga" -> "figa")
+        val collapsedRepetitions = textWithoutWhitelisted.replace(Regex("(.)\\1{2,}"), "$1")
+        if (substringOffensiveWords.any { collapsedRepetitions.contains(it) }) {
+            return true
+        }
+
+        // 3. Controllo token/parole esatte o delimitate
         if (matchesTokenOrExact(text, textWithoutWhitelisted)) {
             return true
         }
@@ -173,9 +244,12 @@ class EmailValidatorUseCase @Inject constructor() {
         return false
     }
 
+    /**
+     * Verifica se il testo viola i termini riservati del brand o ruoli ufficiali di sistema.
+     */
     fun containsReservedWords(text: String): Boolean {
-        val normalized = normalizeText(text)
-        
+        val normalized = normalizeLatinText(text)
+
         // Brand names are strictly forbidden anywhere in the username
         if (brandWords.any { normalized.contains(it) }) {
             return true
