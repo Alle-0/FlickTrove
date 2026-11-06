@@ -24,9 +24,9 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
@@ -42,9 +42,9 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
@@ -60,9 +60,9 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
@@ -78,9 +78,9 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
@@ -96,9 +96,9 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
@@ -114,20 +114,20 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
-        <!-- 7. Arrow Shaft and Feathers: Pure Crisp White -->
+        <!-- 7. Arrow Shaft and Feathers: Soft Pastel Pink -->
         <path
             android:pathData="M356.799 98.2077L366.558 104.147M366.558 104.147L359.283 115.652L356.799 98.2077L374.461 91.6513L366.558 104.147ZM366.558 104.147L401.119 125.18"
             android:strokeWidth="10"
             android:strokeLineCap="round"
             android:strokeLineJoin="round"
-            android:strokeColor="#FFFFFF" />
-        <!-- 8. Arrow Wave/Curve (ondina): Same gradient as the heart -->
+            android:strokeColor="#FDA4AF" />
+        <!-- 8. Arrow Wave/Curve (ondina): Same gradient as the heart/body -->
         <path
             android:pathData="M412.648 117.741C405.266 124.981 404.064 129.458 405.791 137.988"
             android:strokeWidth="10"
@@ -139,9 +139,9 @@
                     android:endX="464.063"
                     android:endY="155.419"
                     android:type="linear">
-                    <item android:offset="0.15" android:color="#FB7185" />
-                    <item android:offset="0.55" android:color="#F43F5E" />
-                    <item android:offset="0.90" android:color="#E11D48" />
+                    <item android:offset="0.0" android:color="#C084FC" />
+                    <item android:offset="0.45" android:color="#FB7185" />
+                    <item android:offset="0.95" android:color="#E11D48" />
                 </gradient>
             </aapt:attr>
         </path>
