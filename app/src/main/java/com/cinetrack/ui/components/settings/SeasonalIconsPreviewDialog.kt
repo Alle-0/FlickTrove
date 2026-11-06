@@ -35,6 +35,7 @@ fun SeasonalIconsPreviewDialog(
     seasonalAppIconEnabled: Boolean,
     onDismiss: () -> Unit
 ) {
+    val isValentineActive = remember { com.cinetrack.util.IconManager.isValentineSeason() }
     val isHalloweenActive = remember { com.cinetrack.util.IconManager.isHalloweenSeason() }
     val isChristmasActive = remember { com.cinetrack.util.IconManager.isChristmasSeason() }
 
@@ -77,13 +78,28 @@ fun SeasonalIconsPreviewDialog(
                 horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
                 // Classic Default Icon Card
-                val isClassicActive = !seasonalAppIconEnabled || (!isHalloweenActive && !isChristmasActive)
+                val isClassicActive = !seasonalAppIconEnabled || (!isValentineActive && !isHalloweenActive && !isChristmasActive)
                 SeasonalIconCard(
                     title = stringResource(R.string.settings_seasonal_preview_classic),
                     subtitle = stringResource(R.string.settings_seasonal_preview_classic_desc),
                     drawableRes = R.drawable.ic_launcher_foreground_vector,
                     badgeText = if (isClassicActive) stringResource(R.string.settings_seasonal_preview_active_now) else null,
                     accentColor = NeonTeal,
+                    modifier = Modifier.width(130.dp)
+                )
+
+                // Valentine Seasonal Icon Card
+                val isValentineCurrentlyActive = seasonalAppIconEnabled && isValentineActive
+                SeasonalIconCard(
+                    title = stringResource(R.string.settings_seasonal_preview_valentine),
+                    subtitle = stringResource(R.string.settings_seasonal_preview_valentine_desc),
+                    drawableRes = R.drawable.ic_launcher_foreground_valentine,
+                    badgeText = if (isValentineCurrentlyActive) {
+                        stringResource(R.string.settings_seasonal_preview_active_now)
+                    } else {
+                        stringResource(R.string.settings_seasonal_preview_upcoming)
+                    },
+                    accentColor = Color(0xFFF43F5E),
                     modifier = Modifier.width(130.dp)
                 )
 
@@ -154,19 +170,19 @@ private fun SeasonalIconCard(
         Box(
             contentAlignment = Alignment.Center,
             modifier = Modifier
-                .size(64.dp)
-                .clip(RoundedCornerShape(18.dp))
+                .size(72.dp)
+                .clip(RoundedCornerShape(20.dp))
                 .background(Color(0xFF0F1216))
                 .border(
                     width = 1.dp,
                     color = Color.White.copy(alpha = 0.15f),
-                    shape = RoundedCornerShape(18.dp)
+                    shape = RoundedCornerShape(20.dp)
                 )
         ) {
             androidx.compose.foundation.Image(
                 painter = androidx.compose.ui.res.painterResource(id = drawableRes),
                 contentDescription = null,
-                modifier = Modifier.size(54.dp)
+                modifier = Modifier.size(116.dp)
             )
         }
 

@@ -270,12 +270,14 @@ fun ShareStoryCardModal(
             // Dynamic scale derived directly from animatedPreviewWidth to keep card width 1:1 with container
             // and eliminate asynchronous scale dips/shrinking during aspect ratio transitions
             val currentPreviewScale = (animatedPreviewWidth.value * screenDensity) / currentRatio.targetWidthPx.toFloat()
+            val cardCornerRadiusDp = if (currentRatio == ShareAspectRatio.LANDSCAPE_16_9) 46.dp else 32.dp
+            val previewCardRadius = cardCornerRadiusDp * (animatedPreviewWidth / currentRatio.baseWidthDp)
 
             Box(
                 modifier = Modifier
                     .width(animatedPreviewWidth)
                     .aspectRatio(animatedRatio)
-                    .clip(RoundedCornerShape(24.dp))
+                    .clip(RoundedCornerShape(previewCardRadius))
                     .clipToBounds(),
                 contentAlignment = Alignment.Center
             ) {

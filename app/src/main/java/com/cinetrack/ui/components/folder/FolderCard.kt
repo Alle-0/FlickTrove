@@ -318,23 +318,26 @@ fun NewFolderCard(onClick: (Rect) -> Unit, modifier: Modifier = Modifier, alphaP
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 20.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                        .padding(vertical = 12.dp, horizontal = 12.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
                 ) {
                     Icon(
                         ImageVector.vectorResource(id = R.drawable.ic_plus),
                         null,
                         tint = Color.White.copy(alpha = 0.8f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier.size(18.dp)
                     )
                     
-                    Spacer(Modifier.width(12.dp))
+                    Spacer(Modifier.width(8.dp))
                     
                     Text(
                         text = stringResource(R.string.folders_new_folder),
                         color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.Medium,
+                        maxLines = 1,
+                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
                     )
                 }
             }
@@ -369,7 +372,7 @@ fun JoinFolderCard(onClick: (Rect) -> Unit, modifier: Modifier = Modifier, alpha
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(vertical = 12.dp, horizontal = 14.dp),
+                        .padding(vertical = 12.dp, horizontal = 12.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.Center
                 ) {

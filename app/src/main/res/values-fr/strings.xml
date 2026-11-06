@@ -1843,6 +1843,8 @@
     <string name="settings_seasonal_preview_upcoming">À VENIR</string>
     <string name="settings_seasonal_preview_christmas">Noël</string>
     <string name="settings_seasonal_preview_christmas_desc">1 déc. – 6 janv.</string>
+    <string name="settings_seasonal_preview_valentine">Saint-Valentin</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 févr. – 16 févr.</string>
 
     <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
     <string name="trophy_producer_already_unlocked_title">Mécène Officiel de FlickTrove</string>
@@ -1952,7 +1954,7 @@
     <string name="folder_invite_copied_toast">Code copié dans le presse-papier !</string>
     <string name="folder_invite_share">Partager</string>
     <string name="folder_invite_share_message">Rejoins mon dossier « %1$s » sur FlickTrove !\n%2$s\n\nCode d\'invitation : %3$s</string>
-    <string name="folder_join_button">Rejoindre avec un code</string>
+    <string name="folder_join_button">Rejoindre</string>
     <string name="folder_join_title">Rejoindre un dossier partagé</string>
     <string name="folder_join_desc">Entrez le code d\'invitation fourni par le propriétaire.</string>
     <string name="folder_join_hint">ex. FT-7K9P2</string>

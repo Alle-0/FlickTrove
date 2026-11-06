@@ -559,7 +559,7 @@ fun FoldersScreenContent(
                                             createTriggerBounds = bounds
                                             isCreateDialogOpen = true
                                         },
-                                        modifier = Modifier.weight(1.05f),
+                                        modifier = Modifier.weight(1f),
                                         alphaProgress = alphaProgress
                                     )
                                     JoinFolderCard(
@@ -571,7 +571,7 @@ fun FoldersScreenContent(
                                                 isJoinDialogOpen = true
                                             }
                                         },
-                                        modifier = Modifier.weight(0.95f),
+                                        modifier = Modifier.weight(1f),
                                         alphaProgress = alphaProgress
                                     )
                                 }

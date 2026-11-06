@@ -1858,6 +1858,8 @@
     <string name="trophy_unit_trophies">trofei</string>
     <string name="settings_seasonal_preview_christmas">Natale</string>
     <string name="settings_seasonal_preview_christmas_desc">1 dic – 6 gen</string>
+    <string name="settings_seasonal_preview_valentine">San Valentino</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 feb – 16 feb</string>
 
     <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
     <string name="trophy_producer_already_unlocked_title">Mecenate Ufficiale di FlickTrove</string>
@@ -1969,7 +1971,7 @@
     <string name="folder_invite_copied_toast">Codice copiato negli appunti!</string>
     <string name="folder_invite_share">Condividi</string>
     <string name="folder_invite_share_message">Unisciti alla mia cartella \"%1$s\" su FlickTrove!\n%2$s\n\nCodice d\'invito: %3$s</string>
-    <string name="folder_join_button">Unisciti con codice</string>
+    <string name="folder_join_button">Unisciti</string>
     <string name="folder_join_title">Unisciti a una cartella</string>
     <string name="folder_join_desc">Inserisci il codice d\'invito condiviso dal proprietario.</string>
     <string name="folder_join_hint">Es. FT-7K9P2</string>

@@ -1847,6 +1847,8 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="trophy_unit_trophies">трофеїв</string>
     <string name="settings_seasonal_preview_christmas">Різдво</string>
     <string name="settings_seasonal_preview_christmas_desc">1 груд – 6 січ</string>
+    <string name="settings_seasonal_preview_valentine">День закоханих</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 лют – 16 лют</string>
     <string name="trophy_producer_already_unlocked_title">Офіційний меценат FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">Щира подяка за віру в проєкт та підтримку незалежної розробки нашого кінододатку.</string>
     <string name="trophy_producer_support_intro">FlickTrove — незалежний додаток без реклами. Ви можете підтримати розробку добровільним донатом через Ko-fi або PayPal.</string>
@@ -1953,7 +1955,7 @@ Trakt ➔ Додаток: 6 год</string>
 %2$s
 
 Код запрошення: %3$s</string>
-    <string name="folder_join_button">Приєднатися за кодом</string>
+    <string name="folder_join_button">Приєднатися</string>
     <string name="folder_join_title">Приєднатися до спільної папки</string>
     <string name="folder_join_desc">Введіть код запрошення від власника папки.</string>
     <string name="folder_join_hint">напр. FT-7K9P2</string>

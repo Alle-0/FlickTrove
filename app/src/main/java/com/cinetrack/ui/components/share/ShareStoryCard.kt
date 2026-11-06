@@ -216,12 +216,16 @@ fun ShareStoryCard(
     )
 
     // Outer Card Container (responsive to config.aspectRatio)
+    // 46.dp per landscape (concentrico con poster da 26.dp + margin da 20.dp), 32.dp per gli altri formati
+    val cardCornerRadius = if (config.aspectRatio == ShareAspectRatio.LANDSCAPE_16_9) 46.dp else 32.dp
+    val cardShape = RoundedCornerShape(cardCornerRadius)
+
     Box(
         modifier = modifier
             .aspectRatio(config.aspectRatio.ratio)
-            .clip(RoundedCornerShape(28.dp))
+            .clip(cardShape)
             .background(Color(0xFF09090B))
-            .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(28.dp))
+            .border(1.dp, Color.White.copy(alpha = 0.12f), cardShape)
     ) {
         // --- 1. BACKGROUND LAYERS ---
         ShareCardBackground(

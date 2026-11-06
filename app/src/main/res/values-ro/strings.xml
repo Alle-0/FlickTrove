@@ -1849,6 +1849,8 @@ Introdu cel puțin 3 caractere</string>
     <string name="trophy_unit_trophies">trofee</string>
     <string name="settings_seasonal_preview_christmas">Crăciun</string>
     <string name="settings_seasonal_preview_christmas_desc">1 Dec – 6 Ian</string>
+    <string name="settings_seasonal_preview_valentine">Sfântul Valentin</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 Feb – 16 Feb</string>
     <string name="trophy_producer_already_unlocked_title">Susținător oficial FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">Mulțumiri din inimă pentru că ai crezut în proiect și ai susținut dezvoltarea independentă a aplicației.</string>
     <string name="trophy_producer_support_intro">FlickTrove este o aplicație independentă și fără reclame. Poți susține proiectul cu o donație opțională prin Ko-fi sau PayPal.</string>
@@ -1955,7 +1957,7 @@ Introdu cel puțin 3 caractere</string>
 %2$s
 
 Cod de invitație: %3$s</string>
-    <string name="folder_join_button">Alătură-te cu un cod</string>
+    <string name="folder_join_button">Alătură-te</string>
     <string name="folder_join_title">Alătură-te dosarului partajat</string>
     <string name="folder_join_desc">Introdu codul de invitație primit de la proprietarul dosarului.</string>
     <string name="folder_join_hint">ex. FT-7K9P2</string>

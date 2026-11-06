@@ -125,6 +125,7 @@ class MovieDetailViewModel @Inject constructor(
             lastTitle = null
             lastYear = null
             commentsDelegate.reset()
+            commentsDelegate.startLikeObservation(viewModelScope)
             // Load cached accent color instantly if available
             viewModelScope.launch {
                 val cachedHex = repository.getCachedColor("$type:$id")

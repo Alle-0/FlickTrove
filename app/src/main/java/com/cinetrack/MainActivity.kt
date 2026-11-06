@@ -150,9 +150,17 @@ class MainActivity : FragmentActivity() {
 
     override fun onStop() {
         super.onStop()
-        val colorName = settingsViewModel.accentColor.value
-        val isDynamic = settingsViewModel.dynamicAppIconEnabled.value
-        val isSeasonal = settingsViewModel.seasonalAppIconEnabled.value
-        com.cinetrack.util.IconManager.updateAppIcon(applicationContext, colorName, isDynamic, isSeasonal)
+        if (settingsViewModel.isSettingsLoaded.value) {
+            val colorName = settingsViewModel.accentColor.value
+            val isDynamic = settingsViewModel.dynamicAppIconEnabled.value
+            val isSeasonal = settingsViewModel.seasonalAppIconEnabled.value
+            com.cinetrack.util.IconManager.updateAppIcon(
+                context = applicationContext,
+                colorName = colorName,
+                isDynamicIconEnabled = isDynamic,
+                isSeasonalIconEnabled = isSeasonal,
+                restartApp = false
+            )
+        }
     }
 }

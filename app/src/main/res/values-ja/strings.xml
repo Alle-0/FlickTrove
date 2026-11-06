@@ -1849,6 +1849,8 @@
     <string name="settings_seasonal_preview_upcoming">近日公開</string>
     <string name="settings_seasonal_preview_christmas">クリスマス</string>
     <string name="settings_seasonal_preview_christmas_desc">12月1日～1月6日</string>
+    <string name="settings_seasonal_preview_valentine">バレンタイン</string>
+    <string name="settings_seasonal_preview_valentine_desc">2月7日～2月16日</string>
 
     <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
     <string name="trophy_producer_already_unlocked_title">FlickTrove公式パトロン</string>
@@ -1958,7 +1960,7 @@
     <string name="folder_invite_copied_toast">コードをクリップボードにコピーしました！</string>
     <string name="folder_invite_share">共有</string>
     <string name="folder_invite_share_message">FlickTroveのフォルダ「%1$s」に参加しよう！\n%2$s\n\n招待コード: %3$s</string>
-    <string name="folder_join_button">コードで参加</string>
+    <string name="folder_join_button">参加</string>
     <string name="folder_join_title">共有フォルダに参加</string>
     <string name="folder_join_desc">フォルダ所有者から共有された招待コードを入力してください。</string>
     <string name="folder_join_hint">例: FT-7K9P2</string>

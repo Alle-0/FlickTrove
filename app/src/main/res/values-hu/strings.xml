@@ -1849,6 +1849,8 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="trophy_unit_trophies">trófea</string>
     <string name="settings_seasonal_preview_christmas">Karácsony</string>
     <string name="settings_seasonal_preview_christmas_desc">Dec 1 – Jan 6</string>
+    <string name="settings_seasonal_preview_valentine">Valentin-nap</string>
+    <string name="settings_seasonal_preview_valentine_desc">Feb 7 – Feb 16</string>
     <string name="trophy_producer_already_unlocked_title">Hivatalos FlickTrove mecenás</string>
     <string name="trophy_producer_already_unlocked_desc">Szívből köszönjük, hogy hisz a projektben és támogatja az alkalmazás független fejlesztését.</string>
     <string name="trophy_producer_support_intro">A FlickTrove független, hirdetésmentes alkalmazás. Opcionális adománnyal támogathatja Ko-fi-n vagy PayPalon.</string>
@@ -1952,7 +1954,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="folder_invite_copied_toast">Kód a vágólapra másolva!</string>
     <string name="folder_invite_share">Megosztás</string>
     <string name="folder_invite_share_message">Csatlakozz a(z) \"%1$s\" mappámhoz a FlickTrove-on!\n%2$s\n\nMeghívó kód: %3$s</string>
-    <string name="folder_join_button">Csatlakozás kóddal</string>
+    <string name="folder_join_button">Csatlakozás</string>
     <string name="folder_join_title">Csatlakozás megosztott mappához</string>
     <string name="folder_join_desc">Adja meg a mappa tulajdonosa által megosztott meghívó kódot.</string>
     <string name="folder_join_hint">pl. FT-7K9P2</string>

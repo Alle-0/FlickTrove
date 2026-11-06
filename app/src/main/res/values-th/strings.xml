@@ -1840,6 +1840,8 @@
     <string name="trophy_unit_trophies">ถ้วยรางวัล</string>
     <string name="settings_seasonal_preview_christmas">คริสต์มาส</string>
     <string name="settings_seasonal_preview_christmas_desc">1 ธ.ค. – 6 ม.ค.</string>
+    <string name="settings_seasonal_preview_valentine">วาเลนไทน์</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 ก.พ. – 16 ก.พ.</string>
     <string name="trophy_producer_already_unlocked_title">ผู้อุปถัมภ์อย่างเป็นทางการของ FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">ขอขอบคุณจากใจจริงที่เชื่อมั่นในโครงการและสนับสนุนการพัฒนาแอปอย่างเป็นอิสระ</string>
     <string name="trophy_producer_support_intro">FlickTrove เป็นแอปอิสระที่ไม่มีโฆษณา คุณสามารถสนับสนุนโครงการได้ด้วยการบริจาคผ่าน Ko-fi หรือ PayPal</string>
@@ -1946,7 +1948,7 @@
 %2$s
 
 รหัสคำเชิญ: %3$s</string>
-    <string name="folder_join_button">เข้าร่วมด้วยรหัส</string>
+    <string name="folder_join_button">เข้าร่วม</string>
     <string name="folder_join_title">เข้าร่วมโฟลเดอร์ที่แชร์</string>
     <string name="folder_join_desc">ป้อนรหัสคำเชิญที่ได้รับจากเจ้าของโฟลเดอร์</string>
     <string name="folder_join_hint">เช่น FT-7K9P2</string>

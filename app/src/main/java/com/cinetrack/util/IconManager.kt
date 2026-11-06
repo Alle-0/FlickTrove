@@ -13,6 +13,7 @@ object IconManager {
     private const val ALIAS_BLUE = "com.cinetrack.MainActivityBlue"
     private const val ALIAS_HALLOWEEN = "com.cinetrack.MainActivityHalloween"
     private const val ALIAS_CHRISTMAS = "com.cinetrack.MainActivityChristmas"
+    private const val ALIAS_VALENTINE = "com.cinetrack.MainActivityValentine"
 
     fun isHalloweenSeason(): Boolean {
         val cal = java.util.Calendar.getInstance()
@@ -30,11 +31,19 @@ object IconManager {
                (month == java.util.Calendar.JANUARY && day <= 6)
     }
 
+    fun isValentineSeason(): Boolean {
+        val cal = java.util.Calendar.getInstance()
+        val month = cal.get(java.util.Calendar.MONTH) // Calendar.FEBRUARY = 1
+        val day = cal.get(java.util.Calendar.DAY_OF_MONTH)
+        return month == java.util.Calendar.FEBRUARY && day in 7..16
+    }
+
     fun updateAppIcon(
         context: Context,
         colorName: String,
         isDynamicIconEnabled: Boolean,
-        isSeasonalIconEnabled: Boolean = true
+        isSeasonalIconEnabled: Boolean = true,
+        restartApp: Boolean = true
     ) {
         val packageManager = context.packageManager
         
@@ -45,12 +54,14 @@ object IconManager {
             ALIAS_AMBER,
             ALIAS_BLUE,
             ALIAS_HALLOWEEN,
-            ALIAS_CHRISTMAS
+            ALIAS_CHRISTMAS,
+            ALIAS_VALENTINE
         )
         
         val activeAlias = when {
             isSeasonalIconEnabled && isHalloweenSeason() -> ALIAS_HALLOWEEN
             isSeasonalIconEnabled && isChristmasSeason() -> ALIAS_CHRISTMAS
+            isSeasonalIconEnabled && isValentineSeason() -> ALIAS_VALENTINE
             !isDynamicIconEnabled -> ALIAS_TEAL
             colorName == "Pink" -> ALIAS_PINK
             colorName == "Purple" -> ALIAS_PURPLE
@@ -88,13 +99,15 @@ object IconManager {
             }
         }
 
-        // Restart the app cleanly to apply the new icon
-        val intent = android.content.Intent(context, com.cinetrack.MainActivity::class.java).apply {
-            addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
-            action = android.content.Intent.ACTION_MAIN
-            addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+        if (restartApp) {
+            // Restart the app cleanly to apply the new icon
+            val intent = android.content.Intent(context, com.cinetrack.MainActivity::class.java).apply {
+                addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK or android.content.Intent.FLAG_ACTIVITY_CLEAR_TASK)
+                action = android.content.Intent.ACTION_MAIN
+                addCategory(android.content.Intent.CATEGORY_LAUNCHER)
+            }
+            context.startActivity(intent)
         }
-        context.startActivity(intent)
     }
 
     private val presetColors = mapOf(

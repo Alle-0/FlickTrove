@@ -1830,6 +1830,8 @@
     <string name="trophy_unit_trophies">danh hiệu</string>
     <string name="settings_seasonal_preview_christmas">Giáng Sinh</string>
     <string name="settings_seasonal_preview_christmas_desc">1 Tháng 12 – 6 Tháng 1</string>
+    <string name="settings_seasonal_preview_valentine">Valentine</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 Tháng 2 – 16 Tháng 2</string>
     <string name="trophy_producer_already_unlocked_title">Người Ủng Hộ Chính Thức FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">Chân thành cảm ơn bạn đã tin tưởng dự án và ủng hộ quá trình phát triển độc lập của ứng dụng.</string>
     <string name="trophy_producer_support_intro">FlickTrove là ứng dụng độc lập, không quảng cáo. Bạn có thể ủng hộ dự án bằng cách quyên góp tùy tâm qua Ko-fi hoặc PayPal.</string>
@@ -1933,7 +1935,7 @@
     <string name="folder_invite_copied_toast">Đã sao chép mã mời vào bộ nhớ tạm!</string>
     <string name="folder_invite_share">Chia sẻ</string>
     <string name="folder_invite_share_message">Tham gia thư mục \"%1$s\" của tôi trên FlickTrove!\n%2$s\n\nMã mời: %3$s</string>
-    <string name="folder_join_button">Tham gia bằng mã</string>
+    <string name="folder_join_button">Tham gia</string>
     <string name="folder_join_title">Tham gia thư mục chia sẻ</string>
     <string name="folder_join_desc">Nhập mã mời được chủ thư mục chia sẻ.</string>
     <string name="folder_join_hint">vd: FT-7K9P2</string>

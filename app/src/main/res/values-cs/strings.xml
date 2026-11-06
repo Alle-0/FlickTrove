@@ -1830,6 +1830,8 @@
     <string name="trophy_unit_trophies">trofejí</string>
     <string name="settings_seasonal_preview_christmas">Vánoce</string>
     <string name="settings_seasonal_preview_christmas_desc">1. prosinci – 6. lednu</string>
+    <string name="settings_seasonal_preview_valentine">Valentýn</string>
+    <string name="settings_seasonal_preview_valentine_desc">7. února – 16. února</string>
     <string name="trophy_producer_already_unlocked_title">Oficiální mecenáš FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">Srdečně děkujeme, že věříte v tento projekt a podporujete nezávislý vývoj aplikace.</string>
     <string name="trophy_producer_support_intro">FlickTrove je nezávislá aplikace bez reklam. Projekt můžete podpořit dobrovolným darem přes Ko-fi nebo PayPal.</string>
@@ -1933,7 +1935,7 @@
     <string name="folder_invite_copied_toast">Kód byl zkopírován do schránky!</string>
     <string name="folder_invite_share">Sdílet</string>
     <string name="folder_invite_share_message">Připojte se k mé složce \"%1$s\" na FlickTrove!\n%2$s\n\nKód pozvánky: %3$s</string>
-    <string name="folder_join_button">Připojit se kódem</string>
+    <string name="folder_join_button">Připojit se</string>
     <string name="folder_join_title">Připojit se ke sdílené složce</string>
     <string name="folder_join_desc">Zadejte kód pozvánky sdílený vlastníkem složky.</string>
     <string name="folder_join_hint">např. FT-7K9P2</string>

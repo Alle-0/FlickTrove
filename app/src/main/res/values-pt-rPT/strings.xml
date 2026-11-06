@@ -1835,6 +1835,8 @@
     <string name="trophy_unit_trophies">troféus</string>
     <string name="settings_seasonal_preview_christmas">Natal</string>
     <string name="settings_seasonal_preview_christmas_desc">1 dez – 6 jan</string>
+    <string name="settings_seasonal_preview_valentine">São Valentim</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 fev – 16 fev</string>
     <string name="trophy_producer_already_unlocked_title">Apoiador Oficial do FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">O nosso muito obrigado por acreditar no projeto e apoiar o desenvolvimento independente da aplicação.</string>
     <string name="trophy_producer_support_intro">O FlickTrove é uma aplicação independente e sem anúncios. Pode apoiar o projeto com uma doação livre através do Ko-fi ou PayPal.</string>
@@ -1938,7 +1940,7 @@
     <string name="folder_invite_copied_toast">Código copiado para a área de transferência!</string>
     <string name="folder_invite_share">Partilhar</string>
     <string name="folder_invite_share_message">Participe da minha pasta \"%1$s\" no FlickTrove!\n%2$s\n\nCódigo de convite: %3$s</string>
-    <string name="folder_join_button">Entrar com código</string>
+    <string name="folder_join_button">Entrar</string>
     <string name="folder_join_title">Entrar em pasta partilhada</string>
     <string name="folder_join_desc">Introduza o código de convite partilhado pelo proprietário.</string>
     <string name="folder_join_hint">ex. FT-7K9P2</string>

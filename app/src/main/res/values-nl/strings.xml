@@ -1841,6 +1841,8 @@
     <string name="trophy_unit_trophies">trofeeën</string>
     <string name="settings_seasonal_preview_christmas">Kerstmis</string>
     <string name="settings_seasonal_preview_christmas_desc">1 dec – 6 jan</string>
+    <string name="settings_seasonal_preview_valentine">Valentijnsdag</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 feb – 16 feb</string>
     <string name="trophy_producer_already_unlocked_title">Officiële FlickTrove Patron</string>
     <string name="trophy_producer_already_unlocked_desc">Hartelijk dank voor je vertrouwen in het project en voor het steunen van de onafhankelijke ontwikkeling van de app.</string>
     <string name="trophy_producer_support_intro">FlickTrove is een onafhankelijke, advertentievrije app. Je kunt het project steunen met een vrijwillige donatie via Ko-fi of PayPal.</string>
@@ -1944,7 +1946,7 @@
     <string name="folder_invite_copied_toast">Code gekopieerd naar klembord!</string>
     <string name="folder_invite_share">Delen</string>
     <string name="folder_invite_share_message">Doe mee met mijn map \"%1$s\" op FlickTrove!\n%2$s\n\nUitnodigingscode: %3$s</string>
-    <string name="folder_join_button">Deelnemen met code</string>
+    <string name="folder_join_button">Deelnemen</string>
     <string name="folder_join_title">Deelnemen aan gedeelde map</string>
     <string name="folder_join_desc">Voer de uitnodigingscode in die door de mapeigenaar is gedeeld.</string>
     <string name="folder_join_hint">bijv. FT-7K9P2</string>

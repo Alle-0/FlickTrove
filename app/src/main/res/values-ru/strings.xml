@@ -1843,6 +1843,8 @@
     <string name="settings_seasonal_preview_upcoming">СКОРО</string>
     <string name="settings_seasonal_preview_christmas">Рождество</string>
     <string name="settings_seasonal_preview_christmas_desc">1 дек – 6 янв</string>
+    <string name="settings_seasonal_preview_valentine">День влюблённых</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 февр – 16 февр</string>
 
     <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
     <string name="trophy_producer_already_unlocked_title">Официальный меценат FlickTrove</string>
@@ -1952,7 +1954,7 @@
     <string name="folder_invite_copied_toast">Код скопирован в буфер обмена!</string>
     <string name="folder_invite_share">Поделиться</string>
     <string name="folder_invite_share_message">Присоединяйся к моей папке «%1$s» в FlickTrove!\n%2$s\n\nКод приглашения: %3$s</string>
-    <string name="folder_join_button">Войти по коду</string>
+    <string name="folder_join_button">Присоединиться</string>
     <string name="folder_join_title">Присоединиться к общей папке</string>
     <string name="folder_join_desc">Введите код приглашения, полученный от владельца.</string>
     <string name="folder_join_hint">например, FT-7K9P2</string>

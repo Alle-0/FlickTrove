@@ -1849,6 +1849,8 @@
     <string name="settings_seasonal_preview_upcoming">即将到来</string>
     <string name="settings_seasonal_preview_christmas">圣诞节</string>
     <string name="settings_seasonal_preview_christmas_desc">12月1日 – 1月6日</string>
+    <string name="settings_seasonal_preview_valentine">情人节</string>
+    <string name="settings_seasonal_preview_valentine_desc">2月7日 – 2月16日</string>
 
     <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
     <string name="trophy_producer_already_unlocked_title">FlickTrove 官方赞助人</string>
@@ -1958,7 +1960,7 @@
     <string name="folder_invite_copied_toast">邀请码已复制到剪贴板！</string>
     <string name="folder_invite_share">分享</string>
     <string name="folder_invite_share_message">加入我在 FlickTrove 上的“%1$s”文件夹！\n%2$s\n\n邀请码: %3$s</string>
-    <string name="folder_join_button">使用邀请码加入</string>
+    <string name="folder_join_button">加入</string>
     <string name="folder_join_title">加入共享文件夹</string>
     <string name="folder_join_desc">输入文件夹创建者分享的邀请码。</string>
     <string name="folder_join_hint">例如 FT-7K9P2</string>

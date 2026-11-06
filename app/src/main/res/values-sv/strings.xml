@@ -1849,6 +1849,8 @@ Prova att förenkla sökningen</string>
     <string name="trophy_unit_trophies">troféer</string>
     <string name="settings_seasonal_preview_christmas">Jul</string>
     <string name="settings_seasonal_preview_christmas_desc">1 dec – 6 jan</string>
+    <string name="settings_seasonal_preview_valentine">Alla hjärtans dag</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 feb – 16 feb</string>
     <string name="trophy_producer_already_unlocked_title">Officiell FlickTrove-mecenat</string>
     <string name="trophy_producer_already_unlocked_desc">Varmt tack för att du tror på projektet och stödjer den oberoende utvecklingen.</string>
     <string name="trophy_producer_support_intro">FlickTrove är en oberoende, reklamfri app. Du kan stödja projektet med en valfri donation via Ko-fi eller PayPal.</string>
@@ -1952,7 +1954,7 @@ Prova att förenkla sökningen</string>
     <string name="folder_invite_copied_toast">Koden kopierades till urklipp!</string>
     <string name="folder_invite_share">Dela</string>
     <string name="folder_invite_share_message">Gå med i min mapp \"%1$s\" på FlickTrove!\n%2$s\n\nInbjudningskod: %3$s</string>
-    <string name="folder_join_button">Gå med med kod</string>
+    <string name="folder_join_button">Gå med</string>
     <string name="folder_join_title">Gå med i delad mapp</string>
     <string name="folder_join_desc">Ange inbjudningskoden som delats av mappens ägare.</string>
     <string name="folder_join_hint">t.ex. FT-7K9P2</string>

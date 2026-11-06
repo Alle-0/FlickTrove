@@ -1876,6 +1876,8 @@
     <string name="trophy_unit_trophies">trophies</string>
     <string name="settings_seasonal_preview_christmas">Christmas</string>
     <string name="settings_seasonal_preview_christmas_desc">Dec 1 – Jan 6</string>
+    <string name="settings_seasonal_preview_valentine">Valentine\'s</string>
+    <string name="settings_seasonal_preview_valentine_desc">Feb 7 – Feb 16</string>
 
     <!-- Executive Producer: Support & Donation Verification -->
     <string name="trophy_producer_already_unlocked_title">Official FlickTrove Patron</string>
@@ -1985,7 +1987,7 @@
     <string name="folder_invite_copied_toast">Code copied to clipboard!</string>
     <string name="folder_invite_share">Share</string>
     <string name="folder_invite_share_message">Join my \"%1$s\" folder on FlickTrove!\n%2$s\n\nInvite code: %3$s</string>
-    <string name="folder_join_button">Join with Code</string>
+    <string name="folder_join_button">Join</string>
     <string name="folder_join_title">Join Shared Folder</string>
     <string name="folder_join_desc">Enter the invite code shared by the folder owner.</string>
     <string name="folder_join_hint">e.g. FT-7K9P2</string>

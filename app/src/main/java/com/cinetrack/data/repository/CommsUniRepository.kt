@@ -5,14 +5,64 @@ import com.cinetrack.data.api.CommsUniCommentsResponse
 import com.cinetrack.data.api.CommsUniConversationStatsResponse
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.data.mapper.CommsUniMapper
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
 import retrofit2.Response
 import javax.inject.Inject
 import javax.inject.Singleton
+
+data class CommentLikeOverride(
+    val isLiked: Boolean,
+    val likesCount: Int
+)
 
 @Singleton
 class CommsUniRepository @Inject constructor(
     private val commsUniService: CommsUniService
 ) {
+
+    private val _liveCommentLikes = MutableStateFlow<Map<String, CommentLikeOverride>>(emptyMap())
+    val liveCommentLikes: StateFlow<Map<String, CommentLikeOverride>> = _liveCommentLikes.asStateFlow()
+
+    fun recordLikeOverride(commentId: String, isLiked: Boolean, likesCount: Int, alternativeId: String? = null) {
+        if (commentId.isBlank()) return
+        _liveCommentLikes.update { current ->
+            val updated = current.toMutableMap()
+            val override = CommentLikeOverride(isLiked, likesCount)
+            updated[commentId] = override
+            if (!alternativeId.isNullOrBlank() && alternativeId != commentId) {
+                updated[alternativeId] = override
+            }
+            updated
+        }
+    }
+
+    fun applyLikeOverrides(comments: List<AppComment>, currentUserId: String?): List<AppComment> {
+        val overrides = _liveCommentLikes.value
+        if (overrides.isEmpty()) return comments
+        return comments.map { comment ->
+            val override = overrides[comment.id] ?: comment.firestoreId?.let { overrides[it] }
+            if (override != null) {
+                val updatedLikedBy = if (override.isLiked) {
+                    if (currentUserId != null && !comment.likedBy.contains(currentUserId)) {
+                        comment.likedBy + currentUserId
+                    } else comment.likedBy
+                } else {
+                    if (currentUserId != null) {
+                        comment.likedBy.filterNot { it == currentUserId }
+                    } else emptyList()
+                }
+                comment.copy(
+                    likesCount = override.likesCount,
+                    likedBy = updatedLikedBy
+                )
+            } else {
+                comment
+            }
+        }
+    }
 
     /**
      * Recupera le statistiche della conversazione (es. numero di commenti)
@@ -415,7 +465,7 @@ class CommsUniRepository @Inject constructor(
             val response = result.getOrNull()
             val comments = response?.data?.allItems ?: emptyList()
             val sources = getSources().getOrNull()?.associateBy { it.slug } ?: emptyMap()
-            comments.map { 
+            val mapped = comments.map { 
                 CommsUniMapper.toAppComment(
                     comment = it,
                     sourcesMap = sources,
@@ -424,6 +474,7 @@ class CommsUniRepository @Inject constructor(
                     currentUserId = currentUserId
                 )
             }
+            applyLikeOverrides(mapped, currentUserId)
         } else {
             emptyList()
         }

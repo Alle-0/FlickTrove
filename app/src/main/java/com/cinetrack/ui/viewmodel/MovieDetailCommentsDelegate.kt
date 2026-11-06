@@ -18,6 +18,7 @@ import com.cinetrack.ui.utils.UiText
 import com.cinetrack.util.TranslationManager
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -57,14 +58,34 @@ class MovieDetailCommentsDelegate @Inject constructor(
     private val _showTranslationPrompt = MutableStateFlow<Pair<Long, String>?>(null)
     val showTranslationPrompt: StateFlow<Pair<Long, String>?> = _showTranslationPrompt.asStateFlow()
 
+    private var likeObservationJob: Job? = null
+
+    fun startLikeObservation(scope: CoroutineScope) {
+        if (likeObservationJob?.isActive == true) return
+        likeObservationJob = scope.launch {
+            commsUniRepository.liveCommentLikes.collect { overrides ->
+                if (overrides.isNotEmpty() && _appComments.value.isNotEmpty()) {
+                    val uid = FirebaseAuth.getInstance().currentUser?.uid
+                    val updated = commsUniRepository.applyLikeOverrides(_appComments.value, uid)
+                    if (updated != _appComments.value) {
+                        _appComments.value = updated
+                    }
+                }
+            }
+        }
+    }
+
     fun reset() {
+        likeObservationJob?.cancel()
+        likeObservationJob = null
         _appComments.value = emptyList()
         _translationStates.value = emptyMap()
         _showTranslationPrompt.value = null
     }
 
     fun setComments(comments: List<AppComment>) {
-        _appComments.value = comments
+        val uid = FirebaseAuth.getInstance().currentUser?.uid
+        _appComments.value = commsUniRepository.applyLikeOverrides(comments, uid)
     }
 
     suspend fun fetchPreviewComments(
@@ -81,7 +102,7 @@ class MovieDetailCommentsDelegate @Inject constructor(
                 val firestoreDeferred = async {
                     if (movieId != 0L) {
                         try {
-                            commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 5, mediaType)
+                            commentRepository.getTopCommentsForMediaPreview(movieId.toString(), 20, mediaType)
                         } catch (e: Exception) {
                             emptyList()
                         }
@@ -154,7 +175,11 @@ class MovieDetailCommentsDelegate @Inject constructor(
                     .filterNot { blockedAuthorsManager.isAuthorBlocked(it.userId, it.userDisplayName) }
                     .deduplicateComments()
                     .filterNot { it.isEffectivelyDeleted }
-                combined.sortedWith(
+
+                val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+                val withOverrides = commsUniRepository.applyLikeOverrides(combined, currentUid)
+
+                withOverrides.sortedWith(
                     compareByDescending<AppComment> {
                         it.originSlug.equals("flicktrove", ignoreCase = true) || it.originSlug.isBlank()
                     }.thenByDescending {
@@ -177,10 +202,12 @@ class MovieDetailCommentsDelegate @Inject constructor(
         scope: CoroutineScope,
         onTvdbIdResolved: ((Int) -> Unit)? = null
     ) {
+        startLikeObservation(scope)
         scope.launch {
             val comments = fetchPreviewComments(movieId, mediaType, tvdbId, imdbId, title, year, onTvdbIdResolved)
             if (comments.isNotEmpty() || _appComments.value.isEmpty()) {
-                _appComments.value = comments
+                val currentUid = FirebaseAuth.getInstance().currentUser?.uid
+                _appComments.value = commsUniRepository.applyLikeOverrides(comments, currentUid)
             }
         }
     }
@@ -239,6 +266,13 @@ class MovieDetailCommentsDelegate @Inject constructor(
             currentComments[index] = comment.copy(likedBy = newLikedBy, likesCount = newLikesCount)
             _appComments.value = currentComments
 
+            commsUniRepository.recordLikeOverride(
+                commentId = comment.id,
+                isLiked = !isLiked,
+                likesCount = newLikesCount,
+                alternativeId = comment.firestoreId
+            )
+
             scope.launch {
                 val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
                 if (isFlickTrove) {
@@ -251,6 +285,12 @@ class MovieDetailCommentsDelegate @Inject constructor(
                     commsUniRepository.likeComment(commentId)
                 }
                 if (result.isFailure && !isFlickTrove) {
+                    commsUniRepository.recordLikeOverride(
+                        commentId = comment.id,
+                        isLiked = isLiked,
+                        likesCount = comment.likesCount,
+                        alternativeId = comment.firestoreId
+                    )
                     onNetworkFallbackRefresh?.invoke()
                 }
             }

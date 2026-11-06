@@ -1851,6 +1851,8 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="trophy_unit_trophies">trofea</string>
     <string name="settings_seasonal_preview_christmas">Święta</string>
     <string name="settings_seasonal_preview_christmas_desc">1 gru – 6 sty</string>
+    <string name="settings_seasonal_preview_valentine">Walentynki</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 lut – 16 lut</string>
     <string name="trophy_producer_already_unlocked_title">Oficjalny Patron FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">Serdecznie dziękujemy za wiarę w projekt i wsparcie niezależnego rozwoju aplikacji.</string>
     <string name="trophy_producer_support_intro">FlickTrove to niezależna aplikacja bez reklam. Możesz wesprzeć projekt dobrowolną darowizną przez Ko-fi lub PayPal.</string>
@@ -1954,7 +1956,7 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="folder_invite_copied_toast">Kod skopiowany do schowka!</string>
     <string name="folder_invite_share">Udostępnij</string>
     <string name="folder_invite_share_message">Dołącz do mojego folderu \"%1$s\" w FlickTrove!\n%2$s\n\nKod zaproszenia: %3$s</string>
-    <string name="folder_join_button">Dołącz za pomocą kodu</string>
+    <string name="folder_join_button">Dołącz</string>
     <string name="folder_join_title">Dołącz do udostępnionego folderu</string>
     <string name="folder_join_desc">Wprowadź kod zaproszenia udostępniony przez właściciela folderu.</string>
     <string name="folder_join_hint">np. FT-7K9P2</string>

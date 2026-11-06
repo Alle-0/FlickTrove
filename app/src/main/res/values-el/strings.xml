@@ -1852,6 +1852,8 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="trophy_unit_trophies">τρόπαια</string>
     <string name="settings_seasonal_preview_christmas">Χριστούγεννα</string>
     <string name="settings_seasonal_preview_christmas_desc">1 Δεκ – 6 Ιαν</string>
+    <string name="settings_seasonal_preview_valentine">Άγιος Βαλεντίνος</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 Φεβ – 16 Φεβ</string>
     <string name="trophy_producer_already_unlocked_title">Επίσημος Υποστηρικτής FlickTrove</string>
     <string name="trophy_producer_already_unlocked_desc">Ειλικρινείς ευχαριστίες που πιστέψατε στο έργο και υποστηρίξατε την ανεξάρτητη ανάπτυξη της εφαρμογής.</string>
     <string name="trophy_producer_support_intro">Το FlickTrove είναι μια ανεξάρτητη εφαρμογή χωρίς διαφημίσεις. Μπορείτε να υποστηρίξετε το έργο με προαιρετική δωρεά μέσω Ko-fi ή PayPal.</string>
@@ -1955,7 +1957,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="folder_invite_copied_toast">Ο κωδικός αντιγράφηκε στο πρόχειρο!</string>
     <string name="folder_invite_share">Κοινοποίηση</string>
     <string name="folder_invite_share_message">Συνδεθείτε στον φάκελό μου \"%1$s\" στο FlickTrove!\n%2$s\n\nΚωδικός πρόσκλησης: %3$s</string>
-    <string name="folder_join_button">Σύνδεση με Κωδικό</string>
+    <string name="folder_join_button">Σύνδεση</string>
     <string name="folder_join_title">Σύνδεση σε Κοινόχρηστο Φάκελο</string>
     <string name="folder_join_desc">Εισαγάγετε τον κωδικό πρόσκλησης που μοιράστηκε ο κάτοχος.</string>
     <string name="folder_join_hint">π.χ. FT-7K9P2</string>

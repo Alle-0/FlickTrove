@@ -1841,6 +1841,8 @@
     <string name="settings_seasonal_preview_upcoming">जल्द आ रहा है</string>
     <string name="settings_seasonal_preview_christmas">क्रिसमस</string>
     <string name="settings_seasonal_preview_christmas_desc">1 दिस – 6 जन</string>
+    <string name="settings_seasonal_preview_valentine">वैलेंटाइन डे</string>
+    <string name="settings_seasonal_preview_valentine_desc">7 फर – 16 फर</string>
 
     <!-- Produttore Esecutivo: Supporto e Verifica Donazione -->
     <string name="trophy_producer_already_unlocked_title">FlickTrove के आधिकारिक संरक्षक</string>
@@ -1950,7 +1952,7 @@
     <string name="folder_invite_copied_toast">कोड क्लिपबोर्ड पर कॉपी किया गया!</string>
     <string name="folder_invite_share">साझा करें</string>
     <string name="folder_invite_share_message">FlickTrove पर मेरे \"%1$s\" फ़ोल्डर में शामिल हों!\n%2$s\n\nआमंत्रण कोड: %3$s</string>
-    <string name="folder_join_button">कोड से जुड़ें</string>
+    <string name="folder_join_button">जुड़ें</string>
     <string name="folder_join_title">साझा फ़ोल्डर में शामिल हों</string>
     <string name="folder_join_desc">फ़ोल्डर स्वामी द्वारा साझा किया गया आमंत्रण कोड दर्ज करें।</string>
     <string name="folder_join_hint">उदा. FT-7K9P2</string>

@@ -137,7 +137,7 @@ internal fun ShareVerticalPosterLayout(
         ) {
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val cornerRadiusDp = if (isSquare) 24.dp else 32.dp
+            val cornerRadiusDp = if (isSquare) 20.dp else 22.dp
             val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
             val showMvpOnPoster = state.config.showMvp && !actorName.isNullOrBlank()

@@ -256,6 +256,18 @@ class CommsUniViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            commsUniRepository.liveCommentLikes.collect { overrides ->
+                if (overrides.isNotEmpty() && _comments.value.isNotEmpty()) {
+                    val uid = auth.currentUser?.uid
+                    val updated = commsUniRepository.applyLikeOverrides(_comments.value, uid)
+                    if (updated != _comments.value) {
+                        _comments.value = updated
+                    }
+                }
+            }
+        }
+
+        viewModelScope.launch {
             combine(
                 blockedAuthorsManager.blockedAuthorIds,
                 blockedAuthorsManager.blockedAuthorNames
@@ -627,9 +639,11 @@ class CommsUniViewModel @Inject constructor(
                     combined.sortedByDescending { it.createdAt?.seconds ?: 0L }
                 }
 
-                _comments.value = sorted
+                val currentUid = auth.currentUser?.uid
+                val withOverrides = commsUniRepository.applyLikeOverrides(sorted, currentUid)
+                _comments.value = withOverrides
                 _isLoading.value = false
-                autoTranslateCommentsIfModelsDownloaded(sorted)
+                autoTranslateCommentsIfModelsDownloaded(withOverrides)
             }
         }
     }
@@ -665,7 +679,9 @@ class CommsUniViewModel @Inject constructor(
                     }
                 
                 currentList.addAll(toAdd)
-                _comments.value = currentList.deduplicateComments().filterDeletedWithoutReplies()
+                val currentUid = auth.currentUser?.uid
+                val deduplicated = currentList.deduplicateComments().filterDeletedWithoutReplies()
+                _comments.value = commsUniRepository.applyLikeOverrides(deduplicated, currentUid)
                 autoTranslateCommentsIfModelsDownloaded(toAdd)
                 
                 nextCursor = response.data.nextCursor
@@ -1218,6 +1234,13 @@ class CommsUniViewModel @Inject constructor(
             
             currentList[commentIndex] = updatedComment
             _comments.value = currentList
+
+            commsUniRepository.recordLikeOverride(
+                commentId = comment.id,
+                isLiked = !isLiked,
+                likesCount = updatedComment.likesCount,
+                alternativeId = comment.firestoreId
+            )
             
             // Network call
             val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
@@ -1244,6 +1267,12 @@ class CommsUniViewModel @Inject constructor(
                 if (revertIndex != -1) {
                     revertList[revertIndex] = comment
                     _comments.value = revertList
+                    commsUniRepository.recordLikeOverride(
+                        commentId = comment.id,
+                        isLiked = isLiked,
+                        likesCount = comment.likesCount,
+                        alternativeId = comment.firestoreId
+                    )
                 }
                 actionFeedbackManager.emit(UiText.DynamicString("Errore di rete con CommsUni."))
                 return@launch
@@ -1418,7 +1447,8 @@ class CommsUniViewModel @Inject constructor(
                 }.toMutableList()
                 
                 fixedExisting.addAll(toAdd)
-                _comments.value = fixedExisting.deduplicateComments()
+                val currentUid = auth.currentUser?.uid
+                _comments.value = commsUniRepository.applyLikeOverrides(fixedExisting.deduplicateComments(), currentUid)
                 autoTranslateCommentsIfModelsDownloaded(toAdd)
             }
         }

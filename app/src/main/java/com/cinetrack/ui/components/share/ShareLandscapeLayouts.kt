@@ -69,10 +69,13 @@ internal fun ShareLandscapePosterLayout(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val cardMargin = 20.dp
+    val posterCornerRadius = 26.dp
+
     Row(
         modifier = modifier
             .fillMaxSize()
-            .padding(start = 24.dp, end = 20.dp, top = 20.dp, bottom = 20.dp),
+            .padding(start = cardMargin, end = 20.dp, top = cardMargin, bottom = cardMargin),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.spacedBy(36.dp)
     ) {
@@ -84,7 +87,7 @@ internal fun ShareLandscapePosterLayout(
         ) {
             val actorName = state.movie.favoriteActorName
             val profilePath = state.movie.favoriteActorProfilePath ?: state.movie.favoriteActorTmdbPath
-            val cornerRadiusDp = 26.dp
+            val cornerRadiusDp = posterCornerRadius
             val posterShape = RoundedCornerShape(cornerRadiusDp)
             val showVibesOnPoster = state.config.showVibe && state.vibes.isNotEmpty()
             val showMvpOnPoster = state.config.showMvp && !actorName.isNullOrBlank()

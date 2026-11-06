@@ -113,12 +113,25 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    private val _isSettingsLoaded = MutableStateFlow(false)
+    val isSettingsLoaded: StateFlow<Boolean> = _isSettingsLoaded.asStateFlow()
+
     init {
         checkForUpdates(false)
         viewModelScope.launch {
             try {
                 movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             } catch (e: Exception) { }
+        }
+        viewModelScope.launch {
+            try {
+                kotlinx.coroutines.flow.combine(
+                    settingsRepository.accentColor,
+                    settingsRepository.dynamicAppIconEnabled,
+                    settingsRepository.seasonalAppIconEnabled
+                ) { _, _, _ -> true }.first()
+                _isSettingsLoaded.value = true
+            } catch (_: Exception) { }
         }
     }
 
@@ -320,7 +333,7 @@ class SettingsViewModel @Inject constructor(
     }
 
     val accentColor: StateFlow<String> = settingsRepository.accentColor
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), "Teal")
+        .stateIn(viewModelScope, SharingStarted.Eagerly, "Teal")
 
     val showFolderBookmarks: StateFlow<Boolean> = settingsRepository.showFolderBookmarks
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -350,10 +363,10 @@ class SettingsViewModel @Inject constructor(
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
     val dynamicAppIconEnabled: StateFlow<Boolean> = settingsRepository.dynamicAppIconEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     val seasonalAppIconEnabled: StateFlow<Boolean> = settingsRepository.seasonalAppIconEnabled
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+        .stateIn(viewModelScope, SharingStarted.Eagerly, true)
 
     val showLayoutToggle: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showLayoutToggle }

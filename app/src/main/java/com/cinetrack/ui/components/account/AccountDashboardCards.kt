@@ -92,7 +92,7 @@ fun GeneralStatsCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(id = R.string.dashboard_general_stats),
+                    text = stringResource(id = R.string.dashboard_general_stats).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -287,7 +287,7 @@ fun MyFoldersCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.dashboard_my_folders),
+                    text = stringResource(R.string.dashboard_my_folders).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -515,7 +515,7 @@ fun YourFlowCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.dashboard_your_flow),
+                    text = stringResource(R.string.dashboard_your_flow).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -632,7 +632,7 @@ fun TrophyShowcaseCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.dashboard_trophies),
+                    text = stringResource(R.string.dashboard_trophies).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
@@ -772,7 +772,7 @@ fun HistoryDiaryCard(
                 )
                 Spacer(modifier = Modifier.width(12.dp))
                 Text(
-                    text = stringResource(R.string.history_account_card_title),
+                    text = stringResource(R.string.history_account_card_title).uppercase(),
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.Bold,
                         color = Color.White,
