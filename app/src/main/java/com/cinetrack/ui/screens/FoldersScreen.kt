@@ -42,6 +42,12 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
+import androidx.compose.ui.focus.FocusRequester
+import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.text.selection.LocalTextSelectionColors
+import androidx.compose.foundation.text.selection.TextSelectionColors
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.foundation.gestures.detectTapGestures
 import com.cinetrack.ui.LocalModalHost
@@ -77,8 +83,6 @@ import androidx.compose.animation.core.EaseOutCirc
 import androidx.compose.animation.core.EaseInCirc
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.zIndex
-import androidx.compose.ui.input.pointer.pointerInput
-
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
@@ -430,6 +434,9 @@ fun FoldersScreenContent(
                     }
                 }
                 
+                val searchFocusRequester = remember { FocusRequester() }
+                var isSearchFocused by remember { mutableStateOf(false) }
+
                 LazyColumn(
                     state = listState,
                     contentPadding = PaddingValues(
@@ -453,6 +460,27 @@ fun FoldersScreenContent(
                         val progress = if (searchBarMaxHeightPx > 0f) (searchBarHeightPx / searchBarMaxHeightPx).coerceIn(0f, 1f) else 1f
                         val alphaProgress = ((progress - 0.5f) / 0.5f).coerceIn(0f, 1f)
                         
+                        val searchBorderColor by animateColorAsState(
+                            targetValue = if (isSearchFocused) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f),
+                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            label = "foldersSearchBorderColor"
+                        )
+                        val searchBorderWidth by animateDpAsState(
+                            targetValue = if (isSearchFocused) 1.5.dp else 1.dp,
+                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            label = "foldersSearchBorderWidth"
+                        )
+                        val searchIconTint by animateColorAsState(
+                            targetValue = if (isSearchFocused) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.5f),
+                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            label = "foldersSearchIconTint"
+                        )
+                        val searchBgAlpha by animateFloatAsState(
+                            targetValue = if (isSearchFocused) 0.08f else 0.05f,
+                            animationSpec = tween(durationMillis = 200, easing = FastOutSlowInEasing),
+                            label = "foldersSearchBgAlpha"
+                        )
+
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -466,8 +494,16 @@ fun FoldersScreenContent(
                                     .height(pillHeight)
                                     .graphicsLayer { alpha = alphaProgress }
                                     .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape),
+                                    .background(Color.White.copy(alpha = searchBgAlpha))
+                                    .border(searchBorderWidth, searchBorderColor, CircleShape)
+                                    .clickable(
+                                        interactionSource = remember { MutableInteractionSource() },
+                                        indication = null
+                                    ) {
+                                        try {
+                                            searchFocusRequester.requestFocus()
+                                        } catch (_: Exception) {}
+                                    },
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (alphaProgress > 0f) {
@@ -487,25 +523,41 @@ fun FoldersScreenContent(
                                             .padding(horizontal = 16.dp, vertical = 14.dp),
                                         verticalAlignment = Alignment.CenterVertically
                                     ) {
-                                        Icon(ImageVector.vectorResource(id = R.drawable.ic_lente), contentDescription = null, tint = Color.White.copy(alpha = 0.5f), modifier = Modifier.size(20.dp))
+                                        Icon(
+                                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
+                                            contentDescription = null,
+                                            tint = searchIconTint,
+                                            modifier = Modifier.size(20.dp)
+                                        )
                                         Spacer(Modifier.width(12.dp))
                                         Box(modifier = Modifier.weight(1f), contentAlignment = Alignment.CenterStart) {
                                             if (searchQuery.isEmpty()) {
                                                 Text(stringResource(R.string.search_folders), color = Color.White.copy(alpha = 0.5f), fontSize = 16.sp, modifier = Modifier.fillMaxWidth())
                                             }
-                                            androidx.compose.foundation.text.BasicTextField(
-                                                value = searchQuery,
-                                                onValueChange = viewModel::updateSearchQuery,
-                                                textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 16.sp),
-                                                singleLine = true,
-                                                modifier = Modifier.fillMaxWidth(),
-                                                cursorBrush = androidx.compose.ui.graphics.SolidColor(MaterialTheme.colorScheme.primary),
-                                                decorationBox = { innerTextField -> 
-                                                    Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
-                                                        innerTextField()
+                                            val primaryColor = MaterialTheme.colorScheme.primary
+                                            CompositionLocalProvider(
+                                                LocalTextSelectionColors provides TextSelectionColors(
+                                                    handleColor = primaryColor,
+                                                    backgroundColor = primaryColor.copy(alpha = 0.4f)
+                                                )
+                                            ) {
+                                                androidx.compose.foundation.text.BasicTextField(
+                                                    value = searchQuery,
+                                                    onValueChange = viewModel::updateSearchQuery,
+                                                    textStyle = androidx.compose.ui.text.TextStyle(color = Color.White, fontSize = 16.sp),
+                                                    singleLine = true,
+                                                    modifier = Modifier
+                                                        .fillMaxWidth()
+                                                        .focusRequester(searchFocusRequester)
+                                                        .onFocusChanged { isSearchFocused = it.isFocused },
+                                                    cursorBrush = androidx.compose.ui.graphics.SolidColor(primaryColor),
+                                                    decorationBox = { innerTextField -> 
+                                                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.CenterStart) {
+                                                            innerTextField()
+                                                        }
                                                     }
-                                                }
-                                            )
+                                                )
+                                            }
                                         }
                                         if (searchQuery.isNotEmpty()) {
                                             Spacer(Modifier.width(8.dp))

@@ -16,12 +16,29 @@ import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.rememberScrollState
+import androidx.compose.foundation.border
+import androidx.compose.foundation.background
+import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.layout.size
+import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.onGloballyPositioned
+import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -31,6 +48,9 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.card.MovieListCard
 import com.cinetrack.ui.components.common.CategoryPill
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -129,15 +149,67 @@ fun PersonFilmographyTabs(
     mainDepartment: String?,
     hazeState: HazeState,
     onTabChanged: (String) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hasActiveFilters: Boolean = false,
+    onFilterClick: ((Rect?) -> Unit)? = null
 ) {
-    Text(
-        text = stringResource(R.string.person_filmography),
-        color = Color.White,
-        fontSize = 24.sp,
-        fontWeight = FontWeight.Black,
-        modifier = Modifier.padding(horizontal = 16.dp)
-    )
+    var filterCoordinates by remember { mutableStateOf<LayoutCoordinates?>(null) }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.SpaceBetween
+    ) {
+        Text(
+            text = stringResource(R.string.person_filmography),
+            color = Color.White,
+            fontSize = 24.sp,
+            fontWeight = FontWeight.Black
+        )
+
+        if (onFilterClick != null) {
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .onGloballyPositioned { filterCoordinates = it }
+                    .bounceClick(scaleDown = 0.90f) {
+                        val bounds = filterCoordinates?.let { coords ->
+                            if (coords.isAttached) {
+                                val pos = coords.positionInWindow()
+                                Rect(pos.x, pos.y, pos.x + coords.size.width, pos.y + coords.size.height)
+                            } else null
+                        }
+                        onFilterClick(bounds)
+                    }
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = CircleShape,
+                        blurRadius = HazeStyles.SmallGlassBlurRadius,
+                        useOffscreenStrategy = true
+                    ),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_filtri),
+                    contentDescription = stringResource(R.string.filter_title),
+                    tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else Color.White,
+                    modifier = Modifier.size(18.dp)
+                )
+                if (hasActiveFilters) {
+                    Box(
+                        modifier = Modifier
+                            .align(Alignment.TopEnd)
+                            .padding(top = 8.dp, end = 8.dp)
+                            .size(7.dp)
+                            .background(MaterialTheme.colorScheme.primary, CircleShape)
+                            .border(1.dp, Color(0xFF14141E), CircleShape)
+                    )
+                }
+            }
+        }
+    }
 
     val scrollState = rememberScrollState()
     Row(

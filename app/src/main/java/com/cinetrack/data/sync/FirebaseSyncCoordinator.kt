@@ -54,6 +54,9 @@ class FirebaseSyncCoordinator @Inject constructor(
     private val syncScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
     private var lastFolderSyncTimestamp: Long = 0L
     private val FOLDER_SYNC_THROTTLE_MS = 20 * 60 * 1000L // 20 minuti
+    private var lastPreferencesSyncTimestamp: Long = 0L
+    private val PREFERENCES_SYNC_THROTTLE_MS = 15 * 60 * 1000L // 15 minuti di throttle locale per azzerare letture Firestore ripetute
+    private var preferencesSaveJob: kotlinx.coroutines.Job? = null
 
     suspend fun pushPendingChanges() = withContext(Dispatchers.IO) {
         // Push pending Movies
@@ -193,9 +196,13 @@ class FirebaseSyncCoordinator @Inject constructor(
             watchHistoryRepository.syncWatchHistoryFromRemote(remoteHistory)
             preferenceRepository.updateLastWatchHistorySyncTimestamp(now)
 
-            // 4. Pull Preferences
-            emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
-            syncPreferencesWithFirebase()
+            // 4. Pull Preferences (protetta da throttle di 15 minuti a meno che force == true)
+            val shouldSyncPrefs = force || (now - lastPreferencesSyncTimestamp > PREFERENCES_SYNC_THROTTLE_MS)
+            if (shouldSyncPrefs) {
+                emit(UiText.StringResource(R.string.sync_msg_syncing_preferences), 0.92f)
+                syncPreferencesWithFirebase()
+                lastPreferencesSyncTimestamp = now
+            }
             preferenceRepository.updateLastSyncTimestamp(now)
 
             // 5. Monthly Lazy Sync of TasteVector (Zero-waste Spark tier)
@@ -288,7 +295,10 @@ class FirebaseSyncCoordinator @Inject constructor(
     }
 
     suspend fun savePreferencesRemote(prefs: UserPreferences) {
-        syncScope.launch {
+        preferencesSaveJob?.cancel()
+        preferencesSaveJob = syncScope.launch {
+            // Debounce di 1.5s su scope applicativo: aggrega modifiche rapide a switch e slider
+            kotlinx.coroutines.delay(1_500L)
             try {
                 val prefsMap = mapOf(
                     "gridColumns" to prefs.gridColumns,

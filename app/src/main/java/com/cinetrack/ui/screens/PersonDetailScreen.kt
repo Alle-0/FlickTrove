@@ -67,6 +67,10 @@ import cafe.adriel.voyager.hilt.getViewModel
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.R
+import com.cinetrack.ui.components.home.HomeFilterModal
+import com.cinetrack.data.model.GenreConstants
+import com.cinetrack.data.model.SortConfig
+import androidx.compose.ui.geometry.Rect
 import com.cinetrack.data.api.Person
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.detail.PersonBioAndInfoSection
@@ -158,6 +162,13 @@ fun PersonDetailScreenContent(
     val scope = rememberCoroutineScope()
     val currentImageQuality = LocalImageQuality.current
 
+    var filterButtonBounds by remember { mutableStateOf<Rect?>(null) }
+    val filterModalScrimAlpha by animateFloatAsState(
+        targetValue = if (uiState.isFilterModalOpen) 0.6f else 0f,
+        animationSpec = spring(stiffness = Spring.StiffnessMedium),
+        label = "topBarScrimAlpha"
+    )
+
     val scrollState = rememberLazyListState()
     val density = LocalDensity.current
     val scrollThreshold = with(density) { 470.dp.toPx() }
@@ -192,7 +203,9 @@ fun PersonDetailScreenContent(
     val movieActions = LocalMovieActions.current
 
     BackHandler(enabled = true) {
-        if (movieActions.isAnyModalOpen) {
+        if (uiState.isFilterModalOpen) {
+            viewModel.dismissFilterModal()
+        } else if (movieActions.isAnyModalOpen) {
             movieActions.closeAll()
         } else {
             onBackClick()
@@ -323,13 +336,11 @@ fun PersonDetailScreenContent(
                         val castMovies = remember(p.combinedCredits) {
                             p.combinedCredits?.cast?.filter { it.mediaType == "movie" }
                                 ?.distinctBy { it.id }
-                                ?.sortedByDescending { it.releaseDate ?: "" }
                                 .orEmpty()
                         }
                         val castTV = remember(p.combinedCredits) {
                             p.combinedCredits?.cast?.filter { it.mediaType == "tv" }
                                 ?.distinctBy { it.id }
-                                ?.sortedByDescending { it.firstAirDate ?: "" }
                                 .orEmpty()
                         }
                         val allCrew = remember(p.combinedCredits) { p.combinedCredits?.crew.orEmpty() }
@@ -343,34 +354,87 @@ fun PersonDetailScreenContent(
                             if (mainDept == null) emptyList()
                             else allCrew.filter { it.mediaType == "movie" && (it.department == mainDept || (mainDept == "Directing" && it.job == "Director")) }
                                 .distinctBy { it.id }
-                                .sortedByDescending { it.releaseDate ?: "" }
                         }
                         val deptTV = remember(allCrew, mainDept) {
                             if (mainDept == null) emptyList()
                             else allCrew.filter { it.mediaType == "tv" && (it.department == mainDept || (mainDept == "Directing" && it.job == "Director")) }
                                 .distinctBy { it.id }
-                                .sortedByDescending { it.firstAirDate ?: "" }
                         }
                         val crewMovies = remember(allCrew, mainDept) {
                             allCrew.filter { it.mediaType == "movie" && (mainDept == null || !(it.department == mainDept || (mainDept == "Directing" && it.job == "Director"))) }
                                 .distinctBy { it.id }
-                                .sortedByDescending { it.releaseDate ?: "" }
                         }
                         val crewTV = remember(allCrew, mainDept) {
                             allCrew.filter { it.mediaType == "tv" && (mainDept == null || !(it.department == mainDept || (mainDept == "Directing" && it.job == "Director"))) }
                                 .distinctBy { it.id }
-                                .sortedByDescending { it.firstAirDate ?: "" }
                         }
 
-                        val filmo = remember(uiState.activeTab, castMovies, castTV, deptMovies, deptTV, crewMovies, crewTV) {
+                        fun filterAndSortCredits(list: List<Movie>, sort: SortConfig): List<Movie> {
+                            val filtered = list.filter { movie ->
+                                val isTv = movie.mediaType == "tv"
+                                val genreMatch = sort.selectedGenres.isEmpty() || sort.selectedGenres.any { g ->
+                                    val targets = GenreConstants.getEffectiveGenreIds(g, isTv)
+                                    movie.genreIds?.any { it in targets } == true
+                                }
+                                val countryMatch = sort.selectedCountries.isEmpty() ||
+                                    (movie.originCountry?.any { it.uppercase() in sort.selectedCountries } == true)
+                                val decadeMatch = sort.selectedDecades.isEmpty() || sort.selectedDecades.any { decade ->
+                                    val prefix = decade.take(3)
+                                    (movie.releaseDate?.startsWith(prefix) == true) || (movie.firstAirDate?.startsWith(prefix) == true)
+                                }
+                                val providerMatch = sort.selectedProviders.isEmpty() ||
+                                    movie.streamingProviderIds?.any { p -> p in sort.selectedProviders } == true
+                                genreMatch && countryMatch && decadeMatch && providerMatch
+                            }
+                            val isDesc = sort.sortDirection == "desc"
+                            return when (sort.sortType) {
+                                "release_date" -> {
+                                    if (isDesc) {
+                                        filtered.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" })
+                                    } else {
+                                        filtered.sortedWith(compareBy<Movie> { (it.releaseDate ?: it.firstAirDate)?.takeIf { d -> d.isNotBlank() } ?: "9999-99-99" }.thenBy { it.title ?: it.name ?: "" })
+                                    }
+                                }
+                                "vote_average" -> {
+                                    if (isDesc) {
+                                        filtered.sortedWith(compareByDescending<Movie> { it.voteAverage ?: 0.0 }.thenByDescending { it.voteCount ?: 0 })
+                                    } else {
+                                        filtered.sortedWith(compareBy<Movie> { it.voteAverage ?: 0.0 }.thenBy { it.voteCount ?: 0 })
+                                    }
+                                }
+                                "title" -> {
+                                    if (isDesc) {
+                                        filtered.sortedWith(compareByDescending<Movie> { it.title ?: it.name ?: "" })
+                                    } else {
+                                        filtered.sortedWith(compareBy<Movie> { it.title ?: it.name ?: "" })
+                                    }
+                                }
+                                else -> {
+                                    if (isDesc) {
+                                        filtered.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" })
+                                    } else {
+                                        filtered.sortedWith(compareBy<Movie> { (it.releaseDate ?: it.firstAirDate)?.takeIf { d -> d.isNotBlank() } ?: "9999-99-99" })
+                                    }
+                                }
+                            }
+                        }
+
+                        val filteredCastMovies = remember(castMovies, uiState.sortConfig) { filterAndSortCredits(castMovies, uiState.sortConfig) }
+                        val filteredCastTV = remember(castTV, uiState.sortConfig) { filterAndSortCredits(castTV, uiState.sortConfig) }
+                        val filteredDeptMovies = remember(deptMovies, uiState.sortConfig) { filterAndSortCredits(deptMovies, uiState.sortConfig) }
+                        val filteredDeptTV = remember(deptTV, uiState.sortConfig) { filterAndSortCredits(deptTV, uiState.sortConfig) }
+                        val filteredCrewMovies = remember(crewMovies, uiState.sortConfig) { filterAndSortCredits(crewMovies, uiState.sortConfig) }
+                        val filteredCrewTV = remember(crewTV, uiState.sortConfig) { filterAndSortCredits(crewTV, uiState.sortConfig) }
+
+                        val filmo = remember(uiState.activeTab, filteredCastMovies, filteredCastTV, filteredDeptMovies, filteredDeptTV, filteredCrewMovies, filteredCrewTV) {
                             when (uiState.activeTab) {
-                                "cast_movie" -> if (castMovies.isNotEmpty()) castMovies else deptMovies.ifEmpty { crewMovies.ifEmpty { castTV.ifEmpty { deptTV.ifEmpty { crewTV } } } }
-                                "cast_tv" -> if (castTV.isNotEmpty()) castTV else castMovies.ifEmpty { deptTV.ifEmpty { crewTV.ifEmpty { deptMovies.ifEmpty { crewMovies } } } }
-                                "dept_movie" -> if (deptMovies.isNotEmpty()) deptMovies else crewMovies.ifEmpty { castMovies.ifEmpty { deptTV.ifEmpty { crewTV.ifEmpty { castTV } } } }
-                                "dept_tv" -> if (deptTV.isNotEmpty()) deptTV else deptMovies.ifEmpty { crewTV.ifEmpty { castTV.ifEmpty { crewMovies.ifEmpty { castMovies } } } }
-                                "crew_movie" -> if (crewMovies.isNotEmpty()) crewMovies else deptMovies.ifEmpty { castMovies.ifEmpty { crewTV.ifEmpty { deptTV.ifEmpty { castTV } } } }
-                                "crew_tv" -> if (crewTV.isNotEmpty()) crewTV else crewMovies.ifEmpty { deptTV.ifEmpty { castTV.ifEmpty { deptMovies.ifEmpty { castMovies } } } }
-                                else -> deptMovies.ifEmpty { castMovies.ifEmpty { crewMovies.ifEmpty { deptTV.ifEmpty { castTV.ifEmpty { crewTV } } } } }
+                                "cast_movie" -> filteredCastMovies
+                                "cast_tv" -> filteredCastTV
+                                "dept_movie" -> filteredDeptMovies
+                                "dept_tv" -> filteredDeptTV
+                                "crew_movie" -> filteredCrewMovies
+                                "crew_tv" -> filteredCrewTV
+                                else -> filteredDeptMovies.ifEmpty { filteredCastMovies.ifEmpty { filteredCrewMovies.ifEmpty { filteredDeptTV.ifEmpty { filteredCastTV.ifEmpty { filteredCrewTV } } } } }
                             }
                         }
                         val filmoRows = remember(filmo, columns) {
@@ -425,15 +489,20 @@ fun PersonDetailScreenContent(
 
                                         PersonFilmographyTabs(
                                             activeTab = uiState.activeTab,
-                                            castMoviesCount = castMovies.size,
-                                            castTVCount = castTV.size,
-                                            deptMoviesCount = deptMovies.size,
-                                            deptTVCount = deptTV.size,
-                                            crewMoviesCount = crewMovies.size,
-                                            crewTVCount = crewTV.size,
+                                            castMoviesCount = filteredCastMovies.size,
+                                            castTVCount = filteredCastTV.size,
+                                            deptMoviesCount = filteredDeptMovies.size,
+                                            deptTVCount = filteredDeptTV.size,
+                                            crewMoviesCount = filteredCrewMovies.size,
+                                            crewTVCount = filteredCrewTV.size,
                                             mainDepartment = mainDept,
                                             hazeState = localHazeState,
-                                            onTabChanged = { viewModel.onTabChanged(it) }
+                                            onTabChanged = { viewModel.onTabChanged(it) },
+                                            hasActiveFilters = uiState.hasActiveFilters,
+                                            onFilterClick = { bounds ->
+                                                filterButtonBounds = bounds
+                                                viewModel.openFilterModal()
+                                            }
                                         )
                                     }
                                 }
@@ -468,11 +537,13 @@ fun PersonDetailScreenContent(
         val context = LocalContext.current
         PersonMorphingTopBar(
             title = uiState.person?.name ?: "",
+            profilePath = uiState.person?.profilePath ?: uiState.profilePath,
             localHazeState = localHazeState,
             symbioteProgress = symbioteProgress,
             detailStackDepth = detailStackDepth,
             onBackClick = onBackClick,
             onHomeClick = onHomeClick,
+            scrimAlpha = filterModalScrimAlpha,
             onShareClick = {
                 scope.launch(kotlinx.coroutines.Dispatchers.IO) {
                     val imageUrl = com.cinetrack.util.buildTmdbImageUrl(
@@ -522,6 +593,21 @@ fun PersonDetailScreenContent(
                     }
                 }
             }
+        )
+
+        HomeFilterModal(
+            isVisible = uiState.isFilterModalOpen,
+            isCollectionFilter = false,
+            isCommentsFilter = false,
+            hasTvSeries = true,
+            category = if (uiState.activeTab.contains("tv")) "tv" else "movie",
+            triggerBounds = filterButtonBounds,
+            sortConfig = uiState.sortConfig,
+            hazeState = localHazeState,
+            onSortConfigChanged = { newConfig ->
+                viewModel.updateSortConfig(newConfig)
+            },
+            onDismissRequest = { viewModel.dismissFilterModal() }
         )
     }
 }

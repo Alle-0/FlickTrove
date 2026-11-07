@@ -44,6 +44,7 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.data.model.Movie
+import com.cinetrack.util.getEpisodeWatchDate
 import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
@@ -285,7 +286,7 @@ fun EpisodeWatchDatesModal(
                                             modifier = Modifier
                                                 .bounceClick(scaleDown = 0.95f) {
                                                     val firstDate = eps.firstOrNull()?.let { ep ->
-                                                        parseWatchDateToLocalDate(episodeDatesMap["${seasonNum}_$ep"] ?: history.watchedAt)
+                                                        parseWatchDateToLocalDate(episodeDatesMap.getEpisodeWatchDate(seasonNum, ep) ?: history.watchedAt)
                                                     } ?: LocalDate.now()
                                                     activeEdit = TargetEdit(seasonNumber = seasonNum, episodeNumber = null, currentLocalDate = firstDate)
                                                 }
@@ -332,7 +333,7 @@ fun EpisodeWatchDatesModal(
                                         Column(modifier = Modifier.fillMaxWidth()) {
                                             eps.forEachIndexed { epIndex, ep ->
                                                 val isLast = epIndex == eps.size - 1
-                                                val rawDate = episodeDatesMap["${seasonNum}_$ep"] ?: history.watchedAt
+                                                val rawDate = episodeDatesMap.getEpisodeWatchDate(seasonNum, ep) ?: history.watchedAt
                                                 val displayDate = formatDateToLocalDisplay(rawDate)
                                                 val parsedDate = parseWatchDateToLocalDate(rawDate) ?: LocalDate.now()
 

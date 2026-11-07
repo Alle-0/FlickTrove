@@ -6,6 +6,8 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.Box
@@ -17,7 +19,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Surface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -48,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.R
 import com.cinetrack.ui.utils.ColorUtils
+import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
 
 /**
@@ -118,7 +120,7 @@ fun ListCalendarSwitcher(
         // Unified inertial flight oscillator: jumps up in scale, reaches target, and bounces softly into place
         if (isTabChangedByClick) {
             val riseDuration = 85
-            val peakBoost = 0.24f
+            val peakBoost = 0.10f
             launch {
                 flightDynamics.snapTo(0f)
                 flightDynamics.animateTo(peakBoost, tween(riseDuration, easing = FastOutSlowInEasing))
@@ -183,11 +185,11 @@ fun ListCalendarSwitcher(
         }
     }
 
-    // Spring animation for scaling the indicator when held/pressed or dragged (Identical to CategoryTabSelector)
+    // Spring animation for scaling the indicator when held/pressed or dragged
     val dragScaleY by animateFloatAsState(
         targetValue = if (!advancedEffectsEnabled) 1f
-            else if (isDragging) 1.25f
-            else if (isSelectedTabPressed) 1.07f
+            else if (isDragging) 1f
+            else if (isSelectedTabPressed) 1f
             else 1f,
         animationSpec = spring(
             dampingRatio = Spring.DampingRatioMediumBouncy,
@@ -197,7 +199,7 @@ fun ListCalendarSwitcher(
     )
     val dragScaleX by animateFloatAsState(
         targetValue = if (!advancedEffectsEnabled) 1f
-            else if (isDragging) 1.12f
+            else if (isDragging) 1.08f
             else if (isSelectedTabPressed) 1.04f
             else 1f,
         animationSpec = spring(
@@ -209,21 +211,15 @@ fun ListCalendarSwitcher(
 
     val pillPath = remember { Path() }
 
-    Surface(
-        shape = CircleShape,
-        color = trackColor,
-        border = if (borderColor != null) androidx.compose.foundation.BorderStroke(
-            1.dp,
-            borderColor
-        ) else null,
+    Box(
         modifier = modifier
             .size(width = tabWidthDp * 2, height = tabHeightDp)
-    ) {
-        Box(
-            modifier = Modifier
-                .width(tabWidthDp * 2)
-                .height(tabHeightDp)
-                .pointerInput(selectedIndex, tabWidthPx) {
+            .background(trackColor, CircleShape)
+            .then(
+                if (borderColor != null) Modifier.border(1.dp, borderColor, CircleShape)
+                else Modifier
+            )
+            .pointerInput(selectedIndex, tabWidthPx) {
                     var isDragActiveOnPill = false
                     val touchMargin = 8.dp.toPx()
                     var dragTargetLeft = 0f
@@ -254,7 +250,7 @@ fun ListCalendarSwitcher(
                             isDragActiveOnPill = false
                             isDragging = false
                             val currentLeft = animLeft.value - paddingPx
-                            val targetIndex = (currentLeft / tabWidthPx).toInt().coerceIn(0, 1)
+                            val targetIndex = (currentLeft / tabWidthPx).roundToInt().coerceIn(0, 1)
 
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
@@ -412,7 +408,7 @@ fun ListCalendarSwitcher(
                         val cornerRadius = pillHeight / 2f
 
                         val rawDragY = animDragY.value
-                        val maxVisualDrag = paddingPx * 0.75f
+                        val maxVisualDrag = paddingPx * 0.5f
                         val dragYOffset = if (rawDragY > 0) {
                             maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
                         } else if (rawDragY < 0) {
@@ -420,7 +416,8 @@ fun ListCalendarSwitcher(
                         } else 0f
 
                         val pillCenterY = (size.height / 2f) + dragYOffset
-                        val pillTop = pillCenterY - (pillHeight / 2f)
+                        val maxAllowedTop = (size.height - pillHeight - paddingPx * 0.1f).coerceAtLeast(0f)
+                        val pillTop = (pillCenterY - (pillHeight / 2f)).coerceIn(paddingPx * 0.1f, maxAllowedTop)
                         val pillLeft = centerXPx - (finalPillWidth / 2f)
 
                         drawRoundRect(
@@ -446,7 +443,7 @@ fun ListCalendarSwitcher(
                         val cornerRadius = pillHeight / 2f
 
                         val rawDragY = animDragY.value
-                        val maxVisualDrag = paddingPx * 0.75f
+                        val maxVisualDrag = paddingPx * 0.5f
                         val dragYOffset = if (rawDragY > 0) {
                             maxVisualDrag * (1f - kotlin.math.exp(-rawDragY / 80f))
                         } else if (rawDragY < 0) {
@@ -454,7 +451,8 @@ fun ListCalendarSwitcher(
                         } else 0f
 
                         val pillCenterY = (size.height / 2f) + dragYOffset
-                        val pillTop = pillCenterY - (pillHeight / 2f)
+                        val maxAllowedTop = (size.height - pillHeight - paddingPx * 0.1f).coerceAtLeast(0f)
+                        val pillTop = (pillCenterY - (pillHeight / 2f)).coerceIn(paddingPx * 0.1f, maxAllowedTop)
                         val pillLeft = centerXPx - (finalPillWidth / 2f)
 
                         pillPath.reset()
@@ -511,4 +509,3 @@ fun ListCalendarSwitcher(
             }
         }
     }
-}

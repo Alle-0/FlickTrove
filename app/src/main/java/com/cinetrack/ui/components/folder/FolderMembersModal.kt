@@ -57,6 +57,29 @@ import java.time.LocalDateTime
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 
+object FolderMembersAvatarCache {
+    val cache = java.util.concurrent.ConcurrentHashMap<String, String>()
+
+    fun get(userId: String): String? = cache[userId]
+
+    fun put(userId: String, url: String) {
+        cache[userId] = url
+    }
+
+    fun invalidate(userId: String) {
+        cache.remove(userId)
+    }
+}
+
+private fun extractInitials(displayName: String): String {
+    val parts = displayName.trim().split(Regex("\\s+")).filter { it.isNotBlank() }
+    return when {
+        parts.size >= 2 -> (parts[0].take(1) + parts[1].take(1)).uppercase()
+        parts.isNotEmpty() -> parts[0].take(2).uppercase()
+        else -> "?"
+    }
+}
+
 @Composable
 fun FolderMembersModal(
     folder: FolderEntity,
@@ -132,8 +155,7 @@ fun FolderMembersModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp, vertical = 6.dp)
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.05f))
+                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
                     .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
             ) {
                 CategoryTabSelector(
@@ -195,17 +217,23 @@ fun FolderMembersModal(
 
                         LaunchedEffect(member.userId) {
                             if (member.userAvatarUrl.isNullOrBlank()) {
-                                try {
-                                    val doc = com.google.firebase.firestore.FirebaseFirestore.getInstance()
-                                        .collection("users")
-                                        .document(member.userId)
-                                        .get()
-                                        .await()
-                                    val photo = doc.getString("photoUrl")
-                                    if (!photo.isNullOrBlank()) {
-                                        firestoreAvatarUrl = photo
+                                val cached = FolderMembersAvatarCache.get(member.userId)
+                                if (cached != null) {
+                                    firestoreAvatarUrl = cached.takeIf { it.isNotBlank() }
+                                } else {
+                                    try {
+                                        val doc = com.google.firebase.firestore.FirebaseFirestore.getInstance()
+                                            .collection("users")
+                                            .document(member.userId)
+                                            .get()
+                                            .await()
+                                        val photo = doc.getString("photoUrl")?.trim().orEmpty()
+                                        FolderMembersAvatarCache.put(member.userId, photo)
+                                        firestoreAvatarUrl = photo.takeIf { it.isNotBlank() }
+                                    } catch (_: Exception) {
+                                        FolderMembersAvatarCache.put(member.userId, "")
                                     }
-                                } catch (_: Exception) {}
+                                }
                             }
                         }
 
@@ -240,7 +268,7 @@ fun FolderMembersModal(
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
-                                    text = member.displayName.take(1).uppercase(),
+                                    text = extractInitials(member.displayName),
                                     style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
                                     color = folderColor
                                 )
@@ -480,71 +508,30 @@ fun FolderMembersModal(
 
     // Confirm remove member
     memberToRemove?.let { target ->
-        AlertDialog(
-            onDismissRequest = { memberToRemove = null },
-            title = {
-                Text(
-                    text = stringResource(R.string.folder_member_remove),
-                    color = Color.White
-                )
+        RemoveMemberDialog(
+            memberName = target.displayName,
+            onDismiss = { memberToRemove = null },
+            onConfirm = {
+                onRemoveMember(target)
+                memberToRemove = null
             },
-            text = {
-                Text(
-                    text = stringResource(R.string.folder_member_remove_confirm, target.displayName),
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        onRemoveMember(target)
-                        memberToRemove = null
-                    }
-                ) {
-                    Text(stringResource(R.string.folder_member_remove), color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { memberToRemove = null }) {
-                    Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.6f))
-                }
-            },
-            containerColor = Color(0xFF1E1E24)
+            hazeState = hazeState,
+            zIndex = 110f
         )
     }
 
     // Confirm leave folder
     if (showLeaveConfirm) {
-        AlertDialog(
-            onDismissRequest = { showLeaveConfirm = false },
-            title = {
-                Text(
-                    text = stringResource(R.string.folder_leave),
-                    color = Color.White
-                )
+        DeleteFolderDialog(
+            onDismiss = { showLeaveConfirm = false },
+            onConfirm = {
+                showLeaveConfirm = false
+                onLeaveFolder()
             },
-            text = {
-                Text(
-                    text = stringResource(R.string.folder_leave_confirm),
-                    color = Color.White.copy(alpha = 0.8f)
-                )
-            },
-            confirmButton = {
-                TextButton(
-                    onClick = {
-                        showLeaveConfirm = false
-                        onLeaveFolder()
-                    }
-                ) {
-                    Text(stringResource(R.string.folder_leave), color = Color.Red)
-                }
-            },
-            dismissButton = {
-                TextButton(onClick = { showLeaveConfirm = false }) {
-                    Text(stringResource(R.string.settings_cancel), color = Color.White.copy(alpha = 0.6f))
-                }
-            },
-            containerColor = Color(0xFF1E1E24)
+            folderName = folder.name,
+            isLeave = true,
+            hazeState = hazeState,
+            zIndex = 110f
         )
     }
 }

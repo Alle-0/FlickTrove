@@ -238,9 +238,20 @@ class CommsUniCommentsScreen(
         val globalHazeState = remember { HazeState() }
         val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
         var isUploadingImage by remember { mutableStateOf(false) }
-        var attachedMedia by remember { mutableStateOf(emptyList<String>()) }
+        var attachedMedia by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(emptyList<String>()) }
         var showGiphyPicker by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         val imageLoader = context.imageLoader
+
+        val currentAttachedMedia by rememberUpdatedState(attachedMedia)
+        DisposableEffect(Unit) {
+            onDispose {
+                if (activity?.isChangingConfigurations != true) {
+                    currentAttachedMedia.forEach { url ->
+                        viewModel.deleteDraftCommentImage(url)
+                    }
+                }
+            }
+        }
         
         var pendingCameraFile by remember { mutableStateOf<java.io.File?>(null) }
         var pendingCameraUri by remember { mutableStateOf<android.net.Uri?>(null) }

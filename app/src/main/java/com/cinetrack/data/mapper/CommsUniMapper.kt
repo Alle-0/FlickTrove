@@ -39,30 +39,43 @@ object CommsUniMapper {
             sourceRow?.displayName ?: if (resolvedSlug.contains("tvtime", ignoreCase = true)) "TV Time Refugees" else resolvedSlug
         }
 
+        val currentAuthUid = currentUserId ?: com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
         val isMyComment = (comment.id in myCommentIds) ||
             (!comment.userId.isNullOrBlank() && (
                 (myAuthorId != null && comment.userId == myAuthorId) ||
                 (myActorId != null && comment.userId == myActorId) ||
                 (rawUid != null && comment.userId == rawUid) ||
-                (currentUserId != null && comment.userId == currentUserId)
+                (currentAuthUid != null && comment.userId == currentAuthUid)
             ))
 
-        val resolvedAvatar = if (isMyComment && !cachedLocalAvatar.isNullOrBlank()) {
-            cachedLocalAvatar.trim()
+        val effectiveLocalName = cachedLocalName?.trim()?.takeIf { it.isNotBlank() }
+            ?: if (isMyComment) com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.displayName?.trim()?.takeIf { it.isNotBlank() } else null
+
+        val effectiveLocalAvatar = cachedLocalAvatar?.trim()?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+            ?: if (isMyComment) com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()?.trim()?.takeIf { it.isNotBlank() && !it.startsWith("data:image") } else null
+
+        val resolvedAvatar = if (isMyComment) {
+            effectiveLocalAvatar ?: ""
         } else if (!comment.userAvatar.isNullOrBlank()) {
             comment.userAvatar.trim()
         } else {
             ""
         }
 
-        val resolvedUserId = if (isMyComment) (currentUserId ?: comment.userId ?: "") else (comment.userId ?: "")
+        val resolvedUserId = if (isMyComment) (currentAuthUid ?: comment.userId ?: "") else (comment.userId ?: "")
+
+        val resolvedDisplayName = if (isMyComment && !effectiveLocalName.isNullOrBlank()) {
+            effectiveLocalName
+        } else {
+            comment.userName ?: ""
+        }
 
         return AppComment(
             id = comment.id,
             mediaId = currentEntityId,
             mediaType = currentEntityType,
             userId = resolvedUserId,
-            userDisplayName = if (isMyComment && comment.userName.isNullOrBlank() && !cachedLocalName.isNullOrBlank()) cachedLocalName else (comment.userName ?: ""),
+            userDisplayName = resolvedDisplayName,
             userAvatarUrl = resolvedAvatar,
             text = comment.text ?: "",
             createdAt = date?.let { Timestamp(it) },

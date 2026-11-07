@@ -44,6 +44,7 @@ fun FlickTroveModal(
     maxWidth: Dp = 440.dp,
     maxWidthFraction: Float = 0.92f,
     contentPadding: PaddingValues = PaddingValues(horizontal = 22.dp, vertical = 24.dp),
+    zIndex: Float = 100f,
     content: @Composable ColumnScope.() -> Unit
 ) {
     val cardShape = RoundedCornerShape(32.dp)
@@ -94,7 +95,7 @@ fun FlickTroveModal(
         Box(
                 modifier = modifier
                     .fillMaxSize()
-                    .zIndex(100f)
+                    .zIndex(zIndex)
                     .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * modalAlpha))
                     .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
                         keyboardController?.hide()

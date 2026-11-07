@@ -93,7 +93,10 @@ interface WatchHistoryDao {
     @Query("SELECT * FROM watch_history WHERE syncStatus != 'deleted' ORDER BY watchedAt DESC")
     fun getAllWatchHistoryFlow(): Flow<List<WatchHistoryEntity>>
 
-    @Query("SELECT * FROM watch_history WHERE syncStatus = 'pending' OR syncStatus = 'deleted'")
+    @Query("SELECT * FROM watch_history WHERE id = :id LIMIT 1")
+    suspend fun getById(id: Long): WatchHistoryEntity?
+
+    @Query("SELECT * FROM watch_history WHERE syncStatus = 'pending' OR syncStatus = 'pending_update' OR syncStatus = 'deleted'")
     suspend fun getPendingSync(): List<WatchHistoryEntity>
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)

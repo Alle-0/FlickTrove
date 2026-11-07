@@ -108,6 +108,12 @@ class MarkEpisodeWatchedCallback : ActionCallback {
                 )
                 val repository = entryPoint.movieRepository()
                 repository.saveMovie(updatedShow)
+                repository.recordEpisodeWatchState(
+                    movie = updatedShow,
+                    changedEpisodes = listOf(seasonNum to episodeNum),
+                    isAdding = true,
+                    isProgressAdvancing = true
+                )
                 savedViaRepo = true
                 Log.d(TAG, "Show updated via MovieRepository: id=$showId")
             } catch (e: Exception) {

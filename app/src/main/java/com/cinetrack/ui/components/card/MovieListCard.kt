@@ -76,7 +76,7 @@ fun MovieListCard(
     folderColors: List<Color> = emptyList(),
     showFolderBookmarks: Boolean = true,
     showBadges: Boolean = true,
-    showAdvancedBadges: Boolean = false,
+    showAdvancedBadges: Boolean = true,
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
     hasAnimatedSet: MutableSet<String>? = null,
@@ -231,13 +231,28 @@ fun MovieListCard(
             )
 
             // Animated Folder Bookmarks (Top Left)
+            val hasFolderBookmarks = showFolderBookmarks && folderColors.isNotEmpty()
+            var lastFolderColors by remember(movie.id) { mutableStateOf(folderColors) }
+            if (folderColors.isNotEmpty()) {
+                lastFolderColors = folderColors
+            }
+
             androidx.compose.animation.AnimatedVisibility(
-                visible = showFolderBookmarks,
-                enter = fadeIn(tween(250)) + slideInVertically(tween(250)) { -it / 2 },
-                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { -it / 2 },
+                visible = hasFolderBookmarks,
+                enter = fadeIn(tween(250)) + slideInVertically(
+                    initialOffsetY = { -it },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
+                exit = fadeOut(tween(180)) + slideOutVertically(
+                    targetOffsetY = { -it },
+                    animationSpec = tween(200, easing = FastOutSlowInEasing)
+                ),
                 modifier = Modifier.align(Alignment.TopStart)
             ) {
-                MovieFolderBookmarks(folderColors)
+                MovieFolderBookmarks(lastFolderColors)
             }
 
             // Dynamic Badges (Top Right) with smooth animated entrance/exit

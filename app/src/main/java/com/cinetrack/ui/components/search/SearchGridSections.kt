@@ -1,7 +1,16 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibilityScope
 import androidx.compose.animation.ExperimentalAnimationApi
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -94,54 +103,69 @@ fun SearchGridMovieItem(
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
-    onEmitMessage: (String) -> Unit
+    onEmitMessage: (String) -> Unit,
+    modifier: Modifier = Modifier
 ) {
-    if (columns == 1) {
-        MovieListCard(
-            movie = movie,
-            modifier = Modifier.fillMaxWidth(),
-            isFavorite = movieStatus?.favorite ?: false,
-            isWatched = movieStatus?.watched ?: false,
-            isReminder = movieStatus?.reminder ?: false,
-            progress = movieStatus?.progress?.toFloat() ?: 0f,
-            folderColors = folderColors,
-            showFolderBookmarks = showFolderBookmarks,
-            hasAnimatedSet = hasAnimatedSet,
-            staggerIndex = staggerIndex,
-            onPress = { 
-                keyboardController?.hide()
-                onMovieClick(movie) 
+    Box(
+        modifier = modifier.fillMaxWidth(),
+        contentAlignment = Alignment.Center
+    ) {
+        AnimatedContent(
+            targetState = columns == 1,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
+                    .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
             },
-            onAction = { onToggleFavorite(movie) },
-            onLongPress = { m, pressOffset, cardPos ->
-                onLongPress(m, pressOffset, cardPos)
-            },
-            onMessage = { onEmitMessage(it) }
-        )
-    } else {
-        MovieCard(
-            movie = movie,
-            cardWidth = cardWidth,
-            isFavorite = movieStatus?.favorite ?: false,
-            isWatched = movieStatus?.watched ?: false,
-            isReminder = movieStatus?.reminder ?: false,
-            progress = movieStatus?.progress?.toFloat() ?: 0f,
-            personalRating = movieStatus?.personalRating,
-            folderColors = folderColors,
-            showFolderBookmarks = showFolderBookmarks,
-            hasAnimatedSet = hasAnimatedSet,
-            animatedVisibilityScope = animatedVisibilityScope,
-            staggerIndex = staggerIndex,
-            onPress = { 
-                keyboardController?.hide()
-                onMovieClick(movie) 
-            },
-            onAction = { onToggleFavorite(movie) },
-            onLongPress = { m, pressOffset, cardPos ->
-                onLongPress(m, pressOffset, cardPos)
-            },
-            onMessage = { onEmitMessage(it) }
-        )
+            label = "SearchGridCardLayoutTransition"
+        ) { isList ->
+            if (isList) {
+                MovieListCard(
+                    movie = movie,
+                    modifier = Modifier.fillMaxWidth(),
+                    isFavorite = movieStatus?.favorite ?: false,
+                    isWatched = movieStatus?.watched ?: false,
+                    isReminder = movieStatus?.reminder ?: false,
+                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                    folderColors = folderColors,
+                    showFolderBookmarks = showFolderBookmarks,
+                    hasAnimatedSet = hasAnimatedSet,
+                    staggerIndex = staggerIndex,
+                    onPress = { 
+                        keyboardController?.hide()
+                        onMovieClick(movie) 
+                    },
+                    onAction = { onToggleFavorite(movie) },
+                    onLongPress = { m, pressOffset, cardPos ->
+                        onLongPress(m, pressOffset, cardPos)
+                    },
+                    onMessage = { onEmitMessage(it) }
+                )
+            } else {
+                MovieCard(
+                    movie = movie,
+                    cardWidth = cardWidth,
+                    isFavorite = movieStatus?.favorite ?: false,
+                    isWatched = movieStatus?.watched ?: false,
+                    isReminder = movieStatus?.reminder ?: false,
+                    progress = movieStatus?.progress?.toFloat() ?: 0f,
+                    personalRating = movieStatus?.personalRating,
+                    folderColors = folderColors,
+                    showFolderBookmarks = showFolderBookmarks,
+                    hasAnimatedSet = hasAnimatedSet,
+                    animatedVisibilityScope = animatedVisibilityScope,
+                    staggerIndex = staggerIndex,
+                    onPress = { 
+                        keyboardController?.hide()
+                        onMovieClick(movie) 
+                    },
+                    onAction = { onToggleFavorite(movie) },
+                    onLongPress = { m, pressOffset, cardPos ->
+                        onLongPress(m, pressOffset, cardPos)
+                    },
+                    onMessage = { onEmitMessage(it) }
+                )
+            }
+        }
     }
 }
 
@@ -359,6 +383,14 @@ fun LazyGridScope.searchTrendingMoviesSection(
                     val movie = movieStatus ?: baseMovie
                     val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                     SearchGridMovieItem(
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = tween(280),
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            fadeOutSpec = tween(200)
+                        ),
                         movie = movie,
                         movieStatus = movieStatus,
                         folderColors = folderColors,
@@ -451,6 +483,14 @@ fun LazyGridScope.searchTrendingTvSection(
                     val movie = movieStatus ?: baseMovie
                     val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                     SearchGridMovieItem(
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = tween(280),
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            fadeOutSpec = tween(200)
+                        ),
                         movie = movie,
                         movieStatus = movieStatus,
                         folderColors = folderColors,
@@ -721,6 +761,14 @@ fun LazyGridScope.searchResultsGridSection(
                 val movie = movieStatus ?: baseMovie
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                 SearchGridMovieItem(
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(280),
+                        placementSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        ),
+                        fadeOutSpec = tween(200)
+                    ),
                     movie = movie,
                     movieStatus = movieStatus,
                     folderColors = folderColors,
@@ -753,6 +801,14 @@ fun LazyGridScope.searchResultsGridSection(
                 val movie = movieStatus ?: baseMovie
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                 SearchGridMovieItem(
+                    modifier = Modifier.animateItem(
+                        fadeInSpec = tween(280),
+                        placementSpec = spring(
+                            dampingRatio = Spring.DampingRatioLowBouncy,
+                            stiffness = Spring.StiffnessMediumLow
+                        ),
+                        fadeOutSpec = tween(200)
+                    ),
                     movie = movie,
                     movieStatus = movieStatus,
                     folderColors = folderColors,

@@ -193,8 +193,6 @@ fun HistoryScreenContent(
                     initialPage = uiState.selectedViewMode.ordinal,
                     pageCount = { 2 }
                 )
-                val coroutineScope = rememberCoroutineScope()
-                var currentCalendarScopeIndex by remember { mutableIntStateOf(0) }
 
                 LaunchedEffect(uiState.selectedViewMode) {
                     if (pagerState.currentPage != uiState.selectedViewMode.ordinal && !pagerState.isScrollInProgress) {
@@ -211,8 +209,7 @@ fun HistoryScreenContent(
 
                 HorizontalPager(
                     state = pagerState,
-                    modifier = Modifier.fillMaxSize(),
-                    userScrollEnabled = !(pagerState.currentPage == 1 && currentCalendarScopeIndex == 1)
+                    modifier = Modifier.fillMaxSize()
                 ) { pageIndex ->
                     when (pageIndex) {
                         0 -> {
@@ -261,8 +258,7 @@ fun HistoryScreenContent(
                                     end = 16.dp,
                                     top = topBarClearance,
                                     bottom = bottomClearance
-                                ),
-                                onScopeChanged = { currentCalendarScopeIndex = it }
+                                )
                             )
                         }
                     }

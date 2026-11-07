@@ -1,4 +1,4 @@
-package com.cinetrack.worker
+﻿package com.cinetrack.worker
 
 import android.app.NotificationChannel
 import android.app.NotificationManager
@@ -15,6 +15,7 @@ import com.cinetrack.data.api.TraktService
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.TraktAuthRepository
 import com.cinetrack.data.mapper.MovieMapper
+import com.cinetrack.util.getEpisodeWatchDate
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -404,7 +405,7 @@ class TraktSyncWorker @AssistedInject constructor(
                             movieRepository.updateWatchHistory(
                                 latestEntity.copy(
                                     episodeDates = epDatesJson,
-                                    syncStatus = if (latestEntity.syncStatus == "synced") "pending_update" else latestEntity.syncStatus
+                                    syncStatus = "pending"
                                 )
                             )
                         }
@@ -659,7 +660,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                 else com.cinetrack.data.api.TraktSeasonEpisodes(
                                     number = seasonNum,
                                     episodes = epList.map { epNum ->
-                                        val epWatchedAt = localEpDates["S${seasonNum}E${epNum}"] ?: local.watchedAt
+                                        val epWatchedAt = localEpDates.getEpisodeWatchDate(seasonNum, epNum) ?: local.watchedAt
                                         com.cinetrack.data.api.TraktEpisodeNumber(epNum, watched_at = epWatchedAt)
                                     }
                                 )

@@ -40,9 +40,10 @@ class SyncTasteVectorUseCase @Inject constructor(
     companion object {
         private const val SYNC_INTERVAL_DAYS = 30L
         private const val MIN_LIBRARY_SIZE = 5
-        private const val MIN_GENRE_FREQUENCY = 0.03f
+        private const val MIN_GENRE_AFFINITY = 0.05f
         private const val MIN_COUNTRY_FREQUENCY = 0.05f
-        private const val TOP_GENRES_LIMIT = 8
+        private const val TOP_GENRES_LIMIT = 16
+        private const val TOP_GENRE_PAIRS_LIMIT = 3
         private const val TOP_COUNTRIES_LIMIT = 4
         private const val TOP_DIRECTORS_LIMIT = 5
         private const val TOP_ACTORS_LIMIT = 5
@@ -98,9 +99,22 @@ class SyncTasteVectorUseCase @Inject constructor(
             globalProfile
         }
 
-        val movieGenres = distillGenres(movieProfile.genreFrequencies)
-        val tvGenres = distillGenres(tvProfile.genreFrequencies)
+        val movieGenres = distillGenres(movieProfile.genreAffinities, movieProfile.maxAffinity)
+        val tvGenres = distillGenres(tvProfile.genreAffinities, tvProfile.maxAffinity)
         val topCountries = distillCountries(globalProfile.countryFrequencies)
+
+        val safeMaxPair = globalProfile.maxPairAffinity.coerceAtLeast(0.1f)
+        val topGenrePairs = globalProfile.genrePairAffinities
+            .mapValues { (_, score) -> (score / safeMaxPair).coerceIn(0f, 1f) }
+            .filterValues { it >= 0.15f }
+            .toList()
+            .sortedByDescending { it.second }
+            .take(TOP_GENRE_PAIRS_LIMIT)
+            .map { (pairKey, _) ->
+                val genreA = (pairKey ushr 32).toInt()
+                val genreB = (pairKey and 0xFFFFFFFFL).toInt()
+                "${genreA}_${genreB}"
+            }
 
         val dislikedGenres = globalProfile.negativeGenreScores
             .filterValues { it >= 1.5f }
@@ -140,6 +154,7 @@ class SyncTasteVectorUseCase @Inject constructor(
         return TasteVector(
             movieGenres = movieGenres,
             tvGenres = tvGenres,
+            topGenrePairs = topGenrePairs,
             dislikedGenres = dislikedGenres,
             topDecades = topDecades,
             topCountries = topCountries,
@@ -154,13 +169,20 @@ class SyncTasteVectorUseCase @Inject constructor(
         )
     }
 
-    private fun distillGenres(frequencies: Map<Long, Float>): Map<String, Float> {
-        return frequencies
-            .filterValues { it >= MIN_GENRE_FREQUENCY }
+    private fun distillGenres(
+        affinities: Map<Long, Float>,
+        maxAffinity: Float
+    ): Map<String, Float> {
+        val safeMax = maxAffinity.coerceAtLeast(0.1f)
+        return affinities
+            .mapValues { (_, score) -> (score / safeMax).coerceIn(0f, 1f) }
+            .filterValues { it >= MIN_GENRE_AFFINITY }
             .toList()
             .sortedByDescending { it.second }
             .take(TOP_GENRES_LIMIT)
-            .associate { (genreId, freq) -> genreId.toString() to ((freq * 100).toInt() / 100f) }
+            .associate { (genreId, normAffinity) ->
+                genreId.toString() to ((normAffinity * 100).toInt() / 100f)
+            }
     }
 
     private fun distillCountries(frequencies: Map<String, Float>): Map<String, Float> {

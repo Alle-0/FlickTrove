@@ -416,10 +416,10 @@ fun UpdatesScreen(
                         com.cinetrack.ui.components.shared.ListCalendarSwitcher(
                             isCalendar = isCalendarView,
                             onSelectMode = { isCalendarView = it },
-                            tabWidthDp = 36.dp,
-                            tabHeightDp = 36.dp,
-                            paddingDp = 3.5.dp,
-                            iconSizeDp = 18.dp,
+                            tabWidthDp = 44.dp,
+                            tabHeightDp = 44.dp,
+                            paddingDp = 4.dp,
+                            iconSizeDp = 20.dp,
                             trackColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f),
                             borderColor = null,
                             inactiveIconTint = Color.White.copy(alpha = 0.45f)

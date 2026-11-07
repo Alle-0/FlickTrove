@@ -16,11 +16,47 @@ class WatchHistoryRepository @Inject constructor(
     fun getGlobalTimelineFlow(): Flow<List<com.cinetrack.data.local.dao.RawTimelineRecord>> =
         watchHistoryDao.getGlobalTimelineFlow()
 
-    suspend fun updateWatchDate(id: Long, newWatchedAt: String) =
-        watchHistoryDao.updateWatchDate(id, newWatchedAt)
+    suspend fun updateWatchDate(id: Long, newWatchedAt: String) {
+        val existing = watchHistoryDao.getById(id)
+        if (existing != null && existing.watchedAt != newWatchedAt) {
+            watchHistoryDao.updateWatchDate(id, newWatchedAt)
+            watchHistoryDao.insert(
+                WatchHistoryEntity(
+                    id = 0,
+                    movieId = existing.movieId,
+                    mediaType = existing.mediaType,
+                    watchedAt = existing.watchedAt,
+                    isRewatch = existing.isRewatch,
+                    syncStatus = "deleted"
+                )
+            )
+            pushPendingWatchHistory()
+        } else {
+            watchHistoryDao.updateWatchDate(id, newWatchedAt)
+            pushPendingWatchHistory()
+        }
+    }
 
-    suspend fun updateEpisodeDatesAndWatchDate(id: Long, episodeDates: String?, newWatchedAt: String) =
-        watchHistoryDao.updateEpisodeDatesAndWatchDate(id, episodeDates, newWatchedAt)
+    suspend fun updateEpisodeDatesAndWatchDate(id: Long, episodeDates: String?, newWatchedAt: String) {
+        val existing = watchHistoryDao.getById(id)
+        if (existing != null && existing.watchedAt != newWatchedAt) {
+            watchHistoryDao.updateEpisodeDatesAndWatchDate(id, episodeDates, newWatchedAt)
+            watchHistoryDao.insert(
+                WatchHistoryEntity(
+                    id = 0,
+                    movieId = existing.movieId,
+                    mediaType = existing.mediaType,
+                    watchedAt = existing.watchedAt,
+                    isRewatch = existing.isRewatch,
+                    syncStatus = "deleted"
+                )
+            )
+            pushPendingWatchHistory()
+        } else {
+            watchHistoryDao.updateEpisodeDatesAndWatchDate(id, episodeDates, newWatchedAt)
+            pushPendingWatchHistory()
+        }
+    }
 
     suspend fun getWatchHistoryForMovie(movieId: Long, mediaType: String? = null): List<WatchHistoryEntity> =
         if (mediaType.isNullOrBlank()) watchHistoryDao.getWatchHistoryForMovie(movieId)
@@ -39,8 +75,26 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun insertWatchHistory(history: WatchHistoryEntity) =
         watchHistoryDao.insert(history)
 
-    suspend fun updateWatchHistory(history: WatchHistoryEntity) =
-        watchHistoryDao.update(history.copy(syncStatus = "pending"))
+    suspend fun updateWatchHistory(history: WatchHistoryEntity) {
+        val existing = watchHistoryDao.getById(history.id)
+        if (existing != null && existing.watchedAt != history.watchedAt) {
+            watchHistoryDao.update(history.copy(syncStatus = "pending"))
+            watchHistoryDao.insert(
+                WatchHistoryEntity(
+                    id = 0,
+                    movieId = existing.movieId,
+                    mediaType = existing.mediaType,
+                    watchedAt = existing.watchedAt,
+                    isRewatch = existing.isRewatch,
+                    syncStatus = "deleted"
+                )
+            )
+            pushPendingWatchHistory()
+        } else {
+            watchHistoryDao.update(history.copy(syncStatus = "pending"))
+            pushPendingWatchHistory()
+        }
+    }
 
     suspend fun deleteWatchHistory(history: WatchHistoryEntity) =
         watchHistoryDao.markDeleted(history.id)
@@ -128,7 +182,7 @@ class WatchHistoryRepository @Inject constructor(
     suspend fun pushPendingWatchHistory() {
         val pendingHistory = watchHistoryDao.getPendingSync()
         val historyToDelete = pendingHistory.filter { it.syncStatus == "deleted" }
-        val historyToSync = pendingHistory.filter { it.syncStatus == "pending" }.map { it.copy(syncStatus = "synced") }
+        val historyToSync = pendingHistory.filter { it.syncStatus == "pending" || it.syncStatus == "pending_update" }.map { it.copy(syncStatus = "synced") }
 
         if (historyToDelete.isNotEmpty()) {
             try {

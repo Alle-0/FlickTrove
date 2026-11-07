@@ -1,4 +1,4 @@
-package com.cinetrack.data.remote
+﻿package com.cinetrack.data.remote
 
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.Folder
@@ -477,6 +477,29 @@ class FirebaseRemoteDataSource @Inject constructor(
     }
     // --- Global Movie Stats ---
 
+    @Volatile private var cachedBanCheckUid: String? = null
+    @Volatile private var cachedBannedFromVoting: Boolean = false
+    @Volatile private var lastBanCheckTimestamp: Long = 0L
+    private val BAN_CHECK_TTL_MS = 60 * 60 * 1000L // 1 ora di cache in memoria per azzerare letture Firestore su users/{uid}
+
+    private suspend fun isUserBannedFromVoting(uid: String): Boolean {
+        val now = System.currentTimeMillis()
+        if (cachedBanCheckUid == uid && (now - lastBanCheckTimestamp) < BAN_CHECK_TTL_MS) {
+            return cachedBannedFromVoting
+        }
+        return try {
+            val userDoc = firestore.collection("users").document(uid).get().await()
+            val isBanned = userDoc.getBoolean("bannedFromVoting") == true
+            cachedBanCheckUid = uid
+            cachedBannedFromVoting = isBanned
+            lastBanCheckTimestamp = now
+            isBanned
+        } catch (e: Exception) {
+            android.util.Log.e("FirebaseRemoteDataSource", "Error checking ban status: ${e.message}", e)
+            cachedBannedFromVoting
+        }
+    }
+
     fun getGlobalMovieStats(compositeId: String) =
         firestore.collection("global_movie_stats").document(compositeId)
 
@@ -493,15 +516,9 @@ class FirebaseRemoteDataSource @Inject constructor(
         viewsDelta: Long = 0L
     ) {
         val uid = userId ?: return
-        try {
-            val userDoc = firestore.collection("users").document(uid).get().await()
-            if (userDoc.getBoolean("bannedFromVoting") == true) {
-                android.util.Log.w("FirebaseRemoteDataSource", "User $uid is banned from voting. Shadow banning global stats update.")
-                return
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error checking ban status: ${e.message}", e)
-            return // Prevent spam if user doc fails
+        if (isUserBannedFromVoting(uid)) {
+            android.util.Log.w("FirebaseRemoteDataSource", "User $uid is banned from voting. Shadow banning global stats update.")
+            return
         }
 
         val docRef = getGlobalMovieStats(compositeId)
@@ -620,11 +637,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                 }
                 
                 if (countDelta != 0L || ratingDelta != 0.0 || finalViewsDelta != 0L) {
-                    val calendar = java.util.Calendar.getInstance()
-                    val year = calendar.get(java.util.Calendar.YEAR)
-                    val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
-                    
-                    val weekId = "${year}_W$week"
+                    val weekId = com.cinetrack.util.DateTimeUtils.getIsoWeekId()
                     
                     val weeklyRef = firestore.collection("trending_stats_weekly")
                         .document(weekId)
@@ -663,22 +676,12 @@ class FirebaseRemoteDataSource @Inject constructor(
     suspend fun updateTrendingStatsBulk(updates: List<TrendingStatUpdate>) {
         if (updates.isEmpty()) return
         val uid = userId ?: return
-        try {
-            val userDoc = firestore.collection("users").document(uid).get().await()
-            if (userDoc.getBoolean("bannedFromVoting") == true) {
-                android.util.Log.w("FirebaseRemoteDataSource", "User $uid is banned from voting. Shadow banning bulk stats update.")
-                return
-            }
-        } catch (e: Exception) {
-            android.util.Log.e("FirebaseRemoteDataSource", "Error checking ban status for bulk update: ${e.message}", e)
+        if (isUserBannedFromVoting(uid)) {
+            android.util.Log.w("FirebaseRemoteDataSource", "User $uid is banned from voting. Shadow banning bulk stats update.")
             return
         }
 
-        val calendar = java.util.Calendar.getInstance()
-        val year = calendar.get(java.util.Calendar.YEAR)
-        val week = calendar.get(java.util.Calendar.WEEK_OF_YEAR)
-        
-        val weekId = "${year}_W$week"
+        val weekId = com.cinetrack.util.DateTimeUtils.getIsoWeekId()
 
         // Pre-aggregate locally by compositeId to avoid duplicate operations in batch
         val aggregated = mutableMapOf<String, TrendingStatUpdate>()
@@ -756,16 +759,7 @@ class FirebaseRemoteDataSource @Inject constructor(
         }
 
         // 2. Se il documento non esiste o è scaduto da oltre 24 ore, esegue il calcolo rolling 4 settimane
-        val now = java.util.Calendar.getInstance()
-        val weekIds = (0 until 4).map { i ->
-            val cal = java.util.Calendar.getInstance().apply {
-                timeInMillis = now.timeInMillis
-                add(java.util.Calendar.WEEK_OF_YEAR, -i)
-            }
-            val year = cal.get(java.util.Calendar.YEAR)
-            val week = cal.get(java.util.Calendar.WEEK_OF_YEAR)
-            "${year}_W$week"
-        }
+        val weekIds = com.cinetrack.util.DateTimeUtils.getRecentIsoWeekIds(weeksCount = 4)
 
         return try {
             val snaps = coroutineScope {
@@ -776,7 +770,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                                 .document(weekId)
                                 .collection("movies")
                                 .orderBy("view_count", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                                .limit(50)
+                                .limit(100)
                                 .get()
                                 .await()
                         } catch (e: Exception) {

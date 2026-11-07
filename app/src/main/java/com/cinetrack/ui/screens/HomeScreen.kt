@@ -154,11 +154,19 @@ fun HomeScreenContent(
     val columns = if (uiState.preferences.gridColumns in 1..3) uiState.preferences.gridColumns else 3
     val padding = 16.dp
     val gap = 12.dp
-    val cardWidth = if (columns > 1) {
+    val targetCardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
         screenWidth - (padding * 2)
     }
+    val cardWidth by animateDpAsState(
+        targetValue = targetCardWidth,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "homeCardWidth"
+    )
     
     var filterButtonBounds = remember { arrayOf<Rect?>(null) }
     val scope = rememberCoroutineScope()
@@ -380,69 +388,95 @@ fun HomeScreenContent(
                             val nextEpisode = remember(movie.id, movie.watchedEpisodes, movie.seasons, movie.numberOfEpisodes, isTvTab) {
                                 if (isTvTab) movie.calculateNextEpisode() else null
                             }
-                            if (columns == 1) {
-                                com.cinetrack.ui.components.card.MovieListCard(
-                                    movie = movie,
-                                    isFavorite = movie.favorite,
-                                    isWatched = movie.watched,
-                                    isReminder = movie.reminder,
-                                    progress = (movie.progress ?: 0.0).toFloat(),
-                                    folderColors = folderColors,
-                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    showBadges = uiState.preferences.showBadges,
-                                    hazeState = hazeState,
-                                    staggerIndex = index,
-                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                    onPress = stableOnPress,
-                                    onAction = stableOnAction,
-                                    onLongPress = stableOnLongPress,
-                                    onMessage = stableOnMessage,
-                                    onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) stableOnQuickMarkWatched else null,
-                                    precalculatedNextInfo = nextEpisode
-                                )
-                            } else if (isTvTab && nextEpisode != null) {
-                                val isUpdating = viewModel.updatingShowIds[movie.id] == true
-                                com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
-                                    movie = movie,
-                                    cardWidth = cardWidth,
-                                    isUpdating = isUpdating,
-                                    isFavorite = movie.favorite,
-                                    isWatched = movie.watched,
-                                    isReminder = movie.reminder,
-                                    progress = (movie.progress ?: 0.0).toFloat(),
-                                    personalRating = movie.personalRating,
-                                    folderColors = folderColors,
-                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    showBadges = uiState.preferences.showBadges,
-                                    hazeState = hazeState,
-                                    staggerIndex = index,
-                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                    onPress = stableOnPress,
-                                    onLongPress = stableOnLongPress,
-                                    onAction = stableOnAction,
-                                    onQuickMarkWatched = stableOnQuickMarkWatched,
-                                    onMessage = stableOnMessage,
-                                    precalculatedNextInfo = nextEpisode
-                                )
-                            } else {
-                                MovieCard(
-                                    movie = movie,
-                                    cardWidth = cardWidth,
-                                    isFavorite = movie.favorite,
-                                    isWatched = movie.watched,
-                                    isReminder = movie.reminder,
-                                    progress = (movie.progress ?: 0.0).toFloat(),
-                                    folderColors = folderColors,
-                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    showBadges = uiState.preferences.showBadges,
-                                    hazeState = hazeState,
-                                    staggerIndex = index,
-                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                    onPress = stableOnPress,
-                                    onAction = stableOnAction,
-                                    onLongPress = stableOnLongPress,
-                                    onMessage = stableOnMessage
-                                )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(
+                                        fadeInSpec = tween(280),
+                                        placementSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        ),
+                                        fadeOutSpec = tween(200)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AnimatedContent(
+                                    targetState = columns == 1,
+                                    transitionSpec = {
+                                        (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
+                                            .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
+                                    },
+                                    label = "HomeCardLayoutTransition"
+                                ) { isList ->
+                                    if (isList) {
+                                        com.cinetrack.ui.components.card.MovieListCard(
+                                            movie = movie,
+                                            isFavorite = movie.favorite,
+                                            isWatched = movie.watched,
+                                            isReminder = movie.reminder,
+                                            progress = (movie.progress ?: 0.0).toFloat(),
+                                            folderColors = folderColors,
+                                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                            showBadges = uiState.preferences.showBadges,
+                                            showAdvancedBadges = true,
+                                            hazeState = hazeState,
+                                            staggerIndex = index,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            onPress = stableOnPress,
+                                            onAction = stableOnAction,
+                                            onLongPress = stableOnLongPress,
+                                            onMessage = stableOnMessage,
+                                            onQuickMarkWatched = if (isTvTab && nextEpisode != null && !nextEpisode.isUpToDateWithAirDate) stableOnQuickMarkWatched else null,
+                                            precalculatedNextInfo = nextEpisode
+                                        )
+                                    } else if (isTvTab && nextEpisode != null) {
+                                        val isUpdating = viewModel.updatingShowIds[movie.id] == true
+                                        com.cinetrack.ui.components.card.ContinueWatchingSeriesCard(
+                                            movie = movie,
+                                            cardWidth = cardWidth,
+                                            isUpdating = isUpdating,
+                                            isFavorite = movie.favorite,
+                                            isWatched = movie.watched,
+                                            isReminder = movie.reminder,
+                                            progress = (movie.progress ?: 0.0).toFloat(),
+                                            personalRating = movie.personalRating,
+                                            folderColors = folderColors,
+                                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                            showBadges = uiState.preferences.showBadges,
+                                            showAdvancedBadges = true,
+                                            hazeState = hazeState,
+                                            staggerIndex = index,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            onPress = stableOnPress,
+                                            onLongPress = stableOnLongPress,
+                                            onAction = stableOnAction,
+                                            onQuickMarkWatched = stableOnQuickMarkWatched,
+                                            onMessage = stableOnMessage,
+                                            precalculatedNextInfo = nextEpisode
+                                        )
+                                    } else {
+                                        MovieCard(
+                                            movie = movie,
+                                            cardWidth = cardWidth,
+                                            isFavorite = movie.favorite,
+                                            isWatched = movie.watched,
+                                            isReminder = movie.reminder,
+                                            progress = (movie.progress ?: 0.0).toFloat(),
+                                            folderColors = folderColors,
+                                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                            showBadges = uiState.preferences.showBadges,
+                                            showAdvancedBadges = true,
+                                            hazeState = hazeState,
+                                            staggerIndex = index,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            onPress = stableOnPress,
+                                            onAction = stableOnAction,
+                                            onLongPress = stableOnLongPress,
+                                            onMessage = stableOnMessage
+                                        )
+                                    }
+                                }
                             }
                         }
                     }

@@ -23,6 +23,8 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import com.cinetrack.util.toComposeColorOrNull
+import com.cinetrack.util.setEpisodeWatchDate
+import com.cinetrack.util.removeEpisodeWatchDate
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.withLock
@@ -805,76 +807,13 @@ class MovieDetailViewModel @Inject constructor(
         changedEpisodes: List<Pair<Int, Int>>? = null,
         isAdding: Boolean = true
     ) {
-        if (movie.mediaType != "tv") return
-        val watchedCount = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
-        if (watchedCount > 0 || movie.watched) {
-            val currentHistory = repository.getWatchHistoryForMovie(movie.id, movie.mediaType)
-            val activeSession = if (currentHistory.any { it.isRewatch }) {
-                currentHistory.filter { it.isRewatch }.maxByOrNull { parseToEpochMillis(it.watchedAt) }
-            } else {
-                currentHistory.find { !it.isRewatch }
-            }
-            val nowStr = customDate?.toString() ?: java.time.Instant.now().toString()
-
-            val currentDatesMap = try {
-                activeSession?.episodeDates?.let { 
-                    Json.decodeFromString<Map<String, String>>(it).toMutableMap() 
-                } ?: mutableMapOf()
-            } catch (e: Exception) {
-                mutableMapOf()
-            }
-
-            if (!changedEpisodes.isNullOrEmpty()) {
-                for ((seasonNum, epNum) in changedEpisodes) {
-                    val key = "${seasonNum}_$epNum"
-                    if (isAdding) {
-                        currentDatesMap[key] = nowStr
-                    } else {
-                        currentDatesMap.remove(key)
-                    }
-                }
-            }
-
-            val newEpisodeDatesJson = if (currentDatesMap.isNotEmpty()) {
-                try { Json.encodeToString(currentDatesMap) } catch (e: Exception) { null }
-            } else null
-
-            if (activeSession == null) {
-                repository.insertWatchHistory(
-                    com.cinetrack.data.local.entities.WatchHistoryEntity(
-                        movieId = movie.id,
-                        mediaType = movie.mediaType,
-                        watchedAt = nowStr,
-                        isRewatch = false,
-                        episodeDates = newEpisodeDatesJson
-                    )
-                )
-                if (movie.watchedAt != nowStr) {
-                    repository.saveMovie(movie.copy(watchedAt = nowStr, clientUpdatedAt = System.currentTimeMillis()))
-                }
-            } else {
-                val allResolvedDates = currentDatesMap.values.toList()
-                val targetIso = if (allResolvedDates.isNotEmpty()) {
-                    allResolvedDates.maxByOrNull { parseToEpochMillis(it) } ?: nowStr
-                } else if (isProgressAdvancing) {
-                    nowStr
-                } else {
-                    activeSession.watchedAt
-                }
-
-                repository.updateWatchHistory(
-                    activeSession.copy(
-                        watchedAt = targetIso,
-                        episodeDates = newEpisodeDatesJson,
-                        syncStatus = "pending"
-                    )
-                )
-                val latestHistory = repository.getWatchHistoryForMovie(movie.id, movie.mediaType).maxByOrNull { parseToEpochMillis(it.watchedAt) }
-                if (latestHistory != null && movie.watchedAt != latestHistory.watchedAt) {
-                    repository.saveMovie(movie.copy(watchedAt = latestHistory.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
-                }
-            }
-        }
+        repository.recordEpisodeWatchState(
+            movie = movie,
+            changedEpisodes = changedEpisodes,
+            isAdding = isAdding,
+            customDate = customDate,
+            isProgressAdvancing = isProgressAdvancing
+        )
     }
 
     private fun deleteMovie() {
@@ -1116,6 +1055,7 @@ class MovieDetailViewModel @Inject constructor(
                         }
                     }
                     WatchState.BOOKMARKED -> {
+                        badgeRepository.recordMovieBookmarked(previousMovie.id)
                         if (previousMovie.isReleased) {
                             if (mediaType == "tv") {
                                 val totalWatched = previousMovie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
@@ -1138,6 +1078,7 @@ class MovieDetailViewModel @Inject constructor(
                         }
                     }
                     WatchState.WATCHED -> {
+                        badgeRepository.recordMovieWatched(previousMovie.id)
                         if (mediaType == "tv") {
                             updateEpisodesUseCase.markAllWatched(previousMovie).copy(dropped = false)
                         } else {
@@ -1273,7 +1214,7 @@ class MovieDetailViewModel @Inject constructor(
                         mutableMapOf()
                     }
 
-                    datesMap["${seasonNumber}_$episodeNumber"] = newDateIso
+                    datesMap.setEpisodeWatchDate(seasonNumber, episodeNumber, newDateIso)
 
                     val allDates = datesMap.values.toMutableList()
                     val newWatchedAt = allDates.maxByOrNull { parseToEpochMillis(it) } ?: newDateIso
@@ -1319,7 +1260,7 @@ class MovieDetailViewModel @Inject constructor(
                     }
 
                     for (ep in episodeNumbers) {
-                        datesMap["${seasonNumber}_$ep"] = newDateIso
+                        datesMap.setEpisodeWatchDate(seasonNumber, ep, newDateIso)
                     }
 
                     val allDates = datesMap.values.toMutableList()

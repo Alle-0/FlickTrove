@@ -275,10 +275,17 @@ class CommentRepository @Inject constructor(
             val mediaCommentsColl = getMediaCommentsCollection(comment.mediaId)
             val docRef = mediaCommentsColl.document(comment.id)
 
+            val safeDisplayName = user.displayName?.trim()?.takeIf { it.isNotBlank() }
+                ?: comment.userDisplayName.trim().takeIf { it.isNotBlank() }
+                ?: "User"
+
+            val safeAvatarUrl = user.photoUrl?.toString()?.trim()?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+                ?: (if (!comment.userAvatarUrl.startsWith("data:image")) comment.userAvatarUrl.trim() else "")
+
             val mirrorComment = comment.copy(
                 userId = user.uid,
-                userDisplayName = if (comment.userDisplayName.isNotBlank()) comment.userDisplayName else (user.displayName ?: ""),
-                userAvatarUrl = if (comment.userAvatarUrl.isNotBlank()) comment.userAvatarUrl else (user.photoUrl?.toString() ?: ""),
+                userDisplayName = safeDisplayName,
+                userAvatarUrl = safeAvatarUrl,
                 isOnCommsUni = true,
                 originSlug = if (comment.originSlug.isNotBlank()) comment.originSlug else "flicktrove",
                 originName = if (comment.originName.isNotBlank()) comment.originName else "FlickTrove",
@@ -328,6 +335,31 @@ class CommentRepository @Inject constructor(
         }
     }
 
+    suspend fun healCommentAuthor(
+        mediaId: String,
+        commentId: String,
+        displayName: String,
+        avatarUrl: String
+    ): Boolean {
+        if (mediaId.isBlank() || commentId.isBlank()) return false
+        val user = auth.currentUser ?: return false
+        return try {
+            val docRef = getMediaCommentsCollection(mediaId).document(commentId)
+            val snap = docRef.get().await()
+            if (snap.exists() && snap.getString("userId") == user.uid) {
+                docRef.update(
+                    mapOf(
+                        "userDisplayName" to displayName,
+                        "userAvatarUrl" to avatarUrl
+                    )
+                ).await()
+                true
+            } else false
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     suspend fun toggleSpoiler(
         mediaId: String,
         commentId: String,
@@ -358,9 +390,52 @@ class CommentRepository @Inject constructor(
     ): Boolean {
         val userId = auth.currentUser?.uid ?: return false
         var targetDocRef = getMediaCommentsCollection(mediaId).document(commentId)
-        try {
-            val directSnap = targetDocRef.get().await()
-            if (!directSnap.exists() && !commentSnippet.isNullOrBlank()) {
+
+        var targetOwnerId: String? = null
+        var isNewLike = false
+        var isUnlike = false
+        var resolvedCommentContent: String? = null
+
+        suspend fun executeLikeTransaction(docRef: com.google.firebase.firestore.DocumentReference): Boolean {
+            return try {
+                val txResult = firestore.runTransaction { transaction ->
+                    val snapshot = transaction.get(docRef)
+                    if (!snapshot.exists()) return@runTransaction false
+
+                    val currentLikes = snapshot.get("likedBy") as? List<*> ?: emptyList<String>()
+                    val isLiking = !currentLikes.contains(userId)
+                    val commentOwnerId = snapshot.getString("userId")
+
+                    if (!isLiking) {
+                        transaction.update(docRef, "likesCount", FieldValue.increment(-1))
+                        transaction.update(docRef, "likedBy", FieldValue.arrayRemove(userId))
+                        if (commentOwnerId != null && commentOwnerId != userId) {
+                            targetOwnerId = commentOwnerId
+                            isUnlike = true
+                        }
+                    } else {
+                        transaction.update(docRef, "likesCount", FieldValue.increment(1))
+                        transaction.update(docRef, "likedBy", FieldValue.arrayUnion(userId))
+                        if (commentOwnerId != null && commentOwnerId != userId) {
+                            targetOwnerId = commentOwnerId
+                            isNewLike = true
+                            resolvedCommentContent = commentSnippet ?: snapshot.getString("text")
+                        }
+                    }
+                    true
+                }.await()
+                txResult ?: false
+            } catch (e: Exception) {
+                false
+            }
+        }
+
+        // 1. Prova prima la transazione diretta sull'ID fornito (1 SOLA lettura documentale per il 99% dei casi)
+        var success = executeLikeTransaction(targetDocRef)
+
+        // 2. Fallback CommsUni: se il documento non esiste e abbiamo uno snippet, cerca per testo fuori dalla transazione
+        if (!success && !commentSnippet.isNullOrBlank()) {
+            try {
                 val querySnap = getMediaCommentsCollection(mediaId).limit(50).get().await()
                 val match = querySnap.documents.firstOrNull { doc ->
                     val text = doc.getString("text") ?: ""
@@ -368,44 +443,14 @@ class CommentRepository @Inject constructor(
                 }
                 if (match != null) {
                     targetDocRef = match.reference
+                    success = executeLikeTransaction(targetDocRef)
                 }
-            }
-        } catch (_: Exception) {}
+            } catch (_: Exception) {}
+        }
 
-        var targetOwnerId: String? = null
-        var isNewLike = false
-        var isUnlike = false
-        var resolvedCommentContent: String? = null
+        if (!success) return false
 
         return try {
-            firestore.runTransaction { transaction ->
-                val snapshot = transaction.get(targetDocRef)
-                if (!snapshot.exists()) return@runTransaction
-
-                val currentLikes = snapshot.get("likedBy") as? List<*> ?: emptyList<String>()
-                val isLiking = !currentLikes.contains(userId)
-
-                val commentOwnerId = snapshot.getString("userId")
-
-                if (!isLiking) {
-                    transaction.update(targetDocRef, "likesCount", FieldValue.increment(-1))
-                    transaction.update(targetDocRef, "likedBy", FieldValue.arrayRemove(userId))
-                    
-                    if (commentOwnerId != null && commentOwnerId != userId) {
-                        targetOwnerId = commentOwnerId
-                        isUnlike = true
-                    }
-                } else {
-                    transaction.update(targetDocRef, "likesCount", FieldValue.increment(1))
-                    transaction.update(targetDocRef, "likedBy", FieldValue.arrayUnion(userId))
-
-                    if (commentOwnerId != null && commentOwnerId != userId) {
-                        targetOwnerId = commentOwnerId
-                        isNewLike = true
-                        resolvedCommentContent = commentSnippet ?: snapshot.getString("text")
-                    }
-                }
-            }.await()
 
             val ownerId = targetOwnerId
             if (ownerId != null) {

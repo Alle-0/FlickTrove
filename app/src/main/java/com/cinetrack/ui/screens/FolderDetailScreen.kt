@@ -35,9 +35,7 @@ import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.animation.core.Animatable
-import androidx.compose.animation.core.FastOutSlowInEasing
-import androidx.compose.animation.core.tween
+import androidx.compose.animation.core.*
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.zIndex
 import androidx.compose.foundation.shape.CircleShape
@@ -314,11 +312,19 @@ fun FolderDetailScreenContent(
                             val columns = if (preferences.gridColumns in 1..4) preferences.gridColumns else 3
                             val gap = 8.dp
                             val padding = 16.dp
-                            val cardWidth = if (columns > 1) {
+                            val targetCardWidth = if (columns > 1) {
                                 (maxWidth - (padding * 2) - (gap * (columns - 1))) / columns
                             } else {
                                 maxWidth - (padding * 2)
                             }
+                            val cardWidth by animateDpAsState(
+                                targetValue = targetCardWidth,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                label = "folderCardWidth"
+                            )
                             
                             val currentOnMovieClick by rememberUpdatedState(onMovieClick)
                             val currentOnLongPress by rememberUpdatedState { m: Movie, p: androidx.compose.ui.geometry.Offset, c: androidx.compose.ui.geometry.Offset -> actionsState.onLongPress(m, p, c) }
@@ -538,47 +544,70 @@ fun FolderDetailScreenContent(
                                     ) { index, movie ->
                                         val currentFolderColors = precomputedFolderColors[movie.compositeId] ?: emptyList()
                                         
-                                        if (columns == 1) {
-                                            com.cinetrack.ui.components.card.MovieListCard(
-                                                movie = movie,
-                                                modifier = Modifier.fillMaxWidth(),
-                                                isFavorite = movie.favorite,
-                                                isWatched = movie.watched,
-                                                isReminder = movie.reminder,
-                                                personalRating = movie.personalRating,
-                                                progress = movie.progress?.toFloat() ?: 0f,
-                                                folderColors = currentFolderColors,
-                                                showFolderBookmarks = preferences.showFolderBookmarks,
-                                                showBadges = preferences.showBadges,
-                                                showAdvancedBadges = true,
-                                                hazeState = internalHazeState,
-                                                hasAnimatedSet = viewModel.animatedMovieIds,
-                                                staggerIndex = index,
-                                                onPress = handlePress,
-                                                onLongPress = handleLongPress,
-                                                onMessage = handleMessage
-                                            )
-                                        } else {
-                                            MovieCard(
-                                                movie = movie,
-                                                cardWidth = cardWidth,
-                                                isFavorite = movie.favorite,
-                                                isWatched = movie.watched,
-                                                isReminder = movie.reminder,
-                                                personalRating = movie.personalRating,
-                                                onPress = handlePress,
-                                                animatedVisibilityScope = animatedVisibilityScope,
-                                                staggerIndex = index,
-                                                onLongPress = handleLongPress,
-                                                onMessage = handleMessage,
-                                                progress = movie.progress?.toFloat() ?: 0f,
-                                                folderColors = currentFolderColors,
-                                                showFolderBookmarks = preferences.showFolderBookmarks,
-                                                showBadges = preferences.showBadges,
-                                                showAdvancedBadges = true,
-                                                hasAnimatedSet = viewModel.animatedMovieIds,
-                                                hazeState = internalHazeState
-                                            )
+                                        Box(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .animateItem(
+                                                    fadeInSpec = tween(280),
+                                                    placementSpec = spring(
+                                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                                        stiffness = Spring.StiffnessMediumLow
+                                                    ),
+                                                    fadeOutSpec = tween(200)
+                                                ),
+                                            contentAlignment = Alignment.Center
+                                        ) {
+                                            AnimatedContent(
+                                                targetState = columns == 1,
+                                                transitionSpec = {
+                                                    (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
+                                                        .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
+                                                },
+                                                label = "FolderCardLayoutTransition"
+                                            ) { isList ->
+                                                if (isList) {
+                                                    com.cinetrack.ui.components.card.MovieListCard(
+                                                        movie = movie,
+                                                        modifier = Modifier.fillMaxWidth(),
+                                                        isFavorite = movie.favorite,
+                                                        isWatched = movie.watched,
+                                                        isReminder = movie.reminder,
+                                                        personalRating = movie.personalRating,
+                                                        progress = movie.progress?.toFloat() ?: 0f,
+                                                        folderColors = currentFolderColors,
+                                                        showFolderBookmarks = preferences.showFolderBookmarks,
+                                                        showBadges = preferences.showBadges,
+                                                        showAdvancedBadges = true,
+                                                        hazeState = internalHazeState,
+                                                        hasAnimatedSet = viewModel.animatedMovieIds,
+                                                        staggerIndex = index,
+                                                        onPress = handlePress,
+                                                        onLongPress = handleLongPress,
+                                                        onMessage = handleMessage
+                                                     )
+                                                } else {
+                                                    MovieCard(
+                                                        movie = movie,
+                                                        cardWidth = cardWidth,
+                                                        isFavorite = movie.favorite,
+                                                        isWatched = movie.watched,
+                                                        isReminder = movie.reminder,
+                                                        personalRating = movie.personalRating,
+                                                        onPress = handlePress,
+                                                        animatedVisibilityScope = animatedVisibilityScope,
+                                                        staggerIndex = index,
+                                                        onLongPress = handleLongPress,
+                                                        onMessage = handleMessage,
+                                                        progress = movie.progress?.toFloat() ?: 0f,
+                                                        folderColors = currentFolderColors,
+                                                        showFolderBookmarks = preferences.showFolderBookmarks,
+                                                        showBadges = preferences.showBadges,
+                                                        showAdvancedBadges = true,
+                                                        hasAnimatedSet = viewModel.animatedMovieIds,
+                                                        hazeState = internalHazeState
+                                                    )
+                                                }
+                                            }
                                         }
                                     }
                                 }

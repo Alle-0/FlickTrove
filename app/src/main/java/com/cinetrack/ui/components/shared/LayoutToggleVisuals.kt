@@ -1,6 +1,13 @@
 package com.cinetrack.ui.components.shared
 
 import com.cinetrack.R
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
+import androidx.compose.animation.togetherWith
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.size
@@ -55,11 +62,20 @@ fun LayoutToggleButton(
             ),
         contentAlignment = Alignment.Center
     ) {
-        Icon(
-            imageVector = layoutToggleIcon(columns),
-            contentDescription = contentDescription,
-            tint = Color.White,
-            modifier = Modifier.size(18.dp)
-        )
+        AnimatedContent(
+            targetState = columns,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(180)) + scaleIn(initialScale = 0.7f, animationSpec = tween(180)))
+                    .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.7f, animationSpec = tween(120)))
+            },
+            label = "LayoutToggleIconTransition"
+        ) { currentColumns ->
+            Icon(
+                imageVector = layoutToggleIcon(currentColumns),
+                contentDescription = contentDescription,
+                tint = Color.White,
+                modifier = Modifier.size(18.dp)
+            )
+        }
     }
 }

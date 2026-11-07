@@ -620,6 +620,12 @@ class HomeViewModel @Inject constructor(
                 }
 
                 repository.saveMovie(finalMovie)
+                repository.recordEpisodeWatchState(
+                    movie = finalMovie,
+                    changedEpisodes = listOf(nextInfo.seasonNumber to nextInfo.episodeNumber),
+                    isAdding = true,
+                    isProgressAdvancing = true
+                )
 
                 if (nextInfo.isLastEpisodeOfSeries) {
                     actionFeedbackManager.emit(

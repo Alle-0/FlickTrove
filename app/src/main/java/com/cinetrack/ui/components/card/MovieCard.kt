@@ -109,7 +109,10 @@ private val FilmStripBookmarkShape = GenericShape { size, _ ->
 
 
 @Composable
-fun MovieFolderBookmarks(folderColors: List<Color>) {
+fun MovieFolderBookmarks(
+    folderColors: List<Color>,
+    modifier: Modifier = Modifier
+) {
     if (folderColors.isEmpty()) return
     
     val indicatorBrush = if (folderColors.size > 1) {
@@ -119,7 +122,7 @@ fun MovieFolderBookmarks(folderColors: List<Color>) {
     }
 
     Box(
-        modifier = Modifier
+        modifier = modifier
             .padding(start = 14.dp)
             .width(16.dp)
             .height(28.dp)
@@ -316,13 +319,29 @@ fun MovieCard(
                     )
             )
 
+            // Animated Folder Bookmarks (Top Left)
+            val hasFolderBookmarks = showFolderBookmarks && folderColors.isNotEmpty()
+            var lastFolderColors by remember(movie.id) { mutableStateOf(folderColors) }
+            if (folderColors.isNotEmpty()) {
+                lastFolderColors = folderColors
+            }
+
             androidx.compose.animation.AnimatedVisibility(
-                visible = showFolderBookmarks,
-                enter = fadeIn(tween(250)) + slideInVertically(tween(250)) { -it / 2 },
-                exit = fadeOut(tween(200)) + slideOutVertically(tween(200)) { -it / 2 },
+                visible = hasFolderBookmarks,
+                enter = fadeIn(tween(250)) + slideInVertically(
+                    initialOffsetY = { -it },
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioMediumBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    )
+                ),
+                exit = fadeOut(tween(180)) + slideOutVertically(
+                    targetOffsetY = { -it },
+                    animationSpec = tween(200, easing = FastOutSlowInEasing)
+                ),
                 modifier = Modifier.align(Alignment.TopStart)
             ) {
-                MovieFolderBookmarks(folderColors)
+                MovieFolderBookmarks(lastFolderColors)
             }
 
             // Dynamic Badges (Top Right)

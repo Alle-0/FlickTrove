@@ -860,7 +860,7 @@ class BadgeRepository @Inject constructor(
         if (bookmarkedAt > 0L) {
             val diffHours = (System.currentTimeMillis() - bookmarkedAt) / (1000 * 60 * 60)
             if (diffHours in 0..24) {
-                badgePrefs.edit().putBoolean("unlocked_instant_watch", true).apply()
+                badgePrefs.edit().putBoolean("unlocked_instant_watch", true).putLong("instant_watch_movie_id", movieId).apply()
             }
         }
         evaluateBadgesAsync()
@@ -1159,13 +1159,18 @@ class BadgeRepository @Inject constructor(
             val docRef = firestore.collection("system_metrics").document("badges_global")
             val userBadgesCollection = firestore.collection("users").document(user.uid).collection("unlocked_badges")
 
-            val existingDocs = try {
-                userBadgesCollection.get().await().documents.map { it.id }.toSet()
-            } catch (_: Exception) {
-                emptySet()
+            // Verifica l'esistenza remota leggendo puntualmente SOLO i documenti dei badge pendenti (1-2 letture anziché 52 full-fetch)
+            val existingBadgeIds = mutableSetOf<String>()
+            for (b in pendingBadges) {
+                try {
+                    val snap = userBadgesCollection.document(b.badgeId).get().await()
+                    if (snap.exists()) {
+                        existingBadgeIds.add(b.badgeId)
+                    }
+                } catch (_: Exception) {}
             }
 
-            val actuallyNewBadges = pendingBadges.filter { it.badgeId !in existingDocs }
+            val actuallyNewBadges = pendingBadges.filter { it.badgeId !in existingBadgeIds }
 
             if (actuallyNewBadges.isNotEmpty()) {
                 firestore.runTransaction { transaction ->

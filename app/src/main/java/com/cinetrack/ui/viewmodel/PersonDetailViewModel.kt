@@ -5,6 +5,7 @@ import com.cinetrack.ui.utils.UiText
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.model.Movie
+import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.api.Person
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.domain.CycleMovieStatusUseCase
@@ -35,12 +36,22 @@ data class PersonDetailUiState(
     val isLoading: Boolean = true,
     val showFullBio: Boolean = false,
     val activeTab: String = "cast_movie",
+    val sortConfig: SortConfig = SortConfig(sortType = "release_date", sortDirection = "desc"),
+    val isFilterModalOpen: Boolean = false,
     val favorites: ImmutableList<Movie> = persistentListOf(),
     val folders: ImmutableList<com.cinetrack.data.local.entities.FolderEntity> = persistentListOf(),
     val movieFolderColors: ImmutableMap<String, ImmutableList<String>> = persistentMapOf(),
     val preferences: UserPreferences = UserPreferences(),
     val error: String? = null
-)
+) {
+    val hasActiveFilters: Boolean
+        get() = sortConfig.sortType != "release_date" ||
+                sortConfig.sortDirection != "desc" ||
+                sortConfig.selectedGenres.isNotEmpty() ||
+                sortConfig.selectedCountries.isNotEmpty() ||
+                sortConfig.selectedDecades.isNotEmpty() ||
+                sortConfig.selectedProviders.isNotEmpty()
+}
 
 @HiltViewModel
 class PersonDetailViewModel @Inject constructor(
@@ -56,6 +67,8 @@ class PersonDetailViewModel @Inject constructor(
     private var _profilePath: String? = null
     private val _showFullBio = MutableStateFlow(false)
     private val _activeTab = MutableStateFlow("cast_movie")
+    private val _sortConfig = MutableStateFlow(SortConfig(sortType = "release_date", sortDirection = "desc"))
+    private val _isFilterModalOpen = MutableStateFlow(false)
     private val _isLoading = MutableStateFlow(true)
     private val _person = MutableStateFlow<Person?>(null)
     private val _error = MutableStateFlow<String?>(null)
@@ -69,6 +82,22 @@ class PersonDetailViewModel @Inject constructor(
             _profilePath = profilePath
             fetchPerson(id)
         }
+    }
+
+    fun updateSortConfig(config: SortConfig) {
+        _sortConfig.value = config
+    }
+
+    fun openFilterModal() {
+        _isFilterModalOpen.value = true
+    }
+
+    fun dismissFilterModal() {
+        _isFilterModalOpen.value = false
+    }
+
+    fun resetFilters() {
+        _sortConfig.value = SortConfig(sortType = "release_date", sortDirection = "desc")
     }
 
     fun emitMessage(message: UiText) {
@@ -86,20 +115,26 @@ class PersonDetailViewModel @Inject constructor(
             Triple(person, Triple(isLoading, showBio, tab), error)
         },
         combine(
+            _sortConfig,
+            _isFilterModalOpen
+        ) { sort, modalOpen -> Pair(sort, modalOpen) },
+        combine(
             repository.getLocalMoviesFlow(),
             repository.getFoldersFlow(),
             preferenceRepository.userPreferencesFlow
         ) { favorites, folders, prefs ->
             Triple(favorites, folders, prefs)
         }
-    ) { groupA, groupB ->
+    ) { groupA, groupB, groupC ->
         val person = groupA.first
         val (isLoading, showFullBio, activeTab) = groupA.second
         val error = groupA.third
         
-        val favorites = groupB.first
-        val folders = groupB.second
-        val preferences = groupB.third
+        val (sortConfig, isFilterModalOpen) = groupB
+
+        val favorites = groupC.first
+        val folders = groupC.second
+        val preferences = groupC.third
 
         // Calculate folder colors for each movie
         val folderColorsMap = mutableMapOf<String, ImmutableList<String>>()
@@ -118,6 +153,8 @@ class PersonDetailViewModel @Inject constructor(
             isLoading = isLoading,
             showFullBio = showFullBio,
             activeTab = activeTab,
+            sortConfig = sortConfig,
+            isFilterModalOpen = isFilterModalOpen,
             favorites = favorites.toImmutableList(),
             folders = folders.toImmutableList(),
             movieFolderColors = folderColorsMap.toImmutableMap(),

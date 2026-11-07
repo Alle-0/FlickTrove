@@ -8,6 +8,9 @@ import androidx.compose.animation.SharedTransitionLayout
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.CubicBezierEasing
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -229,11 +232,19 @@ fun SearchScreenContent(
     val padding = 16.dp
     val gap = 12.dp
     val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
-    val cardWidth = if (columns > 1) {
+    val targetCardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
         screenWidth - (padding * 2)
     }
+    val cardWidth by animateDpAsState(
+        targetValue = targetCardWidth,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "searchCardWidth"
+    )
     val personColumns = 4
     val personCardWidth = (screenWidth - (padding * 2) - (gap * (personColumns - 1))) / personColumns
 

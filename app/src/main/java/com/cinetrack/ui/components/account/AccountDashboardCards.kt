@@ -54,7 +54,7 @@ fun GeneralStatsCard(
     backgroundLuminance: Float = 0f,
     onClick: () -> Unit
 ) {
-    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
+    val cardOverlay = if (backgroundLuminance > 0.38f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -250,7 +250,7 @@ fun MyFoldersCard(
     onViewAllClick: () -> Unit,
     onFolderClick: (FolderEntity) -> Unit
 ) {
-    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
+    val cardOverlay = if (backgroundLuminance > 0.38f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -477,7 +477,7 @@ fun YourFlowCard(
     onFlowClick: () -> Unit,
     onFlowStatsClick: () -> Unit
 ) {
-    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
+    val cardOverlay = if (backgroundLuminance > 0.38f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     Box(
         modifier = Modifier
             .fillMaxWidth()
@@ -585,7 +585,7 @@ fun TrophyShowcaseCard(
     unlockedBadges: List<TrophyRoomItemUi> = emptyList(),
     onClick: () -> Unit
 ) {
-    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
+    val cardOverlay = if (backgroundLuminance > 0.38f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
     val cardAlpha = if (isEnabled) 1f else 0.45f
 
     Box(
@@ -733,7 +733,7 @@ fun HistoryDiaryCard(
     totalCount: Int = 0,
     onClick: () -> Unit
 ) {
-    val cardOverlay = if (backgroundLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
+    val cardOverlay = if (backgroundLuminance > 0.38f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.05f)
 
     Box(
         modifier = Modifier

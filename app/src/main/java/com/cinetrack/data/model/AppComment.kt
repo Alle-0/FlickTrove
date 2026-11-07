@@ -122,10 +122,14 @@ fun isDuplicateComment(c1: AppComment, c2: AppComment): Boolean {
 }
 
 fun mergeComments(primary: AppComment, secondary: AppComment): AppComment {
-    val avatar = primary.userAvatarUrl.trim().takeIf { it.isNotBlank() }
+    val avatar = primary.userAvatarUrl.trim().takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+        ?: secondary.userAvatarUrl.trim().takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+        ?: primary.userAvatarUrl.trim().takeIf { it.isNotBlank() }
         ?: secondary.userAvatarUrl.trim().takeIf { it.isNotBlank() }
         ?: ""
-    val name = primary.userDisplayName.trim().takeIf { it.isNotBlank() }
+    val name = (if (secondary.originSlug.equals("flicktrove", ignoreCase = true) && secondary.userDisplayName.isNotBlank() && !secondary.userDisplayName.contains("#")) secondary.userDisplayName else null)
+        ?: (if (primary.originSlug.equals("flicktrove", ignoreCase = true) && primary.userDisplayName.isNotBlank() && !primary.userDisplayName.contains("#")) primary.userDisplayName else null)
+        ?: primary.userDisplayName.trim().takeIf { it.isNotBlank() }
         ?: secondary.userDisplayName.trim().takeIf { it.isNotBlank() }
         ?: ""
     val likedBy = (primary.likedBy + secondary.likedBy).distinct()

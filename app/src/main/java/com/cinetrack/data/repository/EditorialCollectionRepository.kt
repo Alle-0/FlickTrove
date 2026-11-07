@@ -36,6 +36,13 @@ class EditorialCollectionRepository @Inject constructor(
     }
 
     suspend fun getCollection(collectionId: String): EditorialCollection? {
+        val now = System.currentTimeMillis()
+        cachedCollections?.let { list ->
+            if ((now - lastCacheTime) < CACHE_TTL_MS) {
+                list.find { it.id == collectionId }?.let { return it }
+            }
+        }
+
         return try {
             val doc = firestore.collection("editorial_collections").document(collectionId).get().await()
             if (doc.exists()) {

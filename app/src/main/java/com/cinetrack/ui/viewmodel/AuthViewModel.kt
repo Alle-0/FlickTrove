@@ -102,13 +102,29 @@ class AuthViewModel @Inject constructor(
                 } else {
                     trySend(AuthState.Authenticated)
                     try {
+                        val syncPrefs = context.getSharedPreferences("fcm_and_version_sync_prefs", android.content.Context.MODE_PRIVATE)
+                        val lastFcmToken = syncPrefs.getString("last_fcm_token_${user.uid}", null)
+                        val lastAppVersion = syncPrefs.getString("last_app_version_${user.uid}", null)
+                        val currentVersion = com.cinetrack.BuildConfig.VERSION_NAME
+
                         com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
-                            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("user_fcm_tokens").document(user.uid)
-                                .set(mapOf("fcmToken" to token), com.google.firebase.firestore.SetOptions.merge())
+                            if (!token.isNullOrBlank() && token != lastFcmToken) {
+                                com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("user_fcm_tokens").document(user.uid)
+                                    .set(mapOf("fcmToken" to token), com.google.firebase.firestore.SetOptions.merge())
+                                    .addOnSuccessListener {
+                                        syncPrefs.edit().putString("last_fcm_token_${user.uid}", token).apply()
+                                    }
+                            }
                         }
-                        // Save the current app version to the user profile
-                        com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(user.uid)
-                            .set(mapOf("appVersion" to com.cinetrack.BuildConfig.VERSION_NAME), com.google.firebase.firestore.SetOptions.merge())
+
+                        // Save the current app version to the user profile only if updated
+                        if (currentVersion != lastAppVersion) {
+                            com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("users").document(user.uid)
+                                .set(mapOf("appVersion" to currentVersion), com.google.firebase.firestore.SetOptions.merge())
+                                .addOnSuccessListener {
+                                    syncPrefs.edit().putString("last_app_version_${user.uid}", currentVersion).apply()
+                                }
+                        }
                     } catch (e: Exception) {
                         e.printStackTrace()
                     }
@@ -312,6 +328,9 @@ class AuthViewModel @Inject constructor(
                                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                                 batch.set(usernameRef, mapOf("uid" to uid))
                                 batch.commit().await()
+                                runCatching {
+                                    commsUniRepository.updateProfile(uniqueName, null)
+                                }
                             } catch (e: Exception) {
                                 // ignore
                             }
@@ -359,6 +378,9 @@ class AuthViewModel @Inject constructor(
                                 val usernameRef = Firebase.firestore.collection("usernames").document(uniqueName.lowercase())
                                 batch.set(usernameRef, mapOf("uid" to uid))
                                 batch.commit().await()
+                                runCatching {
+                                    commsUniRepository.updateProfile(uniqueName, null)
+                                }
                             } catch (e: Exception) {
                                 // ignore
                             }

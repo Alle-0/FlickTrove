@@ -220,11 +220,19 @@ fun RecommendationsScreenContent(
     val padding = 16.dp
     val gap = 12.dp
     val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
-    val cardWidth = if (columns > 1) {
+    val targetCardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
         screenWidth - (padding * 2)
     }
+    val cardWidth by animateDpAsState(
+        targetValue = targetCardWidth,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "recomCardWidth"
+    )
 
     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
     val stickyHeaderHeight = 60.dp
@@ -457,41 +465,64 @@ fun RecommendationsScreenContent(
                         ) { index, movie ->
                             val movieStatus = favoritesMap["${movie.mediaType}_${movie.id}"]
                             val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                            if (columns == 1) {
-                                com.cinetrack.ui.components.card.MovieListCard(
-                                    movie = movie.copy(personalRating = movieStatus?.personalRating),
-                                    modifier = Modifier.fillMaxWidth(),
-                                    isFavorite = movieStatus?.favorite ?: false,
-                                    isWatched = movieStatus?.watched ?: false,
-                                    isReminder = movieStatus?.reminder ?: false,
-                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                    folderColors = folderColors,
-                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                    staggerIndex = index,
-                                    onPress = { onMovieClick(movie) },
-                                    onAction = { viewModel.toggleFavorite(movie) },
-                                    onLongPress = actionsState.onLongPress,
-                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                )
-                            } else {
-                                MovieCard(
-                                    movie = movie,
-                                    cardWidth = cardWidth,
-                                    isFavorite = movieStatus?.favorite ?: false,
-                                    isWatched = movieStatus?.watched ?: false,
-                                    isReminder = movieStatus?.reminder ?: false,
-                                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                                    personalRating = movieStatus?.personalRating,
-                                    folderColors = folderColors,
-                                    showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                    hasAnimatedSet = viewModel.animatedMovieIds,
-                                    staggerIndex = index,
-                                    onPress = { onMovieClick(movie) },
-                                    onAction = { viewModel.toggleFavorite(movie) },
-                                    onLongPress = actionsState.onLongPress,
-                                    onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
-                                )
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(
+                                        fadeInSpec = tween(280),
+                                        placementSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        ),
+                                        fadeOutSpec = tween(200)
+                                    ),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                AnimatedContent(
+                                    targetState = columns == 1,
+                                    transitionSpec = {
+                                        (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
+                                            .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
+                                    },
+                                    label = "RecomCardLayoutTransition"
+                                ) { isList ->
+                                    if (isList) {
+                                        com.cinetrack.ui.components.card.MovieListCard(
+                                            movie = movie.copy(personalRating = movieStatus?.personalRating),
+                                            modifier = Modifier.fillMaxWidth(),
+                                            isFavorite = movieStatus?.favorite ?: false,
+                                            isWatched = movieStatus?.watched ?: false,
+                                            isReminder = movieStatus?.reminder ?: false,
+                                            progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                            folderColors = folderColors,
+                                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            staggerIndex = index,
+                                            onPress = { onMovieClick(movie) },
+                                            onAction = { viewModel.toggleFavorite(movie) },
+                                            onLongPress = actionsState.onLongPress,
+                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                        )
+                                    } else {
+                                        MovieCard(
+                                            movie = movie,
+                                            cardWidth = cardWidth,
+                                            isFavorite = movieStatus?.favorite ?: false,
+                                            isWatched = movieStatus?.watched ?: false,
+                                            isReminder = movieStatus?.reminder ?: false,
+                                            progress = movieStatus?.progress?.toFloat() ?: 0f,
+                                            personalRating = movieStatus?.personalRating,
+                                            folderColors = folderColors,
+                                            showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                            hasAnimatedSet = viewModel.animatedMovieIds,
+                                            staggerIndex = index,
+                                            onPress = { onMovieClick(movie) },
+                                            onAction = { viewModel.toggleFavorite(movie) },
+                                            onLongPress = actionsState.onLongPress,
+                                            onMessage = { viewModel.emitMessage(com.cinetrack.ui.utils.UiText.DynamicString(it)) }
+                                        )
+                                    }
+                                }
                             }
                         }
 

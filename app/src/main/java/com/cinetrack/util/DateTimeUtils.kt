@@ -2,6 +2,8 @@ package com.cinetrack.util
 
 import java.text.SimpleDateFormat
 import java.time.Instant
+import java.time.ZoneOffset
+import java.time.temporal.IsoFields
 import java.util.Date
 import java.util.Locale
 import java.util.TimeZone
@@ -122,4 +124,60 @@ object DateTimeUtils {
     fun formatDateOnly(date: Date): String {
         return dateOnlyFormat.get()?.format(date) ?: ""
     }
+
+    /**
+     * Calculates the ISO 8601 week ID in the format "${weekYear}_W$week" (e.g. "2026_W45").
+     * Uses UTC and IsoFields (ISO-8601 standard: week starts on Monday, year based on week)
+     * to ensure global consistency on Firestore and prevent year-boundary desynchronization
+     * (e.g. Jan 1, 2027 belonging to 2026_W53).
+     */
+    fun getIsoWeekId(epochMillis: Long = System.currentTimeMillis()): String {
+        val zdt = Instant.ofEpochMilli(epochMillis).atZone(ZoneOffset.UTC)
+        val weekYear = zdt.get(IsoFields.WEEK_BASED_YEAR)
+        val week = zdt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+        return "${weekYear}_W$week"
+    }
+
+    /**
+     * Returns the list of the last [weeksCount] ISO week IDs (including the current one),
+     * walking backwards week by week safely across year boundaries and 52/53-week years.
+     */
+    fun getRecentIsoWeekIds(
+        weeksCount: Int = 4,
+        epochMillis: Long = System.currentTimeMillis()
+    ): List<String> {
+        val baseZdt = Instant.ofEpochMilli(epochMillis).atZone(ZoneOffset.UTC)
+        return (0 until weeksCount).map { offset ->
+            val targetZdt = baseZdt.minusWeeks(offset.toLong())
+            val weekYear = targetZdt.get(IsoFields.WEEK_BASED_YEAR)
+            val week = targetZdt.get(IsoFields.WEEK_OF_WEEK_BASED_YEAR)
+            "${weekYear}_W$week"
+        }
+    }
 }
+
+/**
+ * Looks up the watched date for an episode across legacy and modern key formats:
+ * Checks "${seasonNumber}_${episodeNumber}" first, then "S${seasonNumber}E${episodeNumber}".
+ */
+fun Map<String, String>.getEpisodeWatchDate(seasonNumber: Int, episodeNumber: Int): String? {
+    return this["${seasonNumber}_${episodeNumber}"] ?: this["S${seasonNumber}E${episodeNumber}"]
+}
+
+/**
+ * Sets the watch date for an episode, populating "${seasonNumber}_${episodeNumber}"
+ * and cleaning up legacy "S${seasonNumber}E${episodeNumber}" to ensure consistency.
+ */
+fun MutableMap<String, String>.setEpisodeWatchDate(seasonNumber: Int, episodeNumber: Int, dateIso: String) {
+    this["${seasonNumber}_${episodeNumber}"] = dateIso
+    this.remove("S${seasonNumber}E${episodeNumber}")
+}
+
+/**
+ * Removes the episode date under both key formats.
+ */
+fun MutableMap<String, String>.removeEpisodeWatchDate(seasonNumber: Int, episodeNumber: Int) {
+    this.remove("${seasonNumber}_${episodeNumber}")
+    this.remove("S${seasonNumber}E${episodeNumber}")
+}
+

@@ -19,6 +19,7 @@ import java.util.Date
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.serialization.json.Json
 
 /**
  * Risultato della valutazione analitica di un singolo trofeo (progresso, soglia, tier attivo e sblocco).
@@ -46,6 +47,23 @@ class TrophyEvaluationEngine @Inject constructor(
         context.getSharedPreferences("flicktrove_badge_prefs", Context.MODE_PRIVATE)
     }
 
+    fun toLocalDayKey(raw: String?): String? {
+        if (raw.isNullOrBlank()) return null
+        val millis = parseWatchedAtMillis(raw)
+        return if (millis > 0L) {
+            val cal = Calendar.getInstance().apply { timeInMillis = millis }
+            String.format(
+                Locale.US,
+                "%04d-%02d-%02d",
+                cal.get(Calendar.YEAR),
+                cal.get(Calendar.MONTH) + 1,
+                cal.get(Calendar.DAY_OF_MONTH)
+            )
+        } else {
+            raw.take(10)
+        }
+    }
+
     /**
      * Risolve in modo deterministico e retroattivo il titolo e il poster dei media che hanno soddisfatto
      * i requisiti di sblocco per i trofei speciali, sessioni multiple (es. Doppio Spettacolo) e i Lost Reel cinefili.
@@ -62,23 +80,6 @@ class TrophyEvaluationEngine @Inject constructor(
         return when (badgeId) {
             // 48. Doppio Spettacolo: 2 film diversi nello stesso giorno solare
             "badge_double_feature" -> {
-                fun toLocalDayKey(raw: String?): String? {
-                    if (raw.isNullOrBlank()) return null
-                    val millis = parseWatchedAtMillis(raw)
-                    return if (millis > 0L) {
-                        val cal = Calendar.getInstance().apply { timeInMillis = millis }
-                        String.format(
-                            Locale.US,
-                            "%04d-%02d-%02d",
-                            cal.get(Calendar.YEAR),
-                            cal.get(Calendar.MONTH) + 1,
-                            cal.get(Calendar.DAY_OF_MONTH)
-                        )
-                    } else {
-                        raw.take(10)
-                    }
-                }
-
                 val movieIds = watchedMovies.map { it.id }.toSet()
                 val dayToMovieIds = mutableMapOf<String, MutableSet<Long>>()
                 for (history in allHistory) {
@@ -228,12 +229,18 @@ class TrophyEvaluationEngine @Inject constructor(
 
             // Lost Reel #11: Amore a Prima Vista (visto entro 24h dall'aggiunta ai preferiti/watchlist)
             "secret_instant_watch" -> {
-                val m = allWatched.firstOrNull { m ->
-                    val bookmarkedAt = badgePrefs.getLong("bookmarked_at_${m.id}", 0L)
-                    if (bookmarkedAt > 0L) {
-                        val diffHours = (System.currentTimeMillis() - bookmarkedAt) / (1000 * 60 * 60)
-                        diffHours in 0..24
-                    } else false
+                val savedId = badgePrefs.getLong("instant_watch_movie_id", 0L)
+                val m = if (savedId > 0L) {
+                    allWatched.firstOrNull { it.id == savedId }
+                } else {
+                    allWatched.firstOrNull { m ->
+                        val bookmarkedAt = badgePrefs.getLong("bookmarked_at_${m.id}", 0L)
+                        val watchedMillis = m.watchedAt?.let { parseWatchedAtMillis(it) } ?: 0L
+                        if (bookmarkedAt > 0L && watchedMillis > 0L) {
+                            val diffHours = Math.abs(watchedMillis - bookmarkedAt) / (1000 * 60 * 60)
+                            diffHours in 0..24
+                        } else false
+                    }
                 }
                 if (m != null) listOf(m) else emptyList()
             }
@@ -292,11 +299,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     }
                     if (foundLoop) break
                 }
+                val isUnlocked = foundLoop || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = if (foundLoop) 2 else 0,
+                    currentProgress = if (isUnlocked) 2 else 0,
                     targetThreshold = 2,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = foundLoop
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -322,33 +330,36 @@ class TrophyEvaluationEngine @Inject constructor(
                         hour in 2..4
                     } else false
                 }
+                val isUnlocked = nightWatches >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = nightWatches,
+                    currentProgress = if (isUnlocked) maxOf(nightWatches, 1) else nightWatches,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = nightWatches >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
             // 4. Crisi d'Identità: Film completato privo di generi TMDB
             "secret_genreless_rebel" -> {
                 val count = allWatched.count { it.genreIds.isNullOrEmpty() }
+                val isUnlocked = count >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = count,
+                    currentProgress = if (isUnlocked) maxOf(count, 1) else count,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = count >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
             // 5. L'Eterno Dubbioso: Voto modificato almeno 3 volte sullo stesso film
             "secret_indecisive" -> {
                 val count = badgePrefs.getInt("max_rating_changes_on_single_movie", prevEntity?.progressCurrent ?: 0)
+                val isUnlocked = count >= 3 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = count,
+                    currentProgress = if (isUnlocked) maxOf(count, 3) else count,
                     targetThreshold = 3,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = count >= 3
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -359,11 +370,12 @@ class TrophyEvaluationEngine @Inject constructor(
                         !movie.personalNote.isNullOrBlank() &&
                         !movie.emotionalVibes.isNullOrBlank() && movie.emotionalVibes != "[]"
                 }
+                val isUnlocked = fullDetailWatches >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = fullDetailWatches,
+                    currentProgress = if (isUnlocked) maxOf(fullDetailWatches, 1) else fullDetailWatches,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = fullDetailWatches >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -373,11 +385,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val year = movie.releaseDate?.take(4)?.toIntOrNull() ?: 2026
                     year in 1880..1939
                 }
+                val isUnlocked = pre1940Count >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = pre1940Count,
+                    currentProgress = if (isUnlocked) maxOf(pre1940Count, 1) else pre1940Count,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = pre1940Count >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -388,11 +401,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val notDisliked = movie.personalRating == null || movie.personalRating!! >= 5.0
                     isHorror && notDisliked
                 }
+                val isUnlocked = horrorCount >= 3 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = horrorCount,
+                    currentProgress = if (isUnlocked) maxOf(horrorCount, 3) else horrorCount,
                     targetThreshold = 3,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = horrorCount >= 3
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -403,11 +417,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val lowAvg = (movie.voteAverage ?: 0.0) in 0.1..5.8
                     highRating && lowAvg
                 }
+                val isUnlocked = gemsCount >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = gemsCount,
+                    currentProgress = if (isUnlocked) maxOf(gemsCount, 1) else gemsCount,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = gemsCount >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -418,11 +433,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val highGlobal = (movie.voteAverage ?: 0.0) >= 8.3
                     lowPersonal && highGlobal
                 }
+                val isUnlocked = harshCount >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = harshCount,
+                    currentProgress = if (isUnlocked) maxOf(harshCount, 1) else harshCount,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = harshCount >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -443,11 +459,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     it.personalRating?.let { r -> kotlin.math.round(r).toInt().takeIf { s -> s in 1..10 } }
                 }.toSet()
                 val count = usedScores.size
+                val isUnlocked = count >= 10 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = count,
+                    currentProgress = if (isUnlocked) maxOf(count, 10) else count,
                     targetThreshold = 10,
                     activeTier = PreviewBadgeTier.LOST_REEL,
-                    isUnlocked = count >= 10
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -467,16 +484,31 @@ class TrophyEvaluationEngine @Inject constructor(
 
             // 12. Episodi in 24h: Maratona Notturna
             "badge_binge_episodes" -> {
-                val maxEpsInDay = allHistory.groupBy { history ->
-                    val millis = parseWatchedAtMillis(history.watchedAt)
-                    if (millis > 0L) {
-                        val cal = Calendar.getInstance().apply { timeInMillis = millis }
-                        "${cal.get(Calendar.YEAR)}_${cal.get(Calendar.DAY_OF_YEAR)}"
-                    } else {
-                        history.watchedAt.take(10)
+                val dayToEpisodeCount = mutableMapOf<String, Int>()
+                for (history in allHistory) {
+                    var parsedEpisodes = 0
+                    if (!history.episodeDates.isNullOrBlank()) {
+                        try {
+                            val datesMap = Json.decodeFromString<Map<String, String>>(history.episodeDates)
+                            for ((_, dateStr) in datesMap) {
+                                val dayKey = toLocalDayKey(dateStr)
+                                if (!dayKey.isNullOrBlank()) {
+                                    dayToEpisodeCount[dayKey] = (dayToEpisodeCount[dayKey] ?: 0) + 1
+                                    parsedEpisodes++
+                                }
+                            }
+                        } catch (_: Exception) {}
                     }
-                }.values.maxOfOrNull { it.size } ?: 0
-                calculateProgressiveTiers(maxEpsInDay, badge.progressiveSteps)
+                    if (parsedEpisodes == 0 && history.mediaType == "tv") {
+                        val dayKey = toLocalDayKey(history.watchedAt)
+                        if (!dayKey.isNullOrBlank()) {
+                            dayToEpisodeCount[dayKey] = (dayToEpisodeCount[dayKey] ?: 0) + 1
+                        }
+                    }
+                }
+                val maxEpsInDay = dayToEpisodeCount.values.maxOrNull() ?: 0
+                val progress = maxOf(maxEpsInDay, prevEntity?.progressCurrent ?: 0)
+                calculateProgressiveTiers(progress, badge.progressiveSteps)
             }
 
             // 13. Watchlist: L'Archivio Infinito
@@ -687,22 +719,24 @@ class TrophyEvaluationEngine @Inject constructor(
             // 32. TMDB > 8.5: Gourmet del Cinema (10 capolavori)
             "gourmet_critic" -> {
                 val count = watchedMovies.count { (it.voteAverage ?: 0.0) >= 8.5 }
+                val isUnlocked = count >= 10 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = count,
+                    currentProgress = if (isUnlocked) maxOf(count, 10) else count,
                     targetThreshold = 10,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = count >= 10
+                    isUnlocked = isUnlocked
                 )
             }
 
             // 33. Durata > 3h30m (210 min): Titanico
             "colossal" -> {
                 val count = watchedMovies.count { (it.runtime ?: 0) >= 210 }
+                val isUnlocked = count >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = count,
+                    currentProgress = if (isUnlocked) maxOf(count, 1) else count,
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = count >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -711,11 +745,12 @@ class TrophyEvaluationEngine @Inject constructor(
                 val topActorCount = allWatched.filter { it.favoriteActorId != null }
                     .groupBy { it.favoriteActorId }
                     .values.maxOfOrNull { it.size } ?: 0
+                val isUnlocked = topActorCount >= 8 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = topActorCount,
+                    currentProgress = if (isUnlocked) maxOf(topActorCount, 8) else topActorCount,
                     targetThreshold = 8,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = topActorCount >= 8
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -724,50 +759,56 @@ class TrophyEvaluationEngine @Inject constructor(
                 val topDirectorCount = allWatched.filter { it.directorId != null }
                     .groupBy { it.directorId }
                     .values.maxOfOrNull { it.size } ?: 0
+                val isUnlocked = topDirectorCount >= 8 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = topDirectorCount,
+                    currentProgress = if (isUnlocked) maxOf(topDirectorCount, 8) else topDirectorCount,
                     targetThreshold = 8,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = topDirectorCount >= 8
+                    isUnlocked = isUnlocked
                 )
             }
 
             // 36. Note Personali: Diario di Bordo (10 note)
             "personal_diary" -> {
                 val notesCount = allWatched.count { !it.personalNote.isNullOrBlank() }
+                val isUnlocked = notesCount >= 10 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = notesCount,
+                    currentProgress = if (isUnlocked) maxOf(notesCount, 10) else notesCount,
                     targetThreshold = 10,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = notesCount >= 10
+                    isUnlocked = isUnlocked
                 )
             }
 
             // 37. Backdrop & Avatar: Scenografo Personale (Target = 2: Avatar + Backdrop)
             "custom_backdrop" -> {
                 val currentUid = auth.currentUser?.uid
-                val userNamePrefs = context.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE)
-                val commsPrefs = context.getSharedPreferences("commsuni_prefs", android.content.Context.MODE_PRIVATE)
+                val userNamePrefs = context.getSharedPreferences("user_name_changes", Context.MODE_PRIVATE)
+                val commsPrefs = context.getSharedPreferences("commsuni_prefs", Context.MODE_PRIVATE)
 
-                val hasAvatar = !currentUid.isNullOrBlank() && (
+                val hasAvatar = (
                     auth.currentUser?.photoUrl != null ||
-                    !userNamePrefs.getString("user_avatar_$currentUid", null).isNullOrBlank() ||
-                    !commsPrefs.getString("user_avatar_$currentUid", null).isNullOrBlank()
+                    (!currentUid.isNullOrBlank() && !userNamePrefs.getString("user_avatar_$currentUid", null).isNullOrBlank()) ||
+                    (!currentUid.isNullOrBlank() && !commsPrefs.getString("user_avatar_$currentUid", null).isNullOrBlank()) ||
+                    userNamePrefs.all.keys.any { it.startsWith("user_avatar_") && !userNamePrefs.getString(it, null).isNullOrBlank() } ||
+                    commsPrefs.all.keys.any { it.startsWith("user_avatar_") && !commsPrefs.getString(it, null).isNullOrBlank() }
                 )
 
-                val hasProfileBackdrop = !currentUid.isNullOrBlank() && (
-                    !userNamePrefs.getString("avatar_backdrop_$currentUid", null).isNullOrBlank()
+                val hasProfileBackdrop = (
+                    (!currentUid.isNullOrBlank() && !userNamePrefs.getString("avatar_backdrop_$currentUid", null).isNullOrBlank()) ||
+                    userNamePrefs.all.keys.any { it.startsWith("avatar_backdrop_") && !userNamePrefs.getString(it, null).isNullOrBlank() }
                 )
 
                 val avatarScore = if (hasAvatar) 1 else 0
                 val backdropScore = if (hasProfileBackdrop) 1 else 0
                 val totalCustomScore = avatarScore + backdropScore
+                val isUnlocked = totalCustomScore >= 2 || (prevEntity?.isUnlocked == true)
 
                 TrophyEvaluationResult(
-                    currentProgress = totalCustomScore,
+                    currentProgress = if (isUnlocked) 2 else totalCustomScore,
                     targetThreshold = 2,
                     activeTier = PreviewBadgeTier.SUPER_8,
-                    isUnlocked = totalCustomScore >= 2
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -776,22 +817,24 @@ class TrophyEvaluationEngine @Inject constructor(
                 val miniseriesCount = watchedShows.count { show ->
                     show.numberOfSeasons == 1 || (show.seasons?.count { s -> s.seasonNumber > 0 } == 1)
                 }
+                val isUnlocked = miniseriesCount >= 5 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = miniseriesCount.coerceAtMost(5),
+                    currentProgress = if (isUnlocked) 5 else miniseriesCount.coerceAtMost(5),
                     targetThreshold = 5,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = miniseriesCount >= 5
+                    isUnlocked = isUnlocked
                 )
             }
 
             // 43. Profondità Cartelle: La Collezione Definitiva (almeno 1 cartella con >= 25 titoli)
             "badge_folder_deep" -> {
                 val maxFolderItems = allFolders.maxOfOrNull { it.itemIds.distinct().size } ?: 0
+                val isUnlocked = maxFolderItems >= 25 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = maxFolderItems.coerceAtMost(25),
+                    currentProgress = if (isUnlocked) 25 else maxFolderItems.coerceAtMost(25),
                     targetThreshold = 25,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = maxFolderItems >= 25
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -815,11 +858,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val year = movie.releaseDate?.take(4)?.toIntOrNull()
                     if (year != null && year in 1880..2099) (year / 10) * 10 else null
                 }.distinct().size
+                val isUnlocked = distinctDecades >= 7 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = distinctDecades,
+                    currentProgress = if (isUnlocked) maxOf(distinctDecades, 7) else distinctDecades,
                     targetThreshold = 7,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = distinctDecades >= 7
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -827,11 +871,12 @@ class TrophyEvaluationEngine @Inject constructor(
             "badge_current_year" -> {
                 val currentYear = Calendar.getInstance().get(Calendar.YEAR).toString()
                 val currentYearCount = watchedMovies.count { it.releaseDate?.take(4) == currentYear }
+                val isUnlocked = currentYearCount >= 5 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = currentYearCount.coerceAtMost(5),
+                    currentProgress = if (isUnlocked) 5 else currentYearCount.coerceAtMost(5),
                     targetThreshold = 5,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = currentYearCount >= 5
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -841,24 +886,25 @@ class TrophyEvaluationEngine @Inject constructor(
                 val dayToMovieIds = mutableMapOf<String, MutableSet<Long>>()
                 for (history in allHistory) {
                     if (history.movieId in movieIds) {
-                        val dayKey = history.watchedAt.take(10)
-                        if (dayKey.isNotBlank()) {
+                        val dayKey = toLocalDayKey(history.watchedAt)
+                        if (!dayKey.isNullOrBlank()) {
                             dayToMovieIds.getOrPut(dayKey) { mutableSetOf() }.add(history.movieId)
                         }
                     }
                 }
                 for (movie in watchedMovies) {
-                    val dayKey = movie.watchedAt?.take(10)
+                    val dayKey = toLocalDayKey(movie.watchedAt)
                     if (!dayKey.isNullOrBlank()) {
                         dayToMovieIds.getOrPut(dayKey) { mutableSetOf() }.add(movie.id)
                     }
                 }
                 val maxMoviesInSingleDay = dayToMovieIds.values.maxOfOrNull { it.size } ?: 0
+                val isUnlocked = maxMoviesInSingleDay >= 2 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = maxMoviesInSingleDay.coerceAtMost(2),
+                    currentProgress = if (isUnlocked) 2 else maxMoviesInSingleDay.coerceAtMost(2),
                     targetThreshold = 2,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = maxMoviesInSingleDay >= 2
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -870,11 +916,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val isLoved = (movie.personalRating ?: 0.0) >= 7.5 || movie.favorite
                     isNiche && isLoved
                 }
+                val isUnlocked = hiddenGemsCount >= 1 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = hiddenGemsCount.coerceAtMost(1),
+                    currentProgress = if (isUnlocked) 1 else hiddenGemsCount.coerceAtMost(1),
                     targetThreshold = 1,
                     activeTier = PreviewBadgeTier.MM_70,
-                    isUnlocked = hiddenGemsCount >= 1
+                    isUnlocked = isUnlocked
                 )
             }
 
@@ -884,11 +931,12 @@ class TrophyEvaluationEngine @Inject constructor(
                     val rt = movie.runtime ?: 0
                     rt in 1..45
                 }
+                val isUnlocked = shortCount >= 5 || (prevEntity?.isUnlocked == true)
                 TrophyEvaluationResult(
-                    currentProgress = shortCount.coerceAtMost(5),
+                    currentProgress = if (isUnlocked) 5 else shortCount.coerceAtMost(5),
                     targetThreshold = 5,
                     activeTier = PreviewBadgeTier.MM_35,
-                    isUnlocked = shortCount >= 5
+                    isUnlocked = isUnlocked
                 )
             }
 

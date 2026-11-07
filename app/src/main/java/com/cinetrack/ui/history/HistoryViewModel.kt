@@ -7,6 +7,8 @@ import com.cinetrack.data.repository.BadgeRepository
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.WatchHistoryRepository
 import com.cinetrack.domain.UpdateEpisodesUseCase
+import com.cinetrack.util.getEpisodeWatchDate
+import com.cinetrack.util.removeEpisodeWatchDate
 import com.cinetrack.ui.history.model.*
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.serialization.json.Json
@@ -120,8 +122,9 @@ class HistoryViewModel @Inject constructor(
                     data class EpItem(val season: String, val episode: Int, val iso: String, val date: LocalDate, val time: LocalTime?)
 
                     val items = validEpMap.flatMap { (season, eps) ->
+                        val sNum = season.toIntOrNull() ?: 0
                         eps.map { ep ->
-                            val iso = epDatesMap["${season}_${ep}"] ?: rec.watchedAt
+                            val iso = epDatesMap.getEpisodeWatchDate(sNum, ep) ?: rec.watchedAt
                             val (d, t) = parseWatchedAt(iso)
                             EpItem(season, ep, iso, d, t)
                         }
@@ -309,9 +312,9 @@ class HistoryViewModel @Inject constructor(
             } ?: mutableMapOf()
 
             sessionEps.forEach { (season, eps) ->
+                val sNum = season.toIntOrNull() ?: 0
                 eps.forEach { ep ->
-                    epDatesMap.remove("${season}_${ep}")
-                    epDatesMap.remove("S${season}E${ep}")
+                    epDatesMap.removeEpisodeWatchDate(sNum, ep)
                 }
             }
 
@@ -372,7 +375,7 @@ class HistoryViewModel @Inject constructor(
                     watchedAt = newWatchedAt,
                     episodeDates = if (epDatesMap.isNotEmpty()) Json.encodeToString(epDatesMap.toMap()) else null,
                     historicalEpisodes = updatedHistEpisodesJson,
-                    syncStatus = if (historyEntity.syncStatus == "synced") "pending_update" else historyEntity.syncStatus
+                    syncStatus = "pending"
                 )
                 watchHistoryRepository.updateWatchHistory(updatedHistory)
                 watchHistoryRepository.pushPendingWatchHistory()

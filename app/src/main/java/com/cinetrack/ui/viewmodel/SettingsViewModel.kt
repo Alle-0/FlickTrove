@@ -54,6 +54,7 @@ class SettingsViewModel @Inject constructor(
     private val blockedAuthorsManager: com.cinetrack.data.repository.BlockedAuthorsManager,
     private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
     private val sharedFolderRepository: dagger.Lazy<com.cinetrack.data.repository.SharedFolderRepository>,
+    private val badgeRepository: dagger.Lazy<com.cinetrack.data.repository.BadgeRepository>,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -69,6 +70,17 @@ class SettingsViewModel @Inject constructor(
             } catch (e: Exception) {
                 android.util.Log.e("SettingsViewModel", "Failed to sync profile to Shared Folders", e)
             }
+            try {
+                auth.currentUser?.uid?.let { uid ->
+                    com.cinetrack.ui.components.folder.FolderMembersAvatarCache.put(uid, avatarUrl.orEmpty())
+                    context.getSharedPreferences("commsuni_prefs", android.content.Context.MODE_PRIVATE)
+                        .edit()
+                        .putString("user_avatar_$uid", avatarUrl.orEmpty())
+                        .putString("user_name_$uid", displayName)
+                        .putBoolean("user_avatar_checked_$uid", true)
+                        .apply()
+                }
+            } catch (_: Exception) {}
         }
     }
 
@@ -778,6 +790,7 @@ class SettingsViewModel @Inject constructor(
                 // Kick off an immediate full sync so the user's history is populated
                 // right away without having to wait for the next scheduled run.
                 syncTraktNow()
+                badgeRepository.get().evaluateBadgesAsync()
                 actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connected))
             } catch (e: Exception) {
                 android.util.Log.e("SettingsViewModel", "Trakt token exchange failed", e)
@@ -838,6 +851,7 @@ class SettingsViewModel @Inject constructor(
                 }
 
                 syncSimklNow()
+                badgeRepository.get().evaluateBadgesAsync()
                 actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connected))
             } catch (e: Exception) {
                 android.util.Log.e("SettingsViewModel", "Simkl token exchange failed", e)

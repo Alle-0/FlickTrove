@@ -25,8 +25,8 @@ android {
         applicationId = "com.cinetrack"
         minSdk = 26
         targetSdk = 35
-        versionCode = 38
-        versionName = "5.0.0"
+        versionCode = 39
+        versionName = "5.1.0"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -135,8 +135,8 @@ dependencies {
     implementation(libs.liquid)
     
     // Glance AppWidget
-    implementation("androidx.glance:glance-appwidget:1.1.1")
-    implementation("androidx.glance:glance-material3:1.1.1")
+    implementation("androidx.glance:glance-appwidget:1.2.0")
+    implementation("androidx.glance:glance-material3:1.2.0")
     implementation(libs.androidx.material.icons.extended)
     implementation("androidx.compose.animation:animation-graphics")
     implementation(libs.voyager.navigator)

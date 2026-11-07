@@ -43,12 +43,13 @@ data class UserGenreProfile(
  */
 class CalculateMatchScoreUseCase @Inject constructor() {
 
-    // Niche/Format genres on TMDB that represent distinctive visual/stylistic mediums rather than universal themes
+    // Niche/Format and highly polarizing genres on TMDB that represent distinctive visual/stylistic/thematic mediums
     val nicheFormatGenres = setOf(
         16L,     // Animation
         99L,     // Documentary
         10402L,  // Music / Musical
         37L,     // Western
+        10752L,  // War
         10770L,  // TV Movie
         10762L,  // Kids (TV)
         10764L,  // Reality (TV)
@@ -331,6 +332,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             val avgGenreAffinity = sumGenreAffinity / currentMovieGenreIds.size
 
             // Multi-Genre Saturation ("Minestrone Effect"):
+            // Prevents generic blockbusters with 4+ tags from parasitically latching onto a single favorite genre.
+            // 2 and 3-genre movies are preserved to avoid false negatives on classic combinations (e.g. Sci-Fi + Adventure + Drama).
             val isMinestrone = currentMovieGenreIds.size >= 4 && lowAffinityCount > (currentMovieGenreIds.size / 2)
             val maxWeight = if (isMinestrone) 0.45f else 0.65f
             val avgWeight = if (isMinestrone) 0.55f else 0.35f

@@ -140,11 +140,19 @@ fun VistiScreenContent(
     val padding = 16.dp
     val gap = 12.dp
     val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
-    val cardWidth = if (columns > 1) {
+    val targetCardWidth = if (columns > 1) {
         (screenWidth - (padding * 2) - (gap * (columns - 1))) / columns
     } else {
         screenWidth - (padding * 2)
     }
+    val cardWidth by animateDpAsState(
+        targetValue = targetCardWidth,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "vistiCardWidth"
+    )
     
     val listState = if (uiState.activeTab == "movie") viewModel.movieGridState else viewModel.tvGridState
     val scope = rememberCoroutineScope()
@@ -271,46 +279,69 @@ fun VistiScreenContent(
                         key = { index, movie: Movie -> movie.id.toString() + movie.mediaType }
                     ) { index, movie ->
                         val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                        if (columns == 1) {
-                            com.cinetrack.ui.components.card.MovieListCard(
-                                movie = movie,
-                                modifier = Modifier.fillMaxWidth(),
-                                isFavorite = movie.favorite,
-                                isWatched = movie.watched,
-                                isReminder = movie.reminder,
-                                showAdvancedBadges = true,
-                                personalRating = movie.personalRating,
-                                progress = (movie.progress ?: 0.0).toFloat(),
-                                folderColors = folderColors,
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                showBadges = uiState.preferences.showBadges,
-                                hazeState = hazeState,
-                                hasAnimatedSet = viewModel.animatedMovieIds,
-                                staggerIndex = index,
-                                onPress = stableOnPress,
-                                onAction = stableOnAction,
-                                onLongPress = stableOnLongPress,
-                                onMessage = stableOnMessage
-                            )
-                        } else {
-                            MovieCard(
-                                movie = movie,
-                                cardWidth = cardWidth,
-                                isFavorite = movie.favorite,
-                                isWatched = movie.watched,
-                                isReminder = movie.reminder,
-                                showAdvancedBadges = true,
-                                personalRating = movie.personalRating,
-                                progress = (movie.progress ?: 0.0).toFloat(),
-                                folderColors = folderColors,
-                                showFolderBookmarks = uiState.preferences.showFolderBookmarks,
-                                hasAnimatedSet = viewModel.animatedMovieIds,
-                                staggerIndex = index,
-                                onPress = stableOnPress,
-                                onAction = stableOnAction,
-                                onLongPress = stableOnLongPress,
-                                onMessage = stableOnMessage
-                            )
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem(
+                                    fadeInSpec = tween(280),
+                                    placementSpec = spring(
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                        stiffness = Spring.StiffnessMediumLow
+                                    ),
+                                    fadeOutSpec = tween(200)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AnimatedContent(
+                                targetState = columns == 1,
+                                transitionSpec = {
+                                    (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
+                                        .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
+                                },
+                                label = "VistiCardLayoutTransition"
+                            ) { isList ->
+                                if (isList) {
+                                    com.cinetrack.ui.components.card.MovieListCard(
+                                        movie = movie,
+                                        modifier = Modifier.fillMaxWidth(),
+                                        isFavorite = movie.favorite,
+                                        isWatched = movie.watched,
+                                        isReminder = movie.reminder,
+                                        showAdvancedBadges = true,
+                                        personalRating = movie.personalRating,
+                                        progress = (movie.progress ?: 0.0).toFloat(),
+                                        folderColors = folderColors,
+                                        showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                        showBadges = uiState.preferences.showBadges,
+                                        hazeState = hazeState,
+                                        hasAnimatedSet = viewModel.animatedMovieIds,
+                                        staggerIndex = index,
+                                        onPress = stableOnPress,
+                                        onAction = stableOnAction,
+                                        onLongPress = stableOnLongPress,
+                                        onMessage = stableOnMessage
+                                    )
+                                } else {
+                                    MovieCard(
+                                        movie = movie,
+                                        cardWidth = cardWidth,
+                                        isFavorite = movie.favorite,
+                                        isWatched = movie.watched,
+                                        isReminder = movie.reminder,
+                                        showAdvancedBadges = true,
+                                        personalRating = movie.personalRating,
+                                        progress = (movie.progress ?: 0.0).toFloat(),
+                                        folderColors = folderColors,
+                                        showFolderBookmarks = uiState.preferences.showFolderBookmarks,
+                                        hasAnimatedSet = viewModel.animatedMovieIds,
+                                        staggerIndex = index,
+                                        onPress = stableOnPress,
+                                        onAction = stableOnAction,
+                                        onLongPress = stableOnLongPress,
+                                        onMessage = stableOnMessage
+                                    )
+                                }
+                            }
                         }
                     }
                 }

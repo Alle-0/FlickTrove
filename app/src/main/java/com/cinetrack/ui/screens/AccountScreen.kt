@@ -21,8 +21,10 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.clipToBounds
 import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.foundation.interaction.MutableInteractionSource
@@ -36,6 +38,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.unit.lerp
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.foundation.layout.offset
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
@@ -231,6 +235,8 @@ object AccountTab : Tab {
 
         var extractedColor by remember { mutableStateOf<Color?>(null) }
         var rawExtractedColor by remember { mutableStateOf<Color?>(null) }
+        var actualHeaderLuminance by remember { mutableFloatStateOf(0f) }
+        var actualBackdropLuminance by remember { mutableFloatStateOf(0f) }
         
         val baseDarkColor = remember { Color(0xFF0F0F16) }
         val targetBackgroundColor = if (extractedColor != null) {
@@ -268,14 +274,37 @@ object AccountTab : Tab {
                         rawExtractedColor = color
                         extractedColor = color
                     }
+
+                    // Sample 16x16 thumbnail for true pixel luminance
+                    val scaled = android.graphics.Bitmap.createScaledBitmap(bitmap, 16, 16, true)
+                    var headerLumSum = 0f
+                    var totalLumSum = 0f
+                    for (y in 0 until 16) {
+                        for (x in 0 until 16) {
+                            val pixel = scaled.getPixel(x, y)
+                            val r = (pixel shr 16) and 0xFF
+                            val g = (pixel shr 8) and 0xFF
+                            val b = pixel and 0xFF
+                            val lum = (0.299f * r + 0.587f * g + 0.114f * b) / 255f
+                            totalLumSum += lum
+                            if (y < 8) {
+                                headerLumSum += lum
+                            }
+                        }
+                    }
+                    actualHeaderLuminance = headerLumSum / (16f * 8f)
+                    actualBackdropLuminance = totalLumSum / (16f * 16f)
                 }
             } else {
                 extractedColor = null
                 rawExtractedColor = null
+                actualHeaderLuminance = 0f
+                actualBackdropLuminance = 0f
             }
         }
 
         val backgroundHazeState = remember { HazeState() }
+        val scrollState = rememberScrollState()
 
         Box(
             modifier = Modifier
@@ -306,8 +335,8 @@ object AccountTab : Tab {
                                 .fillMaxSize()
                                 .background(
                                     Brush.verticalGradient(
-                                        0.0f to Color.Transparent,
-                                        0.30f to Color.Transparent,
+                                        0.0f to Color.Black.copy(alpha = 0.35f),
+                                        0.18f to Color.Transparent,
                                         0.55f to animatedBgColor.copy(alpha = 0.40f),
                                         0.75f to animatedBgColor.copy(alpha = 0.85f),
                                         0.92f to animatedBgColor.copy(alpha = 0.98f),
@@ -327,132 +356,27 @@ object AccountTab : Tab {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
-                        .verticalScroll(rememberScrollState())
+                        .verticalScroll(scrollState)
                         .padding(bottom = paddingValues.calculateBottomPadding() + 80.dp)
                 ) {
-                    // Top Spacer for Status Bar & padding + GlassyTopBar clearance
+                    val statusBarsTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                    val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+                    val safeDrawingTop = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
+                    val safeTop = maxOf(statusBarsTop, maxOf(cutoutTop, safeDrawingTop))
+                    val compactTop = safeTop + 46.dp + 8.dp
+                    val restingTop = safeTop + 46.dp + 28.dp
+
+                    // Top Spacer for clearance: lets the cards start right below the resting avatar
                     Spacer(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .height(paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp)
+                            .height(restingTop + 120.dp + 24.dp)
                     )
                     
-                    // Capture delegated props into local vals (needed by name pill + dashboard cards)
+                    // Capture delegated props into local vals (needed by dashboard cards)
                     val snapshotRawColor = rawExtractedColor
                     val snapshotBackdrop = avatarBackdrop
                     val rawLuminance = snapshotRawColor?.luminance() ?: 0f
-
-                    // User Profile Section
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(horizontal = 24.dp, vertical = 16.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Avatar Container
-                        Box(
-                            modifier = Modifier
-                                .size(120.dp)
-                                .clickable(
-                                    indication = null,
-                                    interactionSource = remember { MutableInteractionSource() }
-                                ) {
-                                    settingsViewModel.triggerEditProfileMenu()
-                                },
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(112.dp)
-                                    .hazeGlass(
-                                        state = backgroundHazeState,
-                                        shape = CircleShape,
-                                        containerColor = if (rawLuminance > 0.35f) Color.Black.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
-                                        borderColor = if (rawLuminance > 0.35f) Color.White.copy(alpha = 0.2f) else Color.White.copy(alpha = 0.12f),
-                                        borderWidth = 1.dp,
-                                        blurRadius = com.cinetrack.ui.theme.HazeStyles.SmallGlassBlurRadius
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .size(100.dp)
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.1f))
-                                        .border(2.dp, animatedBorderColor.copy(alpha = 0.8f), CircleShape),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    if (currentPhotoUrl != null) {
-                                        AsyncImage(
-                                            model = currentPhotoUrl,
-                                            contentDescription = "Profile Picture",
-                                            modifier = Modifier.fillMaxSize(),
-                                            contentScale = ContentScale.Crop
-                                        )
-                                    } else {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_persona), // Assuming this icon exists
-                                            contentDescription = "Default Profile",
-                                            tint = Color.White.copy(alpha = 0.7f),
-                                            modifier = Modifier.size(48.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                        
-                        Spacer(modifier = Modifier.width(16.dp))
-                        
-                        // Name Container
-                        Box(
-                            modifier = Modifier.weight(1f),
-                            contentAlignment = Alignment.CenterEnd
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .clickable(
-                                        indication = null,
-                                        interactionSource = remember { MutableInteractionSource() }
-                                    ) {
-                                        settingsViewModel.triggerEditProfileMenu()
-                                    }
-                                    .hazeGlass(
-                                        state = backgroundHazeState,
-                                        shape = RoundedCornerShape(50),
-                                        // Stronger overlay when backdrop is light so pill has contrast
-                                        containerColor = if (rawLuminance > 0.35f)
-                                            Color.Black.copy(alpha = 0.4f)
-                                        else
-                                            Color.White.copy(alpha = 0.05f),
-                                        borderColor = Color.White.copy(alpha = 0.1f),
-                                        borderWidth = 1.dp
-                                    )
-                                    .padding(horizontal = 24.dp, vertical = 8.dp)
-                            ) {
-                                val namePencilColor = Color(0xFFF0F0F0)
-                                val textShadow = androidx.compose.ui.graphics.Shadow(
-                                    color = if (namePencilColor == Color(0xFF1A1A1A)) Color.White.copy(alpha = 0.3f)
-                                            else Color.Black.copy(alpha = 0.4f),
-                                    offset = androidx.compose.ui.geometry.Offset(0f, 1f),
-                                    blurRadius = 4f
-                                )
-                                Text(
-                                    text = currentDisplayName,
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Bold,
-                                        color = namePencilColor,
-                                        shadow = textShadow
-                                    ),
-                                    modifier = Modifier.weight(1f, fill = false),
-                                    maxLines = 1,
-                                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
-                                )
-                            }
-                        }
-                    }
-
-                    Spacer(modifier = Modifier.height(32.dp))
 
                     // Dashboard Cards
                     Column(
@@ -467,7 +391,7 @@ object AccountTab : Tab {
                                         GeneralStatsCard(
                                             stats = statsUiState.stats,
                                             hazeState = backgroundHazeState,
-                                            backgroundLuminance = rawLuminance,
+                                            backgroundLuminance = actualBackdropLuminance,
                                             onClick = { tabNavigator.current = StatsTab }
                                         )
                                     }
@@ -478,7 +402,7 @@ object AccountTab : Tab {
                                             folders = folders,
                                             allMovies = allMovies,
                                             hazeState = backgroundHazeState,
-                                            backgroundLuminance = rawLuminance,
+                                            backgroundLuminance = actualBackdropLuminance,
                                             onViewAllClick = { tabNavigator.current = FoldersTab },
                                             onFolderClick = { folder ->
                                                 tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
@@ -490,7 +414,7 @@ object AccountTab : Tab {
                                     if (showYourFlow) {
                                         YourFlowCard(
                                             hazeState = backgroundHazeState,
-                                            backgroundLuminance = rawLuminance,
+                                            backgroundLuminance = actualBackdropLuminance,
                                             onFlowClick = { tabNavigator.current = FlowTab },
                                             onFlowStatsClick = { tabNavigator.current = FlowStatsTab }
                                         )
@@ -500,7 +424,7 @@ object AccountTab : Tab {
                                     if (showTrophies) {
                                         TrophyShowcaseCard(
                                             hazeState = backgroundHazeState,
-                                            backgroundLuminance = rawLuminance,
+                                            backgroundLuminance = actualBackdropLuminance,
                                             isEnabled = true,
                                             unlockedBadges = trophyItems.filter { it.isUnlocked },
                                             onClick = {
@@ -513,7 +437,7 @@ object AccountTab : Tab {
                                     if (showDiary) {
                                         com.cinetrack.ui.components.account.HistoryDiaryCard(
                                             hazeState = backgroundHazeState,
-                                            backgroundLuminance = rawLuminance,
+                                            backgroundLuminance = actualBackdropLuminance,
                                             recentEntries = historyUiState.allEntries.take(3),
                                             totalCount = historyUiState.allEntries.size,
                                             onClick = {
@@ -528,7 +452,7 @@ object AccountTab : Tab {
                         if (!isDiaryInDashboardOrder && showDiary) {
                             com.cinetrack.ui.components.account.HistoryDiaryCard(
                                 hazeState = backgroundHazeState,
-                                backgroundLuminance = rawLuminance,
+                                backgroundLuminance = actualBackdropLuminance,
                                 recentEntries = historyUiState.allEntries.take(3),
                                 totalCount = historyUiState.allEntries.size,
                                 onClick = {
@@ -540,6 +464,151 @@ object AccountTab : Tab {
                     
                     Spacer(modifier = Modifier.height(32.dp))
 
+                }
+
+                // Morphing Profile Header (Avatar and Name smoothly shrink & dock under GlassyTopBar)
+                val statusBarsTop = WindowInsets.statusBars.asPaddingValues().calculateTopPadding()
+                val cutoutTop = WindowInsets.displayCutout.asPaddingValues().calculateTopPadding()
+                val safeDrawingTop = WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding()
+                val safeTop = maxOf(statusBarsTop, maxOf(cutoutTop, safeDrawingTop))
+                val compactTop = safeTop + 46.dp + 8.dp
+                val restingTop = safeTop + 46.dp + 28.dp
+
+                val density = LocalDensity.current
+                val scrollThreshold = with(density) { 140.dp.toPx() }
+                val progress by remember {
+                    derivedStateOf {
+                        (scrollState.value.toFloat() / scrollThreshold).coerceIn(0f, 1f)
+                    }
+                }
+
+                val currentHeaderTop = lerp(restingTop, compactTop, progress)
+
+                BoxWithConstraints(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = currentHeaderTop)
+                        .padding(horizontal = 24.dp)
+                        .zIndex(20f)
+                ) {
+                    val totalWidth = maxWidth
+                    var nameWidthPx by remember { mutableIntStateOf(0) }
+                    val nameWidthDp = with(density) { nameWidthPx.toDp() }
+
+                    val avatarSize = lerp(120.dp, 34.dp, progress)
+                    val avatarInnerSize = lerp(100.dp, 30.dp, progress)
+                    val avatarBorderWidth = lerp(2.dp, 1.5.dp, progress)
+                    val avatarIconSize = lerp(48.dp, 16.dp, progress)
+
+                    val dockedNameX = 34.dp + 10.dp
+                    val restingNameX = if (nameWidthDp > 0.dp) (totalWidth - nameWidthDp).coerceAtLeast(dockedNameX) else totalWidth - 110.dp
+                    val currentNameX = lerp(restingNameX, dockedNameX, progress)
+
+                    val restingNameY = (120.dp - 44.dp) / 2
+                    val dockedNameY = (34.dp - 36.dp) / 2
+                    val currentNameY = lerp(restingNameY, dockedNameY, progress)
+
+                    // Avatar
+                    Box(
+                        modifier = Modifier
+                            .size(avatarSize)
+                            .bounceClick(scaleDown = 0.95f) {
+                                settingsViewModel.triggerEditProfileMenu()
+                            },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(
+                                    state = backgroundHazeState,
+                                    shape = CircleShape,
+                                    containerColor = if (actualHeaderLuminance > 0.38f) Color.Black.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.10f),
+                                    borderColor = (rawExtractedColor ?: MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
+                                    borderWidth = 1.dp,
+                                    blurRadius = com.cinetrack.ui.theme.HazeStyles.SmallGlassBlurRadius
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(avatarInnerSize)
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.1f))
+                                    .border(avatarBorderWidth, animatedBorderColor.copy(alpha = 0.8f), CircleShape),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (currentPhotoUrl != null) {
+                                    AsyncImage(
+                                        model = currentPhotoUrl,
+                                        contentDescription = "Profile Picture",
+                                        modifier = Modifier.fillMaxSize(),
+                                        contentScale = ContentScale.Crop
+                                    )
+                                } else {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_persona),
+                                        contentDescription = "Default Profile",
+                                        tint = Color.White.copy(alpha = 0.7f),
+                                        modifier = Modifier.size(avatarIconSize)
+                                    )
+                                }
+                            }
+                        }
+                    }
+
+                    // Name Pill
+                    val nameContainerColor = if (actualHeaderLuminance > 0.38f) {
+                        Color.Black.copy(alpha = 0.45f + (0.10f * progress))
+                    } else {
+                        androidx.compose.ui.graphics.lerp(
+                            Color.White.copy(alpha = 0.12f),
+                            Color(0xFF16161E).copy(alpha = 0.70f),
+                            progress
+                        )
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .offset(x = currentNameX, y = currentNameY)
+                            .onGloballyPositioned { coordinates ->
+                                nameWidthPx = coordinates.size.width
+                            }
+                            .bounceClick(scaleDown = 0.95f) {
+                                settingsViewModel.triggerEditProfileMenu()
+                            }
+                            .hazeGlass(
+                                state = backgroundHazeState,
+                                shape = RoundedCornerShape(50),
+                                containerColor = nameContainerColor,
+                                borderColor = if (actualHeaderLuminance > 0.38f)
+                                    Color.White.copy(alpha = 0.20f)
+                                else
+                                    Color.White.copy(alpha = 0.25f),
+                                borderWidth = 1.dp
+                            )
+                            .padding(
+                                horizontal = lerp(24.dp, 12.dp, progress),
+                                vertical = lerp(8.dp, 6.dp, progress)
+                            )
+                    ) {
+                        val textShadow = androidx.compose.ui.graphics.Shadow(
+                            color = Color.Black.copy(alpha = if (actualHeaderLuminance > 0.38f) 0.5f else 0.7f),
+                            offset = androidx.compose.ui.geometry.Offset(0f, 1f),
+                            blurRadius = 4f
+                        )
+                        Text(
+                            text = currentDisplayName,
+                            style = MaterialTheme.typography.titleMedium.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = Color.White,
+                                shadow = textShadow,
+                                fontSize = lerp(16.sp, 14.sp, progress)
+                            ),
+                            maxLines = 1,
+                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis
+                        )
+                    }
                 }
             }
             // Removed local AvatarSelectionModal usage

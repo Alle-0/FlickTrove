@@ -49,6 +49,14 @@ import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.LayoutCoordinates
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.width
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.layout.ContentScale
+import coil3.compose.AsyncImage
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.buildTmdbImageUrl
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -62,7 +70,8 @@ fun SimpleMorphingTopBar(
     onShareClick: () -> Unit,
     onFilterClick: ((Rect?) -> Unit)? = null,
     hasActiveFilters: Boolean = false,
-    scrimAlpha: Float = 0f
+    scrimAlpha: Float = 0f,
+    avatarUrl: String? = null
 ) {
     val density = LocalDensity.current
 
@@ -249,19 +258,12 @@ fun SimpleMorphingTopBar(
                         }
                     }
 
-                    // Center Title
+                    // Center Title & Avatar
                     val personTitleAlpha = ((currentEffectiveProgress - 0.68f) / 0.32f).coerceIn(0f, 1f)
                     if (personTitleAlpha > 0.01f) {
                         val titleStartPadding = if (homeButtonVisible) 92.dp else 52.dp
                         val titleEndPadding = if (onFilterClick != null) 100.dp else 52.dp
-                        Text(
-                            text = title,
-                            color = Color.White,
-                            fontWeight = FontWeight.Bold,
-                            fontSize = 16.sp,
-                            maxLines = 1,
-                            overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                        Row(
                             modifier = Modifier
                                 .align(Alignment.Center)
                                 .padding(start = titleStartPadding, end = titleEndPadding)
@@ -270,8 +272,49 @@ fun SimpleMorphingTopBar(
                                     scaleX = 0.9f + (0.1f * personTitleAlpha)
                                     scaleY = 0.9f + (0.1f * personTitleAlpha)
                                     translationY = 10f * (1f - personTitleAlpha)
+                                },
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center
+                        ) {
+                            if (!avatarUrl.isNullOrBlank()) {
+                                val imageModel = remember(avatarUrl) {
+                                    buildTmdbImageUrl(avatarUrl, ImageType.PROFILE, ImageQuality.LOW)
                                 }
-                        )
+                                Box(
+                                    modifier = Modifier
+                                        .size(26.dp)
+                                        .border(1.dp, Color.White.copy(alpha = 0.65f), CircleShape)
+                                        .padding(1.dp)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.08f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_persona),
+                                        contentDescription = null,
+                                        modifier = Modifier.size(14.dp),
+                                        tint = Color.White.copy(alpha = 0.4f)
+                                    )
+                                    AsyncImage(
+                                        model = imageModel,
+                                        contentDescription = null,
+                                        contentScale = ContentScale.Crop,
+                                        modifier = Modifier.fillMaxSize()
+                                    )
+                                }
+                                Spacer(modifier = Modifier.width(8.dp))
+                            }
+                            Text(
+                                text = title,
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 16.sp,
+                                maxLines = 1,
+                                overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                                textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+                                modifier = Modifier.weight(1f, fill = false)
+                            )
+                        }
                     }
 
                     // Right: Filter & Share
@@ -362,25 +405,7 @@ fun SimpleMorphingTopBar(
 @Composable
 fun PersonMorphingTopBar(
     title: String,
-    localHazeState: HazeState,
-    symbioteProgress: Float,
-    detailStackDepth: Int,
-    onBackClick: () -> Unit,
-    onHomeClick: () -> Unit,
-    onShareClick: () -> Unit
-) = SimpleMorphingTopBar(
-    title = title,
-    localHazeState = localHazeState,
-    symbioteProgress = symbioteProgress,
-    detailStackDepth = detailStackDepth,
-    onBackClick = onBackClick,
-    onHomeClick = onHomeClick,
-    onShareClick = onShareClick
-)
-
-@Composable
-fun CollectionMorphingTopBar(
-    title: String,
+    profilePath: String? = null,
     localHazeState: HazeState,
     symbioteProgress: Float,
     detailStackDepth: Int,
@@ -400,5 +425,33 @@ fun CollectionMorphingTopBar(
     onShareClick = onShareClick,
     onFilterClick = onFilterClick,
     hasActiveFilters = hasActiveFilters,
-    scrimAlpha = scrimAlpha
+    scrimAlpha = scrimAlpha,
+    avatarUrl = profilePath
+)
+
+@Composable
+fun CollectionMorphingTopBar(
+    title: String,
+    localHazeState: HazeState,
+    symbioteProgress: Float,
+    detailStackDepth: Int,
+    onBackClick: () -> Unit,
+    onHomeClick: () -> Unit,
+    onShareClick: () -> Unit,
+    onFilterClick: ((Rect?) -> Unit)? = null,
+    hasActiveFilters: Boolean = false,
+    scrimAlpha: Float = 0f,
+    avatarUrl: String? = null
+) = SimpleMorphingTopBar(
+    title = title,
+    localHazeState = localHazeState,
+    symbioteProgress = symbioteProgress,
+    detailStackDepth = detailStackDepth,
+    onBackClick = onBackClick,
+    onHomeClick = onHomeClick,
+    onShareClick = onShareClick,
+    onFilterClick = onFilterClick,
+    hasActiveFilters = hasActiveFilters,
+    scrimAlpha = scrimAlpha,
+    avatarUrl = avatarUrl
 )

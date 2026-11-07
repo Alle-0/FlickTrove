@@ -53,6 +53,9 @@ import kotlinx.coroutines.channels.awaitClose
 import com.cinetrack.worker.TraktInstantWriteWorker
 import com.cinetrack.worker.SimklInstantWriteWorker
 import com.cinetrack.data.repository.importers.MovieLookupService
+import com.cinetrack.util.DateTimeUtils
+import com.cinetrack.util.setEpisodeWatchDate
+import com.cinetrack.util.removeEpisodeWatchDate
 
 @Singleton
 class MovieRepository @Inject constructor(
@@ -1573,6 +1576,85 @@ class MovieRepository @Inject constructor(
     suspend fun purgeHistoryForMovie(movieId: Long, mediaType: String? = null) = watchHistoryRepository.purgeHistoryForMovie(movieId, mediaType)
     suspend fun countDuplicateRewatches(): Int = watchHistoryRepository.countDuplicateRewatches()
     suspend fun cleanupAllRewatches(): Int = watchHistoryRepository.cleanupAllRewatches()
+
+    suspend fun recordEpisodeWatchState(
+        movie: Movie,
+        changedEpisodes: List<Pair<Int, Int>>? = null,
+        isAdding: Boolean = true,
+        customDate: java.time.Instant? = null,
+        isProgressAdvancing: Boolean = true
+    ) {
+        if (movie.mediaType != "tv") return
+        val watchedCount = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+        if (watchedCount > 0 || movie.watched) {
+            val currentHistory = watchHistoryRepository.getWatchHistoryForMovie(movie.id, movie.mediaType)
+            val activeSession = if (currentHistory.any { it.isRewatch }) {
+                currentHistory.filter { it.isRewatch }.maxByOrNull { DateTimeUtils.parseIsoDateToMillis(it.watchedAt) }
+            } else {
+                currentHistory.find { !it.isRewatch }
+            }
+            val nowStr = customDate?.toString() ?: java.time.Instant.now().toString()
+
+            val currentDatesMap = try {
+                activeSession?.episodeDates?.let { 
+                    Json.decodeFromString<Map<String, String>>(it).toMutableMap() 
+                } ?: mutableMapOf()
+            } catch (e: Exception) {
+                mutableMapOf()
+            }
+
+            if (!changedEpisodes.isNullOrEmpty()) {
+                for ((seasonNum, epNum) in changedEpisodes) {
+                    if (isAdding) {
+                        currentDatesMap.setEpisodeWatchDate(seasonNum, epNum, nowStr)
+                    } else {
+                        currentDatesMap.removeEpisodeWatchDate(seasonNum, epNum)
+                    }
+                }
+            }
+
+            val newEpisodeDatesJson = if (currentDatesMap.isNotEmpty()) {
+                try { Json.encodeToString(currentDatesMap) } catch (e: Exception) { null }
+            } else null
+
+            if (activeSession == null) {
+                watchHistoryRepository.insertWatchHistory(
+                    com.cinetrack.data.local.entities.WatchHistoryEntity(
+                        movieId = movie.id,
+                        mediaType = movie.mediaType,
+                        watchedAt = nowStr,
+                        isRewatch = false,
+                        episodeDates = newEpisodeDatesJson
+                    )
+                )
+                if (movie.watchedAt != nowStr) {
+                    saveMovie(movie.copy(watchedAt = nowStr, clientUpdatedAt = System.currentTimeMillis()))
+                }
+            } else {
+                val allResolvedDates = currentDatesMap.values.toList()
+                val targetIso = if (allResolvedDates.isNotEmpty()) {
+                    allResolvedDates.maxByOrNull { DateTimeUtils.parseIsoDateToMillis(it) } ?: nowStr
+                } else if (isProgressAdvancing) {
+                    nowStr
+                } else {
+                    activeSession.watchedAt
+                }
+
+                watchHistoryRepository.updateWatchHistory(
+                    activeSession.copy(
+                        watchedAt = targetIso,
+                        episodeDates = newEpisodeDatesJson,
+                        syncStatus = "pending"
+                    )
+                )
+                val latestHistory = watchHistoryRepository.getWatchHistoryForMovie(movie.id, movie.mediaType)
+                    .maxByOrNull { DateTimeUtils.parseIsoDateToMillis(it.watchedAt) }
+                if (latestHistory != null && movie.watchedAt != latestHistory.watchedAt) {
+                    saveMovie(movie.copy(watchedAt = latestHistory.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
+                }
+            }
+        }
+    }
 
     // --- Box Office ---
     suspend fun getWeekendBoxOffice(forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> =
