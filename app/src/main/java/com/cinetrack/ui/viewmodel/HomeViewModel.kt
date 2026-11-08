@@ -135,7 +135,7 @@ class HomeViewModel @Inject constructor(
 
                     // 2. Sincronizzazione Trakt se collegato
                     if (traktAuthRepository.isLoggedIn.value) {
-                        val inputData = androidx.work.workDataOf("force" to true)
+                        val inputData = androidx.work.workDataOf("force" to false)
                         val traktRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
                             .setInputData(inputData)
                             .build()
@@ -149,7 +149,7 @@ class HomeViewModel @Inject constructor(
 
                     // 3. Sincronizzazione SIMKL se collegato
                     if (simklAuthRepository.getAccessToken() != null) {
-                        val inputData = androidx.work.workDataOf("force" to true)
+                        val inputData = androidx.work.workDataOf("force" to false)
                         val simklRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
                             .setInputData(inputData)
                             .build()

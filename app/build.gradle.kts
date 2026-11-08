@@ -107,7 +107,7 @@ android {
 
 dependencies {
     // Firebase
-    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+    implementation(platform("com.google.firebase:firebase-bom:35.1.0"))
     implementation(libs.firebase.auth)
     implementation(libs.firebase.firestore)
     implementation(libs.firebase.crashlytics)
@@ -180,7 +180,7 @@ dependencies {
 
     // Coroutines
     implementation(libs.kotlinx.coroutines.android)
-    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.9.0")
+    implementation("org.jetbrains.kotlinx:kotlinx-coroutines-play-services:1.11.0")
 
     // Google ML Kit
     implementation("com.google.mlkit:translate:17.0.3")
@@ -192,14 +192,14 @@ dependencies {
     implementation(libs.androidx.work.runtime)
 
     // Security
-    implementation("androidx.security:security-crypto:1.1.0-alpha06")
+    implementation("androidx.security:security-crypto:1.1.0")
 
     debugImplementation(libs.androidx.ui.tooling)
     implementation(libs.androidx.profileinstaller)
     "baselineProfile"(project(":baselineprofile"))
 
     testImplementation(libs.junit)
-    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.11.0")
 }
 
 ksp {

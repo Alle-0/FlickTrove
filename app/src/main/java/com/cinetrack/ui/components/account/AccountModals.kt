@@ -36,11 +36,11 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.viewmodel.SettingsViewModel
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.auth.userProfileChangeRequest
 import com.google.firebase.firestore.SetOptions
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await

@@ -25,6 +25,8 @@ import coil3.compose.AsyncImagePainter
 import androidx.compose.foundation.layout.Box
 import androidx.compose.ui.draw.alpha
 
+val LocalRenderCinematicBackground = compositionLocalOf { true }
+
 @Composable
 fun CinematicBackground(
     modifier: Modifier = Modifier,
@@ -32,6 +34,10 @@ fun CinematicBackground(
     accentColor: Color? = null,
     backdropUrl: String? = null
 ) {
+    if (!LocalRenderCinematicBackground.current && backdropUrl == null && backgroundColor == Color.Transparent) {
+        return
+    }
+
     val baseTint = accentColor ?: MaterialTheme.colorScheme.primary
 
     Box(modifier = modifier.fillMaxSize().background(backgroundColor)) {

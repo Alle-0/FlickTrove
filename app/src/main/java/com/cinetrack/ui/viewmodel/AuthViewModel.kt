@@ -19,8 +19,8 @@ import com.google.firebase.auth.FirebaseAuthRecentLoginRequiredException
 import com.google.firebase.FirebaseNetworkException
 import com.cinetrack.R
 import com.cinetrack.ui.utils.UiText
-import com.google.firebase.firestore.ktx.firestore
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.firestore.firestore
+import com.google.firebase.Firebase
 import com.google.firebase.firestore.SetOptions
 import com.google.firebase.auth.userProfileChangeRequest
 

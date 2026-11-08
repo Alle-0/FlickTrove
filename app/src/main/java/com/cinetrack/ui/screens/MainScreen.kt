@@ -46,6 +46,17 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
+import androidx.compose.foundation.pager.HorizontalPager
+import androidx.compose.foundation.pager.rememberPagerState
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
+import androidx.compose.ui.input.nestedscroll.NestedScrollSource
+import androidx.compose.ui.input.nestedscroll.nestedScroll
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.background
+import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.R
 import com.cinetrack.ui.FilterModalConfig
 import com.cinetrack.ui.LocalActiveFilterConfig
@@ -178,11 +189,28 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val currentUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser }
         val prefs = remember { currentContext.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE) }
 
+        val primaryTabs = remember {
+            listOf(HomeFeedTab, HomeTab, VistiTab, AccountTab)
+        }
+        val initialPrimaryIndex = remember { primaryTabs.indexOf(initialTab).coerceAtLeast(0) }
+        val pagerState = rememberPagerState(initialPage = initialPrimaryIndex) { primaryTabs.size }
+
         TabNavigator(initialTab) { tabNavigator ->
             val currentTab = tabNavigator.current
             var previousTab by remember { mutableStateOf<Tab>(currentTab) }
             var _lastTab by remember { mutableStateOf<Tab>(currentTab) }
             val scrollToTopState = remember { mutableStateOf(com.cinetrack.ui.ScrollToTopState()) }
+
+            LaunchedEffect(pagerState) {
+                snapshotFlow { pagerState.settledPage }.collect { settledPage ->
+                    if (settledPage in primaryTabs.indices) {
+                        val targetTab = primaryTabs[settledPage]
+                        if (tabNavigator.current in primaryTabs && tabNavigator.current != targetTab) {
+                            tabNavigator.current = targetTab
+                        }
+                    }
+                }
+            }
 
             val foldersViewModel: com.cinetrack.ui.viewmodel.FoldersViewModel? = if (activity != null) {
                 hiltViewModel(activity)
@@ -201,6 +229,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     scrollToTopState.value = com.cinetrack.ui.ScrollToTopState()
                     previousTab = _lastTab
                     _lastTab = currentTab
+                }
+                val targetIndex = primaryTabs.indexOf(currentTab)
+                if (targetIndex >= 0 && pagerState.currentPage != targetIndex && !pagerState.isScrollInProgress) {
+                    pagerState.scrollToPage(targetIndex)
                 }
             }
 
@@ -238,6 +270,19 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                 val isTrophyDetailOpen = activeTrophyDetailConfig.value != null
                 val isBarDimmed = isSettingsDialogOpen
+                val isPagerScrollEnabled = !isBarDimmed &&
+                        !isTrophyDetailOpen &&
+                        !isFilterModalVisible &&
+                        !isYearPickerVisible &&
+                        !showFolderOptions &&
+                        !showFolderEditDialog &&
+                        !showFolderDeleteConfirm &&
+                        !showFolderShareModal &&
+                        !showFolderMembersModal &&
+                        !showFoldersSortMenu &&
+                        !showExitConfirmation &&
+                        !showSurpriseMeOverlay
+
                 BackHandler(enabled = isTrophyDetailOpen) {
                     activeTrophyDetailConfig.value?.onClose?.invoke()
                 }
@@ -262,30 +307,38 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     LocalSymbiontPullState provides symbiontPullState
                 ) {
                     Box(modifier = Modifier.fillMaxSize().haze(globalHazeState)) {
-                            Box(modifier = Modifier.fillMaxSize().haze(contentHazeState)) {
+                        CinematicBackground(modifier = Modifier.fillMaxSize())
+                        Box(modifier = Modifier.fillMaxSize().haze(contentHazeState)) {
+                            val activeSecondaryTab = if (currentTab in primaryTabs) null else currentTab
+
                                 AnimatedContent(
-                                    targetState = currentTab,
+                                    targetState = activeSecondaryTab,
                                     contentKey = { tab ->
                                         when (tab) {
+                                            null -> "PRIMARY_PAGER"
                                             is FolderDetailTab -> "FolderDetailTab_${tab.folderId}"
-                                            else -> tab::class.qualifiedName ?: "tab"
+                                            else -> tab::class.qualifiedName ?: "secondary_tab"
                                         }
                                     },
                                     transitionSpec = {
-                                        val targetDepth = when (targetState) {
-                                            is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
+                                        val target = targetState
+                                        val initial = initialState
+                                        val targetDepth = when (target) {
+                                            null -> 0
+                                            is DiscoverTab, is RecommendationsTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
                                             is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
                                             is FolderDetailTab -> 2
                                             else -> 0
                                         }
-                                        val initialDepth = when (initialState) {
-                                            is HomeTab, is HomeFeedTab, is DiscoverTab, is VistiTab, is RecommendationsTab, is AccountTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
+                                        val initialDepth = when (initial) {
+                                            null -> 0
+                                            is DiscoverTab, is RecommendationsTab, is SettingsTab, is NewsTab, is BoxOfficeTab -> 0
                                             is StatsTab, is FoldersTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> 1
                                             is FolderDetailTab -> 2
                                             else -> 0
                                         }
 
-                                        if (targetState::class == initialState::class) {
+                                        if (target != null && initial != null && target::class == initial::class) {
                                             // Same tab class (e.g. rename of FolderDetailTab): no animation
                                             EnterTransition.None togetherWith ExitTransition.None
                                         } else if (targetDepth > initialDepth) {
@@ -299,12 +352,59 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         }
                                     },
                                     label = "TabTransition"
-                                ) { tab ->
-                                    if (tab is FolderDetailTab) {
-                                        tab.Content()
+                                ) { secondaryTab ->
+                                    if (secondaryTab == null) {
+                                        val carouselScrollBoundary = remember {
+                                            object : NestedScrollConnection {
+                                                override fun onPostScroll(
+                                                    consumed: Offset,
+                                                    available: Offset,
+                                                    source: NestedScrollSource
+                                                ): Offset {
+                                                    return if (available.x != 0f) Offset(available.x, 0f) else Offset.Zero
+                                                }
+                                            }
+                                        }
+
+                                        HorizontalPager(
+                                            state = pagerState,
+                                            modifier = Modifier.fillMaxSize(),
+                                            userScrollEnabled = isPagerScrollEnabled,
+                                            key = { page -> primaryTabs[page]::class.qualifiedName ?: page.toString() }
+                                        ) { page ->
+                                            val pageTab = primaryTabs[page]
+                                            val pageModifier = if (pageTab is HomeFeedTab) {
+                                                Modifier.fillMaxSize().nestedScroll(carouselScrollBoundary)
+                                            } else {
+                                                Modifier.fillMaxSize()
+                                            }
+                                            val offsetProvider = remember(pagerState, page) {
+                                                {
+                                                    ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction).coerceAtMost(0f)
+                                                }
+                                            }
+                                            val alphaProvider = remember(offsetProvider) {
+                                                {
+                                                    (1f - kotlin.math.abs(offsetProvider())).coerceIn(0f, 1f)
+                                                }
+                                            }
+                                            CompositionLocalProvider(
+                                                com.cinetrack.ui.components.common.LocalRenderCinematicBackground provides false,
+                                                com.cinetrack.ui.LocalAccountBackdropAlpha provides alphaProvider,
+                                                com.cinetrack.ui.LocalAccountBackdropOffset provides offsetProvider
+                                            ) {
+                                                Box(modifier = pageModifier) {
+                                                    tabNavigator.saveableState(pageTab::class.simpleName ?: "tab", pageTab) {
+                                                        pageTab.Content()
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    } else if (secondaryTab is FolderDetailTab) {
+                                        secondaryTab.Content()
                                     } else {
-                                        tabNavigator.saveableState(tab::class.simpleName ?: "tab", tab) {
-                                            tab.Content()
+                                        tabNavigator.saveableState(secondaryTab::class.simpleName ?: "tab", secondaryTab) {
+                                            secondaryTab.Content()
                                         }
                                     }
                                 }
@@ -474,11 +574,25 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     }
                                 },
                                 onNavigate = { routeStr ->
-                                    when (routeStr) {
-                                        "feed" -> tabNavigator.current = HomeFeedTab
-                                        "index" -> tabNavigator.current = HomeTab
-                                        "visti" -> tabNavigator.current = VistiTab
-                                        "account" -> tabNavigator.current = AccountTab
+                                    val targetTab = when (routeStr) {
+                                        "feed" -> HomeFeedTab
+                                        "index" -> HomeTab
+                                        "visti" -> VistiTab
+                                        "account" -> AccountTab
+                                        else -> null
+                                    }
+                                    if (targetTab != null) {
+                                        val targetIndex = primaryTabs.indexOf(targetTab)
+                                        if (targetIndex >= 0) {
+                                            if (targetIndex == pagerState.currentPage && currentTab == targetTab) {
+                                                scrollToTopState.value.onScrollToTop.invoke()
+                                            } else {
+                                                scope.launch {
+                                                    pagerState.animateScrollToPage(targetIndex)
+                                                }
+                                            }
+                                        }
+                                        tabNavigator.current = targetTab
                                     }
                                 }
                             )

@@ -214,7 +214,13 @@ class TraktJsonImporter @Inject constructor(
                         ?: itemObj["favorite_actor"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["fav_actor"]?.jsonPrimitive?.contentOrNull)?.take(255)
 
-                    val vibesVal = (obj["vibes"]?.jsonPrimitive?.contentOrNull
+                    val rawReaction = (obj["reaction"]?.jsonPrimitive?.contentOrNull
+                        ?: obj["emoji"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["reaction"]?.jsonPrimitive?.contentOrNull
+                        ?: itemObj["emoji"]?.jsonPrimitive?.contentOrNull)
+                    val mappedReactionVibe = rawReaction?.let { com.cinetrack.domain.mapper.TraktReactionMapper.emojiToVibeCode(it) }
+
+                    val rawVibesVal = (obj["vibes"]?.jsonPrimitive?.contentOrNull
                         ?: obj["emotional_vibes"]?.jsonPrimitive?.contentOrNull
                         ?: obj["tags"]?.jsonPrimitive?.contentOrNull
                         ?: obj["mood"]?.jsonPrimitive?.contentOrNull
@@ -222,6 +228,9 @@ class TraktJsonImporter @Inject constructor(
                         ?: itemObj["emotional_vibes"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["tags"]?.jsonPrimitive?.contentOrNull
                         ?: itemObj["mood"]?.jsonPrimitive?.contentOrNull)?.take(255)
+
+                    val vibesVal = mappedReactionVibe
+                        ?: rawVibesVal?.let { com.cinetrack.domain.mapper.TraktReactionMapper.emojiToVibeCode(it) ?: it }
 
                     val hasWatchedField = listOf("watched", "seen", "status", "watch_status").any { key ->
                         obj.containsKey(key) || itemObj.containsKey(key)

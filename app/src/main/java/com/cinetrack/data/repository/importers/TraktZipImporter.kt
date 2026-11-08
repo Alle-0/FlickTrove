@@ -39,15 +39,16 @@ class TraktZipImporter @Inject constructor(
     ): Int = withContext(Dispatchers.IO) {
         var count = 0
         val ratingsMap = buildRatingsMap(zipEntries)
+        val reactionsMap = buildReactionsMap(zipEntries)
         val (episodeMap, lastWatchedByShow, episodeDatesMap) = buildEpisodeMap(zipEntries)
         val hiddenShowsSet = buildHiddenShowsSet(zipEntries)
         val listsMap = buildListsMap(zipEntries)
 
-        count += parseWatchedMovies(zipEntries, ratingsMap, onBatchReady)
-        count += parseWatchedShows(zipEntries, ratingsMap, episodeMap, lastWatchedByShow, episodeDatesMap, hiddenShowsSet, onBatchReady)
-        count += parseWatchlist(zipEntries, ratingsMap, onBatchReady)
-        count += parseFavorites(zipEntries, ratingsMap, onBatchReady)
-        count += parseCustomLists(zipEntries, ratingsMap, listsMap, onBatchReady)
+        count += parseWatchedMovies(zipEntries, ratingsMap, reactionsMap, onBatchReady)
+        count += parseWatchedShows(zipEntries, ratingsMap, reactionsMap, episodeMap, lastWatchedByShow, episodeDatesMap, hiddenShowsSet, onBatchReady)
+        count += parseWatchlist(zipEntries, ratingsMap, reactionsMap, onBatchReady)
+        count += parseFavorites(zipEntries, ratingsMap, reactionsMap, onBatchReady)
+        count += parseCustomLists(zipEntries, ratingsMap, reactionsMap, listsMap, onBatchReady)
 
         count
     }
@@ -63,6 +64,32 @@ class TraktZipImporter @Inject constructor(
                     val tmdbId = mediaObj["ids"]?.jsonObject?.get("tmdb")?.jsonPrimitive?.contentOrNull?.toLongOrNull() ?: return@forEach
                     val rating = obj["rating"]?.jsonPrimitive?.doubleOrNull ?: return@forEach
                     map[tmdbId] = rating
+                }
+            }
+        }
+        return map
+    }
+
+    private fun buildReactionsMap(zipEntries: Map<String, ByteArray>): Map<Long, String> {
+        val map = mutableMapOf<Long, String>()
+        val reactionEntries = zipEntries.filterKeys { 
+            it.contains("reactions") || it.contains("reactions-movies") || it.contains("reactions-shows")
+        }
+        reactionEntries.values.forEach { bytes ->
+            runCatching {
+                (json.parseToJsonElement(bytes.decodeToString()) as? JsonArray)?.forEach { el ->
+                    val obj = el as? JsonObject ?: return@forEach
+                    val mediaObj = obj["movie"]?.jsonObject ?: obj["show"]?.jsonObject ?: obj
+                    val tmdbId = mediaObj["ids"]?.jsonObject?.get("tmdb")?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: obj["ids"]?.jsonObject?.get("tmdb")?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+                        ?: return@forEach
+                    val emoji = obj["reaction"]?.jsonPrimitive?.contentOrNull 
+                        ?: obj["emoji"]?.jsonPrimitive?.contentOrNull 
+                        ?: return@forEach
+                    val vibeCode = com.cinetrack.domain.mapper.TraktReactionMapper.emojiToVibeCode(emoji)
+                    if (vibeCode != null) {
+                        map[tmdbId] = vibeCode
+                    }
                 }
             }
         }
@@ -166,6 +193,7 @@ class TraktZipImporter @Inject constructor(
     private suspend fun parseWatchedMovies(
         zipEntries: Map<String, ByteArray>,
         ratingsMap: Map<Long, Double>,
+        reactionsMap: Map<Long, String>,
         onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         var count = 0
@@ -194,6 +222,7 @@ class TraktZipImporter @Inject constructor(
                                 watched = true,
                                 favorite = false,
                                 personalRating = ratingsMap[tmdbId],
+                                emotionalVibes = reactionsMap[tmdbId],
                                 watchedAt = parseAndNormalizeWatchedDate(watchedAt),
                                 releaseYear = year,
                                 syncStatus = "pending",
@@ -217,6 +246,7 @@ class TraktZipImporter @Inject constructor(
     private suspend fun parseWatchedShows(
         zipEntries: Map<String, ByteArray>,
         ratingsMap: Map<Long, Double>,
+        reactionsMap: Map<Long, String>,
         episodeMap: Map<Long, Map<String, List<Int>>>,
         lastWatchedByShow: Map<Long, String>,
         episodeDatesMap: Map<Long, Map<String, String>>,
@@ -257,6 +287,7 @@ class TraktZipImporter @Inject constructor(
                                 favorite = isDropped,
                                 watchedEpisodes = eps,
                                 personalRating = ratingsMap[tmdbId],
+                                emotionalVibes = reactionsMap[tmdbId],
                                 watchedAt = parseAndNormalizeWatchedDate(lastWatched),
                                 releaseYear = year,
                                 syncStatus = "pending",
@@ -281,6 +312,7 @@ class TraktZipImporter @Inject constructor(
     private suspend fun parseWatchlist(
         zipEntries: Map<String, ByteArray>,
         ratingsMap: Map<Long, Double>,
+        reactionsMap: Map<Long, String>,
         onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         var count = 0
@@ -312,6 +344,7 @@ class TraktZipImporter @Inject constructor(
                                 watched = false,
                                 favorite = true,
                                 personalRating = ratingsMap[tmdbId],
+                                emotionalVibes = reactionsMap[tmdbId],
                                 releaseYear = year,
                                 syncStatus = "pending",
                                 clientUpdatedAt = System.currentTimeMillis()
@@ -353,6 +386,7 @@ class TraktZipImporter @Inject constructor(
     private suspend fun parseFavorites(
         zipEntries: Map<String, ByteArray>,
         ratingsMap: Map<Long, Double>,
+        reactionsMap: Map<Long, String>,
         onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
     ): Int = withContext(Dispatchers.IO) {
         var count = 0
@@ -384,6 +418,7 @@ class TraktZipImporter @Inject constructor(
                                 watched = false,
                                 favorite = true,
                                 personalRating = ratingsMap[tmdbId],
+                                emotionalVibes = reactionsMap[tmdbId],
                                 releaseYear = year,
                                 syncStatus = "pending",
                                 clientUpdatedAt = System.currentTimeMillis()
@@ -406,6 +441,7 @@ class TraktZipImporter @Inject constructor(
     private suspend fun parseCustomLists(
         zipEntries: Map<String, ByteArray>,
         ratingsMap: Map<Long, Double>,
+        reactionsMap: Map<Long, String>,
         listsMap: Map<String, String>,
         onBatchReady: suspend (List<Pair<Movie, String?>>) -> Unit
     ): Int = withContext(Dispatchers.IO) {
@@ -454,6 +490,7 @@ class TraktZipImporter @Inject constructor(
                                 watched = false,
                                 favorite = false,
                                 personalRating = ratingsMap[tmdbId],
+                                emotionalVibes = reactionsMap[tmdbId],
                                 releaseYear = year,
                                 syncStatus = "pending",
                                 clientUpdatedAt = System.currentTimeMillis()

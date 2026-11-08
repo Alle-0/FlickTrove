@@ -31,20 +31,45 @@ class GetHomeFeedUseCase @Inject constructor(
         val recMoviesDeferred = async { 
             val (recs, seedIds) = buildRecommendations(type = "movie", localMovies = localMovies)
             if (recs.isNotEmpty()) {
-                val first = recs.first()
-                try {
-                    val detail = repository.getMovieDetail(first.id, false)
-                    val rawLanguage = preferenceRepository.getContentLanguage()
-                    val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
-                    val logos = detail.images?.logos
-                    val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
-                    val newList = recs.toMutableList()
-                    newList[0] = first.copy(genreIds = detail.genres?.map { it.id } ?: first.genreIds).apply { 
-                        this.logoPath = bestLogo?.filePath 
-                        this.matchScore = first.matchScore
+                val candidateList = recs.toMutableList()
+                val validRecs = mutableListOf<Movie>()
+                var resolvedFirst: Movie? = null
+
+                val movieProfile = calculateMatchScoreUseCase.buildUserProfile(localMovies.filter { it.mediaType != "tv" })
+                val isShortEnthusiast = (movieProfile?.shortRatio ?: 0f) >= 0.10f
+
+                for (candidate in candidateList) {
+                    if (resolvedFirst == null) {
+                        try {
+                            val detail = repository.getMovieDetail(candidate.id, false)
+                            // I cortometraggi (< 40 min) vengono scartati da Trove's Pick a meno che
+                            // l'utente non sia un appassionato di corti (shortRatio >= 10%) E il titolo
+                            // non abbia una solida reputazione internazionale (voteCount >= 500)
+                            val isShort = detail.runtime != null && detail.runtime in 1..39
+                            if (isShort && (!isShortEnthusiast || (detail.voteCount ?: 0) < 500)) {
+                                continue
+                            }
+                            val rawLanguage = preferenceRepository.getContentLanguage()
+                            val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
+                            val logos = detail.images?.logos
+                            val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
+                            resolvedFirst = candidate.copy(
+                                genreIds = detail.genres?.map { it.id } ?: candidate.genreIds,
+                                runtime = detail.runtime ?: candidate.runtime
+                            ).apply { 
+                                this.logoPath = bestLogo?.filePath 
+                                this.matchScore = candidate.matchScore
+                            }
+                            validRecs.add(resolvedFirst)
+                        } catch (e: Exception) { 
+                            validRecs.add(candidate)
+                            resolvedFirst = candidate
+                        }
+                    } else {
+                        validRecs.add(candidate)
                     }
-                    Pair(newList.toImmutableList(), seedIds)
-                } catch (e: Exception) { Pair(recs, seedIds) }
+                }
+                Pair(validRecs.toImmutableList(), seedIds)
             } else Pair(recs, seedIds)
         }
 
@@ -251,6 +276,7 @@ class GetHomeFeedUseCase @Inject constructor(
         } else null
 
         val topSingleGenre = userProfile?.genreAffinities?.maxByOrNull { it.value }?.key
+        val isShortEnthusiast = (userProfile?.shortRatio ?: 0f) >= 0.10f
 
         val localCompositeIds = localMovies.map { it.compositeId }.toSet()
 
@@ -273,6 +299,9 @@ class GetHomeFeedUseCase @Inject constructor(
                         "vote_average.gte" to "6.8",
                         "sort_by" to "popularity.desc"
                     )
+                    if (type == "movie" && !isShortEnthusiast) {
+                        params["with_runtime.gte"] = "40"
+                    }
                     genrePairStr?.let { params["with_genres"] = it }
                     excludedGenresStr?.let { params["without_genres"] = it }
                     topForeignCountry?.let { params["with_origin_country"] = it }
@@ -291,6 +320,9 @@ class GetHomeFeedUseCase @Inject constructor(
                             "vote_count.gte" to "50",
                             "sort_by" to "vote_average.desc"
                         )
+                        if (!isShortEnthusiast) {
+                            params["with_runtime.gte"] = "40"
+                        }
                         excludedGenresStr?.let { params["without_genres"] = it }
                         repository.discoverMoviesWithParams(options = params).onEach { movie ->
                             movie.directorId = topDirectorId
@@ -298,11 +330,14 @@ class GetHomeFeedUseCase @Inject constructor(
                     } else if (topSingleGenre != null) {
                         val params = mutableMapOf<String, String>(
                             "with_genres" to topSingleGenre.toString(),
-                            "vote_count.gte" to "80",
+                            "vote_count.gte" to if (isShortEnthusiast) "250" else "80",
                             "vote_count.lte" to "3500",
                             "vote_average.gte" to "7.3",
                             "sort_by" to "vote_average.desc"
                         )
+                        if (type == "movie" && !isShortEnthusiast) {
+                            params["with_runtime.gte"] = "40"
+                        }
                         excludedGenresStr?.let { params["without_genres"] = it }
                         if (type == "movie") repository.discoverMoviesWithParams(options = params)
                         else repository.discoverTVWithParams(options = params)

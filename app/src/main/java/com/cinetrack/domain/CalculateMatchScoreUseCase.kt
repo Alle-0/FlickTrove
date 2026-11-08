@@ -19,7 +19,8 @@ data class UserGenreProfile(
     val actorAffinities: Map<Long, Float> = emptyMap(),
     val isIndieSeeker: Boolean = false,
     val totalWatchedCount: Int = 0,
-    val averageUserRating: Float = 7.0f
+    val averageUserRating: Float = 7.0f,
+    val shortRatio: Float = 0f
 ) {
     fun getGenreCount(genreId: Long): Int = genreCounts[genreId] ?: 0
     fun getDecadeCount(decade: Int): Int = decadeCounts[decade] ?: 0
@@ -235,6 +236,12 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             count.toFloat() / totalCompleted.toFloat()
         }
 
+        // Frequenza di Cortometraggi (< 40 minuti) per Damping Organico
+        val shortCount = watchedMovies.count { m ->
+            m.mediaType != "tv" && !m.dropped && (m.runtime ?: 0) in 1..39
+        }
+        val shortRatio = if (totalCompleted > 0) shortCount.toFloat() / totalCompleted.toFloat() else 0f
+
         // Micro-Cluster Normalized Affinities
         val pairAffinities = (pairScores.keys + intentPairScores.keys).associateWith { pairKey ->
             val score = pairScores[pairKey] ?: 0f
@@ -299,7 +306,8 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             actorAffinities = actorAffinities,
             isIndieSeeker = isIndieSeeker,
             totalWatchedCount = totalCompleted,
-            averageUserRating = avgUserRating
+            averageUserRating = avgUserRating,
+            shortRatio = shortRatio
         )
     }
 
@@ -396,6 +404,20 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             }
         }
 
+        // 5b. Short-Film Protection & Organic Damping (< 40 mins for non-TV movies):
+        // Obscure shorts or joke entries on TMDB often have inflated ratings (8.0+) with small vote counts.
+        // If the user rarely or never watches short films (< 10% ratio), apply organic continuous damping (up to -35pt).
+        // If the user is an active short film enthusiast (shortRatio >= 10%), the penalty smoothly fades to 0pt.
+        val shortFilmPenalty = if (currentMovie.mediaType != "tv" && (currentMovie.runtime ?: 0) in 1..39) {
+            if (profile.totalWatchedCount >= 6) {
+                if (profile.shortRatio < 0.10f) {
+                    40f * (1f - (profile.shortRatio / 0.10f)).pow(1.4f)
+                } else 0f
+            } else {
+                40f
+            }
+        } else 0f
+
         // 6. Upgrade 4: Era / Decade Modulation (Curva Continua Lerp)
         var eraBonus = 0f
         val candidateYear = extractYear(currentMovie)
@@ -464,7 +486,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
 
         // Composite calculation con Soft-Knee Cap asintotico sopra gli 80 pt
         val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus + countryBonus + auteurBoost + indieGemBonus
-        val totalNegative = repulsionPenalty + formatDamping
+        val totalNegative = repulsionPenalty + formatDamping + shortFilmPenalty
         val rawFinal = totalPositive - totalNegative
 
         val compressedScore = if (rawFinal > 80f) {

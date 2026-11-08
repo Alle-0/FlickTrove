@@ -74,8 +74,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.detail.*
-import com.google.firebase.auth.ktx.auth
-import com.google.firebase.ktx.Firebase
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.ui.utils.verticalFadingEdges

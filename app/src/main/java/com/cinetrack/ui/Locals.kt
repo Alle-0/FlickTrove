@@ -15,6 +15,8 @@ val LocalDeepLinkIntent = staticCompositionLocalOf<MutableState<Intent?>> { erro
 // Callback to open the filter modal from inside a tab; passes optional trigger Rect
 val LocalFilterRequest = compositionLocalOf<((Rect?) -> Unit)?> { null }
 val LocalSurpriseMeRequest = compositionLocalOf<((Rect?) -> Unit)?> { null }
+val LocalAccountBackdropAlpha = compositionLocalOf<() -> Float> { { 1f } }
+val LocalAccountBackdropOffset = compositionLocalOf<() -> Float> { { 0f } }
 
 fun interface SearchOverlayTrigger {
     fun open(

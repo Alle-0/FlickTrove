@@ -133,35 +133,49 @@ class SimklSyncWorker @AssistedInject constructor(
                 processPhaseItems(shows, isMovie = false, bulkStatsUpdates)
                 processPhaseItems(anime, isMovie = false, bulkStatsUpdates)
 
-                val remoteTmdbIds = (movies + shows + anime).mapNotNull { 
-                    it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb ?: it.anime?.ids?.tmdb 
-                }.mapNotNull { it.toLongOrNull() }.toSet()
+                val allRemoteItems = movies + shows + anime
+
+                val remoteWatchedIds = allRemoteItems.filter {
+                    it.status == "completed" || it.status == "watching" || it.status == "watched" || !it.last_watched_at.isNullOrBlank()
+                }.mapNotNull {
+                    val id = (it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb ?: it.anime?.ids?.tmdb)?.toLongOrNull()
+                    val type = if (it.movie != null) "movie" else "tv"
+                    if (id != null) Pair(id, type) else null
+                }.toSet()
+
+                val remotePlanToWatchIds = allRemoteItems.filter {
+                    it.status == "plantowatch" || it.status == "plan_to_watch"
+                }.mapNotNull {
+                    val id = (it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb ?: it.anime?.ids?.tmdb)?.toLongOrNull()
+                    val type = if (it.movie != null) "movie" else "tv"
+                    if (id != null) Pair(id, type) else null
+                }.toSet()
+
+                val remoteDroppedIds = allRemoteItems.filter {
+                    it.status == "dropped"
+                }.mapNotNull {
+                    val id = (it.movie?.ids?.tmdb ?: it.show?.ids?.tmdb ?: it.anime?.ids?.tmdb)?.toLongOrNull()
+                    val type = if (it.movie != null) "movie" else "tv"
+                    if (id != null) Pair(id, type) else null
+                }.toSet()
 
                 val allLocal = movieRepository.getLocalMovies()
 
-                if (isFirstSync) {
-                    // MERGE BIDIREZIONALE: Push su SIMKL solo di ciò che è locale ma manca sul server
-                    val localMissingOnSimkl = allLocal.filter { 
-                        (it.watched || it.favorite || it.dropped || it.watchedEpisodes?.isNotEmpty() == true) && 
-                        !remoteTmdbIds.contains(it.id) 
-                    }
-                    if (localMissingOnSimkl.isNotEmpty()) {
-                        android.util.Log.d("SimklSyncWorker", "SYNC MERGE: Primo sync -> Push di ${localMissingOnSimkl.size} elementi mancanti su SIMKL")
-                        pushItemsToSimkl(localMissingOnSimkl.filter { it.mediaType == "movie" }, isMovie = true)
-                        pushItemsToSimkl(localMissingOnSimkl.filter { it.mediaType == "tv" }, isMovie = false)
-                    }
-                } else {
-                    // FORCE SYNC MANUALE: Cleanup orfani (Sync Distruttivo)
-                    val orphans = allLocal.filter { 
-                        (it.watched || it.favorite || it.dropped) && !remoteTmdbIds.contains(it.id) 
-                    }
-                    if (orphans.isNotEmpty()) {
-                        android.util.Log.d("SimklSyncWorker", "SYNC: Removing ${orphans.size} orphaned items deleted from SIMKL")
-                        val cleared = orphans.map { 
-                            it.copy(watched = false, favorite = false, dropped = false, syncStatus = "synced") 
-                        }
-                        movieRepository.saveMoviesBulk(cleared)
-                    }
+                // MERGE BIDIREZIONALE COSTRUTTIVO (Anti-Data-Loss & Zero Re-upload Loops):
+                // Push su SIMKL solo di ciò che è locale ma manca effettivamente sul server
+                val localMissingOnSimkl = allLocal.filter { local ->
+                    if (local.syncStatus == "pending_delete" || local.syncStatus == "deleted") return@filter false
+                    val key = Pair(local.id, local.mediaType)
+                    val isWatchedMissing = (local.watched || (local.watchedEpisodes?.isNotEmpty() == true)) && !remoteWatchedIds.contains(key)
+                    val isWatchlistMissing = local.favorite && !local.watched && !remotePlanToWatchIds.contains(key) && !remoteWatchedIds.contains(key)
+                    val isDroppedMissing = local.dropped && !remoteDroppedIds.contains(key)
+                    isWatchedMissing || isWatchlistMissing || isDroppedMissing
+                }
+
+                if (localMissingOnSimkl.isNotEmpty()) {
+                    android.util.Log.d("SimklSyncWorker", "SYNC MERGE: Push di ${localMissingOnSimkl.size} elementi mancanti su SIMKL")
+                    pushItemsToSimkl(localMissingOnSimkl.filter { it.mediaType == "movie" }, isMovie = true)
+                    pushItemsToSimkl(localMissingOnSimkl.filter { it.mediaType == "tv" }, isMovie = false)
                 }
 
                 if (isFirstSync) authRepository.setFirstSyncCompleted(true)

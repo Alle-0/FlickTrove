@@ -53,10 +53,10 @@ import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.account.AvatarSelectionModal
 import com.cinetrack.ui.components.account.TrophyShowcaseCard
-import com.google.firebase.auth.ktx.auth
+import com.google.firebase.Firebase
+import com.google.firebase.auth.auth
 import com.google.firebase.auth.userProfileChangeRequest
-import com.google.firebase.ktx.Firebase
-import com.google.firebase.firestore.ktx.firestore
+import com.google.firebase.firestore.firestore
 import com.google.firebase.firestore.SetOptions
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
@@ -305,6 +305,8 @@ object AccountTab : Tab {
 
         val backgroundHazeState = remember { HazeState() }
         val scrollState = rememberScrollState()
+        val backdropAlphaProvider = com.cinetrack.ui.LocalAccountBackdropAlpha.current
+        val backdropOffsetProvider = com.cinetrack.ui.LocalAccountBackdropOffset.current
 
         Box(
             modifier = Modifier
@@ -314,8 +316,13 @@ object AccountTab : Tab {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .graphicsLayer {
+                        val offset = backdropOffsetProvider()
+                        translationX = offset * size.width
+                        alpha = backdropAlphaProvider()
+                    }
                     .haze(state = backgroundHazeState)
-                    .background(animatedBgColor)
+                    .background(if (avatarBackdrop != null) animatedBgColor else Color.Transparent)
             ) {
                 Box(
                     modifier = Modifier
@@ -494,14 +501,21 @@ object AccountTab : Tab {
                     val totalWidth = maxWidth
                     var nameWidthPx by remember { mutableIntStateOf(0) }
                     val nameWidthDp = with(density) { nameWidthPx.toDp() }
+                    val effectiveNameWidth = if (nameWidthDp > 0.dp) nameWidthDp else 90.dp
 
                     val avatarSize = lerp(120.dp, 34.dp, progress)
                     val avatarInnerSize = lerp(100.dp, 30.dp, progress)
                     val avatarBorderWidth = lerp(2.dp, 1.5.dp, progress)
                     val avatarIconSize = lerp(48.dp, 16.dp, progress)
 
-                    val dockedNameX = 34.dp + 10.dp
-                    val restingNameX = if (nameWidthDp > 0.dp) (totalWidth - nameWidthDp).coerceAtLeast(dockedNameX) else totalWidth - 110.dp
+                    val pairWidth = 34.dp + 10.dp + effectiveNameWidth
+                    val dockedAvatarX = ((totalWidth - pairWidth) / 2).coerceAtLeast(0.dp)
+                    val dockedNameX = dockedAvatarX + 34.dp + 10.dp
+
+                    val restingAvatarX = 0.dp
+                    val restingNameX = (totalWidth - effectiveNameWidth).coerceAtLeast(dockedNameX)
+
+                    val currentAvatarX = lerp(restingAvatarX, dockedAvatarX, progress)
                     val currentNameX = lerp(restingNameX, dockedNameX, progress)
 
                     val restingNameY = (120.dp - 44.dp) / 2
@@ -511,6 +525,7 @@ object AccountTab : Tab {
                     // Avatar
                     Box(
                         modifier = Modifier
+                            .offset(x = currentAvatarX)
                             .size(avatarSize)
                             .bounceClick(scaleDown = 0.95f) {
                                 settingsViewModel.triggerEditProfileMenu()
