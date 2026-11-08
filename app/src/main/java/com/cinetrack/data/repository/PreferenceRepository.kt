@@ -80,6 +80,7 @@ class PreferenceRepository @Inject constructor(
         val SHOW_HOME_BECAUSE_YOU_WATCHED = booleanPreferencesKey("show_home_because_you_watched")
         val HOME_SECTION_ORDER = stringPreferencesKey("home_section_order")
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
+        val ENABLE_BOTTOM_BAR_SWIPE = booleanPreferencesKey("enable_bottom_bar_swipe")
         val LAST_TASTE_VECTOR_SYNC_TIMESTAMP = longPreferencesKey("last_taste_vector_sync_timestamp")
     }
 
@@ -161,7 +162,8 @@ class PreferenceRepository @Inject constructor(
                 homeSectionOrder = preferences[PreferencesKeys.HOME_SECTION_ORDER]?.let { raw ->
                     com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(raw.split(","))
                 } ?: com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER,
-                allowMobileDataUpdates = preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] ?: true
+                allowMobileDataUpdates = preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] ?: true,
+                enableBottomBarSwipe = preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] ?: true
             )
         }
 
@@ -299,6 +301,12 @@ class PreferenceRepository @Inject constructor(
         }
     }
 
+    suspend fun updateEnableBottomBarSwipe(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] = enabled
+        }
+    }
+
     suspend fun toggleAllowMobileDataUpdates(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = enabled
@@ -361,6 +369,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] = prefs.showHomeBecauseYouWatched
             preferences[PreferencesKeys.HOME_SECTION_ORDER] = com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(prefs.homeSectionOrder).joinToString(",")
             preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = prefs.allowMobileDataUpdates
+            preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] = prefs.enableBottomBarSwipe
         }
     }
 

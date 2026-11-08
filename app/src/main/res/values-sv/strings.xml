@@ -2104,4 +2104,9 @@ Prova att förenkla sökningen</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+
+    <string name="settings_group_navigation_gestures">Navigering och gester</string>
+    <string name="settings_bottom_bar_swipe">Svep på navigeringsfältet</string>
+    <string name="settings_bottom_bar_swipe_desc">Svep horisontellt på navigeringsfältet för att växla mellan filmer och TV-serier</string>
+    <string name="settings_msg_bottom_bar_swipe">Navigeringsfältssvep %1$s</string>
 </resources>

@@ -2107,4 +2107,9 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+
+    <string name="settings_group_navigation_gestures">Πλοήγηση και χειρονομίες</string>
+    <string name="settings_bottom_bar_swipe">Σύρσιμο κάτω γραμμής (ταινίες/σειρές)</string>
+    <string name="settings_bottom_bar_swipe_desc">Σύρετε οριζόντια την κάτω γραμμή για εναλλαγή μεταξύ ταινιών και σειρών</string>
+    <string name="settings_msg_bottom_bar_swipe">Σύρσιμο κάτω γραμμής %1$s</string>
 </resources>

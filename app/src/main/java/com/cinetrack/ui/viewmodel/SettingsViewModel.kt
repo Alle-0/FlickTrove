@@ -384,6 +384,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.showLayoutToggle }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), false)
 
+    val enableBottomBarSwipe: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.enableBottomBarSwipe }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val showSplitReleasesHome: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
         .map { it.showSplitReleasesHome }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
@@ -544,6 +548,15 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_visible else R.string.status_hidden
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_layout_btn, context.getString(statusRes)))
+        }
+    }
+
+    fun toggleEnableBottomBarSwipe(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateEnableBottomBarSwipe(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+            val statusRes = if (enabled) R.string.status_enabled_f else R.string.status_disabled_f
+            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_bottom_bar_swipe, context.getString(statusRes)))
         }
     }
 

@@ -133,6 +133,7 @@ dependencies {
     implementation(libs.haze.blur)
     implementation(libs.haze.glass)
     implementation(libs.liquid)
+    implementation(libs.backdrop)
     
     // Glance AppWidget
     implementation("androidx.glance:glance-appwidget:1.2.0")

@@ -2107,4 +2107,9 @@ Cod de invitație: %3$s</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+
+    <string name="settings_group_navigation_gestures">Navigare și gesturi</string>
+    <string name="settings_bottom_bar_swipe">Glisare bară inferioară (filme/seriale)</string>
+    <string name="settings_bottom_bar_swipe_desc">Glisați orizontal pe bara de navigare pentru a comuta între filme și seriale TV</string>
+    <string name="settings_msg_bottom_bar_swipe">Glisare bară inferioară %1$s</string>
 </resources>

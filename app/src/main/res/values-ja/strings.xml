@@ -2125,4 +2125,9 @@
     <string name="share_cover_picker_selected">選択済み</string>
     <string name="share_meta_season_single">1シーズン</string>
     <string name="share_meta_seasons_multiple">%1$dシーズン</string>
+
+    <string name="settings_group_navigation_gestures">ナビゲーションとジェスチャー</string>
+    <string name="settings_bottom_bar_swipe">ボトムバーのスワイプ切替</string>
+    <string name="settings_bottom_bar_swipe_desc">ナビゲーションバーを水平にスワイプして映画とTVシリーズを切り替えます</string>
+    <string name="settings_msg_bottom_bar_swipe">ボトムバースワイプ %1$s</string>
 </resources>

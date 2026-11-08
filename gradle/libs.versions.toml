@@ -35,9 +35,11 @@ androidxTestEspresso = "3.7.0"
 credentials = "1.5.0"
 googleid = "1.2.1"
 profileinstaller = "1.4.1"
+backdrop = "2.0.1"
 
 [libraries]
 junit = { group = "junit", name = "junit", version.ref = "junit" }
+backdrop = { group = "io.github.kyant0", name = "backdrop", version.ref = "backdrop" }
 liquid = { group = "io.github.fletchmckee.liquid", name = "liquid", version.ref = "liquid" }
 androidx-core-splashscreen = { group = "androidx.core", name = "core-splashscreen", version.ref = "splashscreen" }
 haze = { group = "dev.chrisbanes.haze", name = "haze", version.ref = "haZe" }

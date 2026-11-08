@@ -2095,4 +2095,9 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="share_cover_picker_selected">Wybrano</string>
     <string name="share_meta_season_single">1 sezon</string>
     <string name="share_meta_seasons_multiple">%1$d sezonów</string>
+
+    <string name="settings_group_navigation_gestures">Nawigacja i gesty</string>
+    <string name="settings_bottom_bar_swipe">Przesuwanie dolnego paska (filmy/seriale)</string>
+    <string name="settings_bottom_bar_swipe_desc">Przesuń pasek nawigacyjny w poziomie, aby przełączać między filmami a serialami</string>
+    <string name="settings_msg_bottom_bar_swipe">Przesuwanie dolnego paska %1$s</string>
 </resources>

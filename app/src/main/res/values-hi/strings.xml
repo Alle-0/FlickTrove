@@ -2117,4 +2117,9 @@
     <string name="share_cover_picker_selected">चयनित</string>
     <string name="share_meta_season_single">1 सीज़न</string>
     <string name="share_meta_seasons_multiple">%1$d सीज़न</string>
+
+    <string name="settings_group_navigation_gestures">नेविगेशन और जेस्चर</string>
+    <string name="settings_bottom_bar_swipe">बॉटम बार मीडिया स्वाइप</string>
+    <string name="settings_bottom_bar_swipe_desc">फिल्मों और टीवी श्रृंखलाओं के बीच स्विच करने के लिए नेविगेशन बार को क्षैतिज रूप से स्वाइप करें</string>
+    <string name="settings_msg_bottom_bar_swipe">बॉटम बार स्वाइप %1$s</string>
 </resources>

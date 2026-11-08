@@ -65,6 +65,9 @@ import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalDeepLinkIntent
 import com.cinetrack.ui.LocalFilterRequest
 import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.cinetrack.ui.LocalSearchOverlay
 import com.cinetrack.ui.components.main.MainBottomBarOverlay
 import com.cinetrack.ui.components.main.MainDeepLinkHandler
@@ -116,6 +119,10 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val scope = rememberCoroutineScope()
         val contentHazeState = remember { HazeState() }
         val globalHazeState = remember { HazeState() }
+        val bottomBarBackdrop = rememberLayerBackdrop {
+            drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+            drawContent()
+        }
         val undoViewModel: UndoViewModel = getViewModel()
         val searchOverlay = LocalSearchOverlay.current
         
@@ -146,6 +153,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val ignoredUpdateVersion by settingsViewModel.ignoredUpdateVersion.collectAsStateWithLifecycle()
         val lastSeenAppVersion by settingsViewModel.lastSeenAppVersion.collectAsStateWithLifecycle()
         val hasSeenOnboarding by settingsViewModel.hasSeenOnboarding.collectAsStateWithLifecycle()
+        val enableBottomBarSwipe by settingsViewModel.enableBottomBarSwipe.collectAsStateWithLifecycle()
 
         val updatesViewModel: UpdatesViewModel = getViewModel()
         val updatesUiState by updatesViewModel.uiState.collectAsStateWithLifecycle()
@@ -297,6 +305,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
+                    LocalBackdrop provides bottomBarBackdrop,
                     com.cinetrack.ui.LocalGlobalHazeState provides globalHazeState,
                     LocalActiveFilterConfig provides activeFilterConfig,
                     com.cinetrack.ui.LocalActiveTrophyFilterConfig provides activeTrophyFilterConfig,
@@ -322,6 +331,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                                 AnimatedContent(
                                     targetState = activeSecondaryTab,
+                                    modifier = Modifier.fillMaxSize().layerBackdrop(bottomBarBackdrop),
                                     contentKey = { tab ->
                                         when (tab) {
                                             null -> "PRIMARY_PAGER"
@@ -587,7 +597,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             }
 
                             // Bottom Bar & Search FAB Layer
-                            val isMediaSwitchSupported = currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is FolderDetailTab
+                            val isMediaSwitchSupported = enableBottomBarSwipe && (currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is FolderDetailTab)
 
                             val currentMediaMode = when (currentTab) {
                                 is VistiTab -> vistiViewModel.uiState.value.activeTab

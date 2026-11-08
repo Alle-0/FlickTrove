@@ -59,6 +59,13 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.Backdrop
+import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.effects.blur
+import com.kyant.backdrop.effects.lens
+import com.kyant.backdrop.effects.vibrancy
+import androidx.compose.ui.graphics.Brush
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
@@ -82,6 +89,7 @@ fun GlassyBottomBar(
     currentMediaMode: String? = null,
     onSwitchMediaMode: ((String) -> Unit)? = null
 ) {
+    val backdrop = LocalBackdrop.current
     val accentColor = MaterialTheme.colorScheme.primary
     val animatedDimAlpha by animateFloatAsState(
         targetValue = if (isDimmed) 0.7f else 0f,
@@ -220,15 +228,48 @@ fun GlassyBottomBar(
             .then(dragModifier),
         contentAlignment = Alignment.Center
     ) {
-        // BACKGROUND BLUR LAYER WITH PROGRESSIVE GLOW BORDER
+        // BACKGROUND BLUR LAYER WITH OPTICAL REFRACTION (Liquid Glass)
         Box(
             modifier = Modifier
                 .matchParentSize()
                 .clip(CircleShape)
-                .hazeGlass(
-                    state = hazeState, 
-                    shape = CircleShape,
-                    useRefraction = true
+                .then(
+                    if (backdrop != null) {
+                        Modifier.drawBackdrop(
+                            backdrop = backdrop,
+                            shape = { CircleShape },
+                            effects = {
+                                vibrancy()
+                                blur(24.dp.toPx())
+                                lens(
+                                    refractionHeight = 16.dp.toPx(),
+                                    refractionAmount = 24.dp.toPx()
+                                )
+                            },
+                            onDrawSurface = {
+                                drawRoundRect(
+                                    color = Color.White.copy(alpha = 0.08f),
+                                    cornerRadius = CornerRadius(size.height / 2f, size.height / 2f)
+                                )
+                            }
+                        )
+                    } else {
+                        Modifier.hazeGlass(
+                            state = hazeState, 
+                            shape = CircleShape,
+                            useRefraction = false
+                        )
+                    }
+                )
+                .border(
+                    width = 1.dp,
+                    brush = Brush.verticalGradient(
+                        colors = listOf(
+                            Color.White.copy(alpha = 0.35f),
+                            Color.White.copy(alpha = 0.08f)
+                        )
+                    ),
+                    shape = CircleShape
                 )
                 .drawWithContent {
                     drawContent()

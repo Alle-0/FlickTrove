@@ -100,7 +100,6 @@ app/src/test/
 *.txt
 partner*.md
 partner_api/
-partner-api/
 .hintrc
 screenshot*.png
 !docs/assets/evidence/*
@@ -114,3 +113,4 @@ RELEASE_NOTES*.md
 /flicktrove_templates
 /mockup*
 export*.py
+knowledge/

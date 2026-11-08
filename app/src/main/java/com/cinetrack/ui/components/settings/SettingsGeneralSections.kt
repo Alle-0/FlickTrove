@@ -148,6 +148,7 @@ fun SettingsUILayoutSection(
     val useMovieLogo by settingsViewModel.useMovieLogo.collectAsStateWithLifecycle()
     val promptWatchDateOnDetail by settingsViewModel.promptWatchDateOnDetail.collectAsStateWithLifecycle()
     val autoOpenVibeOnWatch by settingsViewModel.autoOpenVibeOnWatch.collectAsStateWithLifecycle()
+    val enableBottomBarSwipe by settingsViewModel.enableBottomBarSwipe.collectAsStateWithLifecycle()
 
     SettingsSection(
         title = stringResource(R.string.settings_ui_layout),
@@ -265,7 +266,41 @@ fun SettingsUILayoutSection(
 
         Spacer(modifier = Modifier.height(14.dp))
 
-        // --- 2. CARDS & DETAILS ---
+        // --- 2. NAVIGATION & GESTURES ---
+        Text(
+            text = stringResource(R.string.settings_group_navigation_gestures).uppercase(),
+            style = MaterialTheme.typography.labelSmall.copy(
+                fontWeight = FontWeight.Bold,
+                letterSpacing = 1.2.sp,
+                fontSize = 11.sp
+            ),
+            color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
+            modifier = Modifier.padding(start = 6.dp, bottom = 4.dp)
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_swap),
+            title = stringResource(R.string.settings_bottom_bar_swipe),
+            description = stringResource(R.string.settings_bottom_bar_swipe_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = enableBottomBarSwipe,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleEnableBottomBarSwipe(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleEnableBottomBarSwipe(!enableBottomBarSwipe)
+            }
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
+        // --- 3. CARDS & DETAILS ---
         Text(
             text = stringResource(R.string.settings_group_cards_details).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(

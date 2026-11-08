@@ -2125,4 +2125,9 @@
     <string name="share_cover_picker_selected">선택됨</string>
     <string name="share_meta_season_single">시즌 1개</string>
     <string name="share_meta_seasons_multiple">시즌 %1$d개</string>
+
+    <string name="settings_group_navigation_gestures">탐색 및 제스처</string>
+    <string name="settings_bottom_bar_swipe">하단 바 미디어 스와이프</string>
+    <string name="settings_bottom_bar_swipe_desc">영화와 TV 시리즈 간을 전환하려면 탐색 바를 가로로 스와이프하세요</string>
+    <string name="settings_msg_bottom_bar_swipe">하단 바 스와이프 %1$s</string>
 </resources>

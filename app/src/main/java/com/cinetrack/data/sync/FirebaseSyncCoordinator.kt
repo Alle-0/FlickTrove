@@ -250,6 +250,7 @@ class FirebaseSyncCoordinator @Inject constructor(
             val updatedPrefs = currentPrefs.copy(
                 gridColumns = (remotePrefs["gridColumns"] as? Number)?.toInt() ?: currentPrefs.gridColumns,
                 showLayoutToggle = remotePrefs["showLayoutToggle"] as? Boolean ?: currentPrefs.showLayoutToggle,
+                enableBottomBarSwipe = remotePrefs["enableBottomBarSwipe"] as? Boolean ?: currentPrefs.enableBottomBarSwipe,
                 isSearchSuggestionsExpanded = remotePrefs["isSearchSuggestionsExpanded"] as? Boolean ?: currentPrefs.isSearchSuggestionsExpanded,
                 notificationsReleases = remotePrefs["notificationsReleases"] as? Boolean ?: currentPrefs.notificationsReleases,
                 notificationsSocial = remotePrefs["notificationsSocial"] as? Boolean ?: currentPrefs.notificationsSocial,
@@ -303,6 +304,7 @@ class FirebaseSyncCoordinator @Inject constructor(
                 val prefsMap = mapOf(
                     "gridColumns" to prefs.gridColumns,
                     "showLayoutToggle" to prefs.showLayoutToggle,
+                    "enableBottomBarSwipe" to prefs.enableBottomBarSwipe,
                     "isSearchSuggestionsExpanded" to prefs.isSearchSuggestionsExpanded,
                     "notificationsReleases" to prefs.notificationsReleases,
                     "notificationsSocial" to prefs.notificationsSocial,

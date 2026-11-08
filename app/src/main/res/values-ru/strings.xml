@@ -2119,4 +2119,9 @@
     <string name="share_cover_picker_selected">Выбрано</string>
     <string name="share_meta_season_single">1 сезон</string>
     <string name="share_meta_seasons_multiple">%1$d сезонов</string>
+
+    <string name="settings_group_navigation_gestures">Навигация и жесты</string>
+    <string name="settings_bottom_bar_swipe">Свайп нижней панели (фильмы/сериалы)</string>
+    <string name="settings_bottom_bar_swipe_desc">Проведите по нижней панели по горизонтали для переключения между фильмами и сериалами</string>
+    <string name="settings_msg_bottom_bar_swipe">Свайп нижней панели %1$s</string>
 </resources>
