@@ -62,6 +62,7 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.LocalBackdrop
 import com.kyant.backdrop.Backdrop
 import com.kyant.backdrop.drawBackdrop
+import com.kyant.backdrop.drawPlainBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
 import com.kyant.backdrop.effects.vibrancy
@@ -235,21 +236,21 @@ fun GlassyBottomBar(
                 .clip(CircleShape)
                 .then(
                     if (backdrop != null) {
-                        Modifier.drawBackdrop(
+                        Modifier.drawPlainBackdrop(
                             backdrop = backdrop,
                             shape = { CircleShape },
                             effects = {
                                 vibrancy()
-                                blur(24.dp.toPx())
+                                blur(8.dp.toPx())
                                 lens(
-                                    refractionHeight = 16.dp.toPx(),
-                                    refractionAmount = 24.dp.toPx()
+                                    refractionHeight = 14.dp.toPx(),
+                                    refractionAmount = 20.dp.toPx()
                                 )
                             },
                             onDrawSurface = {
-                                // Deep dark obsidian liquid glass tint
+                                // Deep dark obsidian liquid glass tint without specular white edge
                                 drawRoundRect(
-                                    color = Color(0xFF0E0E12).copy(alpha = 0.65f),
+                                    color = Color(0xFF0B0B0E).copy(alpha = 0.72f),
                                     cornerRadius = CornerRadius(size.height / 2f, size.height / 2f)
                                 )
                             }
