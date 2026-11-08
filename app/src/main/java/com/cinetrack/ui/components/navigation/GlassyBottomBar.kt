@@ -241,10 +241,10 @@ fun GlassyBottomBar(
                             shape = { CircleShape },
                             effects = {
                                 vibrancy()
-                                blur(10.dp.toPx())
+                                blur(8.dp.toPx())
                                 lens(
-                                    refractionHeight = 18.dp.toPx(),
-                                    refractionAmount = 26.dp.toPx(),
+                                    refractionHeight = 24.dp.toPx(),
+                                    refractionAmount = 40.dp.toPx(),
                                     depthEffect = false,
                                     chromaticAberration = true
                                 )
