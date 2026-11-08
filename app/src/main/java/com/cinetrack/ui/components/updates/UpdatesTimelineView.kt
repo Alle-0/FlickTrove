@@ -1,8 +1,13 @@
 package com.cinetrack.ui.components.updates
 
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
@@ -10,16 +15,22 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.utils.bounceClick
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -48,6 +59,10 @@ fun UpdatesTimelineView(
             )
         }
         return
+    }
+
+    var collapsedMonths by rememberSaveable {
+        mutableStateOf(listOf<String>())
     }
 
     // Group reminders by YearMonth safely
@@ -94,19 +109,32 @@ fun UpdatesTimelineView(
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             groupedByMonth.forEach { (yearMonth, monthReminders) ->
+                val monthKey = yearMonth.toString()
+                val isCollapsed = monthKey in collapsedMonths
+
                 // Month timeline pill header (Warm Amber/Gold for future releases)
                 item(key = "reminders_month_${yearMonth}") {
                     RemindersMonthHeader(
                         yearMonth = yearMonth,
-                        count = monthReminders.size
+                        count = monthReminders.size,
+                        isCollapsed = isCollapsed,
+                        onToggleCollapse = {
+                            collapsedMonths = if (isCollapsed) {
+                                collapsedMonths - monthKey
+                            } else {
+                                collapsedMonths + monthKey
+                            }
+                        },
+                        modifier = Modifier.animateItem()
                     )
                 }
 
-                items(
-                    items = monthReminders,
-                    key = { it.id + "_rem" },
-                    contentType = { "movie" }
-                ) { item ->
+                if (!isCollapsed) {
+                    items(
+                        items = monthReminders,
+                        key = { it.id + "_rem" },
+                        contentType = { "movie" }
+                    ) { item ->
                     // Dynamic urgency color on the timeline node:
                     // - Red for Today (0 days)
                     // - Warm Orange for Tomorrow (1 day)
@@ -175,11 +203,14 @@ fun UpdatesTimelineView(
         }
     }
 }
+}
 
 @Composable
 private fun RemindersMonthHeader(
     yearMonth: YearMonth,
     count: Int,
+    isCollapsed: Boolean,
+    onToggleCollapse: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val monthTitle = remember(yearMonth) {
@@ -195,6 +226,15 @@ private fun RemindersMonthHeader(
     // Warm Amber / Golden accent for Future Releases
     val accentColor = Color(0xFFF59E0B)
 
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isCollapsed) 0f else 90f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "reminders_chevron_rotation"
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -206,7 +246,11 @@ private fun RemindersMonthHeader(
         Box(
             modifier = Modifier
                 .width(22.dp)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onToggleCollapse() },
             contentAlignment = Alignment.Center
         ) {
             Box(
@@ -225,6 +269,7 @@ private fun RemindersMonthHeader(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 4.dp)
+                .bounceClick(scaleDown = 0.98f) { onToggleCollapse() }
                 .clip(CircleShape)
                 .background(accentColor.copy(alpha = 0.10f))
                 .border(
@@ -232,7 +277,7 @@ private fun RemindersMonthHeader(
                     color = accentColor.copy(alpha = 0.35f),
                     shape = CircleShape
                 )
-                .padding(horizontal = 16.dp, vertical = 9.dp)
+                .padding(start = 16.dp, end = 12.dp, top = 9.dp, bottom = 9.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -246,21 +291,41 @@ private fun RemindersMonthHeader(
                         color = accentColor,
                         fontSize = 14.5.sp,
                         letterSpacing = 0.3.sp
-                    )
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
 
-                Surface(
-                    shape = CircleShape,
-                    color = accentColor.copy(alpha = 0.22f),
-                    border = BorderStroke(0.8.dp, accentColor.copy(alpha = 0.50f))
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "$count",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = accentColor
-                        ),
-                        modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)
+                    Surface(
+                        shape = CircleShape,
+                        color = accentColor.copy(alpha = 0.22f),
+                        border = BorderStroke(0.8.dp, accentColor.copy(alpha = 0.50f))
+                    ) {
+                        Text(
+                            text = "$count",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = accentColor,
+                                fontSize = 11.5.sp
+                            ),
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 2.5.dp)
+                        )
+                    }
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        contentDescription = stringResource(if (isCollapsed) R.string.search_expand else R.string.search_collapse),
+                        tint = accentColor.copy(alpha = 0.75f),
+                        modifier = Modifier
+                            .size(14.dp)
+                            .graphicsLayer { rotationZ = chevronRotation }
                     )
                 }
             }

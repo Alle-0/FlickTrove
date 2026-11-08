@@ -40,11 +40,17 @@ import java.util.Locale
 
 import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.snap
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.style.TextOverflow
+import com.cinetrack.ui.utils.bounceClick
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalFoundationApi::class)
@@ -80,6 +86,10 @@ fun HistoryTimelineView(
     val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
     val animatedEntryIds = remember { mutableSetOf<String>() }
+
+    var collapsedMonths by rememberSaveable {
+        mutableStateOf(listOf<String>())
+    }
 
     val groupedByMonth = remember(entries) {
         entries.groupBy { YearMonth.from(it.parsedDate) }
@@ -134,29 +144,43 @@ fun HistoryTimelineView(
             verticalArrangement = Arrangement.spacedBy(0.dp)
         ) {
             groupedByMonth.forEach { (yearMonth, monthEntries) ->
+                val monthKey = yearMonth.toString()
+                val isCollapsed = monthKey in collapsedMonths
+
                 // Clean month timeline pill header (scrolls naturally with cards)
                 item(key = "month_${yearMonth}") {
                     MonthTimelineHeader(
                         yearMonth = yearMonth,
-                        count = monthEntries.size
+                        count = monthEntries.size,
+                        isCollapsed = isCollapsed,
+                        onToggleCollapse = {
+                            collapsedMonths = if (isCollapsed) {
+                                collapsedMonths - monthKey
+                            } else {
+                                collapsedMonths + monthKey
+                            }
+                        },
+                        modifier = Modifier.animateItem()
                     )
                 }
 
                 // Entries for this month with staggered entry animation
-                items(
-                    items = monthEntries,
-                    key = { "timeline_entry_${it.uniqueKey}" }
-                ) { entry ->
-                    val staggerIndex = entryIndexMap[entry.uniqueKey] ?: 0
-                    TimelineEntryRow(
-                        entry = entry,
-                        staggerIndex = staggerIndex,
-                        animatedEntryIds = animatedEntryIds,
-                        onMovieClick = onMovieClick,
-                        onEditDate = onEditDate,
-                        onDeleteSession = onDeleteSession,
-                        hazeState = hazeState
-                    )
+                if (!isCollapsed) {
+                    items(
+                        items = monthEntries,
+                        key = { "timeline_entry_${it.uniqueKey}" }
+                    ) { entry ->
+                        val staggerIndex = entryIndexMap[entry.uniqueKey] ?: 0
+                        TimelineEntryRow(
+                            entry = entry,
+                            staggerIndex = staggerIndex,
+                            animatedEntryIds = animatedEntryIds,
+                            onMovieClick = onMovieClick,
+                            onEditDate = onEditDate,
+                            onDeleteSession = onDeleteSession,
+                            hazeState = hazeState
+                        )
+                    }
                 }
             }
         }
@@ -241,7 +265,6 @@ private fun androidx.compose.foundation.lazy.LazyItemScope.TimelineEntryRow(
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .height(IntrinsicSize.Min)
             .animateItem(),
         verticalAlignment = Alignment.Top
     ) {
@@ -333,6 +356,8 @@ private fun androidx.compose.foundation.lazy.LazyItemScope.TimelineEntryRow(
 private fun MonthTimelineHeader(
     yearMonth: YearMonth,
     count: Int,
+    isCollapsed: Boolean,
+    onToggleCollapse: () -> Unit,
     modifier: Modifier = Modifier
 ) {
     val monthTitle = remember(yearMonth) {
@@ -347,6 +372,15 @@ private fun MonthTimelineHeader(
 
     val accentColor = MaterialTheme.colorScheme.primary
 
+    val chevronRotation by animateFloatAsState(
+        targetValue = if (isCollapsed) 0f else 90f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "chevron_rotation"
+    )
+
     Row(
         modifier = modifier
             .fillMaxWidth()
@@ -358,7 +392,11 @@ private fun MonthTimelineHeader(
         Box(
             modifier = Modifier
                 .width(22.dp)
-                .fillMaxHeight(),
+                .fillMaxHeight()
+                .clickable(
+                    interactionSource = remember { MutableInteractionSource() },
+                    indication = null
+                ) { onToggleCollapse() },
             contentAlignment = Alignment.Center
         ) {
             // Month Milestone Node
@@ -378,6 +416,7 @@ private fun MonthTimelineHeader(
             modifier = Modifier
                 .weight(1f)
                 .padding(end = 4.dp)
+                .bounceClick(scaleDown = 0.98f) { onToggleCollapse() }
                 .clip(CircleShape)
                 .background(accentColor.copy(alpha = 0.10f))
                 .border(
@@ -385,7 +424,7 @@ private fun MonthTimelineHeader(
                     color = accentColor.copy(alpha = 0.35f),
                     shape = CircleShape
                 )
-                .padding(horizontal = 16.dp, vertical = 9.dp)
+                .padding(start = 16.dp, end = 12.dp, top = 9.dp, bottom = 9.dp)
         ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
@@ -399,22 +438,41 @@ private fun MonthTimelineHeader(
                         color = accentColor,
                         fontSize = 14.5.sp,
                         letterSpacing = 0.3.sp
-                    )
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis,
+                    modifier = Modifier.weight(1f, fill = false)
                 )
 
-                Surface(
-                    shape = CircleShape,
-                    color = accentColor.copy(alpha = 0.22f),
-                    border = BorderStroke(0.8.dp, accentColor.copy(alpha = 0.50f))
+                Spacer(modifier = Modifier.width(8.dp))
+
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
-                    Text(
-                        text = "$count",
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Bold,
-                            color = accentColor,
-                            fontSize = 11.5.sp
-                        ),
-                        modifier = Modifier.padding(horizontal = 9.dp, vertical = 2.5.dp)
+                    Surface(
+                        shape = CircleShape,
+                        color = accentColor.copy(alpha = 0.22f),
+                        border = BorderStroke(0.8.dp, accentColor.copy(alpha = 0.50f))
+                    ) {
+                        Text(
+                            text = "$count",
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                color = accentColor,
+                                fontSize = 11.5.sp
+                            ),
+                            modifier = Modifier.padding(horizontal = 9.dp, vertical = 2.5.dp)
+                        )
+                    }
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        contentDescription = stringResource(if (isCollapsed) R.string.search_expand else R.string.search_collapse),
+                        tint = accentColor.copy(alpha = 0.75f),
+                        modifier = Modifier
+                            .size(14.dp)
+                            .graphicsLayer { rotationZ = chevronRotation }
                     )
                 }
             }

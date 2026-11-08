@@ -23,6 +23,7 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import kotlinx.coroutines.Dispatchers
 import com.cinetrack.util.toComposeColorOrNull
+import com.cinetrack.util.getEpisodeWatchDate
 import com.cinetrack.util.setEpisodeWatchDate
 import com.cinetrack.util.removeEpisodeWatchDate
 import kotlinx.coroutines.flow.*
@@ -738,13 +739,39 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             movieUpdateMutex.withLock {
                 val currentMovie = repository.getMovie(movie.id, movie.mediaType) ?: movie
-                val oldWatchedCount = currentMovie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+                val oldEpisodes = currentMovie.watchedEpisodes ?: emptyMap()
+                val oldWatchedCount = oldEpisodes.filter { it.key != "0" }.values.sumOf { it.size }
                 val updated = updateEpisodesUseCase.batchUpdate(currentMovie, castedMap).copy(dropped = false)
-                val newWatchedCount = updated.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
+                val newEpisodes = updated.watchedEpisodes ?: emptyMap()
+                val newWatchedCount = newEpisodes.filter { it.key != "0" }.values.sumOf { it.size }
                 val isAdding = newWatchedCount > oldWatchedCount
 
+                val changedEps = mutableListOf<Pair<Int, Int>>()
+                if (isAdding) {
+                    newEpisodes.forEach { (sStr, eps) ->
+                        val sNum = sStr.toIntOrNull() ?: return@forEach
+                        val oldEps = oldEpisodes[sStr] ?: emptyList()
+                        eps.filter { !oldEps.contains(it) }.forEach { ep ->
+                            changedEps.add(sNum to ep)
+                        }
+                    }
+                } else {
+                    oldEpisodes.forEach { (sStr, oldEps) ->
+                        val sNum = sStr.toIntOrNull() ?: return@forEach
+                        val nEps = newEpisodes[sStr] ?: emptyList()
+                        oldEps.filter { !nEps.contains(it) }.forEach { ep ->
+                            changedEps.add(sNum to ep)
+                        }
+                    }
+                }
+
                 repository.saveMovie(updated)
-                ensureFirstViewingCreated(updated, isProgressAdvancing = isAdding)
+                ensureFirstViewingCreated(
+                    movie = updated, 
+                    isProgressAdvancing = isAdding,
+                    changedEpisodes = changedEps,
+                    isAdding = isAdding
+                )
                 badgeRepository.evaluateBadgesAsync()
             }
         }
@@ -1028,7 +1055,21 @@ class MovieDetailViewModel @Inject constructor(
                 cycleMovieStatusUseCase(current)
                 val updated = repository.getMovie(movie.id, targetMediaType)
                 if (updated != null) {
-                    ensureFirstViewingCreated(updated, isProgressAdvancing = true)
+                    val oldEpisodes = current.watchedEpisodes ?: emptyMap()
+                    val addedEps = mutableListOf<Pair<Int, Int>>()
+                    updated.watchedEpisodes?.forEach { (sStr, eps) ->
+                        val sNum = sStr.toIntOrNull() ?: return@forEach
+                        val oldEps = oldEpisodes[sStr] ?: emptyList()
+                        eps.filter { !oldEps.contains(it) }.forEach { ep ->
+                            addedEps.add(sNum to ep)
+                        }
+                    }
+                    ensureFirstViewingCreated(
+                        movie = updated, 
+                        isProgressAdvancing = true,
+                        changedEpisodes = addedEps,
+                        isAdding = true
+                    )
                 }
             }
         }
@@ -1100,7 +1141,22 @@ class MovieDetailViewModel @Inject constructor(
                     repository.purgeHistoryForMovie(previousMovie.id, previousMovie.mediaType)
                 }
                 if (watchState == WatchState.WATCHED && mediaType == "tv") {
-                    ensureFirstViewingCreated(updated, customWatchDate, isProgressAdvancing = true)
+                    val oldEpisodes = previousMovie.watchedEpisodes ?: emptyMap()
+                    val addedEps = mutableListOf<Pair<Int, Int>>()
+                    updated.watchedEpisodes?.forEach { (sStr, eps) ->
+                        val sNum = sStr.toIntOrNull() ?: return@forEach
+                        val oldEps = oldEpisodes[sStr] ?: emptyList()
+                        eps.filter { !oldEps.contains(it) }.forEach { ep ->
+                            addedEps.add(sNum to ep)
+                        }
+                    }
+                    ensureFirstViewingCreated(
+                        movie = updated, 
+                        customDate = customWatchDate, 
+                        isProgressAdvancing = true,
+                        changedEpisodes = addedEps,
+                        isAdding = true
+                    )
                 }
                 badgeRepository.evaluateBadgesAsync()
             }
@@ -1206,12 +1262,35 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             movieUpdateMutex.withLock {
                 try {
+                    val currentMovie = repository.getMovie(history.movieId, history.mediaType)
                     val datesMap = try {
                         history.episodeDates?.let {
                             Json.decodeFromString<Map<String, String>>(it).toMutableMap()
                         } ?: mutableMapOf()
                     } catch (e: Exception) {
                         mutableMapOf()
+                    }
+
+                    // Determina tutti gli episodi appartenenti a questa sessione
+                    val sessionEpisodes: Map<String, List<Int>> = if (!history.historicalEpisodes.isNullOrBlank()) {
+                        try {
+                            Json.decodeFromString(history.historicalEpisodes)
+                        } catch (e: Exception) {
+                            currentMovie?.watchedEpisodes ?: emptyMap()
+                        }
+                    } else {
+                        currentMovie?.watchedEpisodes ?: emptyMap()
+                    }
+
+                    // Preserva le date di tutti gli altri episodi già presenti nella sessione:
+                    // se un episodio non ha una data esplicita, la sua data implicita era history.watchedAt!
+                    for ((sStr, epList) in sessionEpisodes) {
+                        val sNum = sStr.toIntOrNull() ?: continue
+                        for (ep in epList) {
+                            if (datesMap.getEpisodeWatchDate(sNum, ep) == null) {
+                                datesMap.setEpisodeWatchDate(sNum, ep, history.watchedAt)
+                            }
+                        }
                     }
 
                     datesMap.setEpisodeWatchDate(seasonNumber, episodeNumber, newDateIso)
@@ -1226,7 +1305,6 @@ class MovieDetailViewModel @Inject constructor(
                     )
                     repository.updateWatchHistory(updatedHistory)
 
-                    val currentMovie = repository.getMovie(history.movieId, history.mediaType)
                     if (currentMovie != null) {
                         val allHistory = repository.getWatchHistoryForMovie(history.movieId, history.mediaType)
                         val latest = allHistory.maxByOrNull { parseToEpochMillis(it.watchedAt) }
@@ -1251,12 +1329,32 @@ class MovieDetailViewModel @Inject constructor(
         viewModelScope.launch {
             movieUpdateMutex.withLock {
                 try {
+                    val currentMovie = repository.getMovie(history.movieId, history.mediaType)
                     val datesMap = try {
                         history.episodeDates?.let {
                             Json.decodeFromString<Map<String, String>>(it).toMutableMap()
                         } ?: mutableMapOf()
                     } catch (e: Exception) {
                         mutableMapOf()
+                    }
+
+                    val sessionEpisodes: Map<String, List<Int>> = if (!history.historicalEpisodes.isNullOrBlank()) {
+                        try {
+                            Json.decodeFromString(history.historicalEpisodes)
+                        } catch (e: Exception) {
+                            currentMovie?.watchedEpisodes ?: emptyMap()
+                        }
+                    } else {
+                        currentMovie?.watchedEpisodes ?: emptyMap()
+                    }
+
+                    for ((sStr, epList) in sessionEpisodes) {
+                        val sNum = sStr.toIntOrNull() ?: continue
+                        for (ep in epList) {
+                            if (datesMap.getEpisodeWatchDate(sNum, ep) == null) {
+                                datesMap.setEpisodeWatchDate(sNum, ep, history.watchedAt)
+                            }
+                        }
                     }
 
                     for (ep in episodeNumbers) {
@@ -1273,7 +1371,6 @@ class MovieDetailViewModel @Inject constructor(
                     )
                     repository.updateWatchHistory(updatedHistory)
 
-                    val currentMovie = repository.getMovie(history.movieId, history.mediaType)
                     if (currentMovie != null) {
                         val allHistory = repository.getWatchHistoryForMovie(history.movieId, history.mediaType)
                         val latest = allHistory.maxByOrNull { parseToEpochMillis(it.watchedAt) }

@@ -199,8 +199,8 @@ fun HistoryCard(
                 val hasRatingBadge = entry.personalRating != null && entry.personalRating > 0.0
 
                 if (hasSessionCapsule || hasRewatchBadge || hasRatingBadge) {
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
+                    FlowRow(
+                        verticalArrangement = Arrangement.spacedBy(4.dp),
                         horizontalArrangement = Arrangement.spacedBy(6.dp),
                         modifier = Modifier.fillMaxWidth()
                     ) {

@@ -54,6 +54,7 @@ import com.cinetrack.worker.TraktInstantWriteWorker
 import com.cinetrack.worker.SimklInstantWriteWorker
 import com.cinetrack.data.repository.importers.MovieLookupService
 import com.cinetrack.util.DateTimeUtils
+import com.cinetrack.util.getEpisodeWatchDate
 import com.cinetrack.util.setEpisodeWatchDate
 import com.cinetrack.util.removeEpisodeWatchDate
 
@@ -1603,6 +1604,46 @@ class MovieRepository @Inject constructor(
                 mutableMapOf()
             }
 
+            val newlyAddedSet = if (isAdding && !changedEpisodes.isNullOrEmpty()) {
+                changedEpisodes.toSet()
+            } else emptySet()
+
+            val watchedEpsMap = movie.watchedEpisodes ?: emptyMap()
+
+            if (activeSession != null) {
+                // Preserva le date degli episodi già visti in precedenza in questa sessione.
+                // Se un episodio già visto non ha una data esplicita in currentDatesMap:
+                // - Se currentDatesMap è vuota (dati pregressi senza date individuali), tutti gli episodi
+                //   esistenti (tranne eventuali newlyAddedSet) assumono activeSession.watchedAt.
+                // - Se currentDatesMap conteneva già delle date, eventuali episodi mancanti e non inclusi
+                //   in changedEpisodes sono nuovi se isProgressAdvancing = true (assumono nowStr),
+                //   oppure preesistenti (assumono activeSession.watchedAt).
+                val isBackfillingLegacy = currentDatesMap.isEmpty()
+                for ((seasonStr, epList) in watchedEpsMap) {
+                    val sNum = seasonStr.toIntOrNull() ?: continue
+                    for (epNum in epList) {
+                        if ((sNum to epNum) !in newlyAddedSet && currentDatesMap.getEpisodeWatchDate(sNum, epNum) == null) {
+                            val fallbackDate = if (isBackfillingLegacy || !isProgressAdvancing) {
+                                activeSession.watchedAt
+                            } else {
+                                nowStr
+                            }
+                            currentDatesMap.setEpisodeWatchDate(sNum, epNum, fallbackDate)
+                        }
+                    }
+                }
+            } else {
+                // Nuova sessione (prima visione assoluta): popola tutti gli episodi attualmente presenti in watchedEpisodes
+                for ((seasonStr, epList) in watchedEpsMap) {
+                    val sNum = seasonStr.toIntOrNull() ?: continue
+                    for (epNum in epList) {
+                        if (currentDatesMap.getEpisodeWatchDate(sNum, epNum) == null) {
+                            currentDatesMap.setEpisodeWatchDate(sNum, epNum, nowStr)
+                        }
+                    }
+                }
+            }
+
             if (!changedEpisodes.isNullOrEmpty()) {
                 for ((seasonNum, epNum) in changedEpisodes) {
                     if (isAdding) {
@@ -1611,6 +1652,32 @@ class MovieRepository @Inject constructor(
                         currentDatesMap.removeEpisodeWatchDate(seasonNum, epNum)
                     }
                 }
+            }
+
+            // Rimuovi eventuali episodi in currentDatesMap che non sono più in watchedEpisodes
+            val currentEpisodeKeys = watchedEpsMap.flatMap { (sStr, epList) ->
+                val sNum = sStr.toIntOrNull() ?: return@flatMap emptyList<Pair<Int, Int>>()
+                epList.map { sNum to it }
+            }.toSet()
+
+            val keysToRemove = mutableListOf<Pair<Int, Int>>()
+            for (key in currentDatesMap.keys) {
+                val parts = if (key.contains("_")) {
+                    key.split("_")
+                } else if (key.startsWith("S") && key.contains("E")) {
+                    key.removePrefix("S").split("E")
+                } else null
+
+                if (parts != null && parts.size == 2) {
+                    val s = parts[0].toIntOrNull()
+                    val e = parts[1].toIntOrNull()
+                    if (s != null && e != null && (s to e) !in currentEpisodeKeys) {
+                        keysToRemove.add(s to e)
+                    }
+                }
+            }
+            for ((s, e) in keysToRemove) {
+                currentDatesMap.removeEpisodeWatchDate(s, e)
             }
 
             val newEpisodeDatesJson = if (currentDatesMap.isNotEmpty()) {

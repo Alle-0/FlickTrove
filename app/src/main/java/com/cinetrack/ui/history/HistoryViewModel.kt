@@ -367,7 +367,7 @@ class HistoryViewModel @Inject constructor(
                 }
             }
 
-            if (shouldDeleteEntireEntity || epDatesMap.isEmpty()) {
+            if (shouldDeleteEntireEntity) {
                 deleteWatchSession(entry.historyId)
             } else {
                 val newWatchedAt = epDatesMap.values.maxOrNull() ?: historyEntity.watchedAt

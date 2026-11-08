@@ -35,6 +35,7 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.zIndex
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -363,6 +364,13 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                                 ): Offset {
                                                     return if (available.x != 0f) Offset(available.x, 0f) else Offset.Zero
                                                 }
+
+                                                override suspend fun onPostFling(
+                                                    consumed: Velocity,
+                                                    available: Velocity
+                                                ): Velocity {
+                                                    return if (available.x != 0f) Velocity(available.x, 0f) else Velocity.Zero
+                                                }
                                             }
                                         }
 
@@ -373,11 +381,23 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                             key = { page -> primaryTabs[page]::class.qualifiedName ?: page.toString() }
                                         ) { page ->
                                             val pageTab = primaryTabs[page]
-                                            val pageModifier = if (pageTab is HomeFeedTab) {
-                                                Modifier.fillMaxSize().nestedScroll(carouselScrollBoundary)
+                                            val pageModifier = Modifier
+                                                .fillMaxSize()
+                                                .nestedScroll(carouselScrollBoundary)
+
+                                            val contentModifier = if (pageTab is AccountTab) {
+                                                pageModifier
                                             } else {
-                                                Modifier.fillMaxSize()
+                                                pageModifier.graphicsLayer {
+                                                    val rawOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
+                                                    val absOffset = kotlin.math.abs(rawOffset).coerceIn(0f, 1f)
+                                                    val scale = 1f - (0.08f * absOffset)
+                                                    scaleX = scale
+                                                    scaleY = scale
+                                                    alpha = (1f - absOffset).coerceIn(0f, 1f)
+                                                }
                                             }
+
                                             val offsetProvider = remember(pagerState, page) {
                                                 {
                                                     ((pagerState.currentPage - page) + pagerState.currentPageOffsetFraction).coerceAtMost(0f)
@@ -393,7 +413,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                                 com.cinetrack.ui.LocalAccountBackdropAlpha provides alphaProvider,
                                                 com.cinetrack.ui.LocalAccountBackdropOffset provides offsetProvider
                                             ) {
-                                                Box(modifier = pageModifier) {
+                                                Box(modifier = contentModifier) {
                                                     tabNavigator.saveableState(pageTab::class.simpleName ?: "tab", pageTab) {
                                                         pageTab.Content()
                                                     }

@@ -358,8 +358,20 @@ object AccountTab : Tab {
             }
 
             Box(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier
+                    .fillMaxSize()
+                    .graphicsLayer {
+                        val offset = backdropOffsetProvider()
+                        val absOffset = kotlin.math.abs(offset).coerceIn(0f, 1f)
+                        val scale = 1f - (0.08f * absOffset)
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = (1f - absOffset).coerceIn(0f, 1f)
+                    }
             ) {
+                Box(
+                    modifier = Modifier.fillMaxSize()
+                ) {
                 Column(
                     modifier = Modifier
                         .fillMaxSize()
@@ -625,6 +637,7 @@ object AccountTab : Tab {
                         )
                     }
                 }
+            }
             }
             // Removed local AvatarSelectionModal usage
             SnackbarHost(
