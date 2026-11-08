@@ -247,8 +247,9 @@ fun GlassyBottomBar(
                                 )
                             },
                             onDrawSurface = {
+                                // Deep dark obsidian liquid glass tint
                                 drawRoundRect(
-                                    color = Color.White.copy(alpha = 0.08f),
+                                    color = Color(0xFF0E0E12).copy(alpha = 0.65f),
                                     cornerRadius = CornerRadius(size.height / 2f, size.height / 2f)
                                 )
                             }
@@ -260,16 +261,6 @@ fun GlassyBottomBar(
                             useRefraction = false
                         )
                     }
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.verticalGradient(
-                        colors = listOf(
-                            Color.White.copy(alpha = 0.35f),
-                            Color.White.copy(alpha = 0.08f)
-                        )
-                    ),
-                    shape = CircleShape
                 )
                 .drawWithContent {
                     drawContent()

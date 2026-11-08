@@ -565,29 +565,30 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
                     
                     if (newRating != oldRating) {
-                        if (oldRating != null && oldRating > 0.0) {
-                            ratingDelta -= oldRating
+                        val sanitizedOld = oldRating?.coerceIn(0.0, 10.0)
+                        val sanitizedNew = newRating?.coerceIn(0.0, 10.0)
+                        if (sanitizedOld != null && sanitizedOld > 0.0) {
+                            ratingDelta -= sanitizedOld
                             countDelta -= 1L
                         }
-                        if (newRating != null && newRating > 0.0) {
-                            ratingDelta += newRating
+                        if (sanitizedNew != null && sanitizedNew > 0.0) {
+                            ratingDelta += sanitizedNew
                             countDelta += 1L
                         }
                         needsUpdate = true
                     }
 
-                    if (ratingDelta != 0.0) {
-                        val currentTotalRating = snapshot.getDouble("total_rating") ?: 0.0
-                        val newTotalRating = (currentTotalRating + ratingDelta).coerceAtLeast(0.0)
-                        updates["total_rating"] = newTotalRating
-                    }
-                    if (countDelta != 0L) {
+                    if (ratingDelta != 0.0 || countDelta != 0L) {
                         val currentCount = snapshot.getLong("rating_count") ?: 0L
                         val newCount = (currentCount + countDelta).coerceAtLeast(0L)
-                        updates["rating_count"] = newCount
-                        if (newCount == 0L) {
-                            updates["total_rating"] = 0.0
+                        val currentTotalRating = snapshot.getDouble("total_rating") ?: 0.0
+                        val maxAllowedTotal = newCount * 10.0
+                        val newTotalRating = if (newCount == 0L) 0.0 else (currentTotalRating + ratingDelta).coerceIn(0.0, maxAllowedTotal)
+
+                        if (countDelta != 0L) {
+                            updates["rating_count"] = newCount
                         }
+                        updates["total_rating"] = newTotalRating
                     }
                     
                     if (needsUpdate) {
@@ -615,10 +616,11 @@ class FirebaseRemoteDataSource @Inject constructor(
                     }
                     
                     if (newRating != null && newRating > 0.0) {
-                        initialData["total_rating"] = newRating
+                        val sanitizedRating = newRating.coerceIn(0.0, 10.0)
+                        initialData["total_rating"] = sanitizedRating
                         initialData["rating_count"] = 1L
                         countDelta = 1L
-                        ratingDelta = newRating
+                        ratingDelta = sanitizedRating
                     }
                     
                     if (initialData.isNotEmpty()) {

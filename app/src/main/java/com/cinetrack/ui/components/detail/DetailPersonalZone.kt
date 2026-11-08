@@ -144,9 +144,9 @@ fun DetailPersonalZone(
             modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Min)
         ) {
             val flickTroveRating = if (globalStats != null && globalStats.ratingCount > 0) {
-                globalStats.totalRating / globalStats.ratingCount
+                (globalStats.totalRating / globalStats.ratingCount).coerceIn(0.0, 10.0)
             } else if (previewRating > 0) {
-                previewRating
+                previewRating.coerceIn(0.0, 10.0)
             } else {
                 null
             }
