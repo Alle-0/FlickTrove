@@ -13,6 +13,7 @@ interface SettingsRepository {
     val dynamicAppIconEnabled: Flow<Boolean>
     val seasonalAppIconEnabled: Flow<Boolean>
     val advancedVisualEffectsEnabled: Flow<Boolean>
+    val useLiquidGlass: Flow<Boolean>
     val lastFeedbackTimestamp: Flow<Long>
     val titleTextSizeMultiplier: Flow<Float>
     val imageQuality: Flow<String>
@@ -39,6 +40,7 @@ interface SettingsRepository {
     suspend fun toggleSeasonalAppIcon(enabled: Boolean)
     suspend fun updateDisabledBadges(badges: Set<String>)
     suspend fun toggleAdvancedVisualEffects(enabled: Boolean)
+    suspend fun updateUseLiquidGlass(enabled: Boolean)
     suspend fun updateLastFeedbackTimestamp(timestamp: Long)
     suspend fun updateTitleTextSizeMultiplier(multiplier: Float)
     suspend fun updateImageQuality(quality: String)

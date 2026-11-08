@@ -2112,4 +2112,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="settings_bottom_bar_swipe">Σύρσιμο κάτω γραμμής (ταινίες/σειρές)</string>
     <string name="settings_bottom_bar_swipe_desc">Σύρετε οριζόντια την κάτω γραμμή για εναλλαγή μεταξύ ταινιών και σειρών</string>
     <string name="settings_msg_bottom_bar_swipe">Σύρσιμο κάτω γραμμής %1$s</string>
+    <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
+    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
 </resources>

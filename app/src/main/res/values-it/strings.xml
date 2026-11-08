@@ -2135,4 +2135,7 @@
     <string name="settings_bottom_bar_swipe">Swipe barra per Film e Serie TV</string>
     <string name="settings_bottom_bar_swipe_desc">Trascina la barra di navigazione in orizzontale per alternare tra Film e Serie TV</string>
     <string name="settings_msg_bottom_bar_swipe">Swipe della barra di navigazione %1$s</string>
+    <string name="settings_liquid_glass_title">Effetto Vetro Liquido (Liquid Glass)</string>
+    <string name="settings_liquid_glass_desc">Rifrazione ottica convessa e dispersione cromatica sui bordi. Disattiva per il vetro satinato classico (Frosted Glass).</string>
+    <string name="settings_msg_liquid_glass">Effetto Vetro Liquido %1$s</string>
 </resources>

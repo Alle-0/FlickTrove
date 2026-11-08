@@ -2109,4 +2109,7 @@ Prova att förenkla sökningen</string>
     <string name="settings_bottom_bar_swipe">Svep på navigeringsfältet</string>
     <string name="settings_bottom_bar_swipe_desc">Svep horisontellt på navigeringsfältet för att växla mellan filmer och TV-serier</string>
     <string name="settings_msg_bottom_bar_swipe">Navigeringsfältssvep %1$s</string>
+    <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
+    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
 </resources>

@@ -53,6 +53,7 @@ class PreferenceRepository @Inject constructor(
         val VIBRATION_ENABLED = booleanPreferencesKey("vibration_enabled")
         val ACCENT_COLOR = stringPreferencesKey("accent_color")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
+        val USE_LIQUID_GLASS = booleanPreferencesKey("use_liquid_glass")
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
         val SEASONAL_APP_ICON_ENABLED = booleanPreferencesKey("seasonal_app_icon_enabled")
         val APP_THEME = stringPreferencesKey("app_theme")
@@ -116,6 +117,7 @@ class PreferenceRepository @Inject constructor(
                 appTheme = preferences[PreferencesKeys.APP_THEME] ?: "AMOLED",
                 contentLanguage = preferences[PreferencesKeys.CONTENT_LANGUAGE] ?: "system",
                 advancedVisualEffectsEnabled = preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true,
+                useLiquidGlass = preferences[PreferencesKeys.USE_LIQUID_GLASS] ?: true,
                 dynamicAppIconEnabled = preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] ?: false,
                 seasonalAppIconEnabled = preferences[PreferencesKeys.SEASONAL_APP_ICON_ENABLED] ?: true,
                 showSplitReleasesHome = preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] ?: true,
@@ -348,6 +350,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.APP_THEME] = prefs.appTheme
             preferences[PreferencesKeys.CONTENT_LANGUAGE] = prefs.contentLanguage
             preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = prefs.advancedVisualEffectsEnabled
+            preferences[PreferencesKeys.USE_LIQUID_GLASS] = prefs.useLiquidGlass
             preferences[PreferencesKeys.DYNAMIC_APP_ICON_ENABLED] = prefs.dynamicAppIconEnabled
             preferences[PreferencesKeys.SEASONAL_APP_ICON_ENABLED] = prefs.seasonalAppIconEnabled
             preferences[PreferencesKeys.SHOW_SPLIT_RELEASES_HOME] = prefs.showSplitReleasesHome

@@ -597,6 +597,30 @@ fun SettingsAccessibilitySection(
                 settingsViewModel.toggleAdvancedVisualEffects(!advancedVisualEffectsEnabled)
             }
         )
+
+        val useLiquidGlass by settingsViewModel.useLiquidGlass.collectAsStateWithLifecycle()
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_lente),
+            title = stringResource(R.string.settings_liquid_glass_title),
+            description = stringResource(R.string.settings_liquid_glass_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = useLiquidGlass && advancedVisualEffectsEnabled,
+                    enabled = advancedVisualEffectsEnabled,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.setUseLiquidGlass(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (advancedVisualEffectsEnabled) {
+                    if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                    settingsViewModel.setUseLiquidGlass(!useLiquidGlass)
+                }
+            }
+        )
     }
 }
 

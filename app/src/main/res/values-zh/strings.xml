@@ -2130,4 +2130,7 @@
     <string name="settings_bottom_bar_swipe">底部導航欄滑動切換</string>
     <string name="settings_bottom_bar_swipe_desc">水平滑動底部導航欄以在電影和電視劇之間切換</string>
     <string name="settings_msg_bottom_bar_swipe">底部導航欄滑動 %1$s</string>
+    <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
+    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
 </resources>

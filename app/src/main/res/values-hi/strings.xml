@@ -2122,4 +2122,7 @@
     <string name="settings_bottom_bar_swipe">बॉटम बार मीडिया स्वाइप</string>
     <string name="settings_bottom_bar_swipe_desc">फिल्मों और टीवी श्रृंखलाओं के बीच स्विच करने के लिए नेविगेशन बार को क्षैतिज रूप से स्वाइप करें</string>
     <string name="settings_msg_bottom_bar_swipe">बॉटम बार स्वाइप %1$s</string>
+    <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
+    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
 </resources>

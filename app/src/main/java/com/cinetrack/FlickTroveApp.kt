@@ -128,6 +128,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val titleTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
+    val useLiquidGlass by settingsViewModel.useLiquidGlass.collectAsStateWithLifecycle()
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val episodeInfoStyle by settingsViewModel.episodeInfoStyle.collectAsStateWithLifecycle()
     val progressBarTarget by settingsViewModel.progressBarTarget.collectAsStateWithLifecycle()
@@ -174,6 +175,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
             LocalDisabledBadges provides disabledBadges,
             LocalTitleTextSizeMultiplier provides titleTextSizeMultiplier,
             LocalAdvancedVisualEffects provides advancedVisualEffectsEnabled,
+            LocalLiquidGlassEnabled provides useLiquidGlass,
             LocalImageQuality provides imageQuality,
             LocalEpisodeInfoStyle provides episodeInfoStyle,
             LocalProgressBarTarget provides progressBarTarget,

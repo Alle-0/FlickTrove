@@ -2110,4 +2110,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="settings_bottom_bar_swipe">Свайп нижньої панелі (фільми/серіали)</string>
     <string name="settings_bottom_bar_swipe_desc">Проведіть по панелі навігації горизонтально для перемикання між фільмами та серіалами</string>
     <string name="settings_msg_bottom_bar_swipe">Свайп нижньої панелі %1$s</string>
+    <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
+    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
 </resources>

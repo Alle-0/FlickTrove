@@ -2109,4 +2109,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="settings_bottom_bar_swipe">Alsó sáv legyintés (filmek/sorozatok)</string>
     <string name="settings_bottom_bar_swipe_desc">Legyintsen vízszintesen a navigációs sávon a filmek és tévésorozatok közötti váltáshoz</string>
     <string name="settings_msg_bottom_bar_swipe">Alsó sáv legyintés %1$s</string>
+    <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
+    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
 </resources>

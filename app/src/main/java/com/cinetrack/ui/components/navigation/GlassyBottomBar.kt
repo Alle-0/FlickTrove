@@ -233,37 +233,11 @@ fun GlassyBottomBar(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .clip(CircleShape)
-                .then(
-                    if (backdrop != null) {
-                        Modifier.drawPlainBackdrop(
-                            backdrop = backdrop,
-                            shape = { CircleShape },
-                            effects = {
-                                vibrancy()
-                                blur(8.dp.toPx())
-                                lens(
-                                    refractionHeight = 24.dp.toPx(),
-                                    refractionAmount = 40.dp.toPx(),
-                                    depthEffect = false,
-                                    chromaticAberration = true
-                                )
-                            },
-                            onDrawSurface = {
-                                // Deep dark obsidian liquid glass tint without specular white edge
-                                drawRoundRect(
-                                    color = Color(0xFF0C0C10).copy(alpha = 0.52f),
-                                    cornerRadius = CornerRadius(size.height / 2f, size.height / 2f)
-                                )
-                            }
-                        )
-                    } else {
-                        Modifier.hazeGlass(
-                            state = hazeState, 
-                            shape = CircleShape,
-                            useRefraction = false
-                        )
-                    }
+                .hazeGlass(
+                    state = hazeState,
+                    shape = CircleShape,
+                    blurRadius = 8.dp,
+                    useRefraction = true
                 )
                 .drawWithContent {
                     drawContent()
