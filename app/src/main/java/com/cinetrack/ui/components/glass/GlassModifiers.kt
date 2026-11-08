@@ -26,6 +26,7 @@ import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.HazeColorEffect
 import dev.chrisbanes.haze.blur.hazeBlur
 import dev.chrisbanes.haze.glass.GlassStyle
+import dev.chrisbanes.haze.glass.OpticalSizeValue
 import dev.chrisbanes.haze.glass.hazeGlass as hazeGlassRefract
 
 /**
@@ -92,20 +93,22 @@ fun Modifier.hazeGlass(
         .then(
             if (state != null && advancedEffectsEnabled) {
                 if (useRefraction) {
-                    val glassStyle = remember(shape, containerColor, alpha) {
+                    val glassStyle = remember(shape, containerColor, alpha, blurRadius) {
                         GlassStyle.regular.then {
                             if (shape is RoundedCornerShape) {
                                 shape(shape)
                             }
                             optics {
                                 copy(
-                                    refractionStrength = 0.22f,
-                                    refractionHeightFraction = 0.16f
+                                    refractionStrength = 0.45f,
+                                    refractionHeightFraction = 0.22f,
+                                    refractionDisplacement = 32.dp,
+                                    blurRadius = OpticalSizeValue.Fixed(blurRadius)
                                 )
                             }
-                            chromaticAberrationStrength(0.08f)
-                            specularIntensity(0.48f)
-                            ambientResponse(0.20f)
+                            chromaticAberrationStrength(0.12f)
+                            specularIntensity(0.55f)
+                            ambientResponse(0.25f)
                             val targetColor = if (containerColor != null && containerColor != Color.Unspecified) {
                                 containerColor
                             } else {
@@ -117,7 +120,7 @@ fun Modifier.hazeGlass(
                         }
                     }
                     Modifier.hazeGlassRefract(
-                        input = HazeInput.Sources(state),
+                        input = HazeInput.Backdrop(state),
                         style = glassStyle,
                         performanceMode = HazePerformanceMode.Default,
                         expandLayerBounds = false
