@@ -241,18 +241,18 @@ fun GlassyBottomBar(
                             shape = { CircleShape },
                             effects = {
                                 vibrancy()
-                                blur(6.dp.toPx())
+                                blur(10.dp.toPx())
                                 lens(
-                                    refractionHeight = 28.dp.toPx(),
-                                    refractionAmount = 56.dp.toPx(),
-                                    depthEffect = true,
+                                    refractionHeight = 18.dp.toPx(),
+                                    refractionAmount = 26.dp.toPx(),
+                                    depthEffect = false,
                                     chromaticAberration = true
                                 )
                             },
                             onDrawSurface = {
                                 // Deep dark obsidian liquid glass tint without specular white edge
                                 drawRoundRect(
-                                    color = Color(0xFF0A0A0D).copy(alpha = 0.45f),
+                                    color = Color(0xFF0C0C10).copy(alpha = 0.52f),
                                     cornerRadius = CornerRadius(size.height / 2f, size.height / 2f)
                                 )
                             }
