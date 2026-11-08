@@ -68,7 +68,8 @@ data class HomeUiState(
     val becauseYouWatchedTv: Pair<Movie, ImmutableList<Movie>>? = null,
     val preferences: com.cinetrack.data.model.UserPreferences = com.cinetrack.data.model.UserPreferences(),
     val allLocalMovies: ImmutableList<Movie> = persistentListOf(),
-    val boxOfficeWinner: com.cinetrack.data.model.BoxOfficeMovie? = null
+    val boxOfficeWinner: com.cinetrack.data.model.BoxOfficeMovie? = null,
+    val precomputedNextEpisodes: ImmutableMap<Long, com.cinetrack.data.model.NextEpisodeInfo> = persistentMapOf()
 )
 
 @HiltViewModel
@@ -425,20 +426,33 @@ class HomeViewModel @Inject constructor(
 
 
 
-    @OptIn(kotlinx.coroutines.FlowPreview::class)
-    val uiState: StateFlow<HomeUiState> = kotlinx.coroutines.flow.combine(
-        getHomeUiStateUseCase(
-            moviesFlow = repository.getLocalMoviesFlow(),
-            foldersFlow = repository.getFoldersFlow(),
-            preferencesFlow = preferenceRepository.userPreferencesFlow,
-            searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
-            activeTabFlow = _activeTab
-        ),
+    private data class FilteredFeedData(
+        val recommendedMovies: ImmutableList<Movie> = persistentListOf(),
+        val popularMovies: ImmutableList<Movie> = persistentListOf(),
+        val nowPlayingMovies: ImmutableList<Movie> = persistentListOf(),
+        val top10Movies: ImmutableList<Movie> = persistentListOf(),
+        val upcomingMovies: ImmutableList<Movie> = persistentListOf(),
+        val recommendedTv: ImmutableList<Movie> = persistentListOf(),
+        val popularTv: ImmutableList<Movie> = persistentListOf(),
+        val nowStreamingTv: ImmutableList<Movie> = persistentListOf(),
+        val top10Tv: ImmutableList<Movie> = persistentListOf(),
+        val upcomingTv: ImmutableList<Movie> = persistentListOf(),
+        val trendingMovies: ImmutableList<Movie> = persistentListOf(),
+        val trendingTv: ImmutableList<Movie> = persistentListOf(),
+        val magazineNews: ImmutableList<NewsItem> = persistentListOf(),
+        val continueWatchingTv: ImmutableList<Movie> = persistentListOf(),
+        val becauseYouWatchedMovie: Pair<Movie, ImmutableList<Movie>>? = null,
+        val becauseYouWatchedTv: Pair<Movie, ImmutableList<Movie>>? = null,
+        val isFeedLoading: Boolean = true,
+        val hasFeedError: Boolean = false
+    )
+
+    private val filteredFeedFlow: Flow<FilteredFeedData> = combine(
         _feedState,
-        settingsRepository.hideSavedFromDiscovery,
-        _boxOfficeWinner
-    ) { baseState, feedState, hideSaved, boxOfficeWinner ->
-        val allLocalCompositeIds = baseState.allLocalMovies.map { it.compositeId }.toSet()
+        repository.getLocalMoviesFlow(),
+        settingsRepository.hideSavedFromDiscovery
+    ) { feedState, localMovies, hideSaved ->
+        val allLocalCompositeIds = localMovies.map { it.compositeId }.toSet()
         val localCompositeIds = if (hideSaved) allLocalCompositeIds else emptySet()
 
         fun filterList(list: ImmutableList<Movie>): ImmutableList<Movie> {
@@ -450,9 +464,9 @@ class HomeViewModel @Inject constructor(
             return list.filter { !allLocalCompositeIds.contains(it.compositeId) }.toImmutableList()
         }
 
-        val localTvMap = baseState.allLocalMovies.filter { it.mediaType == "tv" }.associateBy { it.id }
+        val localTvMap = localMovies.filter { it.mediaType == "tv" }.associateBy { it.id }
 
-        baseState.copy(
+        FilteredFeedData(
             recommendedMovies = forceFilterRecommendations(feedState.recommendedMovies),
             popularMovies = filterList(feedState.popularMovies),
             nowPlayingMovies = filterList(feedState.nowPlayingMovies),
@@ -478,12 +492,46 @@ class HomeViewModel @Inject constructor(
             }.toImmutableList(),
             becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,
             becauseYouWatchedTv = feedState.becauseYouWatchedTv,
+            isFeedLoading = !feedState.isLoaded && !feedState.hasError,
+            hasFeedError = feedState.hasError
+        )
+    }.flowOn(Dispatchers.Default)
+
+    @OptIn(kotlinx.coroutines.FlowPreview::class)
+    val uiState: StateFlow<HomeUiState> = kotlinx.coroutines.flow.combine(
+        getHomeUiStateUseCase(
+            moviesFlow = repository.getLocalMoviesFlow(),
+            foldersFlow = repository.getFoldersFlow(),
+            preferencesFlow = preferenceRepository.userPreferencesFlow,
+            searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
+            activeTabFlow = _activeTab
+        ),
+        filteredFeedFlow,
+        _boxOfficeWinner
+    ) { baseState, feedData, boxOfficeWinner ->
+        baseState.copy(
+            recommendedMovies = feedData.recommendedMovies,
+            popularMovies = feedData.popularMovies,
+            nowPlayingMovies = feedData.nowPlayingMovies,
+            top10Movies = feedData.top10Movies,
+            upcomingMovies = feedData.upcomingMovies,
+            recommendedTv = feedData.recommendedTv,
+            popularTv = feedData.popularTv,
+            nowStreamingTv = feedData.nowStreamingTv,
+            top10Tv = feedData.top10Tv,
+            upcomingTv = feedData.upcomingTv,
+            trendingMovies = feedData.trendingMovies,
+            trendingTv = feedData.trendingTv,
+            magazineNews = feedData.magazineNews,
+            continueWatchingTv = feedData.continueWatchingTv,
+            becauseYouWatchedMovie = feedData.becauseYouWatchedMovie,
+            becauseYouWatchedTv = feedData.becauseYouWatchedTv,
             isLoading = baseState.isLoading,
-            isFeedLoading = baseState.isLoading || (!feedState.isLoaded && !feedState.hasError),
-            hasFeedError = feedState.hasError,
+            isFeedLoading = baseState.isLoading || feedData.isFeedLoading,
+            hasFeedError = feedData.hasFeedError,
             boxOfficeWinner = boxOfficeWinner
         )
-    }.stateIn(
+    }.flowOn(Dispatchers.Default).stateIn(
         scope = viewModelScope,
         started = SharingStarted.Lazily,
         initialValue = HomeUiState(activeTab = initialMedia)

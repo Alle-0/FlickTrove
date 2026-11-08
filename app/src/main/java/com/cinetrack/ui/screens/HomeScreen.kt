@@ -319,97 +319,94 @@ fun HomeScreenContent(
                     }
                 }
 
-                LazyVerticalGrid(
-                    state = currentGridState,
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
-                    contentPadding = PaddingValues(
-                        start = 16.dp, 
-                        end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
-                        top = topPadding + stickyHeaderHeight + 12.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    val hasDroppedFilter = uiState.sortConfig.selectedStatuses.contains("dropped")
-                    val sections = if (uiState.activeTab == "tv") {
-                        if (uiState.preferences.showSplitDroppedHome) {
-                            listOf(
-                                "" to uiState.activeTvShows,
-                                droppedTitle to uiState.droppedTvShows
-                            ).filter { it.second.isNotEmpty() }
-                        } else {
-                            if (hasDroppedFilter) {
-                                listOf("" to uiState.movies)
+                key(uiState.activeTab) {
+                    LazyVerticalGrid(
+                        state = currentGridState,
+                        columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
+                        contentPadding = PaddingValues(
+                            start = 16.dp, 
+                            end = 16.dp, 
+                            bottom = paddingValues.calculateBottomPadding() + 96.dp, 
+                            top = topPadding + stickyHeaderHeight + 12.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        val hasDroppedFilter = uiState.sortConfig.selectedStatuses.contains("dropped")
+                        val sections = if (uiState.activeTab == "tv") {
+                            if (uiState.preferences.showSplitDroppedHome) {
+                                listOf(
+                                    "" to uiState.activeTvShows,
+                                    droppedTitle to uiState.droppedTvShows
+                                ).filter { it.second.isNotEmpty() }
                             } else {
-                                listOf("" to uiState.activeTvShows)
+                                if (hasDroppedFilter) {
+                                    listOf("" to uiState.movies)
+                                } else {
+                                    listOf("" to uiState.activeTvShows)
+                                }
                             }
-                        }
-                    } else {
-                        if (uiState.preferences.showSplitReleasesHome) {
-                            listOf(
-                                "" to uiState.releasedMovies,
-                                unreleasedTitle to uiState.unreleasedMovies
-                            ).filter { it.second.isNotEmpty() }
                         } else {
-                            listOf("" to uiState.movies)
+                            if (uiState.preferences.showSplitReleasesHome) {
+                                listOf(
+                                    "" to uiState.releasedMovies,
+                                    unreleasedTitle to uiState.unreleasedMovies
+                                ).filter { it.second.isNotEmpty() }
+                            } else {
+                                listOf("" to uiState.movies)
+                            }
                         }
-                    }
 
-                    sections.forEachIndexed { sectionIndex, (title, items) ->
-                        if (title.isNotEmpty()) {
-                            item(
-                                key = "section_header_${title}_$sectionIndex",
-                                span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }
-                            ) {
-                                Text(
-                                    text = title.uppercase(),
-                                    style = MaterialTheme.typography.labelLarge,
-                                    fontWeight = FontWeight.Bold,
-                                    color = Color.White.copy(alpha = 0.6f),
-                                    modifier = Modifier.padding(
-                                        top = if (sectionIndex > 0) 24.dp else 4.dp, 
-                                        bottom = 8.dp
+                        sections.forEachIndexed { sectionIndex, (title, items) ->
+                            if (title.isNotEmpty()) {
+                                item(
+                                    key = "section_header_${title}_$sectionIndex",
+                                    span = { androidx.compose.foundation.lazy.grid.GridItemSpan(maxLineSpan) }
+                                ) {
+                                    Text(
+                                        text = title.uppercase(),
+                                        style = MaterialTheme.typography.labelLarge,
+                                        fontWeight = FontWeight.Bold,
+                                        color = Color.White.copy(alpha = 0.6f),
+                                        modifier = Modifier.padding(
+                                            top = if (sectionIndex > 0) 24.dp else 4.dp, 
+                                            bottom = 8.dp
+                                        )
                                     )
-                                )
+                                }
                             }
-                        }
 
-                        itemsIndexed(
-                            items = items,
-                            key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
-                            contentType = { _, _ -> "movie_card" }
-                        ) { index, movie ->
-                            val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
-                            val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
+                            itemsIndexed(
+                                items = items,
+                                key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
+                                contentType = { _, movie ->
+                                    when {
+                                        columns == 1 -> "list_card"
+                                        uiState.activeTab == "tv" && uiState.precomputedNextEpisodes[movie.id] != null -> "series_card"
+                                        else -> "movie_card"
+                                    }
+                                }
+                            ) { index, movie ->
+                                val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
+                                val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
 
-                            val isTvTab = uiState.activeTab == "tv"
-                            val nextEpisode = remember(movie.id, movie.watchedEpisodes, movie.seasons, movie.numberOfEpisodes, isTvTab) {
-                                if (isTvTab) movie.calculateNextEpisode() else null
-                            }
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItem(
-                                        fadeInSpec = tween(280),
-                                        placementSpec = spring(
-                                            dampingRatio = Spring.DampingRatioLowBouncy,
-                                            stiffness = Spring.StiffnessMediumLow
+                                val isTvTab = uiState.activeTab == "tv"
+                                val nextEpisode = if (isTvTab) uiState.precomputedNextEpisodes[movie.id] else null
+                                Box(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .animateItem(
+                                            fadeInSpec = null,
+                                            fadeOutSpec = null,
+                                            placementSpec = spring(
+                                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                                stiffness = Spring.StiffnessMediumLow
+                                            )
                                         ),
-                                        fadeOutSpec = tween(200)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                AnimatedContent(
-                                    targetState = columns == 1,
-                                    transitionSpec = {
-                                        (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
-                                            .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
-                                    },
-                                    label = "HomeCardLayoutTransition"
-                                ) { isList ->
-                                    if (isList) {
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (columns == 1) {
                                         com.cinetrack.ui.components.card.MovieListCard(
                                             movie = movie,
                                             isFavorite = movie.favorite,
@@ -530,9 +527,6 @@ fun HomeScreenContent(
                         selectedIndex = selectedIndex,
                         onOptionClick = { index ->
                             viewModel.onTabChanged(if (index == 0) "movie" else "tv")
-                            scope.launch {
-                                if (index == 0) movieGridState.scrollToItem(0) else tvGridState.scrollToItem(0)
-                            }
                         }
                     )
                 }

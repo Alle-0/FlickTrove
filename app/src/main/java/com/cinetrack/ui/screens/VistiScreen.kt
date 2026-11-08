@@ -261,46 +261,40 @@ fun VistiScreenContent(
                     }
                 }
 
-                LazyVerticalGrid(
-                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
-                    state = listState,
-                    contentPadding = PaddingValues(
-                        start = 16.dp, 
-                        end = 16.dp, 
-                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
-                        top = topPadding + stickyHeaderHeight + 12.dp
-                    ),
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalArrangement = Arrangement.spacedBy(12.dp),
-                    modifier = Modifier.fillMaxSize()
-                ) {
-                    itemsIndexed(
-                        items = uiState.movies,
-                        key = { index, movie: Movie -> movie.id.toString() + movie.mediaType }
-                    ) { index, movie ->
-                        val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateItem(
-                                    fadeInSpec = tween(280),
-                                    placementSpec = spring(
-                                        dampingRatio = Spring.DampingRatioLowBouncy,
-                                        stiffness = Spring.StiffnessMediumLow
+                key(uiState.activeTab) {
+                    LazyVerticalGrid(
+                        columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
+                        state = listState,
+                        contentPadding = PaddingValues(
+                            start = 16.dp, 
+                            end = 16.dp, 
+                            bottom = paddingValues.calculateBottomPadding() + 96.dp, 
+                            top = topPadding + stickyHeaderHeight + 12.dp
+                        ),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalArrangement = Arrangement.spacedBy(12.dp),
+                        modifier = Modifier.fillMaxSize()
+                    ) {
+                        itemsIndexed(
+                            items = uiState.movies,
+                            key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
+                            contentType = { _, _ -> if (columns == 1) "list_card" else "movie_card" }
+                        ) { index, movie ->
+                            val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .animateItem(
+                                        fadeInSpec = null,
+                                        fadeOutSpec = null,
+                                        placementSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessMediumLow
+                                        )
                                     ),
-                                    fadeOutSpec = tween(200)
-                                ),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            AnimatedContent(
-                                targetState = columns == 1,
-                                transitionSpec = {
-                                    (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
-                                        .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
-                                },
-                                label = "VistiCardLayoutTransition"
-                            ) { isList ->
-                                if (isList) {
+                                contentAlignment = Alignment.Center
+                            ) {
+                                if (columns == 1) {
                                     com.cinetrack.ui.components.card.MovieListCard(
                                         movie = movie,
                                         modifier = Modifier.fillMaxWidth(),
@@ -398,9 +392,6 @@ fun VistiScreenContent(
                         selectedIndex = selectedIndex,
                         onOptionClick = { index ->
                             viewModel.onTabChanged(if (index == 0) "movie" else "tv")
-                            scope.launch {
-                                if (index == 0) viewModel.movieGridState.scrollToItem(0) else viewModel.tvGridState.scrollToItem(0)
-                            }
                         }
                     )
                 }

@@ -604,23 +604,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                         }
                                         is VistiTab -> {
                                             vistiViewModel.onTabChanged(newMode)
-                                            scope.launch {
-                                                if (newMode == "movie") {
-                                                    vistiViewModel.movieGridState.scrollToItem(0)
-                                                } else {
-                                                    vistiViewModel.tvGridState.scrollToItem(0)
-                                                }
-                                            }
                                         }
                                         is HomeTab -> {
                                             homeViewModel.onTabChanged(newMode)
-                                            scope.launch {
-                                                if (newMode == "movie") {
-                                                    homeViewModel.movieGridState.scrollToItem(0)
-                                                } else {
-                                                    homeViewModel.tvGridState.scrollToItem(0)
-                                                }
-                                            }
                                         }
                                         is HomeFeedTab -> {
                                             homeViewModel.onTabChanged(newMode)

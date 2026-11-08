@@ -112,7 +112,18 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 }
                 .toList()
 
-            val sorted: List<Movie> = sortMovies(filtered, prefs.homeSort)
+            val precomputedNextEpisodes = buildMap<Long, com.cinetrack.data.model.NextEpisodeInfo> {
+                toWatchMovies.forEach { movie ->
+                    if (movie.mediaType == "tv") {
+                        val next = movie.calculateNextEpisode()
+                        if (next != null) {
+                            put(movie.id, next)
+                        }
+                    }
+                }
+            }.toImmutableMap()
+
+            val sorted: List<Movie> = sortMovies(filtered, prefs.homeSort, precomputedNextEpisodes)
             
             val partitionResult: Pair<List<Movie>, List<Movie>> = sorted.partition { !it.isReleased }
             val unreleased = partitionResult.first
@@ -158,12 +169,17 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 folders = folders.toImmutableList(),
                 sortConfig = prefs.homeSort,
                 preferences = prefs,
-                allLocalMovies = allMovies.toImmutableList()
+                allLocalMovies = allMovies.toImmutableList(),
+                precomputedNextEpisodes = precomputedNextEpisodes
             )
         }.flowOn(Dispatchers.Default)
     }
 
-    private fun sortMovies(movies: List<Movie>, sort: SortConfig): List<Movie> {
+    private fun sortMovies(
+        movies: List<Movie>,
+        sort: SortConfig,
+        precomputedNextEpisodes: Map<Long, com.cinetrack.data.model.NextEpisodeInfo> = emptyMap()
+    ): List<Movie> {
         val isDesc = sort.sortDirection == "desc"
         return when (sort.sortType) {
             "release_date" -> {
@@ -226,14 +242,14 @@ class GetHomeUiStateUseCase @Inject constructor() {
             "remaining_episodes" -> {
                 if (isDesc) {
                     movies.sortedWith(
-                        compareByDescending<Movie> { getRemainingEpisodes(it) }
+                        compareByDescending<Movie> { getRemainingEpisodes(it, precomputedNextEpisodes) }
                             .thenBy { it.title ?: it.name ?: "" }
                             .thenBy { it.id }
                     )
                 } else {
                     movies.sortedWith(
                         compareBy<Movie> {
-                            val rem = getRemainingEpisodes(it)
+                            val rem = getRemainingEpisodes(it, precomputedNextEpisodes)
                             if (rem == 0) Int.MAX_VALUE else rem
                         }.thenBy { it.title ?: it.name ?: "" }
                             .thenBy { it.id }
@@ -244,9 +260,12 @@ class GetHomeUiStateUseCase @Inject constructor() {
         }
     }
 
-    private fun getRemainingEpisodes(movie: Movie): Int {
+    private fun getRemainingEpisodes(
+        movie: Movie,
+        precomputedNextEpisodes: Map<Long, com.cinetrack.data.model.NextEpisodeInfo> = emptyMap()
+    ): Int {
         if (movie.mediaType != "tv") return 0
-        val info = movie.calculateNextEpisode()
+        val info = precomputedNextEpisodes[movie.id] ?: movie.calculateNextEpisode()
         if (info != null) {
             if (info.isUpToDateWithAirDate) return 0
             return if (info.remainingTotal > 0) info.remainingTotal else info.remainingInSeason
