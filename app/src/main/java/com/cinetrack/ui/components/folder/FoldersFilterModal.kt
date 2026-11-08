@@ -5,7 +5,6 @@ import com.cinetrack.ui.components.dialog.SortOptionItem
 import com.cinetrack.ui.components.dialog.DirectionChip
 import com.cinetrack.ui.components.dialog.FilterChip
 import com.cinetrack.ui.components.dialog.FilterOption
-import com.cinetrack.ui.components.dialog.SeriesStatusInfoDialog
 import com.cinetrack.ui.components.dialog.ProviderItem
 
 import androidx.compose.animation.ExperimentalAnimationApi

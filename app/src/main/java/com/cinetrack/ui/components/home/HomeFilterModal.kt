@@ -68,6 +68,7 @@ import com.cinetrack.ui.utils.ProviderConstants
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
+import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.utils.horizontalFadingEdges
 import kotlin.math.roundToInt
@@ -99,6 +100,7 @@ fun HomeFilterModal(
     var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
     var localSortConfig by remember(isVisible) { mutableStateOf(sortConfig) }
     var showSeriesStatusInfoDialog by remember { mutableStateOf(false) }
+    val filterHazeState = remember { HazeState() }
 
     // Sync local state when modal becomes visible
     LaunchedEffect(isVisible) {
@@ -124,6 +126,7 @@ fun HomeFilterModal(
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                .then(if (contentAlpha > 0f) Modifier.haze(filterHazeState) else Modifier)
                 .zIndex(1f)
                 .graphicsLayer(
                     alpha = contentAlpha,
@@ -391,10 +394,10 @@ fun HomeFilterModal(
                     }
                 }
 
-                // --- SERIES STATUS INFO DIALOG (root level for proper hazeGlass) ---
-                if (showSeriesStatusInfoDialog) {
+                // --- SERIES STATUS INFO DIALOG (nested haze glass) ---
+                if (showSeriesStatusInfoDialog && contentAlpha > 0f) {
                     SeriesStatusInfoDialog(
-                        hazeState = hazeState,
+                        hazeState = filterHazeState,
                         onDismiss = { showSeriesStatusInfoDialog = false }
                     )
                 }

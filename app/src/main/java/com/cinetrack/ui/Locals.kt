@@ -52,6 +52,12 @@ data class FilterModalConfig(
     val availableCountries: List<String> = emptyList()
 )
 
+data class FolderDetailMediaHandler(
+    val activeTab: String = "all",
+    val onTabChanged: (String) -> Unit = {}
+)
+
+val LocalFolderDetailMediaHandler = compositionLocalOf<MutableState<FolderDetailMediaHandler?>> { androidx.compose.runtime.mutableStateOf(null) }
 val LocalActiveFilterConfig = compositionLocalOf<MutableState<FilterModalConfig?>> { androidx.compose.runtime.mutableStateOf(null) }
 val LocalFolderReorderRequest = compositionLocalOf<MutableState<(() -> Unit)?>> { androidx.compose.runtime.mutableStateOf(null) }
 

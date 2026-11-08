@@ -1,8 +1,16 @@
 package com.cinetrack.ui.components.updates
 
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.LinearOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.snap
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalHapticFeedback
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -81,6 +89,30 @@ fun UpdatesTimelineView(
     }
 
     val today = remember { LocalDate.now() }
+    val haptic = LocalHapticFeedback.current
+    val animatedEntryIds = remember { mutableSetOf<String>() }
+
+    // Stable global index mapping for clean, predictable stagger ordering
+    val entryIndexMap = remember(reminders) {
+        reminders.mapIndexed { idx, it -> it.id to idx }.toMap()
+    }
+
+    // Micro-Haptic on Month Scroll Crossing:
+    // Fires an ultra-crisp tactile tick (analog watch bezel feel) when a month milestone capsule crosses near the top
+    val currentTopMonth by remember {
+        derivedStateOf {
+            val visible = listState.layoutInfo.visibleItemsInfo
+            visible.lastOrNull { it.key.toString().startsWith("reminders_month_") && it.offset <= 180 }?.key as? String
+                ?: visible.firstOrNull { it.key.toString().startsWith("reminders_month_") }?.key as? String
+        }
+    }
+    var lastHapticMonth by remember { mutableStateOf<String?>(null) }
+    LaunchedEffect(currentTopMonth) {
+        if (listState.isScrollInProgress && currentTopMonth != null && currentTopMonth != lastHapticMonth) {
+            lastHapticMonth = currentTopMonth
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+        }
+    }
 
     Box(
         modifier = modifier.fillMaxSize()
@@ -135,74 +167,142 @@ fun UpdatesTimelineView(
                         key = { it.id + "_rem" },
                         contentType = { "movie" }
                     ) { item ->
-                    // Dynamic urgency color on the timeline node:
-                    // - Red for Today (0 days)
-                    // - Warm Orange for Tomorrow (1 day)
-                    // - Golden Amber for Upcoming
-                    val nodeColor = remember(item.arrivalDate, today) {
-                        try {
-                            val target = LocalDate.parse(item.arrivalDate.take(10))
-                            val days = ChronoUnit.DAYS.between(today, target)
-                            when (days) {
-                                0L -> Color(0xFFFF5252)
-                                1L -> Color(0xFFFF9800)
-                                else -> Color(0xFFF9A825)
-                            }
-                        } catch (_: Exception) {
-                            Color(0xFFF9A825)
-                        }
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .height(IntrinsicSize.Min)
-                            .animateItem(),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        // Lateral Timeline Node
-                        Box(
-                            modifier = Modifier
-                                .width(22.dp)
-                                .fillMaxHeight(),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(8.dp)
-                                    .clip(CircleShape)
-                                    .background(nodeColor)
-                                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
-                            )
-                        }
-
-                        Spacer(modifier = Modifier.width(10.dp))
-
-                        // Reminder Card with vertical breathing room
-                        Box(
-                            modifier = Modifier
-                                .weight(1f)
-                                .padding(vertical = 5.dp)
-                        ) {
-                            UpdateCard(
-                                movie = item.movie,
-                                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
-                                episodeBadge = item.episodeInfo,
-                                rawDate = item.arrivalDate,
-                                iconRes = R.drawable.ic_bell_piena,
-                                color = MaterialTheme.colorScheme.primary,
-                                isReminder = true,
-                                onAction = {},
-                                onPress = { onMovieClick(item.movie) },
-                                modifier = Modifier.fillMaxWidth()
-                            )
-                        }
+                        val staggerIndex = entryIndexMap[item.id] ?: 0
+                        RemindersEntryRow(
+                            item = item,
+                            staggerIndex = staggerIndex,
+                            animatedEntryIds = animatedEntryIds,
+                            today = today,
+                            onMovieClick = onMovieClick
+                        )
                     }
                 }
-            }
         }
     }
 }
+}
+
+@Composable
+private fun androidx.compose.foundation.lazy.LazyItemScope.RemindersEntryRow(
+    item: ReminderItem,
+    staggerIndex: Int,
+    animatedEntryIds: MutableSet<String>,
+    today: LocalDate,
+    onMovieClick: (Movie) -> Unit,
+    modifier: Modifier = Modifier
+) {
+    val nodeColor = remember(item.arrivalDate, today) {
+        try {
+            val target = LocalDate.parse(item.arrivalDate.take(10))
+            val days = ChronoUnit.DAYS.between(today, target)
+            when (days) {
+                0L -> Color(0xFFFF5252)
+                1L -> Color(0xFFFF9800)
+                else -> Color(0xFFF9A825)
+            }
+        } catch (_: Exception) {
+            Color(0xFFF9A825)
+        }
+    }
+
+    val density = LocalDensity.current
+
+    // Canonical FlickTrove card entrance animation
+    val hasAnimated = rememberSaveable(item.id) {
+        mutableStateOf(animatedEntryIds.contains(item.id))
+    }
+
+    LaunchedEffect(item.id) {
+        if (hasAnimated.value) return@LaunchedEffect
+        if (staggerIndex in 0..11) delay(staggerIndex * 40L)
+        hasAnimated.value = true
+        animatedEntryIds.add(item.id)
+    }
+
+    val isScrollItem = staggerIndex < 0 || staggerIndex >= 12
+    val isVisible = hasAnimated.value || staggerIndex < 0
+
+    val cardAlpha by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = tween(
+            durationMillis = if (isScrollItem) 180 else 250,
+            easing = LinearOutSlowInEasing
+        ),
+        label = "alpha"
+    )
+
+    val cardTranslateY by animateFloatAsState(
+        targetValue = if (isVisible) 0f else 12f,
+        animationSpec = if (isScrollItem) tween(200, easing = FastOutSlowInEasing) else spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "translateY"
+    )
+
+    val nodeScale by animateFloatAsState(
+        targetValue = if (isVisible) 1f else 0f,
+        animationSpec = if (isScrollItem) snap() else spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "nodeScale"
+    )
+
+    Row(
+        modifier = modifier
+            .fillMaxWidth()
+            .height(IntrinsicSize.Min)
+            .animateItem(),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        // Lateral Timeline Node with bouncy spring scale
+        Box(
+            modifier = Modifier
+                .width(22.dp)
+                .fillMaxHeight(),
+            contentAlignment = Alignment.Center
+        ) {
+            Box(
+                modifier = Modifier
+                    .graphicsLayer {
+                        scaleX = nodeScale
+                        scaleY = nodeScale
+                        alpha = nodeScale.coerceIn(0f, 1f)
+                    }
+                    .size(8.dp)
+                    .clip(CircleShape)
+                    .background(nodeColor)
+                    .border(1.dp, Color.White.copy(alpha = 0.35f), CircleShape)
+            )
+        }
+
+        Spacer(modifier = Modifier.width(10.dp))
+
+        // Reminder Card with vertical breathing room and progressive staggered slide + fade
+        Box(
+            modifier = Modifier
+                .weight(1f)
+                .padding(vertical = 5.dp)
+                .graphicsLayer {
+                    alpha = cardAlpha
+                    translationY = cardTranslateY * density.density
+                }
+        ) {
+            UpdateCard(
+                movie = item.movie,
+                label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
+                episodeBadge = item.episodeInfo,
+                rawDate = item.arrivalDate,
+                iconRes = R.drawable.ic_bell_piena,
+                color = MaterialTheme.colorScheme.primary,
+                isReminder = true,
+                onAction = {},
+                onPress = { onMovieClick(item.movie) },
+                modifier = Modifier.fillMaxWidth()
+            )
+        }
+    }
 }
 
 @Composable

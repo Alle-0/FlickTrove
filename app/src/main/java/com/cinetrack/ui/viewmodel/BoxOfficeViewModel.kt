@@ -1,5 +1,6 @@
 package com.cinetrack.ui.viewmodel
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.local.entities.FolderEntity
@@ -50,6 +51,9 @@ class BoxOfficeViewModel @Inject constructor(
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
     private val actionFeedbackManager: ActionFeedbackManager
 ) : ViewModel() {
+
+    val weekendListState = LazyListState()
+    val allTimeListState = LazyListState()
 
     private val _activeTab = MutableStateFlow(BoxOfficeCategory.WEEKEND)
     private val _weekendList = MutableStateFlow<List<BoxOfficeMovie>>(emptyList())
@@ -132,6 +136,9 @@ class BoxOfficeViewModel @Inject constructor(
         if (_selectedYear.value == year) return
         _selectedYear.value = year
         loadAllTimeBoxOffice(year = year)
+        viewModelScope.launch {
+            allTimeListState.scrollToItem(0)
+        }
     }
 
     fun refresh() {

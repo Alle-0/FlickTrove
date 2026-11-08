@@ -23,6 +23,7 @@ import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
@@ -63,7 +64,8 @@ fun HistoryTimelineView(
     topBarClearance: androidx.compose.ui.unit.Dp = 0.dp,
     hazeState: dev.chrisbanes.haze.HazeState? = null,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    listState: LazyListState = rememberLazyListState()
 ) {
     if (entries.isEmpty()) {
         Box(
@@ -83,7 +85,6 @@ fun HistoryTimelineView(
         return
     }
 
-    val listState = rememberLazyListState()
     val haptic = LocalHapticFeedback.current
     val animatedEntryIds = remember { mutableSetOf<String>() }
 

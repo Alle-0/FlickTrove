@@ -25,13 +25,22 @@ import com.cinetrack.ui.components.detail.ALL_VIBES
 import com.cinetrack.ui.components.detail.normalizeVibeCode
 import com.cinetrack.ui.components.detail.findVibe
 
-data class VibeStat(val vibe: String, val emoji: String, val count: Int, val iconRes: Int? = null, val colorHex: Long? = null)
+data class VibeStat(
+    val vibe: String,
+    val emoji: String,
+    val count: Int,
+    val iconRes: Int? = null,
+    val colorHex: Long? = null,
+    @StringRes val labelRes: Int? = null
+)
+
 data class MvpStat(
     val actorId: Long,
     val actorName: String,
     val characterImageUrl: String?,
     val profilePath: String?,
-    val count: Int
+    val count: Int,
+    val movieTitles: List<String> = emptyList()
 )
 
 data class FlowPersona(
@@ -39,7 +48,8 @@ data class FlowPersona(
     @StringRes val descriptionRes: Int,
     val emoji: String,
     @androidx.annotation.DrawableRes val iconRes: Int,
-    val colorHex: Long
+    val colorHex: Long,
+    val topVibeCode: String = ""
 )
 
 enum class FlowSortOption {
@@ -177,7 +187,7 @@ class FlowViewModel @Inject constructor(
                 val code = entry.key
                 val emotionalVibe = findVibe(code)
                 val emoji = emotionalVibe?.emoji ?: "❓"
-                VibeStat(code, emoji, entry.value, emotionalVibe?.iconRes, emotionalVibe?.colorHex) 
+                VibeStat(code, emoji, entry.value, emotionalVibe?.iconRes, emotionalVibe?.colorHex, emotionalVibe?.labelRes) 
             }.sortedByDescending { it.count }
 
             // 1. Filtro Tipo Media
@@ -229,15 +239,23 @@ class FlowViewModel @Inject constructor(
                 val name = movie.favoriteActorName
                 if (id != null && name != null) {
                     val current = mvpCounts[id]
+                    val movieTitle = movie.displayName
                     if (current != null) {
-                        mvpCounts[id] = current.copy(count = current.count + 1)
+                        val updatedTitles = if (movieTitle.isNotBlank() && !current.movieTitles.contains(movieTitle)) {
+                            (current.movieTitles + movieTitle).take(3)
+                        } else current.movieTitles
+                        mvpCounts[id] = current.copy(
+                            count = current.count + 1,
+                            movieTitles = updatedTitles
+                        )
                     } else {
                         mvpCounts[id] = MvpStat(
                             actorId = id,
                             actorName = name,
                             characterImageUrl = null, // unused — profilePath carries the actor image
                             profilePath = movie.favoriteActorTmdbPath ?: movie.favoriteActorProfilePath,
-                            count = 1
+                            count = 1,
+                            movieTitles = if (movieTitle.isNotBlank()) listOf(movieTitle) else emptyList()
                         )
                     }
                 }
@@ -247,19 +265,19 @@ class FlowViewModel @Inject constructor(
             // Calculate Flow Persona based on Top Vibe
             val persona = topVibes.firstOrNull()?.vibe?.let { topVibe ->
                 when(topVibe) {
-                    "MASTERPIECE" -> FlowPersona(R.string.persona_title_connoisseur, R.string.persona_desc_connoisseur, "🍷", R.drawable.ic_vibe_masterpiece, 0xFFFFD700)
-                    "MIND_BLOWING" -> FlowPersona(R.string.persona_title_philosopher, R.string.persona_desc_philosopher, "🌌", R.drawable.ic_vibe_mind_blowing, 0xFF9C27B0)
-                    "IN_TEARS" -> FlowPersona(R.string.persona_title_empath, R.string.persona_desc_empath, "💧", R.drawable.ic_vibe_in_tears, 0xFF2196F3)
-                    "HYPED" -> FlowPersona(R.string.persona_title_adrenaline_junkie, R.string.persona_desc_adrenaline_junkie, "⚡", R.drawable.ic_vibe_hyped, 0xFFFF5722)
-                    "COZY" -> FlowPersona(R.string.persona_title_comfort_seeker, R.string.persona_desc_comfort_seeker, "🍵", R.drawable.ic_vibe_cozy, 0xFFFF9800)
-                    "FEELS_GOOD" -> FlowPersona(R.string.persona_title_optimist, R.string.persona_desc_optimist, "☀️", R.drawable.ic_vibe_feels_good, 0xFFFFEB3B)
-                    "FUNNY" -> FlowPersona(R.string.persona_title_jokester, R.string.persona_desc_jokester, "🎭", R.drawable.ic_vibe_funny, 0xFFE91E63)
-                    "WEIRD" -> FlowPersona(R.string.persona_title_explorer, R.string.persona_desc_explorer, "🛸", R.drawable.ic_vibe_weird, 0xFF00BCD4)
-                    "SCARY" -> FlowPersona(R.string.persona_title_thrill_seeker, R.string.persona_desc_thrill_seeker, "🔪", R.drawable.ic_vibe_scary, 0xFFF44336)
-                    "MEH" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "🧐", R.drawable.ic_vibe_meh, 0xFF9E9E9E)
-                    "DISAPPOINTED" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "😤", R.drawable.ic_vibe_disappointed, 0xFFE64A19)
-                    "BORING" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "😴", R.drawable.ic_vibe_boring, 0xFF7986CB)
-                    else -> FlowPersona(R.string.persona_title_wanderer, R.string.persona_desc_wanderer, "🌿", R.drawable.ic_world, 0xFF4CAF50)
+                    "MASTERPIECE" -> FlowPersona(R.string.persona_title_connoisseur, R.string.persona_desc_connoisseur, "🍷", R.drawable.ic_vibe_masterpiece, 0xFFFFD700, topVibe)
+                    "MIND_BLOWING" -> FlowPersona(R.string.persona_title_philosopher, R.string.persona_desc_philosopher, "🌌", R.drawable.ic_vibe_mind_blowing, 0xFF9C27B0, topVibe)
+                    "IN_TEARS" -> FlowPersona(R.string.persona_title_empath, R.string.persona_desc_empath, "💧", R.drawable.ic_vibe_in_tears, 0xFF2196F3, topVibe)
+                    "HYPED" -> FlowPersona(R.string.persona_title_adrenaline_junkie, R.string.persona_desc_adrenaline_junkie, "⚡", R.drawable.ic_vibe_hyped, 0xFFFF5722, topVibe)
+                    "COZY" -> FlowPersona(R.string.persona_title_comfort_seeker, R.string.persona_desc_comfort_seeker, "🍵", R.drawable.ic_vibe_cozy, 0xFFFF9800, topVibe)
+                    "FEELS_GOOD" -> FlowPersona(R.string.persona_title_optimist, R.string.persona_desc_optimist, "☀️", R.drawable.ic_vibe_feels_good, 0xFFFFEB3B, topVibe)
+                    "FUNNY" -> FlowPersona(R.string.persona_title_jokester, R.string.persona_desc_jokester, "🎭", R.drawable.ic_vibe_funny, 0xFFE91E63, topVibe)
+                    "WEIRD" -> FlowPersona(R.string.persona_title_explorer, R.string.persona_desc_explorer, "🛸", R.drawable.ic_vibe_weird, 0xFF00BCD4, topVibe)
+                    "SCARY" -> FlowPersona(R.string.persona_title_thrill_seeker, R.string.persona_desc_thrill_seeker, "🔪", R.drawable.ic_vibe_scary, 0xFFF44336, topVibe)
+                    "MEH" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "🧐", R.drawable.ic_vibe_meh, 0xFF9E9E9E, topVibe)
+                    "DISAPPOINTED" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "😤", R.drawable.ic_vibe_disappointed, 0xFFE64A19, topVibe)
+                    "BORING" -> FlowPersona(R.string.persona_title_critic, R.string.persona_desc_critic, "😴", R.drawable.ic_vibe_boring, 0xFF7986CB, topVibe)
+                    else -> FlowPersona(R.string.persona_title_wanderer, R.string.persona_desc_wanderer, "🌿", R.drawable.ic_world, 0xFF4CAF50, topVibe)
                 }
             }
             

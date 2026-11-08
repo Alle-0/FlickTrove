@@ -1,5 +1,6 @@
 package com.cinetrack.ui.history
 
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import com.cinetrack.data.local.dao.RawTimelineRecord
@@ -38,6 +39,9 @@ class HistoryViewModel @Inject constructor(
     private val movieRepository: MovieRepository,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase
 ) : ViewModel() {
+
+    val timelineListState = LazyListState()
+    val calendarListState = LazyListState()
 
     private val _viewMode = MutableStateFlow(ViewMode.TIMELINE)
     private val _filterConfig = MutableStateFlow(HistoryFilterConfig())

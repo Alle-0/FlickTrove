@@ -82,6 +82,7 @@ import com.cinetrack.ui.components.shared.LocalMovieActions
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.viewmodel.DiscoverViewModel
 import com.cinetrack.ui.viewmodel.HomeViewModel
+import com.cinetrack.ui.viewmodel.VistiViewModel
 import com.cinetrack.ui.viewmodel.RecommendationsViewModel
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.ui.viewmodel.UndoViewModel
@@ -133,6 +134,11 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
             hiltViewModel<HomeViewModel>(activity)
         } else {
             hiltViewModel<HomeViewModel>()
+        }
+        val vistiViewModel = if (activity != null) {
+            hiltViewModel<VistiViewModel>(activity)
+        } else {
+            hiltViewModel<VistiViewModel>()
         }
         val isSettingsDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
         val updateInfo by settingsViewModel.updateInfo.collectAsStateWithLifecycle()
@@ -268,6 +274,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                 val activeTrophyDetailConfig = remember { mutableStateOf<com.cinetrack.ui.TrophyDetailModalConfig?>(null) }
                 val folderReorderRequest = remember { mutableStateOf<(() -> Unit)?>(null) }
                 val folderReorderConfig = remember { mutableStateOf<com.cinetrack.ui.FolderReorderModalConfig?>(null) }
+                val folderDetailMediaHandler = remember { mutableStateOf<com.cinetrack.ui.FolderDetailMediaHandler?>(null) }
 
                 val isTrophyDetailOpen = activeTrophyDetailConfig.value != null
                 val isBarDimmed = isSettingsDialogOpen
@@ -296,6 +303,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                     com.cinetrack.ui.LocalActiveTrophyDetailConfig provides activeTrophyDetailConfig,
                     com.cinetrack.ui.LocalFolderReorderRequest provides folderReorderRequest,
                     com.cinetrack.ui.LocalFolderReorderConfig provides folderReorderConfig,
+                    com.cinetrack.ui.LocalFolderDetailMediaHandler provides folderDetailMediaHandler,
                     com.cinetrack.ui.LocalScrollToTopState provides scrollToTopState,
                     LocalFilterRequest provides { bounds ->
                         filterButtonBounds = bounds
@@ -391,9 +399,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                                 pageModifier.graphicsLayer {
                                                     val rawOffset = (pagerState.currentPage - page) + pagerState.currentPageOffsetFraction
                                                     val absOffset = kotlin.math.abs(rawOffset).coerceIn(0f, 1f)
-                                                    val scale = 1f - (0.08f * absOffset)
-                                                    scaleX = scale
-                                                    scaleY = scale
                                                     alpha = (1f - absOffset).coerceIn(0f, 1f)
                                                 }
                                             }
@@ -453,7 +458,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                 is BoxOfficeTab -> stringResource(R.string.box_office_title)
                                 is FolderDetailTab -> activeFolderForDetail?.name ?: currentTab.folderName
                                 is FlowTab -> "Flow"
-                                is FlowStatsTab -> "Flow stats"
+                                is FlowStatsTab -> stringResource(R.string.flow_stats_title)
                                 is TrophyRoomTab -> stringResource(R.string.dashboard_trophies)
                                 is HistoryTab -> stringResource(R.string.history_screen_title)
                                 else -> stringResource(R.string.app_name)
@@ -582,6 +587,52 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                             }
 
                             // Bottom Bar & Search FAB Layer
+                            val isMediaSwitchSupported = currentTab is HomeFeedTab || currentTab is HomeTab || currentTab is VistiTab || currentTab is FolderDetailTab
+
+                            val currentMediaMode = when (currentTab) {
+                                is VistiTab -> vistiViewModel.uiState.value.activeTab
+                                is FolderDetailTab -> folderDetailMediaHandler.value?.activeTab ?: "all"
+                                is HomeFeedTab, is HomeTab -> homeViewModel.uiState.value.activeTab
+                                else -> null
+                            }
+
+                            val onSwitchMediaMode: ((String) -> Unit)? = if (isMediaSwitchSupported) {
+                                { newMode ->
+                                    when (currentTab) {
+                                        is FolderDetailTab -> {
+                                            folderDetailMediaHandler.value?.onTabChanged?.invoke(newMode)
+                                        }
+                                        is VistiTab -> {
+                                            vistiViewModel.onTabChanged(newMode)
+                                            scope.launch {
+                                                if (newMode == "movie") {
+                                                    vistiViewModel.movieGridState.scrollToItem(0)
+                                                } else {
+                                                    vistiViewModel.tvGridState.scrollToItem(0)
+                                                }
+                                            }
+                                        }
+                                        is HomeTab -> {
+                                            homeViewModel.onTabChanged(newMode)
+                                            scope.launch {
+                                                if (newMode == "movie") {
+                                                    homeViewModel.movieGridState.scrollToItem(0)
+                                                } else {
+                                                    homeViewModel.tvGridState.scrollToItem(0)
+                                                }
+                                            }
+                                        }
+                                        is HomeFeedTab -> {
+                                            homeViewModel.onTabChanged(newMode)
+                                            scope.launch {
+                                                homeViewModel.feedListState.scrollToItem(0)
+                                            }
+                                        }
+                                        else -> {}
+                                    }
+                                }
+                            } else null
+
                             MainBottomBarOverlay(
                                 currentTab = currentTab,
                                 contentHazeState = contentHazeState,
@@ -608,13 +659,15 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                                 scrollToTopState.value.onScrollToTop.invoke()
                                             } else {
                                                 scope.launch {
-                                                    pagerState.animateScrollToPage(targetIndex)
+                                                    pagerState.scrollToPage(targetIndex)
                                                 }
                                             }
                                         }
                                         tabNavigator.current = targetTab
                                     }
-                                }
+                                },
+                                currentMediaMode = currentMediaMode,
+                                onSwitchMediaMode = onSwitchMediaMode
                             )
 
                             MainScrollToTopFab(

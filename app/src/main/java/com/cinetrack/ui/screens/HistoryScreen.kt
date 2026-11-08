@@ -66,6 +66,7 @@ import com.cinetrack.ui.history.model.WatchTimelineEntry
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.fastScrollToTop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
@@ -153,6 +154,52 @@ fun HistoryScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val internalHazeState = hazeState ?: remember { HazeState() }
 
+    val timelineListState = viewModel.timelineListState
+    val calendarListState = viewModel.calendarListState
+    val scope = rememberCoroutineScope()
+
+    val pagerState = rememberPagerState(
+        initialPage = uiState.selectedViewMode.ordinal,
+        pageCount = { 2 }
+    )
+
+    LaunchedEffect(uiState.selectedViewMode) {
+        if (pagerState.currentPage != uiState.selectedViewMode.ordinal && !pagerState.isScrollInProgress) {
+            pagerState.animateScrollToPage(uiState.selectedViewMode.ordinal)
+        }
+    }
+
+    LaunchedEffect(pagerState.currentPage) {
+        val targetMode = if (pagerState.currentPage == 0) ViewMode.TIMELINE else ViewMode.CALENDAR
+        if (uiState.selectedViewMode != targetMode) {
+            viewModel.setViewMode(targetMode)
+        }
+    }
+
+    val currentListState = if (pagerState.currentPage == 0) timelineListState else calendarListState
+
+    val scrollToTopStateHolder = com.cinetrack.ui.LocalScrollToTopState.current
+    val showScrollToTop by remember {
+        derivedStateOf {
+            val ls = if (pagerState.currentPage == 0) timelineListState else calendarListState
+            ls.firstVisibleItemIndex > 3 || (ls.firstVisibleItemIndex > 0 && ls.firstVisibleItemScrollOffset > 150)
+        }
+    }
+    LaunchedEffect(showScrollToTop, currentListState, pagerState.currentPage) {
+        scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState(
+            isVisible = showScrollToTop,
+            scrollProgress = if (showScrollToTop) 1f else 0f,
+            onScrollToTop = {
+                scope.launch { currentListState.fastScrollToTop() }
+            }
+        )
+    }
+    DisposableEffect(Unit) {
+        onDispose {
+            scrollToTopStateHolder.value = com.cinetrack.ui.ScrollToTopState()
+        }
+    }
+
     var editingEntry by remember { mutableStateOf<WatchTimelineEntry?>(null) }
     var showDatePicker by remember { mutableStateOf(false) }
     var showMonthPicker by remember { mutableStateOf(false) }
@@ -189,24 +236,6 @@ fun HistoryScreenContent(
                     modifier = Modifier.fillMaxSize()
                 )
             } else {
-                val pagerState = rememberPagerState(
-                    initialPage = uiState.selectedViewMode.ordinal,
-                    pageCount = { 2 }
-                )
-
-                LaunchedEffect(uiState.selectedViewMode) {
-                    if (pagerState.currentPage != uiState.selectedViewMode.ordinal && !pagerState.isScrollInProgress) {
-                        pagerState.animateScrollToPage(uiState.selectedViewMode.ordinal)
-                    }
-                }
-
-                LaunchedEffect(pagerState.currentPage) {
-                    val targetMode = if (pagerState.currentPage == 0) ViewMode.TIMELINE else ViewMode.CALENDAR
-                    if (uiState.selectedViewMode != targetMode) {
-                        viewModel.setViewMode(targetMode)
-                    }
-                }
-
                 HorizontalPager(
                     state = pagerState,
                     modifier = Modifier.fillMaxSize()
@@ -231,6 +260,7 @@ fun HistoryScreenContent(
                                     top = topBarClearance,
                                     bottom = bottomClearance
                                 ),
+                                listState = timelineListState,
                                 modifier = Modifier.fillMaxSize()
                             )
                         }
@@ -258,7 +288,8 @@ fun HistoryScreenContent(
                                     end = 16.dp,
                                     top = topBarClearance,
                                     bottom = bottomClearance
-                                )
+                                ),
+                                listState = calendarListState
                             )
                         }
                     }

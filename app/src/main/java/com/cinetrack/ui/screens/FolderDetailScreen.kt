@@ -182,6 +182,21 @@ fun FolderDetailScreenContent(
     val currentActiveTab = successStateForScroll?.activeTab ?: "all"
     val currentSortConfig = successStateForScroll?.sortConfig ?: com.cinetrack.data.model.SortConfig()
 
+    val folderMediaHandler = com.cinetrack.ui.LocalFolderDetailMediaHandler.current
+    DisposableEffect(Unit) {
+        onDispose { folderMediaHandler.value = null }
+    }
+    DisposableEffect(currentActiveTab, viewModel) {
+        folderMediaHandler.value = com.cinetrack.ui.FolderDetailMediaHandler(
+            activeTab = currentActiveTab,
+            onTabChanged = { tab ->
+                viewModel.onTabChanged(tab)
+                scope.launch { lazyGridState.scrollToItem(0) }
+            }
+        )
+        onDispose { }
+    }
+
     LaunchedEffect(currentActiveTab, currentSortConfig, successStateForScroll != null) {
         if (successStateForScroll != null) {
             activeFilterConfig.value = com.cinetrack.ui.FilterModalConfig(

@@ -16,7 +16,9 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.wrapContentSize
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Text
@@ -65,7 +67,8 @@ fun HistoryCalendarView(
     hazeState: HazeState?,
     modifier: Modifier = Modifier,
     contentPadding: PaddingValues = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 120.dp),
-    onScopeChanged: ((Int) -> Unit)? = null
+    onScopeChanged: ((Int) -> Unit)? = null,
+    listState: LazyListState = rememberLazyListState()
 ) {
     // 0 = Vista Mese (default), 1 = Vista Anno (heatmap stile GitHub)
     var selectedScopeIndex by rememberSaveable { mutableIntStateOf(0) }
@@ -80,6 +83,7 @@ fun HistoryCalendarView(
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
+            state = listState,
             modifier = Modifier
                 .fillMaxSize()
                 .haze(calendarHazeState, style = HazeStyles.PremiumDark),

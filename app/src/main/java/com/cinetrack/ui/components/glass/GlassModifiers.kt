@@ -12,6 +12,7 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Density
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
@@ -24,6 +25,8 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.HazeColorEffect
 import dev.chrisbanes.haze.blur.hazeBlur
+import dev.chrisbanes.haze.glass.GlassStyle
+import dev.chrisbanes.haze.glass.hazeGlass as hazeGlassRefract
 
 /**
  * Wraps a Shape to prevent Compose's BorderModifierNode from crashing with
@@ -88,8 +91,32 @@ fun Modifier.hazeGlass(
         .clip(effectiveShape)
         .then(
             if (state != null && advancedEffectsEnabled) {
-                // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeBlur.
-                if (useOffscreenStrategy) {
+                if (useRefraction) {
+                    val glassStyle = remember(shape, containerColor, alpha) {
+                        GlassStyle.clear.then {
+                            if (shape is RoundedCornerShape) {
+                                shape(shape)
+                            }
+                            val targetColor = if (containerColor != null && containerColor != Color.Unspecified) {
+                                containerColor
+                            } else {
+                                HazeStyles.GlassColor
+                            }
+                            val targetAlpha = (if (targetColor.alpha != 1f) targetColor.alpha else HazeStyles.GlassAlpha) * alpha
+                            tint(targetColor.copy(alpha = targetAlpha))
+                            alpha(alpha)
+                            chromaticAberrationStrength(0.08f)
+                            specularIntensity(0.35f)
+                            ambientResponse(0.25f)
+                        }
+                    }
+                    Modifier.hazeGlassRefract(
+                        input = HazeInput.Sources(state),
+                        style = glassStyle,
+                        performanceMode = HazePerformanceMode.Default,
+                        expandLayerBounds = false
+                    )
+                } else if (useOffscreenStrategy) {
                     Modifier
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
                         .hazeBlur(

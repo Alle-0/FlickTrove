@@ -363,9 +363,6 @@ object AccountTab : Tab {
                     .graphicsLayer {
                         val offset = backdropOffsetProvider()
                         val absOffset = kotlin.math.abs(offset).coerceIn(0f, 1f)
-                        val scale = 1f - (0.08f * absOffset)
-                        scaleX = scale
-                        scaleY = scale
                         alpha = (1f - absOffset).coerceIn(0f, 1f)
                     }
             ) {

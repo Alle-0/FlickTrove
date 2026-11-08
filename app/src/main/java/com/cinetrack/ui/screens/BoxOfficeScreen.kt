@@ -179,8 +179,8 @@ fun BoxOfficeScreenContent(
             BoxOfficeCategory.ALL_TIME -> uiState.allTimeList
         }
 
-        val weekendListState = rememberLazyListState()
-        val allTimeListState = rememberLazyListState()
+        val weekendListState = viewModel.weekendListState
+        val allTimeListState = viewModel.allTimeListState
         val listState = if (uiState.activeTab == BoxOfficeCategory.WEEKEND) weekendListState else allTimeListState
         val scope = rememberCoroutineScope()
 

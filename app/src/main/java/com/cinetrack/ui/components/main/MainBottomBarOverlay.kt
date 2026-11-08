@@ -50,7 +50,9 @@ fun BoxScope.MainBottomBarOverlay(
     contentHazeState: HazeState,
     isSettingsDialogOpen: Boolean,
     onDimmedAreaClick: () -> Unit,
-    onNavigate: (String) -> Unit
+    onNavigate: (String) -> Unit,
+    currentMediaMode: String? = null,
+    onSwitchMediaMode: ((String) -> Unit)? = null
 ) {
     if (isPrimaryMainTab(currentTab)) {
         Box(modifier = Modifier.align(Alignment.BottomCenter).zIndex(50f)) {
@@ -65,7 +67,9 @@ fun BoxScope.MainBottomBarOverlay(
                     is AccountTab, is FoldersTab, is FolderDetailTab, is StatsTab, is FlowTab, is FlowStatsTab, is TrophyRoomTab, is HistoryTab -> "account"
                     else -> null
                 },
-                onNavigate = onNavigate
+                onNavigate = onNavigate,
+                currentMediaMode = currentMediaMode,
+                onSwitchMediaMode = onSwitchMediaMode
             )
         }
     }
