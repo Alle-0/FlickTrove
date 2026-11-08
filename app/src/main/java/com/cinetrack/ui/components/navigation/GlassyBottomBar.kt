@@ -227,8 +227,7 @@ fun GlassyBottomBar(
                 .clip(CircleShape)
                 .hazeGlass(
                     state = hazeState, 
-                    shape = CircleShape,
-                    useRefraction = true
+                    shape = CircleShape
                 )
                 .drawWithContent {
                     drawContent()
