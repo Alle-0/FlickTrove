@@ -213,6 +213,8 @@ fun CommentInputBar(
                     .hazeGlass(
                         state = hazeState,
                         shape = boxShape,
+                        blurRadius = 8.dp,
+                        useRefraction = true,
                         style = HazeStyles.PremiumDark
                     )
             )

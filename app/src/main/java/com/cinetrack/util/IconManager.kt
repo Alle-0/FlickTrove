@@ -38,6 +38,16 @@ object IconManager {
         return month == java.util.Calendar.FEBRUARY && day in 7..16
     }
 
+    private fun isAliasEnabled(packageManager: PackageManager, context: Context, alias: String): Boolean {
+        return try {
+            val state = packageManager.getComponentEnabledSetting(ComponentName(context, alias))
+            state == PackageManager.COMPONENT_ENABLED_STATE_ENABLED ||
+                    (state == PackageManager.COMPONENT_ENABLED_STATE_DEFAULT && alias == ALIAS_TEAL)
+        } catch (_: Exception) {
+            false
+        }
+    }
+
     fun updateAppIcon(
         context: Context,
         colorName: String,
@@ -62,7 +72,18 @@ object IconManager {
             isSeasonalIconEnabled && isHalloweenSeason() -> ALIAS_HALLOWEEN
             isSeasonalIconEnabled && isChristmasSeason() -> ALIAS_CHRISTMAS
             isSeasonalIconEnabled && isValentineSeason() -> ALIAS_VALENTINE
-            !isDynamicIconEnabled -> ALIAS_TEAL
+            !isDynamicIconEnabled -> {
+                // If dynamic icon is disabled, keep the currently active icon without changing it.
+                // Exception: if a seasonal icon was active and is no longer valid, fallback to ALIAS_TEAL.
+                val isSeasonalCurrentlyActive = isAliasEnabled(packageManager, context, ALIAS_HALLOWEEN) ||
+                        isAliasEnabled(packageManager, context, ALIAS_CHRISTMAS) ||
+                        isAliasEnabled(packageManager, context, ALIAS_VALENTINE)
+                if (isSeasonalCurrentlyActive) {
+                    ALIAS_TEAL
+                } else {
+                    return
+                }
+            }
             colorName == "Pink" -> ALIAS_PINK
             colorName == "Purple" -> ALIAS_PURPLE
             colorName == "Amber" -> ALIAS_AMBER
@@ -73,9 +94,7 @@ object IconManager {
         }
 
         // Check if the alias is already enabled to avoid unnecessary restarts
-        val isCurrentlyEnabled = packageManager.getComponentEnabledSetting(
-            ComponentName(context, activeAlias)
-        ) == PackageManager.COMPONENT_ENABLED_STATE_ENABLED
+        val isCurrentlyEnabled = isAliasEnabled(packageManager, context, activeAlias)
         
         if (isCurrentlyEnabled) {
             return

@@ -88,6 +88,9 @@ import dev.chrisbanes.haze.haze
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -353,6 +356,12 @@ class CommsUniCommentsScreen(
         val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
         val effectiveBackdrop = currentBackdropUrl ?: mediaImage
 
+        val commentsBackdrop = rememberLayerBackdrop {
+            drawRect(Color(0xFF0D0D12))
+            drawContent()
+        }
+
+        CompositionLocalProvider(LocalBackdrop provides commentsBackdrop) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             Box(
                 modifier = Modifier
@@ -376,7 +385,8 @@ class CommsUniCommentsScreen(
                                     state = hazeState,
                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
                                     containerColor = Color.Black.copy(alpha = 0.75f),
-                                    blurRadius = 20.dp
+                                    blurRadius = 8.dp,
+                                    useRefraction = true
                                 )
                                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                         ) {
@@ -607,6 +617,7 @@ class CommsUniCommentsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
+                        .layerBackdrop(commentsBackdrop)
                         .haze(state = hazeState, style = HazeStyles.PremiumDark)
                 ) {
                     if (!effectiveBackdrop.isNullOrBlank()) {
@@ -977,6 +988,7 @@ class CommsUniCommentsScreen(
                 }
             }
         } // End of Outer Box
+    }
     }
 }
 

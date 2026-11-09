@@ -224,7 +224,12 @@ fun EpisodesBottomSheet(
                 modifier = Modifier
                     .fillMaxWidth()
                     .fillMaxHeight(0.88f)
-                    .hazeGlass(state = hazeState, shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
+                        blurRadius = 8.dp,
+                        useRefraction = true
+                    )
             ) {
             Column(
                 modifier = Modifier
