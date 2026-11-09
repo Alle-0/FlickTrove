@@ -576,7 +576,14 @@ private fun FolderCreateForm(
             OutlinedTextField(
                 value = name,
                 onValueChange = { if (it.length <= 40) name = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hazeGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = Color.White.copy(alpha = 0.05f),
+                        borderWidth = 0.dp,
+                        useRefraction = true
+                    ),
                 label = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.4f)) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -584,7 +591,9 @@ private fun FolderCreateForm(
                     unfocusedTextColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                    cursorColor = Color.White
+                    cursorColor = Color.White,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
                 ),
                 singleLine = true
             )
@@ -602,7 +611,14 @@ private fun FolderCreateForm(
             OutlinedTextField(
                 value = description,
                 onValueChange = { if (it.length <= 250) description = it },
-                modifier = Modifier.fillMaxWidth(),
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .hazeGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = Color.White.copy(alpha = 0.05f),
+                        borderWidth = 0.dp,
+                        useRefraction = true
+                    ),
                 label = { Text(stringResource(R.string.folders_description_placeholder), color = Color.White.copy(alpha = 0.4f)) },
                 shape = RoundedCornerShape(16.dp),
                 colors = OutlinedTextFieldDefaults.colors(
@@ -610,7 +626,9 @@ private fun FolderCreateForm(
                     unfocusedTextColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                    cursorColor = Color.White
+                    cursorColor = Color.White,
+                    focusedContainerColor = Color.Transparent,
+                    unfocusedContainerColor = Color.Transparent
                 ),
                 minLines = 2,
                 maxLines = 4
@@ -646,10 +664,16 @@ private fun FolderCreateForm(
                     .weight(0.8f)
                     .height(52.dp)
                     .bounceClick { onCancel() }
-                    .clip(RoundedCornerShape(16.dp)),
+                    .hazeGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = Color.White.copy(alpha = 0.08f),
+                        borderWidth = 1.dp,
+                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                        useRefraction = true
+                    ),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.5f), maxLines = 1)
+                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.7f), maxLines = 1)
             }
             
             val isEnabled = name.isNotBlank()
@@ -657,13 +681,22 @@ private fun FolderCreateForm(
                 modifier = Modifier
                     .weight(1.2f)
                     .height(52.dp)
+                    .bounceClick(enabled = isEnabled) { 
+                        onCreate(name, selectedColor, description.trim().ifEmpty { null }) 
+                    }
                     .then(
-                        if (isEnabled) Modifier.bounceClick { onCreate(name, selectedColor, description.trim().ifEmpty { null }) }
-                        else Modifier
-                    )
-                    .background(
-                        if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f), 
-                        RoundedCornerShape(16.dp)
+                        if (isEnabled)
+                            Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White)
+                        else
+                            Modifier.hazeGlass(
+                                shape = RoundedCornerShape(16.dp),
+                                containerColor = Color.White.copy(alpha = 0.08f),
+                                borderWidth = 1.dp,
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                useRefraction = true
+                            )
                     ),
                 contentAlignment = Alignment.Center
             ) {

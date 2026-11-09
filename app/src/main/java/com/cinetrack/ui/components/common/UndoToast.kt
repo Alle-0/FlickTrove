@@ -131,7 +131,11 @@ fun UndoToast(
                         .hazeGlass(
                             state = hazeState,
                             shape = CircleShape,
-                            useOffscreenStrategy = false // We apply it more precisely to the content below
+                            containerColor = Color.Black.copy(alpha = 0.45f),
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            borderWidth = 1.dp,
+                            useOffscreenStrategy = false,
+                            useRefraction = true
                         )
                 ) {
                     val hasUndo = action.undoFn != null

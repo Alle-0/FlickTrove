@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
@@ -114,7 +116,14 @@ fun FolderCreateDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { if (it.length <= 40) name = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hazeGlass(
+                            shape = RoundedCornerShape(16.dp),
+                            containerColor = Color.White.copy(alpha = 0.05f),
+                            borderWidth = 0.dp,
+                            useRefraction = true
+                        ),
                     label = { Text(stringResource(R.string.folders_name_placeholder), color = Color.White.copy(alpha = 0.5f)) },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -122,7 +131,9 @@ fun FolderCreateDialog(
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = Color.White,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                        cursorColor = Color.White
+                        cursorColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
                     ),
                     singleLine = true
                 )
@@ -140,7 +151,14 @@ fun FolderCreateDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { if (it.length <= 250) description = it },
-                    modifier = Modifier.fillMaxWidth(),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .hazeGlass(
+                            shape = RoundedCornerShape(16.dp),
+                            containerColor = Color.White.copy(alpha = 0.05f),
+                            borderWidth = 0.dp,
+                            useRefraction = true
+                        ),
                     label = { Text(stringResource(R.string.folders_description_placeholder), color = Color.White.copy(alpha = 0.5f)) },
                     shape = RoundedCornerShape(16.dp),
                     visualTransformation = remember { com.cinetrack.ui.utils.MarkdownVisualTransformation() },
@@ -149,7 +167,9 @@ fun FolderCreateDialog(
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = Color.White,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                        cursorColor = Color.White
+                        cursorColor = Color.White,
+                        focusedContainerColor = Color.Transparent,
+                        unfocusedContainerColor = Color.Transparent
                     ),
                     minLines = 2,
                     maxLines = 4
@@ -176,12 +196,13 @@ fun FolderCreateDialog(
             }
 
             // Fixed Footer Action Button
+            val isCreateEnabled = name.isNotBlank()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp)
                     .height(56.dp)
-                    .bounceClick(enabled = name.isNotBlank()) {
+                    .bounceClick(enabled = isCreateEnabled) {
                         val finalName = name
                         val finalDesc = description.trim().ifEmpty { null }
                         val finalColor = selectedColor
@@ -189,16 +210,26 @@ fun FolderCreateDialog(
                             onCreate(finalName, "folder", finalColor, finalDesc)
                         }
                     }
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        if (name.isNotBlank()) Color.White else Color.White.copy(alpha = 0.2f)
+                    .then(
+                        if (isCreateEnabled)
+                            Modifier
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White)
+                        else
+                            Modifier.hazeGlass(
+                                shape = RoundedCornerShape(16.dp),
+                                containerColor = Color.White.copy(alpha = 0.08f),
+                                borderWidth = 1.dp,
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                useRefraction = true
+                            )
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     stringResource(R.string.folders_create_button),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = if (name.isNotBlank()) Color.Black else Color.Black.copy(alpha = 0.5f)
+                    color = if (isCreateEnabled) Color.Black else Color.Black.copy(alpha = 0.5f)
                 )
             }
         }
