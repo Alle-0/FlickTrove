@@ -242,15 +242,9 @@ fun QuickFolderModal(
                     .fillMaxWidth()
                     .height(52.dp)
                     .bounceClick(scaleDown = 0.92f, onClick = onClose)
-                    .hazeGlass(
-                        state = hazeState,
-                        shape = RoundedCornerShape(16.dp),
-                        blurRadius = 8.dp,
-                        useRefraction = true,
-                        borderWidth = 1.dp,
-                        borderColor = Color.White.copy(alpha = 0.25f),
-                        containerColor = accentColor
-                    ),
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(accentColor, RoundedCornerShape(16.dp))
+                    .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -323,15 +317,9 @@ private fun QuickFolderItem(
         modifier = modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
-            .hazeGlass(
-                state = hazeState,
-                shape = RoundedCornerShape(18.dp),
-                blurRadius = 8.dp,
-                useRefraction = true,
-                borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                borderColor = animatedBorderColor,
-                containerColor = animatedBgColor
-            )
+            .clip(RoundedCornerShape(18.dp))
+            .background(animatedBgColor, RoundedCornerShape(18.dp))
+            .border(if (isSelected) 1.5.dp else 1.dp, animatedBorderColor, RoundedCornerShape(18.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -339,15 +327,9 @@ private fun QuickFolderItem(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .hazeGlass(
-                    state = hazeState,
-                    shape = RoundedCornerShape(12.dp),
-                    blurRadius = 8.dp,
-                    useRefraction = true,
-                    borderWidth = 0.5.dp,
-                    borderColor = folderColor.copy(alpha = 0.35f),
-                    containerColor = folderColor.copy(alpha = 0.16f)
-                ),
+                .clip(RoundedCornerShape(12.dp))
+                .background(folderColor.copy(alpha = 0.16f), RoundedCornerShape(12.dp))
+                .border(0.5.dp, folderColor.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(

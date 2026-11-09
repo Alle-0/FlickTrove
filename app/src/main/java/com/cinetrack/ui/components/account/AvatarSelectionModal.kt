@@ -362,15 +362,9 @@ fun AvatarSelectionContent(
                                 modifier = Modifier
                                     .weight(1f)
                                     .bounceClick(scaleDown = 0.94f) { onCharacterSelected(null, null) }
-                                    .hazeGlass(
-                                        state = activeHazeState,
-                                        shape = CircleShape,
-                                        blurRadius = 8.dp,
-                                        useRefraction = true,
-                                        borderWidth = 1.dp,
-                                        borderColor = MaterialTheme.colorScheme.error.copy(alpha = 0.40f),
-                                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.20f)
-                                    )
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.15f), CircleShape)
+                                    .border(1.dp, MaterialTheme.colorScheme.error.copy(alpha = 0.35f), CircleShape)
                                     .padding(vertical = 11.dp, horizontal = 12.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -402,14 +396,12 @@ fun AvatarSelectionContent(
                                     modifier = Modifier
                                         .weight(1f)
                                         .bounceClick(scaleDown = 0.94f) { galleryLauncher.launch("image/*") }
-                                        .hazeGlass(
-                                            state = activeHazeState,
-                                            shape = CircleShape,
-                                            blurRadius = 8.dp,
-                                            useRefraction = true,
-                                            borderWidth = 1.dp,
-                                            borderColor = Color.White.copy(alpha = 0.15f),
-                                            containerColor = Color.White.copy(alpha = 0.10f)
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.08f), CircleShape)
+                                        .border(
+                                            1.dp,
+                                            com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                            CircleShape
                                         )
                                         .padding(vertical = 11.dp, horizontal = 12.dp),
                                     contentAlignment = Alignment.Center
@@ -449,14 +441,12 @@ fun AvatarSelectionContent(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 24.dp)
-                            .hazeGlass(
-                                state = activeHazeState,
-                                shape = CircleShape,
-                                blurRadius = 8.dp,
-                                useRefraction = true,
-                                borderWidth = 1.dp,
-                                borderColor = Color.White.copy(alpha = 0.15f),
-                                containerColor = Color.White.copy(alpha = 0.08f)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.06f), CircleShape)
+                            .border(
+                                1.dp,
+                                com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                CircleShape
                             ),
                         singleLine = true,
                         placeholder = {

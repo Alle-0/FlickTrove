@@ -187,14 +187,12 @@ fun QuickRatingModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(16.dp),
-                            blurRadius = 8.dp,
-                            useRefraction = true,
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.15f),
-                            containerColor = Color.White.copy(alpha = 0.08f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                        .border(
+                            1.dp,
+                            com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                            RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -217,15 +215,9 @@ fun QuickRatingModal(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(currentRating)
                         }
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(16.dp),
-                            blurRadius = 8.dp,
-                            useRefraction = true,
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.25f),
-                            containerColor = accentColor
-                        ),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(accentColor, RoundedCornerShape(16.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

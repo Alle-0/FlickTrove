@@ -497,14 +497,12 @@ fun AccountModals(
                                     .bounceClick { 
                                         editProfileSubScreen = EditProfileSubScreen.MENU
                                     }
-                                    .hazeGlass(
-                                        state = globalHazeState,
-                                        shape = RoundedCornerShape(16.dp),
-                                        blurRadius = 8.dp,
-                                        useRefraction = true,
-                                        borderWidth = 1.dp,
-                                        borderColor = Color.White.copy(alpha = 0.15f),
-                                        containerColor = Color.White.copy(alpha = 0.08f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                                    .border(
+                                        1.dp,
+                                        com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                        RoundedCornerShape(16.dp)
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -519,14 +517,15 @@ fun AccountModals(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .hazeGlass(
-                                        state = globalHazeState,
-                                        shape = RoundedCornerShape(16.dp),
-                                        blurRadius = 8.dp,
-                                        useRefraction = true,
-                                        borderWidth = 1.dp,
-                                        borderColor = if (isSaveEnabled) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),
-                                        containerColor = if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.08f)
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(
+                                        if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.08f),
+                                        RoundedCornerShape(16.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isSaveEnabled) Color.White.copy(alpha = 0.25f) else com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                        RoundedCornerShape(16.dp)
                                     )
                                     .bounceClick(enabled = isSaveEnabled) {
                                         if (nameChangesCount >= 2) {

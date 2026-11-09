@@ -464,15 +464,8 @@ private fun OptionGridCard(
             )
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .clip(cardShape)
-            .hazeGlass(
-                state = hazeState,
-                shape = cardShape,
-                blurRadius = 8.dp,
-                useRefraction = true,
-                borderWidth = 1.dp,
-                borderColor = Color.White.copy(alpha = 0.12f),
-                containerColor = Color.White.copy(alpha = 0.04f)
-            )
+            .background(Color.White.copy(alpha = 0.06f), cardShape)
+            .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), cardShape)
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

@@ -783,14 +783,12 @@ fun SettingsDialogConfirmButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .hazeGlass(
-                state = hazeState,
-                shape = shape,
-                containerColor = if (enabled) containerColor else containerColor.copy(alpha = 0.3f),
-                borderColor = Color.White.copy(alpha = 0.25f),
-                borderWidth = 1.dp,
-                blurRadius = 8.dp,
-                useRefraction = true
+            .clip(shape)
+            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f), shape)
+            .border(
+                1.dp,
+                if (enabled) Color.White.copy(alpha = 0.25f) else com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                shape
             ),
         contentAlignment = Alignment.Center
     ) {
@@ -824,14 +822,12 @@ fun SettingsDialogCancelButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .hazeGlass(
-                state = hazeState,
-                shape = shape,
-                containerColor = Color.White.copy(alpha = 0.08f),
-                borderColor = Color.White.copy(alpha = 0.15f),
-                borderWidth = 1.dp,
-                blurRadius = 8.dp,
-                useRefraction = true
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.08f), shape)
+            .border(
+                1.dp,
+                com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                shape
             ),
         contentAlignment = Alignment.Center
     ) {

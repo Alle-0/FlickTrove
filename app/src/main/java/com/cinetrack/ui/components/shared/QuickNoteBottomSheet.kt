@@ -46,6 +46,7 @@ import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Delete
+import com.cinetrack.ui.theme.HazeStyles
 
 @dagger.hilt.EntryPoint
 @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
@@ -248,14 +249,12 @@ fun QuickNoteModal(
                             }
                             speechLauncher.launch(intent)
                         }
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = CircleShape,
-                            blurRadius = 8.dp,
-                            useRefraction = true,
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.15f),
-                            containerColor = Color.White.copy(alpha = 0.10f)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.08f), CircleShape)
+                        .border(
+                            1.dp,
+                            HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -402,14 +401,12 @@ fun QuickNoteModal(
                                         permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
                                     }
                                 }
-                                .hazeGlass(
-                                    state = hazeState,
-                                    shape = CircleShape,
-                                    blurRadius = 8.dp,
-                                    useRefraction = true,
-                                    borderWidth = 1.dp,
-                                    borderColor = if (isRecording) Color.Red.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.15f),
-                                    containerColor = if (isRecording) Color.Red else Color.White.copy(alpha = 0.10f)
+                                .clip(CircleShape)
+                                .background(if (isRecording) Color.Red else Color.White.copy(alpha = 0.08f), CircleShape)
+                                .border(
+                                    1.dp,
+                                    if (isRecording) Color.Red.copy(alpha = 0.4f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                    CircleShape
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -435,14 +432,12 @@ fun QuickNoteModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(16.dp),
-                            blurRadius = 8.dp,
-                            useRefraction = true,
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.15f),
-                            containerColor = Color.White.copy(alpha = 0.08f)
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
+                        .border(
+                            1.dp,
+                            HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            RoundedCornerShape(16.dp)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -465,15 +460,9 @@ fun QuickNoteModal(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(note)
                         }
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = RoundedCornerShape(16.dp),
-                            blurRadius = 8.dp,
-                            useRefraction = true,
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.25f),
-                            containerColor = accentColor
-                        ),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(accentColor, RoundedCornerShape(16.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

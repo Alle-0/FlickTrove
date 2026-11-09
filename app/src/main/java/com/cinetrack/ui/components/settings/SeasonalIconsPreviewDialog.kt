@@ -164,14 +164,12 @@ private fun SeasonalIconCard(
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
-            .hazeGlass(
-                state = activeHazeState,
-                shape = RoundedCornerShape(20.dp),
-                containerColor = Color.White.copy(alpha = 0.05f),
-                borderColor = Color.White.copy(alpha = 0.15f),
-                borderWidth = 1.dp,
-                blurRadius = 8.dp,
-                useRefraction = true
+            .clip(RoundedCornerShape(20.dp))
+            .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(20.dp))
+            .border(
+                1.dp,
+                com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                RoundedCornerShape(20.dp)
             )
             .padding(vertical = 16.dp, horizontal = 10.dp)
     ) {

@@ -621,25 +621,6 @@ internal fun CoverSelectionView(
                                     }
                                 )
 
-                                // Language badge for logos at bottom-left
-                                if (isLogoTab && !item.iso6391.isNullOrBlank()) {
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(6.dp)
-                                            .align(Alignment.BottomStart)
-                                            .clip(RoundedCornerShape(6.dp))
-                                            .background(Color.Black.copy(alpha = 0.60f))
-                                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                                    ) {
-                                        Text(
-                                            text = "${getFlagEmoji(item.iso6391)} ${item.iso6391.uppercase()}",
-                                            fontSize = 9.5.sp,
-                                            fontWeight = FontWeight.SemiBold,
-                                            color = Color.White.copy(alpha = 0.90f)
-                                        )
-                                    }
-                                }
-
                                 // Top-right selection badge
                                 if (isSelected) {
                                     Box(
