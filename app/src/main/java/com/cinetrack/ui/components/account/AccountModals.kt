@@ -454,21 +454,12 @@ fun AccountModals(
                                 singleLine = true,
                                 enabled = !limitReached,
                                 isError = nameError != null || nameAvailable == false,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .hazeGlass(
-                                        shape = RoundedCornerShape(16.dp),
-                                        containerColor = Color.White.copy(alpha = 0.05f),
-                                        borderWidth = 0.dp,
-                                        useRefraction = true
-                                    ),
+                                modifier = Modifier.fillMaxWidth(),
                                 shape = RoundedCornerShape(16.dp),
                                 colors = OutlinedTextFieldDefaults.colors(
                                     unfocusedBorderColor = Color.White.copy(alpha = 0.3f),
                                     focusedBorderColor = MaterialTheme.colorScheme.primary,
-                                    errorBorderColor = MaterialTheme.colorScheme.error,
-                                    focusedContainerColor = Color.Transparent,
-                                    unfocusedContainerColor = Color.Transparent
+                                    errorBorderColor = MaterialTheme.colorScheme.error
                                 ),
                                 textStyle = MaterialTheme.typography.bodyLarge,
                                 trailingIcon = {
