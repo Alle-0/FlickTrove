@@ -26,6 +26,7 @@ import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.ui.theme.PremiumBackground
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
+import com.cinetrack.ui.components.glass.hazeGlass
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
@@ -109,8 +110,15 @@ fun WatchHistoryBottomSheet(
                             modifier = Modifier
                                 .size(32.dp)
                                 .bounceClick(scaleDown = 0.9f, onClick = onAddRewatch)
-                                .clip(CircleShape)
-                                .background(accentColor.copy(alpha = 0.2f)),
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = CircleShape,
+                                    blurRadius = 8.dp,
+                                    useRefraction = true,
+                                    borderWidth = 1.dp,
+                                    borderColor = accentColor.copy(alpha = 0.40f),
+                                    containerColor = accentColor.copy(alpha = 0.20f)
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -145,6 +153,7 @@ fun WatchHistoryBottomSheet(
                 HistoryItemRow(
                     item = firstViewing,
                     accentColor = accentColor,
+                    hazeState = hazeState,
                     onEdit = handleEditClick,
                     onDelete = null,
                     label = stringResource(id = R.string.watch_history_first_watch)
@@ -200,6 +209,7 @@ fun WatchHistoryBottomSheet(
                         HistoryItemRow(
                             item = item,
                             accentColor = accentColor,
+                            hazeState = hazeState,
                             onEdit = handleEditClick,
                             onDelete = { onDelete(it) },
                             label = "${stringResource(id = R.string.watch_history_rewatch)} $rewatchNumber",
@@ -272,13 +282,21 @@ private fun HistoryItemRow(
     onEdit: (WatchHistoryEntity) -> Unit,
     onDelete: ((WatchHistoryEntity) -> Unit)?,
     label: String?,
+    hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(16.dp))
-            .background(Color.White.copy(alpha = 0.05f))
+            .hazeGlass(
+                state = hazeState,
+                shape = RoundedCornerShape(16.dp),
+                blurRadius = 8.dp,
+                useRefraction = true,
+                borderWidth = 1.dp,
+                borderColor = Color.White.copy(alpha = 0.10f),
+                containerColor = Color.White.copy(alpha = 0.05f)
+            )
             .padding(horizontal = 16.dp, vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically,
         horizontalArrangement = Arrangement.SpaceBetween
@@ -305,8 +323,15 @@ private fun HistoryItemRow(
                 modifier = Modifier
                     .size(36.dp)
                     .bounceClick(scaleDown = 0.9f) { onEdit(item) }
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.1f)),
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = CircleShape,
+                        blurRadius = 8.dp,
+                        useRefraction = true,
+                        borderWidth = 1.dp,
+                        borderColor = Color.White.copy(alpha = 0.15f),
+                        containerColor = Color.White.copy(alpha = 0.10f)
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -321,8 +346,15 @@ private fun HistoryItemRow(
                     modifier = Modifier
                         .size(36.dp)
                         .bounceClick(scaleDown = 0.9f) { onDelete(item) }
-                        .clip(CircleShape)
-                        .background(Color(0xFFFF3D3D).copy(alpha = 0.1f)),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color(0xFFFF3D3D).copy(alpha = 0.35f),
+                            containerColor = Color(0xFFFF3D3D).copy(alpha = 0.10f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

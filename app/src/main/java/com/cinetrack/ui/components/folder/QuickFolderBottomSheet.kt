@@ -1,6 +1,7 @@
 package com.cinetrack.ui.components.folder
 
 import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 import com.cinetrack.ui.utils.ColorUtils
@@ -161,6 +162,7 @@ fun QuickFolderModal(
                                 folder = folder,
                                 isSelected = inFolder,
                                 folderColor = folderColor,
+                                hazeState = hazeState,
                                 onClick = {
                                     val currentVal = itemInFolder(folder.id)
                                     optimisticToggles[folder.id] = !currentVal
@@ -240,8 +242,15 @@ fun QuickFolderModal(
                     .fillMaxWidth()
                     .height(52.dp)
                     .bounceClick(scaleDown = 0.92f, onClick = onClose)
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(accentColor),
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = RoundedCornerShape(16.dp),
+                        blurRadius = 8.dp,
+                        useRefraction = true,
+                        borderWidth = 1.dp,
+                        borderColor = Color.White.copy(alpha = 0.25f),
+                        containerColor = accentColor
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
@@ -262,6 +271,7 @@ private fun QuickFolderItem(
     folder: FolderEntity,
     isSelected: Boolean,
     folderColor: Color,
+    hazeState: dev.chrisbanes.haze.HazeState? = null,
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
@@ -274,7 +284,7 @@ private fun QuickFolderItem(
     }
 
     val animatedBorderColor by animateColorAsState(
-        targetValue = if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
+        targetValue = if (isSelected) folderColor else Color.White.copy(alpha = 0.12f),
         animationSpec = tween(220),
         label = "folderBorderColor"
     )
@@ -313,12 +323,14 @@ private fun QuickFolderItem(
         modifier = modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
-            .clip(RoundedCornerShape(18.dp))
-            .background(animatedBgColor)
-            .border(
-                1.5.dp,
-                animatedBorderColor,
-                RoundedCornerShape(18.dp)
+            .hazeGlass(
+                state = hazeState,
+                shape = RoundedCornerShape(18.dp),
+                blurRadius = 8.dp,
+                useRefraction = true,
+                borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                borderColor = animatedBorderColor,
+                containerColor = animatedBgColor
             )
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
@@ -327,9 +339,15 @@ private fun QuickFolderItem(
         Box(
             modifier = Modifier
                 .size(40.dp)
-                .clip(RoundedCornerShape(12.dp))
-                .background(folderColor.copy(alpha = 0.16f))
-                .border(0.5.dp, folderColor.copy(alpha = 0.25f), RoundedCornerShape(12.dp)),
+                .hazeGlass(
+                    state = hazeState,
+                    shape = RoundedCornerShape(12.dp),
+                    blurRadius = 8.dp,
+                    useRefraction = true,
+                    borderWidth = 0.5.dp,
+                    borderColor = folderColor.copy(alpha = 0.35f),
+                    containerColor = folderColor.copy(alpha = 0.16f)
+                ),
             contentAlignment = Alignment.Center
         ) {
             Icon(

@@ -186,6 +186,7 @@ fun SearchHeader(
                     focusRequester = focusRequester,
                     keyboardController = keyboardController,
                     onFilterBoundsMeasured = onFilterBoundsMeasured,
+                    hazeState = hazeState,
                     modifier = Modifier.weight(1f)
                 )
             }

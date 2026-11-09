@@ -772,6 +772,7 @@ fun SettingsDialogConfirmButton(
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
+    hazeState: dev.chrisbanes.haze.HazeState? = null,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
 ) {
     val haptic = LocalHapticFeedback.current
@@ -782,8 +783,15 @@ fun SettingsDialogConfirmButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .clip(shape)
-            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f)),
+            .hazeGlass(
+                state = hazeState,
+                shape = shape,
+                containerColor = if (enabled) containerColor else containerColor.copy(alpha = 0.3f),
+                borderColor = Color.White.copy(alpha = 0.25f),
+                borderWidth = 1.dp,
+                blurRadius = 8.dp,
+                useRefraction = true
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(

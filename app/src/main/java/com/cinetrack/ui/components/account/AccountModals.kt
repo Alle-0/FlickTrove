@@ -494,11 +494,18 @@ fun AccountModals(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White.copy(alpha = 0.1f))
                                     .bounceClick { 
                                         editProfileSubScreen = EditProfileSubScreen.MENU
-                                    },
+                                    }
+                                    .hazeGlass(
+                                        state = globalHazeState,
+                                        shape = RoundedCornerShape(16.dp),
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = Color.White.copy(alpha = 0.15f),
+                                        containerColor = Color.White.copy(alpha = 0.08f)
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -512,8 +519,15 @@ fun AccountModals(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f))
+                                    .hazeGlass(
+                                        state = globalHazeState,
+                                        shape = RoundedCornerShape(16.dp),
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = if (isSaveEnabled) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),
+                                        containerColor = if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.08f)
+                                    )
                                     .bounceClick(enabled = isSaveEnabled) {
                                         if (nameChangesCount >= 2) {
                                             scope.launch {

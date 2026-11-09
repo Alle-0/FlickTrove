@@ -271,9 +271,12 @@ fun DetailHeader(
                                         state = hazeState,
                                         shape = CircleShape,
                                         containerColor = accentColor.copy(alpha = 0.15f),
-                                        blurRadius = 16.dp
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = accentColor.copy(alpha = 0.40f)
                                     )
-                                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                                    .padding(horizontal = 8.dp, vertical = 3.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -315,7 +318,16 @@ fun DetailHeader(
                             modifier = Modifier
                                 .onGloballyPositioned { buttonCoords = it }
                                 .bounceClick { onTrailerClick(buttonCoords?.boundsInRoot()) }
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = CircleShape,
+                                    blurRadius = 8.dp,
+                                    useRefraction = true,
+                                    borderWidth = 1.dp,
+                                    borderColor = Color.White.copy(alpha = 0.15f),
+                                    containerColor = Color.White.copy(alpha = 0.08f)
+                                )
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -396,6 +408,7 @@ fun DetailHeader(
                             voteAverage = movie.voteAverage ?: 0.0,
                             expansion = ratingsExpansion,
                             accentColor = accentColor,
+                            hazeState = hazeState,
                             onClick = {
                                 expandedSection = if (expandedSection == DetailHeaderExpandedSection.RATINGS) {
                                     DetailHeaderExpandedSection.NONE
@@ -410,6 +423,7 @@ fun DetailHeader(
                             certificationCountry = ratings.certificationCountry,
                             isSelected = expandedSection == DetailHeaderExpandedSection.PARENTS_GUIDE,
                             accentColor = accentColor,
+                            hazeState = hazeState,
                             onClick = {
                                 expandedSection = if (expandedSection == DetailHeaderExpandedSection.PARENTS_GUIDE) {
                                     DetailHeaderExpandedSection.NONE
@@ -422,6 +436,7 @@ fun DetailHeader(
                         HeaderTechnicalPill(
                             isSelected = expandedSection == DetailHeaderExpandedSection.TECHNICAL,
                             accentColor = accentColor,
+                            hazeState = hazeState,
                             onClick = {
                                 expandedSection = if (expandedSection == DetailHeaderExpandedSection.TECHNICAL) {
                                     DetailHeaderExpandedSection.NONE
@@ -590,7 +605,8 @@ fun DetailHeader(
                                     HeaderTechnicalSection(
                                         details = movieDetails,
                                         movie = movie,
-                                        accentColor = accentColor
+                                        accentColor = accentColor,
+                                        hazeState = hazeState
                                     )
                                 }
                             }

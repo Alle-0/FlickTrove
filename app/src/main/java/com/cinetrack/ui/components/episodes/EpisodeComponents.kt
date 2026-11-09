@@ -52,6 +52,7 @@ import kotlin.math.pow
 
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
+import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -69,12 +70,13 @@ internal fun EpisodeCard(
             .bounceClick(
                 onLongClick = { onInfoClick() }
             ) { onToggle() }
-            .clip(RoundedCornerShape(20.dp))
-            .background(if (isWatched) Color(0xFF00E676).copy(alpha = 0.05f) else Color.White.copy(alpha = 0.03f))
-            .border(
-                1.dp,
-                if (isWatched) Color(0xFF00E676).copy(alpha = 0.2f) else Color.White.copy(alpha = 0.05f),
-                RoundedCornerShape(20.dp)
+            .hazeGlass(
+                shape = RoundedCornerShape(20.dp),
+                blurRadius = 8.dp,
+                useRefraction = true,
+                borderWidth = 1.dp,
+                borderColor = if (isWatched) Color(0xFF00E676).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                containerColor = if (isWatched) Color(0xFF00E676).copy(alpha = 0.06f) else Color.White.copy(alpha = 0.03f)
             )
     ) {
         Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
@@ -146,9 +148,14 @@ internal fun EpisodeCard(
                     modifier = Modifier
                         .size(28.dp)
                         .bounceClick(scaleDown = 0.88f) { onCommentsClick() }
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                        .hazeGlass(
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.15f),
+                            containerColor = Color.White.copy(alpha = 0.06f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

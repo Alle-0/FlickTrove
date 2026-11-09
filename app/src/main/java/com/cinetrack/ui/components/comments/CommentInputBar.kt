@@ -382,9 +382,15 @@ fun CommentInputBar(
                         modifier = Modifier
                             .weight(1f)
                             .heightIn(min = 44.dp, max = 130.dp)
-                            .clip(textBoxShape)
-                            .background(Color.White.copy(alpha = 0.06f))
-                            .border(1.dp, Color.White.copy(alpha = 0.10f), textBoxShape)
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = textBoxShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true,
+                                borderWidth = 1.dp,
+                                borderColor = Color.White.copy(alpha = 0.12f),
+                                containerColor = Color.White.copy(alpha = 0.06f)
+                            )
                             .premiumScrollbar(inputScrollState, width = 3f, paddingEnd = 4f, paddingVertical = 6f)
                             .clickable(
                                 interactionSource = remember { MutableInteractionSource() },
@@ -536,11 +542,14 @@ fun CommentInputBar(
                                     }
                                 }
                             }
-                            .background(sendBgColor, CircleShape)
-                            .border(
-                                width = 1.dp,
-                                color = if (canSend) Color.Transparent else Color.White.copy(alpha = 0.10f),
-                                shape = CircleShape
+                            .hazeGlass(
+                                state = hazeState,
+                                shape = CircleShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true,
+                                borderWidth = 1.dp,
+                                borderColor = if (canSend) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),
+                                containerColor = sendBgColor
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -637,8 +646,15 @@ fun CommentInputBar(
                                     .bounceClick(enabled = attachedMedia.isEmpty() && !isUploadingImage) {
                                         if (!isUploadingImage) onPickImage()
                                     }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f)),
+                                    .hazeGlass(
+                                        state = hazeState,
+                                        shape = CircleShape,
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = Color.White.copy(alpha = 0.12f),
+                                        containerColor = Color.White.copy(alpha = 0.05f)
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (isUploadingImage) {
@@ -663,8 +679,15 @@ fun CommentInputBar(
                                     .bounceClick(enabled = attachedMedia.isEmpty()) {
                                         onPickGif()
                                     }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f)),
+                                    .hazeGlass(
+                                        state = hazeState,
+                                        shape = CircleShape,
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = Color.White.copy(alpha = 0.12f),
+                                        containerColor = Color.White.copy(alpha = 0.05f)
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 val gifAlpha = if (attachedMedia.isEmpty()) 0.75f else 0.25f
@@ -683,9 +706,15 @@ fun CommentInputBar(
                                 modifier = Modifier
                                     .size(32.dp)
                                     .bounceClick { isMarkdownMenuExpanded = !isMarkdownMenuExpanded }
-                                    .clip(CircleShape)
-                                    .background(if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.45f) else Color.Transparent, CircleShape),
+                                    .hazeGlass(
+                                        state = hazeState,
+                                        shape = CircleShape,
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.12f),
+                                        containerColor = if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f)
+                                    ),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -706,16 +735,14 @@ fun CommentInputBar(
                                         VibrationHelper.vibrateTick(context)
                                         onSpoilerChanged(!isSpoiler)
                                     }
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSpoiler) accentColor.copy(alpha = 0.16f)
-                                        else Color.White.copy(alpha = 0.06f)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isSpoiler) accentColor.copy(alpha = 0.40f)
-                                        else Color.White.copy(alpha = 0.15f),
-                                        CircleShape
+                                    .hazeGlass(
+                                        state = hazeState,
+                                        shape = CircleShape,
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = if (isSpoiler) accentColor.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.15f),
+                                        containerColor = if (isSpoiler) accentColor.copy(alpha = 0.16f) else Color.White.copy(alpha = 0.06f)
                                     )
                                     .padding(horizontal = 11.dp),
                                 contentAlignment = Alignment.Center
@@ -768,16 +795,16 @@ fun CommentInputBar(
                                                 Modifier
                                             }
                                         )
-                                        .clip(CircleShape)
-                                        .background(
-                                            if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.14f else 0.07f)
-                                            else Color.White.copy(alpha = if (isDestinationActive) 0.06f else 0.03f)
-                                        )
-                                        .border(
-                                            1.dp,
-                                            if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.35f else 0.15f)
-                                            else Color.White.copy(alpha = if (isDestinationActive) 0.15f else 0.07f),
-                                            CircleShape
+                                        .hazeGlass(
+                                            state = hazeState,
+                                            shape = CircleShape,
+                                            blurRadius = 8.dp,
+                                            useRefraction = true,
+                                            borderWidth = 1.dp,
+                                            borderColor = if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.35f else 0.15f)
+                                                          else Color.White.copy(alpha = if (isDestinationActive) 0.15f else 0.07f),
+                                            containerColor = if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.14f else 0.07f)
+                                                             else Color.White.copy(alpha = if (isDestinationActive) 0.06f else 0.03f)
                                         )
                                         .padding(horizontal = 11.dp),
                                     contentAlignment = Alignment.Center

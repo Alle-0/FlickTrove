@@ -128,7 +128,8 @@ fun AvatarSelectionModal(
                 mode = mode,
                 onBack = null,
                 onDismissRequest = onDismissRequest,
-                onCharacterSelected = onCharacterSelected
+                onCharacterSelected = onCharacterSelected,
+                hazeState = hazeState
             )
         }
     }
@@ -141,8 +142,10 @@ fun AvatarSelectionContent(
     mode: AvatarSelectionMode = AvatarSelectionMode.AVATAR,
     onBack: (() -> Unit)? = null,
     onDismissRequest: () -> Unit,
-    onCharacterSelected: (String?, String?) -> Unit
+    onCharacterSelected: (String?, String?) -> Unit,
+    hazeState: HazeState? = null
 ) {
+    val activeHazeState = hazeState ?: com.cinetrack.ui.LocalHazeState.current
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<TMDBSearchResult>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
@@ -359,8 +362,15 @@ fun AvatarSelectionContent(
                                 modifier = Modifier
                                     .weight(1f)
                                     .bounceClick(scaleDown = 0.94f) { onCharacterSelected(null, null) }
-                                    .clip(CircleShape)
-                                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
+                                    .hazeGlass(
+                                        state = activeHazeState,
+                                        shape = CircleShape,
+                                        blurRadius = 8.dp,
+                                        useRefraction = true,
+                                        borderWidth = 1.dp,
+                                        borderColor = MaterialTheme.colorScheme.error.copy(alpha = 0.40f),
+                                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.20f)
+                                    )
                                     .padding(vertical = 11.dp, horizontal = 12.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -392,8 +402,15 @@ fun AvatarSelectionContent(
                                     modifier = Modifier
                                         .weight(1f)
                                         .bounceClick(scaleDown = 0.94f) { galleryLauncher.launch("image/*") }
-                                        .clip(CircleShape)
-                                        .background(Color.White.copy(alpha = 0.1f))
+                                        .hazeGlass(
+                                            state = activeHazeState,
+                                            shape = CircleShape,
+                                            blurRadius = 8.dp,
+                                            useRefraction = true,
+                                            borderWidth = 1.dp,
+                                            borderColor = Color.White.copy(alpha = 0.15f),
+                                            containerColor = Color.White.copy(alpha = 0.10f)
+                                        )
                                         .padding(vertical = 11.dp, horizontal = 12.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -431,7 +448,16 @@ fun AvatarSelectionContent(
                         onValueChange = { searchQuery = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp),
+                            .padding(horizontal = 24.dp)
+                            .hazeGlass(
+                                state = activeHazeState,
+                                shape = CircleShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true,
+                                borderWidth = 1.dp,
+                                borderColor = Color.White.copy(alpha = 0.15f),
+                                containerColor = Color.White.copy(alpha = 0.08f)
+                            ),
                         singleLine = true,
                         placeholder = {
                             Text(
@@ -452,8 +478,8 @@ fun AvatarSelectionContent(
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color.White.copy(alpha = 0.1f),
-                            unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
+                            focusedContainerColor = Color.Transparent,
+                            unfocusedContainerColor = Color.Transparent,
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = Color.Transparent
                         ),

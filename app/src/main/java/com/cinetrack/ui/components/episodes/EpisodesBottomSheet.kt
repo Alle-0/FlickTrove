@@ -52,6 +52,9 @@ import com.cinetrack.ui.viewmodel.DetailEvent
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
@@ -217,9 +220,11 @@ fun EpisodesBottomSheet(
         contentWindowInsets = { WindowInsets(0) }
     ) {
         val sheetHazeState = remember { HazeState() }
+        val sheetBackdrop = rememberLayerBackdrop { drawContent() }
         CompositionLocalProvider(
             LocalContext provides context,
-            LocalConfiguration provides config
+            LocalConfiguration provides config,
+            LocalBackdrop provides sheetBackdrop
         ) {
             Box(
                 modifier = Modifier
@@ -235,6 +240,7 @@ fun EpisodesBottomSheet(
             Column(
                 modifier = Modifier
                     .fillMaxSize()
+                    .layerBackdrop(sheetBackdrop)
                     .haze(state = sheetHazeState, style = HazeStyles.PremiumDark)
                     .navigationBarsPadding()
             ) {
@@ -257,6 +263,7 @@ fun EpisodesBottomSheet(
                 Header(
                     movie = movie,
                     isAccordion = isAccordion,
+                    sheetHazeState = sheetHazeState,
                     onToggleLayout = {
                         val next = if (isAccordion) "STANDARD" else "ACCORDION"
                         settingsViewModel.updateEpisodesLayout(next)
@@ -443,6 +450,7 @@ fun EpisodesBottomSheet(
 private fun Header(
     movie: Movie,
     isAccordion: Boolean,
+    sheetHazeState: HazeState? = null,
     onToggleLayout: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -471,21 +479,27 @@ private fun Header(
         }
 
         // Layout Toggle Button (Chips vs Accordion)
-        Surface(
+        Box(
             modifier = Modifier
                 .size(44.dp)
-                .bounceClick { onToggleLayout() },
-            color = Color.White.copy(alpha = 0.06f),
-            shape = CircleShape
+                .bounceClick { onToggleLayout() }
+                .hazeGlass(
+                    state = sheetHazeState,
+                    shape = CircleShape,
+                    blurRadius = 8.dp,
+                    useRefraction = true,
+                    borderWidth = 1.dp,
+                    borderColor = Color.White.copy(alpha = 0.15f),
+                    containerColor = Color.White.copy(alpha = 0.08f)
+                ),
+            contentAlignment = Alignment.Center
         ) {
-            Box(contentAlignment = Alignment.Center) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = if (isAccordion) R.drawable.ic_grid else R.drawable.ic_lista),
-                    contentDescription = stringResource(R.string.episodes_layout_toggle),
-                    tint = Color.White,
-                    modifier = Modifier.size(20.dp)
-                )
-            }
+            Icon(
+                imageVector = ImageVector.vectorResource(id = if (isAccordion) R.drawable.ic_grid else R.drawable.ic_lista),
+                contentDescription = stringResource(R.string.episodes_layout_toggle),
+                tint = Color.White,
+                modifier = Modifier.size(20.dp)
+            )
         }
 
         Spacer(modifier = Modifier.width(10.dp))
@@ -603,22 +617,15 @@ private fun BulkAction(
                 onClick = onToggle
             )
             .then(
-                if (isAllWatched) {
-                    Modifier
-                        .clip(CircleShape)
-                        .background(Color(0xFF00E676))
-                        .border(androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E676)), CircleShape)
-                } else {
-                    Modifier.hazeGlass(
-                        state = sheetHazeState,
-                        shape = CircleShape,
-                        containerColor = Color.White.copy(alpha = 0.08f),
-                        borderColor = Color.White.copy(alpha = 0.15f),
-                        borderWidth = 1.dp,
-                        blurRadius = 8.dp,
-                        useRefraction = true
-                    )
-                }
+                Modifier.hazeGlass(
+                    state = sheetHazeState,
+                    shape = CircleShape,
+                    containerColor = if (isAllWatched) Color(0xFF00E676).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.08f),
+                    borderColor = if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
+                    borderWidth = 1.dp,
+                    blurRadius = 8.dp,
+                    useRefraction = true
+                )
             ),
         color = Color.Transparent
     ) {

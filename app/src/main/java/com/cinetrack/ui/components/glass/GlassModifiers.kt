@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.LocalBackdrop
+import com.cinetrack.ui.LocalHazeState
 import com.kyant.backdrop.drawPlainBackdrop
 import com.kyant.backdrop.effects.blur
 import com.kyant.backdrop.effects.lens
@@ -67,7 +68,7 @@ fun safeShape(shape: Shape): Shape = object : Shape {
  * @param useOffscreenStrategy Whether to use CompositingStrategy.Offscreen to fix text rendering.
  */
 fun Modifier.hazeGlass(
-    state: HazeState?,
+    state: HazeState? = null,
     shape: Shape,
     style: HazeBlurStyle? = null,
     blurRadius: Dp = HazeStyles.GlassBlurRadius,
@@ -80,6 +81,7 @@ fun Modifier.hazeGlass(
 ): Modifier = composed {
     val effectiveShape = remember(shape) { safeShape(shape) }
     val backdrop = LocalBackdrop.current
+    val effectiveHazeState = state ?: LocalHazeState.current
     val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
     val liquidGlassEnabled = com.cinetrack.LocalLiquidGlassEnabled.current
     val isCornerShape = shape is CornerBasedShape
@@ -120,7 +122,7 @@ fun Modifier.hazeGlass(
                         drawRect(color = darkTint.copy(alpha = tintAlpha))
                     }
                 )
-            } else if (state != null && advancedEffectsEnabled) {
+            } else if (effectiveHazeState != null && advancedEffectsEnabled) {
                 val finalStyle = remember(blurRadius, containerColor, style, alpha) {
                     val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
                     val baseStyle = style ?: HazeStyles.PremiumDark
@@ -138,7 +140,7 @@ fun Modifier.hazeGlass(
                     Modifier
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
                         .hazeBlur(
-                            input = HazeInput.Sources(state),
+                            input = HazeInput.Sources(effectiveHazeState),
                             style = finalStyle,
                             performanceMode = HazePerformanceMode.Default,
                             expandLayerBounds = false
@@ -148,7 +150,7 @@ fun Modifier.hazeGlass(
                         Modifier
                             .graphicsLayer(alpha = alpha)
                             .hazeBlur(
-                                input = HazeInput.Sources(state),
+                                input = HazeInput.Sources(effectiveHazeState),
                                 style = finalStyle,
                                 performanceMode = HazePerformanceMode.Default,
                                 expandLayerBounds = false
@@ -156,7 +158,7 @@ fun Modifier.hazeGlass(
                     } else {
                         Modifier
                             .hazeBlur(
-                                input = HazeInput.Sources(state),
+                                input = HazeInput.Sources(effectiveHazeState),
                                 style = finalStyle,
                                 performanceMode = HazePerformanceMode.Default,
                                 expandLayerBounds = false

@@ -37,6 +37,7 @@ import androidx.compose.animation.core.spring
 import androidx.compose.ui.graphics.graphicsLayer
 import kotlinx.coroutines.launch
 import com.cinetrack.ui.theme.GlassSurface
+import com.cinetrack.ui.components.glass.hazeGlass
 import kotlin.math.roundToInt
 
 @Composable
@@ -186,9 +187,15 @@ fun QuickRatingModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp)),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(16.dp),
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.15f),
+                            containerColor = Color.White.copy(alpha = 0.08f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -210,8 +217,15 @@ fun QuickRatingModal(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(currentRating)
                         }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(accentColor),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(16.dp),
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.25f),
+                            containerColor = accentColor
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

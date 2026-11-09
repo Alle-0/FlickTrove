@@ -36,6 +36,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.util.AudioRecorderHelper
 import androidx.compose.foundation.border
+import com.cinetrack.ui.components.glass.hazeGlass
 import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -247,8 +248,15 @@ fun QuickNoteModal(
                             }
                             speechLauncher.launch(intent)
                         }
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.1f)),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.15f),
+                            containerColor = Color.White.copy(alpha = 0.10f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -394,8 +402,15 @@ fun QuickNoteModal(
                                         permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
                                     }
                                 }
-                                .clip(RoundedCornerShape(50))
-                                .background(if (isRecording) Color.Red else Color.White.copy(alpha = 0.1f)),
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = CircleShape,
+                                    blurRadius = 8.dp,
+                                    useRefraction = true,
+                                    borderWidth = 1.dp,
+                                    borderColor = if (isRecording) Color.Red.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.15f),
+                                    containerColor = if (isRecording) Color.Red else Color.White.copy(alpha = 0.10f)
+                                ),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -420,9 +435,15 @@ fun QuickNoteModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(16.dp)),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(16.dp),
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.15f),
+                            containerColor = Color.White.copy(alpha = 0.08f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -444,8 +465,15 @@ fun QuickNoteModal(
                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                             onSave(note)
                         }
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(accentColor),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(16.dp),
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.25f),
+                            containerColor = accentColor
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
