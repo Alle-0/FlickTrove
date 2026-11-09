@@ -69,7 +69,8 @@ fun GeneralStatsCard(
                     containerColor = cardOverlay,
                     borderColor = Color.White.copy(alpha = 0.1f),
                     borderWidth = 1.dp,
-                    useOffscreenStrategy = false
+                    useOffscreenStrategy = false,
+                    useRefraction = true
                 )
         )
         Column(
@@ -265,7 +266,8 @@ fun MyFoldersCard(
                     containerColor = cardOverlay,
                     borderColor = Color.White.copy(alpha = 0.1f),
                     borderWidth = 1.dp,
-                    useOffscreenStrategy = false
+                    useOffscreenStrategy = false,
+                    useRefraction = true
                 )
         )
         Column(
@@ -492,7 +494,8 @@ fun YourFlowCard(
                     containerColor = cardOverlay,
                     borderColor = Color.White.copy(alpha = 0.1f),
                     borderWidth = 1.dp,
-                    useOffscreenStrategy = false
+                    useOffscreenStrategy = false,
+                    useRefraction = true
                 )
         )
         Column(
@@ -602,7 +605,8 @@ fun TrophyShowcaseCard(
                     containerColor = cardOverlay,
                     borderColor = Color.White.copy(alpha = if (isEnabled) 0.12f else 0.05f),
                     borderWidth = 1.dp,
-                    useOffscreenStrategy = false
+                    useOffscreenStrategy = false,
+                    useRefraction = true
                 )
         )
         Column(
@@ -749,7 +753,8 @@ fun HistoryDiaryCard(
                     containerColor = cardOverlay,
                     borderColor = Color.White.copy(alpha = 0.12f),
                     borderWidth = 1.dp,
-                    useOffscreenStrategy = false
+                    useOffscreenStrategy = false,
+                    useRefraction = true
                 )
         )
         Column(

@@ -186,7 +186,8 @@ fun VibeChip(
                     shape = vibeShape,
                     containerColor = if (isSelected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.06f),
                     borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                    borderColor = if (isSelected) accentColor else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                    borderColor = if (isSelected) accentColor else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                    useRefraction = true
                 )
         )
 

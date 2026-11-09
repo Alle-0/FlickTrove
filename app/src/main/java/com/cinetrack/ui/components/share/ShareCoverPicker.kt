@@ -333,7 +333,8 @@ internal fun CoverSelectionView(
                             .hazeGlass(
                                 shape = CircleShape,
                                 borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                useRefraction = true
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -435,7 +436,8 @@ internal fun CoverSelectionView(
                         .hazeGlass(
                             shape = langFilterShape,
                             borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            useRefraction = true
                         )
                         .padding(horizontal = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
@@ -705,7 +707,8 @@ internal fun CoverSelectionView(
                             blurRadius = 24.dp,
                             containerColor = Color(0xFF141418).copy(alpha = 0.60f),
                             borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.18f)
+                            borderColor = Color.White.copy(alpha = 0.18f),
+                            useRefraction = true
                         )
                 ) {
                     Column(

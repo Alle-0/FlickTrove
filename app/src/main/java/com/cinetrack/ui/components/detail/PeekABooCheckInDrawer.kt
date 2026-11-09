@@ -37,6 +37,9 @@ import kotlinx.coroutines.launch
 import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
@@ -92,6 +95,7 @@ fun CheckInModal(
     }
 
     val modalHazeState = remember { HazeState() }
+    val modalBackdrop = rememberLayerBackdrop { drawContent() }
     val coroutineScope = rememberCoroutineScope()
     var isSaving by remember { mutableStateOf(false) }
     val burstProgress = remember { Animatable(0f) }
@@ -186,6 +190,7 @@ fun CheckInModal(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
+                        .layerBackdrop(modalBackdrop)
                         .haze(modalHazeState)
                 ) {
                     Box(
@@ -196,13 +201,15 @@ fun CheckInModal(
                                 shape = RoundedCornerShape(32.dp),
                                 containerColor = Color(0xFF080B14),
                                 useOffscreenStrategy = true,
-                                borderColor = accentColor.copy(alpha = 0.5f)
+                                borderColor = accentColor.copy(alpha = 0.5f),
+                                useRefraction = true
                             )
                     )
                 }
 
                 androidx.compose.runtime.CompositionLocalProvider(
-                    LocalHazeState provides modalHazeState
+                    LocalHazeState provides modalHazeState,
+                    LocalBackdrop provides modalBackdrop
                 ) {
                     Column(
                         modifier = Modifier
@@ -492,7 +499,8 @@ fun CheckInModal(
                                             state = modalHazeState,
                                             shape = RoundedCornerShape(16.dp),
                                             borderWidth = 1.dp,
-                                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                            useRefraction = true
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {

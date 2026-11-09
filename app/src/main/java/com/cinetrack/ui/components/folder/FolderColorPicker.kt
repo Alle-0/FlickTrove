@@ -1,5 +1,7 @@
 package com.cinetrack.ui.components.folder
 
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.ColorWheel
@@ -120,15 +122,13 @@ fun FolderColorPicker(
                         keyboardController?.hide()
                         setCustomMode(true) 
                     }
-                    .clip(CircleShape)
-                    .background(
-                        if (effectiveCustomMode) selectedColor.toComposeColor()
-                        else Color.White.copy(alpha = 0.1f)
-                    )
-                    .border(
-                        width = if (effectiveCustomMode) 4.dp else 1.dp,
-                        color = if (effectiveCustomMode) Color.White else Color.White.copy(alpha = 0.1f),
-                        shape = CircleShape
+                    .hazeGlass(
+                        shape = CircleShape,
+                        containerColor = if (effectiveCustomMode) selectedColor.toComposeColor()
+                        else Color.White.copy(alpha = 0.1f),
+                        borderWidth = if (effectiveCustomMode) 4.dp else 1.dp,
+                        borderColor = if (effectiveCustomMode) Color.White else Color.White.copy(alpha = 0.1f),
+                        useRefraction = true
                     ),
                 contentAlignment = Alignment.Center
             ) {
@@ -189,12 +189,12 @@ fun FolderColorPicker(
                 Row(
                     modifier = Modifier
                         .width(160.dp)
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.05f))
-                        .border(
-                            width = if (isHexFocused) 2.dp else 1.dp,
-                            color = if (isHexFocused) Color.White else Color.White.copy(alpha = 0.1f),
-                            shape = RoundedCornerShape(12.dp)
+                        .hazeGlass(
+                            shape = RoundedCornerShape(12.dp),
+                            containerColor = Color.White.copy(alpha = 0.05f),
+                            borderWidth = if (isHexFocused) 2.dp else 1.dp,
+                            borderColor = if (isHexFocused) Color.White else Color.White.copy(alpha = 0.15f),
+                            useRefraction = true
                         )
                         .padding(horizontal = 12.dp, vertical = 8.dp),
                     verticalAlignment = Alignment.CenterVertically,

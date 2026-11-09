@@ -101,7 +101,7 @@ fun MainFolderOptionsMenu(
                         .hazeGlass(
                             state = hazeState,
                             shape = RoundedCornerShape(24.dp),
-                            useRefraction = false
+                            useRefraction = true
                         )
                 ) {
                 var itemDelay = 15

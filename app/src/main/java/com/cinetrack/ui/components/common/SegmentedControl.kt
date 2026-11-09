@@ -179,7 +179,8 @@ fun <T> SegmentedControl(
             .hazeGlass(
                 shape = containerShape,
                 borderWidth = 1.dp,
-                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                useRefraction = true
             )
     ) {
         val usableWidthPx = constraints.maxWidth.toFloat()

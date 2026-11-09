@@ -675,7 +675,8 @@ fun AccountMenuButton(
                 shape = RoundedCornerShape(50),
                 containerColor = Color.White.copy(alpha = 0.05f),
                 borderColor = Color.White.copy(alpha = 0.1f),
-                borderWidth = 1.dp
+                borderWidth = 1.dp,
+                useRefraction = true
             )
             .bounceClick { onClick() }
     ) {
