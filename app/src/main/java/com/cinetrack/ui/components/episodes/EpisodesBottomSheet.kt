@@ -264,59 +264,59 @@ fun EpisodesBottomSheet(
                 LocalHazeState provides sheetHazeState,
                 LocalBackdrop provides sheetBackdrop
             ) {
-                Column(
+                Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .navigationBarsPadding()
                 ) {
-                // Custom Drag Handle
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 12.dp, bottom = 8.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Box(
+                    Column(
                         modifier = Modifier
-                            .size(width = 36.dp, height = 4.dp)
-                            .clip(RoundedCornerShape(2.dp))
-                            .background(Color.White.copy(alpha = 0.24f))
-                    )
-                }
+                            .fillMaxSize()
+                            .haze(state = episodesContentHazeState, style = HazeStyles.PremiumDark)
+                    ) {
+                        // Custom Drag Handle
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = 12.dp, bottom = 8.dp),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .size(width = 36.dp, height = 4.dp)
+                                    .clip(RoundedCornerShape(2.dp))
+                                    .background(Color.White.copy(alpha = 0.24f))
+                            )
+                        }
 
-                // Header with Layout Toggle and Close
-                Header(
-                    movie = movie,
-                    isAccordion = isAccordion,
-                    sheetHazeState = sheetHazeState,
-                    onToggleLayout = {
-                        val next = if (isAccordion) "STANDARD" else "ACCORDION"
-                        settingsViewModel.updateEpisodesLayout(next)
-                    },
-                    onDismiss = dismissAndSync
-                )
+                        // Header with Layout Toggle and Close
+                        Header(
+                            movie = movie,
+                            isAccordion = isAccordion,
+                            sheetHazeState = sheetHazeState,
+                            onToggleLayout = {
+                                val next = if (isAccordion) "STANDARD" else "ACCORDION"
+                                settingsViewModel.updateEpisodesLayout(next)
+                            },
+                            onDismiss = dismissAndSync
+                        )
 
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .haze(state = episodesContentHazeState, style = HazeStyles.PremiumDark)
-                ) {
-                    if (isAccordion) {
-                    // Accordion (TV Time style) layout
-                    EpisodesAccordionView(
-                        movie = movie,
-                        viewModel = viewModel,
-                        localWatchedEpisodes = localWatchedEpisodes,
-                        onUpdateWatchedEpisodes = { localWatchedEpisodes = it },
-                        onEpisodeInfoClick = { selectedEpisodeForInfo = it },
-                        onEpisodeCommentsClick = onEpisodeCommentsClick?.let {
-                            { sNum, ep -> handleEpisodeCommentsClick(sNum, ep) }
-                        },
-                        isDropped = isDropped,
-                        nestedScrollConnection = nestedScrollConnection,
-                        modifier = Modifier.fillMaxSize()
-                    )
-                } else {
+                        if (isAccordion) {
+                            // Accordion (TV Time style) layout
+                            EpisodesAccordionView(
+                                movie = movie,
+                                viewModel = viewModel,
+                                localWatchedEpisodes = localWatchedEpisodes,
+                                onUpdateWatchedEpisodes = { localWatchedEpisodes = it },
+                                onEpisodeInfoClick = { selectedEpisodeForInfo = it },
+                                onEpisodeCommentsClick = onEpisodeCommentsClick?.let {
+                                    { sNum, ep -> handleEpisodeCommentsClick(sNum, ep) }
+                                },
+                                isDropped = isDropped,
+                                nestedScrollConnection = nestedScrollConnection,
+                                modifier = Modifier.fillMaxSize()
+                            )
+                        } else {
                     // Standard horizontal chip layout
                     val fetchedSeasonData = seasonDetails[selectedSeasonNumber]
                     val fallbackSeasonData = movie.seasons?.find { it.seasonNumber == selectedSeasonNumber }
@@ -462,7 +462,6 @@ fun EpisodesBottomSheet(
                         }
                     }
                 }
-                }
             }
 
             selectedEpisodeForInfo?.let { ep ->
@@ -474,6 +473,7 @@ fun EpisodesBottomSheet(
                     )
                 }
             }
+        }
         }
         }
     }
