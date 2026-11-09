@@ -59,13 +59,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.Backdrop
-import com.kyant.backdrop.drawBackdrop
-import com.kyant.backdrop.drawPlainBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
 import androidx.compose.ui.graphics.Brush
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.graphics.res.animatedVectorResource
@@ -90,7 +83,6 @@ fun GlassyBottomBar(
     currentMediaMode: String? = null,
     onSwitchMediaMode: ((String) -> Unit)? = null
 ) {
-    val backdrop = LocalBackdrop.current
     val accentColor = MaterialTheme.colorScheme.primary
     val animatedDimAlpha by animateFloatAsState(
         targetValue = if (isDimmed) 0.7f else 0f,

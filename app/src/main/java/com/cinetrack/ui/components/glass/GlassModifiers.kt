@@ -12,20 +12,12 @@ import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.*
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.unit.Density
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
-import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.LocalHazeState
-import com.kyant.backdrop.drawPlainBackdrop
-import com.kyant.backdrop.effects.blur
-import com.kyant.backdrop.effects.lens
-import com.kyant.backdrop.effects.vibrancy
-import androidx.compose.foundation.shape.CornerBasedShape
-import kotlin.math.min
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazePerformanceMode
@@ -33,9 +25,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.blur.HazeBlurStyle
 import dev.chrisbanes.haze.blur.HazeColorEffect
 import dev.chrisbanes.haze.blur.hazeBlur
-import dev.chrisbanes.haze.glass.GlassStyle
-import dev.chrisbanes.haze.glass.OpticalSizeValue
-import dev.chrisbanes.haze.glass.hazeGlass as hazeGlassRefract
 
 /**
  * Wraps a Shape to prevent Compose's BorderModifierNode from crashing with
@@ -80,64 +69,27 @@ fun Modifier.hazeGlass(
     useRefraction: Boolean = false
 ): Modifier = composed {
     val effectiveShape = remember(shape) { safeShape(shape) }
-    val backdrop = LocalBackdrop.current
     val effectiveHazeState = state ?: LocalHazeState.current
     val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
-    val liquidGlassEnabled = com.cinetrack.LocalLiquidGlassEnabled.current
-    val isCornerShape = shape is CornerBasedShape
-    val canUseLiquidGlass = backdrop != null && advancedEffectsEnabled && liquidGlassEnabled && useRefraction && isCornerShape
+
+    val finalStyle = remember(blurRadius, containerColor, style, alpha) {
+        val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
+        val baseStyle = style ?: HazeStyles.PremiumDark
+        baseStyle.then {
+            blurRadius(safeBlurRadius)
+            if (containerColor != null && containerColor != Color.Unspecified) {
+                val targetAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else HazeStyles.GlassAlpha) * alpha
+                colorEffects(listOf(HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))))
+            } else if (style == null && alpha != 1f) {
+                colorEffects(listOf(HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = HazeStyles.GlassAlpha * alpha))))
+            }
+        }
+    }
 
     val modifierChain = this
         .clip(effectiveShape)
         .then(
-            if (canUseLiquidGlass) {
-                Modifier.drawPlainBackdrop(
-                    backdrop = backdrop,
-                    shape = { shape },
-                    effects = {
-                        vibrancy()
-                        val targetBlur = (blurRadius * alpha).coerceAtLeast(0.1.dp).toPx()
-                        blur(targetBlur)
-                        val minDim = min(size.width, size.height)
-                        val refHeight = min(24.dp.toPx(), minDim * 0.45f)
-                        val refAmount = (refHeight * 1.65f).coerceAtLeast(24.dp.toPx())
-                        try {
-                            lens(
-                                refractionHeight = refHeight,
-                                refractionAmount = refAmount,
-                                depthEffect = false,
-                                chromaticAberration = true
-                            )
-                        } catch (_: Throwable) {
-                            // Defensive guard: lens effect only supports CornerBasedShape
-                        }
-                    },
-                    onDrawSurface = {
-                        // Base scura cinematografica: garantisce contrasto, profondità e leggibilità
-                        drawRect(color = Color(0xFF0A0A0E).copy(alpha = 0.40f * alpha))
-                        if (containerColor != null && containerColor != Color.Transparent) {
-                            val tintAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else 0.15f) * alpha
-                            drawRect(color = containerColor.copy(alpha = tintAlpha))
-                        }
-                    }
-                )
-            } else if (effectiveHazeState != null && advancedEffectsEnabled) {
-                val finalStyle = remember(blurRadius, containerColor, style, alpha) {
-                    val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
-                    val baseStyle = style ?: HazeStyles.PremiumDark
-                    baseStyle.then {
-                        blurRadius(safeBlurRadius)
-                        if (containerColor != null && containerColor != Color.Unspecified) {
-                            val targetAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else HazeStyles.GlassAlpha) * alpha
-                            colorEffects(listOf(
-                                HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = 0.55f * alpha)),
-                                HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))
-                            ))
-                        } else if (style == null && alpha != 1f) {
-                            colorEffects(listOf(HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = HazeStyles.GlassAlpha * alpha))))
-                        }
-                    }
-                }
+            if (effectiveHazeState != null && advancedEffectsEnabled) {
                 if (useOffscreenStrategy) {
                     Modifier
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
@@ -243,8 +195,3 @@ fun Modifier.glassOverlay(
         withShimmer
     }
 }
-
-
-
-
-

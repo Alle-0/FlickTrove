@@ -203,13 +203,11 @@ fun MovieActionsPopup(
                     Column(
                         modifier = Modifier
                             .width(actualMenuWidth)
-                            .clip(RoundedCornerShape(24.dp))
                             .hazeGlass(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp),
-                                useRefraction = true,
                                 borderWidth = 1.dp,
-                                borderColor = Color.White.copy(alpha = 0.15f)
+                                borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop)
                             )
                             .bounceClick(scaleDown = 1f) { }
                             .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 10.dp)
