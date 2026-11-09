@@ -89,22 +89,20 @@ fun Modifier.hazeGlass(
             if (backdrop != null && advancedEffectsEnabled && liquidGlassEnabled && useRefraction) {
                 Modifier.drawPlainBackdrop(
                     backdrop = backdrop,
-                    shape = { effectiveShape },
+                    shape = { shape },
                     effects = {
                         vibrancy()
                         val targetBlur = (blurRadius * alpha).coerceAtLeast(0.1.dp).toPx()
                         blur(targetBlur)
-                        if (effectiveShape is CornerBasedShape) {
-                            val minDim = min(size.width, size.height)
-                            val refHeight = min(24.dp.toPx(), minDim * 0.4f)
-                            val refAmount = (refHeight * 1.65f).coerceAtLeast(16.dp.toPx())
-                            lens(
-                                refractionHeight = refHeight,
-                                refractionAmount = refAmount,
-                                depthEffect = false,
-                                chromaticAberration = true
-                            )
-                        }
+                        val minDim = min(size.width, size.height)
+                        val refHeight = min(24.dp.toPx(), minDim * 0.45f)
+                        val refAmount = (refHeight * 1.65f).coerceAtLeast(24.dp.toPx())
+                        lens(
+                            refractionHeight = refHeight,
+                            refractionAmount = refAmount,
+                            depthEffect = false,
+                            chromaticAberration = true
+                        )
                     },
                     onDrawSurface = {
                         val darkTint = containerColor ?: Color(0xFF0C0C10)
