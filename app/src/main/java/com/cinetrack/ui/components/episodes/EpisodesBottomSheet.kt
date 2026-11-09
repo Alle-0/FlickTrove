@@ -246,7 +246,7 @@ fun EpisodesBottomSheet(
                             state = hazeState,
                             shape = sheetShape,
                             blurRadius = 24.dp,
-                            useRefraction = false
+                            useRefraction = true
                         )
                         .border(
                             width = 1.dp,
