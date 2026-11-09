@@ -88,14 +88,7 @@ fun FolderEditDialog(
                 OutlinedTextField(
                     value = name,
                     onValueChange = { if (it.length <= 40) name = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hazeGlass(
-                            shape = RoundedCornerShape(16.dp),
-                            containerColor = Color.White.copy(alpha = 0.05f),
-                            borderWidth = 0.dp,
-                            useRefraction = true
-                        ),
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.folder_edit_name_hint), color = Color.White.copy(alpha = 0.5f)) },
                     shape = RoundedCornerShape(16.dp),
                     colors = OutlinedTextFieldDefaults.colors(
@@ -123,14 +116,7 @@ fun FolderEditDialog(
                 OutlinedTextField(
                     value = description,
                     onValueChange = { if (it.length <= 250) description = it },
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .hazeGlass(
-                            shape = RoundedCornerShape(16.dp),
-                            containerColor = Color.White.copy(alpha = 0.05f),
-                            borderWidth = 0.dp,
-                            useRefraction = true
-                        ),
+                    modifier = Modifier.fillMaxWidth(),
                     label = { Text(stringResource(R.string.folder_edit_description_hint), color = Color.White.copy(alpha = 0.5f)) },
                     shape = RoundedCornerShape(16.dp),
                     visualTransformation = remember { com.cinetrack.ui.utils.MarkdownVisualTransformation() },

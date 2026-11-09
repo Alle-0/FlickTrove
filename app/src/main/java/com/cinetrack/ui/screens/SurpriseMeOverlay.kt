@@ -464,7 +464,6 @@ private fun OptionGridCard(
             .hazeGlass(
                 state = hazeState,
                 shape = cardShape,
-                containerColor = Color.White.copy(alpha = 0.08f),
                 borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                 borderWidth = 1.dp,
                 useRefraction = true

@@ -113,13 +113,17 @@ fun Modifier.hazeGlass(
                         }
                     },
                     onDrawSurface = {
-                        val darkTint = containerColor ?: Color(0xFF0C0C10)
-                        val tintAlpha = if (containerColor != null && containerColor.alpha != 1f) {
-                            containerColor.alpha
-                        } else {
-                            0.28f
-                        } * alpha
-                        drawRect(color = darkTint.copy(alpha = tintAlpha))
+                        // 1. Always apply a deep smoked dark tint base so that the blurred glass darkens the background
+                        // ensuring high contrast and luxury dark-mode aesthetics (matching HazeStyles.GlassAlpha = 0.70f)
+                        val baseDarkAlpha = 0.65f * alpha
+                        drawRect(color = Color(0xFF060609).copy(alpha = baseDarkAlpha))
+
+                        // 2. If a specific containerColor is requested (such as an accent tint, tag color, or sheen),
+                        // blend it on top of the deep smoked dark base
+                        if (containerColor != null && containerColor != Color.Unspecified) {
+                            val tintAlpha = if (containerColor.alpha != 1f) containerColor.alpha else 0.20f
+                            drawRect(color = containerColor.copy(alpha = tintAlpha * alpha))
+                        }
                     }
                 )
             } else if (effectiveHazeState != null && advancedEffectsEnabled) {
@@ -130,7 +134,12 @@ fun Modifier.hazeGlass(
                         blurRadius(safeBlurRadius)
                         if (containerColor != null && containerColor != Color.Unspecified) {
                             val targetAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else HazeStyles.GlassAlpha) * alpha
-                            colorEffects(listOf(HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))))
+                            colorEffects(
+                                listOf(
+                                    HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = 0.65f * alpha)),
+                                    HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))
+                                )
+                            )
                         } else if (style == null && alpha != 1f) {
                             colorEffects(listOf(HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = HazeStyles.GlassAlpha * alpha))))
                         }
