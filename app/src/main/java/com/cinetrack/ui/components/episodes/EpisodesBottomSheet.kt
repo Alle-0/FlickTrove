@@ -53,6 +53,7 @@ import com.cinetrack.ui.viewmodel.MovieDetailViewModel
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.LocalBackdrop
+import com.cinetrack.ui.LocalHazeState
 import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.kyant.backdrop.backdrops.layerBackdrop
 import dev.chrisbanes.haze.HazeState
@@ -220,30 +221,53 @@ fun EpisodesBottomSheet(
         contentWindowInsets = { WindowInsets(0) }
     ) {
         val sheetHazeState = remember { HazeState() }
-        val sheetBackdrop = rememberLayerBackdrop { drawContent() }
-        CompositionLocalProvider(
-            LocalContext provides context,
-            LocalConfiguration provides config,
-            LocalBackdrop provides sheetBackdrop
+        val sheetBackdrop = rememberLayerBackdrop {
+            drawRect(Color(0xFF0C0C10))
+            drawContent()
+        }
+        val sheetShape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
+
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .fillMaxHeight(0.88f)
         ) {
+            // Sibling 1: The blurred glass background card (fills parent, serves as backdrop & haze source)
             Box(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .fillMaxHeight(0.88f)
-                    .hazeGlass(
-                        state = hazeState,
-                        shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                        blurRadius = 24.dp,
-                        useRefraction = true
-                    )
-            ) {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
+                    .matchParentSize()
                     .layerBackdrop(sheetBackdrop)
                     .haze(state = sheetHazeState, style = HazeStyles.PremiumDark)
-                    .navigationBarsPadding()
             ) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = sheetShape,
+                            blurRadius = 24.dp,
+                            useRefraction = false
+                        )
+                        .border(
+                            width = 1.dp,
+                            color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
+                            shape = sheetShape
+                        )
+                )
+            }
+
+            // Sibling 2: The content column with access to sheetBackdrop & sheetHazeState for crisp nested Liquid Glass
+            CompositionLocalProvider(
+                LocalContext provides context,
+                LocalConfiguration provides config,
+                LocalHazeState provides sheetHazeState,
+                LocalBackdrop provides sheetBackdrop
+            ) {
+                Column(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .navigationBarsPadding()
+                ) {
                 // Custom Drag Handle
                 Box(
                     modifier = Modifier

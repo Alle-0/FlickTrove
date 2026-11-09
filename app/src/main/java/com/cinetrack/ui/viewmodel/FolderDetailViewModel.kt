@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 import androidx.compose.foundation.lazy.grid.LazyGridState
 import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.domain.CycleMovieStatusUseCase
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.data.model.UserPreferences
 import javax.inject.Inject
@@ -52,7 +53,8 @@ class FolderDetailViewModel @Inject constructor(
     private val preferenceRepository: PreferenceRepository,
     private val globalErrorHandler: GlobalErrorHandler,
     private val savedStateHandle: SavedStateHandle,
-    private val sharedFolderRepository: com.cinetrack.data.repository.SharedFolderRepository
+    private val sharedFolderRepository: com.cinetrack.data.repository.SharedFolderRepository,
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase
 ) : ViewModel() {
 
     private val _folderId = MutableStateFlow<String?>(null)
@@ -381,6 +383,43 @@ class FolderDetailViewModel @Inject constructor(
             val local = repository.getMovie(movie.id, movie.mediaType)
             val current = local ?: movie
             repository.saveMovie(current.copy(personalNote = note))
+        }
+    }
+
+    fun toggleWatched(movie: Movie) {
+        val title = movie.title ?: movie.name ?: ""
+        viewModelScope.launch {
+            try {
+                val local = repository.getMovie(movie.id, movie.mediaType)
+                val current = local ?: movie
+                val previousState = current.copy()
+
+                // IDEMPOTENCY CHECK: If already watched, do nothing
+                if (current.watched) {
+                    return@launch
+                }
+
+                cycleMovieStatusUseCase(current)
+
+                val updated = repository.getMovie(movie.id, movie.mediaType)
+                val actionMsgRes = when {
+                    updated == null -> R.string.msg_action_removed
+                    updated.watched -> R.string.msg_action_watched
+                    updated.favorite -> R.string.msg_action_favorite
+                    updated.reminder -> R.string.msg_action_reminder
+                    else -> R.string.msg_action_updated
+                }
+
+                actionFeedbackManager.emit(UiText.StringResource(actionMsgRes, title)) {
+                    try {
+                        repository.saveMovie(previousState)
+                    } catch (e: Exception) {
+                        // ignore nested error
+                    }
+                }
+            } catch (e: Exception) {
+                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
+            }
         }
     }
 
