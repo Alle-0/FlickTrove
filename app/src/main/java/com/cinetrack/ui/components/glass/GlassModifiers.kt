@@ -82,11 +82,13 @@ fun Modifier.hazeGlass(
     val backdrop = LocalBackdrop.current
     val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
     val liquidGlassEnabled = com.cinetrack.LocalLiquidGlassEnabled.current
+    val isCornerShape = shape is CornerBasedShape
+    val canUseLiquidGlass = backdrop != null && advancedEffectsEnabled && liquidGlassEnabled && useRefraction && isCornerShape
 
     val modifierChain = this
         .clip(effectiveShape)
         .then(
-            if (backdrop != null && advancedEffectsEnabled && liquidGlassEnabled && useRefraction) {
+            if (canUseLiquidGlass) {
                 Modifier.drawPlainBackdrop(
                     backdrop = backdrop,
                     shape = { shape },
@@ -97,12 +99,16 @@ fun Modifier.hazeGlass(
                         val minDim = min(size.width, size.height)
                         val refHeight = min(24.dp.toPx(), minDim * 0.45f)
                         val refAmount = (refHeight * 1.65f).coerceAtLeast(24.dp.toPx())
-                        lens(
-                            refractionHeight = refHeight,
-                            refractionAmount = refAmount,
-                            depthEffect = false,
-                            chromaticAberration = true
-                        )
+                        try {
+                            lens(
+                                refractionHeight = refHeight,
+                                refractionAmount = refAmount,
+                                depthEffect = false,
+                                chromaticAberration = true
+                            )
+                        } catch (_: Throwable) {
+                            // Defensive guard: lens effect only supports CornerBasedShape
+                        }
                     },
                     onDrawSurface = {
                         val darkTint = containerColor ?: Color(0xFF0C0C10)

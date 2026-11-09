@@ -198,9 +198,7 @@ fun DetailMorphingTopBar(
                         .hazeGlass(
                             state = localHazeState,
                             shape = symbioteShape,
-                            blurRadius = 8.dp,
-                            useOffscreenStrategy = true,
-                            useRefraction = true
+                            useOffscreenStrategy = true
                         )
                 )
             }
@@ -237,8 +235,9 @@ fun DetailMorphingTopBar(
                                         Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
-                                            blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                            useOffscreenStrategy = true
+                                            blurRadius = 8.dp,
+                                            useOffscreenStrategy = true,
+                                            useRefraction = true
                                         )
                                     } else Modifier
                                 ),
@@ -279,8 +278,9 @@ fun DetailMorphingTopBar(
                                             Modifier.hazeGlass(
                                                 state = localHazeState,
                                                 shape = CircleShape,
-                                                blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                                useOffscreenStrategy = true
+                                                blurRadius = 8.dp,
+                                                useOffscreenStrategy = true,
+                                                useRefraction = true
                                             )
                                         } else Modifier
                                     ),
@@ -404,8 +404,9 @@ fun DetailMorphingTopBar(
                                                     Modifier.hazeGlass(
                                                         state = localHazeState,
                                                         shape = CircleShape,
-                                                        blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                                        useOffscreenStrategy = true
+                                                        blurRadius = 8.dp,
+                                                        useOffscreenStrategy = true,
+                                                        useRefraction = true
                                                     )
                                                 } else Modifier
                                             )
@@ -439,8 +440,9 @@ fun DetailMorphingTopBar(
                                                     Modifier.hazeGlass(
                                                         state = localHazeState,
                                                         shape = CircleShape,
-                                                        blurRadius = HazeStyles.SmallGlassBlurRadius,
-                                                        useOffscreenStrategy = true
+                                                        blurRadius = 8.dp,
+                                                        useOffscreenStrategy = true,
+                                                        useRefraction = true
                                                     )
                                                 } else Modifier
                                             )
