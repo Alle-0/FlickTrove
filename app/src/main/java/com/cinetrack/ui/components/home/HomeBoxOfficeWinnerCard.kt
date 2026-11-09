@@ -37,6 +37,7 @@ import coil3.request.crossfade
 import com.cinetrack.R
 import com.cinetrack.data.model.BoxOfficeMovie
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
@@ -135,10 +136,9 @@ fun HomeBoxOfficeWinnerCard(
                         state = cardHazeState,
                         shape = CircleShape,
                         containerColor = Color.Black.copy(alpha = 0.35f),
-                        blurRadius = 8.dp,
                         useRefraction = true,
                         borderWidth = 1.dp,
-                        borderColor = Color.White.copy(alpha = 0.15f)
+                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                     )
                     .padding(horizontal = 10.dp, vertical = 5.dp),
                 verticalAlignment = Alignment.CenterVertically,
@@ -169,7 +169,6 @@ fun HomeBoxOfficeWinnerCard(
                             state = cardHazeState,
                             shape = CircleShape,
                             containerColor = Color.Black.copy(alpha = 0.35f),
-                            blurRadius = 8.dp,
                             useRefraction = true,
                             borderWidth = 1.dp,
                             borderColor = Color(0xFF10B981).copy(alpha = 0.4f)

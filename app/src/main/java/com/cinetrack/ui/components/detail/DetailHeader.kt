@@ -271,7 +271,6 @@ fun DetailHeader(
                                         state = hazeState,
                                         shape = CircleShape,
                                         containerColor = accentColor.copy(alpha = 0.15f),
-                                        blurRadius = 8.dp,
                                         useRefraction = true,
                                         borderWidth = 1.dp,
                                         borderColor = accentColor.copy(alpha = 0.40f)
@@ -321,7 +320,6 @@ fun DetailHeader(
                                 .hazeGlass(
                                     state = hazeState,
                                     shape = CircleShape,
-                                    blurRadius = 8.dp,
                                     useRefraction = true,
                                     borderWidth = 1.dp,
                                     borderColor = Color.White.copy(alpha = 0.15f),
@@ -386,7 +384,6 @@ fun DetailHeader(
                     state = hazeState,
                     shape = containerShape,
                     containerColor = Color(0xFF1A1A1D).copy(alpha = 0.50f),
-                    blurRadius = 8.dp,
                     useRefraction = true
                 )
         ) {

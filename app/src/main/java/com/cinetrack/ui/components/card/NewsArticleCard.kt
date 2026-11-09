@@ -162,7 +162,6 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
                         state = cardHazeState,
                         shape = CircleShape,
                         containerColor = Color.Black.copy(alpha = 0.35f),
-                        blurRadius = 8.dp,
                         useRefraction = true,
                         borderWidth = 0.5.dp,
                         borderColor = Color.White.copy(alpha = 0.25f)

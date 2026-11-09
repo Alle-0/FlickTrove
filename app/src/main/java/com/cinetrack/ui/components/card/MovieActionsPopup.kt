@@ -207,7 +207,6 @@ fun MovieActionsPopup(
                             .hazeGlass(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp),
-                                blurRadius = 8.dp,
                                 useRefraction = true,
                                 borderWidth = 1.dp,
                                 borderColor = Color.White.copy(alpha = 0.15f)

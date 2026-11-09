@@ -236,7 +236,6 @@ fun GlassyBottomBar(
                 .hazeGlass(
                     state = hazeState,
                     shape = CircleShape,
-                    blurRadius = 8.dp,
                     useRefraction = true
                 )
                 .drawWithContent {

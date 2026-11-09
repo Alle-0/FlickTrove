@@ -351,7 +351,6 @@ fun UpdatesScreen(
                                 state = internalHazeState,
                                 shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
                                 borderWidth = 0.dp,
-                                blurRadius = 8.dp,
                                 useRefraction = true
                             )
                             .zIndex(10f),
@@ -388,7 +387,6 @@ fun UpdatesScreen(
                             .hazeGlass(
                                 state = internalHazeState,
                                 shape = CircleShape,
-                                blurRadius = 8.dp,
                                 useRefraction = true
                             ),
                         contentAlignment = Alignment.Center
@@ -470,7 +468,6 @@ fun UpdatesScreen(
                                 .hazeGlass(
                                     state = internalHazeState,
                                     shape = CircleShape,
-                                    blurRadius = 8.dp,
                                     useRefraction = true
                                 )
                         )

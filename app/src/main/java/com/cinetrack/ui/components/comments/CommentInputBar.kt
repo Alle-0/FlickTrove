@@ -213,7 +213,6 @@ fun CommentInputBar(
                     .hazeGlass(
                         state = hazeState,
                         shape = boxShape,
-                        blurRadius = 8.dp,
                         useRefraction = true,
                         style = HazeStyles.PremiumDark
                     )
@@ -385,7 +384,6 @@ fun CommentInputBar(
                             .hazeGlass(
                                 state = hazeState,
                                 shape = textBoxShape,
-                                blurRadius = 8.dp,
                                 useRefraction = true,
                                 borderWidth = 1.dp,
                                 borderColor = Color.White.copy(alpha = 0.12f),
@@ -545,7 +543,6 @@ fun CommentInputBar(
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
-                                blurRadius = 8.dp,
                                 useRefraction = true,
                                 borderWidth = 1.dp,
                                 borderColor = if (canSend) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),
@@ -649,7 +646,6 @@ fun CommentInputBar(
                                     .hazeGlass(
                                         state = hazeState,
                                         shape = CircleShape,
-                                        blurRadius = 8.dp,
                                         useRefraction = true,
                                         borderWidth = 1.dp,
                                         borderColor = Color.White.copy(alpha = 0.12f),
@@ -682,7 +678,6 @@ fun CommentInputBar(
                                     .hazeGlass(
                                         state = hazeState,
                                         shape = CircleShape,
-                                        blurRadius = 8.dp,
                                         useRefraction = true,
                                         borderWidth = 1.dp,
                                         borderColor = Color.White.copy(alpha = 0.12f),
@@ -709,7 +704,6 @@ fun CommentInputBar(
                                     .hazeGlass(
                                         state = hazeState,
                                         shape = CircleShape,
-                                        blurRadius = 8.dp,
                                         useRefraction = true,
                                         borderWidth = 1.dp,
                                         borderColor = if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.45f) else Color.White.copy(alpha = 0.12f),
@@ -738,7 +732,6 @@ fun CommentInputBar(
                                     .hazeGlass(
                                         state = hazeState,
                                         shape = CircleShape,
-                                        blurRadius = 8.dp,
                                         useRefraction = true,
                                         borderWidth = 1.dp,
                                         borderColor = if (isSpoiler) accentColor.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.15f),
@@ -798,7 +791,6 @@ fun CommentInputBar(
                                         .hazeGlass(
                                             state = hazeState,
                                             shape = CircleShape,
-                                            blurRadius = 8.dp,
                                             useRefraction = true,
                                             borderWidth = 1.dp,
                                             borderColor = if (postToCommsUni) accentColor.copy(alpha = if (isDestinationActive) 0.35f else 0.15f)

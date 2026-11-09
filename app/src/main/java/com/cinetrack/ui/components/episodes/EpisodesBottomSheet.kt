@@ -486,7 +486,6 @@ private fun Header(
                 .hazeGlass(
                     state = sheetHazeState,
                     shape = CircleShape,
-                    blurRadius = 8.dp,
                     useRefraction = true,
                     borderWidth = 1.dp,
                     borderColor = Color.White.copy(alpha = 0.15f),
@@ -584,7 +583,6 @@ private fun SeasonSelector(
                         containerColor = backgroundColor,
                         borderColor = borderColor,
                         borderWidth = 1.dp,
-                        blurRadius = 8.dp,
                         useRefraction = true
                     ),
                 color = Color.Transparent
@@ -623,7 +621,6 @@ private fun BulkAction(
                     containerColor = if (isAllWatched) Color(0xFF00E676).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.08f),
                     borderColor = if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
                     borderWidth = 1.dp,
-                    blurRadius = 8.dp,
                     useRefraction = true
                 )
             ),

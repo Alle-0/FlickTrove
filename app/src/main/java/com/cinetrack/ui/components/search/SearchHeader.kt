@@ -70,6 +70,7 @@ import com.cinetrack.data.model.KeywordDictionary
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
@@ -130,8 +131,8 @@ fun SearchHeader(
                 .hazeGlass(
                     state = hazeState,
                     shape = headerShape,
-                    borderWidth = 0.dp,
-                    blurRadius = 8.dp,
+                    borderWidth = 1.dp,
+                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                     useRefraction = true
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
@@ -153,10 +154,9 @@ fun SearchHeader(
                         .hazeGlass(
                             state = hazeState,
                             shape = CircleShape,
-                            blurRadius = 8.dp,
                             useRefraction = true,
                             borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.12f),
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                             containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
                         ),
                     contentAlignment = Alignment.Center

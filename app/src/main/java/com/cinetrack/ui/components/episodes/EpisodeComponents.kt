@@ -72,7 +72,6 @@ internal fun EpisodeCard(
             ) { onToggle() }
             .hazeGlass(
                 shape = RoundedCornerShape(20.dp),
-                blurRadius = 8.dp,
                 useRefraction = true,
                 borderWidth = 1.dp,
                 borderColor = if (isWatched) Color(0xFF00E676).copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
@@ -150,7 +149,6 @@ internal fun EpisodeCard(
                         .bounceClick(scaleDown = 0.88f) { onCommentsClick() }
                         .hazeGlass(
                             shape = CircleShape,
-                            blurRadius = 8.dp,
                             useRefraction = true,
                             borderWidth = 1.dp,
                             borderColor = Color.White.copy(alpha = 0.15f),

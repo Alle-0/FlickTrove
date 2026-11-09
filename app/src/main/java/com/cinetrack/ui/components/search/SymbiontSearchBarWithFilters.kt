@@ -68,6 +68,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.data.model.KeywordDictionary
 import com.cinetrack.data.model.SortConfig
@@ -349,10 +350,9 @@ fun SymbiontSearchBarWithFilters(
                 .hazeGlass(
                     state = hazeState,
                     shape = CircleShape,
-                    blurRadius = 8.dp,
                     useRefraction = true,
                     borderWidth = 1.dp,
-                    borderColor = Color.White.copy(alpha = 0.12f),
+                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                     containerColor = symbioteColor
                 )
                 .clickable(
@@ -496,10 +496,9 @@ fun SymbiontSearchBarWithFilters(
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
-                                blurRadius = 8.dp,
                                 useRefraction = true,
                                 borderWidth = 1.dp,
-                                borderColor = Color.White.copy(alpha = 0.12f),
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                                 containerColor = symbioteColor
                             ),
                         contentAlignment = Alignment.Center
@@ -537,14 +536,13 @@ fun SymbiontSearchBarWithFilters(
                         .hazeGlass(
                             state = hazeState,
                             shape = CircleShape,
-                            blurRadius = 8.dp,
                             useRefraction = true,
                             borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
                             borderColor = if (hasActiveFilters) {
                                 val borderAlpha = if (isDetached) 1f else ((p - 0.68f) / 0.32f).coerceIn(0f, 1f)
                                 MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
                             } else {
-                                Color.White.copy(alpha = 0.12f)
+                                HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                             },
                             containerColor = symbioteColor
                         ),

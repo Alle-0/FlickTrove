@@ -67,7 +67,6 @@ fun RatingPill(
             .hazeGlass(
                 state = hazeState,
                 shape = pillShape,
-                blurRadius = 8.dp,
                 useRefraction = true,
                 borderWidth = 1.dp,
                 borderColor = Color.White.copy(alpha = 0.25f),
@@ -145,7 +144,6 @@ internal fun HeaderRatedPill(
             .hazeGlass(
                 state = hazeState,
                 shape = pillShape,
-                blurRadius = 8.dp,
                 useRefraction = true,
                 borderWidth = 0.5.dp,
                 borderColor = animatedBorderColor,
@@ -203,7 +201,6 @@ internal fun HeaderTechnicalPill(
             .hazeGlass(
                 state = hazeState,
                 shape = pillShape,
-                blurRadius = 8.dp,
                 useRefraction = true,
                 borderWidth = 0.5.dp,
                 borderColor = if (isSelected) accentColor.copy(alpha = 0.45f) else animatedBorderColor,

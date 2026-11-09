@@ -611,7 +611,6 @@ fun RecommendationsScreenContent(
                         .hazeGlass(
                             state = localHazeState,
                             shape = CircleShape,
-                            blurRadius = 8.dp,
                             useRefraction = true
                         )
                 )

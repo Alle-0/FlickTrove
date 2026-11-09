@@ -124,7 +124,6 @@ fun GlassyTopBar(
                 .hazeGlass(
                     state = hazeState,
                     shape = RoundedCornerShape(50),
-                    blurRadius = 8.dp,
                     useRefraction = true
                 )
         )

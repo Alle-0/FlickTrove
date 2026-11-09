@@ -720,7 +720,6 @@ fun FolderDetailScreenContent(
                                             .hazeGlass(
                                                 state = internalHazeState,
                                                 shape = CircleShape,
-                                                blurRadius = 8.dp,
                                                 useRefraction = true
                                             )
                                     )

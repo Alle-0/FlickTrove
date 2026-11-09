@@ -317,7 +317,6 @@ fun BoxOfficeScreenContent(
                             .hazeGlass(
                                 state = hazeState,
                                 shape = CircleShape,
-                                blurRadius = 8.dp,
                                 useRefraction = true
                             )
                     )

@@ -101,7 +101,6 @@ fun MainFolderOptionsMenu(
                         .hazeGlass(
                             state = hazeState,
                             shape = RoundedCornerShape(24.dp),
-                            blurRadius = 8.dp,
                             useRefraction = true
                         )
                 ) {

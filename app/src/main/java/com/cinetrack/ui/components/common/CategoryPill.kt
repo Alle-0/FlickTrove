@@ -52,9 +52,8 @@ fun CategoryPill(
                         state = hazeState,
                         shape = CircleShape,
                         containerColor = Color.White.copy(alpha = 0.08f),
-                        borderColor = Color.White.copy(alpha = 0.15f),
+                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                         borderWidth = 1.dp,
-                        blurRadius = 8.dp,
                         useRefraction = true
                     )
                 }

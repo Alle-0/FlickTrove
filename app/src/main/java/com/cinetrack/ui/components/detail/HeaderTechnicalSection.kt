@@ -179,7 +179,6 @@ private fun HeaderTechnicalItem(
                 .hazeGlass(
                     state = hazeState,
                     shape = iconShape,
-                    blurRadius = 8.dp,
                     useRefraction = true,
                     borderWidth = 0.5.dp,
                     borderColor = ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.4f),

@@ -204,7 +204,6 @@ fun DetailMorphingTopBar(
                         .hazeGlass(
                             state = localHazeState,
                             shape = effectiveGlassShape,
-                            blurRadius = 8.dp,
                             useRefraction = true,
                             useOffscreenStrategy = true
                         )
@@ -243,7 +242,6 @@ fun DetailMorphingTopBar(
                                         Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
-                                            blurRadius = 8.dp,
                                             useOffscreenStrategy = true,
                                             useRefraction = true
                                         )
@@ -286,7 +284,6 @@ fun DetailMorphingTopBar(
                                             Modifier.hazeGlass(
                                                 state = localHazeState,
                                                 shape = CircleShape,
-                                                blurRadius = 8.dp,
                                                 useOffscreenStrategy = true,
                                                 useRefraction = true
                                             )
@@ -412,7 +409,6 @@ fun DetailMorphingTopBar(
                                                     Modifier.hazeGlass(
                                                         state = localHazeState,
                                                         shape = CircleShape,
-                                                        blurRadius = 8.dp,
                                                         useOffscreenStrategy = true,
                                                         useRefraction = true
                                                     )
@@ -448,7 +444,6 @@ fun DetailMorphingTopBar(
                                                     Modifier.hazeGlass(
                                                         state = localHazeState,
                                                         shape = CircleShape,
-                                                        blurRadius = 8.dp,
                                                         useOffscreenStrategy = true,
                                                         useRefraction = true
                                                     )

@@ -560,7 +560,6 @@ object AccountTab : Tab {
                                     containerColor = if (actualHeaderLuminance > 0.38f) Color.Black.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.10f),
                                     borderColor = (rawExtractedColor ?: MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
                                     borderWidth = 0.dp,
-                                    blurRadius = 8.dp,
                                     useRefraction = true
                                 ),
                             contentAlignment = Alignment.Center
@@ -621,7 +620,6 @@ object AccountTab : Tab {
                                 else
                                     Color.White.copy(alpha = 0.25f),
                                 borderWidth = 0.dp,
-                                blurRadius = 8.dp,
                                 useRefraction = true
                             )
                             .padding(

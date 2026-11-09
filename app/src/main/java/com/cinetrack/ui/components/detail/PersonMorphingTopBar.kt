@@ -200,7 +200,6 @@ fun SimpleMorphingTopBar(
                                         Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
-                                            blurRadius = 8.dp,
                                             useOffscreenStrategy = true,
                                             useRefraction = true
                                         )
@@ -242,7 +241,6 @@ fun SimpleMorphingTopBar(
                                             Modifier.hazeGlass(
                                                 state = localHazeState,
                                                 shape = CircleShape,
-                                                blurRadius = 8.dp,
                                                 useOffscreenStrategy = true,
                                                 useRefraction = true
                                             )
@@ -345,7 +343,6 @@ fun SimpleMorphingTopBar(
                                             Modifier.hazeGlass(
                                                 state = localHazeState,
                                                 shape = CircleShape,
-                                                blurRadius = 8.dp,
                                                 useOffscreenStrategy = true,
                                                 useRefraction = true
                                             )
@@ -384,7 +381,6 @@ fun SimpleMorphingTopBar(
                                         Modifier.hazeGlass(
                                             state = localHazeState,
                                             shape = CircleShape,
-                                            blurRadius = 8.dp,
                                             useOffscreenStrategy = true,
                                             useRefraction = true
                                         )

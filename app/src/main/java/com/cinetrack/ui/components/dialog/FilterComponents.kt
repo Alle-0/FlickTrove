@@ -88,7 +88,6 @@ fun ExpandableSection(
             .hazeGlass(
                 state = hazeState,
                 shape = sectionShape,
-                blurRadius = 8.dp,
                 useRefraction = true,
                 borderWidth = 1.dp,
                 borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),

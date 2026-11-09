@@ -70,7 +70,6 @@ fun MonthYearPickerDialog(
                     .hazeGlass(
                         state = internalHazeState,
                         shape = CircleShape,
-                        blurRadius = 8.dp,
                         useRefraction = true,
                         borderWidth = 1.dp,
                         borderColor = Color.White.copy(alpha = 0.15f),
@@ -101,7 +100,6 @@ fun MonthYearPickerDialog(
                     .hazeGlass(
                         state = internalHazeState,
                         shape = CircleShape,
-                        blurRadius = 8.dp,
                         useRefraction = true,
                         borderWidth = 1.dp,
                         borderColor = Color.White.copy(alpha = 0.15f),
@@ -146,7 +144,6 @@ fun MonthYearPickerDialog(
                                 .hazeGlass(
                                     state = internalHazeState,
                                     shape = RoundedCornerShape(12.dp),
-                                    blurRadius = 8.dp,
                                     useRefraction = true,
                                     borderWidth = 1.dp,
                                     borderColor = if (isSelected) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),

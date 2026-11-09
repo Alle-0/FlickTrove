@@ -113,7 +113,6 @@ fun WatchHistoryBottomSheet(
                                 .hazeGlass(
                                     state = hazeState,
                                     shape = CircleShape,
-                                    blurRadius = 8.dp,
                                     useRefraction = true,
                                     borderWidth = 1.dp,
                                     borderColor = accentColor.copy(alpha = 0.40f),
@@ -291,7 +290,6 @@ private fun HistoryItemRow(
             .hazeGlass(
                 state = hazeState,
                 shape = RoundedCornerShape(16.dp),
-                blurRadius = 8.dp,
                 useRefraction = true,
                 borderWidth = 1.dp,
                 borderColor = Color.White.copy(alpha = 0.10f),
@@ -326,7 +324,6 @@ private fun HistoryItemRow(
                     .hazeGlass(
                         state = hazeState,
                         shape = CircleShape,
-                        blurRadius = 8.dp,
                         useRefraction = true,
                         borderWidth = 1.dp,
                         borderColor = Color.White.copy(alpha = 0.15f),
@@ -349,7 +346,6 @@ private fun HistoryItemRow(
                         .hazeGlass(
                             state = hazeState,
                             shape = CircleShape,
-                            blurRadius = 8.dp,
                             useRefraction = true,
                             borderWidth = 1.dp,
                             borderColor = Color(0xFFFF3D3D).copy(alpha = 0.35f),

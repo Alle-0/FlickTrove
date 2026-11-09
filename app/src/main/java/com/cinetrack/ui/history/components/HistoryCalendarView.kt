@@ -207,7 +207,6 @@ fun HistoryCalendarView(
                         .hazeGlass(
                             state = calendarHazeState,
                             shape = CircleShape,
-                            blurRadius = 8.dp,
                             useRefraction = true
                         )
                 )
