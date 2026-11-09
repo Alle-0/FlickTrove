@@ -372,8 +372,9 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     },
                                     label = "TabTransition"
                                 ) { secondaryTab ->
-                                    if (secondaryTab == null) {
-                                        val carouselScrollBoundary = remember {
+                                    CompositionLocalProvider(LocalBackdrop provides null) {
+                                        if (secondaryTab == null) {
+                                            val carouselScrollBoundary = remember {
                                             object : NestedScrollConnection {
                                                 override fun onPostScroll(
                                                     consumed: Offset,
@@ -442,6 +443,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                             secondaryTab.Content()
                                         }
                                     }
+                                }
                                 }
                             }
 

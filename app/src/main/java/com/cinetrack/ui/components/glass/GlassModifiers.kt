@@ -76,7 +76,7 @@ fun Modifier.hazeGlass(
     borderColor: Color = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
     borderWidth: Dp = 0.dp,
     alpha: Float = 1f,
-    useRefraction: Boolean = true
+    useRefraction: Boolean = false
 ): Modifier = composed {
     val effectiveShape = remember(shape) { safeShape(shape) }
     val backdrop = LocalBackdrop.current
