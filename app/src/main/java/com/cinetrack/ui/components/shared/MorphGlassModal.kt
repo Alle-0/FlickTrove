@@ -212,7 +212,7 @@ fun MorphGlassModal(
                                 state = hazeState,
                                 shape = shape,
                                 style = style,
-                                blurRadius = 8.dp,
+                                blurRadius = 24.dp,
                                 useOffscreenStrategy = false,
                                 useRefraction = true
                             )
@@ -315,7 +315,7 @@ fun MorphGlassModal(
                                 shape = currentShape,
                                 style = animatedStyle,
                                 alpha = modalAlpha,
-                                blurRadius = 8.dp,
+                                blurRadius = 24.dp,
                                 useOffscreenStrategy = false,
                                 useRefraction = true
                             )

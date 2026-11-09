@@ -98,7 +98,7 @@ fun GlassmorphicModal(
                             alpha = 1f,
                             shape = RoundedCornerShape(32.dp),
                             style = style,
-                            blurRadius = 8.dp,
+                            blurRadius = 24.dp,
                             useRefraction = true
                         )
                         .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
@@ -184,7 +184,7 @@ fun GlassmorphicModal(
                             alpha = alpha,
                             shape = RoundedCornerShape(32.dp),
                             style = style,
-                            blurRadius = 8.dp,
+                            blurRadius = 24.dp,
                             useRefraction = true
                         )
                         .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))

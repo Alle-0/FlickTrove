@@ -75,7 +75,7 @@ fun Modifier.hazeGlass(
     containerColor: Color? = null,
     useOffscreenStrategy: Boolean = false,
     borderColor: Color = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-    borderWidth: Dp = 0.dp,
+    borderWidth: Dp = 1.dp,
     alpha: Float = 1f,
     useRefraction: Boolean = false
 ): Modifier = composed {
@@ -117,7 +117,7 @@ fun Modifier.hazeGlass(
                         val tintAlpha = if (containerColor != null && containerColor.alpha != 1f) {
                             containerColor.alpha
                         } else {
-                            0.52f
+                            0.28f
                         } * alpha
                         drawRect(color = darkTint.copy(alpha = tintAlpha))
                     }

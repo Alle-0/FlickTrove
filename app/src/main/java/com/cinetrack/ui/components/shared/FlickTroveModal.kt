@@ -138,7 +138,7 @@ fun FlickTroveModal(
                                     state = hazeState,
                                     shape = cardShape,
                                     style = HazeStyles.glassmorphicDialog,
-                                    blurRadius = 8.dp,
+                                    blurRadius = 24.dp,
                                     alpha = modalAlpha,
                                     useRefraction = true
                                 )

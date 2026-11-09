@@ -233,7 +233,7 @@ fun EpisodesBottomSheet(
                     .hazeGlass(
                         state = hazeState,
                         shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp),
-                        blurRadius = 8.dp,
+                        blurRadius = 24.dp,
                         useRefraction = true
                     )
             ) {

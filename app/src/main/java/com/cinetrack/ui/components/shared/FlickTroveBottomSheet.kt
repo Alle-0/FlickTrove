@@ -74,7 +74,7 @@ fun FlickTroveBottomSheet(
                         if (hazeState != null) Modifier.hazeGlass(
                             state = hazeState,
                             shape = shape,
-                            blurRadius = 8.dp,
+                            blurRadius = HazeStyles.GlassBlurRadius,
                             useRefraction = true
                         )
                         else Modifier.glassmorphic(shape = shape, blurRadius = HazeStyles.GlassBlurRadius)
