@@ -30,9 +30,13 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.LaunchedEffect
@@ -101,6 +105,7 @@ fun HomeFilterModal(
     var localSortConfig by remember(isVisible) { mutableStateOf(sortConfig) }
     var showSeriesStatusInfoDialog by remember { mutableStateOf(false) }
     val filterHazeState = remember { HazeState() }
+    val filterBackdrop = rememberLayerBackdrop { drawContent() }
 
     // Sync local state when modal becomes visible
     LaunchedEffect(isVisible) {
@@ -123,16 +128,18 @@ fun HomeFilterModal(
         defaultModalHeight = 380.dp,
         zIndex = 100f
     ) { contentAlpha ->
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .then(if (contentAlpha > 0f) Modifier.haze(filterHazeState) else Modifier)
-                .zIndex(1f)
-                .graphicsLayer(
-                    alpha = contentAlpha,
-                    compositingStrategy = CompositingStrategy.Offscreen
-                )
-        ) {
+        Box(modifier = Modifier.fillMaxWidth()) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .layerBackdrop(filterBackdrop)
+                    .then(if (contentAlpha > 0f) Modifier.haze(filterHazeState) else Modifier)
+                    .zIndex(1f)
+                    .graphicsLayer(
+                        alpha = contentAlpha,
+                        compositingStrategy = CompositingStrategy.Offscreen
+                    )
+            ) {
             // --- HEADER BAR ---
             Row(
                 modifier = Modifier
@@ -393,13 +400,16 @@ fun HomeFilterModal(
                         )
                     }
                 }
+            }
 
-                // --- SERIES STATUS INFO DIALOG (nested haze glass) ---
-                if (showSeriesStatusInfoDialog && contentAlpha > 0f) {
+            // --- SERIES STATUS INFO DIALOG (nested Liquid Glass modal) ---
+            if (showSeriesStatusInfoDialog && contentAlpha > 0f) {
+                CompositionLocalProvider(LocalBackdrop provides filterBackdrop) {
                     SeriesStatusInfoDialog(
                         hazeState = filterHazeState,
                         onDismiss = { showSeriesStatusInfoDialog = false }
                     )
                 }
             }
-}
+        }
+    }

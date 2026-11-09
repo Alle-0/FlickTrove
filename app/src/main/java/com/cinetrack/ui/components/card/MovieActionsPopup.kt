@@ -208,7 +208,9 @@ fun MovieActionsPopup(
                                 state = hazeState,
                                 shape = RoundedCornerShape(24.dp),
                                 blurRadius = 8.dp,
-                                useRefraction = true
+                                useRefraction = true,
+                                borderWidth = 1.dp,
+                                borderColor = Color.White.copy(alpha = 0.15f)
                             )
                             .bounceClick(scaleDown = 1f) { }
                             .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 10.dp)
