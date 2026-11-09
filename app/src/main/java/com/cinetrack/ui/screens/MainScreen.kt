@@ -530,7 +530,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     historyCustomActions = {
                                         HistoryViewSwitcher(
                                             isTimeline = historyUiState.selectedViewMode == ViewMode.TIMELINE,
-                                            onSelectMode = { historyVm.setViewMode(it) }
+                                            onSelectMode = { historyVm.setViewMode(it) },
+                                            hazeState = contentHazeState
                                         )
                                     }
                                 }

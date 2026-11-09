@@ -46,6 +46,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -149,7 +150,15 @@ fun SearchHeader(
                     modifier = Modifier
                         .size(44.dp)
                         .bounceClick { onBackClick() }
-                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color.White.copy(alpha = 0.12f),
+                            containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(

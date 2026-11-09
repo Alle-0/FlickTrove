@@ -48,6 +48,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.R
+import com.cinetrack.ui.components.glass.hazeGlass
+import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.utils.ColorUtils
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -74,6 +76,7 @@ fun ListCalendarSwitcher(
     tabHeightDp: Dp = 32.dp,
     paddingDp: Dp = 3.dp,
     iconSizeDp: Dp = 16.dp,
+    hazeState: HazeState? = null,
     trackColor: Color = Color.White.copy(alpha = 0.08f),
     borderColor: Color? = Color.White.copy(alpha = 0.15f),
     inactiveIconTint: Color = Color.White.copy(alpha = 0.55f)
@@ -214,10 +217,14 @@ fun ListCalendarSwitcher(
     Box(
         modifier = modifier
             .size(width = tabWidthDp * 2, height = tabHeightDp)
-            .background(trackColor, CircleShape)
-            .then(
-                if (borderColor != null) Modifier.border(1.dp, borderColor, CircleShape)
-                else Modifier
+            .hazeGlass(
+                state = hazeState,
+                shape = CircleShape,
+                blurRadius = 8.dp,
+                useRefraction = true,
+                borderWidth = 1.dp,
+                borderColor = borderColor ?: Color.White.copy(alpha = 0.15f),
+                containerColor = trackColor
             )
             .pointerInput(selectedIndex, tabWidthPx) {
                     var isDragActiveOnPill = false

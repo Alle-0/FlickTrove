@@ -344,6 +344,7 @@ fun SymbiontSearchBarWithFilters(
                 .width(searchBarWidth)
                 .height(44.dp)
                 .clip(CircleShape)
+                .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -482,7 +483,8 @@ fun SymbiontSearchBarWithFilters(
                                 val nextColumns = nextGridColumns(preferences.gridColumns)
                                 onLayoutToggleClick(nextColumns)
                             }
-                            .background(symbioteColor, CircleShape),
+                            .background(symbioteColor, CircleShape)
+                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -516,17 +518,17 @@ fun SymbiontSearchBarWithFilters(
                             onFilterClick()
                         }
                         .background(symbioteColor, CircleShape)
-                        .then(
-                            if (hasActiveFilters) {
-                                val borderAlpha = if (isDetached) 1f else ((p - 0.68f) / 0.32f).coerceIn(0f, 1f)
-                                Modifier.border(
-                                    BorderStroke(
-                                        1.5.dp,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
-                                    ),
-                                    CircleShape
-                                )
-                            } else Modifier
+                        .border(
+                            BorderStroke(
+                                if (hasActiveFilters) 1.5.dp else 1.dp,
+                                if (hasActiveFilters) {
+                                    val borderAlpha = if (isDetached) 1f else ((p - 0.68f) / 0.32f).coerceIn(0f, 1f)
+                                    MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
+                                } else {
+                                    Color.White.copy(alpha = 0.12f)
+                                }
+                            ),
+                            CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {

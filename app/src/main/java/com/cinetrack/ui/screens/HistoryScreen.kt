@@ -318,7 +318,8 @@ fun HistoryScreenContent(
                     customActions = {
                         HistoryViewSwitcher(
                             isTimeline = uiState.selectedViewMode == ViewMode.TIMELINE,
-                            onSelectMode = { viewModel.setViewMode(it) }
+                            onSelectMode = { viewModel.setViewMode(it) },
+                            hazeState = internalHazeState
                         )
                     }
                 )
@@ -376,14 +377,16 @@ fun HistoryScreenContent(
 fun HistoryViewSwitcher(
     isTimeline: Boolean,
     onSelectMode: (ViewMode) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    hazeState: HazeState? = null
 ) {
     com.cinetrack.ui.components.shared.ListCalendarSwitcher(
         isCalendar = !isTimeline,
         onSelectMode = { isCalendar ->
             onSelectMode(if (isCalendar) ViewMode.CALENDAR else ViewMode.TIMELINE)
         },
-        modifier = modifier
+        modifier = modifier,
+        hazeState = hazeState
     )
 }
 
