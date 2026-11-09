@@ -725,7 +725,10 @@ fun FoldersScreenContent(
     }
 
     if (folderTransitionState.targetState || !folderTransitionState.isIdle) {
-        stableMenuFolder?.let { folder ->
+        androidx.compose.runtime.CompositionLocalProvider(
+            LocalBackdrop provides foldersBackdrop
+        ) {
+            stableMenuFolder?.let { folder ->
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -877,6 +880,7 @@ fun FoldersScreenContent(
                 }
             }
             }
+        }
         }
     }
 }

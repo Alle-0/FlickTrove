@@ -156,7 +156,8 @@ fun SearchHeader(
                             shape = CircleShape,
                             useRefraction = true,
                             borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            containerColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
