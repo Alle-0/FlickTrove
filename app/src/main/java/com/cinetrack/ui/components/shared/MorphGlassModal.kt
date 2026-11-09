@@ -212,7 +212,9 @@ fun MorphGlassModal(
                                 state = hazeState,
                                 shape = shape,
                                 style = style,
-                                useOffscreenStrategy = false
+                                blurRadius = 8.dp,
+                                useOffscreenStrategy = false,
+                                useRefraction = true
                             )
                             .border(
                                 width = 1.dp,
@@ -313,7 +315,9 @@ fun MorphGlassModal(
                                 shape = currentShape,
                                 style = animatedStyle,
                                 alpha = modalAlpha,
-                                useOffscreenStrategy = false
+                                blurRadius = 8.dp,
+                                useOffscreenStrategy = false,
+                                useRefraction = true
                             )
                             .border(
                                 width = 1.dp,

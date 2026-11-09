@@ -515,7 +515,12 @@ fun HomeScreenContent(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(state = activeHazeState, shape = CircleShape)
+                            .hazeGlass(
+                                state = activeHazeState,
+                                shape = CircleShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true
+                            )
                     )
                     
                     val options = listOf(stringResource(id = R.string.home_tab_movies), stringResource(id = R.string.home_tab_tv_series))

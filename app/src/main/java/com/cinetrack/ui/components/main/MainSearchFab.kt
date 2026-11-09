@@ -156,7 +156,9 @@ fun BoxScope.MainSearchFab(
                 }
                 .hazeGlass(
                     state = contentHazeState,
-                    shape = fabShape
+                    shape = fabShape,
+                    blurRadius = 8.dp,
+                    useRefraction = true
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -479,7 +481,9 @@ fun BoxScope.MainScrollToTopFab(
                         }
                         .hazeGlass(
                             state = contentHazeState,
-                            shape = CircleShape
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true
                         ),
                     contentAlignment = Alignment.Center
                 ) {

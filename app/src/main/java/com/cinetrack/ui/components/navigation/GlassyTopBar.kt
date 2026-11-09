@@ -121,7 +121,12 @@ fun GlassyTopBar(
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .hazeGlass(state = hazeState, shape = RoundedCornerShape(50))
+                .hazeGlass(
+                    state = hazeState,
+                    shape = RoundedCornerShape(50),
+                    blurRadius = 8.dp,
+                    useRefraction = true
+                )
         )
 
         Box(

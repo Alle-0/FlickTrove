@@ -98,7 +98,12 @@ fun MainFolderOptionsMenu(
                     modifier = Modifier
                         .width(200.dp)
                         .clip(RoundedCornerShape(24.dp))
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(24.dp))
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(24.dp),
+                            blurRadius = 8.dp,
+                            useRefraction = true
+                        )
                 ) {
                 var itemDelay = 15
                 val itemStep = 35

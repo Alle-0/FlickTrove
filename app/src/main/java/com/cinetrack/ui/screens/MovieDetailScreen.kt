@@ -85,6 +85,9 @@ import com.cinetrack.ui.viewmodel.DetailUiState
 import com.cinetrack.ui.viewmodel.DetailEvent
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeStyle
@@ -442,6 +445,12 @@ fun MovieDetailScreenContent(
         cachedSuccess = uiState as DetailUiState.Success
     }
 
+    val detailBackdrop = rememberLayerBackdrop {
+        drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+        drawContent()
+    }
+
+    CompositionLocalProvider(LocalBackdrop provides detailBackdrop) {
     Box(modifier = Modifier.fillMaxSize()) {
         MovieActionsWrapper(
             hazeState = rootHazeState,
@@ -467,12 +476,14 @@ fun MovieDetailScreenContent(
                 is DetailUiState.Success -> 1
                 is DetailUiState.Error -> 2
             },
+            modifier = Modifier.layerBackdrop(detailBackdrop),
             transitionSpec = {
                 fadeIn(animationSpec = tween(400, easing = FastOutSlowInEasing)) togetherWith 
                 fadeOut(animationSpec = tween(400, easing = FastOutSlowInEasing))
             },
             label = "DetailUiStateTransition"
         ) { targetIndex ->
+            CompositionLocalProvider(LocalBackdrop provides null) {
             when (targetIndex) {
                 0 -> {
                     DetailSkeleton(
@@ -927,6 +938,7 @@ fun MovieDetailScreenContent(
                     }
                 }
             }
+            }
         }
         } // End of haze Box
 
@@ -1040,4 +1052,5 @@ fun MovieDetailScreenContent(
         }
     }
     } // end root Box
+    } // end CompositionLocalProvider
 }

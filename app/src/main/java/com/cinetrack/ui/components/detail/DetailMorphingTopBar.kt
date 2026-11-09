@@ -198,7 +198,9 @@ fun DetailMorphingTopBar(
                         .hazeGlass(
                             state = localHazeState,
                             shape = symbioteShape,
-                            useOffscreenStrategy = true
+                            blurRadius = 8.dp,
+                            useOffscreenStrategy = true,
+                            useRefraction = true
                         )
                 )
             }

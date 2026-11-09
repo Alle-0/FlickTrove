@@ -377,7 +377,12 @@ fun VistiScreenContent(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(state = activeHazeState, shape = CircleShape)
+                            .hazeGlass(
+                                state = activeHazeState,
+                                shape = CircleShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true
+                            )
                     )
                     
                     // Content Layer (Always sharp)

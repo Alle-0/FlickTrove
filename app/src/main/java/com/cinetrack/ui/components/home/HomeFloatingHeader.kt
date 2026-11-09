@@ -67,7 +67,9 @@ fun HomeFloatingHeader(
                         .matchParentSize()
                         .hazeGlass(
                             state = activeHazeState,
-                            shape = CircleShape
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true
                         )
                 )
 

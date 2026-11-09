@@ -206,7 +206,9 @@ fun MovieActionsPopup(
                             .clip(RoundedCornerShape(24.dp))
                             .hazeGlass(
                                 state = hazeState,
-                                shape = RoundedCornerShape(24.dp)
+                                shape = RoundedCornerShape(24.dp),
+                                blurRadius = 8.dp,
+                                useRefraction = true
                             )
                             .bounceClick(scaleDown = 1f) { }
                             .padding(start = 6.dp, end = 6.dp, top = 6.dp, bottom = 10.dp)
