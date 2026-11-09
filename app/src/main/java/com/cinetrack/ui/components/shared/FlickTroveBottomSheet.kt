@@ -21,10 +21,15 @@ import androidx.compose.animation.core.spring
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.Velocity
 import androidx.compose.ui.unit.dp
+import com.cinetrack.ui.LocalBackdrop
+import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.glass.glassmorphic
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import dev.chrisbanes.haze.HazeState
+import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
 
@@ -63,30 +68,49 @@ fun FlickTroveBottomSheet(
             // The Surface below provides the glassmorphic background
             val shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
             val handleDragOffset = remember { Animatable(0f) }
+            val modalHazeState = remember { HazeState() }
+            val modalBackdrop = rememberLayerBackdrop { drawContent() }
 
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
                     .offset {
                         IntOffset(0, handleDragOffset.value.roundToInt().coerceAtLeast(0))
-                    }
-                    .then(
-                        if (hazeState != null) Modifier.hazeGlass(
-                            state = hazeState,
-                            shape = shape,
-                            blurRadius = HazeStyles.GlassBlurRadius,
-                            useRefraction = true
-                        )
-                        else Modifier.glassmorphic(shape = shape, blurRadius = HazeStyles.GlassBlurRadius)
-                    ),
+                    },
                 color = Color.Transparent
             ) {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .navigationBarsPadding() // Safely handle system navigation
-                        .padding(bottom = 24.dp) // Bottom spacing for aesthetics
-                ) {
+                Box(modifier = Modifier.fillMaxWidth()) {
+                    Box(
+                        modifier = Modifier
+                            .matchParentSize()
+                            .layerBackdrop(modalBackdrop)
+                            .haze(modalHazeState)
+                    ) {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .then(
+                                    if (hazeState != null) Modifier.hazeGlass(
+                                        state = hazeState,
+                                        shape = shape,
+                                        blurRadius = HazeStyles.GlassBlurRadius,
+                                        useRefraction = true
+                                    )
+                                    else Modifier.glassmorphic(shape = shape, blurRadius = HazeStyles.GlassBlurRadius)
+                                )
+                        )
+                    }
+
+                    androidx.compose.runtime.CompositionLocalProvider(
+                        LocalHazeState provides modalHazeState,
+                        LocalBackdrop provides modalBackdrop
+                    ) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .navigationBarsPadding() // Safely handle system navigation
+                                .padding(bottom = 24.dp) // Bottom spacing for aesthetics
+                        ) {
                     // Custom Drag Handle inside the surface
                     Box(
                         modifier = Modifier
@@ -176,6 +200,8 @@ fun FlickTroveBottomSheet(
                     }
                 }
             }
+        }
+    }
         }
     }
 }

@@ -11,11 +11,17 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.LaunchedEffect
+import com.cinetrack.ui.LocalBackdrop
+import com.cinetrack.ui.LocalHazeState
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import dev.chrisbanes.haze.haze
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -126,41 +132,56 @@ fun FlickTroveModal(
                     colors = CardDefaults.cardColors(containerColor = Color.Transparent),
                     elevation = CardDefaults.cardElevation(defaultElevation = 0.dp)
                 ) {
+                    val modalHazeState = remember { HazeState() }
+                    val modalBackdrop = rememberLayerBackdrop { drawContent() }
+
                     Box(
                         modifier = Modifier.fillMaxWidth(),
                         contentAlignment = Alignment.Center
                     ) {
-                        // Sibling 1: The blurred glass background card (fills parent exactly)
+                        // Sibling 1: The blurred glass background card (fills parent exactly and serves as nested backdrop source)
                         Box(
                             modifier = Modifier
                                 .matchParentSize()
-                                .hazeGlass(
-                                    state = hazeState,
-                                    shape = cardShape,
-                                    style = HazeStyles.glassmorphicDialog,
-                                    blurRadius = 24.dp,
-                                    alpha = modalAlpha,
-                                    useRefraction = true
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
-                                    shape = cardShape
-                                )
-                        )
-
-                        // Sibling 2: The crisp content card (completely untouched by blur!)
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
-                                    keyboardController?.hide()
-                                    focusManager.clearFocus()
-                                }
-                                .padding(contentPadding),
-                            horizontalAlignment = Alignment.CenterHorizontally
+                                .layerBackdrop(modalBackdrop)
+                                .haze(modalHazeState)
                         ) {
-                            content()
+                            Spacer(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .hazeGlass(
+                                        state = hazeState,
+                                        shape = cardShape,
+                                        style = HazeStyles.glassmorphicDialog,
+                                        blurRadius = 24.dp,
+                                        alpha = modalAlpha,
+                                        useRefraction = true
+                                    )
+                                    .border(
+                                        width = 1.dp,
+                                        color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
+                                        shape = cardShape
+                                    )
+                            )
+                        }
+
+                        // Sibling 2: The crisp content card (provided with local modal backdrop & haze state for nested blur!)
+                        CompositionLocalProvider(
+                            LocalHazeState provides modalHazeState,
+                            LocalBackdrop provides modalBackdrop
+                        ) {
+                            Column(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .clickable(interactionSource = remember { MutableInteractionSource() }, indication = null) { 
+                                        keyboardController?.hide()
+                                        focusManager.clearFocus()
+                                    }
+                                    .padding(contentPadding),
+                                horizontalAlignment = Alignment.CenterHorizontally
+                            ) {
+                                content()
+                            }
                         }
                     }
                 }

@@ -21,12 +21,18 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import com.cinetrack.ui.LocalBackdrop
+import com.cinetrack.ui.LocalHazeState
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import dev.chrisbanes.haze.haze
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -204,32 +210,47 @@ fun MorphGlassModal(
                         }
                         .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
                 ) {
-                    // Background Layer (Glass / Surface)
-                    Spacer(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = shape,
-                                style = style,
-                                blurRadius = 24.dp,
-                                useOffscreenStrategy = false,
-                                useRefraction = true
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
-                                shape = shape
-                            )
-                    )
+                    val modalHazeState = remember { HazeState() }
+                    val modalBackdrop = rememberLayerBackdrop { drawContent() }
 
-                    // Content
+                    // Background Layer (Glass / Surface as nested backdrop source)
                     Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .zIndex(1f)
+                            .matchParentSize()
+                            .layerBackdrop(modalBackdrop)
+                            .haze(modalHazeState)
                     ) {
-                        content(progress)
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = shape,
+                                    style = style,
+                                    blurRadius = 24.dp,
+                                    useOffscreenStrategy = false,
+                                    useRefraction = true
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
+                                    shape = shape
+                                )
+                        )
+                    }
+
+                    // Content
+                    CompositionLocalProvider(
+                        LocalHazeState provides modalHazeState,
+                        LocalBackdrop provides modalBackdrop
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .zIndex(1f)
+                        ) {
+                            content(progress)
+                        }
                     }
                 }
             } else {
@@ -306,40 +327,55 @@ fun MorphGlassModal(
                         .then(if (triggerBounds == null) Modifier.graphicsLayer { this.alpha = modalAlpha } else Modifier)
                         .bounceClick(scaleDown = 1f) { /* Prevent dismissal on inner tap */ }
                 ) {
-                    // Background Layer (Blurred glass)
-                    Spacer(
+                    val modalHazeState = remember { HazeState() }
+                    val modalBackdrop = rememberLayerBackdrop { drawContent() }
+
+                    // Background Layer (Blurred glass as nested backdrop source)
+                    Box(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = currentShape,
-                                style = animatedStyle,
-                                alpha = modalAlpha,
-                                blurRadius = 24.dp,
-                                useOffscreenStrategy = false,
-                                useRefraction = true
-                            )
-                            .border(
-                                width = 1.dp,
-                                color = Color.White.copy(alpha = borderAlpha),
-                                shape = currentShape
-                            )
-                    )
+                            .layerBackdrop(modalBackdrop)
+                            .haze(modalHazeState)
+                    ) {
+                        Spacer(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .hazeGlass(
+                                    state = hazeState,
+                                    shape = currentShape,
+                                    style = animatedStyle,
+                                    alpha = modalAlpha,
+                                    blurRadius = 24.dp,
+                                    useOffscreenStrategy = false,
+                                    useRefraction = true
+                                )
+                                .border(
+                                    width = 1.dp,
+                                    color = Color.White.copy(alpha = borderAlpha),
+                                    shape = currentShape
+                                )
+                        )
+                    }
 
                     // Foreground Content
                     if (progress > 0.38f) {
                         val contentAlpha = ((progress - 0.38f) / 0.62f).coerceIn(0f, 1f)
 
-                        Box(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .zIndex(1f)
-                                .graphicsLayer(
-                                    alpha = contentAlpha,
-                                    compositingStrategy = CompositingStrategy.Offscreen
-                                )
+                        CompositionLocalProvider(
+                            LocalHazeState provides modalHazeState,
+                            LocalBackdrop provides modalBackdrop
                         ) {
-                            content(contentAlpha)
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .zIndex(1f)
+                                    .graphicsLayer(
+                                        alpha = contentAlpha,
+                                        compositingStrategy = CompositingStrategy.Offscreen
+                                    )
+                            ) {
+                                content(contentAlpha)
+                            }
                         }
                     }
                 }

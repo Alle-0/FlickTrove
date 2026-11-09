@@ -51,9 +51,15 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.shimmerEffect
+import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.LocalHazeState
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import dev.chrisbanes.haze.haze
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.layout.Spacer
+import androidx.compose.runtime.CompositionLocalProvider
 import kotlinx.coroutines.delay
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cinetrack.ui.viewmodel.AvatarSelectionViewModel
@@ -99,6 +105,8 @@ fun AvatarSelectionModal(
     onCharacterSelected: (String?, String?) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
+    val modalHazeState = remember { HazeState() }
+    val modalBackdrop = rememberLayerBackdrop { drawContent() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -113,9 +121,7 @@ fun AvatarSelectionModal(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .fillMaxHeight(0.65f)
-                .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
                 .clip(RoundedCornerShape(32.dp))
-                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
@@ -123,14 +129,32 @@ fun AvatarSelectionModal(
                     focusManager.clearFocus()
                 }
         ) {
-            AvatarSelectionContent(
-                viewModel = viewModel,
-                mode = mode,
-                onBack = null,
-                onDismissRequest = onDismissRequest,
-                onCharacterSelected = onCharacterSelected,
-                hazeState = hazeState
-            )
+            Box(
+                modifier = Modifier
+                    .matchParentSize()
+                    .layerBackdrop(modalBackdrop)
+                    .haze(modalHazeState)
+            ) {
+                Spacer(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
+                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
+                )
+            }
+            CompositionLocalProvider(
+                LocalHazeState provides modalHazeState,
+                LocalBackdrop provides modalBackdrop
+            ) {
+                AvatarSelectionContent(
+                    viewModel = viewModel,
+                    mode = mode,
+                    onBack = null,
+                    onDismissRequest = onDismissRequest,
+                    onCharacterSelected = onCharacterSelected,
+                    hazeState = hazeState
+                )
+            }
         }
     }
 }

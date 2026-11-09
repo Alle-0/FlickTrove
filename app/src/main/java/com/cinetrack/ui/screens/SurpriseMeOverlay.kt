@@ -44,6 +44,7 @@ import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.viewmodel.SurpriseCompany
 import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
 import com.cinetrack.ui.viewmodel.SurpriseMood
@@ -52,8 +53,6 @@ import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.math.roundToInt
-
-private val LocalSurpriseHazeState = compositionLocalOf<HazeState?> { null }
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -91,8 +90,7 @@ fun SurpriseMeOverlay(
         }
     }
 
-    CompositionLocalProvider(LocalSurpriseHazeState provides globalHazeState) {
-        com.cinetrack.ui.components.shared.MorphGlassModal(
+    com.cinetrack.ui.components.shared.MorphGlassModal(
             isVisible = isVisible,
             onDismissRequest = onClose,
             triggerBounds = triggerBounds,
@@ -147,7 +145,7 @@ fun SurpriseMeOverlay(
             }
         }
     }
-}
+
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -451,7 +449,7 @@ private fun OptionGridCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hazeState = LocalSurpriseHazeState.current
+    val hazeState = LocalHazeState.current
     val cardShape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
@@ -463,9 +461,14 @@ private fun OptionGridCard(
                 }
             )
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .clip(cardShape)
-            .background(Color.White.copy(alpha = 0.06f), cardShape)
-            .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), cardShape)
+            .hazeGlass(
+                state = hazeState,
+                shape = cardShape,
+                containerColor = Color.White.copy(alpha = 0.08f),
+                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                borderWidth = 1.dp,
+                useRefraction = true
+            )
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
