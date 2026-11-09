@@ -113,13 +113,12 @@ fun Modifier.hazeGlass(
                         }
                     },
                     onDrawSurface = {
-                        val darkTint = containerColor ?: Color(0xFF0C0C10)
-                        val tintAlpha = if (containerColor != null && containerColor.alpha != 1f) {
-                            containerColor.alpha
-                        } else {
-                            0.28f
-                        } * alpha
-                        drawRect(color = darkTint.copy(alpha = tintAlpha))
+                        // Base scura cinematografica: garantisce contrasto, profondità e leggibilità
+                        drawRect(color = Color(0xFF0A0A0E).copy(alpha = 0.40f * alpha))
+                        if (containerColor != null && containerColor != Color.Transparent) {
+                            val tintAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else 0.15f) * alpha
+                            drawRect(color = containerColor.copy(alpha = tintAlpha))
+                        }
                     }
                 )
             } else if (effectiveHazeState != null && advancedEffectsEnabled) {
@@ -130,7 +129,10 @@ fun Modifier.hazeGlass(
                         blurRadius(safeBlurRadius)
                         if (containerColor != null && containerColor != Color.Unspecified) {
                             val targetAlpha = (if (containerColor.alpha != 1f) containerColor.alpha else HazeStyles.GlassAlpha) * alpha
-                            colorEffects(listOf(HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))))
+                            colorEffects(listOf(
+                                HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = 0.55f * alpha)),
+                                HazeColorEffect.tint(containerColor.copy(alpha = targetAlpha))
+                            ))
                         } else if (style == null && alpha != 1f) {
                             colorEffects(listOf(HazeColorEffect.tint(HazeStyles.GlassColor.copy(alpha = HazeStyles.GlassAlpha * alpha))))
                         }

@@ -127,6 +127,7 @@ fun EpisodesBottomSheet(
     }
     
     var selectedEpisodeForInfo by remember { mutableStateOf<Episode?>(null) }
+    val episodesContentHazeState = remember { HazeState() }
 
     val scope = rememberCoroutineScope()
     val dismissAndSync: () -> Unit = {
@@ -295,7 +296,12 @@ fun EpisodesBottomSheet(
                     onDismiss = dismissAndSync
                 )
 
-                if (isAccordion) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .haze(state = episodesContentHazeState, style = HazeStyles.PremiumDark)
+                ) {
+                    if (isAccordion) {
                     // Accordion (TV Time style) layout
                     EpisodesAccordionView(
                         movie = movie,
@@ -456,14 +462,17 @@ fun EpisodesBottomSheet(
                         }
                     }
                 }
+                }
             }
 
             selectedEpisodeForInfo?.let { ep ->
-                EpisodeInfoModal(
-                    episode = ep,
-                    onDismiss = { selectedEpisodeForInfo = null },
-                    hazeState = sheetHazeState
-                )
+                CompositionLocalProvider(LocalBackdrop provides null) {
+                    EpisodeInfoModal(
+                        episode = ep,
+                        onDismiss = { selectedEpisodeForInfo = null },
+                        hazeState = episodesContentHazeState
+                    )
+                }
             }
         }
         }
