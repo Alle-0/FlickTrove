@@ -57,6 +57,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ColorWheel
 import com.cinetrack.ui.theme.*
@@ -134,16 +135,18 @@ fun BackupDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .bounceClick(enabled = isExportEnabled) { onExport() }
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        if (isExportEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-                        else MaterialTheme.colorScheme.primary.copy(alpha = 0.05f)
-                    )
-                    .border(
-                        1.dp,
-                        if (isExportEnabled) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
-                        else Color.White.copy(alpha = 0.1f),
-                        RoundedCornerShape(16.dp)
+                    .hazeGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = if (isExportEnabled)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
+                        else
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.05f),
+                        borderColor = if (isExportEnabled)
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.4f)
+                        else
+                            Color.White.copy(alpha = 0.1f),
+                        borderWidth = 1.dp,
+                        useRefraction = true
                     )
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
@@ -182,9 +185,13 @@ fun BackupDialog(
                 modifier = Modifier
                     .fillMaxWidth()
                     .bounceClick { onImport() }
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White.copy(alpha = 0.06f))
-                    .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                    .hazeGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = Color.White.copy(alpha = 0.06f),
+                        borderColor = Color.White.copy(alpha = 0.15f),
+                        borderWidth = 1.dp,
+                        useRefraction = true
+                    )
                     .padding(horizontal = 16.dp, vertical = 14.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

@@ -34,6 +34,7 @@ import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.R
 import com.cinetrack.ui.components.common.FlickTroveSwitch
+import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.google.firebase.Firebase
@@ -497,12 +498,12 @@ fun AccountModals(
                                     .bounceClick { 
                                         editProfileSubScreen = EditProfileSubScreen.MENU
                                     }
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-                                    .border(
-                                        1.dp,
-                                        com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                        RoundedCornerShape(16.dp)
+                                    .hazeGlass(
+                                        shape = RoundedCornerShape(16.dp),
+                                        containerColor = Color.White.copy(alpha = 0.08f),
+                                        borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                        borderWidth = 1.dp,
+                                        useRefraction = true
                                     ),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -517,15 +518,20 @@ fun AccountModals(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(
-                                        if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.08f),
-                                        RoundedCornerShape(16.dp)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isSaveEnabled) Color.White.copy(alpha = 0.25f) else com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                        RoundedCornerShape(16.dp)
+                                    .then(
+                                        if (isSaveEnabled)
+                                            Modifier
+                                                .clip(RoundedCornerShape(16.dp))
+                                                .background(MaterialTheme.colorScheme.primary, RoundedCornerShape(16.dp))
+                                                .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp))
+                                        else
+                                            Modifier.hazeGlass(
+                                                shape = RoundedCornerShape(16.dp),
+                                                containerColor = Color.White.copy(alpha = 0.08f),
+                                                borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                                borderWidth = 1.dp,
+                                                useRefraction = true
+                                            )
                                     )
                                     .bounceClick(enabled = isSaveEnabled) {
                                         if (nameChangesCount >= 2) {

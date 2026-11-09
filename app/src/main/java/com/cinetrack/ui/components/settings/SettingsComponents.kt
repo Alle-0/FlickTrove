@@ -7,6 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
+import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.runtime.Composable
@@ -822,12 +823,12 @@ fun SettingsDialogCancelButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .clip(shape)
-            .background(Color.White.copy(alpha = 0.08f), shape)
-            .border(
-                1.dp,
-                com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                shape
+            .hazeGlass(
+                shape = shape,
+                containerColor = Color.White.copy(alpha = 0.08f),
+                borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                borderWidth = 1.dp,
+                useRefraction = true
             ),
         contentAlignment = Alignment.Center
     ) {
