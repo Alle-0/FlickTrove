@@ -64,14 +64,9 @@ fun RatingPill(
         modifier = modifier
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .defaultMinSize(minHeight = 36.dp)
-            .hazeGlass(
-                state = hazeState,
-                shape = pillShape,
-                useRefraction = true,
-                borderWidth = 1.dp,
-                borderColor = Color.White.copy(alpha = 0.25f),
-                containerColor = accentColor
-            )
+            .clip(pillShape)
+            .background(accentColor, pillShape)
+            .border(1.dp, Color.White.copy(alpha = 0.25f), pillShape)
             .padding(horizontal = 11.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -141,13 +136,12 @@ internal fun HeaderRatedPill(
         modifier = modifier
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .defaultMinSize(minWidth = 36.dp, minHeight = 36.dp)
-            .hazeGlass(
-                state = hazeState,
-                shape = pillShape,
-                useRefraction = true,
-                borderWidth = 0.5.dp,
-                borderColor = animatedBorderColor,
-                containerColor = if (isSelected) certColor else Color.White.copy(alpha = 0.08f)
+            .clip(pillShape)
+            .background(if (isSelected) certColor else Color.White.copy(alpha = 0.08f), pillShape)
+            .border(
+                width = if (isSelected) 0.dp else 0.5.dp,
+                color = animatedBorderColor,
+                shape = pillShape
             )
             .padding(horizontal = 10.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
@@ -198,13 +192,12 @@ internal fun HeaderTechnicalPill(
         modifier = modifier
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .size(36.dp)
-            .hazeGlass(
-                state = hazeState,
-                shape = pillShape,
-                useRefraction = true,
-                borderWidth = 0.5.dp,
-                borderColor = if (isSelected) accentColor.copy(alpha = 0.45f) else animatedBorderColor,
-                containerColor = if (isSelected) accentColor else Color.White.copy(alpha = 0.08f)
+            .clip(pillShape)
+            .background(if (isSelected) accentColor else Color.White.copy(alpha = 0.08f), pillShape)
+            .border(
+                width = if (isSelected) 0.dp else 0.5.dp,
+                color = if (isSelected) accentColor.copy(alpha = 0.45f) else animatedBorderColor,
+                shape = pillShape
             ),
         contentAlignment = Alignment.Center
     ) {
