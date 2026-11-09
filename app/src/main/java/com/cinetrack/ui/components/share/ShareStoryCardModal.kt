@@ -418,7 +418,7 @@ fun ShareStoryCardModal(
                             .border(
                                 1.dp,
                                 if (hasCustomImage) accentColor.copy(alpha = 0.65f)
-                                else Color.White.copy(alpha = 0.12f),
+                                else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                                 CircleShape
                             )
                             .padding(
@@ -561,7 +561,7 @@ fun ShareStoryCardModal(
                         }
                         .clip(RoundedCornerShape(50))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(50)),
+                        .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), RoundedCornerShape(50)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -605,7 +605,7 @@ fun ShareStoryCardModal(
                         }
                         .clip(RoundedCornerShape(50))
                         .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(50)),
+                        .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), RoundedCornerShape(50)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -657,7 +657,7 @@ private fun ShareGridToggleCard(
             .background(Color.White.copy(alpha = if (enabled) 0.06f else 0.02f))
             .border(
                 1.dp,
-                Color.White.copy(alpha = if (enabled) 0.12f else 0.05f),
+                if (enabled) HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop) else Color.White.copy(alpha = 0.05f),
                 CircleShape
             )
             .padding(start = 12.dp, end = 8.dp),

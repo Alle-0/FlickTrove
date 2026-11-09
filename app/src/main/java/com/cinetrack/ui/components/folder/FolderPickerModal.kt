@@ -329,7 +329,7 @@ private fun FolderItem(
         label = "bgColor"
     )
     val borderColor by androidx.compose.animation.animateColorAsState(
-        targetValue = if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
+        targetValue = if (isSelected) folderColor else com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
         label = "borderColor"
     )
 
@@ -373,7 +373,7 @@ private fun FolderItem(
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(folderColor.copy(alpha = 0.16f))
-                .border(0.5.dp, folderColor.copy(alpha = 0.25f), RoundedCornerShape(12.dp)),
+                .border(0.5.dp, folderColor.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(

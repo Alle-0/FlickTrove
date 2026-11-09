@@ -549,10 +549,10 @@ private fun ActualTroveCardContent(
                             state          = cardHazeState,
                             shape          = CircleShape,
                             containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
-                            blurRadius     = 8.dp,
+                            blurRadius     = com.cinetrack.ui.theme.HazeStyles.GlassBlurRadius,
                             useRefraction  = true,
-                            borderWidth    = 0.5.dp,
-                            borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+                            borderWidth    = 1.dp,
+                            borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
                         )
                     .padding(
                         start  = if (hasMatch) 4.dp else 10.dp,

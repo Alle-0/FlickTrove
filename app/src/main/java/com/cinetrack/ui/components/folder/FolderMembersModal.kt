@@ -251,7 +251,11 @@ fun FolderMembersModal(
                                 .fillMaxWidth()
                                 .clip(CircleShape)
                                 .background(Color.White.copy(alpha = 0.04f))
-                                .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+                                .border(
+                                    1.dp,
+                                    com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                    CircleShape
+                                )
                                 .padding(
                                     start = 7.dp,
                                     top = 7.dp,
@@ -475,7 +479,12 @@ fun FolderMembersModal(
                             }
                         }
                         .clip(buttonShape)
-                        .background(if (isLimitReached) Color.White.copy(alpha = 0.15f) else folderColor),
+                        .background(if (isLimitReached) Color.White.copy(alpha = 0.15f) else folderColor)
+                        .border(
+                            1.dp,
+                            if (isLimitReached) Color.White.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.25f),
+                            buttonShape
+                        ),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
