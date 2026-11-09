@@ -210,7 +210,6 @@ fun SymbiontSearchBarWithFilters(
             sortConfig.selectedDecades.isNotEmpty() ||
             sortConfig.sortType != "popularity"
 
-    val symbioteColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
 
     BoxWithConstraints(
         modifier = modifier.height(44.dp)
@@ -352,8 +351,7 @@ fun SymbiontSearchBarWithFilters(
                     shape = CircleShape,
                     useRefraction = true,
                     borderWidth = 1.dp,
-                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                    containerColor = symbioteColor
+                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                 )
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
@@ -498,8 +496,7 @@ fun SymbiontSearchBarWithFilters(
                                 shape = CircleShape,
                                 useRefraction = true,
                                 borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                containerColor = symbioteColor
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                             ),
                         contentAlignment = Alignment.Center
                     ) {
@@ -543,8 +540,7 @@ fun SymbiontSearchBarWithFilters(
                                 MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
                             } else {
                                 HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                            },
-                            containerColor = symbioteColor
+                            }
                         ),
                     contentAlignment = Alignment.Center
                 ) {
