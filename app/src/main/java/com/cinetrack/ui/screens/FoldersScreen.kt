@@ -60,6 +60,9 @@ import com.cinetrack.ui.utils.fastScrollToTop
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.components.folder.FolderColorPicker
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -199,13 +202,19 @@ fun FoldersScreenContent(
         activeMenuFolder = null
     }
 
+    val foldersBackdrop = rememberLayerBackdrop { drawContent() }
+
     Box(modifier = Modifier.fillMaxSize()) {
         CinematicBackground(modifier = Modifier.fillMaxSize())
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .layerBackdrop(foldersBackdrop)
                 .haze(state = activeHazeState)
         ) {
+            androidx.compose.runtime.CompositionLocalProvider(
+                LocalBackdrop provides foldersBackdrop
+            ) {
             if (folders.isNullOrEmpty() && searchQuery.isBlank() && typeFilter == FolderTypeFilter.ALL) {
                 Box(
                     modifier = Modifier.fillMaxSize(),
@@ -749,8 +758,13 @@ fun FoldersScreenContent(
                     Column(
                         modifier = Modifier
                             .width(200.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp))
+                            .hazeGlass(
+                                state = activeHazeState,
+                                shape = RoundedCornerShape(24.dp),
+                                borderWidth = 1.dp,
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                useRefraction = true
+                            )
                     ) {
                     val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
                     val isOwner = !folder.isShared || (folder.ownerUid == currentUserId)
@@ -861,6 +875,7 @@ fun FoldersScreenContent(
                         )
                     }
                 }
+            }
             }
         }
     }

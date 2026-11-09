@@ -187,12 +187,12 @@ fun QuickRatingModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-                        .border(
-                            1.dp,
-                            com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                            RoundedCornerShape(16.dp)
+                        .hazeGlass(
+                            shape = RoundedCornerShape(16.dp),
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            borderWidth = 1.dp,
+                            borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                            useRefraction = true
                         ),
                     contentAlignment = Alignment.Center
                 ) {

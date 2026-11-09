@@ -249,12 +249,12 @@ fun QuickNoteModal(
                             }
                             speechLauncher.launch(intent)
                         }
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f), CircleShape)
-                        .border(
-                            1.dp,
-                            HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            CircleShape
+                        .hazeGlass(
+                            shape = CircleShape,
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            borderWidth = 1.dp,
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            useRefraction = true
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -401,12 +401,12 @@ fun QuickNoteModal(
                                         permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
                                     }
                                 }
-                                .clip(CircleShape)
-                                .background(if (isRecording) Color.Red else Color.White.copy(alpha = 0.08f), CircleShape)
-                                .border(
-                                    1.dp,
-                                    if (isRecording) Color.Red.copy(alpha = 0.4f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                    CircleShape
+                                .hazeGlass(
+                                    shape = CircleShape,
+                                    containerColor = if (isRecording) Color.Red.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                                    borderWidth = 1.dp,
+                                    borderColor = if (isRecording) Color.Red.copy(alpha = 0.6f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                    useRefraction = true
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -432,12 +432,12 @@ fun QuickNoteModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .clip(RoundedCornerShape(16.dp))
-                        .background(Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
-                        .border(
-                            1.dp,
-                            HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            RoundedCornerShape(16.dp)
+                        .hazeGlass(
+                            shape = RoundedCornerShape(16.dp),
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            borderWidth = 1.dp,
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            useRefraction = true
                         ),
                     contentAlignment = Alignment.Center
                 ) {

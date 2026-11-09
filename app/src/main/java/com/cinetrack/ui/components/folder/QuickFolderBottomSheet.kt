@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.folder
 
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
 import com.cinetrack.ui.utils.ColorUtils
@@ -317,9 +318,13 @@ private fun QuickFolderItem(
         modifier = modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f, onClick = onClick)
-            .clip(RoundedCornerShape(18.dp))
-            .background(animatedBgColor, RoundedCornerShape(18.dp))
-            .border(if (isSelected) 1.5.dp else 1.dp, animatedBorderColor, RoundedCornerShape(18.dp))
+            .hazeGlass(
+                shape = RoundedCornerShape(18.dp),
+                containerColor = animatedBgColor,
+                borderColor = animatedBorderColor,
+                borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                useRefraction = true
+            )
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
