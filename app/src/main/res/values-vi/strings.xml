@@ -2065,9 +2065,11 @@
     <string name="share_cover_picker_title">Tùy Chỉnh Hình Ảnh</string>
     <string name="share_cover_picker_poster_hint">Chạm vào áp phích cho thẻ</string>
     <string name="share_cover_picker_backdrop_hint">Chạm vào hình nền cho thẻ</string>
+    <string name="share_cover_picker_logo_hint">Chạm vào biểu trưng cho thẻ</string>
     <string name="share_cover_picker_reset">Đặt lại</string>
     <string name="share_cover_picker_posters_tab">Áp phích (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Hình nền (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Biểu trưng (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Tất cả ngôn ngữ</string>
     <string name="share_cover_picker_empty">Không có hình ảnh</string>
     <string name="share_cover_picker_select_language">Chọn ngôn ngữ</string>

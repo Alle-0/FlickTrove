@@ -38,6 +38,31 @@ object IconManager {
         return month == java.util.Calendar.FEBRUARY && day in 7..16
     }
 
+    private const val PREFS_ICON = "app_icon_prefs"
+    private const val KEY_LAST_REGULAR_ALIAS = "last_regular_alias"
+
+    private val regularAliases = setOf(
+        ALIAS_TEAL,
+        ALIAS_PINK,
+        ALIAS_PURPLE,
+        ALIAS_AMBER,
+        ALIAS_BLUE
+    )
+
+    private fun getLastRegularAlias(context: Context): String {
+        val prefs = context.getSharedPreferences(PREFS_ICON, Context.MODE_PRIVATE)
+        return prefs.getString(KEY_LAST_REGULAR_ALIAS, ALIAS_TEAL) ?: ALIAS_TEAL
+    }
+
+    private fun saveLastRegularAlias(context: Context, alias: String) {
+        if (alias in regularAliases) {
+            context.getSharedPreferences(PREFS_ICON, Context.MODE_PRIVATE)
+                .edit()
+                .putString(KEY_LAST_REGULAR_ALIAS, alias)
+                .apply()
+        }
+    }
+
     private fun isAliasEnabled(packageManager: PackageManager, context: Context, alias: String): Boolean {
         return try {
             val state = packageManager.getComponentEnabledSetting(ComponentName(context, alias))
@@ -74,13 +99,19 @@ object IconManager {
             isSeasonalIconEnabled && isValentineSeason() -> ALIAS_VALENTINE
             !isDynamicIconEnabled -> {
                 // If dynamic icon is disabled, keep the currently active icon without changing it.
-                // Exception: if a seasonal icon was active and is no longer valid, fallback to ALIAS_TEAL.
+                // Exception: if a seasonal icon was active and is no longer valid, fallback to the last active regular icon.
                 val isSeasonalCurrentlyActive = isAliasEnabled(packageManager, context, ALIAS_HALLOWEEN) ||
                         isAliasEnabled(packageManager, context, ALIAS_CHRISTMAS) ||
                         isAliasEnabled(packageManager, context, ALIAS_VALENTINE)
                 if (isSeasonalCurrentlyActive) {
-                    ALIAS_TEAL
+                    getLastRegularAlias(context)
                 } else {
+                    for (regular in regularAliases) {
+                        if (isAliasEnabled(packageManager, context, regular)) {
+                            saveLastRegularAlias(context, regular)
+                            break
+                        }
+                    }
                     return
                 }
             }
@@ -91,6 +122,10 @@ object IconManager {
             colorName == "Teal" -> ALIAS_TEAL
             colorName.startsWith("#") -> getClosestPresetAlias(colorName)
             else -> ALIAS_TEAL
+        }
+
+        if (activeAlias in regularAliases) {
+            saveLastRegularAlias(context, activeAlias)
         }
 
         // Check if the alias is already enabled to avoid unnecessary restarts

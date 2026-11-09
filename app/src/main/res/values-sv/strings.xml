@@ -2084,9 +2084,11 @@ Prova att förenkla sökningen</string>
     <string name="share_cover_picker_title">Anpassa bild</string>
     <string name="share_cover_picker_poster_hint">Tryck på en affisch för kortet</string>
     <string name="share_cover_picker_backdrop_hint">Tryck på en bakgrund för kortet</string>
+    <string name="share_cover_picker_logo_hint">Tryck på en logotyp för kortet</string>
     <string name="share_cover_picker_reset">Återställ</string>
     <string name="share_cover_picker_posters_tab">Affischer (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Bakgrunder (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logotyper (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Alla språk</string>
     <string name="share_cover_picker_empty">Inga bilder tillgängliga</string>
     <string name="share_cover_picker_select_language">Välj språk</string>

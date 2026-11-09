@@ -2084,9 +2084,11 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="share_cover_picker_title">Kép testreszabása</string>
     <string name="share_cover_picker_poster_hint">Koppintson egy poszterre a kártyához</string>
     <string name="share_cover_picker_backdrop_hint">Koppintson egy háttérre a kártyához</string>
+    <string name="share_cover_picker_logo_hint">Koppintson egy logóra a kártyához</string>
     <string name="share_cover_picker_reset">Visszaállítás</string>
     <string name="share_cover_picker_posters_tab">Poszterek (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Hátterek (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logók (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Összes nyelv</string>
     <string name="share_cover_picker_empty">Nincsenek elérhető képek</string>
     <string name="share_cover_picker_select_language">Nyelv kiválasztása</string>

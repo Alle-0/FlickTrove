@@ -2110,9 +2110,11 @@
     <string name="share_cover_picker_title">Personnaliser l\'image</string>
     <string name="share_cover_picker_poster_hint">Appuyez sur une affiche pour la carte</string>
     <string name="share_cover_picker_backdrop_hint">Appuyez sur un arrière-plan pour la carte</string>
+    <string name="share_cover_picker_logo_hint">Touchez un logo pour la carte</string>
     <string name="share_cover_picker_reset">Rétablir</string>
     <string name="share_cover_picker_posters_tab">Affiches (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Arrière-plans (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logos (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Toutes les langues</string>
     <string name="share_cover_picker_empty">Aucune image disponible</string>
     <string name="share_cover_picker_select_language">Sélectionner la langue</string>

@@ -608,7 +608,12 @@ fun RecommendationsScreenContent(
                 Spacer(
                     modifier = Modifier
                         .matchParentSize()
-                        .hazeGlass(state = localHazeState, shape = CircleShape)
+                        .hazeGlass(
+                            state = localHazeState,
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true
+                        )
                 )
 
                 val options = listOf(stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))

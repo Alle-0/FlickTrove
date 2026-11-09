@@ -385,7 +385,12 @@ fun UpdatesScreen(
                                     triggerExit() 
                                 }
                             }
-                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
+                            .hazeGlass(
+                                state = internalHazeState,
+                                shape = CircleShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -464,7 +469,9 @@ fun UpdatesScreen(
                                 .matchParentSize()
                                 .hazeGlass(
                                     state = internalHazeState,
-                                    shape = CircleShape
+                                    shape = CircleShape,
+                                    blurRadius = 8.dp,
+                                    useRefraction = true
                                 )
                         )
                         AnimatedContent(

@@ -2086,9 +2086,11 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="share_cover_picker_title">Dostosuj grafikę</string>
     <string name="share_cover_picker_poster_hint">Dotknij plakatu, aby wybrać go do karty</string>
     <string name="share_cover_picker_backdrop_hint">Dotknij tła, aby wybrać je do karty</string>
+    <string name="share_cover_picker_logo_hint">Dotknij logo dla karty</string>
     <string name="share_cover_picker_reset">Resetuj</string>
     <string name="share_cover_picker_posters_tab">Plakaty (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Tła (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logotypy (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Wszystkie języki</string>
     <string name="share_cover_picker_empty">Brak dostępnych grafik</string>
     <string name="share_cover_picker_select_language">Wybierz język</string>

@@ -2108,9 +2108,11 @@
     <string name="share_cover_picker_title">छवि कस्टमाइज़ करें</string>
     <string name="share_cover_picker_poster_hint">कार्ड के लिए पोस्टर पर टैप करें</string>
     <string name="share_cover_picker_backdrop_hint">कार्ड के लिए पृष्ठभूमि पर टैप करें</string>
+    <string name="share_cover_picker_logo_hint">कार्ड के लिए एक लोगो चुनें</string>
     <string name="share_cover_picker_reset">रीसेट करें</string>
     <string name="share_cover_picker_posters_tab">पोस्टर (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">पृष्ठभूमि (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">लोगो (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 सभी भाषाएं</string>
     <string name="share_cover_picker_empty">कोई छवि उपलब्ध नहीं है</string>
     <string name="share_cover_picker_select_language">भाषा चुनें</string>

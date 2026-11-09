@@ -2112,9 +2112,11 @@
     <string name="share_cover_picker_title">Personalizar imagen</string>
     <string name="share_cover_picker_poster_hint">Toca un póster para la tarjeta</string>
     <string name="share_cover_picker_backdrop_hint">Toca un fondo para la tarjeta</string>
+    <string name="share_cover_picker_logo_hint">Toca un logo para la tarjeta</string>
     <string name="share_cover_picker_reset">Restaurar</string>
     <string name="share_cover_picker_posters_tab">Pósteres (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Fondos (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logos (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Todos los idiomas</string>
     <string name="share_cover_picker_empty">No hay imágenes disponibles</string>
     <string name="share_cover_picker_select_language">Seleccionar idioma</string>

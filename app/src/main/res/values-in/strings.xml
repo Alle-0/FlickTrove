@@ -2115,9 +2115,11 @@
     <string name="share_cover_picker_title">Sesuaikan Gambar</string>
     <string name="share_cover_picker_poster_hint">Ketuk poster untuk kartu</string>
     <string name="share_cover_picker_backdrop_hint">Ketuk latar belakang untuk kartu</string>
+    <string name="share_cover_picker_logo_hint">Ketuk logo untuk kartu</string>
     <string name="share_cover_picker_reset">Reset</string>
     <string name="share_cover_picker_posters_tab">Poster (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Latar Belakang (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logo (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Semua bahasa</string>
     <string name="share_cover_picker_empty">Tidak ada gambar tersedia</string>
     <string name="share_cover_picker_select_language">Pilih bahasa</string>

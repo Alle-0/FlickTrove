@@ -7,6 +7,7 @@ import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -188,16 +189,23 @@ fun DetailMorphingTopBar(
         ) {
             // Glass background
             if (currentEffectiveProgress > 0.01f) {
+                val effectiveGlassShape: Shape = remember(currentEffectiveProgress, modalExpansionProgress, modalCorner) {
+                    if (modalExpansionProgress >= 0.99f) RoundedCornerShape(modalCorner)
+                    else if (currentEffectiveProgress >= 0.99f) RoundedCornerShape(50)
+                    else symbioteShape
+                }
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
                         .graphicsLayer {
                             clip = true
-                            shape = symbioteShape
+                            shape = effectiveGlassShape
                         }
                         .hazeGlass(
                             state = localHazeState,
-                            shape = symbioteShape,
+                            shape = effectiveGlassShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true,
                             useOffscreenStrategy = true
                         )
                 )

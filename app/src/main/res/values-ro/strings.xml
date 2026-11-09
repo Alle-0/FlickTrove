@@ -2087,9 +2087,11 @@ Cod de invitație: %3$s</string>
     <string name="share_cover_picker_title">Personalizează imaginea</string>
     <string name="share_cover_picker_poster_hint">Apasă pe un poster pentru card</string>
     <string name="share_cover_picker_backdrop_hint">Apasă pe un fundal pentru card</string>
+    <string name="share_cover_picker_logo_hint">Atingeți o siglă pentru card</string>
     <string name="share_cover_picker_reset">Resetează</string>
     <string name="share_cover_picker_posters_tab">Postere (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Fundaluri (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Sigle (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Toate limbile</string>
     <string name="share_cover_picker_empty">Nicio imagine disponibilă</string>
     <string name="share_cover_picker_select_language">Selectează limba</string>

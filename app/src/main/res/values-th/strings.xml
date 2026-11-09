@@ -2078,9 +2078,11 @@
     <string name="share_cover_picker_title">ปรับแต่งภาพ</string>
     <string name="share_cover_picker_poster_hint">แตะโปสเตอร์เพื่อใช้ในการ์ด</string>
     <string name="share_cover_picker_backdrop_hint">แตะภาพพื้นหลังเพื่อใช้ในการ์ด</string>
+    <string name="share_cover_picker_logo_hint">แตะโลโก้สำหรับนามบัตร</string>
     <string name="share_cover_picker_reset">รีเซ็ต</string>
     <string name="share_cover_picker_posters_tab">โปสเตอร์ (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">ภาพพื้นหลัง (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">โลโก้ (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 ทุกภาษา</string>
     <string name="share_cover_picker_empty">ไม่มีภาพที่ใช้งานได้</string>
     <string name="share_cover_picker_select_language">เลือกภาษา</string>

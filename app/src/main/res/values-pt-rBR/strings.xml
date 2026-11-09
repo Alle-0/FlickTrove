@@ -2108,9 +2108,11 @@
     <string name="share_cover_picker_title">Personalizar imagem</string>
     <string name="share_cover_picker_poster_hint">Toque em um pôster para o card</string>
     <string name="share_cover_picker_backdrop_hint">Toque em um plano de fundo para o card</string>
+    <string name="share_cover_picker_logo_hint">Toque em um logo para o cartão</string>
     <string name="share_cover_picker_reset">Restaurar</string>
     <string name="share_cover_picker_posters_tab">Pôsteres (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Planos de fundo (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logos (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Todos os idiomas</string>
     <string name="share_cover_picker_empty">Nenhuma imagem disponível</string>
     <string name="share_cover_picker_select_language">Selecionar idioma</string>

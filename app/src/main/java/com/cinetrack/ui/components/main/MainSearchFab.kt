@@ -384,7 +384,9 @@ fun BoxScope.MainScrollToTopFab(
                     .hazeGlass(
                         state = contentHazeState,
                         shape = symbioteShape,
-                        borderWidth = 0.dp
+                        borderWidth = 0.dp,
+                        blurRadius = 8.dp,
+                        useRefraction = true
                     )
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {

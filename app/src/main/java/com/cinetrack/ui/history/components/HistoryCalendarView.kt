@@ -206,7 +206,9 @@ fun HistoryCalendarView(
                         .matchParentSize()
                         .hazeGlass(
                             state = calendarHazeState,
-                            shape = CircleShape
+                            shape = CircleShape,
+                            blurRadius = 8.dp,
+                            useRefraction = true
                         )
                 )
                 CategoryTabSelector(

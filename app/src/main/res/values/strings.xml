@@ -2122,9 +2122,11 @@
     <string name="share_cover_picker_title">Customize Image</string>
     <string name="share_cover_picker_poster_hint">Tap a poster for the card</string>
     <string name="share_cover_picker_backdrop_hint">Tap a backdrop for the card</string>
+    <string name="share_cover_picker_logo_hint">Tap a logo for the card</string>
     <string name="share_cover_picker_reset">Reset</string>
     <string name="share_cover_picker_posters_tab">Posters (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Backdrops (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logos (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 All languages</string>
     <string name="share_cover_picker_empty">No images available</string>
     <string name="share_cover_picker_select_language">Select language</string>

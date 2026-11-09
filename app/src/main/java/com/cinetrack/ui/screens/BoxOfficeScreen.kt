@@ -316,7 +316,9 @@ fun BoxOfficeScreenContent(
                             .matchParentSize()
                             .hazeGlass(
                                 state = hazeState,
-                                shape = CircleShape
+                                shape = CircleShape,
+                                blurRadius = 8.dp,
+                                useRefraction = true
                             )
                     )
 

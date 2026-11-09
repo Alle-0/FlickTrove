@@ -71,7 +71,12 @@ fun FlickTroveBottomSheet(
                         IntOffset(0, handleDragOffset.value.roundToInt().coerceAtLeast(0))
                     }
                     .then(
-                        if (hazeState != null) Modifier.hazeGlass(state = hazeState, shape = shape)
+                        if (hazeState != null) Modifier.hazeGlass(
+                            state = hazeState,
+                            shape = shape,
+                            blurRadius = 8.dp,
+                            useRefraction = true
+                        )
                         else Modifier.glassmorphic(shape = shape, blurRadius = HazeStyles.GlassBlurRadius)
                     ),
                 color = Color.Transparent

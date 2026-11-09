@@ -2116,9 +2116,11 @@
     <string name="share_cover_picker_title">画像をカスタマイズ</string>
     <string name="share_cover_picker_poster_hint">カード用のポスターをタップ</string>
     <string name="share_cover_picker_backdrop_hint">カード用の背景画像をタップ</string>
+    <string name="share_cover_picker_logo_hint">カードのロゴをタップ</string>
     <string name="share_cover_picker_reset">リセット</string>
     <string name="share_cover_picker_posters_tab">ポスター (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">背景画像 (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">ロゴ (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 すべての言語</string>
     <string name="share_cover_picker_empty">利用可能な画像がありません</string>
     <string name="share_cover_picker_select_language">言語を選択</string>

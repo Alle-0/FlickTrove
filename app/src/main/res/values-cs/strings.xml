@@ -2065,9 +2065,11 @@
     <string name="share_cover_picker_title">Přizpůsobit obrázek</string>
     <string name="share_cover_picker_poster_hint">Klepnutím vyberte plakát pro kartu</string>
     <string name="share_cover_picker_backdrop_hint">Klepnutím vyberte pozadí pro kartu</string>
+    <string name="share_cover_picker_logo_hint">Klepnutím vyberte logo pro kartu</string>
     <string name="share_cover_picker_reset">Obnovit</string>
     <string name="share_cover_picker_posters_tab">Plakáty (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Pozadí (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Loga (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Všechny jazyky</string>
     <string name="share_cover_picker_empty">Žádné obrázky k dispozici</string>
     <string name="share_cover_picker_select_language">Vybrat jazyk</string>

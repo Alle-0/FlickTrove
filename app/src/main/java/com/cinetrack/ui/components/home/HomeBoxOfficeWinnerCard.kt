@@ -27,6 +27,10 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.runtime.CompositionLocalProvider
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -51,6 +55,7 @@ fun HomeBoxOfficeWinnerCard(
     val movie = item.movie
     val imageQuality = LocalImageQuality.current
     val cardHazeState = remember { HazeState() }
+    val cardBackdrop = rememberLayerBackdrop { drawContent() }
 
     var localLogoPath by remember(movie.id, movie.logoPath) { mutableStateOf(movie.logoPath) }
     LaunchedEffect(movie.id, movie.logoPath) {
@@ -82,10 +87,11 @@ fun HomeBoxOfficeWinnerCard(
             .clip(cardShape)
             .border(1.dp, Color.White.copy(alpha = 0.08f), cardShape)
     ) {
-        // Backdrop & Scrim as Haze Source
+        // Backdrop & Scrim as Haze Source & LayerBackdrop source
         Box(
             modifier = Modifier
                 .fillMaxSize()
+                .layerBackdrop(cardBackdrop)
                 .haze(cardHazeState)
         ) {
             if (backdropUrl != null) {
@@ -119,60 +125,64 @@ fun HomeBoxOfficeWinnerCard(
             )
         }
 
-        // Top Badge: #1 Box Office Pill
-        Row(
-            modifier = Modifier
-                .align(Alignment.TopStart)
-                .padding(12.dp)
-                .hazeGlass(
-                    state = cardHazeState,
-                    shape = CircleShape,
-                    containerColor = Color.Black.copy(alpha = 0.35f),
-                    blurRadius = 16.dp,
-                    borderWidth = 1.dp,
-                    borderColor = Color.White.copy(alpha = 0.15f)
-                )
-                .padding(horizontal = 10.dp, vertical = 5.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(5.dp)
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_crown),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(14.dp)
-            )
-            Text(
-                text = "#1 BOX OFFICE",
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Bold,
-                color = Color.White,
-                letterSpacing = 0.5.sp
-            )
-        }
-
-        // Top Right Badge: Revenue Pill
-        if (item.formattedRevenue.isNotBlank()) {
-            Box(
+        CompositionLocalProvider(LocalBackdrop provides cardBackdrop) {
+            // Top Badge: #1 Box Office Pill
+            Row(
                 modifier = Modifier
-                    .align(Alignment.TopEnd)
+                    .align(Alignment.TopStart)
                     .padding(12.dp)
                     .hazeGlass(
                         state = cardHazeState,
                         shape = CircleShape,
                         containerColor = Color.Black.copy(alpha = 0.35f),
-                        blurRadius = 16.dp,
+                        blurRadius = 8.dp,
+                        useRefraction = true,
                         borderWidth = 1.dp,
-                        borderColor = Color(0xFF10B981).copy(alpha = 0.4f)
+                        borderColor = Color.White.copy(alpha = 0.15f)
                     )
-                    .padding(horizontal = 10.dp, vertical = 5.dp)
+                    .padding(horizontal = 10.dp, vertical = 5.dp),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(5.dp)
             ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_crown),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(14.dp)
+                )
                 Text(
-                    text = item.formattedRevenue,
+                    text = "#1 BOX OFFICE",
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,
-                    color = Color(0xFF34D399)
+                    color = Color.White,
+                    letterSpacing = 0.5.sp
                 )
+            }
+
+            // Top Right Badge: Revenue Pill
+            if (item.formattedRevenue.isNotBlank()) {
+                Box(
+                    modifier = Modifier
+                        .align(Alignment.TopEnd)
+                        .padding(12.dp)
+                        .hazeGlass(
+                            state = cardHazeState,
+                            shape = CircleShape,
+                            containerColor = Color.Black.copy(alpha = 0.35f),
+                            blurRadius = 8.dp,
+                            useRefraction = true,
+                            borderWidth = 1.dp,
+                            borderColor = Color(0xFF10B981).copy(alpha = 0.4f)
+                        )
+                        .padding(horizontal = 10.dp, vertical = 5.dp)
+                ) {
+                    Text(
+                        text = item.formattedRevenue,
+                        fontSize = 11.sp,
+                        fontWeight = FontWeight.Bold,
+                        color = Color(0xFF34D399)
+                    )
+                }
             }
         }
 

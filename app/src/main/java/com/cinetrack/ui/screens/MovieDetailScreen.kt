@@ -449,6 +449,10 @@ fun MovieDetailScreenContent(
         drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
         drawContent()
     }
+    val posterBackdrop = rememberLayerBackdrop {
+        drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+        drawContent()
+    }
 
     CompositionLocalProvider(LocalBackdrop provides detailBackdrop) {
     Box(modifier = Modifier.fillMaxSize()) {
@@ -476,14 +480,13 @@ fun MovieDetailScreenContent(
                 is DetailUiState.Success -> 1
                 is DetailUiState.Error -> 2
             },
-            modifier = Modifier.layerBackdrop(detailBackdrop),
             transitionSpec = {
                 fadeIn(animationSpec = tween(400, easing = FastOutSlowInEasing)) togetherWith 
                 fadeOut(animationSpec = tween(400, easing = FastOutSlowInEasing))
             },
             label = "DetailUiStateTransition"
         ) { targetIndex ->
-            CompositionLocalProvider(LocalBackdrop provides null) {
+            CompositionLocalProvider(LocalBackdrop provides detailBackdrop) {
             when (targetIndex) {
                 0 -> {
                     DetailSkeleton(
@@ -528,6 +531,7 @@ fun MovieDetailScreenContent(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
+                                    .layerBackdrop(detailBackdrop)
                                     .haze(localHazeState, style = HazeStyles.PremiumDark)
                                     .background(animatedBgColor)
                                     .verticalScroll(scrollState)
@@ -558,6 +562,7 @@ fun MovieDetailScreenContent(
                                             backgroundColor = animatedBgColor,
                                             isOffline = isOffline,
                                             modifier = Modifier
+                                                .layerBackdrop(posterBackdrop)
                                                 .pointerInput(Unit) {
                                                     detectTapGestures(
                                                         onLongPress = {
@@ -589,33 +594,35 @@ fun MovieDetailScreenContent(
                                         }
                                     }
 
-                                    DetailHeader(
-                                        movie = activeMovie,
-                                        movieDetails = state.details,
-                                        ratings = state.externalRatings,
-                                        accentColor = accentColor,
-                                        matchPercentage = state.matchPercentage,
-                                        logoPath = if (useMovieLogo) {
-                                            val currentLang = java.util.Locale.getDefault().language
-                                            val logos = state.details.images?.logos
-                                            val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
-                                                ?: logos?.firstOrNull { it.iso6391 == "en" } 
-                                                ?: logos?.firstOrNull()
-                                            bestLogo?.filePath ?: preloadedLogoPath
-                                        } else null,
-                                        hazeState = backdropHazeState,
-                                        onRatingClick = { showRatingInfoDialog = true },
-                                        hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
-                                        onCoverSelectClick = { showCoverSelectionSheet = true },
-                                        onTrailerClick = if (effectiveVideos.isNotEmpty()) {
-                                            { bounds ->
-                                                trailerTriggerBounds = bounds
-                                                showTrailerModal = true
-                                            }
-                                        } else null,
-                                        isOffline = isOffline,
-                                        movieStatus = state.details.status ?: activeMovie.status
-                                    )
+                                    CompositionLocalProvider(LocalBackdrop provides posterBackdrop) {
+                                        DetailHeader(
+                                            movie = activeMovie,
+                                            movieDetails = state.details,
+                                            ratings = state.externalRatings,
+                                            accentColor = accentColor,
+                                            matchPercentage = state.matchPercentage,
+                                            logoPath = if (useMovieLogo) {
+                                                val currentLang = java.util.Locale.getDefault().language
+                                                val logos = state.details.images?.logos
+                                                val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
+                                                    ?: logos?.firstOrNull { it.iso6391 == "en" } 
+                                                    ?: logos?.firstOrNull()
+                                                bestLogo?.filePath ?: preloadedLogoPath
+                                            } else null,
+                                            hazeState = backdropHazeState,
+                                            onRatingClick = { showRatingInfoDialog = true },
+                                            hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
+                                            onCoverSelectClick = { showCoverSelectionSheet = true },
+                                            onTrailerClick = if (effectiveVideos.isNotEmpty()) {
+                                                { bounds ->
+                                                    trailerTriggerBounds = bounds
+                                                    showTrailerModal = true
+                                                }
+                                            } else null,
+                                            isOffline = isOffline,
+                                            movieStatus = state.details.status ?: activeMovie.status
+                                        )
+                                    }
 
                                     DetailMetaRows(
                                         genres = state.movieEntry.genres ?: emptyList(),

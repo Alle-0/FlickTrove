@@ -374,7 +374,8 @@ fun DetailHeader(
                     state = hazeState,
                     shape = containerShape,
                     containerColor = Color(0xFF1A1A1D).copy(alpha = 0.50f),
-                    blurRadius = 32.dp
+                    blurRadius = 8.dp,
+                    useRefraction = true
                 )
         ) {
             Column(

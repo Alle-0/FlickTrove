@@ -2116,9 +2116,11 @@
     <string name="share_cover_picker_title">Resmi Özelleştir</string>
     <string name="share_cover_picker_poster_hint">Kart için bir postere dokunun</string>
     <string name="share_cover_picker_backdrop_hint">Kart için bir arka plana dokunun</string>
+    <string name="share_cover_picker_logo_hint">Kart için bir logoya dokunun</string>
     <string name="share_cover_picker_reset">Sıfırla</string>
     <string name="share_cover_picker_posters_tab">Posterler (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Arka planlar (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Logolar (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Tüm diller</string>
     <string name="share_cover_picker_empty">Görsel bulunamadı</string>
     <string name="share_cover_picker_select_language">Dil seç</string>

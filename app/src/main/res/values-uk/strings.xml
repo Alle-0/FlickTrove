@@ -2085,9 +2085,11 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="share_cover_picker_title">Налаштувати зображення</string>
     <string name="share_cover_picker_poster_hint">Оберіть постер для картки</string>
     <string name="share_cover_picker_backdrop_hint">Оберіть фон для картки</string>
+    <string name="share_cover_picker_logo_hint">Оберіть логотип для картки</string>
     <string name="share_cover_picker_reset">Скинути</string>
     <string name="share_cover_picker_posters_tab">Постери (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Фони (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Логотипи (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Всі мови</string>
     <string name="share_cover_picker_empty">Немає доступних зображень</string>
     <string name="share_cover_picker_select_language">Оберіть мову</string>

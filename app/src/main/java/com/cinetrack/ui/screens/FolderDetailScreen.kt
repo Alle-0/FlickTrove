@@ -717,7 +717,12 @@ fun FolderDetailScreenContent(
                                     Spacer(
                                         modifier = Modifier
                                             .matchParentSize()
-                                            .hazeGlass(state = internalHazeState, shape = CircleShape)
+                                            .hazeGlass(
+                                                state = internalHazeState,
+                                                shape = CircleShape,
+                                                blurRadius = 8.dp,
+                                                useRefraction = true
+                                            )
                                     )
                                     
                                     val options = listOf(stringResource(R.string.folder_detail_tab_all), stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))

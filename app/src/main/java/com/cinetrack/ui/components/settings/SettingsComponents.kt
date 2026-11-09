@@ -8,6 +8,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import com.cinetrack.ui.components.common.FlickTroveSwitch
+import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -804,6 +805,7 @@ fun SettingsDialogCancelButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
+    hazeState: dev.chrisbanes.haze.HazeState? = null,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
 ) {
     val haptic = LocalHapticFeedback.current
@@ -814,9 +816,15 @@ fun SettingsDialogCancelButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .clip(shape)
-            .background(Color.White.copy(alpha = 0.08f))
-            .border(1.dp, Color.White.copy(alpha = 0.15f), shape),
+            .hazeGlass(
+                state = hazeState,
+                shape = shape,
+                containerColor = Color.White.copy(alpha = 0.08f),
+                borderColor = Color.White.copy(alpha = 0.15f),
+                borderWidth = 1.dp,
+                blurRadius = 8.dp,
+                useRefraction = true
+            ),
         contentAlignment = Alignment.Center
     ) {
         Text(

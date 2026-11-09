@@ -2087,9 +2087,11 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="share_cover_picker_title">Προσαρμογή Εικόνας</string>
     <string name="share_cover_picker_poster_hint">Πατήστε μια αφίσα για την κάρτα</string>
     <string name="share_cover_picker_backdrop_hint">Πατήστε ένα φόντο για την κάρτα</string>
+    <string name="share_cover_picker_logo_hint">Πατήστε ένα λογότυπο για την κάρτα</string>
     <string name="share_cover_picker_reset">Επαναφορά</string>
     <string name="share_cover_picker_posters_tab">Αφίσες (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Φόντα (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Λογότυπα (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Όλες οι γλώσσες</string>
     <string name="share_cover_picker_empty">Δεν υπάρχουν διαθέσιμες εικόνες</string>
     <string name="share_cover_picker_select_language">Επιλογή γλώσσας</string>

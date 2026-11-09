@@ -23,6 +23,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.LockReset
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
@@ -484,10 +488,11 @@ private fun ActualTroveCardContent(
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
+    val cardBackdrop = rememberLayerBackdrop { drawContent() }
 
     Box(modifier = modifier) {
-        // Backdrop + gradienti come sorgente Haze
-        Box(modifier = Modifier.fillMaxSize().haze(cardHazeState)) {
+        // Backdrop + gradienti come sorgente Haze e LayerBackdrop
+        Box(modifier = Modifier.fillMaxSize().layerBackdrop(cardBackdrop).haze(cardHazeState)) {
             AsyncImage(
                 model = ImageRequest.Builder(context)
                     .data(backdropUrl)
@@ -528,25 +533,27 @@ private fun ActualTroveCardContent(
         }
 
         // Layout Opzione 3: Badge Unificato in Alto + Basso Pulito
-        Column(
-            modifier            = Modifier
-                .fillMaxSize()
-                .padding(18.dp)
-                .graphicsLayer { alpha = detailsAlpha },
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-            // Badge unificato in alto a sinistra: [ 87% MATCH ] SCELTO PER TE
-            val hasMatch = matchScore != null && matchScore > 0
-            Box(
-                modifier = Modifier
-                    .hazeGlass(
-                        state          = cardHazeState,
-                        shape          = CircleShape,
-                        containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
-                        blurRadius     = 16.dp,
-                        borderWidth    = 0.5.dp,
-                        borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
-                    )
+        CompositionLocalProvider(LocalBackdrop provides cardBackdrop) {
+            Column(
+                modifier            = Modifier
+                    .fillMaxSize()
+                    .padding(18.dp)
+                    .graphicsLayer { alpha = detailsAlpha },
+                verticalArrangement = Arrangement.SpaceBetween
+            ) {
+                // Badge unificato in alto a sinistra: [ 87% MATCH ] SCELTO PER TE
+                val hasMatch = matchScore != null && matchScore > 0
+                Box(
+                    modifier = Modifier
+                        .hazeGlass(
+                            state          = cardHazeState,
+                            shape          = CircleShape,
+                            containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.14f),
+                            blurRadius     = 8.dp,
+                            useRefraction  = true,
+                            borderWidth    = 0.5.dp,
+                            borderColor    = MaterialTheme.colorScheme.primary.copy(alpha = 0.45f)
+                        )
                     .padding(
                         start  = if (hasMatch) 4.dp else 10.dp,
                         end    = 10.dp,
@@ -665,4 +672,5 @@ private fun ActualTroveCardContent(
             }
         }
     }
+}
 }

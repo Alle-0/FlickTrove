@@ -2121,9 +2121,11 @@
     <string name="share_cover_picker_title">Personalizza Immagine</string>
     <string name="share_cover_picker_poster_hint">Tocca una locandina per la card</string>
     <string name="share_cover_picker_backdrop_hint">Tocca uno sfondo per la card</string>
+    <string name="share_cover_picker_logo_hint">Tocca un logo per la card</string>
     <string name="share_cover_picker_reset">Ripristina</string>
     <string name="share_cover_picker_posters_tab">Locandine (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">Sfondi (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">Loghi (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 Tutte le lingue</string>
     <string name="share_cover_picker_empty">Nessuna immagine disponibile</string>
     <string name="share_cover_picker_select_language">Seleziona lingua</string>

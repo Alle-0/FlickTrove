@@ -384,7 +384,7 @@ class CommsUniCommentsScreen(
                                 .hazeGlass(
                                     state = hazeState,
                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
-                                    containerColor = Color.Black.copy(alpha = 0.75f),
+                                    containerColor = Color.Black.copy(alpha = 0.50f),
                                     blurRadius = 8.dp,
                                     useRefraction = true
                                 )
@@ -443,8 +443,15 @@ class CommsUniCommentsScreen(
                                                 }
                                                 showCommsUniInfo = true
                                             }
-                                            .clip(CircleShape)
-                                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                            .hazeGlass(
+                                                state = hazeState,
+                                                shape = CircleShape,
+                                                containerColor = Color.White.copy(alpha = 0.08f),
+                                                borderColor = Color.White.copy(alpha = 0.20f),
+                                                borderWidth = 1.dp,
+                                                blurRadius = 8.dp,
+                                                useRefraction = true
+                                            )
                                             .padding(horizontal = 8.dp, vertical = 5.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -508,9 +515,15 @@ class CommsUniCommentsScreen(
                                                 }
                                                 showEpisodePickerSheet = true
                                             }
-                                            .clip(CircleShape)
-                                            .background(Color.White.copy(alpha = 0.08f))
-                                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                            .hazeGlass(
+                                                state = hazeState,
+                                                shape = CircleShape,
+                                                containerColor = Color.White.copy(alpha = 0.08f),
+                                                borderColor = Color.White.copy(alpha = 0.20f),
+                                                borderWidth = 1.dp,
+                                                blurRadius = 8.dp,
+                                                useRefraction = true
+                                            )
                                             .padding(horizontal = 9.dp, vertical = 4.5.dp),
                                         contentAlignment = Alignment.Center
                                     ) {

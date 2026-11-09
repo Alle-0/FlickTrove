@@ -2116,9 +2116,11 @@
     <string name="share_cover_picker_title">이미지 맞춤설정</string>
     <string name="share_cover_picker_poster_hint">카드에 사용할 포스터를 탭하세요</string>
     <string name="share_cover_picker_backdrop_hint">카드에 사용할 배경을 탭하세요</string>
+    <string name="share_cover_picker_logo_hint">카드의 로고를 탭하세요</string>
     <string name="share_cover_picker_reset">재설정</string>
     <string name="share_cover_picker_posters_tab">포스터 (%1$d)</string>
     <string name="share_cover_picker_backdrops_tab">배경 (%1$d)</string>
+    <string name="share_cover_picker_logos_tab">로고 (%1$d)</string>
     <string name="share_cover_picker_all_languages">🌐 모든 언어</string>
     <string name="share_cover_picker_empty">사용 가능한 이미지가 없습니다</string>
     <string name="share_cover_picker_select_language">언어 선택</string>

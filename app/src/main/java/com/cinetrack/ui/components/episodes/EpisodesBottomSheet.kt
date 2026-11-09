@@ -11,6 +11,7 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -313,6 +314,7 @@ fun EpisodesBottomSheet(
                             seasons = seasons,
                             selectedSeason = selectedSeasonNumber,
                             completedSeasons = completedSeasons,
+                            sheetHazeState = sheetHazeState,
                             onSeasonSelected = { selectedSeasonNumber = it }
                         )
 
@@ -332,6 +334,7 @@ fun EpisodesBottomSheet(
 
                             BulkAction(
                                 isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
+                                sheetHazeState = sheetHazeState,
                                 onToggle = { 
                                     if (isDropped) return@BulkAction
                                     val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
@@ -499,6 +502,7 @@ private fun SeasonSelector(
     seasons: List<Int>,
     selectedSeason: Int,
     completedSeasons: Set<Int>,
+    sheetHazeState: HazeState,
     onSeasonSelected: (Int) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
@@ -554,14 +558,22 @@ private fun SeasonSelector(
             
             val borderColor = when {
                 isCompleted -> Color(0xFF00E676).copy(alpha = 0.8f)
-                else -> Color.White.copy(alpha = 0.1f)
+                else -> Color.White.copy(alpha = 0.15f)
             }
 
             Surface(
-                modifier = Modifier.bounceClick { onSeasonSelected(seasonNum) },
-                color = backgroundColor,
-                shape = CircleShape,
-                border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
+                modifier = Modifier
+                    .bounceClick { onSeasonSelected(seasonNum) }
+                    .hazeGlass(
+                        state = sheetHazeState,
+                        shape = CircleShape,
+                        containerColor = backgroundColor,
+                        borderColor = borderColor,
+                        borderWidth = 1.dp,
+                        blurRadius = 8.dp,
+                        useRefraction = true
+                    ),
+                color = Color.Transparent
             ) {
                 Text(
                     if (seasonNum == 0) stringResource(R.string.episodes_specials) else stringResource(R.string.episodes_season_n, seasonNum),
@@ -579,6 +591,7 @@ private fun SeasonSelector(
 @Composable
 private fun BulkAction(
     isAllWatched: Boolean, 
+    sheetHazeState: HazeState,
     onToggle: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -588,10 +601,26 @@ private fun BulkAction(
             .bounceClick(
                 onLongClick = onLongClick,
                 onClick = onToggle
+            )
+            .then(
+                if (isAllWatched) {
+                    Modifier
+                        .clip(CircleShape)
+                        .background(Color(0xFF00E676))
+                        .border(androidx.compose.foundation.BorderStroke(1.dp, Color(0xFF00E676)), CircleShape)
+                } else {
+                    Modifier.hazeGlass(
+                        state = sheetHazeState,
+                        shape = CircleShape,
+                        containerColor = Color.White.copy(alpha = 0.08f),
+                        borderColor = Color.White.copy(alpha = 0.15f),
+                        borderWidth = 1.dp,
+                        blurRadius = 8.dp,
+                        useRefraction = true
+                    )
+                }
             ),
-        color = if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.08f),
-        shape = CircleShape,
-        border = androidx.compose.foundation.BorderStroke(1.dp, if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.1f))
+        color = Color.Transparent
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),
