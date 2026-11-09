@@ -727,7 +727,8 @@ fun FolderDetailScreenContent(
                                             .matchParentSize()
                                             .hazeGlass(
                                                 state = internalHazeState,
-                                                shape = CircleShape
+                                                shape = CircleShape,
+                                                useRefraction = true
                                             )
                                     )
                                     
@@ -781,7 +782,8 @@ fun FolderDetailScreenContent(
                                             state = internalHazeState, 
                                             shape = CircleShape, 
                                             borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                            useRefraction = true
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {

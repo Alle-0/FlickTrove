@@ -526,7 +526,8 @@ fun HomeScreenContent(
                             .matchParentSize()
                             .hazeGlass(
                                 state = activeHazeState,
-                                shape = CircleShape
+                                shape = CircleShape,
+                                useRefraction = true
                             )
                     )
                     
@@ -577,7 +578,8 @@ fun HomeScreenContent(
                                 state = activeHazeState, 
                                 shape = CircleShape, 
                                 borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                                borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                                borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                useRefraction = true
                             ),
                         contentAlignment = Alignment.Center
                     ) {
