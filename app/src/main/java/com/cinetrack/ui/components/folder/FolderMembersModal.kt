@@ -256,12 +256,12 @@ fun FolderMembersModal(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.04f))
-                                .border(
-                                    1.dp,
-                                    com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                    CircleShape
+                                .hazeGlass(
+                                    shape = CircleShape,
+                                    containerColor = Color.White.copy(alpha = 0.04f),
+                                    borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                    borderWidth = 1.dp,
+                                    useRefraction = true
                                 )
                                 .padding(
                                     start = 7.dp,
@@ -409,9 +409,13 @@ fun FolderMembersModal(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.04f))
-                                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+                                    .hazeGlass(
+                                        shape = CircleShape,
+                                        containerColor = Color.White.copy(alpha = 0.04f),
+                                        borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                                        borderWidth = 1.dp,
+                                        useRefraction = true
+                                    )
                                     .padding(horizontal = 16.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {

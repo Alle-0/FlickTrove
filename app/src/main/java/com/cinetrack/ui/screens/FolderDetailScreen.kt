@@ -45,7 +45,10 @@ import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.kyant.backdrop.backdrops.layerBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
@@ -306,6 +309,7 @@ fun FolderDetailScreenContent(
                 is FolderDetailUiState.Success -> {
                     val externalHazeState = hazeState ?: remember { HazeState() }
                     val internalHazeState = remember { HazeState() }
+                    val folderBackdrop = rememberLayerBackdrop { drawContent() }
                     
                     Box(modifier = Modifier.fillMaxSize().haze(state = externalHazeState, style = HazeStyles.PremiumDark)) {
                         MovieActionsWrapper(
@@ -320,7 +324,10 @@ fun FolderDetailScreenContent(
                         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
                     ) { actionsState ->
                         BoxWithConstraints(
-                            modifier = Modifier.fillMaxSize().haze(state = internalHazeState, style = HazeStyles.PremiumDark)
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .layerBackdrop(folderBackdrop)
+                                .haze(state = internalHazeState, style = HazeStyles.PremiumDark)
                         ) {
                             CompositionLocalProvider(com.cinetrack.ui.LocalHazeState provides internalHazeState) {
                                 CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -685,13 +692,14 @@ fun FolderDetailScreenContent(
                     // Perfectly Centered Floating Sticky Header
                     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
                     val stickyHeaderHeight = 60.dp
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(top = topPadding)
-                            .align(Alignment.TopCenter)
-                            .zIndex(1f)
-                    ) {
+                    CompositionLocalProvider(LocalBackdrop provides folderBackdrop) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(top = topPadding)
+                                .align(Alignment.TopCenter)
+                                .zIndex(1f)
+                        ) {
                         BoxWithConstraints(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -798,6 +806,7 @@ fun FolderDetailScreenContent(
                                 }
                             }
                         }
+                    }
                     }
                     }
                 }

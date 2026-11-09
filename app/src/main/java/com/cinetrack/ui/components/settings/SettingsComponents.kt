@@ -31,6 +31,7 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -677,13 +678,15 @@ fun DonationBanner(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.spacedBy(1.dp)
                         ) {
                             Text(
                                 text = "Ko-fi",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.5.sp
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 15.sp,
+                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
                                 ),
                                 color = Color.White
                             )
@@ -691,7 +694,9 @@ fun DonationBanner(
                                 text = "GPay • ApplePay • Card",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    lineHeight = 10.sp,
+                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
                                 ),
                                 color = Color.White.copy(alpha = 0.88f),
                                 maxLines = 1,
@@ -736,13 +741,15 @@ fun DonationBanner(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.Center
+                            verticalArrangement = Arrangement.spacedBy(1.dp)
                         ) {
                             Text(
                                 text = "PayPal",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.5.sp
+                                    fontSize = 13.5.sp,
+                                    lineHeight = 15.sp,
+                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
                                 ),
                                 color = Color.White
                             )
@@ -750,7 +757,9 @@ fun DonationBanner(
                                 text = "Account • Card",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.Medium
+                                    fontWeight = FontWeight.Medium,
+                                    lineHeight = 10.sp,
+                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
                                 ),
                                 color = Color.White.copy(alpha = 0.88f),
                                 maxLines = 1,
