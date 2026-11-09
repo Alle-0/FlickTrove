@@ -51,6 +51,9 @@ import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.cinetrack.ui.components.account.AvatarSelectionModal
 import com.cinetrack.ui.components.account.TrophyShowcaseCard
 import com.google.firebase.Firebase
@@ -308,6 +311,11 @@ object AccountTab : Tab {
         val backdropAlphaProvider = com.cinetrack.ui.LocalAccountBackdropAlpha.current
         val backdropOffsetProvider = com.cinetrack.ui.LocalAccountBackdropOffset.current
 
+        val accountBackdrop = rememberLayerBackdrop {
+            drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+            drawContent()
+        }
+
         Box(
             modifier = Modifier
                 .fillMaxSize()
@@ -316,6 +324,7 @@ object AccountTab : Tab {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .layerBackdrop(accountBackdrop)
                     .graphicsLayer {
                         val offset = backdropOffsetProvider()
                         translationX = offset * size.width
@@ -357,15 +366,16 @@ object AccountTab : Tab {
                 }
             }
 
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .graphicsLayer {
-                        val offset = backdropOffsetProvider()
-                        val absOffset = kotlin.math.abs(offset).coerceIn(0f, 1f)
-                        alpha = (1f - absOffset).coerceIn(0f, 1f)
-                    }
-            ) {
+            CompositionLocalProvider(LocalBackdrop provides accountBackdrop) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .graphicsLayer {
+                            val offset = backdropOffsetProvider()
+                            val absOffset = kotlin.math.abs(offset).coerceIn(0f, 1f)
+                            alpha = (1f - absOffset).coerceIn(0f, 1f)
+                        }
+                ) {
                 Box(
                     modifier = Modifier.fillMaxSize()
                 ) {
@@ -549,8 +559,9 @@ object AccountTab : Tab {
                                     shape = CircleShape,
                                     containerColor = if (actualHeaderLuminance > 0.38f) Color.Black.copy(alpha = 0.40f) else Color.White.copy(alpha = 0.10f),
                                     borderColor = (rawExtractedColor ?: MaterialTheme.colorScheme.primary).copy(alpha = 0.35f),
-                                    borderWidth = 1.dp,
-                                    blurRadius = com.cinetrack.ui.theme.HazeStyles.SmallGlassBlurRadius
+                                    borderWidth = 0.dp,
+                                    blurRadius = 8.dp,
+                                    useRefraction = true
                                 ),
                             contentAlignment = Alignment.Center
                         ) {
@@ -609,7 +620,9 @@ object AccountTab : Tab {
                                     Color.White.copy(alpha = 0.20f)
                                 else
                                     Color.White.copy(alpha = 0.25f),
-                                borderWidth = 1.dp
+                                borderWidth = 0.dp,
+                                blurRadius = 8.dp,
+                                useRefraction = true
                             )
                             .padding(
                                 horizontal = lerp(24.dp, 12.dp, progress),
@@ -642,7 +655,7 @@ object AccountTab : Tab {
                 modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 80.dp) // Avoid bottom bar
             )
         }
-
+        } // end CompositionLocalProvider
     }
 }
 

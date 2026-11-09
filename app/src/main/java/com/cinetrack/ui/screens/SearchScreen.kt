@@ -25,6 +25,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.statusBars
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -79,6 +80,9 @@ import com.cinetrack.ui.viewmodel.SearchViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.ui.res.painterResource
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.Row
@@ -352,6 +356,11 @@ fun SearchScreenContent(
                 onUpdateNote = { movie, note -> viewModel.updateNote(movie, note) },
                 onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
             ) { actionsState ->
+                val searchBackdrop = rememberLayerBackdrop {
+                    drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+                    drawContent()
+                }
+
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -362,6 +371,7 @@ fun SearchScreenContent(
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
+                            .layerBackdrop(searchBackdrop)
                             .haze(
                                 state = internalHazeState,
                                 style = HazeStyles.PremiumDark
@@ -413,53 +423,55 @@ fun SearchScreenContent(
                     }
 
                     // 2. Header Layer
-                    SearchHeader(
-                        query = uiState.query,
-                        category = uiState.category,
-                        sortConfig = uiState.sortConfig,
-                        preferences = uiState.preferences,
-                        recentSearches = uiState.recentSearches,
-                        suggestedFilters = uiState.suggestedFilters,
-                        initialGenreName = initialGenreName,
-                        initialKeywordName = initialKeywordName,
-                        textFieldValue = textFieldValue,
-                        onTextFieldValueChange = { textFieldValue = it },
-                        onQueryChanged = { viewModel.onQueryChanged(it) },
-                        onClearQuery = { viewModel.onQueryChanged("") },
-                        onBackClick = { onExitRequest.value?.invoke() },
-                        onLayoutToggleClick = { nextCols ->
-                            viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextCols))
-                        },
-                        onFilterClick = {
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
-                            isFilterVisible = true
-                        },
-                        onCategoryChanged = { viewModel.onCategoryChanged(it) },
-                        onClearRecentSearches = { viewModel.clearRecentSearches() },
-                        onDeleteRecentSearch = { viewModel.deleteRecentSearch(it) },
-                        onToggleSuggestionsExpanded = { viewModel.toggleSuggestionsExpanded() },
-                        onSuggestedFilterClick = { filter ->
-                            if (filter.isKeyword) {
-                                val currentKw = uiState.sortConfig.selectedKeywords
-                                val newKw = if (currentKw.contains(filter.id)) emptyList() else listOf(filter.id)
-                                viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = newKw))
-                            } else {
-                                val currentGenres = uiState.sortConfig.selectedGenres
-                                val newGenres = if (currentGenres.contains(filter.id)) emptyList() else listOf(filter.id)
-                                viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = newGenres))
-                            }
-                            viewModel.onQueryChanged("")
-                            keyboardController?.hide()
-                            focusManager.clearFocus()
-                        },
-                        focusRequester = focusRequester,
-                        keyboardController = keyboardController,
-                        hazeState = internalHazeState,
-                        onHeaderHeightMeasured = { measured -> headerHeight = measured },
-                        onFilterBoundsMeasured = { bounds -> filterBounds[0] = bounds },
-                        modifier = Modifier.align(Alignment.TopCenter)
-                    )
+                    CompositionLocalProvider(LocalBackdrop provides searchBackdrop) {
+                        SearchHeader(
+                            query = uiState.query,
+                            category = uiState.category,
+                            sortConfig = uiState.sortConfig,
+                            preferences = uiState.preferences,
+                            recentSearches = uiState.recentSearches,
+                            suggestedFilters = uiState.suggestedFilters,
+                            initialGenreName = initialGenreName,
+                            initialKeywordName = initialKeywordName,
+                            textFieldValue = textFieldValue,
+                            onTextFieldValueChange = { textFieldValue = it },
+                            onQueryChanged = { viewModel.onQueryChanged(it) },
+                            onClearQuery = { viewModel.onQueryChanged("") },
+                            onBackClick = { onExitRequest.value?.invoke() },
+                            onLayoutToggleClick = { nextCols ->
+                                viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextCols))
+                            },
+                            onFilterClick = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                isFilterVisible = true
+                            },
+                            onCategoryChanged = { viewModel.onCategoryChanged(it) },
+                            onClearRecentSearches = { viewModel.clearRecentSearches() },
+                            onDeleteRecentSearch = { viewModel.deleteRecentSearch(it) },
+                            onToggleSuggestionsExpanded = { viewModel.toggleSuggestionsExpanded() },
+                            onSuggestedFilterClick = { filter ->
+                                if (filter.isKeyword) {
+                                    val currentKw = uiState.sortConfig.selectedKeywords
+                                    val newKw = if (currentKw.contains(filter.id)) emptyList() else listOf(filter.id)
+                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedKeywords = newKw))
+                                } else {
+                                    val currentGenres = uiState.sortConfig.selectedGenres
+                                    val newGenres = if (currentGenres.contains(filter.id)) emptyList() else listOf(filter.id)
+                                    viewModel.updateSortConfig(uiState.sortConfig.copy(selectedGenres = newGenres))
+                                }
+                                viewModel.onQueryChanged("")
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                            },
+                            focusRequester = focusRequester,
+                            keyboardController = keyboardController,
+                            hazeState = internalHazeState,
+                            onHeaderHeightMeasured = { measured -> headerHeight = measured },
+                            onFilterBoundsMeasured = { bounds -> filterBounds[0] = bounds },
+                            modifier = Modifier.align(Alignment.TopCenter)
+                        )
+                    }
 
                     // 3. Local-Only Banner (bottom, shown when offline/poor connection)
                     AnimatedVisibility(

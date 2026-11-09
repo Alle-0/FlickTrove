@@ -48,6 +48,9 @@ import com.cinetrack.util.toComposeColor
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.*
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.home.HomeFilterModal
@@ -250,6 +253,11 @@ fun HomeScreenContent(
                 }
             }
 
+            val homeBackdrop = rememberLayerBackdrop {
+                drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+                drawContent()
+            }
+
             Box(
                 modifier = Modifier
                     .fillMaxSize()
@@ -260,7 +268,7 @@ fun HomeScreenContent(
                     isRefreshing = isRefreshing,
                     onRefresh = { viewModel.pullToRefresh() },
                     state = pullToRefreshState,
-                    modifier = Modifier.fillMaxSize(),
+                    modifier = Modifier.fillMaxSize().layerBackdrop(homeBackdrop),
                     indicator = {}
                 ) {
                     if (showSkeleton) {
@@ -483,13 +491,14 @@ fun HomeScreenContent(
     }
 
         // Perfectly Centered Floating Sticky Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = topPadding)
-                .align(Alignment.TopCenter)
-                .zIndex(1f)
-        ) {
+        CompositionLocalProvider(LocalBackdrop provides homeBackdrop) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = topPadding)
+                    .align(Alignment.TopCenter)
+                    .zIndex(1f)
+            ) {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -584,6 +593,7 @@ fun HomeScreenContent(
                 }
                 }
             }
+        } // end CompositionLocalProvider
         }
     }
 }

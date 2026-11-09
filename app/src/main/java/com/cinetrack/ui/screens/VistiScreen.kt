@@ -51,6 +51,9 @@ import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.components.common.CinematicBackground
+import com.cinetrack.ui.LocalBackdrop
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
+import com.kyant.backdrop.backdrops.layerBackdrop
 
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.viewmodel.VistiViewModel
@@ -205,10 +208,16 @@ fun VistiScreenContent(
         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) },
         onActionModalVisibilityChanged = onActionModalVisibilityChanged
     ) { actionsState ->
+        val vistiBackdrop = rememberLayerBackdrop {
+            drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
+            drawContent()
+        }
+
         Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
+                    .layerBackdrop(vistiBackdrop)
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
             CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -343,13 +352,14 @@ fun VistiScreenContent(
         }
 
         // Perfectly Centered Floating Sticky Header
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = topPadding)
-                .align(Alignment.TopCenter)
-                .zIndex(1f)
-        ) {
+        CompositionLocalProvider(LocalBackdrop provides vistiBackdrop) {
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(top = topPadding)
+                    .align(Alignment.TopCenter)
+                    .zIndex(1f)
+            ) {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -458,6 +468,7 @@ fun VistiScreenContent(
                 }
             }
         }
+        } // end CompositionLocalProvider
         }
         } // end Box B (fillMaxSize)
     } // end MovieActionsWrapper

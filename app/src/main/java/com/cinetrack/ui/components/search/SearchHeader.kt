@@ -129,7 +129,9 @@ fun SearchHeader(
                 .hazeGlass(
                     state = hazeState,
                     shape = headerShape,
-                    borderWidth = 0.dp
+                    borderWidth = 0.dp,
+                    blurRadius = 8.dp,
+                    useRefraction = true
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .windowInsetsPadding(WindowInsets.displayCutout)
