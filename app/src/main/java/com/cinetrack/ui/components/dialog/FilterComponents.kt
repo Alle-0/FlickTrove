@@ -90,8 +90,8 @@ fun ExpandableSection(
                 shape = sectionShape,
                 useRefraction = true,
                 borderWidth = 1.dp,
-                borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                containerColor = Color.Black.copy(alpha = 0.45f)
+                borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+                containerColor = Color.White.copy(alpha = 0.08f)
             )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {

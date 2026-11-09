@@ -878,8 +878,13 @@ private fun MdBtn(onClick: () -> Unit, content: @Composable () -> Unit) {
         modifier = Modifier
             .size(32.dp)
             .bounceClick { onClick() }
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.08f)),
+            .hazeGlass(
+                shape = CircleShape,
+                containerColor = Color.White.copy(alpha = 0.08f),
+                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                borderWidth = 1.dp,
+                useRefraction = true
+            ),
         contentAlignment = Alignment.Center
     ) {
         content()
@@ -893,8 +898,13 @@ private fun MdBtnPill(onClick: () -> Unit, content: @Composable () -> Unit) {
         modifier = Modifier
             .height(32.dp)
             .bounceClick { onClick() }
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.08f))
+            .hazeGlass(
+                shape = CircleShape,
+                containerColor = Color.White.copy(alpha = 0.08f),
+                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                borderWidth = 1.dp,
+                useRefraction = true
+            )
             .padding(horizontal = 10.dp),
         contentAlignment = Alignment.Center
     ) {

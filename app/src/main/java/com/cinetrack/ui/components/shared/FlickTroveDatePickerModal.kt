@@ -26,6 +26,8 @@ import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.components.updates.MonthYearPickerDialog
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import java.time.DayOfWeek
@@ -116,8 +118,13 @@ fun FlickTroveDatePickerModal(
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 currentMonth = currentMonth.minusMonths(1)
                             }
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.1f)),
+                            .hazeGlass(
+                                shape = RoundedCornerShape(12.dp),
+                                containerColor = Color.White.copy(alpha = 0.08f),
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                borderWidth = 1.dp,
+                                useRefraction = true
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -134,8 +141,13 @@ fun FlickTroveDatePickerModal(
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 currentMonth = currentMonth.plusMonths(1)
                             }
-                            .clip(RoundedCornerShape(12.dp))
-                            .background(Color.White.copy(alpha = 0.1f)),
+                            .hazeGlass(
+                                shape = RoundedCornerShape(12.dp),
+                                containerColor = Color.White.copy(alpha = 0.08f),
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                borderWidth = 1.dp,
+                                useRefraction = true
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(

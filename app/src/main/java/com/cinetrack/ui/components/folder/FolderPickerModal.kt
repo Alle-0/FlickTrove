@@ -297,13 +297,19 @@ private fun FolderListContent(
                 .fillMaxWidth()
                 .height(52.dp)
                 .bounceClick { onNewFolder() }
-                .background(Color.White, RoundedCornerShape(16.dp)),
+                .hazeGlass(
+                    shape = RoundedCornerShape(16.dp),
+                    containerColor = Color.White.copy(alpha = 0.12f),
+                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                    borderWidth = 1.dp,
+                    useRefraction = true
+                ),
             contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.Black, modifier = Modifier.size(18.dp))
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.folder_picker_new), color = Color.Black, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                Text(stringResource(R.string.folder_picker_new), color = Color.White, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
             }
         }
     }
@@ -361,9 +367,13 @@ private fun FolderItem(
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f) { onClick() }
-            .clip(RoundedCornerShape(16.dp))
-            .background(backgroundColor)
-            .border(if (isSelected) 1.5.dp else 1.dp, borderColor, RoundedCornerShape(16.dp))
+            .hazeGlass(
+                shape = RoundedCornerShape(16.dp),
+                containerColor = backgroundColor,
+                borderColor = borderColor,
+                borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                useRefraction = true
+            )
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {

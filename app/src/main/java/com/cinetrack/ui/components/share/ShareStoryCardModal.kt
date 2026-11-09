@@ -410,16 +410,12 @@ fun ShareStoryCardModal(
                                 coverTab = if (config.coverStyle == ShareCoverStyle.BACKDROP_FULL) 1 else 0
                                 isSelectingCover = true
                             }
-                            .clip(CircleShape)
-                            .background(
-                                if (hasCustomImage) accentColor.copy(alpha = 0.20f)
-                                else Color.White.copy(alpha = 0.06f)
-                            )
-                            .border(
-                                1.dp,
-                                if (hasCustomImage) accentColor.copy(alpha = 0.65f)
-                                else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                CircleShape
+                            .hazeGlass(
+                                shape = CircleShape,
+                                containerColor = if (hasCustomImage) accentColor.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.06f),
+                                borderColor = if (hasCustomImage) accentColor.copy(alpha = 0.65f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                                borderWidth = 1.dp,
+                                useRefraction = true
                             )
                             .padding(
                                 start = 12.dp,
@@ -559,9 +555,13 @@ fun ShareStoryCardModal(
                                 isProcessing = false
                             }
                         }
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), RoundedCornerShape(50)),
+                        .hazeGlass(
+                            shape = RoundedCornerShape(50),
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            borderWidth = 1.dp,
+                            useRefraction = true
+                        ),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -603,9 +603,13 @@ fun ShareStoryCardModal(
                                 isProcessing = false
                             }
                         }
-                        .clip(RoundedCornerShape(50))
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), RoundedCornerShape(50)),
+                        .hazeGlass(
+                            shape = RoundedCornerShape(50),
+                            containerColor = Color.White.copy(alpha = 0.08f),
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                            borderWidth = 1.dp,
+                            useRefraction = true
+                        ),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -653,12 +657,12 @@ private fun ShareGridToggleCard(
                     onToggle(!checked)
                 }
             }
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = if (enabled) 0.06f else 0.02f))
-            .border(
-                1.dp,
-                if (enabled) HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop) else Color.White.copy(alpha = 0.05f),
-                CircleShape
+            .hazeGlass(
+                shape = CircleShape,
+                containerColor = Color.White.copy(alpha = if (enabled) 0.06f else 0.02f),
+                borderColor = if (enabled) HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop) else Color.White.copy(alpha = 0.05f),
+                borderWidth = 1.dp,
+                useRefraction = true
             )
             .padding(start = 12.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,
