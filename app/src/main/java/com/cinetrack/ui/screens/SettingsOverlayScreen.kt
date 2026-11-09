@@ -29,10 +29,12 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.R
+import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.viewmodel.AuthViewModel
 import com.cinetrack.ui.viewmodel.SettingsViewModel
+import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.launch
 
@@ -233,29 +235,37 @@ fun SettingsOverlayScreen(
                             else Modifier
                         )
                 ) {
-                    Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
-                        SettingsScreenContent(
-                            viewModel = viewModel,
-                            settingsViewModel = settingsViewModel,
-                            paddingValues = paddingValues,
-                            hazeState = internalHazeState,
-                            scrollState = scrollState,
-                            onLoggedOut = onLoggedOut,
-                            onLoginClick = onLoginClick
-                        )
-                        
-                        val isAnyDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
-                Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(10f)) {
-                    com.cinetrack.ui.components.navigation.GlassyTopBar(
-                        hazeState = internalHazeState,
-                        title = androidx.compose.ui.res.stringResource(com.cinetrack.R.string.settings_tab_title),
-                        onBackPress = triggerExit,
-                        isDimmed = isAnyDialogOpen,
-                        onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() }
-                    )
+                    val settingsBackdrop = rememberLayerBackdrop {
+                        drawRect(Color(0xFF0D0D12))
+                        drawContent()
+                    }
+
+                    CompositionLocalProvider(LocalBackdrop provides settingsBackdrop) {
+                        Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
+                            SettingsScreenContent(
+                                viewModel = viewModel,
+                                settingsViewModel = settingsViewModel,
+                                paddingValues = paddingValues,
+                                hazeState = internalHazeState,
+                                scrollState = scrollState,
+                                onLoggedOut = onLoggedOut,
+                                onLoginClick = onLoginClick,
+                                backdrop = settingsBackdrop
+                            )
+                            
+                            val isAnyDialogOpen by settingsViewModel.isAnyDialogOpen.collectAsStateWithLifecycle()
+                            Box(modifier = Modifier.align(Alignment.TopCenter).zIndex(10f)) {
+                                com.cinetrack.ui.components.navigation.GlassyTopBar(
+                                    hazeState = internalHazeState,
+                                    title = androidx.compose.ui.res.stringResource(com.cinetrack.R.string.settings_tab_title),
+                                    onBackPress = triggerExit,
+                                    isDimmed = isAnyDialogOpen,
+                                    onDimmedAreaClick = { settingsViewModel.triggerCloseDialogs() }
+                                )
+                            }
+                        }
+                    }
                 }
-            }
-        }
         }
         }
     }
