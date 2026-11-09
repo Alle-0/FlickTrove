@@ -330,9 +330,11 @@ internal fun CoverSelectionView(
                         modifier = Modifier
                             .size(36.dp)
                             .bounceClick(scaleDown = 0.90f) { onBack() }
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                            .hazeGlass(
+                                shape = CircleShape,
+                                borderWidth = 1.dp,
+                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                            ),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -420,6 +422,7 @@ internal fun CoverSelectionView(
                     label = "langChevron"
                 )
 
+                val langFilterShape = RoundedCornerShape(12.dp)
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -429,9 +432,11 @@ internal fun CoverSelectionView(
                             languageButtonBottomPx = coordinates.positionInParent().y + coordinates.size.height
                         }
                         .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = !languageMenuExpanded }
-                        .clip(RoundedCornerShape(12.dp))
-                        .background(Color.White.copy(alpha = 0.06f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
+                        .hazeGlass(
+                            shape = langFilterShape,
+                            borderWidth = 1.dp,
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+                        )
                         .padding(horizontal = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween

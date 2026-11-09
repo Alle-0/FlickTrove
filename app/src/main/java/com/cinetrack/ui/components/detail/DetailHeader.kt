@@ -318,8 +318,6 @@ fun DetailHeader(
                                 .onGloballyPositioned { buttonCoords = it }
                                 .bounceClick { onTrailerClick(buttonCoords?.boundsInRoot()) }
                                 .clip(CircleShape)
-                                .background(Color.White.copy(alpha = 0.08f))
-                                .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
                                 .padding(horizontal = 8.dp, vertical = 4.dp),
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
                             verticalAlignment = Alignment.CenterVertically

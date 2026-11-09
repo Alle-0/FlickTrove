@@ -666,10 +666,13 @@ class MovieDetailViewModel @Inject constructor(
 
     private fun deleteMovieItem(movie: Movie) {
         viewModelScope.launch {
-            val targetMediaType = movie.mediaType.ifBlank { "movie" }
-            val movieToDelete = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
-            repository.deleteMovie(movieToDelete)
-            badgeRepository.evaluateBadgesAsync()
+            movieUpdateMutex.withLock {
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val target = repository.getMovie(movie.id, targetMediaType)
+                val movieToDelete = target ?: (if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie)
+                repository.deleteMovie(movieToDelete)
+                badgeRepository.evaluateBadgesAsync()
+            }
         }
     }
 
@@ -847,8 +850,11 @@ class MovieDetailViewModel @Inject constructor(
         val state = uiState.value as? DetailUiState.Success ?: return
         val movie = state.movieEntry
         viewModelScope.launch {
-            repository.deleteMovie(movie)
-            badgeRepository.evaluateBadgesAsync()
+            movieUpdateMutex.withLock {
+                val target = repository.getMovie(movie.id, movie.mediaType) ?: movie
+                repository.deleteMovie(target)
+                badgeRepository.evaluateBadgesAsync()
+            }
         }
     }
 

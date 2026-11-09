@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.LocalAdvancedVisualEffects
+import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.util.VibrationHelper
 import kotlin.math.roundToInt
@@ -168,13 +169,18 @@ fun <T> SegmentedControl(
         label = "segControlAlpha"
     )
 
+    val containerShape = RoundedCornerShape(containerCornerRadius)
+
     BoxWithConstraints(
         modifier = modifier
             .fillMaxWidth()
             .height(height)
             .graphicsLayer { alpha = controlAlpha }
-            .background(Color.White.copy(alpha = 0.04f), RoundedCornerShape(containerCornerRadius))
-            .border(1.dp, HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop), RoundedCornerShape(containerCornerRadius))
+            .hazeGlass(
+                shape = containerShape,
+                borderWidth = 1.dp,
+                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
+            )
     ) {
         val usableWidthPx = constraints.maxWidth.toFloat()
         val segmentCount = options.size

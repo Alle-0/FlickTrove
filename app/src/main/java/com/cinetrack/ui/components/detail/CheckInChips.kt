@@ -52,6 +52,8 @@ import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
@@ -175,16 +177,16 @@ fun VibeChip(
             },
         contentAlignment = Alignment.Center
     ) {
+        val vibeShape = RoundedCornerShape(24.dp)
         // Inner capsule surface (clipped to 24dp rounded shape)
         Box(
             modifier = Modifier
                 .matchParentSize()
-                .clip(RoundedCornerShape(24.dp))
-                .background(animatedBgColor)
-                .border(
-                    width = animatedBorderWidth,
-                    color = animatedBorderColor,
-                    shape = RoundedCornerShape(24.dp)
+                .hazeGlass(
+                    shape = vibeShape,
+                    containerColor = if (isSelected) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.06f),
+                    borderWidth = if (isSelected) 1.5.dp else 1.dp,
+                    borderColor = if (isSelected) accentColor else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                 )
         )
 
