@@ -31,8 +31,6 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.theme.ErrorRed
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -97,13 +95,9 @@ fun DeleteFolderDialog(
                     .weight(1f)
                     .height(48.dp)
                     .bounceClick { onDismiss() }
-                    .hazeGlass(
-                        shape = RoundedCornerShape(16.dp),
-                        containerColor = Color.White.copy(alpha = 0.08f),
-                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                        borderWidth = 1.dp,
-                        useRefraction = true
-                    ),
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(Color.White.copy(alpha = 0.08f))
+                    .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
                 Text(

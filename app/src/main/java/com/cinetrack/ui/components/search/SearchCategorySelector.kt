@@ -5,7 +5,6 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -53,11 +52,7 @@ fun SearchCategorySelector(
                     .matchParentSize()
                     .hazeGlass(
                         state = hazeState,
-                        shape = CircleShape,
-                        containerColor = Color.Black.copy(alpha = 0.35f),
-                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                        borderWidth = 1.dp,
-                        useRefraction = true
+                        shape = CircleShape
                     )
             )
 

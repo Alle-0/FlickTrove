@@ -27,7 +27,6 @@ import com.cinetrack.ui.theme.NeonTeal
 import com.cinetrack.ui.utils.horizontalFadingEdges
 import com.cinetrack.util.IconManager
 import dev.chrisbanes.haze.HazeState
-import com.cinetrack.ui.components.glass.hazeGlass
 
 @Composable
 fun SeasonalIconsPreviewDialog(
@@ -86,7 +85,6 @@ fun SeasonalIconsPreviewDialog(
                     drawableRes = R.drawable.ic_launcher_foreground_vector,
                     badgeText = if (isClassicActive) stringResource(R.string.settings_seasonal_preview_active_now) else null,
                     accentColor = NeonTeal,
-                    activeHazeState = activeHazeState,
                     modifier = Modifier.width(130.dp)
                 )
 
@@ -102,7 +100,6 @@ fun SeasonalIconsPreviewDialog(
                         stringResource(R.string.settings_seasonal_preview_upcoming)
                     },
                     accentColor = Color(0xFFF43F5E),
-                    activeHazeState = activeHazeState,
                     modifier = Modifier.width(130.dp)
                 )
 
@@ -118,7 +115,6 @@ fun SeasonalIconsPreviewDialog(
                         stringResource(R.string.settings_seasonal_preview_upcoming)
                     },
                     accentColor = Color(0xFFFF7518),
-                    activeHazeState = activeHazeState,
                     modifier = Modifier.width(130.dp)
                 )
 
@@ -134,7 +130,6 @@ fun SeasonalIconsPreviewDialog(
                         stringResource(R.string.settings_seasonal_preview_upcoming)
                     },
                     accentColor = Color(0xFFEF4444),
-                    activeHazeState = activeHazeState,
                     modifier = Modifier.width(130.dp)
                 )
             }
@@ -144,7 +139,6 @@ fun SeasonalIconsPreviewDialog(
             SettingsDialogCancelButton(
                 text = stringResource(R.string.settings_confirm),
                 onClick = onDismiss,
-                hazeState = activeHazeState,
                 modifier = Modifier.fillMaxWidth().height(48.dp)
             )
         }
@@ -158,18 +152,17 @@ private fun SeasonalIconCard(
     @androidx.annotation.DrawableRes drawableRes: Int,
     badgeText: String?,
     accentColor: Color = NeonTeal,
-    activeHazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .clip(RoundedCornerShape(20.dp))
-            .background(Color.White.copy(alpha = 0.06f), RoundedCornerShape(20.dp))
+            .background(Color.White.copy(alpha = 0.04f))
             .border(
-                1.dp,
-                com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                RoundedCornerShape(20.dp)
+                width = 1.dp,
+                color = Color.White.copy(alpha = 0.12f),
+                shape = RoundedCornerShape(20.dp)
             )
             .padding(vertical = 16.dp, horizontal = 10.dp)
     ) {

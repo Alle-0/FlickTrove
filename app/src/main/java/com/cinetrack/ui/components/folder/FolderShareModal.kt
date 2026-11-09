@@ -34,8 +34,6 @@ import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.SharedFolderInviteDto
 import com.cinetrack.data.repository.InviteDurationOption
 import com.cinetrack.ui.utils.UiText
-import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.rememberActionFeedbackManager
 import dev.chrisbanes.haze.HazeState
@@ -128,12 +126,12 @@ fun FolderShareModal(
                             .padding(vertical = 3.dp)
                             .height(46.dp)
                             .bounceClick(scaleDown = 0.98f) { selectedOption = option }
-                            .hazeGlass(
-                                shape = CircleShape,
-                                containerColor = if (isSelected) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.04f),
-                                borderColor = if (isSelected) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
-                                borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                                useRefraction = true
+                            .clip(CircleShape)
+                            .background(if (isSelected) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.04f))
+                            .border(
+                                width = if (isSelected) 1.5.dp else 1.dp,
+                                color = if (isSelected) Color.White.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
+                                shape = CircleShape
                             )
                             .padding(start = 18.dp, end = 13.dp),
                         verticalAlignment = Alignment.CenterVertically,

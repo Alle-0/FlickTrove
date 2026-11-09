@@ -50,8 +50,6 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.cinetrack.util.toComposeColor
-import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
@@ -157,13 +155,8 @@ fun FolderMembersModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp, vertical = 6.dp)
-                    .hazeGlass(
-                        shape = CircleShape,
-                        containerColor = Color.White.copy(alpha = 0.05f),
-                        borderColor = Color.White.copy(alpha = 0.12f),
-                        borderWidth = 1.dp,
-                        useRefraction = true
-                    )
+                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
             ) {
                 CategoryTabSelector(
                     options = listOf(
@@ -256,13 +249,9 @@ fun FolderMembersModal(
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .hazeGlass(
-                                    shape = CircleShape,
-                                    containerColor = Color.White.copy(alpha = 0.04f),
-                                    borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                    borderWidth = 1.dp,
-                                    useRefraction = true
-                                )
+                                .clip(CircleShape)
+                                .background(Color.White.copy(alpha = 0.04f))
+                                .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
                                 .padding(
                                     start = 7.dp,
                                     top = 7.dp,
@@ -409,13 +398,9 @@ fun FolderMembersModal(
                             Row(
                                 modifier = Modifier
                                     .fillMaxWidth()
-                                    .hazeGlass(
-                                        shape = CircleShape,
-                                        containerColor = Color.White.copy(alpha = 0.04f),
-                                        borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                        borderWidth = 1.dp,
-                                        useRefraction = true
-                                    )
+                                    .clip(CircleShape)
+                                    .background(Color.White.copy(alpha = 0.04f))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
                                     .padding(horizontal = 16.dp, vertical = 10.dp),
                                 verticalAlignment = Alignment.CenterVertically
                             ) {
@@ -490,12 +475,7 @@ fun FolderMembersModal(
                             }
                         }
                         .clip(buttonShape)
-                        .background(if (isLimitReached) Color.White.copy(alpha = 0.15f) else folderColor)
-                        .border(
-                            1.dp,
-                            if (isLimitReached) Color.White.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.25f),
-                            buttonShape
-                        ),
+                        .background(if (isLimitReached) Color.White.copy(alpha = 0.15f) else folderColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

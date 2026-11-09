@@ -46,7 +46,6 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.geometry.Rect
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
@@ -70,7 +69,6 @@ import com.cinetrack.data.model.KeywordDictionary
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
@@ -131,9 +129,7 @@ fun SearchHeader(
                 .hazeGlass(
                     state = hazeState,
                     shape = headerShape,
-                    borderWidth = 1.dp,
-                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                    useRefraction = true
+                    borderWidth = 0.dp
                 )
                 .windowInsetsPadding(WindowInsets.statusBars)
                 .windowInsetsPadding(WindowInsets.displayCutout)
@@ -151,13 +147,7 @@ fun SearchHeader(
                     modifier = Modifier
                         .size(44.dp)
                         .bounceClick { onBackClick() }
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = CircleShape,
-                            useRefraction = true,
-                            borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                        ),
+                        .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -185,7 +175,6 @@ fun SearchHeader(
                     focusRequester = focusRequester,
                     keyboardController = keyboardController,
                     onFilterBoundsMeasured = onFilterBoundsMeasured,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(1f)
                 )
             }

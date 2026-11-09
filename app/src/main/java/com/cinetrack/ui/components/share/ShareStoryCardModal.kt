@@ -119,20 +119,17 @@ fun ShareStoryCardModal(
     var isSelectingCover by remember { mutableStateOf(false) }
     var coverTab by remember { mutableStateOf(0) }
 
-    // Preload high-res poster, backdrop, and logo immediately (including customized paths)
-    LaunchedEffect(movie, config.customPosterPath, config.customBackdropPath, config.customLogoPath) {
+    // Preload high-res poster and backdrop immediately (including customized paths)
+    LaunchedEffect(movie, config.customPosterPath, config.customBackdropPath) {
         val posterPath = config.customPosterPath ?: movie.posterPath
         val posterUrl = posterPath?.let { buildTmdbImageUrl(it, ImageType.POSTER, ImageQuality.HIGH) }
         val backdropPath = config.customBackdropPath ?: movie.customBackdropPath ?: movie.backdropPath ?: movie.posterPath
         val backdropUrl = backdropPath?.let {
             buildTmdbImageUrl(it, ImageType.BACKDROP, ImageQuality.HIGH)
         }
-        val effLogoPath = config.customLogoPath ?: logoPath
-        val effLogoUrl = effLogoPath?.let { buildTmdbImageUrl(it, ImageType.LOGO, ImageQuality.HIGH) }
         val imageLoader = coil3.SingletonImageLoader.get(context)
         posterUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
         backdropUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
-        effLogoUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
     }
 
     suspend fun captureCardBitmap(): Bitmap? {
@@ -188,8 +185,7 @@ fun ShareStoryCardModal(
                     coverTab = coverTab,
                     onCoverTabChange = { coverTab = it },
                     onConfigChange = { config = it },
-                    onBack = { isSelectingCover = false },
-                    defaultLogoPath = logoPath
+                    onBack = { isSelectingCover = false }
                 )
             } else {
                 Column(
@@ -346,7 +342,7 @@ fun ShareStoryCardModal(
             val hasVibes = !movie.emotionalVibes.isNullOrBlank() && movie.emotionalVibes != "[]"
             val hasMvp = movie.favoriteActorId != null || !movie.favoriteActorName.isNullOrBlank()
             val hasProfile = userDisplayName != null
-            val hasCustomImage = config.customPosterPath != null || config.customBackdropPath != null || config.customLogoPath != null
+            val hasCustomImage = config.customPosterPath != null || config.customBackdropPath != null
 
             Column(
                 modifier = Modifier
@@ -410,12 +406,16 @@ fun ShareStoryCardModal(
                                 coverTab = if (config.coverStyle == ShareCoverStyle.BACKDROP_FULL) 1 else 0
                                 isSelectingCover = true
                             }
-                            .hazeGlass(
-                                shape = CircleShape,
-                                containerColor = if (hasCustomImage) accentColor.copy(alpha = 0.20f) else Color.White.copy(alpha = 0.06f),
-                                borderColor = if (hasCustomImage) accentColor.copy(alpha = 0.65f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                borderWidth = 1.dp,
-                                useRefraction = true
+                            .clip(CircleShape)
+                            .background(
+                                if (hasCustomImage) accentColor.copy(alpha = 0.20f)
+                                else Color.White.copy(alpha = 0.06f)
+                            )
+                            .border(
+                                1.dp,
+                                if (hasCustomImage) accentColor.copy(alpha = 0.65f)
+                                else Color.White.copy(alpha = 0.12f),
+                                CircleShape
                             )
                             .padding(
                                 start = 12.dp,
@@ -555,13 +555,9 @@ fun ShareStoryCardModal(
                                 isProcessing = false
                             }
                         }
-                        .hazeGlass(
-                            shape = RoundedCornerShape(50),
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            borderWidth = 1.dp,
-                            useRefraction = true
-                        ),
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(50)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -603,13 +599,9 @@ fun ShareStoryCardModal(
                                 isProcessing = false
                             }
                         }
-                        .hazeGlass(
-                            shape = RoundedCornerShape(50),
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            borderWidth = 1.dp,
-                            useRefraction = true
-                        ),
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.16f), RoundedCornerShape(50)),
                     horizontalArrangement = Arrangement.Center,
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -657,12 +649,12 @@ private fun ShareGridToggleCard(
                     onToggle(!checked)
                 }
             }
-            .hazeGlass(
-                shape = CircleShape,
-                containerColor = Color.White.copy(alpha = if (enabled) 0.06f else 0.02f),
-                borderColor = if (enabled) HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop) else Color.White.copy(alpha = 0.05f),
-                borderWidth = 1.dp,
-                useRefraction = true
+            .clip(CircleShape)
+            .background(Color.White.copy(alpha = if (enabled) 0.06f else 0.02f))
+            .border(
+                1.dp,
+                Color.White.copy(alpha = if (enabled) 0.12f else 0.05f),
+                CircleShape
             )
             .padding(start = 12.dp, end = 8.dp),
         verticalAlignment = Alignment.CenterVertically,

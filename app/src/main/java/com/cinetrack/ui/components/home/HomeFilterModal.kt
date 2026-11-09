@@ -30,13 +30,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.LaunchedEffect
@@ -72,7 +68,6 @@ import com.cinetrack.ui.utils.ProviderConstants
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.haze
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.ui.utils.horizontalFadingEdges
 import kotlin.math.roundToInt
@@ -104,8 +99,6 @@ fun HomeFilterModal(
     var expandedSection by remember(isVisible) { mutableStateOf<String?>(null) }
     var localSortConfig by remember(isVisible) { mutableStateOf(sortConfig) }
     var showSeriesStatusInfoDialog by remember { mutableStateOf(false) }
-    val filterHazeState = remember { HazeState() }
-    val filterBackdrop = rememberLayerBackdrop { drawContent() }
 
     // Sync local state when modal becomes visible
     LaunchedEffect(isVisible) {
@@ -128,18 +121,15 @@ fun HomeFilterModal(
         defaultModalHeight = 380.dp,
         zIndex = 100f
     ) { contentAlpha ->
-        Box(modifier = Modifier.fillMaxWidth()) {
-            Column(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .layerBackdrop(filterBackdrop)
-                    .then(if (contentAlpha > 0f) Modifier.haze(filterHazeState) else Modifier)
-                    .zIndex(1f)
-                    .graphicsLayer(
-                        alpha = contentAlpha,
-                        compositingStrategy = CompositingStrategy.Offscreen
-                    )
-            ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .zIndex(1f)
+                .graphicsLayer(
+                    alpha = contentAlpha,
+                    compositingStrategy = CompositingStrategy.Offscreen
+                )
+        ) {
             // --- HEADER BAR ---
             Row(
                 modifier = Modifier
@@ -400,16 +390,13 @@ fun HomeFilterModal(
                         )
                     }
                 }
-            }
 
-            // --- SERIES STATUS INFO DIALOG (nested Liquid Glass modal) ---
-            if (showSeriesStatusInfoDialog && contentAlpha > 0f) {
-                CompositionLocalProvider(LocalBackdrop provides filterBackdrop) {
+                // --- SERIES STATUS INFO DIALOG (root level for proper hazeGlass) ---
+                if (showSeriesStatusInfoDialog) {
                     SeriesStatusInfoDialog(
-                        hazeState = filterHazeState,
+                        hazeState = hazeState,
                         onDismiss = { showSeriesStatusInfoDialog = false }
                     )
                 }
             }
-        }
-    }
+}

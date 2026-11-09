@@ -85,9 +85,6 @@ import com.cinetrack.ui.viewmodel.DetailUiState
 import com.cinetrack.ui.viewmodel.DetailEvent
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import dev.chrisbanes.haze.HazeStyle
@@ -445,16 +442,6 @@ fun MovieDetailScreenContent(
         cachedSuccess = uiState as DetailUiState.Success
     }
 
-    val detailBackdrop = rememberLayerBackdrop {
-        drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
-        drawContent()
-    }
-    val posterBackdrop = rememberLayerBackdrop {
-        drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
-        drawContent()
-    }
-
-    CompositionLocalProvider(LocalBackdrop provides detailBackdrop) {
     Box(modifier = Modifier.fillMaxSize()) {
         MovieActionsWrapper(
             hazeState = rootHazeState,
@@ -486,7 +473,6 @@ fun MovieDetailScreenContent(
             },
             label = "DetailUiStateTransition"
         ) { targetIndex ->
-            CompositionLocalProvider(LocalBackdrop provides detailBackdrop) {
             when (targetIndex) {
                 0 -> {
                     DetailSkeleton(
@@ -531,7 +517,6 @@ fun MovieDetailScreenContent(
                             Column(
                                 modifier = Modifier
                                     .fillMaxSize()
-                                    .layerBackdrop(detailBackdrop)
                                     .haze(localHazeState, style = HazeStyles.PremiumDark)
                                     .background(animatedBgColor)
                                     .verticalScroll(scrollState)
@@ -562,7 +547,6 @@ fun MovieDetailScreenContent(
                                             backgroundColor = animatedBgColor,
                                             isOffline = isOffline,
                                             modifier = Modifier
-                                                .layerBackdrop(posterBackdrop)
                                                 .pointerInput(Unit) {
                                                     detectTapGestures(
                                                         onLongPress = {
@@ -594,35 +578,33 @@ fun MovieDetailScreenContent(
                                         }
                                     }
 
-                                    CompositionLocalProvider(LocalBackdrop provides posterBackdrop) {
-                                        DetailHeader(
-                                            movie = activeMovie,
-                                            movieDetails = state.details,
-                                            ratings = state.externalRatings,
-                                            accentColor = accentColor,
-                                            matchPercentage = state.matchPercentage,
-                                            logoPath = if (useMovieLogo) {
-                                                val currentLang = java.util.Locale.getDefault().language
-                                                val logos = state.details.images?.logos
-                                                val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
-                                                    ?: logos?.firstOrNull { it.iso6391 == "en" } 
-                                                    ?: logos?.firstOrNull()
-                                                bestLogo?.filePath ?: preloadedLogoPath
-                                            } else null,
-                                            hazeState = backdropHazeState,
-                                            onRatingClick = { showRatingInfoDialog = true },
-                                            hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
-                                            onCoverSelectClick = { showCoverSelectionSheet = true },
-                                            onTrailerClick = if (effectiveVideos.isNotEmpty()) {
-                                                { bounds ->
-                                                    trailerTriggerBounds = bounds
-                                                    showTrailerModal = true
-                                                }
-                                            } else null,
-                                            isOffline = isOffline,
-                                            movieStatus = state.details.status ?: activeMovie.status
-                                        )
-                                    }
+                                    DetailHeader(
+                                        movie = activeMovie,
+                                        movieDetails = state.details,
+                                        ratings = state.externalRatings,
+                                        accentColor = accentColor,
+                                        matchPercentage = state.matchPercentage,
+                                        logoPath = if (useMovieLogo) {
+                                            val currentLang = java.util.Locale.getDefault().language
+                                            val logos = state.details.images?.logos
+                                            val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
+                                                ?: logos?.firstOrNull { it.iso6391 == "en" } 
+                                                ?: logos?.firstOrNull()
+                                            bestLogo?.filePath ?: preloadedLogoPath
+                                        } else null,
+                                        hazeState = backdropHazeState,
+                                        onRatingClick = { showRatingInfoDialog = true },
+                                        hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
+                                        onCoverSelectClick = { showCoverSelectionSheet = true },
+                                        onTrailerClick = if (effectiveVideos.isNotEmpty()) {
+                                            { bounds ->
+                                                trailerTriggerBounds = bounds
+                                                showTrailerModal = true
+                                            }
+                                        } else null,
+                                        isOffline = isOffline,
+                                        movieStatus = state.details.status ?: activeMovie.status
+                                    )
 
                                     DetailMetaRows(
                                         genres = state.movieEntry.genres ?: emptyList(),
@@ -849,6 +831,51 @@ fun MovieDetailScreenContent(
                                     )
                                 }
                             }
+
+                            if (showEpisodesSheet) {
+                                EpisodesBottomSheet(
+                                    movie = activeMovie,
+                                    viewModel = viewModel,
+                                    hazeState = localHazeState,
+                                    onDismiss = { showEpisodesSheet = false },
+                                    onEpisodeCommentsClick = { seasonNumber, episode ->
+                                        val epStill = episode.stillPath?.let {
+                                            buildTmdbImageUrl(it, ImageType.BACKDROP, ImageQuality.HIGH)
+                                        }
+                                        val seasonPoster = state.seasonDetails[seasonNumber]?.posterPath?.let {
+                                            buildTmdbImageUrl(it, ImageType.POSTER, ImageQuality.HIGH)
+                                        }
+                                        val image = epStill ?: seasonPoster ?: buildTmdbImageUrl(state.details.posterPath ?: state.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
+                                        val backdrop = epStill ?: buildTmdbImageUrl(
+                                            state.movieEntry.customBackdropPath ?: state.movieEntry.backdropPath ?: state.details.backdropPath ?: state.details.posterPath,
+                                            ImageType.BACKDROP,
+                                            ImageQuality.HIGH
+                                        )
+                                        val tvdbId = viewModel.tvdbId ?: state.details.externalIds?.tvdbId
+                                        val imdbId = state.details.externalIds?.imdbId
+                                        val releaseYear = episode.airDate?.take(4) ?: (state.details.releaseDate ?: state.details.firstAirDate)?.take(4)
+                                        val seriesTitle = state.details.name ?: state.details.title ?: ""
+
+                                        navigator.push(
+                                            com.cinetrack.ui.screens.CommsUniCommentsScreen(
+                                                tvdbId = tvdbId,
+                                                mediaId = viewModel.movieId.toString(),
+                                                mediaType = viewModel.mediaType,
+                                                seasonNumber = seasonNumber,
+                                                episodeNumber = episode.episodeNumber,
+                                                accentColorValue = globalAccentColor.value.toLong(),
+                                                mediaTitle = seriesTitle,
+                                                mediaImage = image,
+                                                backdropUrl = backdrop,
+                                                releaseYear = releaseYear,
+                                                focusInputOnLaunch = false,
+                                                imdbId = imdbId,
+                                                episodeTitle = episode.name
+                                            )
+                                        )
+                                    }
+                                )
+                            }
                             
                             if (showWatchHistorySheet) {
                                 com.cinetrack.ui.components.detail.WatchHistoryBottomSheet(
@@ -899,7 +926,6 @@ fun MovieDetailScreenContent(
                         }
                     }
                 }
-            }
             }
         }
         } // End of haze Box
@@ -1013,51 +1039,5 @@ fun MovieDetailScreenContent(
             )
         }
     }
-
-    if (showEpisodesSheet && cachedSuccess != null) {
-        EpisodesBottomSheet(
-            movie = cachedSuccess!!.movieEntry,
-            viewModel = viewModel,
-            hazeState = rootHazeState,
-            onDismiss = { showEpisodesSheet = false },
-            onEpisodeCommentsClick = { seasonNumber, episode ->
-                val epStill = episode.stillPath?.let {
-                    buildTmdbImageUrl(it, ImageType.BACKDROP, ImageQuality.HIGH)
-                }
-                val seasonPoster = cachedSuccess!!.seasonDetails[seasonNumber]?.posterPath?.let {
-                    buildTmdbImageUrl(it, ImageType.POSTER, ImageQuality.HIGH)
-                }
-                val image = epStill ?: seasonPoster ?: buildTmdbImageUrl(cachedSuccess!!.details.posterPath ?: cachedSuccess!!.details.backdropPath, ImageType.POSTER, ImageQuality.HIGH)
-                val backdrop = epStill ?: buildTmdbImageUrl(
-                    cachedSuccess!!.movieEntry.customBackdropPath ?: cachedSuccess!!.movieEntry.backdropPath ?: cachedSuccess!!.details.backdropPath ?: cachedSuccess!!.details.posterPath,
-                    ImageType.BACKDROP,
-                    ImageQuality.HIGH
-                )
-                val tvdbId = viewModel.tvdbId ?: cachedSuccess!!.details.externalIds?.tvdbId
-                val imdbId = cachedSuccess!!.details.externalIds?.imdbId
-                val releaseYear = episode.airDate?.take(4) ?: (cachedSuccess!!.details.releaseDate ?: cachedSuccess!!.details.firstAirDate)?.take(4)
-                val seriesTitle = cachedSuccess!!.details.name ?: cachedSuccess!!.details.title ?: ""
-
-                navigator.push(
-                    com.cinetrack.ui.screens.CommsUniCommentsScreen(
-                        tvdbId = tvdbId,
-                        mediaId = viewModel.movieId.toString(),
-                        mediaType = viewModel.mediaType,
-                        seasonNumber = seasonNumber,
-                        episodeNumber = episode.episodeNumber,
-                        accentColorValue = globalAccentColor.value.toLong(),
-                        mediaTitle = seriesTitle,
-                        mediaImage = image,
-                        backdropUrl = backdrop,
-                        releaseYear = releaseYear,
-                        focusInputOnLaunch = false,
-                        imdbId = imdbId,
-                        episodeTitle = episode.name
-                    )
-                )
-            }
-        )
-    }
     } // end root Box
-    } // end CompositionLocalProvider
 }

@@ -59,8 +59,6 @@ import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
 import com.cinetrack.ui.viewmodel.UpdatesViewModel
 import com.cinetrack.util.AppUpdateInfo
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.zIndex
 import androidx.activity.compose.BackHandler
@@ -136,13 +134,9 @@ fun MainGlobalDialogs(
                         .weight(1f)
                         .height(48.dp)
                         .bounceClick { onExitConfirmationChange(false) }
-                        .hazeGlass(
-                            shape = RoundedCornerShape(16.dp),
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            borderWidth = 1.dp,
-                            useRefraction = true
-                        ),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f))
+                        .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

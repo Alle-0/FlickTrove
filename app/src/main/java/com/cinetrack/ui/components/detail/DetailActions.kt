@@ -316,10 +316,7 @@ fun DetailActions(
                         onSideActionIndexChange = { currentSideActionIndex = it },
                         onExecuteAction = { action ->
                             when (action) {
-                                SideAction.TRASH -> {
-                                    optimisticWatchState = WatchState.NONE
-                                    currentOnRemove()
-                                }
+                                SideAction.TRASH -> currentOnRemove()
                                 SideAction.DROP -> {
                                     val next = if (optimisticWatchState == WatchState.DROPPED) WatchState.BOOKMARKED else WatchState.DROPPED
                                     optimisticWatchState = next

@@ -271,11 +271,9 @@ fun DetailHeader(
                                         state = hazeState,
                                         shape = CircleShape,
                                         containerColor = accentColor.copy(alpha = 0.15f),
-                                        useRefraction = true,
-                                        borderWidth = 1.dp,
-                                        borderColor = accentColor.copy(alpha = 0.40f)
+                                        blurRadius = 16.dp
                                     )
-                                    .padding(horizontal = 8.dp, vertical = 3.dp),
+                                    .padding(horizontal = 6.dp, vertical = 2.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -317,8 +315,7 @@ fun DetailHeader(
                             modifier = Modifier
                                 .onGloballyPositioned { buttonCoords = it }
                                 .bounceClick { onTrailerClick(buttonCoords?.boundsInRoot()) }
-                                .clip(CircleShape)
-                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                                .padding(horizontal = 4.dp, vertical = 2.dp),
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
@@ -377,7 +374,7 @@ fun DetailHeader(
                     state = hazeState,
                     shape = containerShape,
                     containerColor = Color(0xFF1A1A1D).copy(alpha = 0.50f),
-                    useRefraction = true
+                    blurRadius = 32.dp
                 )
         ) {
             Column(
@@ -398,7 +395,6 @@ fun DetailHeader(
                             voteAverage = movie.voteAverage ?: 0.0,
                             expansion = ratingsExpansion,
                             accentColor = accentColor,
-                            hazeState = hazeState,
                             onClick = {
                                 expandedSection = if (expandedSection == DetailHeaderExpandedSection.RATINGS) {
                                     DetailHeaderExpandedSection.NONE
@@ -413,7 +409,6 @@ fun DetailHeader(
                             certificationCountry = ratings.certificationCountry,
                             isSelected = expandedSection == DetailHeaderExpandedSection.PARENTS_GUIDE,
                             accentColor = accentColor,
-                            hazeState = hazeState,
                             onClick = {
                                 expandedSection = if (expandedSection == DetailHeaderExpandedSection.PARENTS_GUIDE) {
                                     DetailHeaderExpandedSection.NONE
@@ -426,7 +421,6 @@ fun DetailHeader(
                         HeaderTechnicalPill(
                             isSelected = expandedSection == DetailHeaderExpandedSection.TECHNICAL,
                             accentColor = accentColor,
-                            hazeState = hazeState,
                             onClick = {
                                 expandedSection = if (expandedSection == DetailHeaderExpandedSection.TECHNICAL) {
                                     DetailHeaderExpandedSection.NONE
@@ -595,8 +589,7 @@ fun DetailHeader(
                                     HeaderTechnicalSection(
                                         details = movieDetails,
                                         movie = movie,
-                                        accentColor = accentColor,
-                                        hazeState = hazeState
+                                        accentColor = accentColor
                                     )
                                 }
                             }

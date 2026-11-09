@@ -45,10 +45,7 @@ import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
@@ -309,7 +306,6 @@ fun FolderDetailScreenContent(
                 is FolderDetailUiState.Success -> {
                     val externalHazeState = hazeState ?: remember { HazeState() }
                     val internalHazeState = remember { HazeState() }
-                    val folderBackdrop = rememberLayerBackdrop { drawContent() }
                     
                     Box(modifier = Modifier.fillMaxSize().haze(state = externalHazeState, style = HazeStyles.PremiumDark)) {
                         MovieActionsWrapper(
@@ -324,10 +320,7 @@ fun FolderDetailScreenContent(
                         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) }
                     ) { actionsState ->
                         BoxWithConstraints(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .layerBackdrop(folderBackdrop)
-                                .haze(state = internalHazeState, style = HazeStyles.PremiumDark)
+                            modifier = Modifier.fillMaxSize().haze(state = internalHazeState, style = HazeStyles.PremiumDark)
                         ) {
                             CompositionLocalProvider(com.cinetrack.ui.LocalHazeState provides internalHazeState) {
                                 CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -349,12 +342,10 @@ fun FolderDetailScreenContent(
                             )
                             
                             val currentOnMovieClick by rememberUpdatedState(onMovieClick)
-                            val currentOnAction by rememberUpdatedState(viewModel::toggleWatched)
                             val currentOnLongPress by rememberUpdatedState { m: Movie, p: androidx.compose.ui.geometry.Offset, c: androidx.compose.ui.geometry.Offset -> actionsState.onLongPress(m, p, c) }
                             val currentOnMessage by rememberUpdatedState(viewModel::emitMessage)
 
                             val handlePress: (Movie) -> Unit = remember { { m -> currentOnMovieClick(m) } }
-                            val handleAction: (Movie) -> Unit = remember { { m -> currentOnAction(m) } }
                             val handleLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember { { m, p, c -> currentOnLongPress(m, p, c) } }
                             val handleMessage: (String) -> Unit = remember { { msg -> currentOnMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) } }
                             val precomputedFolderColors = remember(folderColors) {
@@ -606,7 +597,6 @@ fun FolderDetailScreenContent(
                                                         hasAnimatedSet = viewModel.animatedMovieIds,
                                                         staggerIndex = index,
                                                         onPress = handlePress,
-                                                        onAction = handleAction,
                                                         onLongPress = handleLongPress,
                                                         onMessage = handleMessage
                                                      )
@@ -619,7 +609,6 @@ fun FolderDetailScreenContent(
                                                         isReminder = movie.reminder,
                                                         personalRating = movie.personalRating,
                                                         onPress = handlePress,
-                                                        onAction = handleAction,
                                                         animatedVisibilityScope = animatedVisibilityScope,
                                                         staggerIndex = index,
                                                         onLongPress = handleLongPress,
@@ -696,14 +685,13 @@ fun FolderDetailScreenContent(
                     // Perfectly Centered Floating Sticky Header
                     val topPadding = paddingValues.calculateTopPadding() + androidx.compose.foundation.layout.WindowInsets.safeDrawing.asPaddingValues().calculateTopPadding() + 46.dp
                     val stickyHeaderHeight = 60.dp
-                    CompositionLocalProvider(LocalBackdrop provides folderBackdrop) {
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = topPadding)
-                                .align(Alignment.TopCenter)
-                                .zIndex(1f)
-                        ) {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(top = topPadding)
+                            .align(Alignment.TopCenter)
+                            .zIndex(1f)
+                    ) {
                         BoxWithConstraints(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -729,11 +717,7 @@ fun FolderDetailScreenContent(
                                     Spacer(
                                         modifier = Modifier
                                             .matchParentSize()
-                                            .hazeGlass(
-                                                state = internalHazeState,
-                                                shape = CircleShape,
-                                                useRefraction = true
-                                            )
+                                            .hazeGlass(state = internalHazeState, shape = CircleShape)
                                     )
                                     
                                     val options = listOf(stringResource(R.string.folder_detail_tab_all), stringResource(R.string.folder_detail_tab_movies), stringResource(R.string.folder_detail_tab_tv))
@@ -786,8 +770,7 @@ fun FolderDetailScreenContent(
                                             state = internalHazeState, 
                                             shape = CircleShape, 
                                             borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                            useRefraction = true
+                                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                                         ),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -811,7 +794,6 @@ fun FolderDetailScreenContent(
                                 }
                             }
                         }
-                    }
                     }
                     }
                 }

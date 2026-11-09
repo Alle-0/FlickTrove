@@ -30,7 +30,6 @@ class SettingsRepositoryImpl @Inject constructor(
         val DYNAMIC_APP_ICON_ENABLED = booleanPreferencesKey("dynamic_app_icon_enabled")
         val SEASONAL_APP_ICON_ENABLED = booleanPreferencesKey("seasonal_app_icon_enabled")
         val ADVANCED_VISUAL_EFFECTS_ENABLED = booleanPreferencesKey("advanced_visual_effects_enabled")
-        val USE_LIQUID_GLASS = booleanPreferencesKey("use_liquid_glass")
         val LAST_FEEDBACK_TIMESTAMP = longPreferencesKey("last_feedback_timestamp")
         val TITLE_TEXT_SIZE_MULTIPLIER = floatPreferencesKey("title_text_size_multiplier")
         val IMAGE_QUALITY = stringPreferencesKey("image_quality")
@@ -116,10 +115,6 @@ class SettingsRepositoryImpl @Inject constructor(
         preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] ?: true // Default value
     }
 
-    override val useLiquidGlass: Flow<Boolean> = dataStore.data.map { preferences ->
-        preferences[PreferencesKeys.USE_LIQUID_GLASS] ?: true
-    }
-
     override val lastFeedbackTimestamp: Flow<Long> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.LAST_FEEDBACK_TIMESTAMP] ?: 0L
     }
@@ -189,12 +184,6 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleAdvancedVisualEffects(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.ADVANCED_VISUAL_EFFECTS_ENABLED] = enabled
-        }
-    }
-
-    override suspend fun updateUseLiquidGlass(enabled: Boolean) {
-        dataStore.edit { preferences ->
-            preferences[PreferencesKeys.USE_LIQUID_GLASS] = enabled
         }
     }
 

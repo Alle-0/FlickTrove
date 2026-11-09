@@ -42,9 +42,6 @@ import androidx.compose.ui.zIndex
 import com.cinetrack.R
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.cinetrack.ui.components.shared.calendar.CalendarMonthWidget
 import com.cinetrack.ui.components.updates.formatReleaseDate
 import com.cinetrack.ui.history.model.WatchTimelineEntry
@@ -83,14 +80,12 @@ fun HistoryCalendarView(
     val topClearance = contentPadding.calculateTopPadding()
     val bottomClearance = contentPadding.calculateBottomPadding()
     val calendarHazeState = remember { HazeState() }
-    val calendarBackdrop = rememberLayerBackdrop { drawContent() }
 
     Box(modifier = modifier.fillMaxSize()) {
         LazyColumn(
             state = listState,
             modifier = Modifier
                 .fillMaxSize()
-                .layerBackdrop(calendarBackdrop)
                 .haze(calendarHazeState, style = HazeStyles.PremiumDark),
             contentPadding = PaddingValues(
                 start = 16.dp,
@@ -200,37 +195,29 @@ fun HistoryCalendarView(
                 .zIndex(10f),
             contentAlignment = Alignment.Center
         ) {
-            androidx.compose.runtime.CompositionLocalProvider(
-                LocalBackdrop provides calendarBackdrop
+            Box(
+                modifier = Modifier
+                    .wrapContentSize()
+                    .padding(vertical = 4.dp),
+                contentAlignment = Alignment.Center
             ) {
-                Box(
+                Spacer(
                     modifier = Modifier
-                        .wrapContentSize()
-                        .padding(vertical = 4.dp),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Spacer(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .hazeGlass(
-                                state = calendarHazeState,
-                                shape = CircleShape,
-                                containerColor = Color.Black.copy(alpha = 0.35f),
-                                borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                useRefraction = true
-                            )
-                    )
-                    CategoryTabSelector(
-                        options = listOf(
-                            stringResource(R.string.history_activity_scope_month),
-                            stringResource(R.string.history_activity_scope_year)
-                        ),
-                        selectedIndex = selectedScopeIndex,
-                        onOptionClick = { index -> selectedScopeIndex = index },
-                        tabWidth = 100.dp
-                    )
-                }
+                        .matchParentSize()
+                        .hazeGlass(
+                            state = calendarHazeState,
+                            shape = CircleShape
+                        )
+                )
+                CategoryTabSelector(
+                    options = listOf(
+                        stringResource(R.string.history_activity_scope_month),
+                        stringResource(R.string.history_activity_scope_year)
+                    ),
+                    selectedIndex = selectedScopeIndex,
+                    onOptionClick = { index -> selectedScopeIndex = index },
+                    tabWidth = 100.dp
+                )
             }
         }
     }

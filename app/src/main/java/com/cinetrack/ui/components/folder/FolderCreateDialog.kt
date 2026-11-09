@@ -21,8 +21,6 @@ import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
@@ -124,9 +122,7 @@ fun FolderCreateDialog(
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = Color.White,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                        cursorColor = Color.White,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent
+                        cursorColor = Color.White
                     ),
                     singleLine = true
                 )
@@ -153,9 +149,7 @@ fun FolderCreateDialog(
                         unfocusedTextColor = Color.White,
                         focusedBorderColor = Color.White,
                         unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                        cursorColor = Color.White,
-                        focusedContainerColor = Color.Transparent,
-                        unfocusedContainerColor = Color.Transparent
+                        cursorColor = Color.White
                     ),
                     minLines = 2,
                     maxLines = 4
@@ -182,13 +176,12 @@ fun FolderCreateDialog(
             }
 
             // Fixed Footer Action Button
-            val isCreateEnabled = name.isNotBlank()
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(start = 16.dp, end = 16.dp, top = 12.dp, bottom = 16.dp)
                     .height(56.dp)
-                    .bounceClick(enabled = isCreateEnabled) {
+                    .bounceClick(enabled = name.isNotBlank()) {
                         val finalName = name
                         val finalDesc = description.trim().ifEmpty { null }
                         val finalColor = selectedColor
@@ -196,26 +189,16 @@ fun FolderCreateDialog(
                             onCreate(finalName, "folder", finalColor, finalDesc)
                         }
                     }
-                    .then(
-                        if (isCreateEnabled)
-                            Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White)
-                        else
-                            Modifier.hazeGlass(
-                                shape = RoundedCornerShape(16.dp),
-                                containerColor = Color.White.copy(alpha = 0.08f),
-                                borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                useRefraction = true
-                            )
+                    .clip(RoundedCornerShape(16.dp))
+                    .background(
+                        if (name.isNotBlank()) Color.White else Color.White.copy(alpha = 0.2f)
                     ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
                     stringResource(R.string.folders_create_button),
                     style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                    color = if (isCreateEnabled) Color.Black else Color.Black.copy(alpha = 0.5f)
+                    color = if (name.isNotBlank()) Color.Black else Color.Black.copy(alpha = 0.5f)
                 )
             }
         }

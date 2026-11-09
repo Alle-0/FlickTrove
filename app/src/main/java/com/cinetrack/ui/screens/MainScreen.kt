@@ -65,9 +65,6 @@ import com.cinetrack.ui.LocalAppPadding
 import com.cinetrack.ui.LocalDeepLinkIntent
 import com.cinetrack.ui.LocalFilterRequest
 import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import com.cinetrack.ui.LocalSearchOverlay
 import com.cinetrack.ui.components.main.MainBottomBarOverlay
 import com.cinetrack.ui.components.main.MainDeepLinkHandler
@@ -119,10 +116,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
         val scope = rememberCoroutineScope()
         val contentHazeState = remember { HazeState() }
         val globalHazeState = remember { HazeState() }
-        val bottomBarBackdrop = rememberLayerBackdrop {
-            drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
-            drawContent()
-        }
         val undoViewModel: UndoViewModel = getViewModel()
         val searchOverlay = LocalSearchOverlay.current
         
@@ -305,7 +298,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                 CompositionLocalProvider(
                     LocalAppPadding provides PaddingValues(bottom = 80.dp),
-                    LocalBackdrop provides bottomBarBackdrop,
                     com.cinetrack.ui.LocalGlobalHazeState provides globalHazeState,
                     LocalActiveFilterConfig provides activeFilterConfig,
                     com.cinetrack.ui.LocalActiveTrophyFilterConfig provides activeTrophyFilterConfig,
@@ -331,7 +323,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
 
                                 AnimatedContent(
                                     targetState = activeSecondaryTab,
-                                    modifier = Modifier.fillMaxSize().layerBackdrop(bottomBarBackdrop),
+                                    modifier = Modifier.fillMaxSize(),
                                     contentKey = { tab ->
                                         when (tab) {
                                             null -> "PRIMARY_PAGER"
@@ -372,9 +364,8 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     },
                                     label = "TabTransition"
                                 ) { secondaryTab ->
-                                    CompositionLocalProvider(LocalBackdrop provides null) {
-                                        if (secondaryTab == null) {
-                                            val carouselScrollBoundary = remember {
+                                    if (secondaryTab == null) {
+                                        val carouselScrollBoundary = remember {
                                             object : NestedScrollConnection {
                                                 override fun onPostScroll(
                                                     consumed: Offset,
@@ -443,7 +434,6 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                             secondaryTab.Content()
                                         }
                                     }
-                                }
                                 }
                             }
 
@@ -530,8 +520,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                     historyCustomActions = {
                                         HistoryViewSwitcher(
                                             isTimeline = historyUiState.selectedViewMode == ViewMode.TIMELINE,
-                                            onSelectMode = { historyVm.setViewMode(it) },
-                                            hazeState = contentHazeState
+                                            onSelectMode = { historyVm.setViewMode(it) }
                                         )
                                     }
                                 }

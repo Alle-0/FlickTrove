@@ -22,7 +22,6 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.FlickTroveModal
-import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
@@ -63,18 +62,11 @@ fun MonthYearPickerDialog(
             Box(
                 modifier = Modifier
                     .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
                     .bounceClick(scaleDown = 0.8f) {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         selectedYear--
-                    }
-                    .hazeGlass(
-                        state = internalHazeState,
-                        shape = CircleShape,
-                        useRefraction = true,
-                        borderWidth = 1.dp,
-                        borderColor = Color.White.copy(alpha = 0.15f),
-                        containerColor = Color.White.copy(alpha = 0.08f)
-                    ),
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -93,18 +85,11 @@ fun MonthYearPickerDialog(
             Box(
                 modifier = Modifier
                     .size(40.dp)
+                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
                     .bounceClick(scaleDown = 0.8f) {
                         haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         selectedYear++
-                    }
-                    .hazeGlass(
-                        state = internalHazeState,
-                        shape = CircleShape,
-                        useRefraction = true,
-                        borderWidth = 1.dp,
-                        borderColor = Color.White.copy(alpha = 0.15f),
-                        containerColor = Color.White.copy(alpha = 0.08f)
-                    ),
+                    },
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -137,18 +122,12 @@ fun MonthYearPickerDialog(
                         Box(
                             modifier = Modifier
                                 .weight(1f)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(if (isSelected) selectedBgColor else Color.White.copy(alpha = 0.05f))
                                 .bounceClick(scaleDown = 0.95f) {
                                     onMonthSelected(YearMonth.of(selectedYear, month))
                                     onDismiss()
                                 }
-                                .hazeGlass(
-                                    state = internalHazeState,
-                                    shape = RoundedCornerShape(12.dp),
-                                    useRefraction = true,
-                                    borderWidth = 1.dp,
-                                    borderColor = if (isSelected) Color.White.copy(alpha = 0.25f) else Color.White.copy(alpha = 0.10f),
-                                    containerColor = if (isSelected) selectedBgColor else Color.White.copy(alpha = 0.05f)
-                                )
                                 .padding(vertical = 14.dp),
                             contentAlignment = Alignment.Center
                         ) {

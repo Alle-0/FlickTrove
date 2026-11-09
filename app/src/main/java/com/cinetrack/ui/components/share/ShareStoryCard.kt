@@ -107,9 +107,7 @@ data class ShareStoryCardConfig(
     val showMvp: Boolean = true,
     val showWatermark: Boolean = true,
     val customPosterPath: String? = null,
-    val customBackdropPath: String? = null,
-    val customLogoPath: String? = null,
-    val hasManualLogoOverride: Boolean = false
+    val customBackdropPath: String? = null
 )
 
 /**
@@ -159,10 +157,9 @@ fun ShareStoryCard(
         if (!path.isNullOrBlank()) buildTmdbImageUrl(path, ImageType.BACKDROP, ImageQuality.HIGH) else null
     }
 
-    val effectiveLogoPath = config.customLogoPath ?: logoPath
-    val logoUrl = remember(effectiveLogoPath) {
-        if (!effectiveLogoPath.isNullOrBlank()) {
-            buildTmdbImageUrl(effectiveLogoPath, ImageType.LOGO, ImageQuality.HIGH)
+    val logoUrl = remember(logoPath) {
+        if (!logoPath.isNullOrBlank()) {
+            buildTmdbImageUrl(logoPath, ImageType.LOGO, ImageQuality.HIGH)
         } else null
     }
 

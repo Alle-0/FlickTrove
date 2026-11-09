@@ -93,7 +93,6 @@ data object DetailOverlayPlaceholder
 val LocalDisabledBadges = androidx.compose.runtime.compositionLocalOf<Set<String>> { emptySet() }
 val LocalTitleTextSizeMultiplier = androidx.compose.runtime.compositionLocalOf<Float> { 1.0f }
 val LocalAdvancedVisualEffects = androidx.compose.runtime.compositionLocalOf<Boolean> { true }
-val LocalLiquidGlassEnabled = androidx.compose.runtime.compositionLocalOf<Boolean> { true }
 /** "REMAINING" | "WATCHED_OVER_TOTAL" | "SEASON_ONLY" | "SEASON_AND_TOTAL" | "PERCENTAGE" */
 val LocalEpisodeInfoStyle = androidx.compose.runtime.compositionLocalOf<String> { "REMAINING" }
 /** "CIRCULAR_TOTAL" | "CIRCULAR_SEASON" | "LINEAR_TOTAL" | "LINEAR_SEASON" | "NONE" (legacy) */

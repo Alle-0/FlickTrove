@@ -125,7 +125,6 @@ data class UserPreferences(
     val appTheme: String = "AMOLED", // System, Amoled
     val contentLanguage: String = "system",
     val advancedVisualEffectsEnabled: Boolean = true,
-    val useLiquidGlass: Boolean = true,
     val dynamicAppIconEnabled: Boolean = false,
     val seasonalAppIconEnabled: Boolean = true,
     val showSplitReleasesHome: Boolean = true,

@@ -65,10 +65,6 @@ import com.cinetrack.ui.components.dialog.UnmatchedItemsModal
 import com.cinetrack.ui.components.dialog.BlockedUsersModal
 import com.cinetrack.ui.components.glass.*
 import com.cinetrack.ui.components.shared.*
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.LayerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.stringResource
 import com.cinetrack.R
@@ -177,15 +173,10 @@ fun SettingsScreenContent(
     hazeState: HazeState? = null,
     scrollState: androidx.compose.foundation.lazy.LazyListState = androidx.compose.foundation.lazy.rememberLazyListState(),
     onLoggedOut: () -> Unit,
-    onLoginClick: () -> Unit,
-    backdrop: LayerBackdrop? = null
+    onLoginClick: () -> Unit
 ) {
     val activeHazeState = hazeState ?: remember { HazeState() }
     val cardHazeState = remember { HazeState() }
-    val activeBackdrop = backdrop ?: rememberLayerBackdrop {
-        drawRect(Color(0xFF0D0D12))
-        drawContent()
-    }
     val authState by viewModel.authState.collectAsStateWithLifecycle()
     val user = remember { FirebaseAuth.getInstance().currentUser }
     val focusManager = LocalFocusManager.current
@@ -494,26 +485,23 @@ fun SettingsScreenContent(
         }
     }
 
-    CompositionLocalProvider(LocalBackdrop provides activeBackdrop) {
+    Box(
+        modifier = Modifier.fillMaxSize()
+    ) {
+        CinematicBackground(modifier = Modifier.fillMaxSize())
         Box(
-            modifier = Modifier.fillMaxSize()
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(
+                    state = activeHazeState,
+                    style = HazeStyles.PremiumDark
+                )
         ) {
-            CinematicBackground(modifier = Modifier.fillMaxSize())
+            // Content Layer - Recorded by localHazeState
             Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .haze(
-                        state = activeHazeState,
-                        style = HazeStyles.PremiumDark
-                    )
+                modifier = Modifier.fillMaxSize()
             ) {
-                // Content Layer - Recorded by activeBackdrop and localHazeState
-                Box(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .layerBackdrop(activeBackdrop)
-                ) {
-                    Column(modifier = Modifier.fillMaxSize()) {
+                Column(modifier = Modifier.fillMaxSize()) {
 
                 LazyColumn(
                     state = scrollState,
@@ -779,6 +767,5 @@ fun SettingsScreenContent(
             onOpenBadgesInfoDialog = { showBadgesInfoDialog = true },
             onDismissBadgesInfoDialog = { showBadgesInfoDialog = false }
         )
-        }
     }
 }

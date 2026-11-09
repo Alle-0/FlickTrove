@@ -374,9 +374,6 @@ class SettingsViewModel @Inject constructor(
     val advancedVisualEffectsEnabled: StateFlow<Boolean> = settingsRepository.advancedVisualEffectsEnabled
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
-    val useLiquidGlass: StateFlow<Boolean> = settingsRepository.useLiquidGlass
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
-
     val dynamicAppIconEnabled: StateFlow<Boolean> = settingsRepository.dynamicAppIconEnabled
         .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
@@ -908,15 +905,6 @@ class SettingsViewModel @Inject constructor(
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             val statusRes = if (enabled) R.string.status_enabled_plural_m else R.string.status_disabled_plural_m
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_visual_fx, context.getString(statusRes)))
-        }
-    }
-
-    fun setUseLiquidGlass(enabled: Boolean) {
-        viewModelScope.launch {
-            settingsRepository.updateUseLiquidGlass(enabled)
-            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
-            val statusRes = if (enabled) R.string.status_enabled_plural_m else R.string.status_disabled_plural_m
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_liquid_glass, context.getString(statusRes)))
         }
     }
 

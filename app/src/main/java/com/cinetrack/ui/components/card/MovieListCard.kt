@@ -397,23 +397,14 @@ fun MovieListCard(
             }
             
             // Action Button
+            val isQuickWatch = isTv && !isEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
             val appAccent = MaterialTheme.colorScheme.primary
             val isReleased = movie.isReleased
-
-            var optimisticFavorite by remember(isFavorite) { mutableStateOf(isFavorite) }
-            var optimisticWatched by remember(isEffectiveWatched) { mutableStateOf(isEffectiveWatched) }
-            var optimisticReminder by remember(isReminder) { mutableStateOf(isReminder) }
-
-            val currentEffectiveWatched = optimisticWatched
-            val currentEffectiveFavorite = optimisticFavorite
-            val currentEffectiveReminder = optimisticReminder
-
-            val isQuickWatch = isTv && !currentEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate
-            val isPromemoriaAttiva = !isReleased && !currentEffectiveWatched && (currentEffectiveReminder || currentEffectiveFavorite)
-            val isOcchio = !isQuickWatch && isReleased && !currentEffectiveWatched && (currentEffectiveReminder || currentEffectiveFavorite)
-            val isTick = isQuickWatch || currentEffectiveWatched
-            val isPlus = !currentEffectiveWatched && isReleased && !isOcchio && !isQuickWatch
-            val isBellOutlined = !isReleased && !currentEffectiveWatched && !(currentEffectiveReminder || currentEffectiveFavorite)
+            val isPromemoriaAttiva = !isReleased && !isEffectiveWatched && (isReminder || isFavorite)
+            val isOcchio = !isQuickWatch && isReleased && !isEffectiveWatched && (isReminder || isFavorite)
+            val isTick = isQuickWatch || isEffectiveWatched
+            val isPlus = !isEffectiveWatched && isReleased && !isOcchio && !isQuickWatch
+            val isBellOutlined = !isReleased && !isEffectiveWatched && !(isReminder || isFavorite)
 
             val actionButtonScale = remember { Animatable(1f) }
             val actionIconScale = remember { Animatable(1f) }
@@ -540,36 +531,23 @@ fun MovieListCard(
                                 com.cinetrack.util.VibrationHelper.vibrateTick(context)
                                 haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
 
-                                if (!isReleased && !currentEffectiveWatched) {
-                                    if (!currentEffectiveWatched && !currentEffectiveFavorite && !currentEffectiveReminder) {
-                                        optimisticReminder = true
-                                        onAction(movie)
-                                    } else {
-                                        onMessage(context.getString(R.string.card_hint_manage_reminder))
-                                    }
+                                triggerActionAnimation()
+
+                                if (!isReleased && !isEffectiveWatched) {
+                                    if (!isWatched && !isFavorite && !isReminder) onAction(movie)
+                                    else onMessage(context.getString(R.string.card_hint_manage_reminder))
                                 } else if (isTv) {
-                                    if (!currentEffectiveWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate) {
+                                    if (!isWatched && onQuickMarkWatched != null && nextInfo != null && !nextInfo.isUpToDateWithAirDate) {
                                         onQuickMarkWatched(movie)
-                                    } else if (!currentEffectiveWatched && !currentEffectiveFavorite && !currentEffectiveReminder) {
-                                        optimisticFavorite = true
+                                    } else if (!isWatched && !isFavorite && !isReminder) {
                                         onAction(movie)
                                     } else {
                                         onMessage(context.getString(R.string.card_hint_manage_episodes))
                                     }
                                 } else {
-                                    // Normal behavior for released movies: Plus -> Eye -> Check
-                                    if (!currentEffectiveWatched && !currentEffectiveFavorite && !currentEffectiveReminder) {
-                                        optimisticFavorite = true
-                                        optimisticWatched = false
-                                        optimisticReminder = false
-                                    } else if (!currentEffectiveWatched && (currentEffectiveFavorite || currentEffectiveReminder)) {
-                                        optimisticWatched = true
-                                        optimisticFavorite = false
-                                        optimisticReminder = false
-                                    }
+                                    // Normal behavior for released movies
                                     onAction(movie)
                                 }
-                                triggerActionAnimation()
                             } else {
                                 // Cancelled
                                 actionScope.launch {
@@ -599,11 +577,11 @@ fun MovieListCard(
                     ),
                     label = "listCircularProgress"
                 )
-                val isHasCircularProgress = isQuickWatch || (isTv && !currentEffectiveWatched && (isOcchio || isPromemoriaAttiva || computedProgress > 0f))
+                val isHasCircularProgress = isQuickWatch || (isTv && !isEffectiveWatched && (isOcchio || isReminder || isFavorite || computedProgress > 0f))
 
                 val actionBg = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.15f)
-                    currentEffectiveWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
+                    isEffectiveWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
                     isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
                     else -> com.cinetrack.ui.theme.HazeStyles.GlassColor.copy(alpha = 0.60f)
@@ -611,7 +589,7 @@ fun MovieListCard(
 
                 val actionBorder = when {
                     isQuickWatch -> appAccent.copy(alpha = 0.45f)
-                    currentEffectiveWatched -> appAccent
+                    isEffectiveWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
                     else -> com.cinetrack.ui.theme.HazeStyles.GlassBorderColor
@@ -619,7 +597,7 @@ fun MovieListCard(
 
                 val actionTint = when {
                     isQuickWatch -> appAccent
-                    currentEffectiveWatched -> appAccent
+                    isEffectiveWatched -> appAccent
                     isPromemoriaAttiva -> appAccent
                     isOcchio -> com.cinetrack.ui.theme.HazeStyles.AccentYellow
                     else -> Color.White
@@ -676,7 +654,7 @@ fun MovieListCard(
                     Icon(
                         imageVector = when {
                             isTick -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
-                            !isReleased -> if (isPromemoriaAttiva) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
+                            !isReleased -> if (isReminder || isFavorite) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
                             isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
                             else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
                         },
@@ -687,12 +665,12 @@ fun MovieListCard(
                             .graphicsLayer {
                                 scaleX = actionIconScale.value
                                 scaleY = actionIconScale.value
-                                rotationZ = if (!isReleased && isPromemoriaAttiva) {
+                                rotationZ = if (!isReleased && (isReminder || isFavorite)) {
                                     bellRotation.value
                                 } else {
                                     0f
                                 }
-                                if (!isReleased && isPromemoriaAttiva) {
+                                if (!isReleased && (isReminder || isFavorite)) {
                                     transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
                                 }
                             }

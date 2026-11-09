@@ -148,8 +148,7 @@ internal fun CoverSelectionView(
     coverTab: Int,
     onCoverTabChange: (Int) -> Unit,
     onConfigChange: (ShareStoryCardConfig) -> Unit,
-    onBack: () -> Unit,
-    defaultLogoPath: String? = null
+    onBack: () -> Unit
 ) {
     val context = LocalContext.current
     val userLang = remember { Locale.getDefault().language.lowercase() }
@@ -167,12 +166,6 @@ internal fun CoverSelectionView(
         val defaultPath = movie.customBackdropPath ?: movie.backdropPath
         if (defaultPath != null && list.none { it.filePath == defaultPath }) {
             listOf(ImageItem(filePath = defaultPath, iso6391 = null)) + list
-        } else list
-    }
-    val rawLogos = remember(activeImages?.logos, defaultLogoPath) {
-        val list = activeImages?.logos ?: emptyList()
-        if (defaultLogoPath != null && list.none { it.filePath == defaultLogoPath }) {
-            listOf(ImageItem(filePath = defaultLogoPath, iso6391 = null)) + list
         } else list
     }
 
@@ -216,42 +209,6 @@ internal fun CoverSelectionView(
         }
     }
 
-    // Per i loghi: mostra tutti i loghi disponibili e ordina le lingue con la lingua utente in testa
-    val validLogos = remember(rawLogos) { rawLogos }
-    val availableLogoLanguages = remember(validLogos, userLang) {
-        val codes = validLogos.mapNotNull { it.iso6391?.lowercase() }.filter { it.isNotBlank() }.distinct()
-        codes.sortedWith { a, b ->
-            when {
-                a == b -> 0
-                a == userLang -> -1
-                b == userLang -> 1
-                a == "en" -> -1
-                b == "en" -> 1
-                else -> a.compareTo(b)
-            }
-        }
-    }
-
-    var selectedLogoLanguageCode by remember(validLogos, userLang) {
-        mutableStateOf(
-            when {
-                validLogos.any { it.iso6391.equals(userLang, ignoreCase = true) } -> userLang
-                validLogos.any { it.iso6391.equals("en", ignoreCase = true) } -> "en"
-                availableLogoLanguages.isNotEmpty() -> availableLogoLanguages.first()
-                else -> "all"
-            }
-        )
-    }
-
-    val filteredLogos = remember(validLogos, selectedLogoLanguageCode) {
-        if (selectedLogoLanguageCode == "all") {
-            validLogos
-        } else {
-            val matching = validLogos.filter { it.iso6391.equals(selectedLogoLanguageCode, ignoreCase = true) }
-            if (matching.isNotEmpty()) matching else validLogos
-        }
-    }
-
     // Per i backdrop: filtra i backdrop con scritte straniere casuali (turco, polacco, ecc.)
     // Dà priorità assoluta a quelli textless (puliti senza scritte), poi alla lingua dell'utente e all'inglese
     val validBackdrops = remember(rawBackdrops, userLang) {
@@ -275,28 +232,14 @@ internal fun CoverSelectionView(
         }
     }
 
-    val currentDisplayList = when (coverTab) {
-        0 -> filteredPosters
-        1 -> validBackdrops
-        else -> filteredLogos
-    }
+    val currentDisplayList = if (coverTab == 0) filteredPosters else validBackdrops
 
     val defaultPoster = movie.posterPath
     val defaultBackdrop = movie.customBackdropPath ?: movie.backdropPath
-    val hasCustomForCurrentTab = when (coverTab) {
-        0 -> config.customPosterPath != null && config.customPosterPath != defaultPoster
-        1 -> config.customBackdropPath != null && config.customBackdropPath != defaultBackdrop
-        else -> (config.customLogoPath != null && config.customLogoPath != defaultLogoPath) || config.hasManualLogoOverride
-    }
-
-    val showLanguageFilter = (coverTab == 0 && availableLanguages.isNotEmpty()) || (coverTab == 2 && availableLogoLanguages.isNotEmpty())
-    val currentLanguages = if (coverTab == 0) availableLanguages else availableLogoLanguages
-    val currentSelectedLanguage = if (coverTab == 0) selectedLanguageCode else selectedLogoLanguageCode
-    val currentTotalCount = if (coverTab == 0) validPosters.size else validLogos.size
-    val currentFilteredCount = if (coverTab == 0) {
-        if (selectedLanguageCode == "all") validPosters.size else validPosters.count { it.iso6391.equals(selectedLanguageCode, ignoreCase = true) }
+    val hasCustomForCurrentTab = if (coverTab == 0) {
+        config.customPosterPath != null && config.customPosterPath != defaultPoster
     } else {
-        if (selectedLogoLanguageCode == "all") validLogos.size else validLogos.count { it.iso6391.equals(selectedLogoLanguageCode, ignoreCase = true) }
+        config.customBackdropPath != null && config.customBackdropPath != defaultBackdrop
     }
 
     val coverHazeState = remember { HazeState() }
@@ -330,12 +273,9 @@ internal fun CoverSelectionView(
                         modifier = Modifier
                             .size(36.dp)
                             .bounceClick(scaleDown = 0.90f) { onBack() }
-                            .hazeGlass(
-                                shape = CircleShape,
-                                borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                useRefraction = true
-                            ),
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -355,11 +295,7 @@ internal fun CoverSelectionView(
                             )
                         )
                         Text(
-                            text = when (coverTab) {
-                                0 -> stringResource(R.string.share_cover_picker_poster_hint)
-                                1 -> stringResource(R.string.share_cover_picker_backdrop_hint)
-                                else -> stringResource(R.string.share_cover_picker_logo_hint)
-                            },
+                            text = if (coverTab == 0) stringResource(R.string.share_cover_picker_poster_hint) else stringResource(R.string.share_cover_picker_backdrop_hint),
                             fontSize = 11.5.sp,
                             color = Color.White.copy(alpha = 0.60f)
                         )
@@ -374,10 +310,10 @@ internal fun CoverSelectionView(
                         color = ColorUtils.lightenForText(accentColor, 1.35f),
                         modifier = Modifier
                             .bounceClick(scaleDown = 0.92f) {
-                                when (coverTab) {
-                                    0 -> onConfigChange(config.copy(customPosterPath = null))
-                                    1 -> onConfigChange(config.copy(customBackdropPath = null))
-                                    else -> onConfigChange(config.copy(customLogoPath = null, hasManualLogoOverride = false))
+                                if (coverTab == 0) {
+                                    onConfigChange(config.copy(customPosterPath = null))
+                                } else {
+                                    onConfigChange(config.copy(customBackdropPath = null))
                                 }
                                 onBack()
                             }
@@ -388,12 +324,11 @@ internal fun CoverSelectionView(
 
             Spacer(modifier = Modifier.height(6.dp))
 
-            // Tab Selector (Posters vs Backdrops vs Logos)
+            // Tab Selector (Posters vs Backdrops)
             SegmentedControl(
                 options = listOf(
                     SegmentedOption(value = 0, title = stringResource(R.string.share_cover_picker_posters_tab, validPosters.size)),
-                    SegmentedOption(value = 1, title = stringResource(R.string.share_cover_picker_backdrops_tab, validBackdrops.size)),
-                    SegmentedOption(value = 2, title = stringResource(R.string.share_cover_picker_logos_tab, validLogos.size))
+                    SegmentedOption(value = 1, title = stringResource(R.string.share_cover_picker_backdrops_tab, validBackdrops.size))
                 ),
                 selected = coverTab,
                 accentColor = accentColor,
@@ -401,7 +336,7 @@ internal fun CoverSelectionView(
                 context = context,
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 16.dp),
+                    .padding(horizontal = 24.dp),
                 height = 36.dp,
                 onSelect = { newTab ->
                     onCoverTabChange(newTab)
@@ -410,20 +345,25 @@ internal fun CoverSelectionView(
 
             Spacer(modifier = Modifier.height(10.dp))
 
-            // Sezione Filtro Lingua: per Locandine (coverTab == 0) e Loghi (coverTab == 2)
-            if (showLanguageFilter) {
-                val currentLabel = if (currentSelectedLanguage == "all") {
-                    stringResource(R.string.share_cover_picker_all_languages)
-                } else {
-                    getLanguageDisplayName(currentSelectedLanguage)
-                }
+            // Sezione Filtro Lingua: SOLO per le Locandine (coverTab == 0) con pulsante a tendina e icona standard ic_right
+            if (coverTab == 0 && availableLanguages.isNotEmpty()) {
                 val chevronRotation by animateFloatAsState(
                     targetValue = if (languageMenuExpanded) 270f else 90f,
                     animationSpec = spring(stiffness = Spring.StiffnessMediumLow),
                     label = "langChevron"
                 )
 
-                val langFilterShape = RoundedCornerShape(12.dp)
+                val currentCount = if (selectedLanguageCode == "all") {
+                    validPosters.size
+                } else {
+                    validPosters.count { it.iso6391.equals(selectedLanguageCode, ignoreCase = true) }
+                }
+                val currentLabel = if (selectedLanguageCode == "all") {
+                    stringResource(R.string.share_cover_picker_all_languages)
+                } else {
+                    getLanguageDisplayName(selectedLanguageCode)
+                }
+
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
@@ -433,12 +373,9 @@ internal fun CoverSelectionView(
                             languageButtonBottomPx = coordinates.positionInParent().y + coordinates.size.height
                         }
                         .bounceClick(scaleDown = 0.97f) { languageMenuExpanded = !languageMenuExpanded }
-                        .hazeGlass(
-                            shape = langFilterShape,
-                            borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            useRefraction = true
-                        )
+                        .clip(RoundedCornerShape(12.dp))
+                        .background(Color.White.copy(alpha = 0.06f))
+                        .border(1.dp, Color.White.copy(alpha = 0.12f), RoundedCornerShape(12.dp))
                         .padding(horizontal = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.SpaceBetween
@@ -454,7 +391,7 @@ internal fun CoverSelectionView(
                             color = Color.White
                         )
                         CountPill(
-                            count = currentFilteredCount,
+                            count = currentCount,
                             isSelected = false,
                             accentColor = accentColor
                         )
@@ -473,14 +410,10 @@ internal fun CoverSelectionView(
             }
 
             // Image Grid con gradiente superiore e inferiore di dissolvenza allo scroll
+            // Per i backdrop: combacia la ratio con quella selezionata
             val isPosterTab = coverTab == 0
-            val isLogoTab = coverTab == 2
-            val itemAspectRatio = when (coverTab) {
-                0 -> 2f / 3f
-                1 -> config.aspectRatio.ratio
-                else -> 16f / 9f
-            }
-            val columns = if (isPosterTab || (coverTab == 1 && itemAspectRatio < 1f)) 3 else 2
+            val itemAspectRatio = if (isPosterTab) (2f / 3f) else config.aspectRatio.ratio
+            val columns = if (isPosterTab || itemAspectRatio < 1f) 3 else 2
 
             if (currentDisplayList.isEmpty()) {
                 Box(
@@ -535,18 +468,14 @@ internal fun CoverSelectionView(
                         verticalArrangement = Arrangement.spacedBy(10.dp)
                     ) {
                         items(currentDisplayList, key = { it.filePath }) { item ->
-                            val isSelected = when (coverTab) {
-                                0 -> (config.customPosterPath ?: defaultPoster) == item.filePath
-                                1 -> (config.customBackdropPath ?: defaultBackdrop) == item.filePath
-                                else -> (config.customLogoPath ?: defaultLogoPath) == item.filePath
+                            val isSelected = if (isPosterTab) {
+                                (config.customPosterPath ?: defaultPoster) == item.filePath
+                            } else {
+                                (config.customBackdropPath ?: defaultBackdrop) == item.filePath
                             }
 
-                            val imageUrl = remember(item.filePath, coverTab) {
-                                val imageType = when (coverTab) {
-                                    0 -> ImageType.POSTER
-                                    1 -> ImageType.BACKDROP
-                                    else -> ImageType.LOGO
-                                }
+                            val imageUrl = remember(item.filePath) {
+                                val imageType = if (isPosterTab) ImageType.POSTER else ImageType.BACKDROP
                                 buildTmdbImageUrl(item.filePath, imageType, ImageQuality.HIGH)
                             }
 
@@ -556,43 +485,12 @@ internal fun CoverSelectionView(
                                     .aspectRatio(itemAspectRatio)
                                     .bounceClick(scaleDown = 0.95f) {
                                         VibrationHelper.vibrateTick(context)
-                                        when (coverTab) {
-                                            0 -> {
-                                                val newPath = if (item.filePath == defaultPoster) null else item.filePath
-                                                // SMART SYNC DEFAULT:
-                                                // Se l'utente non ha impostato un logo manualmente,
-                                                // tenta di sincronizzare il logo con la lingua della locandina scelta!
-                                                val posterLang = item.iso6391?.lowercase()
-                                                val matchingLogo = if (!posterLang.isNullOrBlank()) {
-                                                    validLogos.firstOrNull { it.iso6391?.equals(posterLang, ignoreCase = true) == true }
-                                                } else null
-
-                                                val newLogoPath = if (!config.hasManualLogoOverride) {
-                                                    if (matchingLogo != null) matchingLogo.filePath else null
-                                                } else {
-                                                    config.customLogoPath
-                                                }
-
-                                                onConfigChange(
-                                                    config.copy(
-                                                        customPosterPath = newPath,
-                                                        customLogoPath = newLogoPath
-                                                    )
-                                                )
-                                            }
-                                            1 -> {
-                                                val newPath = if (item.filePath == defaultBackdrop) null else item.filePath
-                                                onConfigChange(config.copy(customBackdropPath = newPath))
-                                            }
-                                            else -> {
-                                                val newPath = if (item.filePath == defaultLogoPath) null else item.filePath
-                                                onConfigChange(
-                                                    config.copy(
-                                                        customLogoPath = newPath,
-                                                        hasManualLogoOverride = true
-                                                    )
-                                                )
-                                            }
+                                        if (isPosterTab) {
+                                            val newPath = if (item.filePath == defaultPoster) null else item.filePath
+                                            onConfigChange(config.copy(customPosterPath = newPath))
+                                        } else {
+                                            val newPath = if (item.filePath == defaultBackdrop) null else item.filePath
+                                            onConfigChange(config.copy(customBackdropPath = newPath))
                                         }
                                         onBack() // Si applica subito alla card e torna indietro
                                     }
@@ -610,14 +508,8 @@ internal fun CoverSelectionView(
                                         .crossfade(true)
                                         .build(),
                                     contentDescription = null,
-                                    contentScale = if (isLogoTab) ContentScale.Fit else ContentScale.Crop,
-                                    modifier = if (isLogoTab) {
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(14.dp)
-                                    } else {
-                                        Modifier.fillMaxSize()
-                                    },
+                                    contentScale = ContentScale.Crop,
+                                    modifier = Modifier.fillMaxSize(),
                                     loading = {
                                         Box(
                                             modifier = Modifier
@@ -667,7 +559,7 @@ internal fun CoverSelectionView(
         }
 
         // Layer 3: Floating In-tree Glass Dropdown with Haze & Top/Bottom scroll fade gradient
-        if (showLanguageFilter) {
+        if (coverTab == 0 && availableLanguages.isNotEmpty()) {
             val dropdownTopDp = if (languageButtonBottomPx > 0f) {
                 with(LocalDensity.current) { languageButtonBottomPx.toDp() + 6.dp }
             } else {
@@ -707,8 +599,7 @@ internal fun CoverSelectionView(
                             blurRadius = 24.dp,
                             containerColor = Color(0xFF141418).copy(alpha = 0.60f),
                             borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.18f),
-                            useRefraction = true
+                            borderColor = Color.White.copy(alpha = 0.18f)
                         )
                 ) {
                     Column(
@@ -735,18 +626,15 @@ internal fun CoverSelectionView(
                             .padding(vertical = 6.dp)
                     ) {
                         // Opzione "Tutte le lingue"
-                        val isAllSelected = currentSelectedLanguage == "all"
+                        val totalPosters = validPosters.size
+                        val isAllSelected = selectedLanguageCode == "all"
                         LanguageMenuItem(
                             text = stringResource(R.string.share_cover_picker_all_languages),
-                            count = currentTotalCount,
+                            count = totalPosters,
                             isSelected = isAllSelected,
                             accentColor = accentColor,
                             onClick = {
-                                if (coverTab == 0) {
-                                    selectedLanguageCode = "all"
-                                } else {
-                                    selectedLogoLanguageCode = "all"
-                                }
+                                selectedLanguageCode = "all"
                                 languageMenuExpanded = false
                             }
                         )
@@ -757,24 +645,16 @@ internal fun CoverSelectionView(
                             thickness = 0.5.dp
                         )
 
-                        for (code in currentLanguages) {
-                            val count = if (coverTab == 0) {
-                                validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
-                            } else {
-                                validLogos.count { it.iso6391.equals(code, ignoreCase = true) }
-                            }
-                            val isCurrent = currentSelectedLanguage.equals(code, ignoreCase = true)
+                        availableLanguages.forEach { code ->
+                            val count = validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
+                            val isCurrent = selectedLanguageCode.equals(code, ignoreCase = true)
                             LanguageMenuItem(
                                 text = getLanguageDisplayName(code),
                                 count = count,
                                 isSelected = isCurrent,
                                 accentColor = accentColor,
                                 onClick = {
-                                    if (coverTab == 0) {
-                                        selectedLanguageCode = code
-                                    } else {
-                                        selectedLogoLanguageCode = code
-                                    }
+                                    selectedLanguageCode = code
                                     languageMenuExpanded = false
                                 }
                             )

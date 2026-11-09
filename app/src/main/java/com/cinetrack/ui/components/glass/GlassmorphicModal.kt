@@ -22,15 +22,8 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.widthIn
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
-import androidx.compose.foundation.layout.Spacer
-import com.cinetrack.ui.LocalBackdrop
-import com.cinetrack.ui.LocalHazeState
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.haze
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -95,47 +88,25 @@ fun GlassmorphicModal(
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                val modalHazeState = remember { HazeState() }
-                val modalBackdrop = rememberLayerBackdrop { drawContent() }
-
                 Box(
                     modifier = Modifier
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.9f)
                         .clip(RoundedCornerShape(32.dp))
+                        .hazeGlass(
+                            state = activeHazeState,
+                            alpha = 1f,
+                            shape = RoundedCornerShape(32.dp),
+                            style = style
+                        )
+                        .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
                         .pointerInput(Unit) {
                             detectTapGestures {
                                 focusManager.clearFocus()
                             }
                         }
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .layerBackdrop(modalBackdrop)
-                            .haze(modalHazeState)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .hazeGlass(
-                                    state = activeHazeState,
-                                    alpha = 1f,
-                                    shape = RoundedCornerShape(32.dp),
-                                    style = style,
-                                    blurRadius = 24.dp,
-                                    useRefraction = true
-                                )
-                                .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
-                        )
-                    }
-
-                    CompositionLocalProvider(
-                        LocalHazeState provides modalHazeState,
-                        LocalBackdrop provides modalBackdrop
-                    ) {
-                        content(1f)
-                    }
+                    content(1f)
                 }
             }
         }
@@ -197,9 +168,6 @@ fun GlassmorphicModal(
                     .padding(vertical = 16.dp),
                 contentAlignment = Alignment.Center
             ) {
-                val modalHazeState = remember { HazeState() }
-                val modalBackdrop = rememberLayerBackdrop { drawContent() }
-
                 Box(
                     modifier = Modifier
                         .graphicsLayer {
@@ -209,39 +177,20 @@ fun GlassmorphicModal(
                         .widthIn(max = 400.dp)
                         .fillMaxWidth(0.9f)
                         .clip(RoundedCornerShape(32.dp))
+                        .hazeGlass(
+                            state = activeHazeState,
+                            alpha = alpha,
+                            shape = RoundedCornerShape(32.dp),
+                            style = style
+                        )
+                        .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
                         .pointerInput(Unit) { 
                             detectTapGestures {
                                 focusManager.clearFocus()
                             } 
                         }
                 ) {
-                    Box(
-                        modifier = Modifier
-                            .matchParentSize()
-                            .layerBackdrop(modalBackdrop)
-                            .haze(modalHazeState)
-                    ) {
-                        Spacer(
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .hazeGlass(
-                                    state = activeHazeState,
-                                    alpha = alpha,
-                                    shape = RoundedCornerShape(32.dp),
-                                    style = style,
-                                    blurRadius = 24.dp,
-                                    useRefraction = true
-                                )
-                                .border(1.dp, Color.White.copy(alpha = HazeStyles.ModalBorderAlpha), RoundedCornerShape(32.dp))
-                        )
-                    }
-
-                    CompositionLocalProvider(
-                        LocalHazeState provides modalHazeState,
-                        LocalBackdrop provides modalBackdrop
-                    ) {
-                        content(alpha)
-                    }
+                    content(alpha)
                 }
             }
         }

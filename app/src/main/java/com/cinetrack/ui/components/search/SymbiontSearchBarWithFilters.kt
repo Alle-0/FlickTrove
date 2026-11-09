@@ -67,9 +67,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
-import dev.chrisbanes.haze.HazeState
 import com.cinetrack.data.model.KeywordDictionary
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
@@ -110,7 +107,6 @@ fun SymbiontSearchBarWithFilters(
     focusRequester: FocusRequester,
     keyboardController: SoftwareKeyboardController?,
     onFilterBoundsMeasured: (Rect) -> Unit,
-    hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
     val filtersVisible = category != "person" && category != "collection"
@@ -210,6 +206,7 @@ fun SymbiontSearchBarWithFilters(
             sortConfig.selectedDecades.isNotEmpty() ||
             sortConfig.sortType != "popularity"
 
+    val symbioteColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f)
 
     BoxWithConstraints(
         modifier = modifier.height(44.dp)
@@ -346,13 +343,7 @@ fun SymbiontSearchBarWithFilters(
             modifier = Modifier
                 .width(searchBarWidth)
                 .height(44.dp)
-                .hazeGlass(
-                    state = hazeState,
-                    shape = CircleShape,
-                    useRefraction = true,
-                    borderWidth = 1.dp,
-                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                )
+                .clip(CircleShape)
                 .clickable(
                     interactionSource = remember { MutableInteractionSource() },
                     indication = null,
@@ -491,13 +482,7 @@ fun SymbiontSearchBarWithFilters(
                                 val nextColumns = nextGridColumns(preferences.gridColumns)
                                 onLayoutToggleClick(nextColumns)
                             }
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = CircleShape,
-                                useRefraction = true,
-                                borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                            ),
+                            .background(symbioteColor, CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -530,17 +515,18 @@ fun SymbiontSearchBarWithFilters(
                             keyboardController?.hide()
                             onFilterClick()
                         }
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = CircleShape,
-                            useRefraction = true,
-                            borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                            borderColor = if (hasActiveFilters) {
+                        .background(symbioteColor, CircleShape)
+                        .then(
+                            if (hasActiveFilters) {
                                 val borderAlpha = if (isDetached) 1f else ((p - 0.68f) / 0.32f).coerceIn(0f, 1f)
-                                MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
-                            } else {
-                                HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
-                            }
+                                Modifier.border(
+                                    BorderStroke(
+                                        1.5.dp,
+                                        MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
+                                    ),
+                                    CircleShape
+                                )
+                            } else Modifier
                         ),
                     contentAlignment = Alignment.Center
                 ) {

@@ -36,7 +36,6 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.ui.platform.LocalContext
 import com.cinetrack.util.AudioRecorderHelper
 import androidx.compose.foundation.border
-import com.cinetrack.ui.components.glass.hazeGlass
 import kotlinx.coroutines.launch
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.tween
@@ -46,7 +45,6 @@ import androidx.compose.material.icons.rounded.MicOff
 import androidx.compose.material.icons.rounded.PlayArrow
 import androidx.compose.material.icons.rounded.Stop
 import androidx.compose.material.icons.rounded.Delete
-import com.cinetrack.ui.theme.HazeStyles
 
 @dagger.hilt.EntryPoint
 @dagger.hilt.InstallIn(dagger.hilt.components.SingletonComponent::class)
@@ -249,13 +247,8 @@ fun QuickNoteModal(
                             }
                             speechLauncher.launch(intent)
                         }
-                        .hazeGlass(
-                            shape = CircleShape,
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            useRefraction = true
-                        ),
+                        .clip(RoundedCornerShape(50))
+                        .background(Color.White.copy(alpha = 0.1f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Icon(
@@ -401,13 +394,8 @@ fun QuickNoteModal(
                                         permissionLauncher.launch(android.Manifest.permission.RECORD_AUDIO)
                                     }
                                 }
-                                .hazeGlass(
-                                    shape = CircleShape,
-                                    containerColor = if (isRecording) Color.Red.copy(alpha = 0.35f) else Color.White.copy(alpha = 0.08f),
-                                    borderWidth = 1.dp,
-                                    borderColor = if (isRecording) Color.Red.copy(alpha = 0.6f) else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                    useRefraction = true
-                                ),
+                                .clip(RoundedCornerShape(50))
+                                .background(if (isRecording) Color.Red else Color.White.copy(alpha = 0.1f)),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
@@ -432,13 +420,8 @@ fun QuickNoteModal(
                         .weight(1f)
                         .height(52.dp)
                         .bounceClick(scaleDown = 0.92f, onClick = onDismiss)
-                        .hazeGlass(
-                            shape = RoundedCornerShape(16.dp),
-                            containerColor = Color.White.copy(alpha = 0.08f),
-                            borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            useRefraction = true
-                        ),
+                        .clip(RoundedCornerShape(16.dp))
+                        .background(Color.White.copy(alpha = 0.08f)),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(
@@ -461,8 +444,7 @@ fun QuickNoteModal(
                             onSave(note)
                         }
                         .clip(RoundedCornerShape(16.dp))
-                        .background(accentColor, RoundedCornerShape(16.dp))
-                        .border(1.dp, Color.White.copy(alpha = 0.25f), RoundedCornerShape(16.dp)),
+                        .background(accentColor),
                     contentAlignment = Alignment.Center
                 ) {
                     Text(

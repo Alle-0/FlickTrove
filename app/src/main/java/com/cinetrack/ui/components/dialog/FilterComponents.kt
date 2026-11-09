@@ -73,25 +73,26 @@ fun ExpandableSection(
     showChevron: Boolean = true,
     isClickable: Boolean = true,
     badgeCount: Int = 0,
-    hazeState: HazeState? = null,
     onToggle: () -> Unit,
     content: @Composable () -> Unit
 ) {
     val rotation by animateFloatAsState(targetValue = if (isExpanded) 90f else 0f, label = "arrowRotation")
-    val sectionShape = RoundedCornerShape(28.dp)
     Box(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp, vertical = 2.dp)
             .bounceClick(enabled = isClickable) { onToggle() }
-            .clip(sectionShape)
-            .hazeGlass(
-                state = hazeState,
-                shape = sectionShape,
-                useRefraction = true,
-                borderWidth = 1.dp,
-                borderColor = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
-                containerColor = Color.Black.copy(alpha = 0.45f)
+            .clip(RoundedCornerShape(28.dp))
+            .background(Color.Black.copy(alpha = 0.6f))
+            .border(
+                width = 1.dp,
+                brush = Brush.verticalGradient(
+                    listOf(
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.12f),
+                        MaterialTheme.colorScheme.onSurface.copy(alpha = 0.04f)
+                    )
+                ),
+                shape = RoundedCornerShape(28.dp)
             )
     ) {
         Column(modifier = Modifier.fillMaxWidth()) {

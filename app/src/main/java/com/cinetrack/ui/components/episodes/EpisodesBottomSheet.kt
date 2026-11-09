@@ -11,7 +11,6 @@ import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.LocalImageQuality
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
@@ -52,10 +51,6 @@ import com.cinetrack.ui.viewmodel.DetailEvent
 import com.cinetrack.ui.viewmodel.MovieDetailViewModel
 import com.cinetrack.ui.viewmodel.WatchState
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.LocalBackdrop
-import com.cinetrack.ui.LocalHazeState
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import dev.chrisbanes.haze.haze
@@ -127,7 +122,6 @@ fun EpisodesBottomSheet(
     }
     
     var selectedEpisodeForInfo by remember { mutableStateOf<Episode?>(null) }
-    val episodesContentHazeState = remember { HazeState() }
 
     val scope = rememberCoroutineScope()
     val dismissAndSync: () -> Unit = {
@@ -222,101 +216,64 @@ fun EpisodesBottomSheet(
         contentWindowInsets = { WindowInsets(0) }
     ) {
         val sheetHazeState = remember { HazeState() }
-        val sheetBackdrop = rememberLayerBackdrop {
-            drawRect(Color(0xFF0C0C10))
-            drawContent()
-        }
-        val sheetShape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp)
-
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .fillMaxHeight(0.88f)
+        CompositionLocalProvider(
+            LocalContext provides context,
+            LocalConfiguration provides config
         ) {
-            // Sibling 1: The blurred glass background card (fills parent, serves as backdrop & haze source)
             Box(
                 modifier = Modifier
-                    .matchParentSize()
-                    .layerBackdrop(sheetBackdrop)
+                    .fillMaxWidth()
+                    .fillMaxHeight(0.88f)
+                    .hazeGlass(state = hazeState, shape = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp))
+            ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxSize()
                     .haze(state = sheetHazeState, style = HazeStyles.PremiumDark)
+                    .navigationBarsPadding()
             ) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = sheetShape,
-                            blurRadius = 24.dp,
-                            useRefraction = true
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = Color.White.copy(alpha = HazeStyles.ModalBorderAlpha),
-                            shape = sheetShape
-                        )
-                )
-            }
-
-            // Sibling 2: The content column with access to sheetBackdrop & sheetHazeState for crisp nested Liquid Glass
-            CompositionLocalProvider(
-                LocalContext provides context,
-                LocalConfiguration provides config,
-                LocalHazeState provides sheetHazeState,
-                LocalBackdrop provides sheetBackdrop
-            ) {
+                // Custom Drag Handle
                 Box(
                     modifier = Modifier
-                        .fillMaxSize()
-                        .navigationBarsPadding()
+                        .fillMaxWidth()
+                        .padding(top = 12.dp, bottom = 8.dp),
+                    contentAlignment = Alignment.Center
                 ) {
-                    Column(
+                    Box(
                         modifier = Modifier
-                            .fillMaxSize()
-                            .haze(state = episodesContentHazeState, style = HazeStyles.PremiumDark)
-                    ) {
-                        // Custom Drag Handle
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(top = 12.dp, bottom = 8.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .size(width = 36.dp, height = 4.dp)
-                                    .clip(RoundedCornerShape(2.dp))
-                                    .background(Color.White.copy(alpha = 0.24f))
-                            )
-                        }
+                            .size(width = 36.dp, height = 4.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color.White.copy(alpha = 0.24f))
+                    )
+                }
 
-                        // Header with Layout Toggle and Close
-                        Header(
-                            movie = movie,
-                            isAccordion = isAccordion,
-                            sheetHazeState = sheetHazeState,
-                            onToggleLayout = {
-                                val next = if (isAccordion) "STANDARD" else "ACCORDION"
-                                settingsViewModel.updateEpisodesLayout(next)
-                            },
-                            onDismiss = dismissAndSync
-                        )
+                // Header with Layout Toggle and Close
+                Header(
+                    movie = movie,
+                    isAccordion = isAccordion,
+                    onToggleLayout = {
+                        val next = if (isAccordion) "STANDARD" else "ACCORDION"
+                        settingsViewModel.updateEpisodesLayout(next)
+                    },
+                    onDismiss = dismissAndSync
+                )
 
-                        if (isAccordion) {
-                            // Accordion (TV Time style) layout
-                            EpisodesAccordionView(
-                                movie = movie,
-                                viewModel = viewModel,
-                                localWatchedEpisodes = localWatchedEpisodes,
-                                onUpdateWatchedEpisodes = { localWatchedEpisodes = it },
-                                onEpisodeInfoClick = { selectedEpisodeForInfo = it },
-                                onEpisodeCommentsClick = onEpisodeCommentsClick?.let {
-                                    { sNum, ep -> handleEpisodeCommentsClick(sNum, ep) }
-                                },
-                                isDropped = isDropped,
-                                nestedScrollConnection = nestedScrollConnection,
-                                modifier = Modifier.fillMaxSize()
-                            )
-                        } else {
+                if (isAccordion) {
+                    // Accordion (TV Time style) layout
+                    EpisodesAccordionView(
+                        movie = movie,
+                        viewModel = viewModel,
+                        localWatchedEpisodes = localWatchedEpisodes,
+                        onUpdateWatchedEpisodes = { localWatchedEpisodes = it },
+                        onEpisodeInfoClick = { selectedEpisodeForInfo = it },
+                        onEpisodeCommentsClick = onEpisodeCommentsClick?.let {
+                            { sNum, ep -> handleEpisodeCommentsClick(sNum, ep) }
+                        },
+                        isDropped = isDropped,
+                        nestedScrollConnection = nestedScrollConnection,
+                        modifier = Modifier.fillMaxSize()
+                    )
+                } else {
                     // Standard horizontal chip layout
                     val fetchedSeasonData = seasonDetails[selectedSeasonNumber]
                     val fallbackSeasonData = movie.seasons?.find { it.seasonNumber == selectedSeasonNumber }
@@ -351,7 +308,6 @@ fun EpisodesBottomSheet(
                             seasons = seasons,
                             selectedSeason = selectedSeasonNumber,
                             completedSeasons = completedSeasons,
-                            sheetHazeState = sheetHazeState,
                             onSeasonSelected = { selectedSeasonNumber = it }
                         )
 
@@ -371,7 +327,6 @@ fun EpisodesBottomSheet(
 
                             BulkAction(
                                 isAllWatched = isSeasonFullyWatched(localWatchedEpisodes, currentSeasonNumber = selectedSeasonNumber, seasonData = currentSeasonData),
-                                sheetHazeState = sheetHazeState,
                                 onToggle = { 
                                     if (isDropped) return@BulkAction
                                     val currentWatched = localWatchedEpisodes[selectedSeasonNumber.toString()] ?: emptyList()
@@ -465,15 +420,12 @@ fun EpisodesBottomSheet(
             }
 
             selectedEpisodeForInfo?.let { ep ->
-                CompositionLocalProvider(LocalBackdrop provides null) {
-                    EpisodeInfoModal(
-                        episode = ep,
-                        onDismiss = { selectedEpisodeForInfo = null },
-                        hazeState = episodesContentHazeState
-                    )
-                }
+                EpisodeInfoModal(
+                    episode = ep,
+                    onDismiss = { selectedEpisodeForInfo = null },
+                    hazeState = sheetHazeState
+                )
             }
-        }
         }
         }
     }
@@ -483,7 +435,6 @@ fun EpisodesBottomSheet(
 private fun Header(
     movie: Movie,
     isAccordion: Boolean,
-    sheetHazeState: HazeState? = null,
     onToggleLayout: () -> Unit,
     onDismiss: () -> Unit
 ) {
@@ -512,26 +463,21 @@ private fun Header(
         }
 
         // Layout Toggle Button (Chips vs Accordion)
-        Box(
+        Surface(
             modifier = Modifier
                 .size(44.dp)
-                .bounceClick { onToggleLayout() }
-                .hazeGlass(
-                    state = sheetHazeState,
-                    shape = CircleShape,
-                    useRefraction = true,
-                    borderWidth = 1.dp,
-                    borderColor = Color.White.copy(alpha = 0.15f),
-                    containerColor = Color.White.copy(alpha = 0.08f)
-                ),
-            contentAlignment = Alignment.Center
+                .bounceClick { onToggleLayout() },
+            color = Color.White.copy(alpha = 0.06f),
+            shape = CircleShape
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = if (isAccordion) R.drawable.ic_grid else R.drawable.ic_lista),
-                contentDescription = stringResource(R.string.episodes_layout_toggle),
-                tint = Color.White,
-                modifier = Modifier.size(20.dp)
-            )
+            Box(contentAlignment = Alignment.Center) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = if (isAccordion) R.drawable.ic_grid else R.drawable.ic_lista),
+                    contentDescription = stringResource(R.string.episodes_layout_toggle),
+                    tint = Color.White,
+                    modifier = Modifier.size(20.dp)
+                )
+            }
         }
 
         Spacer(modifier = Modifier.width(10.dp))
@@ -548,7 +494,6 @@ private fun SeasonSelector(
     seasons: List<Int>,
     selectedSeason: Int,
     completedSeasons: Set<Int>,
-    sheetHazeState: HazeState,
     onSeasonSelected: (Int) -> Unit
 ) {
     val lazyListState = rememberLazyListState()
@@ -604,21 +549,14 @@ private fun SeasonSelector(
             
             val borderColor = when {
                 isCompleted -> Color(0xFF00E676).copy(alpha = 0.8f)
-                else -> Color.White.copy(alpha = 0.15f)
+                else -> Color.White.copy(alpha = 0.1f)
             }
 
             Surface(
-                modifier = Modifier
-                    .bounceClick { onSeasonSelected(seasonNum) }
-                    .hazeGlass(
-                        state = sheetHazeState,
-                        shape = CircleShape,
-                        containerColor = backgroundColor,
-                        borderColor = borderColor,
-                        borderWidth = 1.dp,
-                        useRefraction = true
-                    ),
-                color = Color.Transparent
+                modifier = Modifier.bounceClick { onSeasonSelected(seasonNum) },
+                color = backgroundColor,
+                shape = CircleShape,
+                border = androidx.compose.foundation.BorderStroke(1.dp, borderColor)
             ) {
                 Text(
                     if (seasonNum == 0) stringResource(R.string.episodes_specials) else stringResource(R.string.episodes_season_n, seasonNum),
@@ -636,7 +574,6 @@ private fun SeasonSelector(
 @Composable
 private fun BulkAction(
     isAllWatched: Boolean, 
-    sheetHazeState: HazeState,
     onToggle: () -> Unit,
     onLongClick: () -> Unit
 ) {
@@ -646,18 +583,10 @@ private fun BulkAction(
             .bounceClick(
                 onLongClick = onLongClick,
                 onClick = onToggle
-            )
-            .then(
-                Modifier.hazeGlass(
-                    state = sheetHazeState,
-                    shape = CircleShape,
-                    containerColor = if (isAllWatched) Color(0xFF00E676).copy(alpha = 0.85f) else Color.White.copy(alpha = 0.08f),
-                    borderColor = if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.15f),
-                    borderWidth = 1.dp,
-                    useRefraction = true
-                )
             ),
-        color = Color.Transparent
+        color = if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.08f),
+        shape = CircleShape,
+        border = androidx.compose.foundation.BorderStroke(1.dp, if (isAllWatched) Color(0xFF00E676) else Color.White.copy(alpha = 0.1f))
     ) {
         Row(
             modifier = Modifier.padding(horizontal = 18.dp, vertical = 10.dp),

@@ -25,8 +25,6 @@ import com.cinetrack.R
 import com.cinetrack.data.api.MovieDetailResponse
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.ColorUtils
-import com.cinetrack.ui.components.glass.hazeGlass
-import dev.chrisbanes.haze.HazeState
 import java.text.DecimalFormat
 import java.text.DecimalFormatSymbols
 import java.util.Locale
@@ -35,8 +33,7 @@ import java.util.Locale
 internal fun HeaderTechnicalSection(
     details: MovieDetailResponse?,
     movie: Movie,
-    accentColor: Color,
-    hazeState: HazeState? = null
+    accentColor: Color
 ) {
     Column(
         modifier = Modifier
@@ -76,7 +73,6 @@ internal fun HeaderTechnicalSection(
                     value = originalTitle,
                     icon = ImageVector.vectorResource(id = R.drawable.ic_documento),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(1.15f)
                 )
                 HeaderTechnicalItem(
@@ -84,7 +80,6 @@ internal fun HeaderTechnicalSection(
                     value = status,
                     icon = Icons.Rounded.Info,
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(0.85f)
                 )
             }
@@ -98,7 +93,6 @@ internal fun HeaderTechnicalSection(
                     value = releaseDate,
                     icon = ImageVector.vectorResource(id = R.drawable.ic_calendario),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(1.15f)
                 )
                 HeaderTechnicalItem(
@@ -106,7 +100,6 @@ internal fun HeaderTechnicalSection(
                     value = if (budget != null && budget > 0) "${formatter.format(budget)} USD" else "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_dollar),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(0.85f)
                 )
             }
@@ -120,7 +113,6 @@ internal fun HeaderTechnicalSection(
                     value = origLang?.uppercase(Locale.getDefault()) ?: "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_traduzione),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(1.15f)
                 )
                 HeaderTechnicalItem(
@@ -128,7 +120,6 @@ internal fun HeaderTechnicalSection(
                     value = if (revenue != null && revenue > 0) "${formatter.format(revenue)} USD" else "—",
                     icon = ImageVector.vectorResource(id = R.drawable.ic_world),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(0.85f)
                 )
             }
@@ -142,7 +133,6 @@ internal fun HeaderTechnicalSection(
                     value = production,
                     icon = ImageVector.vectorResource(id = R.drawable.ic_edifici),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(1.15f)
                 )
                 HeaderTechnicalItem(
@@ -150,7 +140,6 @@ internal fun HeaderTechnicalSection(
                     value = country,
                     icon = ImageVector.vectorResource(id = R.drawable.ic_partenone),
                     accentColor = accentColor,
-                    hazeState = hazeState,
                     modifier = Modifier.weight(0.85f)
                 )
             }
@@ -165,7 +154,6 @@ private fun HeaderTechnicalItem(
     value: String,
     icon: ImageVector,
     accentColor: Color,
-    hazeState: HazeState? = null,
     modifier: Modifier = Modifier
 ) {
     Row(
@@ -176,14 +164,8 @@ private fun HeaderTechnicalItem(
         Box(
             modifier = Modifier
                 .size(32.dp)
-                .hazeGlass(
-                    state = hazeState,
-                    shape = iconShape,
-                    useRefraction = true,
-                    borderWidth = 0.5.dp,
-                    borderColor = ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.4f),
-                    containerColor = accentColor.copy(alpha = 0.15f)
-                ),
+                .background(accentColor.copy(alpha = 0.15f), iconShape)
+                .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.4f), iconShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(

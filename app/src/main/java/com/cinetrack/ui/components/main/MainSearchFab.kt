@@ -156,8 +156,7 @@ fun BoxScope.MainSearchFab(
                 }
                 .hazeGlass(
                     state = contentHazeState,
-                    shape = fabShape,
-                    useRefraction = true
+                    shape = fabShape
                 ),
             contentAlignment = Alignment.Center
         ) {
@@ -383,8 +382,7 @@ fun BoxScope.MainScrollToTopFab(
                     .hazeGlass(
                         state = contentHazeState,
                         shape = symbioteShape,
-                        borderWidth = 0.dp,
-                        useRefraction = true
+                        borderWidth = 0.dp
                     )
             ) {
                 Canvas(modifier = Modifier.fillMaxSize()) {
@@ -481,8 +479,7 @@ fun BoxScope.MainScrollToTopFab(
                         }
                         .hazeGlass(
                             state = contentHazeState,
-                            shape = CircleShape,
-                            useRefraction = true
+                            shape = CircleShape
                         ),
                     contentAlignment = Alignment.Center
                 ) {

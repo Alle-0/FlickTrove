@@ -133,12 +133,9 @@ fun GlobalErrorToast(
                         .hazeGlass(
                             state = hazeState,
                             shape = RoundedCornerShape(16.dp),
-                            containerColor = Color(0xFF1E0E10).copy(alpha = 0.65f),
-                            borderColor = Color(0xFFE53935).copy(alpha = 0.5f),
-                            borderWidth = 1.dp,
-                            useOffscreenStrategy = false,
-                            useRefraction = true
+                            useOffscreenStrategy = false
                         )
+                        .border(1.dp, Color(0xFFE53935).copy(alpha = 0.5f), RoundedCornerShape(16.dp))
                 ) {
                     Row(
                         modifier = Modifier

@@ -25,11 +25,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.remember
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -76,7 +72,6 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
 
     val cardShape = RoundedCornerShape(24.dp)
     val cardHazeState = remember { HazeState() }
-    val cardBackdrop = rememberLayerBackdrop { drawContent() }
 
     Box(
         modifier = Modifier
@@ -89,11 +84,10 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
             .clip(cardShape)
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), cardShape)
     ) {
-        // Immagine di sfondo come Haze Source & LayerBackdrop source
+        // Immagine di sfondo come Haze Source
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .layerBackdrop(cardBackdrop)
                 .haze(cardHazeState)
         ) {
             if (article.imageUrl != null) {
@@ -152,39 +146,37 @@ fun NewsArticleCard(article: NewsItem, context: Context) {
             )
         }
 
-        // Badge "External link" in alto a destra a pillola con Liquid Glass
-        CompositionLocalProvider(LocalBackdrop provides cardBackdrop) {
-            Box(
-                modifier = Modifier
-                    .align(Alignment.TopEnd)
-                    .padding(6.dp)
-                    .hazeGlass(
-                        state = cardHazeState,
-                        shape = CircleShape,
-                        containerColor = Color.Black.copy(alpha = 0.35f),
-                        useRefraction = true,
-                        borderWidth = 0.5.dp,
-                        borderColor = Color.White.copy(alpha = 0.25f)
-                    )
-                    .padding(horizontal = 8.dp, vertical = 3.5.dp)
-            ) {
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(
-                        text = stringResource(R.string.news_external_link),
-                        style = MaterialTheme.typography.labelSmall.copy(
-                            fontSize = 9.5.sp,
-                            fontWeight = FontWeight.SemiBold
-                        ),
-                        color = Color.White
-                    )
-                    Spacer(modifier = Modifier.width(3.5.dp))
-                    Icon(
-                        imageVector = ImageVector.vectorResource(R.drawable.ic_external_link),
-                        contentDescription = null,
-                        tint = Color.White,
-                        modifier = Modifier.size(10.dp)
-                    )
-                }
+        // Badge "External link" in alto a destra a pillola con hazeGlass
+        Box(
+            modifier = Modifier
+                .align(Alignment.TopEnd)
+                .padding(6.dp)
+                .hazeGlass(
+                    state = cardHazeState,
+                    shape = CircleShape,
+                    containerColor = Color.Black.copy(alpha = 0.35f),
+                    blurRadius = 16.dp,
+                    borderWidth = 0.5.dp,
+                    borderColor = Color.White.copy(alpha = 0.25f)
+                )
+                .padding(horizontal = 8.dp, vertical = 3.5.dp)
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = stringResource(R.string.news_external_link),
+                    style = MaterialTheme.typography.labelSmall.copy(
+                        fontSize = 9.5.sp,
+                        fontWeight = FontWeight.SemiBold
+                    ),
+                    color = Color.White
+                )
+                Spacer(modifier = Modifier.width(3.5.dp))
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_external_link),
+                    contentDescription = null,
+                    tint = Color.White,
+                    modifier = Modifier.size(10.dp)
+                )
             }
         }
     }

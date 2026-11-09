@@ -23,8 +23,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.Path
 import androidx.compose.ui.graphics.drawscope.clipPath
-import androidx.compose.ui.graphics.drawscope.Stroke
-import com.cinetrack.ui.theme.HazeStyles
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.lerp
 import androidx.compose.ui.draw.drawBehind
@@ -434,13 +432,6 @@ fun CategoryTabSelector(
                             topLeft = Offset(pillLeft, pillTop),
                             size = Size(finalPillWidth, pillHeight),
                             cornerRadius = CornerRadius(cornerRadius, cornerRadius)
-                        )
-                        drawRoundRect(
-                            color = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            topLeft = Offset(pillLeft, pillTop),
-                            size = Size(finalPillWidth, pillHeight),
-                            cornerRadius = CornerRadius(cornerRadius, cornerRadius),
-                            style = Stroke(width = 1.dp.toPx())
                         )
                     }
                     .drawWithContent {

@@ -33,8 +33,6 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.components.glass.hazeGlass
-import dev.chrisbanes.haze.HazeState
 import java.util.Locale
 
 
@@ -53,7 +51,6 @@ fun RatingPill(
     expansion: Float,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    hazeState: HazeState? = null,
     onClick: () -> Unit = {}
 ) {
     val pillRadius = 48.dp
@@ -66,7 +63,6 @@ fun RatingPill(
             .defaultMinSize(minHeight = 36.dp)
             .clip(pillShape)
             .background(accentColor, pillShape)
-            .border(1.dp, Color.White.copy(alpha = 0.25f), pillShape)
             .padding(horizontal = 11.dp, vertical = 6.dp),
         contentAlignment = Alignment.Center
     ) {
@@ -103,7 +99,6 @@ internal fun HeaderRatedPill(
     isSelected: Boolean,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    hazeState: HazeState? = null,
     onClick: () -> Unit
 ) {
     val pillShape = CircleShape
@@ -137,9 +132,19 @@ internal fun HeaderRatedPill(
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .defaultMinSize(minWidth = 36.dp, minHeight = 36.dp)
             .clip(pillShape)
-            .background(if (isSelected) certColor else Color.White.copy(alpha = 0.08f), pillShape)
+            .background(Color.White.copy(alpha = 0.08f), pillShape)
+            .drawBehind {
+                if (revealProgress > 0f) {
+                    val maxRadius = kotlin.math.hypot(size.width / 2f, size.height / 2f)
+                    drawCircle(
+                        color = certColor,
+                        radius = maxRadius * revealProgress,
+                        center = center
+                    )
+                }
+            }
             .border(
-                width = if (isSelected) 0.dp else 0.5.dp,
+                width = 0.5.dp,
                 color = animatedBorderColor,
                 shape = pillShape
             )
@@ -161,7 +166,6 @@ internal fun HeaderTechnicalPill(
     isSelected: Boolean,
     accentColor: Color,
     modifier: Modifier = Modifier,
-    hazeState: HazeState? = null,
     onClick: () -> Unit
 ) {
     val pillShape = CircleShape
@@ -193,10 +197,20 @@ internal fun HeaderTechnicalPill(
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
             .size(36.dp)
             .clip(pillShape)
-            .background(if (isSelected) accentColor else Color.White.copy(alpha = 0.08f), pillShape)
+            .background(Color.White.copy(alpha = 0.08f), pillShape)
+            .drawBehind {
+                if (revealProgress > 0f) {
+                    val maxRadius = kotlin.math.hypot(size.width / 2f, size.height / 2f)
+                    drawCircle(
+                        color = accentColor,
+                        radius = maxRadius * revealProgress,
+                        center = center
+                    )
+                }
+            }
             .border(
-                width = if (isSelected) 0.dp else 0.5.dp,
-                color = if (isSelected) accentColor.copy(alpha = 0.45f) else animatedBorderColor,
+                width = 0.5.dp,
+                color = animatedBorderColor,
                 shape = pillShape
             ),
         contentAlignment = Alignment.Center

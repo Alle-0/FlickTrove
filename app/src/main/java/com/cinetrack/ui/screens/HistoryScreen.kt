@@ -52,10 +52,7 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import com.cinetrack.R
 import com.cinetrack.ui.LocalAppPadding
-import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.LocalHazeState
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.navigation.GlassyTopBar
 import com.cinetrack.ui.history.HistoryViewModel
@@ -214,25 +211,19 @@ fun HistoryScreenContent(
     val topBarClearance = paddingValues.calculateTopPadding() + statusBarsTop + cutoutTop + 46.dp + 16.dp
     val bottomClearance = paddingValues.calculateBottomPadding() + 100.dp
 
-    val historyBackdrop = rememberLayerBackdrop {
-        drawContent()
-    }
-
     Box(modifier = Modifier.fillMaxSize()) {
         // Authentic FlickTrove cinematic dark background
         CinematicBackground()
 
-        CompositionLocalProvider(LocalBackdrop provides historyBackdrop) {
-            // Scrollable Content Layer (Hazed so items scrolling under the glass bars are blurred)
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .layerBackdrop(historyBackdrop)
-                    .haze(
-                        state = internalHazeState,
-                        style = HazeStyles.PremiumDark
-                    )
-            ) {
+        // Scrollable Content Layer (Hazed so items scrolling under the glass bars are blurred)
+        Box(
+            modifier = Modifier
+                .fillMaxSize()
+                .haze(
+                    state = internalHazeState,
+                    style = HazeStyles.PremiumDark
+                )
+        ) {
             if (uiState.isLoading) {
                 HistoryTimelineSkeleton(
                     topBarClearance = topBarClearance,
@@ -327,8 +318,7 @@ fun HistoryScreenContent(
                     customActions = {
                         HistoryViewSwitcher(
                             isTimeline = uiState.selectedViewMode == ViewMode.TIMELINE,
-                            onSelectMode = { viewModel.setViewMode(it) },
-                            hazeState = internalHazeState
+                            onSelectMode = { viewModel.setViewMode(it) }
                         )
                     }
                 )
@@ -379,7 +369,6 @@ fun HistoryScreenContent(
             },
             hazeState = internalHazeState
         )
-        }
     }
 }
 
@@ -387,16 +376,14 @@ fun HistoryScreenContent(
 fun HistoryViewSwitcher(
     isTimeline: Boolean,
     onSelectMode: (ViewMode) -> Unit,
-    modifier: Modifier = Modifier,
-    hazeState: HazeState? = null
+    modifier: Modifier = Modifier
 ) {
     com.cinetrack.ui.components.shared.ListCalendarSwitcher(
         isCalendar = !isTimeline,
         onSelectMode = { isCalendar ->
             onSelectMode(if (isCalendar) ViewMode.CALENDAR else ViewMode.TIMELINE)
         },
-        modifier = modifier,
-        hazeState = hazeState
+        modifier = modifier
     )
 }
 

@@ -59,7 +59,6 @@ import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.components.glass.hazeGlass
-import androidx.compose.ui.graphics.Brush
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.animation.graphics.res.animatedVectorResource
 import androidx.compose.animation.graphics.res.rememberAnimatedVectorPainter
@@ -221,14 +220,14 @@ fun GlassyBottomBar(
             .then(dragModifier),
         contentAlignment = Alignment.Center
     ) {
-        // BACKGROUND BLUR LAYER WITH OPTICAL REFRACTION (Liquid Glass)
+        // BACKGROUND BLUR LAYER WITH PROGRESSIVE GLOW BORDER
         Box(
             modifier = Modifier
                 .matchParentSize()
+                .clip(CircleShape)
                 .hazeGlass(
-                    state = hazeState,
-                    shape = CircleShape,
-                    useRefraction = true
+                    state = hazeState, 
+                    shape = CircleShape
                 )
                 .drawWithContent {
                     drawContent()

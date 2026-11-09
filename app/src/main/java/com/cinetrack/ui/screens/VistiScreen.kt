@@ -51,9 +51,6 @@ import com.cinetrack.ui.components.shared.LayoutToggleButton
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.components.common.CinematicBackground
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.viewmodel.VistiViewModel
@@ -208,16 +205,10 @@ fun VistiScreenContent(
         onToggleFolder = { movie, folder -> viewModel.toggleItemInFolder(folder, movie) },
         onActionModalVisibilityChanged = onActionModalVisibilityChanged
     ) { actionsState ->
-        val vistiBackdrop = rememberLayerBackdrop {
-            drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
-            drawContent()
-        }
-
         Box(modifier = Modifier.fillMaxSize().background(Color.Transparent)) {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .layerBackdrop(vistiBackdrop)
                     .haze(activeHazeState, style = HazeStyles.PremiumDark)
             ) {
             CinematicBackground(modifier = Modifier.fillMaxSize())
@@ -270,40 +261,46 @@ fun VistiScreenContent(
                     }
                 }
 
-                key(uiState.activeTab) {
-                    LazyVerticalGrid(
-                        columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
-                        state = listState,
-                        contentPadding = PaddingValues(
-                            start = 16.dp, 
-                            end = 16.dp, 
-                            bottom = paddingValues.calculateBottomPadding() + 96.dp, 
-                            top = topPadding + stickyHeaderHeight + 12.dp
-                        ),
-                        horizontalArrangement = Arrangement.spacedBy(12.dp),
-                        verticalArrangement = Arrangement.spacedBy(12.dp),
-                        modifier = Modifier.fillMaxSize()
-                    ) {
-                        itemsIndexed(
-                            items = uiState.movies,
-                            key = { index, movie: Movie -> movie.id.toString() + movie.mediaType },
-                            contentType = { _, _ -> if (columns == 1) "list_card" else "movie_card" }
-                        ) { index, movie ->
-                            val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .animateItem(
-                                        fadeInSpec = null,
-                                        fadeOutSpec = null,
-                                        placementSpec = spring(
-                                            dampingRatio = Spring.DampingRatioLowBouncy,
-                                            stiffness = Spring.StiffnessMediumLow
-                                        )
+                LazyVerticalGrid(
+                    columns = androidx.compose.foundation.lazy.grid.GridCells.Fixed(columns),
+                    state = listState,
+                    contentPadding = PaddingValues(
+                        start = 16.dp, 
+                        end = 16.dp, 
+                        bottom = paddingValues.calculateBottomPadding() + 96.dp, 
+                        top = topPadding + stickyHeaderHeight + 12.dp
+                    ),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalArrangement = Arrangement.spacedBy(12.dp),
+                    modifier = Modifier.fillMaxSize()
+                ) {
+                    itemsIndexed(
+                        items = uiState.movies,
+                        key = { index, movie: Movie -> movie.id.toString() + movie.mediaType }
+                    ) { index, movie ->
+                        val folderColors = precomputedFolderColors["${movie.mediaType}_${movie.id}"] ?: emptyList()
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .animateItem(
+                                    fadeInSpec = tween(280),
+                                    placementSpec = spring(
+                                        dampingRatio = Spring.DampingRatioLowBouncy,
+                                        stiffness = Spring.StiffnessMediumLow
                                     ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (columns == 1) {
+                                    fadeOutSpec = tween(200)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            AnimatedContent(
+                                targetState = columns == 1,
+                                transitionSpec = {
+                                    (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
+                                        .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
+                                },
+                                label = "VistiCardLayoutTransition"
+                            ) { isList ->
+                                if (isList) {
                                     com.cinetrack.ui.components.card.MovieListCard(
                                         movie = movie,
                                         modifier = Modifier.fillMaxWidth(),
@@ -352,14 +349,13 @@ fun VistiScreenContent(
         }
 
         // Perfectly Centered Floating Sticky Header
-        CompositionLocalProvider(LocalBackdrop provides vistiBackdrop) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = topPadding)
-                    .align(Alignment.TopCenter)
-                    .zIndex(1f)
-            ) {
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = topPadding)
+                .align(Alignment.TopCenter)
+                .zIndex(1f)
+        ) {
             BoxWithConstraints(
                 modifier = Modifier
                     .fillMaxWidth()
@@ -387,11 +383,7 @@ fun VistiScreenContent(
                     Spacer(
                         modifier = Modifier
                             .matchParentSize()
-                            .hazeGlass(
-                                state = activeHazeState,
-                                shape = CircleShape,
-                                useRefraction = true
-                            )
+                            .hazeGlass(state = activeHazeState, shape = CircleShape)
                     )
                     
                     // Content Layer (Always sharp)
@@ -406,6 +398,9 @@ fun VistiScreenContent(
                         selectedIndex = selectedIndex,
                         onOptionClick = { index ->
                             viewModel.onTabChanged(if (index == 0) "movie" else "tv")
+                            scope.launch {
+                                if (index == 0) viewModel.movieGridState.scrollToItem(0) else viewModel.tvGridState.scrollToItem(0)
+                            }
                         }
                     )
                 }
@@ -444,8 +439,7 @@ fun VistiScreenContent(
                             state = activeHazeState, 
                             shape = CircleShape, 
                             borderWidth = if (hasActiveFilters) 1.5.dp else 1.dp,
-                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            useRefraction = true
+                            borderColor = if (hasActiveFilters) MaterialTheme.colorScheme.primary else HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                         ),
                     contentAlignment = Alignment.Center
                 ) {
@@ -468,7 +462,6 @@ fun VistiScreenContent(
                 }
             }
         }
-        } // end CompositionLocalProvider
         }
         } // end Box B (fillMaxSize)
     } // end MovieActionsWrapper

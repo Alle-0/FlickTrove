@@ -12,9 +12,6 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.foundation.layout.Box
 import dev.chrisbanes.haze.haze
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.core.content.ContextCompat
 import cafe.adriel.voyager.hilt.getViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -131,7 +128,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
     val disabledBadges by settingsViewModel.disabledBadges.collectAsStateWithLifecycle()
     val titleTextSizeMultiplier by settingsViewModel.titleTextSizeMultiplier.collectAsStateWithLifecycle()
     val advancedVisualEffectsEnabled by settingsViewModel.advancedVisualEffectsEnabled.collectAsStateWithLifecycle()
-    val useLiquidGlass by settingsViewModel.useLiquidGlass.collectAsStateWithLifecycle()
     val appTheme by settingsViewModel.appTheme.collectAsStateWithLifecycle()
     val episodeInfoStyle by settingsViewModel.episodeInfoStyle.collectAsStateWithLifecycle()
     val progressBarTarget by settingsViewModel.progressBarTarget.collectAsStateWithLifecycle()
@@ -156,7 +152,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         FlickTroveTheme(themeSetting = appTheme, accentColor = accentColor) {
         val movieActionsManager = remember { MovieActionsManager() }
         val globalHazeState = remember { dev.chrisbanes.haze.HazeState() }
-        val rootBackdrop = rememberLayerBackdrop { drawContent() }
         
         var searchOverlayTriggerX by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(-1f) }
         var searchOverlayTriggerY by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(-1f) }
@@ -179,7 +174,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
             LocalDisabledBadges provides disabledBadges,
             LocalTitleTextSizeMultiplier provides titleTextSizeMultiplier,
             LocalAdvancedVisualEffects provides advancedVisualEffectsEnabled,
-            LocalLiquidGlassEnabled provides useLiquidGlass,
             LocalImageQuality provides imageQuality,
             LocalEpisodeInfoStyle provides episodeInfoStyle,
             LocalProgressBarTarget provides progressBarTarget,
@@ -221,7 +215,6 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                     Box(
                                         modifier = Modifier
                                             .fillMaxSize()
-                                            .layerBackdrop(rootBackdrop)
                                             .haze(globalHazeState)
                                     ) {
                                     cafe.adriel.voyager.transitions.ScreenTransition(
@@ -406,48 +399,44 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                     }
 
                     
-                    CompositionLocalProvider(
-                        com.cinetrack.ui.LocalBackdrop provides rootBackdrop
-                    ) {
-                        com.cinetrack.ui.components.shared.GlobalMovieActions(
-                            manager = movieActionsManager,
-                            hazeState = globalHazeState
-                        )
-                        
-                        com.cinetrack.ui.components.common.UndoToast(
-                            actionFeedbackManager = undoViewModel.actionFeedbackManager,
-                            hazeState = globalHazeState,
-                            modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(200000f)
-                        )
-                        
-                        com.cinetrack.ui.components.common.GlobalErrorToast(
-                            globalErrorHandler = errorViewModel.globalErrorHandler,
-                            hazeState = globalHazeState,
-                            modifier = Modifier.align(Alignment.TopCenter).zIndex(200000f)
-                        )
-                        
-                        if (avatarSelectionState.isVisible) {
-                            Box(modifier = Modifier.fillMaxSize().zIndex(200000f)) {
-                                com.cinetrack.ui.components.account.AvatarSelectionModal(
-                                    hazeState = globalHazeState,
-                                    mode = avatarSelectionState.mode,
-                                    onDismissRequest = { avatarSelectionState.dismiss() },
-                                    onCharacterSelected = { url, backdropUrl -> 
-                                        avatarSelectionState.onSelected?.invoke(url, backdropUrl)
-                                        avatarSelectionState.dismiss()
-                                    }
-                                )
-                            }
+                    com.cinetrack.ui.components.shared.GlobalMovieActions(
+                        manager = movieActionsManager,
+                        hazeState = globalHazeState
+                    )
+                    
+                    com.cinetrack.ui.components.common.UndoToast(
+                        actionFeedbackManager = undoViewModel.actionFeedbackManager,
+                        hazeState = globalHazeState,
+                        modifier = Modifier.align(Alignment.BottomCenter).padding(bottom = 110.dp).zIndex(200000f)
+                    )
+                    
+                    com.cinetrack.ui.components.common.GlobalErrorToast(
+                        globalErrorHandler = errorViewModel.globalErrorHandler,
+                        hazeState = globalHazeState,
+                        modifier = Modifier.align(Alignment.TopCenter).zIndex(200000f)
+                    )
+                    
+                    if (avatarSelectionState.isVisible) {
+                        Box(modifier = Modifier.fillMaxSize().zIndex(200000f)) {
+                            com.cinetrack.ui.components.account.AvatarSelectionModal(
+                                hazeState = globalHazeState,
+                                mode = avatarSelectionState.mode,
+                                onDismissRequest = { avatarSelectionState.dismiss() },
+                                onCharacterSelected = { url, backdropUrl -> 
+                                    avatarSelectionState.onSelected?.invoke(url, backdropUrl)
+                                    avatarSelectionState.dismiss()
+                                }
+                            )
                         }
+                    }
 
-                        val activeModal = modalHostState.currentModal
-                        if (activeModal != null) {
-                            androidx.activity.compose.BackHandler {
-                                modalHostState.dismiss()
-                            }
-                            Box(modifier = Modifier.fillMaxSize().zIndex(250000f)) {
-                                activeModal()
-                            }
+                    val activeModal = modalHostState.currentModal
+                    if (activeModal != null) {
+                        androidx.activity.compose.BackHandler {
+                            modalHostState.dismiss()
+                        }
+                        Box(modifier = Modifier.fillMaxSize().zIndex(250000f)) {
+                            activeModal()
                         }
                     }
                 }

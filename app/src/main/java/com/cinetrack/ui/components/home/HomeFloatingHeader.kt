@@ -67,8 +67,7 @@ fun HomeFloatingHeader(
                         .matchParentSize()
                         .hazeGlass(
                             state = activeHazeState,
-                            shape = CircleShape,
-                            useRefraction = true
+                            shape = CircleShape
                         )
                 )
 
@@ -113,8 +112,7 @@ fun HomeFloatingHeader(
                             state = activeHazeState,
                             shape = CircleShape,
                             borderWidth = 1.dp,
-                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            useRefraction = true
+                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                         ),
                     contentAlignment = Alignment.Center
                 ) {

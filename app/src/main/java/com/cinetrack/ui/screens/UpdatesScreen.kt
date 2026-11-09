@@ -58,9 +58,6 @@ import androidx.compose.foundation.interaction.collectIsPressedAsState
 import kotlinx.coroutines.launch
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.pager.HorizontalPager
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.foundation.pager.rememberPagerState
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -226,17 +223,12 @@ fun UpdatesScreen(
                 
             ) {
             val internalHazeState = remember { HazeState() }
-            val updatesBackdrop = rememberLayerBackdrop {
-                drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
-                drawContent()
-            }
 
             Box(modifier = Modifier.fillMaxSize().background(MaterialTheme.colorScheme.background)) {
                 // 1. Content Layer
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .layerBackdrop(updatesBackdrop)
                         .haze(
                             state = internalHazeState,
                             style = HazeStyles.PremiumDark
@@ -342,20 +334,18 @@ fun UpdatesScreen(
                 } // end Content Layer Box
 
                 // 2. Fixed Header (Layered on top of content)
-                CompositionLocalProvider(LocalBackdrop provides updatesBackdrop) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .wrapContentHeight()
-                            .hazeGlass(
-                                state = internalHazeState,
-                                shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
-                                borderWidth = 0.dp,
-                                useRefraction = true
-                            )
-                            .zIndex(10f),
-                        contentAlignment = Alignment.TopCenter
-                    ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .wrapContentHeight()
+                        .hazeGlass(
+                            state = internalHazeState,
+                            shape = RoundedCornerShape(bottomStart = 28.dp, bottomEnd = 28.dp),
+                            borderWidth = 0.dp
+                        )
+                        .zIndex(10f),
+                    contentAlignment = Alignment.TopCenter
+                ) {
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
@@ -384,11 +374,7 @@ fun UpdatesScreen(
                                     triggerExit() 
                                 }
                             }
-                            .hazeGlass(
-                                state = internalHazeState,
-                                shape = CircleShape,
-                                useRefraction = true
-                            ),
+                            .background(MaterialTheme.colorScheme.onSurface.copy(alpha = 0.05f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -467,8 +453,7 @@ fun UpdatesScreen(
                                 .matchParentSize()
                                 .hazeGlass(
                                     state = internalHazeState,
-                                    shape = CircleShape,
-                                    useRefraction = true
+                                    shape = CircleShape
                                 )
                         )
                         AnimatedContent(
@@ -530,7 +515,8 @@ fun UpdatesScreen(
                     }
                 }
                 }
-            } // end CompositionLocalProvider
+
+
         } // end Box(fillMaxSize)
         
         // Dialog OVERLAY via Global ModalHost (Mounts above TopBar, BottomBar and Search FAB)

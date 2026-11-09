@@ -17,7 +17,6 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceAtLeast
 import androidx.compose.ui.unit.dp
 import com.cinetrack.LocalAdvancedVisualEffects
-import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.theme.HazeStyles
 import dev.chrisbanes.haze.HazeInput
 import dev.chrisbanes.haze.HazePerformanceMode
@@ -57,7 +56,7 @@ fun safeShape(shape: Shape): Shape = object : Shape {
  * @param useOffscreenStrategy Whether to use CompositingStrategy.Offscreen to fix text rendering.
  */
 fun Modifier.hazeGlass(
-    state: HazeState? = null,
+    state: HazeState?,
     shape: Shape,
     style: HazeBlurStyle? = null,
     blurRadius: Dp = HazeStyles.GlassBlurRadius,
@@ -69,9 +68,6 @@ fun Modifier.hazeGlass(
     useRefraction: Boolean = false
 ): Modifier = composed {
     val effectiveShape = remember(shape) { safeShape(shape) }
-    val effectiveHazeState = state ?: LocalHazeState.current
-    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
-
     val finalStyle = remember(blurRadius, containerColor, style, alpha) {
         val safeBlurRadius = (blurRadius * alpha).coerceAtLeast(0.1.dp)
         val baseStyle = style ?: HazeStyles.PremiumDark
@@ -85,16 +81,19 @@ fun Modifier.hazeGlass(
             }
         }
     }
-
+    
+    val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
+    
     val modifierChain = this
         .clip(effectiveShape)
         .then(
-            if (effectiveHazeState != null && advancedEffectsEnabled) {
+            if (state != null && advancedEffectsEnabled) {
+                // Apply graphicsLayer with Offscreen strategy if requested, then apply hazeBlur.
                 if (useOffscreenStrategy) {
                     Modifier
                         .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen, alpha = alpha)
                         .hazeBlur(
-                            input = HazeInput.Sources(effectiveHazeState),
+                            input = HazeInput.Sources(state),
                             style = finalStyle,
                             performanceMode = HazePerformanceMode.Default,
                             expandLayerBounds = false
@@ -104,7 +103,7 @@ fun Modifier.hazeGlass(
                         Modifier
                             .graphicsLayer(alpha = alpha)
                             .hazeBlur(
-                                input = HazeInput.Sources(effectiveHazeState),
+                                input = HazeInput.Sources(state),
                                 style = finalStyle,
                                 performanceMode = HazePerformanceMode.Default,
                                 expandLayerBounds = false
@@ -112,7 +111,7 @@ fun Modifier.hazeGlass(
                     } else {
                         Modifier
                             .hazeBlur(
-                                input = HazeInput.Sources(effectiveHazeState),
+                                input = HazeInput.Sources(state),
                                 style = finalStyle,
                                 performanceMode = HazePerformanceMode.Default,
                                 expandLayerBounds = false
@@ -120,6 +119,9 @@ fun Modifier.hazeGlass(
                     }
                 }
             } else {
+                // When blur/effects are disabled, fallback to a solid/semi-translucent dark glass surface.
+                // If containerColor was a light highlight tint (e.g. Color.White with low alpha), we MUST NOT
+                // turn the whole card into 95% solid white. Instead, use HazeStyles.GlassColor as the base.
                 val fallbackBaseColor = if (containerColor != null && containerColor.luminance() > 0.4f) {
                     HazeStyles.GlassColor
                 } else {
@@ -135,7 +137,7 @@ fun Modifier.hazeGlass(
             }
         )
         .glassOverlay(effectiveShape, borderWidth, borderColor.copy(alpha = borderColor.alpha * alpha))
-
+        
     modifierChain
 }
 
@@ -195,3 +197,8 @@ fun Modifier.glassOverlay(
         withShimmer
     }
 }
+
+
+
+
+

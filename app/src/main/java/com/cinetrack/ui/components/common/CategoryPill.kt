@@ -41,32 +41,18 @@ fun CategoryPill(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick() 
             }
-            .then(
-                if (isSelected) {
-                    Modifier.hazeGlass(
-                        state = hazeState,
-                        shape = CircleShape,
-                        containerColor = accentColor.copy(alpha = 0.35f),
-                        borderColor = accentColor.copy(alpha = 0.75f),
-                        borderWidth = 1.dp,
-                        useRefraction = true
-                    )
-                } else {
-                    Modifier.hazeGlass(
-                        state = hazeState,
-                        shape = CircleShape,
-                        borderWidth = 1.dp,
-                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                        useRefraction = true
-                    )
-                }
+            .clip(CircleShape)
+            .background(if (isSelected) accentColor else Color.White.copy(alpha = 0.08f))
+            .border(
+                BorderStroke(1.dp, if (isSelected) accentColor else Color.White.copy(alpha = 0.12f)),
+                CircleShape
             )
             .padding(horizontal = 20.dp, vertical = 10.dp),
         contentAlignment = Alignment.Center
     ) {
         Text(
             text = text,
-            color = Color.White,
+            color = if (isSelected) Color.Black else Color.White.copy(alpha = 0.95f),
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 0.5.sp

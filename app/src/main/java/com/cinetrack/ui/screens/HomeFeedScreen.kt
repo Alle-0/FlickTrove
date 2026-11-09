@@ -86,9 +86,6 @@ import com.cinetrack.ui.components.card.NewsArticleCard
 import com.cinetrack.ui.components.card.Top10MovieCard
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.common.CinematicBackground
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import com.cinetrack.ui.components.home.*
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
@@ -348,11 +345,6 @@ fun HomeFeedScreenContent(
             }
         }
 
-        val feedBackdrop = rememberLayerBackdrop {
-            drawRect(androidx.compose.ui.graphics.Color(0xFF0D0D0E))
-            drawContent()
-        }
-
         Box(
             modifier = Modifier            
                 .fillMaxSize()
@@ -363,7 +355,7 @@ fun HomeFeedScreenContent(
                 isRefreshing = isRefreshing,
                 onRefresh = { viewModel.pullToRefresh() },
                 state = pullToRefreshState,
-                modifier = Modifier.fillMaxSize().layerBackdrop(feedBackdrop),
+                modifier = Modifier.fillMaxSize(),
                 indicator = {}
             ) {
                 LazyColumn(
@@ -762,16 +754,14 @@ fun HomeFeedScreenContent(
     }
 
         // Perfectly Centered Floating Sticky Header
-        CompositionLocalProvider(LocalBackdrop provides feedBackdrop) {
-            HomeFloatingHeader(
-                activeTab = uiState.activeTab,
-                topPadding = topPadding,
-                stickyHeaderHeight = stickyHeaderHeight,
-                activeHazeState = activeHazeState,
-                onTabChanged = { tab -> viewModel.onTabChanged(tab) },
-                onSurpriseMeClick = { rect -> surpriseMeRequest?.invoke(rect) }
-            )
-        }
+        HomeFloatingHeader(
+            activeTab = uiState.activeTab,
+            topPadding = topPadding,
+            stickyHeaderHeight = stickyHeaderHeight,
+            activeHazeState = activeHazeState,
+            onTabChanged = { tab -> viewModel.onTabChanged(tab) },
+            onSurpriseMeClick = { rect -> surpriseMeRequest?.invoke(rect) }
+        )
     }
 }
 

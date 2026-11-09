@@ -44,8 +44,6 @@ import coil3.compose.AsyncImage
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.GlassmorphicModal
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
@@ -161,13 +159,9 @@ fun FolderReorderModal(
                                 VibrationHelper.vibrateClick(context)
                                 onSave()
                             }
-                            .hazeGlass(
-                                shape = CircleShape,
-                                containerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.20f),
-                                borderWidth = 1.dp,
-                                borderColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.50f),
-                                useRefraction = true
-                            ),
+                            .clip(CircleShape)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
                         contentAlignment = Alignment.Center
                     ) {
                         Icon(
@@ -276,12 +270,14 @@ fun FolderReorderModal(
                                     }
                                     .zIndex(if (isDragging) 1f else 0f)
                                     .graphicsLayer { translationY = finalTranslation }
-                                    .hazeGlass(
-                                        shape = RoundedCornerShape(14.dp),
-                                        containerColor = if (isDragging) Color.White.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.04f),
-                                        borderWidth = 1.dp,
-                                        borderColor = if (isDragging) MaterialTheme.colorScheme.primary.copy(alpha = 0.5f) else Color.White.copy(alpha = 0.08f),
-                                        useRefraction = true
+                                    .background(
+                                        if (isDragging) Color.White.copy(alpha = 0.12f) else Color.White.copy(alpha = 0.03f),
+                                        RoundedCornerShape(14.dp)
+                                    )
+                                    .border(
+                                        1.dp,
+                                        if (isDragging) MaterialTheme.colorScheme.primary.copy(alpha = 0.4f) else Color.White.copy(alpha = 0.06f),
+                                        RoundedCornerShape(14.dp)
                                     )
                                     .padding(horizontal = 12.dp, vertical = 10.dp)
                             ) {

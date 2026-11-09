@@ -36,19 +36,13 @@ import androidx.compose.ui.zIndex
 import kotlinx.coroutines.launch
 import com.cinetrack.R
 import com.cinetrack.data.api.CastMember
-import com.cinetrack.ui.LocalHazeState
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
-import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import kotlin.random.Random
@@ -94,8 +88,6 @@ fun CheckInModal(
         mutableStateOf(cast.find { it.id == movie?.favoriteActorId })
     }
 
-    val modalHazeState = remember { HazeState() }
-    val modalBackdrop = rememberLayerBackdrop { drawContent() }
     val coroutineScope = rememberCoroutineScope()
     var isSaving by remember { mutableStateOf(false) }
     val burstProgress = remember { Animatable(0f) }
@@ -190,32 +182,20 @@ fun CheckInModal(
                 Box(
                     modifier = Modifier
                         .matchParentSize()
-                        .layerBackdrop(modalBackdrop)
-                        .haze(modalHazeState)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .hazeGlass(
-                                state = hazeState,
-                                shape = RoundedCornerShape(32.dp),
-                                containerColor = Color(0xFF080B14),
-                                useOffscreenStrategy = true,
-                                borderColor = accentColor.copy(alpha = 0.5f),
-                                useRefraction = true
-                            )
-                    )
-                }
+                        .hazeGlass(
+                            state = hazeState,
+                            shape = RoundedCornerShape(32.dp),
+                            containerColor = Color(0xFF080B14),
+                            useOffscreenStrategy = true,
+                            borderColor = accentColor.copy(alpha = 0.5f)
+                        )
+                )
 
-                androidx.compose.runtime.CompositionLocalProvider(
-                    LocalHazeState provides modalHazeState,
-                    LocalBackdrop provides modalBackdrop
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp)
                 ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(16.dp)
-                    ) {
                     // Header and Content
                     Column(modifier = Modifier.fillMaxWidth()) {
                         Row(
@@ -495,13 +475,8 @@ fun CheckInModal(
                                             haptic.performHapticFeedback(HapticFeedbackType.LongPress)
                                             currentPage -= 1
                                         }
-                                        .hazeGlass(
-                                            state = modalHazeState,
-                                            shape = RoundedCornerShape(16.dp),
-                                            borderWidth = 1.dp,
-                                            borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                            useRefraction = true
-                                        ),
+                                        .clip(RoundedCornerShape(16.dp))
+                                        .background(Color.White.copy(alpha = 0.1f)),
                                     contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
@@ -602,7 +577,6 @@ fun CheckInModal(
                                 }
                             }
                         }
-                    }
                     }
                 }
             }

@@ -7,9 +7,7 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
-import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.common.FlickTroveSwitch
-import com.cinetrack.ui.components.glass.hazeGlass
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.mutableStateOf
@@ -31,7 +29,6 @@ import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
-import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
@@ -678,15 +675,13 @@ fun DonationBanner(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(1.dp)
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Text(
                                 text = "Ko-fi",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.5.sp,
-                                    lineHeight = 15.sp,
-                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    fontSize = 13.5.sp
                                 ),
                                 color = Color.White
                             )
@@ -694,9 +689,7 @@ fun DonationBanner(
                                 text = "GPay • ApplePay • Card",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    lineHeight = 10.sp,
-                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    fontWeight = FontWeight.Medium
                                 ),
                                 color = Color.White.copy(alpha = 0.88f),
                                 maxLines = 1,
@@ -741,15 +734,13 @@ fun DonationBanner(
                         Spacer(modifier = Modifier.width(8.dp))
                         Column(
                             modifier = Modifier.weight(1f),
-                            verticalArrangement = Arrangement.spacedBy(1.dp)
+                            verticalArrangement = Arrangement.Center
                         ) {
                             Text(
                                 text = "PayPal",
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 13.5.sp,
-                                    lineHeight = 15.sp,
-                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    fontSize = 13.5.sp
                                 ),
                                 color = Color.White
                             )
@@ -757,9 +748,7 @@ fun DonationBanner(
                                 text = "Account • Card",
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    lineHeight = 10.sp,
-                                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    fontWeight = FontWeight.Medium
                                 ),
                                 color = Color.White.copy(alpha = 0.88f),
                                 maxLines = 1,
@@ -782,7 +771,6 @@ fun SettingsDialogConfirmButton(
     enabled: Boolean = true,
     containerColor: Color = MaterialTheme.colorScheme.primary,
     contentColor: Color = MaterialTheme.colorScheme.onPrimary,
-    hazeState: dev.chrisbanes.haze.HazeState? = null,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
 ) {
     val haptic = LocalHapticFeedback.current
@@ -794,12 +782,7 @@ fun SettingsDialogConfirmButton(
                 onClick()
             }
             .clip(shape)
-            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f), shape)
-            .border(
-                1.dp,
-                if (enabled) Color.White.copy(alpha = 0.25f) else com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                shape
-            ),
+            .background(if (enabled) containerColor else containerColor.copy(alpha = 0.3f)),
         contentAlignment = Alignment.Center
     ) {
         Text(
@@ -821,7 +804,6 @@ fun SettingsDialogCancelButton(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    hazeState: dev.chrisbanes.haze.HazeState? = null,
     shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp)
 ) {
     val haptic = LocalHapticFeedback.current
@@ -832,13 +814,9 @@ fun SettingsDialogCancelButton(
                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                 onClick()
             }
-            .hazeGlass(
-                shape = shape,
-                containerColor = Color.White.copy(alpha = 0.08f),
-                borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                borderWidth = 1.dp,
-                useRefraction = true
-            ),
+            .clip(shape)
+            .background(Color.White.copy(alpha = 0.08f))
+            .border(1.dp, Color.White.copy(alpha = 0.15f), shape),
         contentAlignment = Alignment.Center
     ) {
         Text(

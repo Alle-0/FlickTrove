@@ -88,9 +88,6 @@ import dev.chrisbanes.haze.haze
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.LocalBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import com.kyant.backdrop.backdrops.layerBackdrop
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.ui.input.pointer.pointerInput
@@ -356,12 +353,6 @@ class CommsUniCommentsScreen(
         val movieColor = if (accentColorValue != 0L) Color(accentColorValue) else Color.Transparent
         val effectiveBackdrop = currentBackdropUrl ?: mediaImage
 
-        val commentsBackdrop = rememberLayerBackdrop {
-            drawRect(Color(0xFF0D0D12))
-            drawContent()
-        }
-
-        CompositionLocalProvider(LocalBackdrop provides commentsBackdrop) {
         Box(modifier = Modifier.fillMaxSize().background(Color.Black)) {
             Box(
                 modifier = Modifier
@@ -384,8 +375,8 @@ class CommsUniCommentsScreen(
                                 .hazeGlass(
                                     state = hazeState,
                                     shape = androidx.compose.foundation.shape.RoundedCornerShape(bottomStart = 24.dp, bottomEnd = 24.dp),
-                                    containerColor = Color.Black.copy(alpha = 0.50f),
-                                    useRefraction = true
+                                    containerColor = Color.Black.copy(alpha = 0.75f),
+                                    blurRadius = 20.dp
                                 )
                                 .windowInsetsPadding(WindowInsets.safeDrawing.only(WindowInsetsSides.Top))
                         ) {
@@ -442,14 +433,8 @@ class CommsUniCommentsScreen(
                                                 }
                                                 showCommsUniInfo = true
                                             }
-                                            .hazeGlass(
-                                                state = hazeState,
-                                                shape = CircleShape,
-                                                containerColor = Color.White.copy(alpha = 0.08f),
-                                                borderColor = Color.White.copy(alpha = 0.20f),
-                                                borderWidth = 1.dp,
-                                                useRefraction = true
-                                            )
+                                            .clip(CircleShape)
+                                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
                                             .padding(horizontal = 8.dp, vertical = 5.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -513,14 +498,9 @@ class CommsUniCommentsScreen(
                                                 }
                                                 showEpisodePickerSheet = true
                                             }
-                                            .hazeGlass(
-                                                state = hazeState,
-                                                shape = CircleShape,
-                                                containerColor = Color.White.copy(alpha = 0.08f),
-                                                borderColor = Color.White.copy(alpha = 0.20f),
-                                                borderWidth = 1.dp,
-                                                useRefraction = true
-                                            )
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.20f), CircleShape)
                                             .padding(horizontal = 9.dp, vertical = 4.5.dp),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -627,7 +607,6 @@ class CommsUniCommentsScreen(
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
-                        .layerBackdrop(commentsBackdrop)
                         .haze(state = hazeState, style = HazeStyles.PremiumDark)
                 ) {
                     if (!effectiveBackdrop.isNullOrBlank()) {
@@ -998,7 +977,6 @@ class CommsUniCommentsScreen(
                 }
             }
         } // End of Outer Box
-    }
     }
 }
 

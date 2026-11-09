@@ -297,19 +297,13 @@ private fun FolderListContent(
                 .fillMaxWidth()
                 .height(52.dp)
                 .bounceClick { onNewFolder() }
-                .hazeGlass(
-                    shape = RoundedCornerShape(16.dp),
-                    containerColor = Color.White.copy(alpha = 0.12f),
-                    borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                    borderWidth = 1.dp,
-                    useRefraction = true
-                ),
+                .background(Color.White, RoundedCornerShape(16.dp)),
             contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
+                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.Black, modifier = Modifier.size(18.dp))
                 Spacer(Modifier.width(8.dp))
-                Text(stringResource(R.string.folder_picker_new), color = Color.White, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
+                Text(stringResource(R.string.folder_picker_new), color = Color.Black, style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold))
             }
         }
     }
@@ -335,7 +329,7 @@ private fun FolderItem(
         label = "bgColor"
     )
     val borderColor by androidx.compose.animation.animateColorAsState(
-        targetValue = if (isSelected) folderColor else com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
+        targetValue = if (isSelected) folderColor else Color.White.copy(alpha = 0.06f),
         label = "borderColor"
     )
 
@@ -367,13 +361,9 @@ private fun FolderItem(
         modifier = Modifier
             .fillMaxWidth()
             .bounceClick(scaleDown = 0.97f) { onClick() }
-            .hazeGlass(
-                shape = RoundedCornerShape(16.dp),
-                containerColor = backgroundColor,
-                borderColor = borderColor,
-                borderWidth = if (isSelected) 1.5.dp else 1.dp,
-                useRefraction = true
-            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(backgroundColor)
+            .border(if (isSelected) 1.5.dp else 1.dp, borderColor, RoundedCornerShape(16.dp))
             .padding(horizontal = 14.dp, vertical = 12.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
@@ -383,7 +373,7 @@ private fun FolderItem(
                 .size(40.dp)
                 .clip(RoundedCornerShape(12.dp))
                 .background(folderColor.copy(alpha = 0.16f))
-                .border(0.5.dp, folderColor.copy(alpha = 0.35f), RoundedCornerShape(12.dp)),
+                .border(0.5.dp, folderColor.copy(alpha = 0.25f), RoundedCornerShape(12.dp)),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -584,9 +574,7 @@ private fun FolderCreateForm(
                     unfocusedTextColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                    cursorColor = Color.White,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
+                    cursorColor = Color.White
                 ),
                 singleLine = true
             )
@@ -612,9 +600,7 @@ private fun FolderCreateForm(
                     unfocusedTextColor = Color.White,
                     focusedBorderColor = Color.White,
                     unfocusedBorderColor = Color.White.copy(alpha = 0.15f),
-                    cursorColor = Color.White,
-                    focusedContainerColor = Color.Transparent,
-                    unfocusedContainerColor = Color.Transparent
+                    cursorColor = Color.White
                 ),
                 minLines = 2,
                 maxLines = 4
@@ -650,16 +636,10 @@ private fun FolderCreateForm(
                     .weight(0.8f)
                     .height(52.dp)
                     .bounceClick { onCancel() }
-                    .hazeGlass(
-                        shape = RoundedCornerShape(16.dp),
-                        containerColor = Color.White.copy(alpha = 0.08f),
-                        borderWidth = 1.dp,
-                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                        useRefraction = true
-                    ),
+                    .clip(RoundedCornerShape(16.dp)),
                 contentAlignment = Alignment.Center
             ) {
-                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.7f), maxLines = 1)
+                Text(stringResource(R.string.action_cancel).uppercase(), color = Color.White.copy(alpha = 0.5f), maxLines = 1)
             }
             
             val isEnabled = name.isNotBlank()
@@ -667,22 +647,13 @@ private fun FolderCreateForm(
                 modifier = Modifier
                     .weight(1.2f)
                     .height(52.dp)
-                    .bounceClick(enabled = isEnabled) { 
-                        onCreate(name, selectedColor, description.trim().ifEmpty { null }) 
-                    }
                     .then(
-                        if (isEnabled)
-                            Modifier
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White)
-                        else
-                            Modifier.hazeGlass(
-                                shape = RoundedCornerShape(16.dp),
-                                containerColor = Color.White.copy(alpha = 0.08f),
-                                borderWidth = 1.dp,
-                                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                                useRefraction = true
-                            )
+                        if (isEnabled) Modifier.bounceClick { onCreate(name, selectedColor, description.trim().ifEmpty { null }) }
+                        else Modifier
+                    )
+                    .background(
+                        if (isEnabled) Color.White else Color.White.copy(alpha = 0.3f), 
+                        RoundedCornerShape(16.dp)
                     ),
                 contentAlignment = Alignment.Center
             ) {

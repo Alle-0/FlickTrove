@@ -44,7 +44,6 @@ import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 import com.cinetrack.ui.utils.bounceClick
-import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.viewmodel.SurpriseCompany
 import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
 import com.cinetrack.ui.viewmodel.SurpriseMood
@@ -91,61 +90,60 @@ fun SurpriseMeOverlay(
     }
 
     com.cinetrack.ui.components.shared.MorphGlassModal(
-            isVisible = isVisible,
-            onDismissRequest = onClose,
-            triggerBounds = triggerBounds,
-            hazeState = globalHazeState,
-            targetMaxWidth = 380.dp,
-            targetWidthFraction = 0.90f,
-            maxModalHeightFraction = 0.78f,
-            minModalHeight = 0.dp,
-            defaultModalHeight = 220.dp,
-            zIndex = 90000f
-        ) { contentAlpha ->
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .verticalScroll(rememberScrollState())
-            ) {
-                SurpriseMeContent(
-                    step = step,
-                    selectedTime = selectedTime,
-                    selectedMood = selectedMood,
-                    selectedCompany = selectedCompany,
-                    isGhost = contentAlpha == 0f,
-                    onBack = { if (step in 1..3) step-- else onClose() },
-                    onClose = onClose,
-                    onRandomClick = {
-                        scope.launch {
-                            step = 4
-                            delay(800)
-                            val movie = viewModel.getRandomMovie()
-                            onMovieFound(movie)
-                        }
-                    },
-                    onEmotionalClick = { step = 1 },
-                    onTimeSelect = {
-                        selectedTime = it
-                        step = 2
-                    },
-                    onMoodSelect = {
-                        selectedMood = it
-                        step = 3
-                    },
-                    onCompanySelect = {
-                        selectedCompany = it
-                        scope.launch {
-                            step = 4
-                            delay(800)
-                            val movie = viewModel.getEmotionalMovie(selectedTime!!, selectedMood!!, selectedCompany!!)
-                            onMovieFound(movie)
-                        }
+        isVisible = isVisible,
+        onDismissRequest = onClose,
+        triggerBounds = triggerBounds,
+        hazeState = globalHazeState,
+        targetMaxWidth = 380.dp,
+        targetWidthFraction = 0.90f,
+        maxModalHeightFraction = 0.78f,
+        minModalHeight = 0.dp,
+        defaultModalHeight = 220.dp,
+        zIndex = 90000f
+    ) { contentAlpha ->
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+        ) {
+            SurpriseMeContent(
+                step = step,
+                selectedTime = selectedTime,
+                selectedMood = selectedMood,
+                selectedCompany = selectedCompany,
+                isGhost = contentAlpha == 0f,
+                onBack = { if (step in 1..3) step-- else onClose() },
+                onClose = onClose,
+                onRandomClick = {
+                    scope.launch {
+                        step = 4
+                        delay(800)
+                        val movie = viewModel.getRandomMovie()
+                        onMovieFound(movie)
                     }
-                )
-            }
+                },
+                onEmotionalClick = { step = 1 },
+                onTimeSelect = {
+                    selectedTime = it
+                    step = 2
+                },
+                onMoodSelect = {
+                    selectedMood = it
+                    step = 3
+                },
+                onCompanySelect = {
+                    selectedCompany = it
+                    scope.launch {
+                        step = 4
+                        delay(800)
+                        val movie = viewModel.getEmotionalMovie(selectedTime!!, selectedMood!!, selectedCompany!!)
+                        onMovieFound(movie)
+                    }
+                }
+            )
         }
     }
-
+}
 
 @OptIn(ExperimentalAnimationApi::class)
 @Composable
@@ -449,8 +447,6 @@ private fun OptionGridCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    val hazeState = LocalHazeState.current
-    val cardShape = RoundedCornerShape(16.dp)
     Column(
         modifier = modifier
             .then(
@@ -461,13 +457,9 @@ private fun OptionGridCard(
                 }
             )
             .bounceClick(scaleDown = 0.92f, onClick = onClick)
-            .hazeGlass(
-                state = hazeState,
-                shape = cardShape,
-                borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                borderWidth = 1.dp,
-                useRefraction = true
-            )
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color.White.copy(alpha = 0.04f))
+            .border(1.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
             .padding(horizontal = 12.dp, vertical = 12.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center

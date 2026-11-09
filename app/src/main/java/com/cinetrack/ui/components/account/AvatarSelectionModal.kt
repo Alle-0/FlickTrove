@@ -51,15 +51,9 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.shimmerEffect
-import com.cinetrack.ui.LocalBackdrop
 import com.cinetrack.ui.LocalHazeState
-import com.kyant.backdrop.backdrops.layerBackdrop
-import com.kyant.backdrop.backdrops.rememberLayerBackdrop
-import dev.chrisbanes.haze.haze
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.interaction.MutableInteractionSource
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.runtime.CompositionLocalProvider
 import kotlinx.coroutines.delay
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.cinetrack.ui.viewmodel.AvatarSelectionViewModel
@@ -105,8 +99,6 @@ fun AvatarSelectionModal(
     onCharacterSelected: (String?, String?) -> Unit
 ) {
     val focusManager = LocalFocusManager.current
-    val modalHazeState = remember { HazeState() }
-    val modalBackdrop = rememberLayerBackdrop { drawContent() }
     Box(
         modifier = Modifier
             .fillMaxSize()
@@ -121,7 +113,9 @@ fun AvatarSelectionModal(
             modifier = Modifier
                 .fillMaxWidth(0.9f)
                 .fillMaxHeight(0.65f)
+                .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
                 .clip(RoundedCornerShape(32.dp))
+                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
                 .clickable(
                     indication = null,
                     interactionSource = remember { MutableInteractionSource() }
@@ -129,32 +123,13 @@ fun AvatarSelectionModal(
                     focusManager.clearFocus()
                 }
         ) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .layerBackdrop(modalBackdrop)
-                    .haze(modalHazeState)
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .hazeGlass(state = hazeState, shape = RoundedCornerShape(32.dp))
-                        .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(32.dp))
-                )
-            }
-            CompositionLocalProvider(
-                LocalHazeState provides modalHazeState,
-                LocalBackdrop provides modalBackdrop
-            ) {
-                AvatarSelectionContent(
-                    viewModel = viewModel,
-                    mode = mode,
-                    onBack = null,
-                    onDismissRequest = onDismissRequest,
-                    onCharacterSelected = onCharacterSelected,
-                    hazeState = hazeState
-                )
-            }
+            AvatarSelectionContent(
+                viewModel = viewModel,
+                mode = mode,
+                onBack = null,
+                onDismissRequest = onDismissRequest,
+                onCharacterSelected = onCharacterSelected
+            )
         }
     }
 }
@@ -166,10 +141,8 @@ fun AvatarSelectionContent(
     mode: AvatarSelectionMode = AvatarSelectionMode.AVATAR,
     onBack: (() -> Unit)? = null,
     onDismissRequest: () -> Unit,
-    onCharacterSelected: (String?, String?) -> Unit,
-    hazeState: HazeState? = null
+    onCharacterSelected: (String?, String?) -> Unit
 ) {
-    val activeHazeState = hazeState ?: com.cinetrack.ui.LocalHazeState.current
     var searchQuery by remember { mutableStateOf("") }
     var searchResults by remember { mutableStateOf<List<TMDBSearchResult>>(emptyList()) }
     var isSearching by remember { mutableStateOf(false) }
@@ -386,13 +359,8 @@ fun AvatarSelectionContent(
                                 modifier = Modifier
                                     .weight(1f)
                                     .bounceClick(scaleDown = 0.94f) { onCharacterSelected(null, null) }
-                                    .hazeGlass(
-                                        shape = CircleShape,
-                                        containerColor = MaterialTheme.colorScheme.error.copy(alpha = 0.15f),
-                                        borderColor = MaterialTheme.colorScheme.error.copy(alpha = 0.35f),
-                                        borderWidth = 1.dp,
-                                        useRefraction = true
-                                    )
+                                    .clip(CircleShape)
+                                    .background(MaterialTheme.colorScheme.error.copy(alpha = 0.2f))
                                     .padding(vertical = 11.dp, horizontal = 12.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -424,13 +392,8 @@ fun AvatarSelectionContent(
                                     modifier = Modifier
                                         .weight(1f)
                                         .bounceClick(scaleDown = 0.94f) { galleryLauncher.launch("image/*") }
-                                        .hazeGlass(
-                                            shape = CircleShape,
-                                            containerColor = Color.White.copy(alpha = 0.08f),
-                                            borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                            borderWidth = 1.dp,
-                                            useRefraction = true
-                                        )
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.1f))
                                         .padding(vertical = 11.dp, horizontal = 12.dp),
                                     contentAlignment = Alignment.Center
                                 ) {
@@ -468,14 +431,7 @@ fun AvatarSelectionContent(
                         onValueChange = { searchQuery = it },
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 24.dp)
-                            .hazeGlass(
-                                shape = CircleShape,
-                                containerColor = Color.White.copy(alpha = 0.06f),
-                                borderColor = com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                borderWidth = 1.dp,
-                                useRefraction = true
-                            ),
+                            .padding(horizontal = 24.dp),
                         singleLine = true,
                         placeholder = {
                             Text(
@@ -496,8 +452,8 @@ fun AvatarSelectionContent(
                         colors = TextFieldDefaults.colors(
                             focusedTextColor = Color.White,
                             unfocusedTextColor = Color.White,
-                            focusedContainerColor = Color.Transparent,
-                            unfocusedContainerColor = Color.Transparent,
+                            focusedContainerColor = Color.White.copy(alpha = 0.1f),
+                            unfocusedContainerColor = Color.White.copy(alpha = 0.1f),
                             focusedIndicatorColor = MaterialTheme.colorScheme.primary,
                             unfocusedIndicatorColor = Color.Transparent
                         ),

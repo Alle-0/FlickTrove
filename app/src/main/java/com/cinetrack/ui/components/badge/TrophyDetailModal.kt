@@ -220,11 +220,6 @@ fun TrophyDetailContent(
                         modifier = Modifier
                             .clip(CircleShape)
                             .background(Color.White.copy(alpha = 0.07f))
-                            .border(
-                                1.dp,
-                                com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                                CircleShape
-                            )
                             .padding(horizontal = 10.dp, vertical = 4.dp)
                     ) {
                         Text(
@@ -242,11 +237,6 @@ fun TrophyDetailContent(
                     modifier = Modifier
                         .clip(CircleShape)
                         .background(Color.White.copy(alpha = 0.07f))
-                        .border(
-                            1.dp,
-                            com.cinetrack.ui.theme.HazeStyles.GlassBorderColor.copy(alpha = com.cinetrack.ui.theme.HazeStyles.GlassBorderAlphaTop),
-                            CircleShape
-                        )
                         .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
                     Text(
