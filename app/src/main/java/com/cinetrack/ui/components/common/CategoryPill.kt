@@ -43,10 +43,14 @@ fun CategoryPill(
             }
             .then(
                 if (isSelected) {
-                    Modifier
-                        .clip(CircleShape)
-                        .background(accentColor)
-                        .border(BorderStroke(1.dp, accentColor), CircleShape)
+                    Modifier.hazeGlass(
+                        state = hazeState,
+                        shape = CircleShape,
+                        containerColor = accentColor.copy(alpha = 0.35f),
+                        borderColor = accentColor.copy(alpha = 0.75f),
+                        borderWidth = 1.dp,
+                        useRefraction = true
+                    )
                 } else {
                     Modifier.hazeGlass(
                         state = hazeState,
@@ -63,7 +67,7 @@ fun CategoryPill(
     ) {
         Text(
             text = text,
-            color = if (isSelected) Color.Black else Color.White.copy(alpha = 0.95f),
+            color = Color.White,
             fontSize = 11.sp,
             fontWeight = FontWeight.Black,
             letterSpacing = 0.5.sp

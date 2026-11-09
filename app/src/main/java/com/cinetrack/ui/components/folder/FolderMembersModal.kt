@@ -50,6 +50,8 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.cinetrack.util.toComposeColor
+import com.cinetrack.ui.LocalHazeState
+import com.cinetrack.ui.components.glass.hazeGlass
 import dev.chrisbanes.haze.HazeState
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
@@ -155,8 +157,13 @@ fun FolderMembersModal(
                 modifier = Modifier
                     .fillMaxWidth()
                     .padding(horizontal = 22.dp, vertical = 6.dp)
-                    .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                    .border(0.5.dp, Color.White.copy(alpha = 0.08f), CircleShape)
+                    .hazeGlass(
+                        shape = CircleShape,
+                        containerColor = Color.White.copy(alpha = 0.05f),
+                        borderColor = Color.White.copy(alpha = 0.12f),
+                        borderWidth = 1.dp,
+                        useRefraction = true
+                    )
             ) {
                 CategoryTabSelector(
                     options = listOf(
