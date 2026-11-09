@@ -30,6 +30,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.components.shared.FlickTroveModal
+import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.theme.ErrorRed
 import com.cinetrack.ui.utils.bounceClick
 import dev.chrisbanes.haze.HazeState
@@ -98,9 +100,13 @@ fun RemoveMemberDialog(
                     .weight(1f)
                     .height(48.dp)
                     .bounceClick { onDismiss() }
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(Color.White.copy(alpha = 0.08f))
-                    .border(1.dp, Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp)),
+                    .hazeGlass(
+                        shape = RoundedCornerShape(16.dp),
+                        containerColor = Color.White.copy(alpha = 0.08f),
+                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
+                        borderWidth = 1.dp,
+                        useRefraction = true
+                    ),
                 contentAlignment = Alignment.Center
             ) {
                 Text(
