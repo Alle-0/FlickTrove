@@ -119,17 +119,20 @@ fun ShareStoryCardModal(
     var isSelectingCover by remember { mutableStateOf(false) }
     var coverTab by remember { mutableStateOf(0) }
 
-    // Preload high-res poster and backdrop immediately (including customized paths)
-    LaunchedEffect(movie, config.customPosterPath, config.customBackdropPath) {
+    // Preload high-res poster, backdrop, and logo immediately (including customized paths)
+    LaunchedEffect(movie, config.customPosterPath, config.customBackdropPath, config.customLogoPath) {
         val posterPath = config.customPosterPath ?: movie.posterPath
         val posterUrl = posterPath?.let { buildTmdbImageUrl(it, ImageType.POSTER, ImageQuality.HIGH) }
         val backdropPath = config.customBackdropPath ?: movie.customBackdropPath ?: movie.backdropPath ?: movie.posterPath
         val backdropUrl = backdropPath?.let {
             buildTmdbImageUrl(it, ImageType.BACKDROP, ImageQuality.HIGH)
         }
+        val effLogoPath = config.customLogoPath ?: logoPath
+        val effLogoUrl = effLogoPath?.let { buildTmdbImageUrl(it, ImageType.LOGO, ImageQuality.HIGH) }
         val imageLoader = coil3.SingletonImageLoader.get(context)
         posterUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
         backdropUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
+        effLogoUrl?.let { imageLoader.enqueue(ImageRequest.Builder(context).data(it).build()) }
     }
 
     suspend fun captureCardBitmap(): Bitmap? {
@@ -185,7 +188,8 @@ fun ShareStoryCardModal(
                     coverTab = coverTab,
                     onCoverTabChange = { coverTab = it },
                     onConfigChange = { config = it },
-                    onBack = { isSelectingCover = false }
+                    onBack = { isSelectingCover = false },
+                    defaultLogoPath = logoPath
                 )
             } else {
                 Column(
@@ -342,7 +346,7 @@ fun ShareStoryCardModal(
             val hasVibes = !movie.emotionalVibes.isNullOrBlank() && movie.emotionalVibes != "[]"
             val hasMvp = movie.favoriteActorId != null || !movie.favoriteActorName.isNullOrBlank()
             val hasProfile = userDisplayName != null
-            val hasCustomImage = config.customPosterPath != null || config.customBackdropPath != null
+            val hasCustomImage = config.customPosterPath != null || config.customBackdropPath != null || config.customLogoPath != null
 
             Column(
                 modifier = Modifier

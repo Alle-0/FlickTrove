@@ -43,6 +43,8 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.PlatformTextStyle
+import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -242,19 +244,27 @@ fun HomeSupportCard(
                             Spacer(modifier = Modifier.width(8.dp))
                             Column(
                                 modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.Center
+                                verticalArrangement = Arrangement.spacedBy(1.dp)
                             ) {
                                 Text(
                                     text = "Ko-fi",
-                                    color = Color.White,
-                                    fontSize = 13.5.sp,
-                                    fontWeight = FontWeight.Bold
+                                    style = TextStyle(
+                                        color = Color.White,
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 15.sp,
+                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    )
                                 )
                                 Text(
                                     text = "GPay • ApplePay • Card",
-                                    fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color.White.copy(alpha = 0.88f),
+                                    style = TextStyle(
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.White.copy(alpha = 0.88f),
+                                        lineHeight = 10.sp,
+                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )
@@ -300,19 +310,27 @@ fun HomeSupportCard(
                             Spacer(modifier = Modifier.width(8.dp))
                             Column(
                                 modifier = Modifier.weight(1f),
-                                verticalArrangement = Arrangement.Center
+                                verticalArrangement = Arrangement.spacedBy(1.dp)
                             ) {
                                 Text(
                                     text = "PayPal",
-                                    color = Color.White,
-                                    fontSize = 13.5.sp,
-                                    fontWeight = FontWeight.Bold
+                                    style = TextStyle(
+                                        color = Color.White,
+                                        fontSize = 13.5.sp,
+                                        fontWeight = FontWeight.Bold,
+                                        lineHeight = 15.sp,
+                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    )
                                 )
                                 Text(
                                     text = "Account • Card",
-                                    fontSize = 8.5.sp,
-                                    fontWeight = FontWeight.Medium,
-                                    color = Color.White.copy(alpha = 0.88f),
+                                    style = TextStyle(
+                                        fontSize = 8.5.sp,
+                                        fontWeight = FontWeight.Medium,
+                                        color = Color.White.copy(alpha = 0.88f),
+                                        lineHeight = 10.sp,
+                                        platformStyle = PlatformTextStyle(includeFontPadding = false)
+                                    ),
                                     maxLines = 1,
                                     overflow = TextOverflow.Ellipsis
                                 )

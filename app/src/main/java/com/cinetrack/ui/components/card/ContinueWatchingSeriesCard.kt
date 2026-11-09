@@ -22,7 +22,6 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -248,25 +247,17 @@ private fun SeasonProgressCheckButton(
                     }
                 }
             }
-            if (isUpdating) {
-                CircularProgressIndicator(
-                    modifier = Modifier.size(11.dp),
-                    strokeWidth = 1.5.dp,
-                    color = accentColor
-                )
-            } else {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick_card),
-                    contentDescription = null, // Handled by parent semantics
-                    tint = accentColor,
-                    modifier = Modifier
-                        .size(10.dp)
-                        .graphicsLayer {
-                            scaleX = tickScale.value
-                            scaleY = tickScale.value
-                        }
-                )
-            }
+            Icon(
+                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tick_card),
+                contentDescription = null, // Handled by parent semantics
+                tint = accentColor,
+                modifier = Modifier
+                    .size(10.dp)
+                    .graphicsLayer {
+                        scaleX = tickScale.value
+                        scaleY = tickScale.value
+                    }
+            )
         }
     }
 }

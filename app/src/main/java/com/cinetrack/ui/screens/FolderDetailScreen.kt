@@ -342,10 +342,12 @@ fun FolderDetailScreenContent(
                             )
                             
                             val currentOnMovieClick by rememberUpdatedState(onMovieClick)
+                            val currentOnAction by rememberUpdatedState(viewModel::toggleWatched)
                             val currentOnLongPress by rememberUpdatedState { m: Movie, p: androidx.compose.ui.geometry.Offset, c: androidx.compose.ui.geometry.Offset -> actionsState.onLongPress(m, p, c) }
                             val currentOnMessage by rememberUpdatedState(viewModel::emitMessage)
 
                             val handlePress: (Movie) -> Unit = remember { { m -> currentOnMovieClick(m) } }
+                            val handleAction: (Movie) -> Unit = remember { { m -> currentOnAction(m) } }
                             val handleLongPress: (Movie, androidx.compose.ui.geometry.Offset, androidx.compose.ui.geometry.Offset) -> Unit = remember { { m, p, c -> currentOnLongPress(m, p, c) } }
                             val handleMessage: (String) -> Unit = remember { { msg -> currentOnMessage(com.cinetrack.ui.utils.UiText.DynamicString(msg)) } }
                             val precomputedFolderColors = remember(folderColors) {
@@ -597,6 +599,7 @@ fun FolderDetailScreenContent(
                                                         hasAnimatedSet = viewModel.animatedMovieIds,
                                                         staggerIndex = index,
                                                         onPress = handlePress,
+                                                        onAction = handleAction,
                                                         onLongPress = handleLongPress,
                                                         onMessage = handleMessage
                                                      )
@@ -609,6 +612,7 @@ fun FolderDetailScreenContent(
                                                         isReminder = movie.reminder,
                                                         personalRating = movie.personalRating,
                                                         onPress = handlePress,
+                                                        onAction = handleAction,
                                                         animatedVisibilityScope = animatedVisibilityScope,
                                                         staggerIndex = index,
                                                         onLongPress = handleLongPress,
