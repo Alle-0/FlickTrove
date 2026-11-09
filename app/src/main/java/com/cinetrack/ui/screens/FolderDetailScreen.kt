@@ -727,8 +727,7 @@ fun FolderDetailScreenContent(
                                             .matchParentSize()
                                             .hazeGlass(
                                                 state = internalHazeState,
-                                                shape = CircleShape,
-                                                useRefraction = true
+                                                shape = CircleShape
                                             )
                                     )
                                     

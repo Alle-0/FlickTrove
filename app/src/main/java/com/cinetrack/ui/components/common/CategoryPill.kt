@@ -48,17 +48,14 @@ fun CategoryPill(
                         shape = CircleShape,
                         containerColor = accentColor.copy(alpha = 0.35f),
                         borderColor = accentColor.copy(alpha = 0.75f),
-                        borderWidth = 1.dp,
-                        useRefraction = true
+                        borderWidth = 1.dp
                     )
                 } else {
                     Modifier.hazeGlass(
                         state = hazeState,
                         shape = CircleShape,
-                        containerColor = Color.White.copy(alpha = 0.08f),
-                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
                         borderWidth = 1.dp,
-                        useRefraction = true
+                        borderColor = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop)
                     )
                 }
             )

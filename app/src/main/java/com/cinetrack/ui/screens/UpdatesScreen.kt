@@ -467,8 +467,7 @@ fun UpdatesScreen(
                                 .matchParentSize()
                                 .hazeGlass(
                                     state = internalHazeState,
-                                    shape = CircleShape,
-                                    useRefraction = true
+                                    shape = CircleShape
                                 )
                         )
                         AnimatedContent(

@@ -610,8 +610,7 @@ fun RecommendationsScreenContent(
                         .matchParentSize()
                         .hazeGlass(
                             state = localHazeState,
-                            shape = CircleShape,
-                            useRefraction = true
+                            shape = CircleShape
                         )
                 )
 

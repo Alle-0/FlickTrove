@@ -220,7 +220,6 @@ fun ListCalendarSwitcher(
             .hazeGlass(
                 state = hazeState,
                 shape = CircleShape,
-                useRefraction = true,
                 borderWidth = 1.dp,
                 borderColor = borderColor ?: Color.White.copy(alpha = 0.15f),
                 containerColor = trackColor

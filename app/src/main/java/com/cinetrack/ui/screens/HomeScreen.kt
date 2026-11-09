@@ -526,8 +526,7 @@ fun HomeScreenContent(
                             .matchParentSize()
                             .hazeGlass(
                                 state = activeHazeState,
-                                shape = CircleShape,
-                                useRefraction = true
+                                shape = CircleShape
                             )
                     )
                     
