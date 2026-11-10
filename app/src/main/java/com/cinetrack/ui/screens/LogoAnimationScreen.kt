@@ -199,8 +199,9 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
 
         translate(left = originX, top = originY) {
             scale(sf, sf, pivot = Offset.Zero) {
-                // Nel file ic_launcher_foreground_vector.xml il path è traslato di 128
+                // Nel file ic_launcher_foreground_vector.xml il path è traslato di 128 e scalato di 1.10
                 translate(128f, 128f) {
+                    scale(1.10f, 1.10f, pivot = Offset(256f, 256f)) {
 
                 val ENTRY_DIST = 850f
                 val STAGGER    = 0.05f
@@ -274,6 +275,7 @@ fun MetamorphosisLogo(modifier: Modifier = Modifier, onAnimationEnd: () -> Unit 
                                 style = strokeStyle
                             )
                         }
+                    }
                     }
                 }
                 }
