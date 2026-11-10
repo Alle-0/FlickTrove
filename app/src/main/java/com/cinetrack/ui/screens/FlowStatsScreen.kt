@@ -469,7 +469,7 @@ private fun VibeLegendItem(
             .padding(start = 8.dp, end = 16.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
-        val iconRes = vibe.iconRes ?: if (vibe.vibe == "OTHER") R.drawable.ic_sparkle else null
+        val iconRes = if (vibe.vibe == "OTHER") null else vibe.iconRes
         Box(
             modifier = Modifier
                 .size(28.dp)
@@ -483,7 +483,7 @@ private fun VibeLegendItem(
                     modifier = Modifier.size(16.dp),
                     tint = color
                 )
-            } else {
+            } else if (vibe.emoji.isNotEmpty()) {
                 Text(
                     text = vibe.emoji,
                     fontSize = 14.sp
@@ -544,9 +544,9 @@ fun TopVibesSection(vibes: List<VibeStat>) {
             val othersCount = vibes.drop(7).sumOf { it.count }
             mainVibes + VibeStat(
                 vibe = "OTHER",
-                emoji = "✨",
+                emoji = "",
                 count = othersCount,
-                iconRes = R.drawable.ic_sparkle,
+                iconRes = null,
                 colorHex = 0xFFFF9800,
                 labelRes = R.string.stats_genre_other
             )
@@ -557,7 +557,7 @@ fun TopVibesSection(vibes: List<VibeStat>) {
     val density = LocalDensity.current
     val vibeDrawables = remember(processedVibes) {
         processedVibes.associate { vibe ->
-            val resId = vibe.iconRes ?: if (vibe.vibe == "OTHER") R.drawable.ic_sparkle else null
+            val resId = if (vibe.vibe == "OTHER") null else vibe.iconRes
             vibe.vibe to (resId?.let { ContextCompat.getDrawable(context, it)?.mutate() })
         }
     }
@@ -714,20 +714,23 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                             style = Stroke(width = currentStrokeWidth, cap = if (isSelected) StrokeCap.Round else StrokeCap.Butt)
                         )
 
-                        // Etichette esterne con icona e percentuale
-                        val percentage = if (totalCount > 0) (vibe.count.toFloat() / totalCount * 100).roundToInt() else 0
-                        val percentageText = if (percentage == 0 && vibe.count > 0) "<1%" else "$percentage%"
+                        // Etichette esterne con icona/testo e numero
+                        val isOther = (vibe.vibe == "OTHER")
+                        val otherVibeText = otherVibeLabel.lowercase().replaceFirstChar { it.uppercase() }
+                        val countText = vibe.count.toString()
+                        val labelText = if (isOther) "$otherVibeText $countText" else countText
+
                         if (sweepAngle > 8f && vibe.count > 0) {
                             val textRadius = donutRadius + 11.dp.toPx() + selectionOffset
                             val textX = centerX + cosVal * textRadius
                             val textY = centerY + sinVal * textRadius
 
-                            val drawable = vibeDrawables[vibe.vibe]
+                            val drawable = if (isOther) null else vibeDrawables[vibe.vibe]
                             val iconSizePx = with(density) { 15.dp.toPx() }
                             val spacingPx = with(density) { 3.dp.toPx() }
 
-                            val percentageLayoutResult = textMeasurer.measure(
-                                text = percentageText,
+                            val countLayoutResult = textMeasurer.measure(
+                                text = labelText,
                                 style = TextStyle(
                                     color = color.copy(alpha = alpha),
                                     fontSize = 11.sp,
@@ -735,8 +738,16 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                 )
                             )
 
-                            val totalWidth = iconSizePx + spacingPx + percentageLayoutResult.size.width
-                            val totalHeight = maxOf(iconSizePx, percentageLayoutResult.size.height.toFloat())
+                            val totalWidth = if (drawable != null) {
+                                iconSizePx + spacingPx + countLayoutResult.size.width
+                            } else {
+                                countLayoutResult.size.width.toFloat()
+                            }
+                            val totalHeight = if (drawable != null) {
+                                maxOf(iconSizePx, countLayoutResult.size.height.toFloat())
+                            } else {
+                                countLayoutResult.size.height.toFloat()
+                            }
 
                             val x = if (cosVal > 0.2f) textX else if (cosVal < -0.2f) textX - totalWidth else textX - totalWidth / 2f
                             val y = if (sinVal > 0.2f) textY else if (sinVal < -0.2f) textY - totalHeight else textY - totalHeight / 2f
@@ -766,15 +777,20 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                 }
 
                                 val textXPos = iconRight + spacingPx
-                                val textYPos = y + (totalHeight - percentageLayoutResult.size.height) / 2f
+                                val textYPos = y + (totalHeight - countLayoutResult.size.height) / 2f
 
                                 drawText(
-                                    textLayoutResult = percentageLayoutResult,
+                                    textLayoutResult = countLayoutResult,
                                     topLeft = Offset(textXPos, textYPos)
+                                )
+                            } else if (isOther) {
+                                drawText(
+                                    textLayoutResult = countLayoutResult,
+                                    topLeft = Offset(x, y)
                                 )
                             } else {
                                 val fallbackLayoutResult = textMeasurer.measure(
-                                    text = "${vibe.emoji} $percentageText",
+                                    text = if (vibe.emoji.isNotEmpty()) "${vibe.emoji} $countText" else countText,
                                     style = TextStyle(
                                         color = color.copy(alpha = alpha),
                                         fontSize = 11.sp,
@@ -872,7 +888,7 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                 ?: targetVibe?.vibe?.lowercase()?.replace("_", " ")?.replaceFirstChar { it.uppercase() }
                                 ?: activeCode
 
-                            val centerIconRes = targetVibe?.iconRes ?: if (targetVibe?.vibe == "OTHER") R.drawable.ic_sparkle else null
+                            val centerIconRes = if (targetVibe?.vibe == "OTHER") null else targetVibe?.iconRes
                             if (centerIconRes != null && centerIconRes != 0) {
                                 Icon(
                                     painter = painterResource(id = centerIconRes),
