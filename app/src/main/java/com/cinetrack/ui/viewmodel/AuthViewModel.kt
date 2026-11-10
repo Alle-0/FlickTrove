@@ -107,6 +107,7 @@ class AuthViewModel @Inject constructor(
                         val lastAppVersion = syncPrefs.getString("last_app_version_${user.uid}", null)
                         val currentVersion = com.cinetrack.BuildConfig.VERSION_NAME
 
+                        @Suppress("DEPRECATION")
                         com.google.firebase.messaging.FirebaseMessaging.getInstance().token.addOnSuccessListener { token ->
                             if (!token.isNullOrBlank() && token != lastFcmToken) {
                                 com.google.firebase.firestore.FirebaseFirestore.getInstance().collection("user_fcm_tokens").document(user.uid)

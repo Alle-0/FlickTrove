@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import javax.inject.Inject
 import javax.inject.Singleton
 
+@Suppress("DEPRECATION")
 @Singleton
 class TraktAuthRepository @Inject constructor(
     @ApplicationContext context: Context

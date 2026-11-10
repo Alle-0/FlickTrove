@@ -12,6 +12,7 @@ import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
 
+@Suppress("DEPRECATION")
 class FCMService : FirebaseMessagingService() {
 
     override fun onNewToken(token: String) {

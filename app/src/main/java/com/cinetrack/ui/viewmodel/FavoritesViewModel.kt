@@ -92,7 +92,7 @@ class FavoritesViewModel @Inject constructor(
         val title = movie.title ?: movie.name ?: ""
         val previousState = movie.copy()
         viewModelScope.launch {
-            _syncingIds.update { it.add(movie.id) }
+            _syncingIds.update { it.adding(movie.id) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = movieRepository.getMovie(movie.id, movie.mediaType)
@@ -120,7 +120,7 @@ class FavoritesViewModel @Inject constructor(
                     movieRepository.saveMovie(previousState)
                 }
             } finally {
-                _syncingIds.update { it.remove(movie.id) }
+                _syncingIds.update { it.removing(movie.id) }
             }
         }
     }
@@ -130,7 +130,7 @@ class FavoritesViewModel @Inject constructor(
         
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            _syncingIds.update { it.add(movie.id) }
+            _syncingIds.update { it.adding(movie.id) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = movieRepository.getMovie(movie.id, movie.mediaType)
@@ -158,7 +158,7 @@ class FavoritesViewModel @Inject constructor(
                     movieRepository.saveMovie(previousState)
                 }
             } finally {
-                _syncingIds.update { it.remove(movie.id) }
+                _syncingIds.update { it.removing(movie.id) }
             }
         }
     }

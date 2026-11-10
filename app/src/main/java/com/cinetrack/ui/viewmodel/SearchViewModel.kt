@@ -797,7 +797,7 @@ class SearchViewModel @Inject constructor(
         
         val title = movie.title ?: movie.name ?: ""
         viewModelScope.launch {
-            _uiState.update { it.copy(togglingIds = it.togglingIds.add(movie.id)) }
+            _uiState.update { it.copy(togglingIds = it.togglingIds.adding(movie.id)) }
             try {
                 // 1. Fetch current database state to have an accurate baseline
                 val local = repository.getMovie(movie.id, movie.mediaType)
@@ -832,7 +832,7 @@ class SearchViewModel @Inject constructor(
             } catch (e: Exception) {
                 android.util.Log.e("SearchViewModel", "Error toggling favorite for $title", e)
             } finally {
-                _uiState.update { it.copy(togglingIds = it.togglingIds.remove(movie.id)) }
+                _uiState.update { it.copy(togglingIds = it.togglingIds.removing(movie.id)) }
             }
         }
     }
