@@ -25,8 +25,8 @@ android {
         applicationId = "com.cinetrack"
         minSdk = 26
         targetSdk = 35
-        versionCode = 39
-        versionName = "5.1.0"
+        versionCode = 40
+        versionName = "5.1.1"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"

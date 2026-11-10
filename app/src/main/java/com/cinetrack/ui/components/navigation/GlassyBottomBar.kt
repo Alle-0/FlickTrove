@@ -50,9 +50,10 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
-import androidx.compose.ui.platform.LocalHapticFeedback
+import com.cinetrack.ui.utils.LocalVibrationEnabled
+import com.cinetrack.util.VibrationHelper
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.IntOffset
@@ -90,7 +91,8 @@ fun GlassyBottomBar(
     )
 
     val coroutineScope = rememberCoroutineScope()
-    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val vibrationEnabled = LocalVibrationEnabled.current
     val density = LocalDensity.current
 
     // Synchronous physical drag state for 100% zero-latency tracking (fast swipes)
@@ -122,10 +124,14 @@ fun GlassyBottomBar(
                 onDragEnd = {
                     val finalDragDp = dragX / density.density
                     if (finalDragDp >= thresholdRawDp) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (vibrationEnabled) {
+                            VibrationHelper.vibrateClick(context)
+                        }
                         onSwitchMediaMode.invoke("tv")
                     } else if (finalDragDp <= -thresholdRawDp) {
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (vibrationEnabled) {
+                            VibrationHelper.vibrateClick(context)
+                        }
                         onSwitchMediaMode.invoke("movie")
                     }
                     hasFiredHaptic = false
@@ -171,10 +177,14 @@ fun GlassyBottomBar(
 
                     val currentRawDp = dragX / density.density
                     if (!hasFiredHaptic && abs(currentRawDp) >= thresholdRawDp) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        if (vibrationEnabled) {
+                            VibrationHelper.vibrateTick(context)
+                        }
                         hasFiredHaptic = true
                     } else if (hasFiredHaptic && abs(currentRawDp) < thresholdRawDp) {
-                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                        if (vibrationEnabled) {
+                            VibrationHelper.vibrateTick(context)
+                        }
                         hasFiredHaptic = false
                     }
 
@@ -452,7 +462,8 @@ private fun RowScope.NavItem(
     onClick: () -> Unit,
     accentColor: Color
 ) {
-    val haptic = LocalHapticFeedback.current
+    val context = LocalContext.current
+    val vibrationEnabled = LocalVibrationEnabled.current
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
     
@@ -485,7 +496,9 @@ private fun RowScope.NavItem(
                 indication = null,
                 enabled = enabled && !isSelected // Disable click if dimmed OR already on this screen
             ) {
-                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                if (vibrationEnabled) {
+                    VibrationHelper.vibrateTick(context)
+                }
                 onClick()
             },
         horizontalAlignment = Alignment.CenterHorizontally,
