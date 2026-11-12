@@ -330,6 +330,22 @@
       border-radius: 8px;
     }
 
+    .content-title.skeleton {
+      width: 80%;
+      height: 28px;
+    }
+
+    .content-meta.skeleton {
+      width: 50%;
+      height: 16px;
+      margin-bottom: 20px;
+    }
+
+    #btn-open-app,
+    #divider {
+      display: none;
+    }
+
     @keyframes shimmer {
       0% {
         background-position: 200% 0;
@@ -487,12 +503,12 @@
 
       <!-- Body -->
       <div class="card-body">
-        <div class="content-title skeleton" id="content-title" style="width:80%; height:28px;">&nbsp;</div>
-        <div class="content-meta skeleton" id="content-meta" style="width:50%; height:16px; margin-bottom:20px;">&nbsp;
+        <div class="content-title skeleton" id="content-title">&nbsp;</div>
+        <div class="content-meta skeleton" id="content-meta">&nbsp;
         </div>
 
         <div class="cta-group">
-          <a id="btn-open-app" class="btn-primary" href="#" style="display:none;">
+          <a id="btn-open-app" class="btn-primary" href="#">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
               stroke-linecap="round" stroke-linejoin="round">
               <path d="M5 12h14M12 5l7 7-7 7" />
@@ -500,7 +516,7 @@
             <span id="txt-open-app">Open in FlickTrove</span>
           </a>
 
-          <div class="divider" id="divider" style="display:none;">or</div>
+          <div class="divider" id="divider">or</div>
 
           <a id="btn-play-store" href="https://github.com/Alle-0/FlickTrove/releases/latest" class="btn-secondary"
             target="_blank" rel="noopener">

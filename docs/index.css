@@ -354,6 +354,7 @@ body {
   background: linear-gradient(135deg, var(--primary) 0%, var(--tertiary) 48%, var(--secondary) 100%);
   background-size: 200% auto;
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   animation: gradientShift 6s ease-in-out infinite alternate;
 }
@@ -704,6 +705,7 @@ body {
   pointer-events: none;
   background: linear-gradient(180deg, rgba(255, 255, 255, 0.5) 0%, rgba(255, 255, 255, 0.1) 100%);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
   mix-blend-mode: plus-lighter;
 }
@@ -1188,6 +1190,31 @@ body {
   box-shadow: 0 0 22px var(--glow, rgba(255, 255, 255, 0.6)), inset 0 1px 2px rgba(255, 255, 255, 0.75);
 }
 
+.swatch-red {
+  background: #FF2A4B;
+  --glow: rgba(255, 42, 75, 0.65);
+}
+
+.swatch-amber {
+  background: #FFB703;
+  --glow: rgba(255, 183, 3, 0.65);
+}
+
+.swatch-mint {
+  background: #4ADE80;
+  --glow: rgba(74, 222, 128, 0.65);
+}
+
+.swatch-teal {
+  background: #2DD4BF;
+  --glow: rgba(45, 212, 191, 0.65);
+}
+
+.cta-btn-wrapper {
+  position: relative;
+  z-index: 10;
+}
+
 /* Offline Floating Badge */
 .offline-floating-badge {
   position: absolute;
@@ -1314,6 +1341,7 @@ body {
   font-family: var(--font-heading);
   line-height: 1.2;
   text-align: center;
+  -webkit-user-select: none;
   user-select: none;
   z-index: 20;
   pointer-events: none;
@@ -1494,6 +1522,7 @@ body {
   text-align: left;
   font-family: inherit;
   gap: 16px;
+  -webkit-user-select: none;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
   transition: color 0.3s ease;
@@ -1519,6 +1548,7 @@ body {
   flex-shrink: 0;
   width: 24px;
   height: 24px;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2244,6 +2274,7 @@ body {
   display: none;
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  -webkit-user-select: none;
   user-select: none;
 }
 
@@ -2293,6 +2324,7 @@ body {
   border: 1px solid rgba(255, 255, 255, 0.15);
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  -webkit-user-select: none;
   user-select: none;
   opacity: 0;
   transform: scale(0.7) rotate(-45deg);
@@ -2329,6 +2361,7 @@ body {
   transform: translateY(24px) scale(0.95);
   -webkit-tap-highlight-color: transparent;
   outline: none;
+  -webkit-user-select: none;
   user-select: none;
   transition: opacity 0.4s cubic-bezier(0.16, 1, 0.3, 1),
     transform 0.4s cubic-bezier(0.16, 1, 0.3, 1),
@@ -2408,7 +2441,6 @@ body {
     overflow-x: clip;
     max-width: 100vw;
     width: 100%;
-    -webkit-overflow-scrolling: touch;
   }
 
   /* Navbar */
@@ -2436,7 +2468,8 @@ body {
     flex-shrink: 0;
     -webkit-tap-highlight-color: transparent !important;
     outline: none !important;
-    user-select: none;
+    -webkit-user-select: none;
+  user-select: none;
     background: transparent !important;
   }
 
@@ -2800,7 +2833,6 @@ body {
     width: auto;
     max-width: 100%;
     overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
     scrollbar-width: none;
     display: inline-flex;
     justify-content: center;
