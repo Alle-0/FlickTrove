@@ -28,7 +28,7 @@
 
 <br>
 
-<details open>
+<details>
   <summary><b><img src="docs/assets/readme_icons/lista.svg" width="20" height="20" align="absmiddle" /> Table of Contents</b></summary>
   <ol>
     <li><a href="#the-project"><img src="docs/assets/readme_icons/ciak.svg" width="18" height="18" align="absmiddle" /> The Project</a></li>
@@ -71,7 +71,8 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 <br>
 
-> **Note:** Since the app is not currently distributed via the Google Play Store, you will need to allow **"Install from unknown sources"** in your Android security settings before installing the downloaded APK file.
+> [!IMPORTANT]
+> Since the app is not currently distributed via the Google Play Store, you will need to allow **"Install from unknown sources"** in your Android security settings before installing the downloaded APK file.
 
 ---
 
@@ -239,9 +240,10 @@ Design is the true crown jewel of FlickTrove.
 
 <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note</h2>
 
-For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, TheTVDB, OMDb, Trakt, KLIPY) have been excluded from this repository.
-
-Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
+> [!NOTE]
+> For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, TheTVDB, OMDb, Trakt, KLIPY) have been excluded from this repository.
+>
+> Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
 
 ---
 
@@ -303,6 +305,20 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 </div>
 
 <br>
+
+<details>
+  <summary><b>📈 Star History</b></summary>
+  <br>
+  <div align="center">
+    <a href="https://www.star-history.com/#Alle-0/FlickTrove&Date">
+      <picture>
+        <source media="(prefers-color-scheme: dark)" srcset="https://api.star-history.com/svg?repos=Alle-0/FlickTrove&type=Date&theme=dark" />
+        <source media="(prefers-color-scheme: light)" srcset="https://api.star-history.com/svg?repos=Alle-0/FlickTrove&type=Date" />
+        <img alt="Star History Chart" src="https://api.star-history.com/svg?repos=Alle-0/FlickTrove&type=Date" width="680" />
+      </picture>
+    </a>
+  </div>
+</details>
 
 ---
 
