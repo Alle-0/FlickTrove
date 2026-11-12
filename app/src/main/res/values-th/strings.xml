@@ -316,7 +316,7 @@
     <string name="settings_terms_service">ข้อกำหนดในการให้บริการ</string>
     <string name="settings_privacy_policy">นโยบายความเป็นส่วนตัว</string>
     <string name="settings_tmdb_notice">ผลิตภัณฑ์นี้ใช้ TMDB API แต่ไม่ได้รับการรับรองหรือรับรองความถูกต้องโดย TMDB</string>
-    <string name="settings_giphy_notice">ขับเคลื่อนภาพ GIF โดย GIPHY</string>
+    <string name="settings_klipy_notice">ขับเคลื่อนภาพ GIF โดย KLIPY</string>
     <string name="settings_omdb_notice">ข้อมูลและคะแนนเพิ่มเติมจัดทำโดย OMDb API</string>
     <string name="settings_tvdb_notice">ข้อมูลเมตาของซีรีส์จัดทำโดย TheTVDB</string>
     <string name="settings_trakt_notice">การซิงค์และสถิติขับเคลื่อนโดย Trakt.tv</string>
@@ -1386,6 +1386,15 @@
     <string name="comment_tap_to_reveal">แตะเพื่อแสดงเนื้อหา</string>
     <string name="comment_image_preview">[รูปภาพ]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">ไม่สามารถโหลด GIF ได้</string>
+    <string name="gif_picker_empty">ไม่มี GIF ที่พร้อมใช้งาน</string>
+    <string name="gif_picker_search_empty">ไม่พบ GIF สำหรับ \"%1$s\"</string>
+    <string name="gif_picker_retry">ลองใหม่</string>
+    <string name="gif_picker_cd_clear">ล้าง</string>
+    <string name="comment_stickers">สติกเกอร์</string>
+    <string name="sticker_picker_load_error">ไม่สามารถโหลดสติกเกอร์ได้</string>
+    <string name="sticker_picker_empty">ไม่มีสติกเกอร์ที่ใช้งานได้</string>
+    <string name="sticker_picker_search_empty">ไม่พบสติกเกอร์สำหรับ \"%1$s\"</string>
     <string name="report_success">ส่งรายงานสำเร็จแล้ว</string>
     <string name="report_cooldown">คุณได้รายงานเรื่องนี้ไปแล้วใน 24 ชั่วโมงที่ผ่านมา</string>
     <string name="report_error">เกิดข้อผิดพลาดในการส่งรายงาน</string>
@@ -2100,6 +2109,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">การนำทางและท่าทาง</string>
     <string name="settings_bottom_bar_swipe">ปัดแถบด้านล่างสลับภาพยนตร์/ซีรีส์</string>
@@ -2108,4 +2118,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">คู่มือการจัดรูปแบบ</string>
+    <string name="comment_tip_bold">เน้นข้อความตัวหนา</string>
+    <string name="comment_tip_italic">รูปแบบตัวเอียง</string>
+    <string name="comment_tip_strikethrough">ข้อความขีดฆ่า</string>
+    <string name="comment_tip_list">รายการแบบจุดหรือตัวเลข (1.)</string>
+    <string name="comment_tip_quote">บล็อกคำพูด</string>
+    <string name="comment_tip_media_tag_syntax">#หนัง</string>
+    <string name="comment_tip_media_tag">เชื่อมโยงภาพยนตร์หรือซีรีส์: เปิดหน้าข้อมูลตามภาษาของผู้อ่าน</string>
+    <string name="comment_tip_attachments">เพิ่มรูปภาพหรือ GIF จากแถบด้านล่าง</string>
+    <string name="comment_tip_links">URL ที่วางจะคลิกเปิดได้พร้อมหน้าต่างตรวจสอบความปลอดภัย</string>
+    <string name="comment_tip_spoiler">เปิด Spoiler เพื่อเบลอความคิดเห็นทั้งหมดจนกว่าจะแตะ</string>
+    <string name="comment_tip_max_chars">จำกัด: สูงสุด %1$d ตัวอักษร</string>
+    <string name="comment_tag_search_hint">พิมพ์ชื่อภาพยนตร์หรือซีรีส์เพื่อแท็ก...</string>
 </resources>

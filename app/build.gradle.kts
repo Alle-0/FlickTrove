@@ -25,8 +25,8 @@ android {
         applicationId = "com.cinetrack"
         minSdk = 26
         targetSdk = 35
-        versionCode = 40
-        versionName = "5.1.1"
+        versionCode = 41
+        versionName = "5.2.0"
 
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
@@ -43,7 +43,7 @@ android {
         val supabaseAnonKey = localProps.getProperty("SUPABASE_ANON_KEY", "")
         val commsuniApiKey = localProps.getProperty("COMMSUNI_API_KEY", "")
         val commsuniHmacSecret = localProps.getProperty("COMMSUNI_HMAC_SECRET", "")
-        val giphyKey = localProps.getProperty("GIPHY_API_KEY", "")
+        val klipyKey = localProps.getProperty("KLIPY_API_KEY", "")
 
         // TMDB API KEY (To be replaced by user or local.properties)
         buildConfigField("String", "TMDB_API_KEY", "\"$tmdbKey\"")
@@ -57,7 +57,7 @@ android {
         buildConfigField("String", "SUPABASE_ANON_KEY", "\"$supabaseAnonKey\"")
         buildConfigField("String", "COMMSUNI_API_KEY", "\"$commsuniApiKey\"")
         buildConfigField("String", "COMMSUNI_HMAC_SECRET", "\"$commsuniHmacSecret\"")
-        buildConfigField("String", "GIPHY_API_KEY", "\"$giphyKey\"")
+        buildConfigField("String", "KLIPY_API_KEY", "\"$klipyKey\"")
     }
 
     signingConfigs {

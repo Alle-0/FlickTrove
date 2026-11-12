@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 
 /**
@@ -175,8 +176,9 @@ fun Modifier.horizontalFadingEdges(
         val leftColors = listOf(Color.Transparent, Color.Black)
         val rightColors = listOf(Color.Black, Color.Transparent)
         
-        val showLeft = lazyListState.canScrollBackward
-        val showRight = lazyListState.canScrollForward
+        val isRtl = layoutDirection == LayoutDirection.Rtl
+        val showLeft = if (isRtl) lazyListState.canScrollForward else lazyListState.canScrollBackward
+        val showRight = if (isRtl) lazyListState.canScrollBackward else lazyListState.canScrollForward
 
         if (showLeft && leftEdgeWidth > 0.dp) {
             drawRect(
@@ -214,8 +216,9 @@ fun Modifier.horizontalFadingEdges(
         val leftColors = listOf(Color.Transparent, Color.Black)
         val rightColors = listOf(Color.Black, Color.Transparent)
         
-        val showLeft = scrollState.value > 0
-        val showRight = scrollState.value < scrollState.maxValue
+        val isRtl = layoutDirection == LayoutDirection.Rtl
+        val showLeft = if (isRtl) scrollState.value < scrollState.maxValue else scrollState.value > 0
+        val showRight = if (isRtl) scrollState.value > 0 else scrollState.value < scrollState.maxValue
 
         if (showLeft && leftEdgeWidth > 0.dp) {
             drawRect(

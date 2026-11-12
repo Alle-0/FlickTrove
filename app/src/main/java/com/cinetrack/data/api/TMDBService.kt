@@ -240,4 +240,14 @@ interface TMDBService {
     suspend fun getTVImagesAllLanguages(
         @Path("id") id: Long
     ): ImagesResponse
+
+    @GET("watch/providers/movie")
+    suspend fun getWatchProvidersMovie(
+        @Query("watch_region") watchRegion: String
+    ): WatchProviderCatalogResponse
+
+    @GET("watch/providers/tv")
+    suspend fun getWatchProvidersTv(
+        @Query("watch_region") watchRegion: String
+    ): WatchProviderCatalogResponse
 }

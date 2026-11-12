@@ -238,6 +238,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">Startscherm</string>
     <string name="settings_default_start_tab_desc">Kies het standaardscherm bij het starten van de app</string>
     <string name="settings_default_start_feed">HOME</string>
@@ -317,7 +318,7 @@
     <string name="settings_terms_service">Servicevoorwaarden</string>
     <string name="settings_privacy_policy">Privacybeleid</string>
     <string name="settings_tmdb_notice">Dit product maakt gebruik van de TMDB-API, maar is niet goedgekeurd of gecertificeerd door TMDB.</string>
-    <string name="settings_giphy_notice">GIF\'s mogelijk gemaakt door GIPHY</string>
+    <string name="settings_klipy_notice">GIF\'s mogelijk gemaakt door KLIPY</string>
     <string name="settings_omdb_notice">Aanvullende gegevens en beoordelingen geleverd door de OMDb-API.</string>
     <string name="settings_tvdb_notice">Seriemetadata geleverd door TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronisatie en statistieken mogelijk gemaakt door Trakt.tv.</string>
@@ -1387,6 +1388,15 @@
     <string name="comment_tap_to_reveal">Tik om te tonen</string>
     <string name="comment_image_preview">[Afbeelding]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Kan GIF\'s niet laden</string>
+    <string name="gif_picker_empty">Geen GIF\'s beschikbaar</string>
+    <string name="gif_picker_search_empty">Geen GIF\'s gevonden voor \"%1$s\"</string>
+    <string name="gif_picker_retry">Opnieuw proberen</string>
+    <string name="gif_picker_cd_clear">Wissen</string>
+    <string name="comment_stickers">Stickers</string>
+    <string name="sticker_picker_load_error">Kan stickers niet laden</string>
+    <string name="sticker_picker_empty">Geen stickers beschikbaar</string>
+    <string name="sticker_picker_search_empty">Geen stickers gevonden voor \"%1$s\"</string>
     <string name="report_success">Rapport succesvol verzonden</string>
     <string name="report_cooldown">Je hebt dit in de afgelopen 24 uur al gerapporteerd</string>
     <string name="report_error">Fout bij het verzenden van het rapport</string>
@@ -2095,4 +2105,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Opmaakgids</string>
+    <string name="comment_tip_bold">Vetgedrukte nadruk</string>
+    <string name="comment_tip_italic">Cursieve stijl</string>
+    <string name="comment_tip_strikethrough">Doorgehaalde tekst</string>
+    <string name="comment_tip_list">Opsomming of genummerde lijst (1.)</string>
+    <string name="comment_tip_quote">Citaatblok</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Koppel een film of serie: opent de pagina in de taal van de lezer</string>
+    <string name="comment_tip_attachments">Voeg afbeeldingen of GIF\'s toe via de onderste balk</string>
+    <string name="comment_tip_links">Geplakte URL\'s worden klikbaar met een veiligheidsvoorbeeld</string>
+    <string name="comment_tip_spoiler">Schakel Spoiler in om de hele reactie te vervagen tot erop wordt getikt</string>
+    <string name="comment_tip_max_chars">Limiet: maximaal %1$d tekens</string>
+    <string name="comment_tag_search_hint">Typ de titel van een film of serie om te taggen...</string>
 </resources>

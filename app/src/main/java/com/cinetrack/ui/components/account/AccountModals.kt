@@ -35,6 +35,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.cinetrack.R
 import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.google.firebase.Firebase
 import com.google.firebase.auth.auth
@@ -318,7 +319,9 @@ fun AccountModals(
                                 painter = painterResource(id = R.drawable.ic_right),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .mirrorInRtl()
                             )
                         }
                         
@@ -355,7 +358,9 @@ fun AccountModals(
                                 painter = painterResource(id = R.drawable.ic_right),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .mirrorInRtl()
                             )
                         }
                         
@@ -386,7 +391,9 @@ fun AccountModals(
                                 painter = painterResource(id = R.drawable.ic_right),
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                                modifier = Modifier.size(16.dp)
+                                modifier = Modifier
+                                    .size(16.dp)
+                                    .mirrorInRtl()
                             )
                         }
                     }

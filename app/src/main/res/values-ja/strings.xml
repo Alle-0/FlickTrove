@@ -237,6 +237,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">起動画面</string>
     <string name="settings_default_start_tab_desc">アプリ起動時に最初に表示する画面を選択</string>
     <string name="settings_default_start_feed">ホーム</string>
@@ -303,7 +304,7 @@
     <string name="settings_terms_service">利用規約</string>
     <string name="settings_privacy_policy">プライバシーポリシー</string>
     <string name="settings_tmdb_notice">本アプリはTMDB APIを使用していますが、TMDBによる承認または認定は受けていません。</string>
-    <string name="settings_giphy_notice">GIFs powered by GIPHY</string>
+    <string name="settings_klipy_notice">GIFs powered by KLIPY</string>
     <string name="settings_omdb_notice">追加データおよび評価はOMDb APIより提供されています。</string>
     <string name="settings_tvdb_notice">シリーズのメタデータはTheTVDBより提供されています。</string>
     <string name="settings_trakt_notice">同期および統計機能はTrakt.tvによって提供されています。</string>
@@ -1353,6 +1354,15 @@
     <string name="comment_tap_to_reveal">タップしてネタバレを表示</string>
     <string name="comment_image_preview">[画像]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">GIFを読み込めませんでした</string>
+    <string name="gif_picker_empty">利用可能なGIFがありません</string>
+    <string name="gif_picker_search_empty">「%1$s」のGIFが見つかりません</string>
+    <string name="gif_picker_retry">再試行</string>
+    <string name="gif_picker_cd_clear">クリア</string>
+    <string name="comment_stickers">スタンプ</string>
+    <string name="sticker_picker_load_error">スタンプを読み込めません</string>
+    <string name="sticker_picker_empty">利用可能なスタンプがありません</string>
+    <string name="sticker_picker_search_empty">「%1$s」のスタンプが見つかりません</string>
     <string name="report_success">通報を正常に送信しました</string>
     <string name="report_cooldown">過去24時間以内に既に通報されています</string>
     <string name="report_error">通報の送信中にエラーが発生しました</string>
@@ -2135,4 +2145,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">書式ガイド</string>
+    <string name="comment_tip_bold">太字で強調</string>
+    <string name="comment_tip_italic">斜体スタイル</string>
+    <string name="comment_tip_strikethrough">取り消し線テキスト</string>
+    <string name="comment_tip_list">箇条書きまたは番号付きリスト (1.)</string>
+    <string name="comment_tip_quote">引用ブロック</string>
+    <string name="comment_tip_media_tag_syntax">#映画</string>
+    <string name="comment_tip_media_tag">映画やドラマをリンク：読者の言語で詳細ページを開きます</string>
+    <string name="comment_tip_attachments">下のバーから画像やGIFを追加</string>
+    <string name="comment_tip_links">貼り付けたURLは安全プレビュー付きでタップ可能になります</string>
+    <string name="comment_tip_spoiler">ネタバレをオンにするとタップするまでコメント全体にぼかしが入ります</string>
+    <string name="comment_tip_max_chars">上限：最大%1$d文字</string>
+    <string name="comment_tag_search_hint">タグ付けする映画やドラマのタイトルを入力...</string>
 </resources>

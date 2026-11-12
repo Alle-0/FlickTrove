@@ -38,6 +38,7 @@ import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import dev.chrisbanes.haze.HazeState
 
 private enum class CommentModalStep {
@@ -194,7 +195,9 @@ fun CommentReportModal(
                                             painter = painterResource(id = R.drawable.ic_right),
                                             contentDescription = null,
                                             tint = Color(0xFF2DD4BF).copy(alpha = 0.60f),
-                                            modifier = Modifier.size(14.dp)
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .mirrorInRtl()
                                         )
                                     }
                                 }
@@ -240,7 +243,9 @@ fun CommentReportModal(
                                         painter = painterResource(id = R.drawable.ic_right),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.35f),
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .mirrorInRtl()
                                     )
                                 }
                             }
@@ -289,7 +294,9 @@ fun CommentReportModal(
                                             painter = painterResource(id = R.drawable.ic_right),
                                             contentDescription = null,
                                             tint = Color(0xFFFF6E6E).copy(alpha = 0.50f),
-                                            modifier = Modifier.size(14.dp)
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .mirrorInRtl()
                                         )
                                     }
                                 }
@@ -391,7 +398,9 @@ fun CommentReportModal(
                                             painter = painterResource(id = R.drawable.ic_right),
                                             contentDescription = null,
                                             tint = Color.White.copy(alpha = 0.35f),
-                                            modifier = Modifier.size(14.dp)
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .mirrorInRtl()
                                         )
                                     }
                                 }
@@ -632,7 +641,9 @@ fun CommentReportModal(
                                         painter = painterResource(id = R.drawable.ic_right),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.35f),
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .mirrorInRtl()
                                     )
                                 }
                             }
@@ -677,7 +688,9 @@ fun CommentReportModal(
                                         painter = painterResource(id = R.drawable.ic_right),
                                         contentDescription = null,
                                         tint = Color.White.copy(alpha = 0.35f),
-                                        modifier = Modifier.size(14.dp)
+                                        modifier = Modifier
+                                            .size(14.dp)
+                                            .mirrorInRtl()
                                     )
                                 }
                             }

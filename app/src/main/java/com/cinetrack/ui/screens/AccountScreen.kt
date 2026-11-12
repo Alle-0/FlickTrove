@@ -5,6 +5,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.pager.HorizontalPager
@@ -698,7 +699,7 @@ fun AccountMenuButton(
                 painter = painterResource(id = R.drawable.ic_right),
                 contentDescription = "Go",
                 tint = Color.White.copy(alpha = 0.5f),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier.size(24.dp).mirrorInRtl()
             )
         }
     }

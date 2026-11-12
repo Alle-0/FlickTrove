@@ -1,0 +1,19 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="325.2"
+    android:viewportHeight="325.2">
+    <!-- Official KLIPY mark (centered inside 1:1 viewport from 256.9x325.2) -->
+    <group android:translateX="34.15">
+        <path
+            android:fillColor="#F8DC3B"
+            android:fillType="evenOdd"
+            android:pathData="M255.9,316.1l-68.5-105.7c-1.2-1.9-1.3-4.3-0.1-6.3l64.3-105.8c2.4-4-0.4-9-5.1-9L206,98.6c-32.3,7.3-41.8,26.1-61.2,53c-3.8,5.3-6.3,8.9-6.3,8.9c-3,5.4-11.1,3.3-11.1-2.8V70.4c-24.6,0-37.5,9-47.5,17.2c-30.8,25.4-37.6,57-37.6,97.1v134.6c0,3.3,2.6,5.9,5.9,5.9h73.3c3.2,0,5.9-2.6,5.9-5.9v-67.1c0-6,7.9-8.2,11-3l25,73.2c1.1,1.8,3,2.9,5.1,2.9H251C255.7,325.2,258.5,320,255.9,316.1z M110.6,101.2c-4.4,0-8-3.6-8-8s3.6-8,8-8s8,3.6,8,8S115.1,101.2,110.6,101.2z" />
+        <path
+            android:fillColor="#F04420"
+            android:pathData="M32,148.1c0.7,1.7,6.4-90.1,96.2-90.9c0,0-72.9-85.4-99.9-47.4c0,0-13.4,21,12.4,27.4C40.8,37.2-0.8,48,0,77c0.3,9,9.5,14.9,17.7,11.3c4.8-2.1,10.9-6.2,18.6-13.5C36.4,74.7,18.2,111.3,32,148.1z" />
+        <path
+            android:fillColor="#F04420"
+            android:pathData="M137.4,74.1v22.3c0,1.6,1.8,2.5,3.1,1.7L161.8,84l-21.4-11.5C139,71.6,137.4,72.6,137.4,74.1z" />
+    </group>
+</vector>

@@ -569,22 +569,87 @@ class HistoryViewModel @Inject constructor(
             return formatTvEpisodesForMap(currentEpisodes)
         }
 
-        private fun formatTvEpisodesForMap(
-            episodesMap: Map<String, List<Int>>?
-        ): String? {
-            if (!episodesMap.isNullOrEmpty()) {
-                val validMap = episodesMap.filter { it.key != "0" && it.value.isNotEmpty() }
-                val totalEps = validMap.values.sumOf { it.size }
-                if (totalEps > 0) {
-                    val seasonKeys = validMap.keys.sortedBy { it.toIntOrNull() ?: 0 }
-                    return when {
-                        seasonKeys.size == 1 -> "S${seasonKeys.first()} • $totalEps ep"
-                        seasonKeys.size > 1 -> "${seasonKeys.joinToString(", ") { "S$it" }} • $totalEps ep"
-                        else -> "$totalEps ep"
-                    }
+        private data class EpisodeRun(val start: Int, val end: Int) {
+            val count: Int get() = end - start + 1
+            val label: String
+                get() = when {
+                    start == end -> "E$start"
+                    count == 2 -> "E$start, E$end"
+                    else -> "E$start–E$end"
+                }
+        }
+
+        private fun compressEpisodeRuns(sortedDistinctEps: List<Int>): List<EpisodeRun> {
+            if (sortedDistinctEps.isEmpty()) return emptyList()
+            val runs = mutableListOf<EpisodeRun>()
+            var runStart = sortedDistinctEps.first()
+            var runEnd = runStart
+            for (i in 1 until sortedDistinctEps.size) {
+                val ep = sortedDistinctEps[i]
+                if (ep == runEnd + 1) {
+                    runEnd = ep
+                } else {
+                    runs.add(EpisodeRun(runStart, runEnd))
+                    runStart = ep
+                    runEnd = ep
                 }
             }
-            return null
+            runs.add(EpisodeRun(runStart, runEnd))
+            return runs
+        }
+
+        internal fun formatTvEpisodesForMap(
+            episodesMap: Map<String, List<Int>>?
+        ): String? {
+            if (episodesMap.isNullOrEmpty()) return null
+            val validSeasons = episodesMap
+                .filter { it.key != "0" && it.value.isNotEmpty() }
+                .entries
+                .map { (season, eps) -> season to eps.distinct().sorted() }
+                .sortedBy { it.first.toIntOrNull() ?: Int.MAX_VALUE }
+
+            if (validSeasons.isEmpty()) return null
+
+            if (validSeasons.size == 1) {
+                val (season, eps) = validSeasons.first()
+                val runs = compressEpisodeRuns(eps)
+                val maxCharBudget = 18
+                val shownLabels = mutableListOf<String>()
+                var shownCount = 0
+                var currentLen = 0
+                for (run in runs) {
+                    val addition = if (shownLabels.isEmpty()) run.label.length else 2 + run.label.length
+                    if (shownLabels.size >= 3 || (shownLabels.isNotEmpty() && currentLen + addition > maxCharBudget)) {
+                        break
+                    }
+                    shownLabels.add(run.label)
+                    shownCount += run.count
+                    currentLen += addition
+                }
+                val remaining = eps.size - shownCount
+                val episodesPart = shownLabels.joinToString(", ")
+                return if (remaining > 0) {
+                    "S$season • $episodesPart +$remaining"
+                } else {
+                    "S$season • $episodesPart"
+                }
+            }
+
+            // Multiple seasons: show up to 2 seasons compactly, plus "+N" if more episodes remain
+            val seasonParts = mutableListOf<String>()
+            var shownEpisodesCount = 0
+            val totalEpisodesCount = validSeasons.sumOf { it.second.size }
+
+            for ((season, eps) in validSeasons.take(2)) {
+                val runs = compressEpisodeRuns(eps)
+                val shownRuns = runs.take(2)
+                shownEpisodesCount += shownRuns.sumOf { it.count }
+                seasonParts.add("S$season ${shownRuns.joinToString(", ") { it.label }}")
+            }
+
+            val remaining = totalEpisodesCount - shownEpisodesCount
+            val base = seasonParts.joinToString(" • ")
+            return if (remaining > 0) "$base +$remaining" else base
         }
     }
 }

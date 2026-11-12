@@ -321,7 +321,7 @@ Biztosan folytatni szeretnéd?</string>
     <string name="settings_terms_service">Felhasználási feltételek</string>
     <string name="settings_privacy_policy">Adatvédelmi irányelvek</string>
     <string name="settings_tmdb_notice">Ez a termék a TMDB API-t használja, de a TMDB nem támogatja és nem hitelesíti.</string>
-    <string name="settings_giphy_notice">A GIF-eket a GIPHY biztosítja</string>
+    <string name="settings_klipy_notice">A GIF-eket a KLIPY biztosítja</string>
     <string name="settings_omdb_notice">A további adatokat és értékeléseket az OMDb API biztosítja.</string>
     <string name="settings_tvdb_notice">A sorozatok metaadatait a TheTVDB biztosítja.</string>
     <string name="settings_trakt_notice">A szinkronizálást és a statisztikákat a Trakt.tv biztosítja.</string>
@@ -1395,6 +1395,15 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="comment_tap_to_reveal">Koppintson a felfedéshez</string>
     <string name="comment_image_preview">[Kép]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Nem sikerült betölteni a GIF-eket</string>
+    <string name="gif_picker_empty">Nincsenek elérhető GIF-ek</string>
+    <string name="gif_picker_search_empty">Nem találhatók GIF-ek erre: „%1$s”</string>
+    <string name="gif_picker_retry">Újra</string>
+    <string name="gif_picker_cd_clear">Törlés</string>
+    <string name="comment_stickers">Matricák</string>
+    <string name="sticker_picker_load_error">Nem sikerült betölteni a matricákat</string>
+    <string name="sticker_picker_empty">Nincsenek elérhető matricák</string>
+    <string name="sticker_picker_search_empty">Nem találhatók matricák erre: „%1$s”</string>
     <string name="report_success">Jelentés sikeresen elküldve</string>
     <string name="report_cooldown">Ezt már jelentette az elmúlt 24 órában</string>
     <string name="report_error">Hiba a jelentés elküldésekor</string>
@@ -2106,6 +2115,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">Navigáció és mozdulatok</string>
     <string name="settings_bottom_bar_swipe">Alsó sáv legyintés (filmek/sorozatok)</string>
@@ -2114,4 +2124,18 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Formázási útmutató</string>
+    <string name="comment_tip_bold">Félkövér kiemelés</string>
+    <string name="comment_tip_italic">Dőlt stílus</string>
+    <string name="comment_tip_strikethrough">Áthúzott szöveg</string>
+    <string name="comment_tip_list">Felsorolás vagy számozott lista (1.)</string>
+    <string name="comment_tip_quote">Idézetblokk</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Film vagy sorozat csatolása: az olvasó nyelvén nyitja meg az adatlapot</string>
+    <string name="comment_tip_attachments">Adjon hozzá képeket vagy GIF-eket az alsó sávról</string>
+    <string name="comment_tip_links">A beillesztett URL-ek biztonsági előnézettel nyithatók meg</string>
+    <string name="comment_tip_spoiler">Kapcsolja be a Spoilert a hozzászólás elhomályosításához koppintásig</string>
+    <string name="comment_tip_max_chars">Korlát: legfeljebb %1$d karakter</string>
+    <string name="comment_tag_search_hint">Írd be egy film vagy sorozat címét a megjelöléshez...</string>
 </resources>

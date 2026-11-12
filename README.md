@@ -93,7 +93,7 @@ FlickTrove is not just a tracker, it's a personal cinema companion and media lib
 - 🎬 **Episodic TV Tracking**: Full TV series lifecycle management. Spunta episodes and seasons, track next upcoming air dates, monitor up-to-date completion status, and preserve your watched episode history even when dropping or pausing shows.
 - ☁️ **Cloud & Live Sync**: Native Firebase Firestore backup alongside seamless, two-way background synchronization with **Trakt.tv** and **SIMKL** (OAuth 2.0 with PKCE) for watch history, personal ratings, watchlist, and custom folders via Android WorkManager.
 - 📴 **Offline-First Architecture**: Access your entire library, update watch states, rate titles, and take personal notes without an internet connection, backed by a solid local Room database.
-- 🌍 **25 Languages & Regional Age Ratings**: Full app-wide native localization supporting 25 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇵🇹 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇹🇼 🇮🇩 🇹🇷 🇵🇱 🇳🇱 🇨🇿 🇺🇦 🇭🇺 🇷🇴 🇸🇪 🇬🇷 🇻🇳 🇹🇭) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC, Kijkwijzer).
+- 🌍 **26 Languages & Regional Age Ratings**: Full app-wide native localization supporting 26 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇵🇹 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇹🇼 🇮🇩 🇹🇷 🇵🇱 🇳🇱 🇨🇿 🇺🇦 🇭🇺 🇷🇴 🇸🇪 🇬🇷 🇻🇳 🇹🇭 🇸🇦) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC, Kijkwijzer).
 - 🍿 **Streaming Providers & Trailers**: Discover where to stream, buy, or rent any title in your country, powered by JustWatch data via TMDB, alongside high-definition in-app YouTube trailers.
 - 📅 **Release Reminders & Notifications**: Never miss theatrical premieres or streaming releases with local calendar notifications and customizable alert schedules.
 - 📰 **Film Magazine & Editorial Collections**: Dedicated news section featuring articles from top film publications alongside curated editorial spotlight collections.
@@ -155,11 +155,11 @@ Behind a gorgeous interface lies a solid and scalable engine. We used the best p
 | **Architecture** | <img src="https://img.shields.io/badge/MVVM_%2B_Clean_Architecture-3DDC84?style=for-the-badge&logo=android&logoColor=white" alt="MVVM & Clean Architecture"> |
 | **UI Framework** | <img src="https://img.shields.io/badge/Jetpack_Compose-4285F4?style=for-the-badge&logo=jetpackcompose&logoColor=white" alt="Compose"> <img src="https://img.shields.io/badge/Material_3-EADDFF?style=for-the-badge&logo=materialdesign&logoColor=black" alt="Material 3"> |
 | **Navigation** | <img src="https://img.shields.io/badge/Voyager_1.1-7B1FA2?style=for-the-badge&logo=compass&logoColor=white" alt="Voyager"> |
-| **Blur & Glassmorphism** | <img src="https://img.shields.io/badge/Haze_2.0.1-00B4D8?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Haze"> |
+| **Blur & Glassmorphism** | <img src="https://img.shields.io/badge/Haze_2.1.0-00B4D8?style=for-the-badge&logo=googlechrome&logoColor=white" alt="Haze"> |
 | **Networking** | <img src="https://img.shields.io/badge/Retrofit_2-FF6347?style=for-the-badge&logo=square&logoColor=white" alt="Retrofit"> <img src="https://img.shields.io/badge/OkHttp-109D59?style=for-the-badge&logo=square&logoColor=white" alt="OkHttp"> |
 | **Local Database** | <img src="https://img.shields.io/badge/Room_DB_2.8-3DDC84?style=for-the-badge&logo=sqlite&logoColor=white" alt="Room"> |
 | **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=for-the-badge&logo=google&logoColor=white" alt="Hilt"> |
-| **Images & Colors** | <img src="https://img.shields.io/badge/Coil_3.0-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> <img src="https://img.shields.io/badge/AndroidX_Palette-FF7043?style=for-the-badge&logo=android&logoColor=white" alt="Palette"> |
+| **Images & Colors** | <img src="https://img.shields.io/badge/Coil_3.6.3-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> <img src="https://img.shields.io/badge/AndroidX_Palette-FF7043?style=for-the-badge&logo=android&logoColor=white" alt="Palette"> |
 | **Background Sync** | <img src="https://img.shields.io/badge/WorkManager-34A853?style=for-the-badge&logo=android&logoColor=white" alt="WorkManager"> |
 | **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"> <img src="https://img.shields.io/badge/OAuth_2.0-Trakt_%26_SIMKL-232F3E?style=for-the-badge&logo=openid&logoColor=white" alt="OAuth2"> |
 
@@ -195,7 +195,7 @@ Design is the true crown jewel of FlickTrove.
 
 ## <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" align="absmiddle" /> Developer Note</h2>
 
-For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, TheTVDB, OMDB, Trakt, Giphy) have been excluded from this repository.
+For security reasons, backend configuration files (such as Firebase's google-services.json) and private API keys (TMDB, TheTVDB, OMDB, Trakt, KLIPY) have been excluded from this repository.
 
 Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
 
@@ -280,7 +280,7 @@ FlickTrove is, and will always be, completely free, source-available, and ad-fre
 - 📝 [Trakt API](https://trakt.docs.apiary.io/) - For sync and scrobbling
 - 📡 [SIMKL API](https://api.simkl.org/) - For bidirectional sync and tracking
 - 🌐 [CommsUni (commsuni.tv)](https://commsuni.tv/) - For federated community discussion and social comments network
-- 👾 [Giphy API](https://developers.giphy.com/docs/api/) - For searching and sharing GIFs in social comments
+- 👾 [KLIPY API](https://klipy.com/) - For searching and sharing GIFs in social comments
 - 🍅 [Rotten Tomatoes](https://www.rottentomatoes.com/) - For critic and audience scores
 - Ⓜ️ [Metacritic](https://www.metacritic.com/) - For aggregated critic reviews
 - 🏆 [Game-Icons.net](https://game-icons.net/) - For achievement badge and trophy icons (licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/))

@@ -137,6 +137,9 @@ class DiscoverViewModel @Inject constructor(
             selectedGenres = if (newGenreId != null) listOf(newGenreId) else emptyList(),
             selectedDecades = emptyList()
         )
+        viewModelScope.launch(Dispatchers.IO) {
+            repository.ensureRegionalWatchProvidersLoaded()
+        }
         fetchMovies()
     }
 

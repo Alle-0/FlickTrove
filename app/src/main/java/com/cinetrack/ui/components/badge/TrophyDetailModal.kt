@@ -70,6 +70,7 @@ import com.cinetrack.data.repository.BadgeRepository
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.theme.FlickTroveTheme
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import kotlinx.coroutines.launch
 
 /**
@@ -393,7 +394,9 @@ fun TrophyDetailContent(
                                     imageVector = ImageVector.vectorResource(R.drawable.ic_right),
                                     contentDescription = null,
                                     tint = Color.White.copy(alpha = 0.40f),
-                                    modifier = Modifier.size(14.dp)
+                                    modifier = Modifier
+                                        .size(14.dp)
+                                        .mirrorInRtl()
                                 )
                             }
                         }
@@ -499,7 +502,9 @@ fun TrophyDetailContent(
                                             imageVector = ImageVector.vectorResource(R.drawable.ic_right),
                                             contentDescription = null,
                                             tint = Color.White.copy(alpha = 0.40f),
-                                            modifier = Modifier.size(14.dp)
+                                            modifier = Modifier
+                                                .size(14.dp)
+                                                .mirrorInRtl()
                                         )
                                     }
                                 }

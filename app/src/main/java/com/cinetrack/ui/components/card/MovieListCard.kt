@@ -587,8 +587,12 @@ fun MovieListCard(
                 contentAlignment = Alignment.Center
             ) {
                 val circularBar = com.cinetrack.LocalCircularProgressBar.current
-                val targetCircularProgress = when (circularBar) {
-                    "SEASON" -> if (seasonProgress > 0f) seasonProgress else computedProgress
+                val targetCircularProgress = when {
+                    isQuickWatch && circularBar == "SEASON" -> {
+                        if (seasonProgress > 0f) seasonProgress
+                        else if (!movie.seasons.isNullOrEmpty()) 0f
+                        else computedProgress
+                    }
                     else -> computedProgress
                 }
                 val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(

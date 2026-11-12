@@ -48,6 +48,9 @@ import androidx.compose.ui.platform.LocalConfiguration
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import com.cinetrack.util.VibrationHelper
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -94,7 +97,7 @@ fun FeedbackDialog(
                     stringResource(R.string.settings_feedback_title),
                     style = MaterialTheme.typography.headlineSmall.copy(
                         fontWeight = FontWeight.Bold,
-                        letterSpacing = (-0.5).sp
+                        letterSpacing = rtlSafeLetterSpacing((-0.5).sp)
                     ),
                     color = Color.White
                 )
@@ -119,13 +122,16 @@ fun FeedbackDialog(
                         .verticalScroll(feedbackScrollState)
                 ) {
                     // Rating Section
+                    val layoutDirection = LocalLayoutDirection.current
                     Row(
                         horizontalArrangement = Arrangement.spacedBy(10.dp),
                         verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier
-                            .pointerInput(Unit) {
+                            .pointerInput(layoutDirection) {
                                 detectTapGestures { offset ->
-                                    val fraction = offset.x / size.width.toFloat()
+                                    val width = size.width.toFloat().coerceAtLeast(1f)
+                                    val effectiveX = if (layoutDirection == LayoutDirection.Rtl) width - offset.x else offset.x
+                                    val fraction = (effectiveX / width).coerceIn(0f, 1f)
                                     val newRating = (fraction * 5).toInt() + 1
                                     val clamped = newRating.coerceIn(1, 5)
                                     if (clamped != rating) {
@@ -134,9 +140,11 @@ fun FeedbackDialog(
                                     }
                                 }
                             }
-                            .pointerInput(Unit) {
+                            .pointerInput(layoutDirection) {
                                 detectDragGestures { change, _ ->
-                                    val fraction = change.position.x / size.width.toFloat()
+                                    val width = size.width.toFloat().coerceAtLeast(1f)
+                                    val effectiveX = if (layoutDirection == LayoutDirection.Rtl) width - change.position.x else change.position.x
+                                    val fraction = (effectiveX / width).coerceIn(0f, 1f)
                                     val newRating = (fraction * 5).toInt() + 1
                                     val clamped = newRating.coerceIn(1, 5)
                                     if (clamped != rating) {

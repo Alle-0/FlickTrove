@@ -28,6 +28,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import dev.chrisbanes.haze.HazeState
@@ -414,7 +415,7 @@ fun DetailRatingInfoDialog(
                                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                                     contentDescription = null,
                                     tint = accent,
-                                    modifier = Modifier.size(10.dp)
+                                    modifier = Modifier.size(10.dp).mirrorInRtl()
                                 )
                             }
                         }

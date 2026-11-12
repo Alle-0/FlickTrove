@@ -24,6 +24,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.theme.FlickTroveTheme
 
 @Composable
@@ -41,7 +42,8 @@ fun ShowMoreCard(onClick: () -> Unit, height: androidx.compose.ui.unit.Dp = 165.
             Icon(
                 imageVector = ImageVector.vectorResource(R.drawable.ic_right),
                 contentDescription = stringResource(R.string.overview_show_more),
-                tint = Color.White
+                tint = Color.White,
+                modifier = Modifier.mirrorInRtl()
             )
             Spacer(modifier = Modifier.height(8.dp))
             Text(

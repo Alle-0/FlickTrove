@@ -321,7 +321,7 @@ Trakt ➔ Εφαρμογή: 6 ώρες</string>
     <string name="settings_terms_service">Όροι χρήσης</string>
     <string name="settings_privacy_policy">Πολιτική απορρήτου</string>
     <string name="settings_tmdb_notice">Αυτό το προϊόν χρησιμοποιεί το API του TMDB, αλλά δεν έχει εγκριθεί ή πιστοποιηθεί από το TMDB.</string>
-    <string name="settings_giphy_notice">Τα GIF παρέχονται από το GIPHY</string>
+    <string name="settings_klipy_notice">Τα GIF παρέχονται από το KLIPY</string>
     <string name="settings_omdb_notice">Πρόσθετα δεδομένα και βαθμολογίες παρέχονται από το OMDb API.</string>
     <string name="settings_tvdb_notice">Τα μεταδεδομένα σειρών παρέχονται από το TheTVDB.</string>
     <string name="settings_trakt_notice">Ο συγχρονισμός και τα στατιστικά υποστηρίζονται από το Trakt.tv.</string>
@@ -1397,6 +1397,15 @@ Trakt ➔ Εφαρμογή: 6 ώρες</string>
     <string name="comment_tap_to_reveal">Πατήστε για αποκάλυψη</string>
     <string name="comment_image_preview">[Εικόνα]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Αδυναμία φόρτωσης των GIF</string>
+    <string name="gif_picker_empty">Δεν υπάρχουν διαθέσιμα GIF</string>
+    <string name="gif_picker_search_empty">Δεν βρέθηκαν GIF για «%1$s»</string>
+    <string name="gif_picker_retry">Επανάληψη</string>
+    <string name="gif_picker_cd_clear">Εκκαθάριση</string>
+    <string name="comment_stickers">Αυτοκόλλητα</string>
+    <string name="sticker_picker_load_error">Αδυναμία φόρτωσης αυτοκόλλητων</string>
+    <string name="sticker_picker_empty">Δεν υπάρχουν διαθέσιμα αυτοκόλλητα</string>
+    <string name="sticker_picker_search_empty">Δεν βρέθηκαν αυτοκόλλητα για «%1$s»</string>
     <string name="report_success">Η αναφορά στάλθηκε επιτυχώς</string>
     <string name="report_cooldown">Έχετε ήδη υποβάλει αναφορά τις τελευταίες 24 ώρες</string>
     <string name="report_error">Σφάλμα κατά την αποστολή αναφοράς</string>
@@ -2109,6 +2118,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">Πλοήγηση και χειρονομίες</string>
     <string name="settings_bottom_bar_swipe">Σύρσιμο κάτω γραμμής (ταινίες/σειρές)</string>
@@ -2117,4 +2127,18 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Οδηγός μορφοποίησης</string>
+    <string name="comment_tip_bold">Έντονη έμφαση</string>
+    <string name="comment_tip_italic">Πλάγια γραφή</string>
+    <string name="comment_tip_strikethrough">Διαγραμμένο κείμενο</string>
+    <string name="comment_tip_list">Λίστες με κουκκίδες ή αρίθμηση (1.)</string>
+    <string name="comment_tip_quote">Πλαίσιο παράθεσης</string>
+    <string name="comment_tip_media_tag_syntax">#ταινία</string>
+    <string name="comment_tip_media_tag">Σύνδεση ταινίας ή σειράς: ανοίγει τη σελίδα στη γλώσσα του αναγνώστη</string>
+    <string name="comment_tip_attachments">Προσθέστε εικόνες ή GIF από την κάτω γραμμή</string>
+    <string name="comment_tip_links">Οι επικολλημένες διευθύνσεις URL ανοίγουν με προεπισκόπηση ασφαλείας</string>
+    <string name="comment_tip_spoiler">Ενεργοποιήστε το Spoiler για θόλωση σχολίου μέχρι το άγγιγμα</string>
+    <string name="comment_tip_max_chars">Όριο: έως %1$d χαρακτήρες</string>
+    <string name="comment_tag_search_hint">Πληκτρολογήστε τίτλο ταινίας ή σειράς για επισήμανση...</string>
 </resources>

@@ -12,6 +12,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.remember
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -167,6 +168,7 @@ fun MovieActionsPopup(
         val expandAlignment = if (isShiftedUp) Alignment.Bottom else Alignment.Top
 
         Box(
+            contentAlignment = AbsoluteAlignment.TopLeft,
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(9999f)
@@ -180,7 +182,7 @@ fun MovieActionsPopup(
 
             // Popup container offset to calculated coordinates
             Box(
-                modifier = Modifier.offset { IntOffset(xPos.toInt(), yPos.toInt()) }
+                modifier = Modifier.absoluteOffset { IntOffset(xPos.toInt(), yPos.toInt()) }
             ) {
                 AnimatedVisibility(
                     visibleState = transitionState,

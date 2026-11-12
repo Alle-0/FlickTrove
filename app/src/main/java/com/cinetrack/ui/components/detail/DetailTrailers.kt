@@ -23,6 +23,7 @@ import androidx.compose.material3.*
 import kotlinx.coroutines.flow.filter
 import kotlin.math.abs
 import androidx.compose.runtime.*
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -89,7 +90,9 @@ fun DetailTrailersMenuModal(
     )
 
     if (transition.currentState || transition.targetState) {
+        val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
         Box(
+            contentAlignment = AbsoluteAlignment.TopLeft,
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(99999f)
@@ -119,7 +122,8 @@ fun DetailTrailersMenuModal(
 
             val minX = sideSafetyPx
             val maxX = screenWidthPx - sideSafetyPx - menuWidthPx
-            val xPos = (triggerRect.right - menuWidthPx).coerceIn(minX, maxX.coerceAtLeast(minX))
+            val preferredX = if (isRtl) triggerRect.left else triggerRect.right - menuWidthPx
+            val xPos = preferredX.coerceIn(minX, maxX.coerceAtLeast(minX))
 
             val openDownY = triggerRect.bottom + spacingPx
             val openUpY = triggerRect.top - spacingPx - menuHeightPx
@@ -157,7 +161,7 @@ fun DetailTrailersMenuModal(
                 ),
                 exit = fadeOut(animationSpec = tween(200)),
                 modifier = Modifier
-                    .offset { androidx.compose.ui.unit.IntOffset(xPos.toInt(), yPos.toInt()) }
+                    .absoluteOffset { androidx.compose.ui.unit.IntOffset(xPos.toInt(), yPos.toInt()) }
                     .zIndex(100f)
             ) {
                 Box(

@@ -414,6 +414,36 @@ object GenreConstants {
         10768L to "युद्ध और राजनीति"
     )
 
+    private val ARABIC_NAMES = mapOf(
+        28L to "أكشن",
+        12L to "مغامرة",
+        16L to "رسوم متحركة",
+        35L to "كوميديا",
+        80L to "جريمة",
+        99L to "وثائقي",
+        18L to "دراما",
+        10751L to "عائلي",
+        14L to "فانتازيا",
+        36L to "تاريخ",
+        27L to "رعب",
+        10402L to "موسيقى",
+        9648L to "غموض",
+        10749L to "رومانسية",
+        878L to "خيال علمي",
+        10770L to "فيلم تلفزيوني",
+        53L to "إثارة",
+        10752L to "حرب",
+        37L to "ويسترن",
+        10759L to "أكشن ومغامرة",
+        10762L to "أطفال",
+        10763L to "أخبار",
+        10764L to "واقعي",
+        10765L to "خيال علمي وفانتازيا",
+        10766L to "أوبرا الصابون",
+        10767L to "حواري",
+        10768L to "حرب وسياسة"
+    )
+
     fun getLocalizedName(id: Long, languageCode: String, defaultName: String): String {
         val lang = languageCode.lowercase()
         return when {
@@ -429,6 +459,7 @@ object GenreConstants {
             lang.startsWith("tr") -> TURKISH_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             lang.startsWith("id") || lang.startsWith("in") -> INDONESIAN_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             lang.startsWith("hi") -> HINDI_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
+            lang.startsWith("ar") -> ARABIC_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             else -> ENGLISH_NAMES[id] ?: defaultName
         }
     }

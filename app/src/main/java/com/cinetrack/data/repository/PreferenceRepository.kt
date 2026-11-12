@@ -27,9 +27,35 @@ class PreferenceRepository @Inject constructor(
     private val json = Json { ignoreUnknownKeys = true }
     private val repoScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private val startupPrefs = context?.getSharedPreferences("flicktrove_startup_prefs", android.content.Context.MODE_PRIVATE)
+    @Volatile
+    private var fallbackAnonymousGifId: String? = null
 
     val initialDefaultMedia: String
         get() = startupPrefs?.getString("default_start_media", "movie") ?: "movie"
+
+    /** Returns a persistent anonymous UUID for KLIPY `customer_id` personalization without PII. */
+    fun getOrCreateAnonymousGifClientId(): String {
+        val prefs = startupPrefs
+        if (prefs == null) {
+            return fallbackAnonymousGifId ?: synchronized(this) {
+                fallbackAnonymousGifId ?: java.util.UUID.randomUUID().toString().also {
+                    fallbackAnonymousGifId = it
+                }
+            }
+        }
+        val existing = prefs.getString("gif_anonymous_client_id", null)
+        if (!existing.isNullOrBlank()) return existing
+        return synchronized(this) {
+            val rechecked = prefs.getString("gif_anonymous_client_id", null)
+            if (!rechecked.isNullOrBlank()) {
+                rechecked
+            } else {
+                java.util.UUID.randomUUID().toString().also { generated ->
+                    prefs.edit().putString("gif_anonymous_client_id", generated).apply()
+                }
+            }
+        }
+    }
 
     private object PreferencesKeys {
         // --- Scrigno del Trove: stato giornaliero di sblocco ---
@@ -529,5 +555,7 @@ class PreferenceRepository @Inject constructor(
         dataStore.edit { preferences ->
             preferences.clear()
         }
+        startupPrefs?.edit()?.remove("gif_anonymous_client_id")?.apply()
+        fallbackAnonymousGifId = null
     }
 }

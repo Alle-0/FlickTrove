@@ -78,14 +78,11 @@ fun CheckInModal(
     var rating by remember(movie?.personalRating) { mutableDoubleStateOf(movie?.personalRating ?: 0.0) }
 
     // Local selection state initialized from movie if present
-    var selectedVibes by remember(movie?.emotionalVibes) { 
-        val initial = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
-            findVibe(vibeString)
-        }?.toSet() ?: emptySet()
-        mutableStateOf(initial) 
+    var selectedVibes by remember(movie?.emotionalVibes) {
+        mutableStateOf(resolveInitialVibes(movie?.emotionalVibes))
     }
-    var selectedMvp by remember(movie?.favoriteActorId) { 
-        mutableStateOf(cast.find { it.id == movie?.favoriteActorId })
+    var selectedMvp by remember(movie?.favoriteActorId, cast) {
+        mutableStateOf(resolveInitialMvp(movie, cast))
     }
 
     val coroutineScope = rememberCoroutineScope()
@@ -114,10 +111,8 @@ fun CheckInModal(
     LaunchedEffect(visible) {
         if (visible) {
             rating = movie?.personalRating ?: 0.0
-            selectedVibes = movie?.emotionalVibes?.split(",")?.mapNotNull { vibeString ->
-                findVibe(vibeString)
-            }?.toSet() ?: emptySet()
-            selectedMvp = cast.find { it.id == movie?.favoriteActorId }
+            selectedVibes = resolveInitialVibes(movie?.emotionalVibes)
+            selectedMvp = resolveInitialMvp(movie, cast)
             currentPage = 0
             isSaving = false
             burstProgress.snapTo(0f)
@@ -325,7 +320,7 @@ fun CheckInModal(
                                                     val isSelected = selectedVibes.contains(vibe)
                                                     val isDisabled = !isSelected && selectedVibes.size >= 3
                                                     val originalVibes = remember(movie?.emotionalVibes) {
-                                                        movie?.emotionalVibes?.split(",")?.map { it.trim() }?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+                                                        resolveInitialVibes(movie?.emotionalVibes).map { it.code }.toSet()
                                                     }
                                                     val currentVibes = selectedVibes.map { it.code }.toSet()
                                                     val missingOriginalVibes = originalVibes.count { 
@@ -532,7 +527,10 @@ fun CheckInModal(
                                                     val finalCharImageUrl = selectedMvp?.let { mvp ->
                                                         val cName = mvp.character?.lowercase()?.trim()
                                                         val aName = mvp.name.lowercase().trim()
-                                                        cName?.let { characterImages[it] } ?: characterImages[aName]
+                                                        cName?.let { characterImages[it] }
+                                                            ?: characterImages[aName]
+                                                            ?: movie?.takeIf { it.favoriteActorId == mvp.id }?.favoriteActorProfilePath
+                                                                ?.takeIf { it.isNotBlank() && it != mvp.profilePath }
                                                     }
                                                     val finalRating = if (rating > 0.0) rating else null
                                                     onSave(finalRating, selectedVibes.map { it.code }, selectedMvp, finalCharImageUrl)
@@ -618,5 +616,26 @@ fun PeekABooCheckInDrawer(
         onSave = onSave,
         onDismiss = onDismiss,
         modifier = modifier
+    )
+}
+
+private fun resolveInitialVibes(emotionalVibes: String?): Set<EmotionalVibe> {
+    return emotionalVibes
+        ?.split(",")
+        ?.mapNotNull { vibeString -> findVibe(vibeString) }
+        ?.toSet()
+        ?: emptySet()
+}
+
+private fun resolveInitialMvp(
+    movie: com.cinetrack.data.model.Movie?,
+    cast: List<CastMember>
+): CastMember? {
+    val actorId = movie?.favoriteActorId ?: return null
+    return cast.find { it.id == actorId } ?: CastMember(
+        id = actorId,
+        name = movie.favoriteActorName.orEmpty(),
+        character = movie.favoriteActorCharacter,
+        profilePath = movie.favoriteActorTmdbPath ?: movie.favoriteActorProfilePath?.takeIf { !it.startsWith("http") }
     )
 }

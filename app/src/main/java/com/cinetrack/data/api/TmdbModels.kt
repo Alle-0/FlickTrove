@@ -255,6 +255,20 @@ data class WatchProvidersResponse(
 )
 
 @Serializable
+data class WatchProviderCatalogItem(
+    @SerialName("provider_id") val providerId: Long = 0L,
+    @SerialName("provider_name") val providerName: String = "",
+    @SerialName("logo_path") val logoPath: String? = null,
+    @SerialName("display_priority") val displayPriority: Int? = null,
+    @SerialName("display_priorities") val displayPriorities: Map<String, Int>? = null
+)
+
+@Serializable
+data class WatchProviderCatalogResponse(
+    val results: List<WatchProviderCatalogItem> = emptyList()
+)
+
+@Serializable
 data class Collection(
     val id: Long = 0L,
     val name: String = "",

@@ -1,5 +1,14 @@
 package com.cinetrack.ui.history.components
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -9,10 +18,12 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.rounded.MoreVert
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.layout.ContentScale
@@ -62,6 +73,20 @@ fun HistoryCard(
     val cardSize = remember { arrayOf(Size.Zero) }
     val buttonPosition = remember { arrayOf(Offset.Zero) }
 
+    val expandedEpisodes = remember(entry.sessionEpisodes) {
+        entry.sessionEpisodes
+            ?.filter { it.key != "0" && it.value.isNotEmpty() }
+            ?.toList()
+            ?.sortedBy { it.first.toIntOrNull() ?: Int.MAX_VALUE }
+            ?.flatMap { (season, eps) ->
+                val sNum = season.toIntOrNull() ?: 0
+                eps.distinct().sorted().map { ep -> sNum to ep }
+            }
+            .orEmpty()
+    }
+    val canExpandEpisodes = entry.isTvShow && expandedEpisodes.size > 1
+    var isEpisodesExpanded by rememberSaveable(entry.uniqueKey) { mutableStateOf(false) }
+
     val posterUrl = remember(entry.posterPath) {
         if (!entry.posterPath.isNullOrBlank()) {
             "https://image.tmdb.org/t/p/w342${entry.posterPath}"
@@ -107,6 +132,7 @@ fun HistoryCard(
             .border(0.5.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(22.dp))
             .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 12.dp)
     ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
         Row(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
@@ -221,13 +247,33 @@ fun HistoryCard(
                             MaterialTheme.colorScheme.secondary
                         }
 
-                        // 1. Session Capsule: [ Date? • Ep? ]
+                        // 1. Session Capsule: [ Date? • Ep? ▾ ]
                         if (hasSessionCapsule) {
+                            val isCapsuleExpandable = canExpandEpisodes && !entry.episodeInfo.isNullOrBlank()
+                            val chevronRotation by animateFloatAsState(
+                                targetValue = if (isEpisodesExpanded) 90f else 0f,
+                                animationSpec = spring(
+                                    dampingRatio = Spring.DampingRatioNoBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                label = "history_episode_chevron_rotation"
+                            )
+                            val capsuleTapModifier = if (isCapsuleExpandable) {
+                                Modifier.bounceClick(scaleDown = 0.94f) {
+                                    isEpisodesExpanded = !isEpisodesExpanded
+                                }
+                            } else {
+                                Modifier
+                            }
                             Box(
-                                modifier = Modifier
-                                    .clip(RoundedCornerShape(50))
-                                    .background(sessionColor.copy(alpha = 0.14f))
-                                    .border(1.dp, sessionColor.copy(alpha = 0.35f), RoundedCornerShape(50))
+                                modifier = capsuleTapModifier
+                                    .clip(CircleShape)
+                                    .background(sessionColor.copy(alpha = if (isEpisodesExpanded) 0.22f else 0.14f))
+                                    .border(
+                                        width = 1.dp,
+                                        color = sessionColor.copy(alpha = if (isEpisodesExpanded) 0.55f else 0.35f),
+                                        shape = CircleShape
+                                    )
                                     .padding(horizontal = 8.dp, vertical = 3.dp),
                                 contentAlignment = Alignment.Center
                             ) {
@@ -266,6 +312,16 @@ fun HistoryCard(
                                             letterSpacing = 0.3.sp,
                                             maxLines = 1
                                         )
+                                        if (isCapsuleExpandable) {
+                                            Icon(
+                                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                                                contentDescription = null,
+                                                tint = sessionColor.copy(alpha = 0.85f),
+                                                modifier = Modifier
+                                                    .size(10.dp)
+                                                    .graphicsLayer { rotationZ = chevronRotation }
+                                            )
+                                        }
                                     }
                                 }
                             }
@@ -400,6 +456,68 @@ fun HistoryCard(
                     tint = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.size(18.dp)
                 )
+            }
+        }
+
+            AnimatedVisibility(
+                visible = canExpandEpisodes && isEpisodesExpanded,
+                enter = expandVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    expandFrom = Alignment.Top
+                ) + fadeIn(animationSpec = tween(180)),
+                exit = shrinkVertically(
+                    animationSpec = spring(
+                        dampingRatio = Spring.DampingRatioNoBouncy,
+                        stiffness = Spring.StiffnessMediumLow
+                    ),
+                    shrinkTowards = Alignment.Top
+                ) + fadeOut(animationSpec = tween(120))
+            ) {
+                val epAccent = MaterialTheme.colorScheme.primary
+                Column(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 10.dp)
+                ) {
+                    HorizontalDivider(
+                        thickness = 0.5.dp,
+                        color = Color.White.copy(alpha = 0.08f)
+                    )
+                    Spacer(modifier = Modifier.height(8.dp))
+                    FlowRow(
+                        horizontalArrangement = Arrangement.spacedBy(6.dp),
+                        verticalArrangement = Arrangement.spacedBy(6.dp),
+                        modifier = Modifier.fillMaxWidth()
+                    ) {
+                        expandedEpisodes.forEach { (seasonNum, episodeNum) ->
+                            val code = remember(seasonNum, episodeNum) {
+                                String.format(Locale.US, "S%dE%02d", seasonNum, episodeNum)
+                            }
+                            // Concentricity: card R_outer = 22.dp, P_start = P_bottom = 8.dp -> chip r = 14.dp (H = 28.dp, CircleShape)
+                            Box(
+                                modifier = Modifier
+                                    .height(28.dp)
+                                    .clip(CircleShape)
+                                    .background(epAccent.copy(alpha = 0.10f))
+                                    .border(0.75.dp, epAccent.copy(alpha = 0.28f), CircleShape)
+                                    .padding(horizontal = 10.dp),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = code,
+                                    color = Color.White.copy(alpha = 0.92f),
+                                    fontSize = 11.sp,
+                                    fontWeight = FontWeight.SemiBold,
+                                    letterSpacing = 0.3.sp,
+                                    maxLines = 1
+                                )
+                            }
+                        }
+                    }
+                }
             }
         }
     }

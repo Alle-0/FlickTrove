@@ -377,9 +377,11 @@ class CommentsViewModel @Inject constructor(
         viewModelScope.launch {
             when (commentRepository.deleteComment(currentMediaId, commentId)) {
                 com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.HARD_DELETED -> {
+                    badgeRepository.recordCommentDeleted()
                     _comments.value = _comments.value.filterNot { it.id == commentId }
                 }
                 com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.SOFT_DELETED -> {
+                    badgeRepository.recordCommentDeleted()
                     _comments.value = _comments.value.map { comment ->
                         if (comment.id == commentId) comment.copy(
                             userId = "",

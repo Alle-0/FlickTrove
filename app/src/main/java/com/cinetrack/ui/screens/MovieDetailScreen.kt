@@ -441,6 +441,8 @@ fun MovieDetailScreenContent(
     if (uiState is DetailUiState.Success) {
         cachedSuccess = uiState as DetailUiState.Success
     }
+    var pendingExternalUrl by remember { mutableStateOf<String?>(null) }
+    var pendingExternalHost by remember { mutableStateOf("") }
 
     Box(modifier = Modifier.fillMaxSize()) {
         MovieActionsWrapper(
@@ -618,25 +620,44 @@ fun MovieDetailScreenContent(
                                         onProviderClick = { provider ->
                                             val title = java.net.URLEncoder.encode(state.movieEntry.displayName, "UTF-8")
                                             val name = provider.providerName.lowercase().trim()
+                                            val region = state.watchRegion
                                             val deepLink = when {
                                                 name.contains("netflix") -> "https://www.netflix.com/search?q=$title"
                                                 name.contains("prime video") || name.contains("amazon prime") || name.contains("amazon video") -> "https://app.primevideo.com/search?searchTerm=$title"
                                                 name.contains("disney") -> "https://www.disneyplus.com/search?q=$title"
                                                 name.contains("apple") -> "https://tv.apple.com/search?term=$title"
                                                 name.contains("crunchyroll") -> "https://www.crunchyroll.com/search?q=$title"
-                                                name.contains("now") || name.contains("sky") -> "https://www.nowtv.it/ricerca?q=$title"
+                                                name.contains("now") || name.contains("sky") -> when (region) {
+                                                    "IT" -> "https://www.nowtv.it/ricerca?q=$title"
+                                                    "GB", "IE" -> "https://www.nowtv.com/watch/search?q=$title"
+                                                    else -> state.watchProviderLink
+                                                }
                                                 name.contains("paramount") -> "https://www.paramountplus.com/search?q=$title"
                                                 name.contains("youtube") -> "https://www.youtube.com/results?search_query=$title"
                                                 name.contains("google play") -> "https://play.google.com/store/search?q=$title&c=movies"
-                                                name.contains("rakuten") -> "https://rakuten.tv/it/search?q=$title"
-                                                name.contains("timvision") -> "https://www.timvision.it/search?q=$title"
-                                                name.contains("infinity") || name.contains("mediaset") -> "https://mediasetinfinity.mediaset.it/ricerca/$title"
-                                                name.contains("raiplay") -> "https://www.raiplay.it/ricerca.html?q=$title"
-                                                name.contains("discovery") -> "https://www.discoveryplus.com/it/search?query=$title"
+                                                name.contains("rakuten") -> {
+                                                    val rakutenPath = when (region) {
+                                                        "GB" -> "uk"
+                                                        "IT", "ES", "FR", "DE", "NL", "PL", "PT", "AT", "CH", "BE", "SE", "NO", "DK", "FI", "IE", "CZ", "HU", "RO", "GR" -> region.lowercase()
+                                                        else -> null
+                                                    }
+                                                    if (rakutenPath != null) "https://rakuten.tv/$rakutenPath/search?q=$title" else state.watchProviderLink
+                                                }
+                                                name.contains("timvision") -> if (region == "IT") "https://www.timvision.it/search?q=$title" else state.watchProviderLink
+                                                name.contains("infinity") || name.contains("mediaset") -> if (region == "IT") "https://mediasetinfinity.mediaset.it/ricerca/$title" else state.watchProviderLink
+                                                name.contains("raiplay") -> if (region == "IT") "https://www.raiplay.it/ricerca.html?q=$title" else state.watchProviderLink
+                                                name.contains("discovery") -> {
+                                                    val discRegions = setOf("IT", "GB", "US", "DE", "NL", "SE", "NO", "DK", "FI", "ES", "PL", "BR", "IN")
+                                                    if (region in discRegions) "https://www.discoveryplus.com/${region.lowercase()}/search?query=$title" else state.watchProviderLink
+                                                }
                                                 name.contains("max") || name.contains("hbo") -> "https://play.max.com/search?q=$title"
                                                 name.contains("hulu") -> "https://www.hulu.com/search?q=$title"
                                                 name.contains("peacock") -> "https://www.peacocktv.com/watch/search?q=$title"
-                                                name.contains("chili") -> "https://it.chili.com/search?q=$title"
+                                                name.contains("chili") -> when (region) {
+                                                    "IT", "DE", "PL", "AT" -> "https://${region.lowercase()}.chili.com/search?q=$title"
+                                                    "GB" -> "https://uk.chili.com/search?q=$title"
+                                                    else -> state.watchProviderLink
+                                                }
                                                 name.contains("mgm") -> "https://www.mgmplus.com/search?q=$title"
                                                 else -> state.watchProviderLink
                                             }
@@ -760,6 +781,20 @@ fun MovieDetailScreenContent(
                                             } else {
                                                 viewModel.onEvent(DetailEvent.ToggleCommentLike(commentId))
                                             }
+                                        },
+                                        onOpenUrl = { rawUrl ->
+                                            when (val check = com.cinetrack.util.LinkSecurityUtils.verifyUrl(rawUrl)) {
+                                                is com.cinetrack.util.LinkSecurityCheck.Safe -> {
+                                                    pendingExternalUrl = check.cleanUrl
+                                                    pendingExternalHost = check.host
+                                                }
+                                                is com.cinetrack.util.LinkSecurityCheck.Blocked -> {
+                                                    viewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(check.reasonResId))
+                                                }
+                                            }
+                                        },
+                                        onMediaTagClick = { mType, mId ->
+                                            navigator.push(MovieDetailScreen(movieId = mId, mediaType = mType))
                                         }
                                     )
 
@@ -973,6 +1008,24 @@ fun MovieDetailScreenContent(
                 onDismiss = { showCheckInModal = false }
             )
         }
+
+        com.cinetrack.ui.components.comments.ExternalLinkWarningModal(
+            url = pendingExternalUrl,
+            host = pendingExternalHost,
+            onDismiss = { pendingExternalUrl = null },
+            onConfirm = { linkUrl ->
+                pendingExternalUrl = null
+                try {
+                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(linkUrl)).apply {
+                        addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                    }
+                    context.startActivity(intent)
+                } catch (_: Exception) {
+                    viewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(R.string.external_link_error_no_browser))
+                }
+            },
+            hazeState = rootHazeState
+        )
         } // end Box (fillMaxSize background)
     } // end MovieActionsWrapper
 

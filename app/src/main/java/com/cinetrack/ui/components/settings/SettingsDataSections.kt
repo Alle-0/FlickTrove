@@ -38,6 +38,7 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.cinetrack.ui.utils.mirrorInRtl
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -212,7 +213,7 @@ fun SettingsAccountSection(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                             contentDescription = null,
                             tint = Color.White.copy(alpha = 0.2f),
-                            modifier = Modifier.size(18.dp)
+                            modifier = Modifier.size(18.dp).mirrorInRtl()
                         )
                     }
                 },
@@ -432,8 +433,8 @@ var creditsExpanded by remember { mutableStateOf(false) }
                     ) {
 
                         AttributionRow(
-                            brand = "GIPHY",
-                            text = stringResource(R.string.settings_giphy_notice)
+                            brand = "KLIPY",
+                            text = stringResource(R.string.settings_klipy_notice)
                         )
                         AttributionRow(
                             brand = "TMDB",

@@ -1,5 +1,6 @@
 package com.cinetrack.ui.utils
 
+import androidx.compose.foundation.text.appendInlineContent
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.LinkAnnotation
 import androidx.compose.ui.text.SpanStyle
@@ -9,8 +10,144 @@ import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.withStyle
+import com.cinetrack.data.repository.MovieRepository
+import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 private val RAW_URL_REGEX = Regex("^(?:https?://|www\\.)[^\\s\\[\\]\\(\\)<>\"']+")
+private val TMDB_URL_REGEX = Regex("""^https?://(?:www\.)?themoviedb\.org/(movie|tv)/(\d+)(?:-[^/?#]*)?(?:[?#].*)?$""", RegexOption.IGNORE_CASE)
+val TMDB_MEDIA_LINK_REGEX = Regex("""\[(#?[^\]]+)\]\((https?://(?:www\.)?themoviedb\.org/(movie|tv)/(\d+)(?:-[^)]*)?)\)""", RegexOption.IGNORE_CASE)
+private val NUMBERED_LIST_PREFIX_REGEX = Regex("""^(\d+\.)\s+(.*)$""")
+
+data class TaggedMediaRef(
+    val id: Long,
+    val mediaType: String, // "movie" or "tv"
+    val title: String,
+    val posterPath: String? = null,
+    val releaseYear: String? = null
+)
+
+fun buildTmdbMediaTagUrl(mediaType: String, id: Long): String {
+    val safeType = if (mediaType == "tv") "tv" else "movie"
+    return "https://www.themoviedb.org/$safeType/$id"
+}
+
+fun parseTmdbMediaUrl(url: String): Pair<String, Long>? {
+    val match = TMDB_URL_REGEX.matchEntire(url.trim()) ?: return null
+    val type = match.groupValues[1].lowercase()
+    val id = match.groupValues[2].toLongOrNull() ?: return null
+    if (id <= 0L) return null
+    return type to id
+}
+
+fun extractTmdbMediaRefsFromText(text: String): List<Pair<String, Long>> {
+    if (!text.contains("themoviedb.org", ignoreCase = true)) return emptyList()
+    return TMDB_MEDIA_LINK_REGEX.findAll(text).mapNotNull { match ->
+        val label = match.groupValues[1]
+        if (!label.startsWith("#")) return@mapNotNull null
+        val type = match.groupValues[3].lowercase()
+        val id = match.groupValues[4].toLongOrNull() ?: return@mapNotNull null
+        if (id > 0L) type to id else null
+    }.distinct().toList()
+}
+
+data class ResolvedMediaTagMetadata(
+    val titles: Map<String, String> = emptyMap(),
+    val posters: Map<String, String> = emptyMap()
+)
+
+suspend fun resolveTmdbMediaTagsMetadata(
+    refs: List<Pair<String, Long>>,
+    movieRepository: MovieRepository,
+    semaphore: Semaphore = Semaphore(4)
+): ResolvedMediaTagMetadata {
+    if (refs.isEmpty()) return ResolvedMediaTagMetadata()
+    val entries = coroutineScope {
+        refs.distinct().map { (type, id) ->
+            async {
+                val key = "$type:$id"
+                val (localizedTitle, posterPath) = semaphore.withPermit {
+                    try {
+                        val details = movieRepository.fetchMovieDetails(id, isTv = type == "tv")
+                        val title = (if (type == "tv") details.name ?: details.title else details.title ?: details.name)
+                            ?.trim()
+                            ?.takeIf { it.isNotEmpty() }
+                        val poster = details.posterPath?.trim()?.takeIf { it.isNotEmpty() }
+                        title to poster
+                    } catch (_: Exception) {
+                        try {
+                            val local = movieRepository.getMovie(id, type)
+                            val title = (local?.title ?: local?.name)?.trim()?.takeIf { it.isNotEmpty() }
+                            val poster = local?.posterPath?.trim()?.takeIf { it.isNotEmpty() }
+                            title to poster
+                        } catch (_: Exception) {
+                            null to null
+                        }
+                    }
+                }
+                Triple(key, localizedTitle, posterPath)
+            }
+        }.awaitAll()
+    }
+    val titles = buildMap {
+        entries.forEach { (key, title, _) -> if (title != null) put(key, title) }
+    }
+    val posters = buildMap {
+        entries.forEach { (key, _, poster) -> if (poster != null) put(key, poster) }
+    }
+    return ResolvedMediaTagMetadata(titles = titles, posters = posters)
+}
+
+fun serializeMediaTagsForSend(
+    text: String,
+    selectedTags: List<TaggedMediaRef>,
+    maxLength: Int = 8000
+): String {
+    if (selectedTags.isEmpty() || !text.contains('#')) return text
+    val sortedTags = selectedTags.distinctBy { it.title }.sortedByDescending { it.title.length }
+    var result = text
+    for (tag in sortedTags) {
+        val cleanTitle = tag.title.trim()
+        if (cleanTitle.isEmpty()) continue
+        val token = "#$cleanTitle"
+        val safeLabel = cleanTitle.replace("[", "(").replace("]", ")")
+        val replacement = "[#$safeLabel](${buildTmdbMediaTagUrl(tag.mediaType, tag.id)})"
+        val delta = replacement.length - token.length
+
+        val sb = StringBuilder(result.length + 64)
+        var searchFrom = 0
+        var projectedLen = result.length
+        while (searchFrom < result.length) {
+            val idx = result.indexOf(token, searchFrom)
+            if (idx == -1) {
+                sb.append(result, searchFrom, result.length)
+                break
+            }
+            val end = idx + token.length
+            val validStart = idx == 0 || result[idx - 1].isWhitespace() || result[idx - 1] in "(\"{'"
+            val validEnd = end == result.length || result[end].isWhitespace() || result[end] in ".,;:!?)\"'"
+            if (validStart && validEnd && projectedLen + delta <= maxLength) {
+                sb.append(result, searchFrom, idx)
+                sb.append(replacement)
+                projectedLen += delta
+                searchFrom = end
+            } else {
+                sb.append(result, searchFrom, idx + 1)
+                searchFrom = idx + 1
+            }
+        }
+        result = sb.toString()
+    }
+    return result
+}
+
+fun stripTmdbMediaLinkForPreview(text: String): String {
+    if (!text.contains("themoviedb.org", ignoreCase = true)) return text
+    return TMDB_MEDIA_LINK_REGEX.replace(text) { it.groupValues[1] }
+}
 
 fun String.parseMarkdown(): AnnotatedString {
     // Gestione semplice delle liste: sostituisce "- " o "* " all'inizio della riga con un bullet "• "
@@ -66,17 +203,65 @@ fun String.parseMarkdown(): AnnotatedString {
     }
 }
 
+data class InlineMediaTagToken(
+    val placeholderId: String,
+    val mediaType: String,
+    val mediaId: Long,
+    val displayText: String,
+    val fullUrl: String
+)
+
+data class ParsedMarkdownContent(
+    val text: AnnotatedString,
+    val mediaTags: List<InlineMediaTagToken>
+)
+
 fun parseSimpleMarkdown(
     text: String,
     accentColor: androidx.compose.ui.graphics.Color,
-    onLinkClick: ((String) -> Unit)? = null
-): AnnotatedString {
-    return buildAnnotatedString {
+    onLinkClick: ((String) -> Unit)? = null,
+    localizedMediaTitles: Map<String, String> = emptyMap(),
+    onMediaTagClick: ((mediaType: String, mediaId: Long) -> Unit)? = null
+): AnnotatedString = buildParsedMarkdown(
+    text = text,
+    accentColor = accentColor,
+    onLinkClick = onLinkClick,
+    localizedMediaTitles = localizedMediaTitles,
+    onMediaTagClick = onMediaTagClick,
+    emitInlineMediaTags = false
+).text
+
+fun parseSimpleMarkdownWithMediaTags(
+    text: String,
+    accentColor: androidx.compose.ui.graphics.Color,
+    onLinkClick: ((String) -> Unit)? = null,
+    localizedMediaTitles: Map<String, String> = emptyMap(),
+    onMediaTagClick: ((mediaType: String, mediaId: Long) -> Unit)? = null
+): ParsedMarkdownContent = buildParsedMarkdown(
+    text = text,
+    accentColor = accentColor,
+    onLinkClick = onLinkClick,
+    localizedMediaTitles = localizedMediaTitles,
+    onMediaTagClick = onMediaTagClick,
+    emitInlineMediaTags = true
+)
+
+private fun buildParsedMarkdown(
+    text: String,
+    accentColor: androidx.compose.ui.graphics.Color,
+    onLinkClick: ((String) -> Unit)?,
+    localizedMediaTitles: Map<String, String>,
+    onMediaTagClick: ((mediaType: String, mediaId: Long) -> Unit)?,
+    emitInlineMediaTags: Boolean
+): ParsedMarkdownContent {
+    val mediaTagTokens = mutableListOf<InlineMediaTagToken>()
+    val annotated = buildAnnotatedString {
         val lines = text.split("\n")
         lines.forEachIndexed { index, line ->
             var currentLine = line
             var isQuote = false
             var isList = false
+            var numberedPrefix: String? = null
             
             if (currentLine.startsWith("> ")) {
                 isQuote = true
@@ -84,6 +269,12 @@ fun parseSimpleMarkdown(
             } else if (currentLine.startsWith("- ") || currentLine.startsWith("* ")) {
                 isList = true
                 currentLine = currentLine.substring(2)
+            } else {
+                val numMatch = NUMBERED_LIST_PREFIX_REGEX.matchEntire(currentLine)
+                if (numMatch != null) {
+                    numberedPrefix = numMatch.groupValues[1]
+                    currentLine = numMatch.groupValues[2]
+                }
             }
             
             withStyle(
@@ -94,11 +285,16 @@ fun parseSimpleMarkdown(
             ) {
                 if (isList) {
                     append("• ")
+                } else if (numberedPrefix != null) {
+                    withStyle(SpanStyle(fontWeight = FontWeight.Bold)) {
+                        append(numberedPrefix)
+                    }
+                    append(" ")
                 }
                 
                 var i = 0
                 while (i < currentLine.length) {
-                    // 1. Markdown Links: [label](url)
+                    // 1. Markdown Links: [label](url) & #film/serie TMDB tags
                     if (currentLine[i] == '[') {
                         val closeBracket = currentLine.indexOf(']', i + 1)
                         if (closeBracket != -1 && currentLine.startsWith("(", closeBracket + 1)) {
@@ -111,13 +307,85 @@ fun parseSimpleMarkdown(
                                 } else {
                                     "https://$linkUrl"
                                 }
-                                if (onLinkClick != null) {
+                                val tmdbTarget = parseTmdbMediaUrl(fullUrl)
+                                if (tmdbTarget != null && label.startsWith("#")) {
+                                    val (mType, mId) = tmdbTarget
+                                    val key = "$mType:$mId"
+                                    val displayLabel = localizedMediaTitles[key]?.takeIf { it.isNotBlank() }?.let { "#$it" } ?: label
+                                    val tagStyle = SpanStyle(
+                                        color = accentColor,
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    val tagPressedStyle = SpanStyle(
+                                        color = accentColor.copy(alpha = 0.62f),
+                                        fontWeight = FontWeight.Bold
+                                    )
+                                    val clickHandler: (() -> Unit)? = when {
+                                        onMediaTagClick != null -> ({ onMediaTagClick(mType, mId) })
+                                        onLinkClick != null -> ({ onLinkClick(fullUrl) })
+                                        else -> null
+                                    }
+                                    if (emitInlineMediaTags && clickHandler != null) {
+                                        val placeholderId = "tmdb_tag_${mediaTagTokens.size}_${mType}_$mId"
+                                        mediaTagTokens.add(
+                                            InlineMediaTagToken(
+                                                placeholderId = placeholderId,
+                                                mediaType = mType,
+                                                mediaId = mId,
+                                                displayText = displayLabel,
+                                                fullUrl = fullUrl
+                                            )
+                                        )
+                                        appendInlineContent(id = placeholderId, alternateText = displayLabel)
+                                    } else if (clickHandler != null) {
+                                        pushLink(
+                                            LinkAnnotation.Clickable(
+                                                tag = "tmdb:$key",
+                                                styles = TextLinkStyles(style = tagStyle, pressedStyle = tagPressedStyle),
+                                                linkInteractionListener = { clickHandler() }
+                                            )
+                                        )
+                                        append(displayLabel)
+                                        pop()
+                                    } else {
+                                        withStyle(tagStyle) {
+                                            append(displayLabel)
+                                        }
+                                    }
+                                } else if (tmdbTarget != null && onMediaTagClick != null) {
+                                    val (mType, mId) = tmdbTarget
                                     pushLink(
                                         LinkAnnotation.Clickable(
                                             tag = fullUrl,
                                             styles = TextLinkStyles(
                                                 style = SpanStyle(
                                                     color = accentColor,
+                                                    textDecoration = TextDecoration.Underline,
+                                                    fontWeight = FontWeight.SemiBold
+                                                ),
+                                                pressedStyle = SpanStyle(
+                                                    color = accentColor.copy(alpha = 0.62f),
+                                                    textDecoration = TextDecoration.Underline,
+                                                    fontWeight = FontWeight.SemiBold
+                                                )
+                                            ),
+                                            linkInteractionListener = { onMediaTagClick(mType, mId) }
+                                        )
+                                    )
+                                    append(label)
+                                    pop()
+                                } else if (onLinkClick != null) {
+                                    pushLink(
+                                        LinkAnnotation.Clickable(
+                                            tag = fullUrl,
+                                            styles = TextLinkStyles(
+                                                style = SpanStyle(
+                                                    color = accentColor,
+                                                    textDecoration = TextDecoration.Underline,
+                                                    fontWeight = FontWeight.SemiBold
+                                                ),
+                                                pressedStyle = SpanStyle(
+                                                    color = accentColor.copy(alpha = 0.62f),
                                                     textDecoration = TextDecoration.Underline,
                                                     fontWeight = FontWeight.SemiBold
                                                 )
@@ -163,6 +431,11 @@ fun parseSimpleMarkdown(
                                             styles = TextLinkStyles(
                                                 style = SpanStyle(
                                                     color = accentColor,
+                                                    textDecoration = TextDecoration.Underline,
+                                                    fontWeight = FontWeight.Medium
+                                                ),
+                                                pressedStyle = SpanStyle(
+                                                    color = accentColor.copy(alpha = 0.62f),
                                                     textDecoration = TextDecoration.Underline,
                                                     fontWeight = FontWeight.Medium
                                                 )
@@ -258,9 +531,13 @@ fun parseSimpleMarkdown(
             if (index < lines.size - 1) append("\n")
         }
     }
+    return ParsedMarkdownContent(annotated, mediaTagTokens)
 }
 
-class MarkdownVisualTransformation : androidx.compose.ui.text.input.VisualTransformation {
+class MarkdownVisualTransformation(
+    private val highlightedMediaTags: Set<String> = emptySet(),
+    private val accentColor: androidx.compose.ui.graphics.Color = androidx.compose.ui.graphics.Color(0xFF2DD4BF)
+) : androidx.compose.ui.text.input.VisualTransformation {
     override fun filter(text: AnnotatedString): androidx.compose.ui.text.input.TransformedText {
         val originalText = text.text
         val symbolColor = androidx.compose.ui.graphics.Color(0xFF666666) // Grigio scuro per i simboli markdown
@@ -313,6 +590,35 @@ class MarkdownVisualTransformation : androidx.compose.ui.text.input.VisualTransf
                     addStyle(SpanStyle(color = symbolColor), currentIndex, currentIndex + dotIndex)
                 }
                 currentIndex += line.length + 1 // +1 for the newline
+            }
+
+            // Highlight confirmed #Movie / #TV tags (never plain hashtags like #masterpiece)
+            if (highlightedMediaTags.isNotEmpty() && originalText.contains('#')) {
+                val coveredRanges = mutableListOf<IntRange>()
+                val sortedTags = highlightedMediaTags.sortedByDescending { it.length }
+                for (tag in sortedTags) {
+                    if (tag.length < 2) continue
+                    var searchFrom = 0
+                    while (searchFrom < originalText.length) {
+                        val idx = originalText.indexOf(tag, searchFrom)
+                        if (idx == -1) break
+                        val end = idx + tag.length
+                        val validStart = idx == 0 || originalText[idx - 1].isWhitespace() || originalText[idx - 1] in "(\"{'"
+                        val validEnd = end == originalText.length || originalText[end].isWhitespace() || originalText[end] in ".,;:!?)\"'"
+                        val overlaps = coveredRanges.any { idx < it.last && end > it.first }
+                        if (validStart && validEnd && !overlaps) {
+                            addStyle(
+                                SpanStyle(color = accentColor, fontWeight = FontWeight.Bold),
+                                idx,
+                                end
+                            )
+                            coveredRanges.add(idx until end)
+                            searchFrom = end
+                        } else {
+                            searchFrom = idx + 1
+                        }
+                    }
+                }
             }
         }
         return androidx.compose.ui.text.input.TransformedText(annotatedString, androidx.compose.ui.text.input.OffsetMapping.Identity)

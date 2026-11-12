@@ -87,7 +87,7 @@ data class SortConfig(
     val selectedProviders: List<Long> = emptyList(),
     val selectedDecades: List<String> = emptyList(),
     val selectedKeywords: List<Long> = emptyList(),
-    val selectedStatuses: List<String> = emptyList(), // "dropped", "not_started", "watching", "up_to_date"
+    val selectedStatuses: List<String> = emptyList(), // Home: "dropped", "not_started", "watching"; Visti: "returning", "ended", "canceled" (legacy: "up_to_date")
     val selectedSources: List<String> = emptyList(), // empty = All (CommsUni)
     val selectedLanguages: List<String> = emptyList(), // empty = all
     val selectedCountries: List<String> = emptyList(), // Filter by production country (ISO 3166-1 alpha-2)

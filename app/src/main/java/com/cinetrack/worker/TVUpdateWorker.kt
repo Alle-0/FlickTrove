@@ -69,7 +69,8 @@ class TVUpdateWorker(
                         }
                     }
 
-                    if (latestEps > currentEps || show.nextEpisodeAirDate != newNextEpAirDate || newLastAirDate != oldLastAirDate || updatedSeasons != show.seasons) {
+                    val statusChanged = !latest.status.isNullOrBlank() && latest.status != show.status
+                    if (latestEps > currentEps || show.nextEpisodeAirDate != newNextEpAirDate || newLastAirDate != oldLastAirDate || updatedSeasons != show.seasons || statusChanged) {
                         // Case 1: TMDB database expanded with new episodes that are already released
                         val addedAndReleasedEps = if (currentEps > 0 && latestEps > currentEps && !isNextEpInFuture) {
                             val airedEps = calculateAiredEpisodes(latest)

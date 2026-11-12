@@ -629,16 +629,22 @@ class TranslationManager @Inject constructor(
     // ─────────────────────────────────────────────────────────────────────────
 
     private val URL_REGEX = Regex("""https?://[^\s\(\)\[\]<>"']+""")
+    private val TMDB_MEDIA_TAG_REGEX = Regex("""\[#[^\]]+\]\(https?://(?:www\.)?themoviedb\.org/(?:movie|tv)/\d+(?:-[^)]*)?\)""", RegexOption.IGNORE_CASE)
     private val HTML_ENTITY_REGEX = Regex("&(#x[0-9a-fA-F]+|#[0-9]+|[a-zA-Z]+);")
 
     /**
-     * Shields URLs with invariant tokens (e.g. __FT_URL_0__) before sending text to
-     * translation APIs, preventing endpoints from translating or corrupting URL slugs, query params,
-     * or markdown links.
+     * Shields TMDB #media tags and URLs with invariant tokens (e.g. __FT_URL_0__) before sending
+     * text to translation APIs, preventing endpoints from translating or corrupting URL slugs,
+     * query params, or tagged movie/TV markdown links.
      */
     private fun shieldUrls(text: String): Pair<String, List<String>> {
         val urls = mutableListOf<String>()
-        val shielded = URL_REGEX.replace(text) { matchResult ->
+        val tagsShielded = TMDB_MEDIA_TAG_REGEX.replace(text) { matchResult ->
+            val index = urls.size
+            urls.add(matchResult.value)
+            "__FT_URL_${index}__"
+        }
+        val shielded = URL_REGEX.replace(tagsShielded) { matchResult ->
             var url = matchResult.value
             var trailingPunctuation = ""
             while (url.isNotEmpty() && (url.endsWith(".") || url.endsWith(",") || url.endsWith(";") || url.endsWith("!") || url.endsWith("?"))) {
@@ -663,7 +669,7 @@ class TranslationManager @Inject constructor(
             restored = restored.replace(exact, originalUrl)
             // Handle edge-cases where translation engines might inject spaces into token symbols
             val tolerant = Regex("""__\s*FT_URL_${index}\s*__""")
-            restored = restored.replace(tolerant, originalUrl)
+            restored = restored.replace(tolerant, Regex.escapeReplacement(originalUrl))
         }
         return restored
     }

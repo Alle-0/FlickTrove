@@ -234,7 +234,7 @@ class MovieParadiseImporter @Inject constructor() {
 
             val item = itemsMap["movie_$tmdbId"] ?: itemsMap["tv_$tmdbId"] ?: getItem("movie", tmdbId)
             if (!emotions.isNullOrEmpty()) {
-                item.emotionalVibes = emotions.joinToString(", ")
+                item.emotionalVibes = emotions.joinToString(",")
             }
             if (!favChar.isNullOrBlank()) {
                 item.favoriteActorCharacter = favChar
@@ -266,7 +266,7 @@ class MovieParadiseImporter @Inject constructor() {
                 item.favoriteActorName = favPerson
             }
             if (item.emotionalVibes.isNullOrBlank() && !emotions.isNullOrEmpty()) {
-                item.emotionalVibes = emotions.joinToString(", ")
+                item.emotionalVibes = emotions.joinToString(",")
             }
         }
 

@@ -82,7 +82,7 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         val ratedList = watchedMovies.mapNotNull { it.personalRating?.toFloat()?.takeIf { r -> r > 0f } }
         val avgUserRating = if (ratedList.isNotEmpty()) ratedList.average().toFloat() else 7.0f
         // Pivot neutro dinamico: 6.0 di default, ma scende per i critici severi e sale per i votanti generosi
-        val neutralPivot = (avgUserRating - 0.8f).coerceIn(5.2f, 6.6f)
+        val neutralPivot = neutralPivotFor(avgUserRating)
 
         // 1. Process all watched titles with Temporal Decay and Negative/Positive Split
         watchedMovies.forEach { m ->
@@ -311,7 +311,11 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         )
     }
 
-    fun calculateScore(currentMovie: Movie, profile: UserGenreProfile?): Int? {
+    fun calculateScore(
+        currentMovie: Movie,
+        profile: UserGenreProfile?,
+        sagaSiblings: List<Movie> = emptyList()
+    ): Int? {
         // 1. Direct Personal Rating: 100% ground truth if user explicitly rated it
         val personalRating = currentMovie.personalRating
         if (personalRating != null && personalRating > 0) {
@@ -466,15 +470,16 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         // 9. Bayesian True Quality Score (IMDb Weighted Mean Formula)
         val rawTmdbRating = currentMovie.voteAverage ?: 0.0
         val voteCount = currentMovie.voteCount ?: 0
+        val priorMean = 6.4   // Neutral global TMDB mean
 
         val effectiveRating = if (voteCount > 0 && rawTmdbRating > 0.0) {
             val priorVotes = 45.0 // Confidence threshold
-            val priorMean = 6.4   // Neutral global TMDB mean
             ((voteCount * rawTmdbRating) + (priorVotes * priorMean)) / (voteCount + priorVotes)
         } else if (rawTmdbRating > 0.0) {
-            (rawTmdbRating + (6.4 * 3.0)) / 4.0
+            (rawTmdbRating + (priorMean * 3.0)) / 4.0
         } else {
-            0.0
+            // Pure Bayesian prior when no TMDB votes exist yet (e.g., upcoming titles)
+            priorMean
         }
 
         val baseScore = ((effectiveRating / 8.6) * 30.0).toFloat().coerceIn(0f, 30f)
@@ -484,10 +489,17 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             (((rawTmdbRating.toFloat() - 7.2f) / 1.6f) * 4.0f).coerceIn(1.5f, 4.0f)
         } else 0f
 
+        // 11. Saga / Collection Affinity (when other chapters of the same saga are known in Detail)
+        val sagaAdjustment = computeSagaAdjustment(
+            currentMovieId = currentMovie.id,
+            sagaSiblings = sagaSiblings,
+            averageUserRating = profile.averageUserRating
+        )
+
         // Composite calculation con Soft-Knee Cap asintotico sopra gli 80 pt
         val totalPositive = baseScore + coreMatchScore + pairSynergyBonus + eraBonus + countryBonus + auteurBoost + indieGemBonus
         val totalNegative = repulsionPenalty + formatDamping + shortFilmPenalty
-        val rawFinal = totalPositive - totalNegative
+        val rawFinal = totalPositive - totalNegative + sagaAdjustment
 
         val compressedScore = if (rawFinal > 80f) {
             val excess = rawFinal - 80f
@@ -507,7 +519,11 @@ class CalculateMatchScoreUseCase @Inject constructor() {
         else -> 1.0f
     }
 
-    operator fun invoke(currentMovie: Movie, localMovies: List<Movie>): Int? {
+    operator fun invoke(
+        currentMovie: Movie,
+        localMovies: List<Movie>,
+        sagaSiblings: List<Movie> = emptyList()
+    ): Int? {
         val personalRating = currentMovie.personalRating
         if (personalRating != null && personalRating > 0) {
             return (personalRating * 10f).toInt().coerceIn(10, 99)
@@ -517,7 +533,46 @@ class CalculateMatchScoreUseCase @Inject constructor() {
             if (isTv) it.mediaType == "tv" else it.mediaType != "tv" 
         }
         val profile = buildUserProfile(filteredMovies) ?: buildUserProfile(localMovies) ?: return null
-        return calculateScore(currentMovie, profile)
+        return calculateScore(currentMovie, profile, sagaSiblings)
+    }
+
+    private fun neutralPivotFor(averageUserRating: Float): Float =
+        (averageUserRating - 0.8f).coerceIn(5.2f, 6.6f)
+
+    private fun computeSagaAdjustment(
+        currentMovieId: Long,
+        sagaSiblings: List<Movie>,
+        averageUserRating: Float
+    ): Float {
+        if (sagaSiblings.isEmpty()) return 0f
+        val neutralPivot = neutralPivotFor(averageUserRating)
+        val signals = sagaSiblings
+            .asSequence()
+            .filter { it.id != currentMovieId }
+            .distinctBy { it.compositeId }
+            .mapNotNull { sibling ->
+                val rating = sibling.personalRating?.toFloat()
+                when {
+                    sibling.dropped -> -1.0f
+                    rating != null && rating > 0f -> {
+                        if (rating >= neutralPivot) {
+                            ((rating - neutralPivot) / (9.5f - neutralPivot).coerceAtLeast(1.5f)).coerceIn(0f, 1.1f)
+                        } else {
+                            -((neutralPivot - rating) / (neutralPivot - 3.0f).coerceAtLeast(1.5f)).coerceIn(0f, 1.1f)
+                        }
+                    }
+                    sibling.watched -> 0.25f
+                    else -> null
+                }
+            }
+            .toList()
+        if (signals.isEmpty()) return 0f
+        val avgSignal = signals.average().toFloat()
+        return if (avgSignal >= 0f) {
+            (avgSignal * 10.0f).coerceIn(0f, 11.0f)
+        } else {
+            (avgSignal * 15.0f).coerceIn(-16.0f, 0f)
+        }
     }
 
     private fun extractYear(movie: Movie): Int? {

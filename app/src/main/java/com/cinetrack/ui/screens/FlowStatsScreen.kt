@@ -2,6 +2,9 @@ package com.cinetrack.ui.screens
 
 import android.content.Context
 import android.content.Intent
+import android.graphics.Bitmap
+import android.net.Uri
+import android.os.Build
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.*
@@ -25,6 +28,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawWithContent
+import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.BlendMode
@@ -32,10 +36,12 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.CompositingStrategy
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.asAndroidBitmap
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.drawIntoCanvas
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.nativeCanvas
+import androidx.compose.ui.graphics.rememberGraphicsLayer
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.content.ContextCompat
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
@@ -54,8 +60,14 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.delay
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import com.cinetrack.ui.components.share.saveBitmapToCacheUri
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
@@ -136,28 +148,34 @@ object FlowStatsTab : Tab {
                     horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Header con Titolo Periodo & Selettore Anno
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 20.dp, vertical = 16.dp)
+                            .padding(horizontal = 20.dp, vertical = 16.dp),
+                        horizontalArrangement = Arrangement.spacedBy(12.dp),
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
                         val titleText = when (val range = flowUiState.timeRange) {
                             is TimeRange.AllTime -> stringResource(R.string.flow_stats_all_time)
                             is TimeRange.Year -> stringResource(R.string.flow_stats_year, range.year.toString())
                         }
-                        
-                        Column(modifier = Modifier.align(Alignment.CenterStart)) {
+
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = titleText,
                                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                                color = Color.White
+                                color = Color.White,
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
                             )
                             if (flowUiState.totalUnfilteredCount > 0) {
                                 Spacer(modifier = Modifier.height(2.dp))
                                 Text(
                                     text = stringResource(R.string.flow_stats_evaluated_count, flowUiState.totalUnfilteredCount),
                                     style = MaterialTheme.typography.labelSmall,
-                                    color = Color.White.copy(alpha = 0.5f)
+                                    color = Color.White.copy(alpha = 0.5f),
+                                    maxLines = 1,
+                                    overflow = TextOverflow.Ellipsis
                                 )
                             }
                         }
@@ -168,8 +186,7 @@ object FlowStatsTab : Tab {
                                 if (visible) {
                                     filterRequest?.invoke(bounds)
                                 }
-                            },
-                            modifier = Modifier.align(Alignment.CenterEnd)
+                            }
                         )
                     }
 
@@ -251,6 +268,10 @@ fun FlowPersonaCard(
     topMvp: MvpStat? = null
 ) {
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    val cardGraphicsLayer = rememberGraphicsLayer()
+    var isSharing by remember { mutableStateOf(false) }
+
     val totalVibesCount = remember(topVibes) { topVibes.sumOf { it.count } }
     val topVibeStat = topVibes.firstOrNull()
     val topVibeCount = topVibeStat?.count ?: 0
@@ -261,6 +282,22 @@ fun FlowPersonaCard(
         modifier = Modifier
             .fillMaxWidth()
             .padding(horizontal = 16.dp)
+            .drawWithContent {
+                drawContent()
+                if (size.width >= 1f && size.height >= 1f) {
+                    val cornerPx = 24.dp.toPx()
+                    cardGraphicsLayer.record(
+                        size = IntSize(size.width.toInt(), size.height.toInt())
+                    ) {
+                        // Sfondo scuro opaco dietro al gradiente traslucido per l'immagine esportata
+                        drawRoundRect(
+                            color = Color(0xFF0A0D12),
+                            cornerRadius = CornerRadius(cornerPx, cornerPx)
+                        )
+                        this@drawWithContent.drawContent()
+                    }
+                }
+            }
             .clip(RoundedCornerShape(24.dp))
             .background(
                 Brush.verticalGradient(
@@ -345,25 +382,33 @@ fun FlowPersonaCard(
 
             Spacer(modifier = Modifier.height(14.dp))
 
-            // Footer con 2 metriche reali e pulsante Condividi
-            Row(
+            // Footer con metriche reali e pulsante Condividi su righe dedicate per evitare a capo e sovrapposizioni
+            Column(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
-                verticalAlignment = Alignment.CenterVertically
+                verticalArrangement = Arrangement.spacedBy(14.dp)
             ) {
                 val topVibeName = topVibeStat?.let {
                     it.labelRes?.let { res -> stringResource(res) } ?: it.vibe
                 } ?: "-"
 
                 Row(
-                    modifier = Modifier.weight(1f, fill = false),
-                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(12.dp),
+                    verticalAlignment = Alignment.Top
                 ) {
-                    Column {
+                    Column(
+                        modifier = if (topMvp != null) {
+                            Modifier.widthIn(max = 96.dp)
+                        } else {
+                            Modifier.weight(1f)
+                        }
+                    ) {
                         Text(
                             text = stringResource(R.string.flow_stats_insight_vibe),
                             color = Color.White.copy(alpha = 0.45f),
-                            fontSize = 10.5.sp
+                            fontSize = 10.5.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
@@ -377,11 +422,13 @@ fun FlowPersonaCard(
                     }
 
                     if (topMvp != null) {
-                        Column(modifier = Modifier.widthIn(max = 110.dp)) {
+                        Column(modifier = Modifier.weight(1f)) {
                             Text(
                                 text = "Top MVP",
                                 color = Color.White.copy(alpha = 0.45f),
-                                fontSize = 10.5.sp
+                                fontSize = 10.5.sp,
+                                maxLines = 1,
+                                overflow = TextOverflow.Ellipsis
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
@@ -395,44 +442,90 @@ fun FlowPersonaCard(
                         }
                     }
 
-                    Column {
+                    Column(
+                        modifier = Modifier.widthIn(max = 112.dp),
+                        horizontalAlignment = Alignment.End
+                    ) {
                         Text(
                             text = stringResource(R.string.flow_stats_insight_titles),
                             color = Color.White.copy(alpha = 0.45f),
-                            fontSize = 10.5.sp
+                            fontSize = 10.5.sp,
+                            maxLines = 1,
+                            overflow = TextOverflow.Ellipsis
                         )
                         Spacer(modifier = Modifier.height(2.dp))
                         Text(
                             text = "$totalTitles",
                             color = Color.White,
                             fontSize = 13.sp,
-                            fontWeight = FontWeight.Bold
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 1
                         )
                     }
                 }
 
                 val titleString = stringResource(persona.titleRes)
-                Row(
-                    modifier = Modifier
-                        .bounceClick { shareFlowPersona(context, titleString) }
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .padding(horizontal = 12.dp, vertical = 7.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Icon(
-                        painter = painterResource(R.drawable.ic_share),
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.85f),
-                        modifier = Modifier.size(13.dp)
-                    )
-                    Text(
-                        text = stringResource(R.string.card_share),
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold
-                    )
+                if (!isSharing) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .bounceClick {
+                                if (isSharing) return@bounceClick
+                                isSharing = true
+                                scope.launch(Dispatchers.Main) {
+                                    try {
+                                        withFrameMillis {}
+                                        delay(80)
+                                        withFrameMillis {}
+                                        val bitmap = cardGraphicsLayer.toImageBitmap().asAndroidBitmap()
+                                        if (bitmap.width > 0 && bitmap.height > 0) {
+                                            val softwareBitmap = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && bitmap.config == Bitmap.Config.HARDWARE) {
+                                                bitmap.copy(Bitmap.Config.ARGB_8888, false)
+                                            } else {
+                                                bitmap
+                                            }
+                                            val contentUri = withContext(Dispatchers.IO) {
+                                                saveBitmapToCacheUri(context, softwareBitmap, titleString)
+                                            }
+                                            if (softwareBitmap !== bitmap) {
+                                                softwareBitmap.recycle()
+                                            }
+                                            if (contentUri != null) {
+                                                shareFlowPersonaImage(context, contentUri, titleString)
+                                            } else {
+                                                shareFlowPersona(context, titleString)
+                                            }
+                                        } else {
+                                            shareFlowPersona(context, titleString)
+                                        }
+                                    } catch (_: Exception) {
+                                        shareFlowPersona(context, titleString)
+                                    } finally {
+                                        isSharing = false
+                                    }
+                                }
+                            }
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.1f), CircleShape)
+                            .padding(horizontal = 16.dp, vertical = 10.dp),
+                        verticalAlignment = Alignment.CenterVertically,
+                        horizontalArrangement = Arrangement.spacedBy(6.dp, Alignment.CenterHorizontally)
+                    ) {
+                        Icon(
+                            painter = painterResource(R.drawable.ic_share),
+                            contentDescription = null,
+                            tint = Color.White.copy(alpha = 0.85f),
+                            modifier = Modifier.size(14.dp)
+                        )
+                        Text(
+                            text = stringResource(R.string.card_share),
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = 12.5.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            maxLines = 1
+                        )
+                    }
                 }
             }
         }
@@ -499,8 +592,12 @@ private fun VibeLegendItem(
                 fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
                 color = if (isSelected) color else Color.White.copy(alpha = if (isDimmed) 0.35f else 0.9f)
             ),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
             modifier = Modifier.weight(1f)
         )
+
+        Spacer(Modifier.width(8.dp))
 
         Row(
             verticalAlignment = Alignment.CenterVertically
@@ -1286,7 +1383,27 @@ private fun InitialsAvatar(name: String) {
 }
 
 /**
- * Condivisione nativa tramite Android Share Intent
+ * Condivisione immagine della Flow Persona Card tramite FileProvider, con fallback testuale
+ */
+private fun shareFlowPersonaImage(context: Context, contentUri: Uri, personaTitle: String) {
+    try {
+        val sendIntent = Intent(Intent.ACTION_SEND).apply {
+            type = "image/png"
+            putExtra(Intent.EXTRA_STREAM, contentUri)
+            putExtra(Intent.EXTRA_SUBJECT, personaTitle)
+            putExtra(Intent.EXTRA_TEXT, context.getString(R.string.flow_stats_share_text, personaTitle))
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+        }
+        val shareIntent = Intent.createChooser(sendIntent, context.getString(R.string.stats_share_chooser_title))
+        shareIntent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+        context.startActivity(shareIntent)
+    } catch (_: Exception) {
+        shareFlowPersona(context, personaTitle)
+    }
+}
+
+/**
+ * Condivisione nativa tramite Android Share Intent (fallback testuale)
  */
 private fun shareFlowPersona(context: Context, personaTitle: String) {
     try {

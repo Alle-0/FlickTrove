@@ -17,6 +17,7 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.alpha
@@ -62,6 +63,7 @@ fun StatsEpisodesTooltipOverlay(
     val screenWidth = LocalConfiguration.current.screenWidthDp.dp
 
     Box(
+        contentAlignment = AbsoluteAlignment.TopLeft,
         modifier = modifier
             .fillMaxSize()
             .zIndex(500f)
@@ -103,7 +105,7 @@ fun StatsEpisodesTooltipOverlay(
                 animationSpec = tween(120)
             ),
             modifier = Modifier
-                .offset { IntOffset(targetX.roundToInt(), targetY.roundToInt()) }
+                .absoluteOffset { IntOffset(targetX.roundToInt(), targetY.roundToInt()) }
                 .alpha(if (tooltipWidthPx > 0f) 1f else 0f)
         ) {
             Box(

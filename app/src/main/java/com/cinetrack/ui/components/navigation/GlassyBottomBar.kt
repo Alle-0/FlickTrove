@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.navigation
 import com.cinetrack.R
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.animateColorAsState
@@ -30,12 +31,15 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,6 +50,9 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -111,8 +118,42 @@ fun GlassyBottomBar(
     val isThresholdCrossed = (abs(effectiveRaw) / density.density) >= thresholdRawDp
     val isDraggingRight = if (isSpringing && releaseDirectionIsRight != null) releaseDirectionIsRight == true else (effectiveRaw >= 0f)
 
-    val dragModifier = if (onSwitchMediaMode != null && !isDimmed) {
-        Modifier.pointerInput(currentMediaMode) {
+    val currentOnSwitchMediaMode by rememberUpdatedState(onSwitchMediaMode)
+    val currentVibrationEnabled by rememberUpdatedState(vibrationEnabled)
+    val isSwipeEnabled = onSwitchMediaMode != null && !isDimmed
+
+    LaunchedEffect(isSwipeEnabled) {
+        if (!isSwipeEnabled) {
+            springJob?.cancel()
+            springJob = null
+            isSpringing = false
+            dragX = 0f
+            releaseDirectionIsRight = null
+            hasFiredHaptic = false
+            animDrag.snapTo(0f)
+        }
+    }
+
+    fun launchSpringReturn(startPos: Float) {
+        releaseDirectionIsRight = if (abs(startPos) > 4f) startPos >= 0f else null
+        springJob = coroutineScope.launch {
+            isSpringing = true
+            animDrag.snapTo(startPos)
+            animDrag.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(
+                    dampingRatio = 0.58f,
+                    stiffness = 500f
+                )
+            )
+            dragX = 0f
+            releaseDirectionIsRight = null
+            isSpringing = false
+        }
+    }
+
+    val dragModifier = if (isSwipeEnabled) {
+        Modifier.pointerInput(Unit) {
             detectHorizontalDragGestures(
                 onDragStart = {
                     springJob?.cancel()
@@ -124,65 +165,34 @@ fun GlassyBottomBar(
                 onDragEnd = {
                     val finalDragDp = dragX / density.density
                     if (finalDragDp >= thresholdRawDp) {
-                        if (vibrationEnabled) {
+                        if (currentVibrationEnabled) {
                             VibrationHelper.vibrateClick(context)
                         }
-                        onSwitchMediaMode.invoke("tv")
+                        currentOnSwitchMediaMode?.invoke("tv")
                     } else if (finalDragDp <= -thresholdRawDp) {
-                        if (vibrationEnabled) {
+                        if (currentVibrationEnabled) {
                             VibrationHelper.vibrateClick(context)
                         }
-                        onSwitchMediaMode.invoke("movie")
+                        currentOnSwitchMediaMode?.invoke("movie")
                     }
                     hasFiredHaptic = false
-
-                    val startPos = dragX
-                    releaseDirectionIsRight = if (abs(startPos) > 4f) startPos >= 0f else null
-                    springJob = coroutineScope.launch {
-                        isSpringing = true
-                        animDrag.snapTo(startPos)
-                        animDrag.animateTo(
-                            targetValue = 0f,
-                            animationSpec = spring(
-                                dampingRatio = 0.58f,
-                                stiffness = 500f
-                            )
-                        )
-                        dragX = 0f
-                        releaseDirectionIsRight = null
-                        isSpringing = false
-                    }
+                    launchSpringReturn(dragX)
                 },
                 onDragCancel = {
                     hasFiredHaptic = false
-                    val startPos = dragX
-                    releaseDirectionIsRight = if (abs(startPos) > 4f) startPos >= 0f else null
-                    springJob = coroutineScope.launch {
-                        isSpringing = true
-                        animDrag.snapTo(startPos)
-                        animDrag.animateTo(
-                            targetValue = 0f,
-                            animationSpec = spring(
-                                dampingRatio = 0.58f,
-                                stiffness = 500f
-                            )
-                        )
-                        dragX = 0f
-                        releaseDirectionIsRight = null
-                        isSpringing = false
-                    }
+                    launchSpringReturn(dragX)
                 },
                 onHorizontalDrag = { change, dragAmount ->
                     dragX += dragAmount
 
                     val currentRawDp = dragX / density.density
                     if (!hasFiredHaptic && abs(currentRawDp) >= thresholdRawDp) {
-                        if (vibrationEnabled) {
+                        if (currentVibrationEnabled) {
                             VibrationHelper.vibrateTick(context)
                         }
                         hasFiredHaptic = true
                     } else if (hasFiredHaptic && abs(currentRawDp) < thresholdRawDp) {
-                        if (vibrationEnabled) {
+                        if (currentVibrationEnabled) {
                             VibrationHelper.vibrateTick(context)
                         }
                         hasFiredHaptic = false
@@ -280,7 +290,7 @@ fun GlassyBottomBar(
             NavItem(
                 icon = ImageVector.vectorResource(id = R.drawable.ic_home),
                 animatedIconRes = R.drawable.ic_home_anim,
-                label = "Home",
+                label = stringResource(R.string.home_tab_title),
                 isSelected = selectedRoute == "feed",
                 enabled = !isDimmed && !isDragging,
                 onClick = { onNavigate("feed") },
@@ -389,47 +399,50 @@ fun GlassyBottomBar(
                 label = "arrowScaleBump"
             )
 
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(10.dp)
-            ) {
-                if (!isDraggingRight) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
-                        contentDescription = null,
-                        tint = contentColor,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .graphicsLayer {
-                                translationX = -arrowOffset * density.density
-                                scaleX = arrowScale
-                                scaleY = arrowScale
-                            }
-                    )
-                }
+            val labelSpacing = rtlSafeLetterSpacing(3.sp)
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(10.dp)
+                ) {
+                    if (!isDraggingRight) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_left),
+                            contentDescription = null,
+                            tint = contentColor,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .graphicsLayer {
+                                    translationX = -arrowOffset * density.density
+                                    scaleX = arrowScale
+                                    scaleY = arrowScale
+                                }
+                        )
+                    }
 
-                Text(
-                    text = if (isDraggingRight) tvLabel else movieLabel,
-                    color = contentColor,
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Black,
-                    fontFamily = FontFamily.Default,
-                    letterSpacing = 3.sp
-                )
-
-                if (isDraggingRight) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                        contentDescription = null,
-                        tint = contentColor,
-                        modifier = Modifier
-                            .size(16.dp)
-                            .graphicsLayer {
-                                translationX = arrowOffset * density.density
-                                scaleX = arrowScale
-                                scaleY = arrowScale
-                            }
+                    Text(
+                        text = if (isDraggingRight) tvLabel else movieLabel,
+                        color = contentColor,
+                        style = MaterialTheme.typography.titleMedium,
+                        fontWeight = FontWeight.Black,
+                        fontFamily = FontFamily.Default,
+                        letterSpacing = labelSpacing
                     )
+
+                    if (isDraggingRight) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                            contentDescription = null,
+                            tint = contentColor,
+                            modifier = Modifier
+                                .size(16.dp)
+                                .graphicsLayer {
+                                    translationX = arrowOffset * density.density
+                                    scaleX = arrowScale
+                                    scaleY = arrowScale
+                                }
+                        )
+                    }
                 }
             }
         }
@@ -552,7 +565,7 @@ private fun RowScope.NavItem(
             fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.Medium,
             color = tintColor,
             modifier = Modifier.padding(top = 4.dp),
-            letterSpacing = 0.5.sp
+            letterSpacing = rtlSafeLetterSpacing(0.5.sp)
         )
 
     }

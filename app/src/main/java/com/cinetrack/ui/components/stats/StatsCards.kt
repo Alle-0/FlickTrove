@@ -26,6 +26,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 
 // ════════════════════════════════════════════════════════════════════
 // Section Header
@@ -77,14 +79,17 @@ fun StatsSectionHeader(
                     style = MaterialTheme.typography.labelSmall,
                     fontWeight = FontWeight.Black,
                     color = MaterialTheme.colorScheme.primary,
-                    letterSpacing = 1.sp
+                    letterSpacing = rtlSafeLetterSpacing(1.sp)
                 )
                 Spacer(Modifier.width(4.dp))
+                val isLessAction = actionLabel.contains("MENO", ignoreCase = true)
                 Icon(
-                    imageVector = if (actionLabel.contains("MENO", ignoreCase = true)) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_right),
+                    imageVector = if (isLessAction) ImageVector.vectorResource(id = R.drawable.ic_left) else ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(14.dp)
+                    modifier = Modifier
+                        .size(14.dp)
+                        .then(if (isLessAction) Modifier else Modifier.mirrorInRtl())
                 )
             }
         } else if (count != null) {

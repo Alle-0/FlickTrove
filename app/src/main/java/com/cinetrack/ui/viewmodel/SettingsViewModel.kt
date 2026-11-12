@@ -993,6 +993,11 @@ class SettingsViewModel @Inject constructor(
     fun updateContentLanguage(language: String, onSuccess: () -> Unit = {}) {
         viewModelScope.launch {
             preferenceRepository.updateContentLanguage(language)
+            launch(Dispatchers.IO) {
+                movieRepository.ensureRegionalWatchProvidersLoaded(
+                    com.cinetrack.util.RegionResolver.resolveRegion(language)
+                )
+            }
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_language, language))
             onSuccess()

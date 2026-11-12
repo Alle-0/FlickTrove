@@ -5,10 +5,15 @@ import com.cinetrack.data.model.StudioData
 import com.cinetrack.data.api.ExternalIds
 import com.cinetrack.data.api.MovieDetailResponse
 
+import com.cinetrack.util.RegionResolver
 import java.util.Locale
 
 object MovieMapper {
-    fun mapResponseToMovie(response: MovieDetailResponse, type: String): Movie {
+    fun mapResponseToMovie(
+        response: MovieDetailResponse,
+        type: String,
+        region: String = RegionResolver.resolveFromLocale(Locale.getDefault())
+    ): Movie {
         val effectiveRuntime = if (type == "tv") {
             response.episodeRunTime?.filter { it > 0 }?.firstOrNull()
                 ?: response.lastEpisodeToAir?.runtime?.takeIf { it > 0 }
@@ -24,12 +29,6 @@ object MovieMapper {
         } else {
             response.episodeRunTime
         }
-        
-        // Get the device's actual country code (e.g. IT, FR, DE, GB). 
-        // If the country is somehow missing from the locale, fallback to a sensible default based on language, or US.
-        val locale = Locale.getDefault()
-        val region = locale.country.takeIf { it.isNotBlank() }
-            ?: if (locale.language == "it") "IT" else "US"
         
         val regionalReleaseDate = if (type == "movie") {
             val regionalReleases = response.releaseDates?.results?.find { it.iso31661 == region }?.releaseDates
@@ -125,6 +124,7 @@ object MovieMapper {
             "pl" -> listOf("PL")
             "nl" -> listOf("NL")
             "tr" -> listOf("TR")
+            "ar" -> listOf("SA")
             else -> null
         }
     }
@@ -201,7 +201,7 @@ object MovieMapper {
 
     val SUPPORTED_RATING_COUNTRIES = setOf(
         "IT", "DE", "FR", "ES", "BR", "RU", "IN", "GB", "US", "JP", "KR", "ID", "TR",
-        "PL", "NL", "PT", "CZ", "GR", "HU", "RO", "SE", "TH", "UA", "VN"
+        "PL", "NL", "PT", "CZ", "GR", "HU", "RO", "SE", "TH", "UA", "VN", "SA", "AE", "EG"
     )
 
     fun extractCertificationWithCountry(

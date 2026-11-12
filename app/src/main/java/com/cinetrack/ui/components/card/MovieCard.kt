@@ -175,10 +175,6 @@ fun MovieCard(
 ) {
     val cardHeight = cardWidth * 1.5f
     val isTv = movie.mediaType == "tv"
-    val nextInfo = remember(movie.seasons, movie.watchedEpisodes, movie.numberOfEpisodes, movie.status) {
-        if (isTv) movie.calculateNextEpisode() else null
-    }
-    val progressBarTarget = com.cinetrack.LocalProgressBarTarget.current
 
     val computedProgress = remember(movie.watchedEpisodes, movie.numberOfEpisodes, progress) {
         if (progress > 0f) progress
@@ -186,10 +182,6 @@ fun MovieCard(
             val totalWatched = movie.watchedEpisodes!!.filter { it.key != "0" }.values.sumOf { it.size }
             (totalWatched.toFloat() / movie.numberOfEpisodes!!.toFloat()).coerceIn(0f, 1f)
         } else 0f
-    }
-
-    val seasonProgress = remember(nextInfo, movie.seasons, movie.watchedEpisodes) {
-        if (isTv && nextInfo != null) com.cinetrack.ui.components.settings.calculateSeasonProgress(nextInfo, movie) else 0f
     }
     val posterUrl = buildTmdbImageUrl(movie.posterPath, ImageType.POSTER, LocalImageQuality.current)
     val context = LocalContext.current
@@ -631,11 +623,8 @@ fun MovieCard(
                             },
                         contentAlignment = Alignment.Center
                     ) {
-                        val circularBar = com.cinetrack.LocalCircularProgressBar.current
-                        val targetCircularProgress = when (circularBar) {
-                            "SEASON" -> if (seasonProgress > 0f) seasonProgress else computedProgress
-                            else -> computedProgress
-                        }
+                        // Outside "Da guardare" / "Continua a guardare", circular progress always reflects total series progress
+                        val targetCircularProgress = computedProgress
                         val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(
                             targetValue = targetCircularProgress,
                             animationSpec = androidx.compose.animation.core.spring(

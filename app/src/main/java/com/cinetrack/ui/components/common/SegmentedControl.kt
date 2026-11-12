@@ -30,12 +30,15 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.LocalAdvancedVisualEffects
+import com.cinetrack.ui.utils.rtlMirrorIndex
 import com.cinetrack.util.VibrationHelper
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -175,14 +178,16 @@ fun <T> SegmentedControl(
             .background(Color.White.copy(alpha = 0.04f), RoundedCornerShape(containerCornerRadius))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(containerCornerRadius))
     ) {
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         val usableWidthPx = constraints.maxWidth.toFloat()
         val segmentCount = options.size
+        val visualSelectedIndex = rtlMirrorIndex(selectedIndex, segmentCount, isRtl)
         val realTabWidthPx = if (segmentCount > 0) usableWidthPx / segmentCount else 1f
         val paddingPx = with(density) { padding.toPx() }
         val normalWidthPx = (realTabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-        val initialLeft = if (selectedIndex >= 0) selectedIndex * realTabWidthPx + paddingPx else -realTabWidthPx
-        val initialRight = if (selectedIndex >= 0) (selectedIndex + 1) * realTabWidthPx - paddingPx else 0f
+        val initialLeft = if (visualSelectedIndex >= 0) visualSelectedIndex * realTabWidthPx + paddingPx else -realTabWidthPx
+        val initialRight = if (visualSelectedIndex >= 0) (visualSelectedIndex + 1) * realTabWidthPx - paddingPx else 0f
 
         val animLeft = remember { Animatable(initialLeft) }
         val animRight = remember { Animatable(initialRight) }
@@ -198,13 +203,13 @@ fun <T> SegmentedControl(
             label = "segIndicatorAlpha"
         )
 
-        LaunchedEffect(selectedIndex, realTabWidthPx, segmentCount, advancedEffectsEnabled) {
-            if (selectedIndex < 0) {
+        LaunchedEffect(selectedIndex, visualSelectedIndex, realTabWidthPx, segmentCount, advancedEffectsEnabled) {
+            if (visualSelectedIndex < 0) {
                 previousIndex = selectedIndex
                 return@LaunchedEffect
             }
-            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
 
             val wasPreviouslyUnselected = previousIndex < 0
             val isTabChangedByClick = previousIndex != selectedIndex && !isDragging && !wasPreviouslyUnselected
@@ -274,7 +279,7 @@ fun <T> SegmentedControl(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(selectedIndex, realTabWidthPx, enabled) {
+                .pointerInput(selectedIndex, visualSelectedIndex, realTabWidthPx, enabled, isRtl) {
                     if (!enabled) return@pointerInput
                     var isDragActiveOnPill = false
                     val touchMargin = 8.dp.toPx()
@@ -304,15 +309,16 @@ fun <T> SegmentedControl(
                             isDragActiveOnPill = false
                             isDragging = false
                             val currentLeft = animLeft.value - paddingPx
-                            val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+                            val visualTargetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+                            val targetIndex = rtlMirrorIndex(visualTargetIndex, segmentCount, isRtl)
 
                             if (targetIndex != selectedIndex) {
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                 onSelect(options[targetIndex].value)
                             } else {
-                                val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-                                val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                                val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                                val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
                                 coroutineScope.launch {
                                     launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
                                     launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
@@ -323,8 +329,8 @@ fun <T> SegmentedControl(
                             if (!isDragActiveOnPill) return@detectDragGestures
                             isDragActiveOnPill = false
                             isDragging = false
-                            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-                            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
                             coroutineScope.launch {
                                 launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
                                 launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }

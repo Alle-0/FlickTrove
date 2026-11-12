@@ -382,8 +382,8 @@ class MovieRepository @Inject constructor(
             try {
                 firebaseRemoteDataSource.setMovie(movie)
                 
-                val oldVibes = oldMovie?.emotionalVibes?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
-                val newVibes = movie.emotionalVibes?.split(",")?.filter { it.isNotBlank() }?.toSet() ?: emptySet()
+                val oldVibes = parseVibeCodes(oldMovie?.emotionalVibes)
+                val newVibes = parseVibeCodes(movie.emotionalVibes)
                 
                 val addedVibes = newVibes - oldVibes
                 val removedVibes = oldVibes - newVibes
@@ -636,7 +636,7 @@ class MovieRepository @Inject constructor(
 
                 // Rimuove il voto, le emotional vibes, l'attore MVP e le views dai global stats di Firestore
                 val ratingToRemove = targetMovie.personalRating
-                val vibesToRemove = targetMovie.emotionalVibes?.split(",")?.filter { it.isNotBlank() } ?: emptyList()
+                val vibesToRemove = parseVibeCodes(targetMovie.emotionalVibes).toList()
                 val mvpToRemove = targetMovie.favoriteActorId
                 val calculatedViewsDelta = if (targetMovie.mediaType == "tv") {
                     -(targetMovie.watchedEpisodes?.values?.sumOf { it.size } ?: 0).toLong()
@@ -1185,68 +1185,47 @@ class MovieRepository @Inject constructor(
 
     suspend fun getRegionFromPrefs(): String {
         val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-        return if (rawLanguage == "system") {
-            val systemCountry = java.util.Locale.getDefault().country
-            if (systemCountry.isNotBlank() && systemCountry.length == 2) {
-                systemCountry.uppercase()
-            } else {
-                when (java.util.Locale.getDefault().language.lowercase()) {
-                    "it" -> "IT"
-                    "es" -> "ES"
-                    "fr" -> "FR"
-                    "de" -> "DE"
-                    "pt" -> "PT"
-                    "ru" -> "RU"
-                    "hi" -> "IN"
-                    "ja" -> "JP"
-                    "ko" -> "KR"
-                    "zh" -> "CN"
-                    "id", "in" -> "ID"
-                    "tr" -> "TR"
-                    else -> "US"
+        return com.cinetrack.util.RegionResolver.resolveRegion(rawLanguage)
+    }
+
+    suspend fun ensureRegionalWatchProvidersLoaded(region: String? = null) {
+        val targetRegion = (region ?: getRegionFromPrefs()).uppercase(java.util.Locale.ROOT)
+        if (com.cinetrack.ui.utils.ProviderConstants.hasCachedRegion(targetRegion)) return
+        try {
+            coroutineScope {
+                val movieDeferred = async {
+                    runCatching { tmdbService.getWatchProvidersMovie(watchRegion = targetRegion).results }
+                        .getOrDefault(emptyList())
                 }
-            }
-        } else {
-            when (val code = rawLanguage.lowercase()) {
-                "it" -> "IT"
-                "es" -> "ES"
-                "fr" -> "FR"
-                "de" -> "DE"
-                "pt-pt" -> "PT"
-                "pt", "pt-br" -> "BR"
-                "ru" -> "RU"
-                "hi" -> "IN"
-                "ja" -> "JP"
-                "ko" -> "KR"
-                "zh" -> "CN"
-                "id", "in" -> "ID"
-                "tr" -> "TR"
-                "pl" -> "PL"
-                "nl" -> "NL"
-                "cs" -> "CZ"
-                "el" -> "GR"
-                "hu" -> "HU"
-                "ro" -> "RO"
-                "sv" -> "SE"
-                "th" -> "TH"
-                "uk" -> "UA"
-                "vi" -> "VN"
-                else -> {
-                    when (code.substringBefore("-")) {
-                        "pl" -> "PL"
-                        "nl" -> "NL"
-                        "cs" -> "CZ"
-                        "el" -> "GR"
-                        "hu" -> "HU"
-                        "ro" -> "RO"
-                        "sv" -> "SE"
-                        "th" -> "TH"
-                        "uk" -> "UA"
-                        "vi" -> "VN"
-                        else -> "US"
+                val tvDeferred = async {
+                    runCatching { tmdbService.getWatchProvidersTv(watchRegion = targetRegion).results }
+                        .getOrDefault(emptyList())
+                }
+                val combined = movieDeferred.await() + tvDeferred.await()
+                val providers = combined
+                    .filter { !it.logoPath.isNullOrBlank() && it.providerName.isNotBlank() }
+                    .groupBy { it.providerId }
+                    .mapNotNull { (_, items) ->
+                        val best = items.minByOrNull { item ->
+                            item.displayPriorities?.get(targetRegion) ?: item.displayPriority ?: Int.MAX_VALUE
+                        } ?: return@mapNotNull null
+                        val priority = best.displayPriorities?.get(targetRegion) ?: best.displayPriority ?: Int.MAX_VALUE
+                        priority to com.cinetrack.data.api.Provider(
+                            providerId = best.providerId,
+                            providerName = best.providerName,
+                            logoPath = best.logoPath
+                        )
                     }
+                    .sortedBy { it.first }
+                    .take(30)
+                    .map { it.second }
+
+                if (providers.isNotEmpty()) {
+                    com.cinetrack.ui.utils.ProviderConstants.cacheRegionProviders(targetRegion, providers)
                 }
             }
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
         }
     }
 
@@ -1729,6 +1708,18 @@ class MovieRepository @Inject constructor(
 
     suspend fun getAllTimeBoxOffice(year: Int? = null, page: Int = 1, forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> =
         boxOfficeRepository.get().getAllTimeBoxOffice(year, page, forceRefresh)
+
+    /** Parses and normalizes comma-separated vibe codes so whitespace or legacy aliases don't trigger spurious global stat diffs. */
+    private fun parseVibeCodes(emotionalVibes: String?): Set<String> {
+        return emotionalVibes
+            ?.split(",")
+            ?.mapNotNull { raw ->
+                val normalized = com.cinetrack.ui.components.detail.normalizeVibeCode(raw)
+                normalized.takeIf { it.isNotBlank() }
+            }
+            ?.toSet()
+            ?: emptySet()
+    }
 }
 
 data class TraktRatingInfo(val rating: Double?, val votes: Int)

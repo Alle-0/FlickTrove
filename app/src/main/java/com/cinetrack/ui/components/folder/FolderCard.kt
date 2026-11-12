@@ -34,20 +34,83 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import com.cinetrack.R
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.util.toComposeColor
+
+/**
+ * Renders up to 3 overlapping fanned posters for a folder preview while keeping
+ * horizontal offsets and Z-axis tilt aligned across LTR and RTL layouts.
+ */
+@Composable
+fun FolderCoverFan(
+    posterPaths: List<String?>,
+    posterWidth: Dp = 40.dp,
+    posterHeight: Dp = 60.dp,
+    slotSpacing: Dp = 22.dp,
+    offsetStepDp: Float = 14f,
+    cornerRadius: Dp = 10.dp,
+    borderWidth: Dp = 1.5.dp,
+    modifier: Modifier = Modifier
+) {
+    if (posterPaths.isEmpty()) return
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val itemShape = RoundedCornerShape(cornerRadius)
+
+    Box(
+        modifier = modifier
+            .width(posterWidth + (slotSpacing * (posterPaths.size - 1)))
+            .height(posterHeight),
+        contentAlignment = Alignment.Center
+    ) {
+        posterPaths.forEachIndexed { index, posterPath ->
+            val centerIndex = (posterPaths.size - 1) / 2f
+            val baseRotation = if (posterPaths.size <= 1) 0f else {
+                val maxRotation = 15f
+                val rotationStep = (maxRotation * 2) / (posterPaths.size - 1)
+                -maxRotation + (index * rotationStep)
+            }
+            val currentRotation = if (isRtl) -baseRotation else baseRotation
+            val xOffset = (index - centerIndex) * offsetStepDp
+
+            Box(
+                modifier = Modifier
+                    .offset(x = xOffset.dp)
+                    .size(width = posterWidth, height = posterHeight)
+                    .graphicsLayer {
+                        rotationZ = currentRotation
+                        transformOrigin = TransformOrigin(0.5f, 1.1f)
+                    }
+                    .clip(itemShape)
+                    .border(borderWidth, Color(0xFF13151A), itemShape)
+                    .zIndex((posterPaths.size - index).toFloat())
+            ) {
+                AsyncImage(
+                    model = "https://image.tmdb.org/t/p/w200${posterPath.orEmpty()}",
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+        }
+    }
+}
 
 @Composable
 fun FolderCard(
@@ -101,42 +164,9 @@ fun FolderCard(
                 )
             }
         } else {
-            Box(
-                modifier = Modifier
-                    .width(40.dp + ((topItems.size - 1) * 22).dp)
-                    .height(60.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                topItems.forEachIndexed { index, movie ->
-                    val centerIndex = (topItems.size - 1) / 2f
-                    val currentRotation = if (topItems.size <= 1) 0f else {
-                        val maxRotation = 15f
-                        val rotationStep = (maxRotation * 2) / (topItems.size - 1)
-                        -maxRotation + (index * rotationStep)
-                    }
-                    val xOffset = (index - centerIndex) * 14f
-                    
-                    Box(
-                        modifier = Modifier
-                            .offset(x = xOffset.dp)
-                            .size(width = 40.dp, height = 60.dp)
-                            .graphicsLayer {
-                                rotationZ = currentRotation
-                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1.1f)
-                            }
-                            .clip(RoundedCornerShape(10.dp))
-                            .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(10.dp))
-                            .zIndex((topItems.size - index).toFloat())
-                    ) {
-                        coil3.compose.AsyncImage(
-                            model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
-                            contentDescription = null,
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-            }
+            FolderCoverFan(
+                posterPaths = topItems.map { it.posterPath }
+            )
         }
         
         Spacer(Modifier.width(16.dp))
@@ -158,7 +188,7 @@ fun FolderCard(
                     text = folder.name,
                     style = MaterialTheme.typography.titleMedium.copy(
                         fontWeight = FontWeight.SemiBold,
-                        letterSpacing = (-0.3).sp
+                        letterSpacing = rtlSafeLetterSpacing((-0.3).sp)
                     ),
                     color = Color.White,
                     maxLines = 1,
@@ -284,7 +314,7 @@ fun FolderCard(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
             contentDescription = null,
             tint = Color.White.copy(alpha = 0.35f),
-            modifier = Modifier.size(18.dp)
+            modifier = Modifier.size(18.dp).mirrorInRtl()
         )
         }
     }

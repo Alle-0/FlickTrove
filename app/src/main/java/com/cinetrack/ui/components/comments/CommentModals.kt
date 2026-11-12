@@ -55,6 +55,13 @@ import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.stripTmdbMediaLinkForPreview
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.rounded.Info
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontStyle
+import androidx.compose.ui.text.style.TextDecoration
 import dev.chrisbanes.haze.HazeState
 import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
@@ -71,7 +78,7 @@ fun CommentContextPreviewCard(
 ) {
     val isEffectivelyDeleted = comment.isEffectivelyDeleted
     val cleanPreviewText = remember(comment.text) {
-        comment.text
+        stripTmdbMediaLinkForPreview(comment.text)
             .replace(MEDIA_REGEX, "")
             .replace(Regex("[#*_`~]"), "")
             .trim()
@@ -199,7 +206,8 @@ fun CommentBlockModal(
     FlickTroveModal(
         isVisible = comment != null,
         onDismissRequest = onDismiss,
-        hazeState = hazeState
+        hazeState = hazeState,
+        contentPadding = PaddingValues(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 16.dp)
     ) {
         if (activeComment != null) {
             val displayName = activeComment.userDisplayName.ifBlank { "User" }
@@ -292,7 +300,8 @@ fun CommentDeleteModal(
     FlickTroveModal(
         isVisible = comment != null,
         onDismissRequest = onDismiss,
-        hazeState = hazeState
+        hazeState = hazeState,
+        contentPadding = PaddingValues(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 16.dp)
     ) {
         if (activeComment != null) {
             Row(
@@ -384,7 +393,8 @@ fun ExternalLinkWarningModal(
     FlickTroveModal(
         isVisible = !url.isNullOrBlank(),
         onDismissRequest = onDismiss,
-        hazeState = hazeState
+        hazeState = hazeState,
+        contentPadding = PaddingValues(start = 16.dp, top = 24.dp, end = 16.dp, bottom = 16.dp)
     ) {
         if (!activeUrl.isNullOrBlank()) {
             Row(
@@ -522,7 +532,9 @@ fun ExternalLinkWarningModal(
                             painter = painterResource(id = R.drawable.ic_right),
                             contentDescription = null,
                             tint = Color.Black,
-                            modifier = Modifier.size(14.dp)
+                            modifier = Modifier
+                                .size(14.dp)
+                                .mirrorInRtl()
                         )
                     }
                 }
@@ -697,6 +709,230 @@ fun CommsUniInfoModal(
                 }
             }
         }
+    }
+}
+
+@Composable
+fun WritingTipsModal(
+    isVisible: Boolean,
+    onDismiss: () -> Unit,
+    hazeState: HazeState,
+    accentColor: Color,
+    triggerBounds: Rect? = null
+) {
+    MorphGlassModal(
+        isVisible = isVisible,
+        onDismissRequest = onDismiss,
+        triggerBounds = triggerBounds,
+        hazeState = hazeState,
+        targetMaxWidth = 420.dp,
+        targetWidthFraction = 0.90f,
+        targetCornerRadius = 32.dp
+    ) { contentAlpha ->
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .verticalScroll(rememberScrollState())
+                .graphicsLayer { alpha = contentAlpha }
+                .padding(horizontal = 22.dp, vertical = 22.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    text = stringResource(R.string.comment_writing_tips_title),
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    style = MaterialTheme.typography.titleLarge
+                )
+                ModalCloseButton(onClick = onDismiss)
+            }
+
+            Spacer(modifier = Modifier.height(18.dp))
+
+            WritingTipCodeRow(
+                syntax = "**word**",
+                description = stringResource(R.string.comment_tip_bold),
+                descriptionFontWeight = FontWeight.Bold
+            )
+            WritingTipCodeRow(
+                syntax = "*word*",
+                description = stringResource(R.string.comment_tip_italic),
+                descriptionFontStyle = FontStyle.Italic
+            )
+            WritingTipCodeRow(
+                syntax = "~~word~~",
+                description = stringResource(R.string.comment_tip_strikethrough),
+                descriptionTextDecoration = TextDecoration.LineThrough
+            )
+            WritingTipCodeRow(
+                syntax = "- list",
+                description = stringResource(R.string.comment_tip_list)
+            )
+            WritingTipCodeRow(
+                syntax = "> text",
+                description = stringResource(R.string.comment_tip_quote)
+            )
+            WritingTipCodeRow(
+                syntax = stringResource(R.string.comment_tip_media_tag_syntax),
+                description = stringResource(R.string.comment_tip_media_tag),
+                syntaxColor = accentColor,
+                isPillSyntax = true
+            )
+
+            Spacer(modifier = Modifier.height(4.dp))
+            HorizontalDivider(color = Color.White.copy(alpha = 0.08f))
+            Spacer(modifier = Modifier.height(12.dp))
+
+            WritingTipIconRow(
+                iconRes = R.drawable.ic_image,
+                description = stringResource(R.string.comment_tip_attachments)
+            )
+            WritingTipIconRow(
+                iconRes = R.drawable.ic_link,
+                description = stringResource(R.string.comment_tip_links)
+            )
+            WritingTipIconRow(
+                iconRes = R.drawable.ic_eye_off,
+                description = stringResource(R.string.comment_tip_spoiler)
+            )
+            WritingTipInfoRow(
+                description = stringResource(R.string.comment_tip_max_chars, 8000)
+            )
+        }
+    }
+}
+
+@Composable
+private fun WritingTipCodeRow(
+    syntax: String,
+    description: String,
+    syntaxColor: Color = Color.White.copy(alpha = 0.90f),
+    isPillSyntax: Boolean = false,
+    descriptionFontWeight: FontWeight = FontWeight.Normal,
+    descriptionFontStyle: FontStyle = FontStyle.Normal,
+    descriptionTextDecoration: TextDecoration? = null
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.width(100.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            if (isPillSyntax) {
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(syntaxColor.copy(alpha = 0.16f))
+                        .padding(horizontal = 10.dp, vertical = 2.dp),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Text(
+                        text = syntax,
+                        color = syntaxColor,
+                        style = MaterialTheme.typography.bodyMedium.copy(
+                            fontWeight = FontWeight.Bold,
+                            fontSize = 13.sp
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+            } else {
+                Text(
+                    text = syntax,
+                    color = syntaxColor,
+                    style = MaterialTheme.typography.bodyMedium.copy(
+                        fontFamily = FontFamily.Monospace,
+                        fontWeight = FontWeight.Medium,
+                        fontSize = 13.sp,
+                        letterSpacing = 0.2.sp
+                    ),
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = description,
+            color = Color.White.copy(alpha = 0.78f),
+            style = MaterialTheme.typography.bodyMedium.copy(
+                fontWeight = descriptionFontWeight,
+                fontStyle = descriptionFontStyle,
+                textDecoration = descriptionTextDecoration
+            ),
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun WritingTipIconRow(
+    iconRes: Int,
+    description: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.width(100.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                painter = painterResource(id = iconRes),
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.72f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = description,
+            color = Color.White.copy(alpha = 0.78f),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun WritingTipInfoRow(
+    description: String
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Box(
+            modifier = Modifier.width(100.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Icon(
+                imageVector = Icons.Rounded.Info,
+                contentDescription = null,
+                tint = Color.White.copy(alpha = 0.72f),
+                modifier = Modifier.size(18.dp)
+            )
+        }
+        Spacer(modifier = Modifier.width(12.dp))
+        Text(
+            text = description,
+            color = Color.White.copy(alpha = 0.78f),
+            style = MaterialTheme.typography.bodyMedium,
+            modifier = Modifier.weight(1f)
+        )
     }
 }
 

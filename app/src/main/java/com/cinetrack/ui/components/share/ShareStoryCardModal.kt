@@ -454,7 +454,12 @@ fun ShareStoryCardModal(
                                 modifier = Modifier
                                     .size(22.dp)
                                     .bounceClick(scaleDown = 0.88f) {
-                                        config = config.copy(customPosterPath = null, customBackdropPath = null)
+                                        config = config.copy(
+                                            customPosterPath = null,
+                                            customBackdropPath = null,
+                                            customLogoPath = null,
+                                            hasManualLogoOverride = false
+                                        )
                                     }
                                     .clip(CircleShape)
                                     .background(Color.White.copy(alpha = 0.12f)),

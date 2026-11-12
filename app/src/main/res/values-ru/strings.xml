@@ -230,6 +230,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">Начальный экран</string>
     <string name="settings_default_start_tab_desc">Выберите экран по умолчанию при запуске приложения</string>
     <string name="settings_default_start_home">БУДУ СМОТРЕТЬ</string>
@@ -293,7 +294,7 @@
     <string name="settings_terms_service">Условия предоставления услуг</string>
     <string name="settings_privacy_policy">Политика конфиденциальности</string>
     <string name="settings_tmdb_notice">Этот продукт использует API TMDB, но не одобрен и не сертифицирован TMDB.</string>
-    <string name="settings_giphy_notice">GIF предоставлены GIPHY</string>
+    <string name="settings_klipy_notice">GIF предоставлены KLIPY</string>
     <string name="settings_omdb_notice">Дополнительные данные и оценки предоставлены OMDb API.</string>
     <string name="settings_tvdb_notice">Метаданные сериалов предоставлены TheTVDB.</string>
     <string name="settings_trakt_notice">Синхронизация и статистика от Trakt.tv.</string>
@@ -1271,6 +1272,15 @@
     <string name="comment_tap_to_reveal">Нажмите, чтобы показать</string>
     <string name="comment_image_preview">[Изображение]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Не удалось загрузить GIF</string>
+    <string name="gif_picker_empty">Нет доступных GIF</string>
+    <string name="gif_picker_search_empty">GIF для «%1$s» не найдены</string>
+    <string name="gif_picker_retry">Повторить</string>
+    <string name="gif_picker_cd_clear">Очистить</string>
+    <string name="comment_stickers">Стикеры</string>
+    <string name="sticker_picker_load_error">Не удалось загрузить стикеры</string>
+    <string name="sticker_picker_empty">Нет доступных стикеров</string>
+    <string name="sticker_picker_search_empty">Стикеры для «%1$s» не найдены</string>
     <string name="report_success">Жалоба успешно отправлена</string>
     <string name="report_cooldown">Вы уже жаловались на это за последние 24 часа</string>
     <string name="report_error">Ошибка отправки жалобы</string>
@@ -2129,4 +2139,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Справка по форматированию</string>
+    <string name="comment_tip_bold">Жирное выделение</string>
+    <string name="comment_tip_italic">Курсивный стиль</string>
+    <string name="comment_tip_strikethrough">Зачёркнутый текст</string>
+    <string name="comment_tip_list">Маркированный или нумерованный список (1.)</string>
+    <string name="comment_tip_quote">Блок цитаты</string>
+    <string name="comment_tip_media_tag_syntax">#фильм</string>
+    <string name="comment_tip_media_tag">Ссылка на фильм или сериал: открывает страницу на языке читателя</string>
+    <string name="comment_tip_attachments">Добавляйте изображения или GIF с нижней панели</string>
+    <string name="comment_tip_links">Вставленные URL открываются с предпросмотром безопасности</string>
+    <string name="comment_tip_spoiler">Включите Спойлер, чтобы размыть весь комментарий до нажатия</string>
+    <string name="comment_tip_max_chars">Лимит: не более %1$d символов</string>
+    <string name="comment_tag_search_hint">Введите название фильма или сериала, чтобы отметить...</string>
 </resources>

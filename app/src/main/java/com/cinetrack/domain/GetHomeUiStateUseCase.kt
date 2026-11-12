@@ -5,6 +5,7 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.local.entities.FolderEntity
+import com.cinetrack.data.local.entities.WatchHistoryEntity
 import com.cinetrack.ui.viewmodel.HomeUiState
 import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.Dispatchers
@@ -13,13 +14,16 @@ import javax.inject.Inject
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 
-class GetHomeUiStateUseCase @Inject constructor() {
+class GetHomeUiStateUseCase @Inject constructor(
+    private val selectContinueWatchingTvUseCase: SelectContinueWatchingTvUseCase
+) {
     operator fun invoke(
         moviesFlow: Flow<List<Movie>>,
         foldersFlow: Flow<List<FolderEntity>>,
         preferencesFlow: Flow<UserPreferences>,
         searchQueryFlow: Flow<String>,
-        activeTabFlow: Flow<String>
+        activeTabFlow: Flow<String>,
+        watchHistoryFlow: Flow<List<WatchHistoryEntity>> = flowOf(emptyList())
     ): Flow<HomeUiState> {
         @OptIn(kotlinx.coroutines.FlowPreview::class)
         val baseMoviesFlow = moviesFlow.map { movies -> 
@@ -45,14 +49,20 @@ class GetHomeUiStateUseCase @Inject constructor() {
             .debounce(300)
             .distinctUntilChanged()
 
-        val combinedMovies = combine(moviesFlow, baseMoviesFlow) { all, base -> all to base }
+        val latestWatchMillisFlow = watchHistoryFlow
+            .map { selectContinueWatchingTvUseCase.buildLatestWatchMillisMap(it) }
+            .distinctUntilChanged()
+
+        val combinedMovies = combine(moviesFlow, baseMoviesFlow, latestWatchMillisFlow) { all, base, latestMap ->
+            Triple(all, base, latestMap)
+        }
         return combine(
             combinedMovies,
             foldersFlow,
             preferencesFlow,
             debouncedSearch,
             activeTabFlow
-        ) { (allMovies, toWatchMovies), folders, prefs, query, tab ->
+        ) { (allMovies, toWatchMovies, latestWatchMillisMap), folders, prefs, query, tab ->
             
             val movieCount = toWatchMovies.count { it.mediaType != "tv" }
             val tvCount = toWatchMovies.count { it.mediaType == "tv" && !it.dropped }
@@ -123,7 +133,7 @@ class GetHomeUiStateUseCase @Inject constructor() {
                 }
             }.toImmutableMap()
 
-            val sorted: List<Movie> = sortMovies(filtered, prefs.homeSort, precomputedNextEpisodes)
+            val sorted: List<Movie> = sortMovies(filtered, prefs.homeSort, precomputedNextEpisodes, latestWatchMillisMap)
             
             val partitionResult: Pair<List<Movie>, List<Movie>> = sorted.partition { !it.isReleased }
             val unreleased = partitionResult.first
@@ -178,10 +188,30 @@ class GetHomeUiStateUseCase @Inject constructor() {
     private fun sortMovies(
         movies: List<Movie>,
         sort: SortConfig,
-        precomputedNextEpisodes: Map<Long, com.cinetrack.data.model.NextEpisodeInfo> = emptyMap()
+        precomputedNextEpisodes: Map<Long, com.cinetrack.data.model.NextEpisodeInfo> = emptyMap(),
+        latestWatchMillisMap: Map<Long, Long> = emptyMap()
     ): List<Movie> {
         val isDesc = sort.sortDirection == "desc"
         return when (sort.sortType) {
+            "last_watched_at", "watched_at" -> {
+                if (isDesc) {
+                    movies.sortedWith(
+                        compareByDescending<Movie> { selectContinueWatchingTvUseCase.resolveLatestWatchMillis(it, latestWatchMillisMap) }
+                            .thenByDescending { it.clientUpdatedAt }
+                            .thenBy { it.title ?: it.name ?: "" }
+                            .thenBy { it.id }
+                    )
+                } else {
+                    movies.sortedWith(
+                        compareBy<Movie> {
+                            val millis = selectContinueWatchingTvUseCase.resolveLatestWatchMillis(it, latestWatchMillisMap)
+                            if (millis == 0L) Long.MAX_VALUE else millis
+                        }
+                            .thenBy { it.title ?: it.name ?: "" }
+                            .thenBy { it.id }
+                    )
+                }
+            }
             "release_date" -> {
                 if (isDesc) {
                     movies.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })

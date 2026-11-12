@@ -34,6 +34,7 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.*
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.LocalImageQuality
 import com.cinetrack.util.buildTmdbImageUrl
@@ -76,7 +77,7 @@ fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
             }
             .hazeGlass(
                 state = null, // Header uses its own state, cards use global or none for now to avoid complexity, but usually null is fine for subtle fallback or we can pass state
-                shape = RoundedCornerShape(32.dp),
+                shape = CircleShape,
                 blurRadius = HazeStyles.SmallGlassBlurRadius
             )
             .clickable(
@@ -88,13 +89,15 @@ fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
             }
     ) {
         Row(
-            modifier = Modifier.padding(12.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(12.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
             Box(
                 modifier = Modifier
-                    .size(44.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), RoundedCornerShape(22.dp)),
+                    .size(48.dp)
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f), CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
@@ -123,7 +126,9 @@ fun RemindersSummaryCard(count: Int, onClick: () -> Unit) {
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                 contentDescription = null,
                 tint = Color.White.copy(alpha = 0.2f),
-                modifier = Modifier.size(24.dp)
+                modifier = Modifier
+                    .size(24.dp)
+                    .mirrorInRtl()
             )
         }
     }
@@ -467,7 +472,9 @@ fun UpdateCard(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.25f),
-                        modifier = Modifier.size(14.dp)
+                        modifier = Modifier
+                            .size(14.dp)
+                            .mirrorInRtl()
                     )
                 }
             } else {

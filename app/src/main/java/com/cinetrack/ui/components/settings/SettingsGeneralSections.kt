@@ -31,6 +31,8 @@ import com.cinetrack.ui.components.common.FlickTroveSwitch
 import com.cinetrack.ui.viewmodel.SettingsViewModel
 import com.cinetrack.util.VibrationHelper
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 
 @Composable
 fun SettingsGeneralPreferencesSection(
@@ -80,6 +82,7 @@ fun SettingsGeneralPreferencesSection(
                     "el" -> stringResource(R.string.settings_language_el)
                     "vi" -> stringResource(R.string.settings_language_vi)
                     "th" -> stringResource(R.string.settings_language_th)
+                    "ar" -> stringResource(R.string.settings_language_ar)
                     else -> contentLanguage
                 }
                 Text(
@@ -159,7 +162,7 @@ fun SettingsUILayoutSection(
             text = stringResource(R.string.settings_group_home_feed).uppercase(),
             style = MaterialTheme.typography.labelSmall.copy(
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 1.2.sp,
+                letterSpacing = rtlSafeLetterSpacing(1.2.sp),
                 fontSize = 11.sp
             ),
             color = MaterialTheme.colorScheme.primary.copy(alpha = 0.75f),
@@ -175,7 +178,7 @@ fun SettingsUILayoutSection(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp).mirrorInRtl()
                 )
             },
             onClick = {
@@ -321,7 +324,7 @@ fun SettingsUILayoutSection(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp).mirrorInRtl()
                 )
             },
             onClick = {
@@ -399,7 +402,7 @@ fun SettingsUILayoutSection(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                    modifier = Modifier.size(16.dp)
+                    modifier = Modifier.size(16.dp).mirrorInRtl()
                 )
             },
             onClick = {

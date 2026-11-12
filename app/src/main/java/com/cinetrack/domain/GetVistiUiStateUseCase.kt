@@ -3,6 +3,7 @@ package com.cinetrack.domain
 import com.cinetrack.data.model.GenreConstants
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
+import com.cinetrack.data.model.TvProductionStatus
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.ui.viewmodel.VistiUiState
@@ -98,10 +99,12 @@ class GetVistiUiStateUseCase @Inject constructor() {
                     movie.mediaType != "tv" ||
                     prefs.vistiSort.selectedStatuses.any { status ->
                         when (status) {
+                            "returning", "up_to_date" -> movie.tvProductionStatus == TvProductionStatus.RETURNING
+                            "ended" -> movie.tvProductionStatus == TvProductionStatus.ENDED
+                            "canceled" -> movie.tvProductionStatus == TvProductionStatus.CANCELED
                             "dropped" -> movie.dropped
                             "not_started" -> !movie.dropped && (movie.progress ?: 0.0) == 0.0
                             "watching" -> !movie.dropped && (movie.progress ?: 0.0) > 0.0 && (movie.progress ?: 0.0) < 1.0
-                            "up_to_date" -> movie.status != "Ended" && movie.status != "Canceled"
                             else -> false
                         }
                     }

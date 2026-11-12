@@ -41,6 +41,8 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.theme.OnSurfaceMuted
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.material.icons.Icons
@@ -124,7 +126,7 @@ fun SettingsSection(
             Box(
                 modifier = Modifier
                     .width(4.dp)
-                    .height(16.dp)
+                    .height(20.dp)
                     .clip(RoundedCornerShape(2.dp))
                     .background(
                         Brush.verticalGradient(
@@ -152,7 +154,7 @@ fun SettingsSection(
                     text = title.uppercase(),
                     style = MaterialTheme.typography.labelMedium.copy(
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 1.5.sp,
+                        letterSpacing = rtlSafeLetterSpacing(1.5.sp),
                         fontSize = 13.sp
                     ),
                     color = MaterialTheme.colorScheme.primary
@@ -323,7 +325,7 @@ fun SettingsItem(
                         imageVector = ImageVector.vectorResource(id = if (isExternal) R.drawable.ic_external_link else R.drawable.ic_right),
                         contentDescription = null,
                         tint = Color.White.copy(alpha = 0.2f),
-                        modifier = Modifier.size(18.dp)
+                        modifier = if (isExternal) Modifier.size(18.dp) else Modifier.size(18.dp).mirrorInRtl()
                     )
                 }
             }
@@ -346,7 +348,7 @@ fun AttributionRow(
         "TMDB" -> R.drawable.ic_tmdb_logo
         "Trakt.tv" -> R.drawable.ic_trakt_logo
         "TheTVDB" -> R.drawable.ic_tvdb_logo
-        "GIPHY" -> R.drawable.ic_giphy_logo
+        "KLIPY" -> R.drawable.ic_klipy_logo
         "SIMKL" -> R.drawable.ic_simkl_logo
         "CommsUni", "CommsUni (commsuni.tv)" -> R.drawable.ic_commsuni_logo
         "Rotten Tomatoes" -> R.drawable.ic_rottentomatoes_logo
@@ -378,7 +380,7 @@ fun AttributionRow(
                         "OMDb API" -> Color(0xFFF5C518)
                         "TheTVDB" -> Color(0xFF31B057)
                         "Trakt.tv" -> Color.White.copy(alpha = 0.05f)
-                        "GIPHY" -> Color.Black
+                        "KLIPY" -> Color(0xFF141418)
                         "SIMKL" -> Color(0xFF1B1B1B)
                         "CommsUni", "CommsUni (commsuni.tv)" -> Color(0xFF2B2D30)
                         "Rotten Tomatoes" -> Color(0xFFFA320A)
@@ -398,7 +400,7 @@ fun AttributionRow(
                         .padding(
                             when (brand) {
                                 "TMDB" -> 6.dp
-                                "GIPHY" -> 8.dp
+                                "KLIPY" -> 4.dp
                                 else -> 0.dp
                             }
                         ),
@@ -410,7 +412,7 @@ fun AttributionRow(
                     text = when (brand) {
                         "OMDb API" -> "OMDb"
                         "TheTVDB" -> "TVDB"
-                        "GIPHY" -> "GIPHY"
+                        "KLIPY" -> "KLIPY"
                         "SIMKL" -> "SIMKL"
                         "Rotten Tomatoes" -> "RT"
                         "Metacritic" -> "MC"
@@ -418,7 +420,7 @@ fun AttributionRow(
                     },
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
-                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "GIPHY" || brand == "SIMKL") 9.sp else 14.sp
+                        fontSize = if (brand == "OMDb API" || brand == "TheTVDB" || brand == "KLIPY" || brand == "SIMKL") 9.sp else 14.sp
                     ),
                     maxLines = 1,
                     overflow = androidx.compose.ui.text.style.TextOverflow.Visible,

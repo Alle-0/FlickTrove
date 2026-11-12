@@ -8,6 +8,7 @@ import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.mapper.MovieMapper
 import com.cinetrack.data.model.Season
 import com.cinetrack.domain.CalculateMatchScoreUseCase
+import com.cinetrack.util.RegionResolver
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
 import javax.inject.Inject
@@ -29,7 +30,8 @@ class DetailUiStateMapper @Inject constructor(
         folders: List<FolderEntity>,
         characterImages: Map<String, String>,
         watchHistory: List<com.cinetrack.data.local.entities.WatchHistoryEntity>,
-        hideSaved: Boolean = false
+        hideSaved: Boolean = false,
+        watchRegion: String = RegionResolver.resolveFromLocale()
     ): DetailUiState {
         if (errorMsg != null && metadata == null) return DetailUiState.Error(errorMsg)
         if (metadata == null) return DetailUiState.Loading
@@ -37,7 +39,7 @@ class DetailUiStateMapper @Inject constructor(
         val movie = localMovies.find { it.id == movieId && it.mediaType == mediaType }
             ?: localMovies.find { it.id == movieId && (it.mediaType.isBlank() || mediaType.isBlank()) }
             ?: localMovies.find { it.id == movieId }
-        val freshMovie = MovieMapper.mapResponseToMovie(metadata, mediaType)
+        val freshMovie = MovieMapper.mapResponseToMovie(metadata, mediaType, region = watchRegion)
         
         val effectiveMovie = movie?.copy(
             genres = freshMovie.genres,
@@ -150,15 +152,14 @@ class DetailUiStateMapper @Inject constructor(
             watchedEpisodes = effectiveWatchedEpisodes,
             progress = progress.toDouble()
         ).reconcileTvWatchState()
+        val hydratedCollectionMovies = collectionMovies.map { it.hydrate() }
         // Prefer the pre-computed score from the Home/Recommendations (stored in movie.matchScore),
         // recalculate only when the movie arrives from a context without a pre-computed score.
-        val matchScore = finalMovie.matchScore ?: calculateMatchScoreUseCase(finalMovie, localMovies)
-
-        val currentLang = java.util.Locale.getDefault().language.lowercase()
-        val watchRegion = if (currentLang == "it") "IT" else {
-            val userCountry = java.util.Locale.getDefault().country
-            if (userCountry.isNotBlank() && metadata.watchProviders?.results?.containsKey(userCountry) == true) userCountry else "US"
-        }
+        val matchScore = finalMovie.matchScore ?: calculateMatchScoreUseCase(
+            currentMovie = finalMovie,
+            localMovies = localMovies,
+            sagaSiblings = hydratedCollectionMovies
+        )
 
         return DetailUiState.Success(
             movieEntry = finalMovie,
@@ -222,12 +223,13 @@ class DetailUiStateMapper @Inject constructor(
                     mediaType
                 )
             }?.take(10) ?: emptyList()).map { it.hydrate() }.toImmutableList(),
-            collectionMovies = collectionMovies.map { it.hydrate() }.toImmutableList(),
+            collectionMovies = hydratedCollectionMovies.toImmutableList(),
             externalRatings = externalRatings,
             loadingSeason = loadingSeason,
             seasonDetails = seasonDetails.toImmutableMap(),
             folders = folders.toImmutableList(),
             watchProviderLink = metadata.watchProviders?.results?.get(watchRegion)?.link,
+            watchRegion = watchRegion,
             isInTheaters = run {
                 if (mediaType != "movie") return@run false
                 val releaseDateStr = metadata.releaseDate

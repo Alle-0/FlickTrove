@@ -43,6 +43,9 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import com.cinetrack.ui.utils.rtlMirrorIndex
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -83,6 +86,8 @@ fun ListCalendarSwitcher(
     val density = LocalDensity.current
 
     val selectedIndex = if (!isCalendar) 0 else 1
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val visualSelectedIndex = rtlMirrorIndex(selectedIndex, 2, isRtl)
     val primaryColor = MaterialTheme.colorScheme.primary
     val activeContentColor = ColorUtils.contentColorForAccent(primaryColor)
 
@@ -92,8 +97,8 @@ fun ListCalendarSwitcher(
 
     val normalWidthPx = (tabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-    val animLeft = remember { Animatable(selectedIndex * tabWidthPx + paddingPx) }
-    val animRight = remember { Animatable((selectedIndex + 1) * tabWidthPx - paddingPx) }
+    val animLeft = remember { Animatable(visualSelectedIndex * tabWidthPx + paddingPx) }
+    val animRight = remember { Animatable((visualSelectedIndex + 1) * tabWidthPx - paddingPx) }
     val animDragY = remember { Animatable(0f) }
     val flightDynamics = remember { Animatable(0f) }
 
@@ -104,9 +109,9 @@ fun ListCalendarSwitcher(
     val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
 
     // Tab change animation: Asymmetric spring physics (Leading edge stretches, trailing edge catches up)
-    LaunchedEffect(selectedIndex, tabWidthPx, advancedEffectsEnabled) {
-        val targetLeft = selectedIndex * tabWidthPx + paddingPx
-        val targetRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+    LaunchedEffect(selectedIndex, visualSelectedIndex, tabWidthPx, advancedEffectsEnabled) {
+        val targetLeft = visualSelectedIndex * tabWidthPx + paddingPx
+        val targetRight = (visualSelectedIndex + 1) * tabWidthPx - paddingPx
 
         val isTabChangedByClick = previousIndex != selectedIndex && !isDragging
         previousIndex = selectedIndex
@@ -219,7 +224,7 @@ fun ListCalendarSwitcher(
                 if (borderColor != null) Modifier.border(1.dp, borderColor, CircleShape)
                 else Modifier
             )
-            .pointerInput(selectedIndex, tabWidthPx) {
+            .pointerInput(selectedIndex, visualSelectedIndex, tabWidthPx, isRtl) {
                     var isDragActiveOnPill = false
                     val touchMargin = 8.dp.toPx()
                     var dragTargetLeft = 0f
@@ -250,7 +255,8 @@ fun ListCalendarSwitcher(
                             isDragActiveOnPill = false
                             isDragging = false
                             val currentLeft = animLeft.value - paddingPx
-                            val targetIndex = (currentLeft / tabWidthPx).roundToInt().coerceIn(0, 1)
+                            val visualTargetIndex = (currentLeft / tabWidthPx).roundToInt().coerceIn(0, 1)
+                            val targetIndex = rtlMirrorIndex(visualTargetIndex, 2, isRtl)
 
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
@@ -260,8 +266,8 @@ fun ListCalendarSwitcher(
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onSelectMode(targetIndex == 1)
                             } else {
-                                val targetLeft = selectedIndex * tabWidthPx + paddingPx
-                                val targetRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+                                val targetLeft = visualSelectedIndex * tabWidthPx + paddingPx
+                                val targetRight = (visualSelectedIndex + 1) * tabWidthPx - paddingPx
                                 coroutineScope.launch {
                                     launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
                                     launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
@@ -272,8 +278,8 @@ fun ListCalendarSwitcher(
                             if (!isDragActiveOnPill) return@detectDragGestures
                             isDragActiveOnPill = false
                             isDragging = false
-                            val targetLeft = selectedIndex * tabWidthPx + paddingPx
-                            val targetRight = (selectedIndex + 1) * tabWidthPx - paddingPx
+                            val targetLeft = visualSelectedIndex * tabWidthPx + paddingPx
+                            val targetRight = (visualSelectedIndex + 1) * tabWidthPx - paddingPx
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
                                 launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }

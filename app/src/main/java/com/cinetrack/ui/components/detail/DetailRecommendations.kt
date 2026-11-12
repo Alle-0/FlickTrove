@@ -17,6 +17,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.geometry.Offset
@@ -201,7 +202,7 @@ fun DetailRecommendations(
                                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                                         contentDescription = "View Collection",
                                         tint = Color.White.copy(alpha = 0.5f),
-                                        modifier = Modifier.padding(start = 8.dp).size(20.dp)
+                                        modifier = Modifier.padding(start = 8.dp).size(20.dp).mirrorInRtl()
                                     )
                                 }
                             }

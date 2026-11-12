@@ -80,6 +80,7 @@ import androidx.compose.material.icons.filled.KeyboardArrowDown
 import androidx.compose.material.icons.filled.KeyboardArrowUp
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.util.lerp
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.R
 import com.cinetrack.ui.theme.HazeStyles
@@ -172,6 +173,10 @@ class CommsUniCommentsScreen(
         val isLoadingMore by viewModel.isLoadingMore.collectAsStateWithLifecycle()
         val translationStates by viewModel.translationStates.collectAsStateWithLifecycle()
         val showTranslationPrompt by viewModel.showTranslationPrompt.collectAsStateWithLifecycle()
+        val mediaTagSuggestions by viewModel.mediaTagSuggestions.collectAsStateWithLifecycle()
+        val isSearchingMediaTags by viewModel.isSearchingMediaTags.collectAsStateWithLifecycle()
+        val taggedMediaTitles by viewModel.taggedMediaTitles.collectAsStateWithLifecycle()
+        val taggedMediaPosters by viewModel.taggedMediaPosters.collectAsStateWithLifecycle()
         // Temporary shadow properties
         val isUserBanned = false 
         val banExpiration: String? = null
@@ -221,9 +226,40 @@ class CommsUniCommentsScreen(
         var languageFilters by remember { mutableStateOf<Set<String>>(emptySet()) }
         var showSortMenu by remember { mutableStateOf(false) }
         var showCommsUniInfo by remember { mutableStateOf(false) }
+        var showWritingTips by remember { mutableStateOf(false) }
         var sortButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var commsUniButtonBounds by remember { mutableStateOf<Rect?>(null) }
+        var writingTipsButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var episodesButtonBounds by remember { mutableStateOf<Rect?>(null) }
+        var selectedMediaTags by androidx.compose.runtime.saveable.rememberSaveable(
+            stateSaver = androidx.compose.runtime.saveable.listSaver(
+                save = { list ->
+                    list.map {
+                        listOf(
+                            it.id.toString(),
+                            it.mediaType,
+                            it.title,
+                            it.posterPath ?: "",
+                            it.releaseYear ?: ""
+                        )
+                    }
+                },
+                restore = { saved ->
+                    saved.mapNotNull { row ->
+                        val id = row.getOrNull(0)?.toLongOrNull() ?: return@mapNotNull null
+                        val type = row.getOrNull(1) ?: return@mapNotNull null
+                        val title = row.getOrNull(2) ?: return@mapNotNull null
+                        com.cinetrack.ui.utils.TaggedMediaRef(
+                            id = id,
+                            mediaType = type,
+                            title = title,
+                            posterPath = row.getOrNull(3)?.takeIf { it.isNotEmpty() },
+                            releaseYear = row.getOrNull(4)?.takeIf { it.isNotEmpty() }
+                        )
+                    }
+                }
+            )
+        ) { mutableStateOf(emptyList<com.cinetrack.ui.utils.TaggedMediaRef>()) }
 
         LaunchedEffect(sortOption, sortOrder, sourceFilters, languageFilters) {
             val sortString = if (sortOption == CommentSortOption.DATE) (if (sortOrder == CommentSortOrder.DESC) "most_recent" else "oldest") else "most_liked"
@@ -239,7 +275,7 @@ class CommsUniCommentsScreen(
         val focusRequester = remember { androidx.compose.ui.focus.FocusRequester() }
         var isUploadingImage by remember { mutableStateOf(false) }
         var attachedMedia by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(emptyList<String>()) }
-        var showGiphyPicker by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
+        var showGifPicker by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
         val imageLoader = context.imageLoader
 
         val currentAttachedMedia by rememberUpdatedState(attachedMedia)
@@ -529,7 +565,9 @@ class CommsUniCommentsScreen(
                                                 painter = painterResource(id = R.drawable.ic_right),
                                                 contentDescription = null,
                                                 tint = Color.White.copy(alpha = 0.70f),
-                                                modifier = Modifier.size(11.dp)
+                                                modifier = Modifier
+                                                    .size(11.dp)
+                                                    .mirrorInRtl()
                                             )
                                         }
                                     }
@@ -716,6 +754,11 @@ class CommsUniCommentsScreen(
                                             viewModel.emitBlockedLink(check.reasonResId)
                                         }
                                     }
+                                },
+                                localizedMediaTitles = taggedMediaTitles,
+                                localizedMediaPosters = taggedMediaPosters,
+                                onMediaTagClick = { mType, mId ->
+                                    navigator.push(MovieDetailScreen(movieId = mId, mediaType = mType))
                                 }
                             )
                         }
@@ -767,7 +810,7 @@ class CommsUniCommentsScreen(
                     onRemoveMedia = { removedUrl -> viewModel.deleteDraftCommentImage(removedUrl) },
                     isUploadingImage = isUploadingImage,
                     onPickImage = launchMediaChooser,
-                    onPickGif = { showGiphyPicker = true },
+                    onPickGif = { showGifPicker = true },
                     onSendComment = {
                         if (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) {
                             val pId = replyingTo?.id
@@ -780,6 +823,11 @@ class CommsUniCommentsScreen(
                             }
 
                             val cleanMessage = inputText.text.trim()
+                            val messageWithTags = com.cinetrack.ui.utils.serializeMediaTagsForSend(
+                                text = cleanMessage,
+                                selectedTags = selectedMediaTags,
+                                maxLength = 8000
+                            )
 
                             localFocusManager.clearFocus()
                             val effectivePostToCommsUni = when {
@@ -788,7 +836,7 @@ class CommsUniCommentsScreen(
                                 else -> postToCommsUni
                             }
                             viewModel.addComment(
-                                text = cleanMessage,
+                                text = messageWithTags,
                                 isSpoiler = isSpoiler,
                                 parentId = pId,
                                 parentUserId = pUserId,
@@ -799,6 +847,8 @@ class CommsUniCommentsScreen(
                                 attachedMedia = attachedMedia
                             )
                             inputText = androidx.compose.ui.text.input.TextFieldValue("")
+                            selectedMediaTags = emptyList()
+                            viewModel.clearMediaTagSuggestions()
                             attachedMedia = emptyList()
                             replyingTo = null
                             isSpoiler = false
@@ -806,21 +856,31 @@ class CommsUniCommentsScreen(
                     },
                     accentColor = accentColor,
                     hazeState = hazeState,
-                    focusRequester = focusRequester
+                    focusRequester = focusRequester,
+                    selectedMediaTags = selectedMediaTags,
+                    onSelectedMediaTagsChanged = { selectedMediaTags = it },
+                    mediaTagSuggestions = mediaTagSuggestions,
+                    isSearchingMediaTags = isSearchingMediaTags,
+                    onSearchMediaTags = { viewModel.searchMediaTags(it) },
+                    onClearMediaTagSuggestions = { viewModel.clearMediaTagSuggestions() },
+                    onOpenWritingTips = { bounds ->
+                        writingTipsButtonBounds = bounds
+                        showWritingTips = true
+                    }
                 )
             }
         } // End of Scaffold
     } // End of Box with globalHazeState
             
             // GIF Picker Modal Overlay (Root level for full screen blur & safe insets)
-            com.cinetrack.ui.components.comments.GiphyPickerModal(
-                isVisible = showGiphyPicker,
-                onDismiss = { showGiphyPicker = false },
+            com.cinetrack.ui.components.comments.GifPickerModal(
+                isVisible = showGifPicker,
+                onDismiss = { showGifPicker = false },
                 hazeState = globalHazeState,
                 accentColor = accentColor,
                 onGifSelected = { gifUrl ->
                     attachedMedia = listOf(gifUrl)
-                    showGiphyPicker = false
+                    showGifPicker = false
                 }
             )
 
@@ -850,6 +910,15 @@ class CommsUniCommentsScreen(
                 isVisible = showCommsUniInfo,
                 onDismiss = { showCommsUniInfo = false },
                 triggerBounds = commsUniButtonBounds,
+                hazeState = globalHazeState
+            )
+
+            // Writing Tips Modal
+            com.cinetrack.ui.components.comments.WritingTipsModal(
+                isVisible = showWritingTips,
+                onDismiss = { showWritingTips = false },
+                triggerBounds = writingTipsButtonBounds,
+                accentColor = accentColor,
                 hazeState = globalHazeState
             )
 
@@ -966,10 +1035,11 @@ class CommsUniCommentsScreen(
             )
 
             androidx.activity.compose.BackHandler(
-                enabled = showEpisodePickerSheet || pendingExternalUrl != null || userToBlock != null || commentToReport != null || commentToDelete != null
+                enabled = showEpisodePickerSheet || showWritingTips || pendingExternalUrl != null || userToBlock != null || commentToReport != null || commentToDelete != null
             ) {
                 when {
                     showEpisodePickerSheet -> showEpisodePickerSheet = false
+                    showWritingTips -> showWritingTips = false
                     pendingExternalUrl != null -> pendingExternalUrl = null
                     userToBlock != null -> userToBlock = null
                     commentToReport != null -> commentToReport = null

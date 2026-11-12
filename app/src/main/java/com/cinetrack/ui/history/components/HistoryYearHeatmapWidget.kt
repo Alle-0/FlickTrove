@@ -36,6 +36,7 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.history.model.WatchTimelineEntry
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import kotlinx.coroutines.launch
 import java.time.DayOfWeek
 import java.time.LocalDate
@@ -306,7 +307,7 @@ private fun HeatmapYearStepper(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                 contentDescription = "Anno successivo",
                 tint = Color.White,
-                modifier = Modifier.size(22.dp)
+                modifier = Modifier.size(22.dp).mirrorInRtl()
             )
         }
     }

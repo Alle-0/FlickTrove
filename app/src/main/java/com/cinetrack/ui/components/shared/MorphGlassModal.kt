@@ -15,8 +15,8 @@ import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -27,6 +27,7 @@ import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -160,6 +161,7 @@ fun MorphGlassModal(
         }
 
         Box(
+            contentAlignment = AbsoluteAlignment.TopLeft,
             modifier = Modifier
                 .fillMaxSize()
                 .zIndex(zIndex)
@@ -191,7 +193,7 @@ fun MorphGlassModal(
 
                 Box(
                     modifier = Modifier
-                        .offset { IntOffset(targetRect.left.roundToInt(), targetRect.top.roundToInt()) }
+                        .absoluteOffset { IntOffset(targetRect.left.roundToInt(), targetRect.top.roundToInt()) }
                         .size(
                             width = with(density) { targetRect.width.toDp() },
                             height = with(density) { targetRect.height.toDp() }
@@ -295,7 +297,7 @@ fun MorphGlassModal(
 
                 Box(
                     modifier = Modifier
-                        .offset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
+                        .absoluteOffset { IntOffset(currentRect.left.roundToInt(), currentRect.top.roundToInt()) }
                         .size(
                             width = with(density) { currentRect.width.toDp() },
                             height = with(density) { currentRect.height.toDp() }

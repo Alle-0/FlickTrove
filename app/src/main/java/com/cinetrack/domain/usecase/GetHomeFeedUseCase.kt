@@ -5,6 +5,7 @@ import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.NewsRepository
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.domain.CalculateMatchScoreUseCase
+import com.cinetrack.domain.SelectContinueWatchingTvUseCase
 import com.cinetrack.ui.viewmodel.FeedState
 import kotlinx.collections.immutable.ImmutableList
 import kotlinx.collections.immutable.persistentListOf
@@ -12,6 +13,7 @@ import kotlinx.collections.immutable.toImmutableList
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.take
@@ -21,9 +23,13 @@ class GetHomeFeedUseCase @Inject constructor(
     private val repository: MovieRepository,
     private val newsRepository: NewsRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase
+    private val calculateMatchScoreUseCase: CalculateMatchScoreUseCase,
+    private val selectContinueWatchingTvUseCase: SelectContinueWatchingTvUseCase
 ) {
     suspend operator fun invoke(): FeedState = coroutineScope {
+        // Precarica in background il catalogo provider TMDB della regione attiva per i filtri
+        launch { repository.ensureRegionalWatchProvidersLoaded() }
+
         // Carica i film salvati dall'utente per generare le raccomandazioni
         val localMovies = repository.getLocalMoviesFlow().first()
 
@@ -165,17 +171,9 @@ class GetHomeFeedUseCase @Inject constructor(
         val newsDeferred = async { newsRepository.getNews().take(5).toImmutableList() }
         
         val continueWatchingTvDeferred = async {
-            localMovies.filter { movie ->
-                movie.mediaType == "tv" &&
-                movie.syncStatus != "pending_delete" &&
-                !movie.watched &&
-                !movie.dropped &&
-                (movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0) > 0 &&
-                run {
-                    val next = movie.calculateNextEpisode()
-                    next != null && !next.isUpToDateWithAirDate
-                }
-            }.sortedByDescending { it.clientUpdatedAt }.take(10).toImmutableList()
+            val histories = repository.getAllWatchHistory()
+            val latestWatchMap = selectContinueWatchingTvUseCase.buildLatestWatchMillisMap(histories)
+            selectContinueWatchingTvUseCase(localMovies, latestWatchMap)
         }
         
         // Collect seed IDs used by the main recommendation blocks to prevent

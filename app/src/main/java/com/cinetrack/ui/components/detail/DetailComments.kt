@@ -29,6 +29,8 @@ import androidx.compose.ui.Modifier
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.bounceClickWithOffset
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
@@ -37,7 +39,11 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.AppComment
-import com.cinetrack.ui.utils.parseMarkdown
+import com.cinetrack.ui.components.comments.CommentRichMarkdownText
+import com.cinetrack.ui.utils.extractTmdbMediaRefsFromText
+import com.cinetrack.ui.utils.resolveTmdbMediaTagsMetadata
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.tween
@@ -67,6 +73,7 @@ interface DetailCommentsEntryPoint {
     fun preferenceRepository(): com.cinetrack.data.repository.PreferenceRepository
     fun actionFeedbackManager(): com.cinetrack.ui.utils.ActionFeedbackManager
     fun blockedAuthorsManager(): com.cinetrack.data.repository.BlockedAuthorsManager
+    fun movieRepository(): com.cinetrack.data.repository.MovieRepository
 }
 
 @Composable
@@ -76,6 +83,8 @@ fun DetailComments(
     isOffline: Boolean = false,
     onOpenThread: (Boolean) -> Unit,
     onLikeClick: (String) -> Unit,
+    onOpenUrl: ((String) -> Unit)? = null,
+    onMediaTagClick: ((mediaType: String, mediaId: Long) -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val context = LocalContext.current
@@ -105,7 +114,7 @@ fun DetailComments(
                     text = stringResource(R.string.detail_top_comments),
                     style = MaterialTheme.typography.labelSmall.copy(
                         fontWeight = FontWeight.Black,
-                        letterSpacing = 3.sp
+                        letterSpacing = rtlSafeLetterSpacing(3.sp)
                     ),
                     color = Color.White.copy(alpha = 0.65f)
                 )
@@ -114,7 +123,7 @@ fun DetailComments(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = null,
                     tint = Color.White.copy(alpha = 0.65f),
-                    modifier = Modifier.size(12.dp)
+                    modifier = Modifier.size(12.dp).mirrorInRtl()
                 )
             }
             
@@ -122,7 +131,7 @@ fun DetailComments(
                 text = stringResource(R.string.comment_write_btn),
                 style = MaterialTheme.typography.labelMedium.copy(
                     fontWeight = FontWeight.Bold,
-                    letterSpacing = 1.sp
+                    letterSpacing = rtlSafeLetterSpacing(1.sp)
                 ),
                 color = ColorUtils.lightenForText(accentColor, 1.35f),
                 modifier = Modifier
@@ -150,6 +159,32 @@ fun DetailComments(
                     it.createdAt?.seconds ?: 0L
                 }
             ).take(5)
+        }
+
+        var localizedMediaTitles by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+        var localizedMediaPosters by remember { mutableStateOf<Map<String, String>>(emptyMap()) }
+
+        LaunchedEffect(sortedComments) {
+            val refs = sortedComments
+                .flatMap { extractTmdbMediaRefsFromText(it.text) }
+                .distinct()
+                .filter { (type, id) ->
+                    val key = "$type:$id"
+                    !localizedMediaTitles.containsKey(key) || !localizedMediaPosters.containsKey(key)
+                }
+            if (refs.isEmpty()) return@LaunchedEffect
+            val resolved = withContext(Dispatchers.IO) {
+                resolveTmdbMediaTagsMetadata(
+                    refs = refs,
+                    movieRepository = entryPoint.movieRepository()
+                )
+            }
+            if (resolved.titles.isNotEmpty()) {
+                localizedMediaTitles = localizedMediaTitles + resolved.titles
+            }
+            if (resolved.posters.isNotEmpty()) {
+                localizedMediaPosters = localizedMediaPosters + resolved.posters
+            }
         }
 
         if (sortedComments.isEmpty()) {
@@ -180,7 +215,11 @@ fun DetailComments(
                 CommentCard(
                     comment = comment,
                     accentColor = accentColor,
-                    onLikeClick = onLikeClick
+                    onLikeClick = onLikeClick,
+                    localizedMediaTitles = localizedMediaTitles,
+                    localizedMediaPosters = localizedMediaPosters,
+                    onOpenUrl = onOpenUrl,
+                    onMediaTagClick = onMediaTagClick
                 )
             }
             item {
@@ -207,7 +246,11 @@ fun DetailComments(
 private fun CommentCard(
     comment: AppComment,
     accentColor: Color,
-    onLikeClick: (String) -> Unit
+    onLikeClick: (String) -> Unit,
+    localizedMediaTitles: Map<String, String> = emptyMap(),
+    localizedMediaPosters: Map<String, String> = emptyMap(),
+    onOpenUrl: ((String) -> Unit)? = null,
+    onMediaTagClick: ((mediaType: String, mediaId: Long) -> Unit)? = null
 ) {
     var isExpanded by remember { mutableStateOf(false) }
     var isSpoilerRevealed by remember { mutableStateOf(false) }
@@ -281,8 +324,11 @@ private fun CommentCard(
         else -> comment.text
     }
     val mediaRegex = remember { Regex("!\\[.*?\\]\\((.*?)\\)") }
-    val textWithoutMedia = remember(displayedTextRaw) { displayedTextRaw.replace(mediaRegex, "").trim() }
-    val inlineMediaUrls = remember(displayedTextRaw) { mediaRegex.findAll(displayedTextRaw).map { it.groupValues[1] }.toList() }
+    val textWithoutMedia = remember(displayedTextRaw) {
+        val clean = displayedTextRaw.replace(mediaRegex, "").trim()
+        if (clean == "[image]" || clean == "[gif]") "" else clean
+    }
+    val inlineMediaUrls = remember(comment.text) { mediaRegex.findAll(comment.text).map { it.groupValues[1] }.toList() }
     val mediaUrls = remember(inlineMediaUrls, comment.attachedMedia) { (inlineMediaUrls + comment.attachedMedia).distinct() }
 
     Box(
@@ -465,18 +511,22 @@ private fun CommentCard(
                     ) {
                         if (textWithoutMedia.isNotEmpty() || mediaUrls.isEmpty()) {
                             val textToDisplay = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
-                            Text(
-                                text = textToDisplay.parseMarkdown(),
-                                style = MaterialTheme.typography.bodyMedium.copy(
+                            CommentRichMarkdownText(
+                                text = textToDisplay,
+                                accentColor = accentColor,
+                                textStyle = MaterialTheme.typography.bodyMedium.copy(
                                     lineHeight = 18.sp,
                                     fontSize = 13.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.88f),
+                                textColor = Color.White.copy(alpha = 0.88f),
+                                modifier = Modifier.fillMaxWidth(),
+                                localizedMediaTitles = localizedMediaTitles,
+                                localizedMediaPosters = localizedMediaPosters,
+                                onOpenUrl = onOpenUrl,
+                                onMediaTagClick = onMediaTagClick,
                                 maxLines = if (isExpanded) Int.MAX_VALUE else 4,
                                 overflow = TextOverflow.Ellipsis,
-                                modifier = Modifier.then(
-                                    if (isBlurred) Modifier.clip(RoundedCornerShape(8.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
-                                )
+                                isBlurred = isBlurred
                             )
                         }
 

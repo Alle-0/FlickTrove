@@ -317,7 +317,8 @@ class MovieDetailViewModel @Inject constructor(
             flow3,
             repository.getLocalMoviesFlow(),
             repository.getFoldersFlow(),
-            settingsRepository.hideSavedFromDiscovery
+            settingsRepository.hideSavedFromDiscovery,
+            preferenceRepository.userPreferencesFlow.map { it.contentLanguage }.distinctUntilChanged()
         ) { args ->
             @Suppress("UNCHECKED_CAST")
             val f1 = args[0] as Triple<MovieDetailResponse?, ExternalRatings, Boolean>
@@ -330,6 +331,8 @@ class MovieDetailViewModel @Inject constructor(
             @Suppress("UNCHECKED_CAST")
             val folders = args[4] as List<FolderEntity>
             val hideSaved = args[5] as Boolean
+            val contentLanguage = args[6] as String
+            val watchRegion = com.cinetrack.util.RegionResolver.resolveRegion(contentLanguage)
             
             kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.Default) {
                 detailUiStateMapper.mapToState(
@@ -346,7 +349,8 @@ class MovieDetailViewModel @Inject constructor(
                     folders = folders,
                     characterImages = f3.second,
                     watchHistory = f3.third,
-                    hideSaved = hideSaved
+                    hideSaved = hideSaved,
+                    watchRegion = watchRegion
                 )
             }
         }
@@ -372,37 +376,7 @@ class MovieDetailViewModel @Inject constructor(
                 // Start caching and secondary background syncs AFTER initial display
                 viewModelScope.launch(Dispatchers.IO) {
                     val prefs = preferenceRepository.userPreferencesFlow.first()
-                    val rawLang = prefs.contentLanguage
-                    val userCountry = if (rawLang == "system") {
-                        java.util.Locale.getDefault().country.uppercase().ifBlank { "US" }
-                    } else {
-                        when (rawLang.lowercase()) {
-                            "it" -> "IT"
-                            "de" -> "DE"
-                            "fr" -> "FR"
-                            "es" -> "ES"
-                            "pt", "pt_br", "pt-br" -> "BR"
-                            "pt-pt", "pt_pt" -> "PT"
-                            "ru" -> "RU"
-                            "hi" -> "IN"
-                            "ja" -> "JP"
-                            "ko" -> "KR"
-                            "zh", "zh_cn", "zh-cn" -> "CN"
-                            "id", "in" -> "ID"
-                            "tr" -> "TR"
-                            "pl" -> "PL"
-                            "nl" -> "NL"
-                            "cs" -> "CZ"
-                            "el" -> "GR"
-                            "hu" -> "HU"
-                            "ro" -> "RO"
-                            "sv" -> "SE"
-                            "th" -> "TH"
-                            "uk" -> "UA"
-                            "vi" -> "VN"
-                            else -> java.util.Locale.getDefault().country.uppercase().ifBlank { "US" }
-                        }
-                    }
+                    val userCountry = com.cinetrack.util.RegionResolver.resolveRegion(prefs.contentLanguage)
                     val certPair = com.cinetrack.data.mapper.MovieMapper.extractCertificationWithCountry(response, if (isTv) "tv" else "movie", userCountry)
                     _externalRatings.update { it.copy(certification = certPair?.second, certificationCountry = certPair?.first) }
                     val imdbId = response.externalIds?.imdbId
@@ -414,7 +388,7 @@ class MovieDetailViewModel @Inject constructor(
                     // Update local DB if movie already exists (to sync missing release dates etc.)
                     val localMovie = repository.getMovie(id, if (isTv) "tv" else "movie")
                     if (localMovie != null) {
-                        val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie")
+                        val freshMovie = com.cinetrack.data.mapper.MovieMapper.mapResponseToMovie(response, if (isTv) "tv" else "movie", region = userCountry)
                         var updatedEpisodes = localMovie.watchedEpisodes
                         var updatedProgress = localMovie.progress
                         if (isTv && localMovie.watched && (updatedEpisodes.isNullOrEmpty() || updatedEpisodes.values.sumOf { it.size } == 0)) {

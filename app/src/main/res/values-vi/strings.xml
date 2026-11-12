@@ -306,7 +306,7 @@
     <string name="settings_terms_service">Điều khoản dịch vụ</string>
     <string name="settings_privacy_policy">Chính sách quyền riêng tư</string>
     <string name="settings_tmdb_notice">Sản phẩm này sử dụng API của TMDB nhưng không được TMDB chứng thực hoặc chứng nhận.</string>
-    <string name="settings_giphy_notice">GIF được cung cấp bởi GIPHY</string>
+    <string name="settings_klipy_notice">GIF được cung cấp bởi KLIPY</string>
     <string name="settings_omdb_notice">Dữ liệu bổ sung và xếp hạng được cung cấp bởi OMDb API.</string>
     <string name="settings_tvdb_notice">Siêu dữ liệu phim bộ được cung cấp bởi TheTVDB.</string>
     <string name="settings_trakt_notice">Đồng bộ và thống kê được cung cấp bởi Trakt.tv.</string>
@@ -1376,6 +1376,15 @@
     <string name="comment_tap_to_reveal">Chạm để xem</string>
     <string name="comment_image_preview">[Hình ảnh]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Không thể tải ảnh GIF</string>
+    <string name="gif_picker_empty">Không có ảnh GIF nào</string>
+    <string name="gif_picker_search_empty">Không tìm thấy ảnh GIF nào cho \"%1$s\"</string>
+    <string name="gif_picker_retry">Thử lại</string>
+    <string name="gif_picker_cd_clear">Xóa</string>
+    <string name="comment_stickers">Nhãn dán</string>
+    <string name="sticker_picker_load_error">Không thể tải nhãn dán</string>
+    <string name="sticker_picker_empty">Không có nhãn dán nào</string>
+    <string name="sticker_picker_search_empty">Không tìm thấy nhãn dán nào cho \"%1$s\"</string>
     <string name="report_success">Gửi báo cáo thành công</string>
     <string name="report_cooldown">Bạn đã báo cáo nội dung này trong 24 giờ qua</string>
     <string name="report_error">Lỗi khi gửi báo cáo</string>
@@ -2087,6 +2096,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">Điều hướng &amp; Cử chỉ</string>
     <string name="settings_bottom_bar_swipe">Vuốt thanh dưới cho phim &amp; phim bộ</string>
@@ -2095,4 +2105,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Hướng dẫn định dạng</string>
+    <string name="comment_tip_bold">Nhấn mạnh in đậm</string>
+    <string name="comment_tip_italic">Kiểu chữ nghiêng</string>
+    <string name="comment_tip_strikethrough">Chữ gạch ngang</string>
+    <string name="comment_tip_list">Danh sách dấu đầu dòng hoặc đánh số (1.)</string>
+    <string name="comment_tip_quote">Khối trích dẫn</string>
+    <string name="comment_tip_media_tag_syntax">#phim</string>
+    <string name="comment_tip_media_tag">Gắn thẻ phim hoặc series: mở trang theo ngôn ngữ người đọc</string>
+    <string name="comment_tip_attachments">Thêm ảnh hoặc GIF từ thanh phía dưới</string>
+    <string name="comment_tip_links">URL được dán có thể nhấp với bản xem trước an toàn</string>
+    <string name="comment_tip_spoiler">Bật Spoiler để làm mờ toàn bộ bình luận cho đến khi chạm</string>
+    <string name="comment_tip_max_chars">Giới hạn: tối đa %1$d ký tự</string>
+    <string name="comment_tag_search_hint">Nhập tên phim hoặc series để gắn thẻ...</string>
 </resources>

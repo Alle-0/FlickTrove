@@ -221,6 +221,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">Startbildschirm</string>
     <string name="settings_default_start_tab_desc">Wähle den Standardbildschirm beim Start der App</string>
     <string name="settings_default_start_home">MÖCHTE ICH SEHEN</string>
@@ -284,7 +285,7 @@
     <string name="settings_terms_service">Nutzungsbedingungen</string>
     <string name="settings_privacy_policy">Datenschutzbestimmungen</string>
     <string name="settings_tmdb_notice">Dieses Produkt nutzt die TMDB-API, wird jedoch nicht von TMDB unterstützt oder zertifiziert.</string>
-    <string name="settings_giphy_notice">GIFs von GIPHY</string>
+    <string name="settings_klipy_notice">GIFs von KLIPY</string>
     <string name="settings_omdb_notice">Zusätzliche Daten und Bewertungen werden von der OMDb API bereitgestellt.</string>
     <string name="settings_tvdb_notice">Serien-Metadaten bereitgestellt von TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronisation und Statistiken unterstützt von Trakt.tv.</string>
@@ -1262,6 +1263,15 @@
     <string name="comment_tap_to_reveal">Tippen, um aufzudecken</string>
     <string name="comment_image_preview">[Bild]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">GIFs konnten nicht geladen werden</string>
+    <string name="gif_picker_empty">Keine GIFs verfügbar</string>
+    <string name="gif_picker_search_empty">Keine GIFs für \"%1$s\" gefunden</string>
+    <string name="gif_picker_retry">Erneut versuchen</string>
+    <string name="gif_picker_cd_clear">Löschen</string>
+    <string name="comment_stickers">Sticker</string>
+    <string name="sticker_picker_load_error">Sticker konnten nicht geladen werden</string>
+    <string name="sticker_picker_empty">Keine Sticker verfügbar</string>
+    <string name="sticker_picker_search_empty">Keine Sticker für \"%1$s\" gefunden</string>
     <string name="report_success">Meldung erfolgreich gesendet</string>
     <string name="report_cooldown">Du hast dies in den letzten 24 Stunden bereits gemeldet</string>
     <string name="report_error">Fehler beim Senden der Meldung</string>
@@ -2132,4 +2142,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Formatierungshilfe</string>
+    <string name="comment_tip_bold">Starke Betonung (Fett)</string>
+    <string name="comment_tip_italic">Kursive Betonung</string>
+    <string name="comment_tip_strikethrough">Durchgestrichener Text</string>
+    <string name="comment_tip_list">Aufzählungen oder nummerierte Listen (1.)</string>
+    <string name="comment_tip_quote">Zitatblock</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Film oder Serie verknüpfen: öffnet die Seite in der Sprache des Lesers</string>
+    <string name="comment_tip_attachments">Bilder oder GIFs über die untere Leiste einfügen</string>
+    <string name="comment_tip_links">Eingefügte URLs werden mit Sicherheitsvorschau klickbar</string>
+    <string name="comment_tip_spoiler">Spoiler aktivieren, um den Kommentar bis zum Tippen zu verwischen</string>
+    <string name="comment_tip_max_chars">Limit: max. %1$d Zeichen</string>
+    <string name="comment_tag_search_hint">Gib einen Film- oder Serientitel zum Markieren ein...</string>
 </resources>

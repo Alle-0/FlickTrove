@@ -248,6 +248,7 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">Ekran startowy</string>
     <string name="settings_default_start_tab_desc">Wybierz domyślny ekran po uruchomieniu aplikacji</string>
     <string name="settings_default_start_feed">GŁÓWNA</string>
@@ -327,7 +328,7 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="settings_terms_service">Warunki korzystania z usługi</string>
     <string name="settings_privacy_policy">Polityka prywatności</string>
     <string name="settings_tmdb_notice">Ten produkt korzysta z interfejsu API TMDB, ale nie jest wspierany ani certyfikowany przez TMDB.</string>
-    <string name="settings_giphy_notice">GIPHY dostarcza pliki GIF</string>
+    <string name="settings_klipy_notice">KLIPY dostarcza pliki GIF</string>
     <string name="settings_omdb_notice">Dodatkowe dane i oceny dostarcza OMDb API.</string>
     <string name="settings_tvdb_notice">Metadane seriali dostarcza TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronizacja i statystyki obsługiwane przez Trakt.tv.</string>
@@ -1397,6 +1398,15 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="comment_tap_to_reveal">Dotknij, aby odkryć</string>
     <string name="comment_image_preview">[Obraz]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Nie można załadować GIF-ów</string>
+    <string name="gif_picker_empty">Brak dostępnych GIF-ów</string>
+    <string name="gif_picker_search_empty">Nie znaleziono GIF-ów dla „%1$s”</string>
+    <string name="gif_picker_retry">Ponów</string>
+    <string name="gif_picker_cd_clear">Wyczyść</string>
+    <string name="comment_stickers">Naklejki</string>
+    <string name="sticker_picker_load_error">Nie można załadować naklejek</string>
+    <string name="sticker_picker_empty">Brak dostępnych naklejek</string>
+    <string name="sticker_picker_search_empty">Nie znaleziono naklejek dla „%1$s”</string>
     <string name="report_success">Zgłoszenie wysłane pomyślnie</string>
     <string name="report_cooldown">To zgłoszenie zostało już przez Ciebie wysłane w ciągu ostatnich 24 godzin</string>
     <string name="report_error">Błąd podczas wysyłania zgłoszenia</string>
@@ -2105,4 +2115,18 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Przewodnik formatowania</string>
+    <string name="comment_tip_bold">Wyróżnienie pogrubieniem</string>
+    <string name="comment_tip_italic">Styl kursywy</string>
+    <string name="comment_tip_strikethrough">Przekreślony tekst</string>
+    <string name="comment_tip_list">Lista punktowana lub numerowana (1.)</string>
+    <string name="comment_tip_quote">Blok cytatu</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Oznacz film lub serial: otwiera stronę w języku czytelnika</string>
+    <string name="comment_tip_attachments">Dodaj obrazy lub GIF-y z dolnego paska</string>
+    <string name="comment_tip_links">Wklejone adresy URL otwierają się z podglądem bezpieczeństwa</string>
+    <string name="comment_tip_spoiler">Włącz Spoiler, aby rozmyć cały komentarz do momentu dotknięcia</string>
+    <string name="comment_tip_max_chars">Limit: maks. %1$d znaków</string>
+    <string name="comment_tag_search_hint">Wpisz tytuł filmu lub serialu, aby go oznaczyć...</string>
 </resources>

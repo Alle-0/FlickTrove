@@ -321,7 +321,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="settings_terms_service">Умови використання</string>
     <string name="settings_privacy_policy">Політика конфіденційності</string>
     <string name="settings_tmdb_notice">Цей продукт використовує TMDB API, але не схвалений і не сертифікований TMDB.</string>
-    <string name="settings_giphy_notice">GIF-анімації надано сервісом GIPHY</string>
+    <string name="settings_klipy_notice">GIF-анімації надано сервісом KLIPY</string>
     <string name="settings_omdb_notice">Додаткові дані та оцінки надано OMDb API.</string>
     <string name="settings_tvdb_notice">Метадані серіалів надано TheTVDB.</string>
     <string name="settings_trakt_notice">Синхронізація та статистика працюють на базі Trakt.tv.</string>
@@ -1393,6 +1393,15 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="comment_tap_to_reveal">Торкніться, щоб відкрити</string>
     <string name="comment_image_preview">[Зображення]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Не вдалося завантажити GIF</string>
+    <string name="gif_picker_empty">Немає доступних GIF</string>
+    <string name="gif_picker_search_empty">Не знайдено GIF для «%1$s»</string>
+    <string name="gif_picker_retry">Повторити</string>
+    <string name="gif_picker_cd_clear">Очистити</string>
+    <string name="comment_stickers">Стікери</string>
+    <string name="sticker_picker_load_error">Не вдалося завантажити стікери</string>
+    <string name="sticker_picker_empty">Немає доступних стікерів</string>
+    <string name="sticker_picker_search_empty">Не знайдено стікерів для «%1$s»</string>
     <string name="report_success">Скаргу успішно надіслано</string>
     <string name="report_cooldown">Ви вже скаржилися на це протягом останніх 24 годин</string>
     <string name="report_error">Помилка надсилання скарги</string>
@@ -2107,6 +2116,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">Навігація та жести</string>
     <string name="settings_bottom_bar_swipe">Свайп нижньої панелі (фільми/серіали)</string>
@@ -2115,4 +2125,18 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Довідник форматування</string>
+    <string name="comment_tip_bold">Жирне виділення</string>
+    <string name="comment_tip_italic">Курсивний стиль</string>
+    <string name="comment_tip_strikethrough">Закреслений текст</string>
+    <string name="comment_tip_list">Марковані або нумеровані списки (1.)</string>
+    <string name="comment_tip_quote">Блок цитати</string>
+    <string name="comment_tip_media_tag_syntax">#фільм</string>
+    <string name="comment_tip_media_tag">Посилання на фільм або серіал: відкриває сторінку мовою читача</string>
+    <string name="comment_tip_attachments">Додавайте зображення або GIF з нижньої панелі</string>
+    <string name="comment_tip_links">Вставлені URL-адреси відкриваються з безпечним переглядом</string>
+    <string name="comment_tip_spoiler">Увімкніть Спойлер, щоб розмити весь коментар до натискання</string>
+    <string name="comment_tip_max_chars">Ліміт: щонайбільше %1$d символів</string>
+    <string name="comment_tag_search_hint">Введіть назву фільму або серіалу, щоб позначити...</string>
 </resources>

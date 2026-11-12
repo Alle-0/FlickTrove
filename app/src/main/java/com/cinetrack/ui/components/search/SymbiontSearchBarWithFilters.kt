@@ -57,6 +57,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -64,6 +65,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
@@ -111,6 +113,7 @@ fun SymbiontSearchBarWithFilters(
 ) {
     val filtersVisible = category != "person" && category != "collection"
     val density = LocalDensity.current
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     // Progresso animato: 0f = filtri completamente inglobati (barra a tutta larghezza)
     //                     1f = filtri completamente rigurgitati e stabilizzati a destra
@@ -241,7 +244,8 @@ fun SymbiontSearchBarWithFilters(
                 .fillMaxSize()
                 .graphicsLayer(
                     compositingStrategy = CompositingStrategy.Offscreen,
-                    alpha = 0.05f
+                    alpha = 0.05f,
+                    scaleX = if (isRtl) -1f else 1f
                 )
         ) {
             // 1. Sfondo base della barra di ricerca a capsula (onSurface solido ad alpha 1.0)
@@ -341,6 +345,7 @@ fun SymbiontSearchBarWithFilters(
         // --- BARRA DI RICERCA (Capsula elastica con contenuti) ---
         Box(
             modifier = Modifier
+                .align(Alignment.CenterStart)
                 .width(searchBarWidth)
                 .height(44.dp)
                 .clip(CircleShape)

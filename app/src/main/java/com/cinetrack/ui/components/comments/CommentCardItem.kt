@@ -8,11 +8,14 @@ import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.interaction.MutableInteractionSource
+import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.GenericShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.InlineTextContent
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -33,11 +36,15 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.Placeholder
+import androidx.compose.ui.text.PlaceholderVerticalAlign
 import androidx.compose.ui.text.SpanStyle
 import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.rememberTextMeasurer
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.Dp
@@ -52,7 +59,10 @@ import com.cinetrack.R
 import com.cinetrack.data.model.AppComment
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.bounceClickWithOffset
-import com.cinetrack.ui.utils.parseSimpleMarkdown
+import com.cinetrack.ui.utils.parseSimpleMarkdownWithMediaTags
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.ui.viewmodel.CommentsViewModel
 import com.cinetrack.ui.components.common.ZoomableImageViewerDialog
 import kotlinx.coroutines.launch
@@ -84,6 +94,9 @@ fun CommentCardItem(
     onTranslate: (text: String) -> Unit,
     onTriggerGuestAuth: () -> Unit,
     onOpenUrl: ((String) -> Unit)? = null,
+    localizedMediaTitles: Map<String, String> = emptyMap(),
+    localizedMediaPosters: Map<String, String> = emptyMap(),
+    onMediaTagClick: ((mediaType: String, mediaId: Long) -> Unit)? = null,
     isOwner: Boolean = (currentUserId != null && comment.userId == currentUserId),
     modifier: Modifier = Modifier
 ) {
@@ -395,36 +408,30 @@ fun CommentCardItem(
                     } else null
                 }
 
-                val annotatedCommentText = remember(mediaUrls, textWithoutMedia, displayedTextRaw, accentColor, parentDisplayName, onOpenUrl) {
-                    buildAnnotatedString {
-                        if (parentDisplayName != null) {
-                            withStyle(style = SpanStyle(color = accentColor, fontWeight = FontWeight.Bold)) {
-                                append("@$parentDisplayName ")
-                            }
-                        }
-                        val targetText = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
-                        append(parseSimpleMarkdown(targetText, accentColor, onLinkClick = onOpenUrl))
-                    }
-                }
-
                 val contentToDraw = @Composable { isBlurred: Boolean ->
                     Column {
                         if (textWithoutMedia.isNotEmpty() || parentDisplayName != null || mediaUrls.isEmpty()) {
-                            Text(
-                                text = annotatedCommentText,
-                                style = MaterialTheme.typography.bodyMedium,
-                                color = Color.White.copy(alpha = 0.8f),
+                            val targetText = if (mediaUrls.isNotEmpty()) textWithoutMedia else displayedTextRaw
+                            CommentRichMarkdownText(
+                                text = targetText,
+                                accentColor = accentColor,
+                                textStyle = MaterialTheme.typography.bodyMedium,
+                                textColor = Color.White.copy(alpha = 0.8f),
+                                modifier = Modifier.fillMaxWidth(),
+                                prefixText = parentDisplayName?.let { "@$it " },
+                                localizedMediaTitles = localizedMediaTitles,
+                                localizedMediaPosters = localizedMediaPosters,
+                                imageLoader = imageLoader,
+                                onOpenUrl = onOpenUrl,
+                                onMediaTagClick = onMediaTagClick,
                                 maxLines = if (isTextExpanded) Int.MAX_VALUE else 6,
                                 overflow = TextOverflow.Ellipsis,
+                                isBlurred = isBlurred,
                                 onTextLayout = { textLayoutResult ->
                                     if (!isTextExpanded && textLayoutResult.hasVisualOverflow) {
                                         isTextExpandable = true
                                     }
-                                },
-                                modifier = Modifier
-                                    .then(
-                                        if (isBlurred) Modifier.clip(RoundedCornerShape(8.dp)).blur(16.dp, edgeTreatment = BlurredEdgeTreatment.Unbounded) else Modifier
-                                    )
+                                }
                             )
                         }
                         if (mediaUrls.isNotEmpty()) {

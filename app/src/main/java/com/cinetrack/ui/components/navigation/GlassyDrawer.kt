@@ -37,6 +37,8 @@ import com.cinetrack.ui.components.shared.ModalCloseButton
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.ui.res.vectorResource
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 @Composable
 fun GlassyDrawer(
     hazeState: HazeState,
@@ -359,7 +361,7 @@ private fun DrawerItem(
                 imageVector = trailingIcon,
                 contentDescription = null,
                 tint = Color.White.copy(alpha = 0.3f),
-                modifier = Modifier.size(16.dp)
+                modifier = Modifier.size(16.dp).mirrorInRtl()
             )
         }
     }
@@ -372,7 +374,7 @@ private fun SectionHeader(title: String) {
         style = MaterialTheme.typography.labelMedium.copy(
             color = Color.White.copy(alpha = 0.5f),
             fontWeight = FontWeight.Bold,
-            letterSpacing = 1.sp,
+            letterSpacing = rtlSafeLetterSpacing(1.sp),
             fontSize = 11.sp
         ),
         modifier = Modifier.padding(start = 24.dp, top = 20.dp, bottom = 4.dp)

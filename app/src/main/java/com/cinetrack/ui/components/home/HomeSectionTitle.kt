@@ -20,6 +20,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.theme.FlickTroveTheme
 import androidx.compose.material3.Surface
 
@@ -49,7 +50,7 @@ fun HomeSectionTitle(title: String, onClick: (() -> Unit)? = null) {
                     imageVector = ImageVector.vectorResource(R.drawable.ic_right),
                     contentDescription = stringResource(R.string.home_section_see_all),
                     tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(18.dp)
+                    modifier = Modifier.size(18.dp).mirrorInRtl()
                 )
             }
         }

@@ -237,6 +237,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">启动页面</string>
     <string name="settings_default_start_tab_desc">选择启动应用时默认打开的屏幕</string>
     <string name="settings_default_start_feed">首页</string>
@@ -303,7 +304,7 @@
     <string name="settings_terms_service">服务条款</string>
     <string name="settings_privacy_policy">隐私政策</string>
     <string name="settings_tmdb_notice">本产品使用 TMDB API，但未经 TMDB 认可或认证。</string>
-    <string name="settings_giphy_notice">GIF 由 GIPHY 提供</string>
+    <string name="settings_klipy_notice">GIF 由 KLIPY 提供</string>
     <string name="settings_omdb_notice">额外数据与评分由 OMDb API 提供。</string>
     <string name="settings_tvdb_notice">剧集元数据由 TheTVDB 提供。</string>
     <string name="settings_trakt_notice">同步与统计功能由 Trakt.tv 提供。</string>
@@ -1353,6 +1354,15 @@
     <string name="comment_tap_to_reveal">点击以揭晓内容</string>
     <string name="comment_image_preview">[图片]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">無法載入 GIF</string>
+    <string name="gif_picker_empty">沒有可用的 GIF</string>
+    <string name="gif_picker_search_empty">找不到與「%1$s」相符的 GIF</string>
+    <string name="gif_picker_retry">重試</string>
+    <string name="gif_picker_cd_clear">清除</string>
+    <string name="comment_stickers">貼圖</string>
+    <string name="sticker_picker_load_error">無法載入貼圖</string>
+    <string name="sticker_picker_empty">沒有可用的貼圖</string>
+    <string name="sticker_picker_search_empty">找不到與「%1$s」相符的貼圖</string>
     <string name="report_success">举报已成功提交</string>
     <string name="report_cooldown">您在过去 24 小时内已举报过此项</string>
     <string name="report_error">提交举报失败</string>
@@ -2135,4 +2145,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">格式指南</string>
+    <string name="comment_tip_bold">粗體強調</string>
+    <string name="comment_tip_italic">斜體樣式</string>
+    <string name="comment_tip_strikethrough">刪除線文字</string>
+    <string name="comment_tip_list">項目符號或編號清單 (1.)</string>
+    <string name="comment_tip_quote">引言區塊</string>
+    <string name="comment_tip_media_tag_syntax">#电影</string>
+    <string name="comment_tip_media_tag">連結電影或影集：以讀者的語言開啟頁面</string>
+    <string name="comment_tip_attachments">從底部工具列加入圖片或 GIF</string>
+    <string name="comment_tip_links">貼上的網址可點擊並提供安全預覽</string>
+    <string name="comment_tip_spoiler">開啟劇透遮罩，點擊前將模糊整則留言</string>
+    <string name="comment_tip_max_chars">字數上限：最多 %1$d 字元</string>
+    <string name="comment_tag_search_hint">输入电影或剧集名称以添加标签...</string>
 </resources>

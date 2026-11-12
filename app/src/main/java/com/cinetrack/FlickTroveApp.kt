@@ -75,11 +75,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         }
         val config = android.content.res.Configuration(currentContext.resources.configuration)
         config.setLocale(locale)
+        config.setLayoutDirection(locale)
         @Suppress("DEPRECATION")
         currentContext.resources.updateConfiguration(config, currentContext.resources.displayMetrics)
         
         val appConfig = android.content.res.Configuration(baseContext.applicationContext.resources.configuration)
         appConfig.setLocale(locale)
+        appConfig.setLayoutDirection(locale)
         @Suppress("DEPRECATION")
         baseContext.applicationContext.resources.updateConfiguration(appConfig, baseContext.applicationContext.resources.displayMetrics)
     }
@@ -98,11 +100,19 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
         }
         val config = android.content.res.Configuration(baseContext.resources.configuration)
         config.setLocale(locale)
+        config.setLayoutDirection(locale)
         val configContext = baseContext.createConfigurationContext(config)
         val wrappedContext = object : android.content.ContextWrapper(baseContext) {
             override fun getResources() = configContext.resources
         }
         Pair(wrappedContext, config)
+    }
+    val localizedLayoutDirection = remember(localizedConfig) {
+        if (localizedConfig.layoutDirection == android.util.LayoutDirection.RTL) {
+            androidx.compose.ui.unit.LayoutDirection.Rtl
+        } else {
+            androidx.compose.ui.unit.LayoutDirection.Ltr
+        }
     }
 
     // Ask for POST_NOTIFICATIONS at startup if user has it enabled but hasn't granted yet
@@ -147,7 +157,8 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
 
     androidx.compose.runtime.CompositionLocalProvider(
         LocalContext provides context,
-        androidx.compose.ui.platform.LocalConfiguration provides localizedConfig
+        androidx.compose.ui.platform.LocalConfiguration provides localizedConfig,
+        androidx.compose.ui.platform.LocalLayoutDirection provides localizedLayoutDirection
     ) {
         FlickTroveTheme(themeSetting = appTheme, accentColor = accentColor) {
         val movieActionsManager = remember { MovieActionsManager() }
@@ -244,7 +255,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                     androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
                                                 } else if (isTargetHorizontal) {
                                                     androidx.compose.animation.slideInHorizontally(
-                                                        initialOffsetX = { it },
+                                                        initialOffsetX = { if (localizedLayoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl) -it else it },
                                                         animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                                                     )
                                                 } else {
@@ -260,7 +271,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                     androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                                                 } else if (isInitialHorizontal) {
                                                     androidx.compose.animation.slideOutHorizontally(
-                                                        targetOffsetX = { it },
+                                                        targetOffsetX = { if (localizedLayoutDirection == androidx.compose.ui.unit.LayoutDirection.Rtl) -it else it },
                                                         animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                                                     )
                                                 } else {

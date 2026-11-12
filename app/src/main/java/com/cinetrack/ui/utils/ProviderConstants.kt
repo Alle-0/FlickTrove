@@ -1,6 +1,12 @@
 package com.cinetrack.ui.utils
 
 import com.cinetrack.data.api.Provider
+import com.cinetrack.util.RegionResolver
+import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.update
+import java.util.Locale
 
 object ProviderConstants {
     val ALL_PROVIDERS = listOf(
@@ -23,25 +29,99 @@ object ProviderConstants {
         Provider(11L, "MUBI", "/x570VpH2C9EKDf1riP83rYc5dnL.jpg")
     )
 
+    private val globalFallbackProviders = listOf(
+        Provider(8L, "Netflix", "/pbpMk2JmcoNnQwx5JGpXngfoWtp.jpg"),
+        Provider(337L, "Disney Plus", "/97yvRBw1GzX7fXprcF80er19ot.jpg"),
+        Provider(119L, "Prime Video", "/pvske1MyAoymrs5bguRfVqYiM9a.jpg"),
+        Provider(350L, "Apple TV Plus", "/mcbz1LgtErU9p4UdbZ0rG6RTWHX.jpg"),
+        Provider(531L, "Paramount Plus", "/h5DcR0J2EESLitnhR8xLG1QymTE.jpg"),
+        Provider(283L, "Crunchyroll", "/fzN5Jok5Ig1eJ7gyNGoMhnLSCfh.jpg"),
+        Provider(3L, "Google TV", "/8z7rC8uIDaTM91X0ZfkRf04ydj2.jpg"),
+        Provider(300L, "Pluto TV", "/dB8G41Q6tSL5NBisrIeqByfepBc.jpg"),
+        Provider(192L, "YouTube", "/pTnn5JwWr4p3pG8H6VrpiQo7Vs0.jpg"),
+        Provider(11L, "MUBI", "/x570VpH2C9EKDf1riP83rYc5dnL.jpg")
+    )
+
+    private val usExtraProviders = listOf(
+        Provider(15L, "Hulu", "/bxBlRPEPpMVDc4jMhSrTf2339DW.jpg"),
+        Provider(1899L, "Max", "/jbe4gVSfRlbPTdESXhEKpornsfu.jpg"),
+        Provider(386L, "Peacock", "/2aGrp1xw3qhwCYvNGAJZPdjfeeX.jpg")
+    )
+
+    private val nowProvider = Provider(39L, "NOW", "/g0E9h3JAeIwmdvxlT73jiEuxdNj.jpg")
+    private val rakutenProvider = Provider(35L, "Rakuten TV", "/bZvc9dXrXNly7cA0V4D9pR8yJwm.jpg")
+    private val discoveryProvider = Provider(512L, "Discovery+", "/bPW3J8KlLrot95sLzadnpzVe61f.jpg")
+    private val maxProvider = Provider(1899L, "Max", "/jbe4gVSfRlbPTdESXhEKpornsfu.jpg")
+
+    private val maxRegions = setOf(
+        "US", "PR", "BR", "MX", "AR", "CL", "CO", "PE", "UY",
+        "FR", "ES", "PT", "NL", "PL", "BE", "SE", "NO", "DK", "FI", "CZ", "HU", "RO"
+    )
+    private val rakutenEuropeRegions = setOf(
+        "GB", "IE", "FR", "DE", "AT", "CH", "ES", "PT", "NL", "PL", "BE", "SE", "NO", "DK", "FI", "CZ", "HU", "RO", "GR"
+    )
+    private val discoveryRegions = setOf(
+        "GB", "IE", "DE", "AT", "NL", "SE", "NO", "DK", "FI", "ES", "PL", "US", "BR", "IN"
+    )
+
+    private val _cachedProvidersByRegion = MutableStateFlow<Map<String, List<Provider>>>(emptyMap())
+    val cachedProvidersFlow: StateFlow<Map<String, List<Provider>>> = _cachedProvidersByRegion.asStateFlow()
+
+    fun hasCachedRegion(region: String): Boolean {
+        return _cachedProvidersByRegion.value.containsKey(region.uppercase(Locale.ROOT))
+    }
+
+    fun cacheRegionProviders(region: String, providers: List<Provider>) {
+        if (providers.isEmpty()) return
+        val normalized = region.uppercase(Locale.ROOT)
+        _cachedProvidersByRegion.update { current ->
+            current + (normalized to providers)
+        }
+    }
+
     fun getLogoUrl(logoPath: String?): String {
         if (logoPath == null) return ""
         if (logoPath.startsWith("http")) return logoPath
         return "https://image.tmdb.org/t/p/w154$logoPath"
     }
 
-    fun getAvailableProviders(language: String = java.util.Locale.getDefault().language.lowercase()): List<Provider> {
-        val italianProviderIds = setOf(359L, 222L, 109L, 40L) // Mediaset Infinity, RaiPlay, TIMVISION, Chili
-        val internationalProviders = ALL_PROVIDERS + listOf(
-            Provider(15L, "Hulu", "/bxBlRPEPpMVDc4jMhSrTf2339DW.jpg"),
-            Provider(1899L, "Max", "/jbe4gVSfRlbPTdESXhEKpornsfu.jpg"),
-            Provider(386L, "Peacock", "/2aGrp1xw3qhwCYvNGAJZPdjfeeX.jpg")
-        )
-
-        return if (language == "it") {
-            ALL_PROVIDERS
-        } else {
-            internationalProviders.filterNot { it.providerId in italianProviderIds }
+    /**
+     * Returns the streaming providers to display in filters for the given ISO 3166-1 alpha-2 [region].
+     * Prefers the live TMDB regional catalog when cached, falling back cleanly offline to curated regional defaults.
+     */
+    fun getAvailableProvidersForRegion(region: String): List<Provider> {
+        val normalizedRegion = region.trim().uppercase(Locale.ROOT).ifBlank { "US" }
+        _cachedProvidersByRegion.value[normalizedRegion]?.let { cached ->
+            if (cached.isNotEmpty()) return cached
         }
+
+        if (normalizedRegion == "IT") {
+            return ALL_PROVIDERS
+        }
+
+        if (normalizedRegion == "US" || normalizedRegion == "PR") {
+            return globalFallbackProviders + usExtraProviders
+        }
+
+        val extras = mutableListOf<Provider>()
+        if (normalizedRegion == "GB" || normalizedRegion == "IE") {
+            extras += nowProvider
+        }
+        if (normalizedRegion in maxRegions) {
+            extras += maxProvider
+        }
+        if (normalizedRegion in discoveryRegions) {
+            extras += discoveryProvider
+        }
+        if (normalizedRegion in rakutenEuropeRegions) {
+            extras += rakutenProvider
+        }
+
+        return (globalFallbackProviders + extras).distinctBy { it.providerId }
+    }
+
+    fun getAvailableProviders(language: String = Locale.getDefault().language.lowercase()): List<Provider> {
+        val region = RegionResolver.resolveRegion(language)
+        return getAvailableProvidersForRegion(region)
     }
 }
-

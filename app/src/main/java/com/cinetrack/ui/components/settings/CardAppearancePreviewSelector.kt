@@ -30,13 +30,16 @@ import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.ui.components.card.PreviewCardMode
+import com.cinetrack.ui.utils.rtlMirrorIndex
 import com.cinetrack.util.VibrationHelper
 import kotlin.math.roundToInt
 import kotlinx.coroutines.launch
@@ -150,14 +153,16 @@ fun DraggablePreviewModeSelector(
             .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(16.dp))
             .border(0.5.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(16.dp))
     ) {
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
         val usableWidthPx = constraints.maxWidth.toFloat()
         val segmentCount = modes.size
+        val visualSelectedIndex = rtlMirrorIndex(selectedIndex, segmentCount, isRtl)
         val realTabWidthPx = if (segmentCount > 0) usableWidthPx / segmentCount else 1f
         val paddingPx = with(density) { padding.toPx() }
         val normalWidthPx = (realTabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-        val animLeft = remember { Animatable(selectedIndex * realTabWidthPx + paddingPx) }
-        val animRight = remember { Animatable((selectedIndex + 1) * realTabWidthPx - paddingPx) }
+        val animLeft = remember { Animatable(visualSelectedIndex * realTabWidthPx + paddingPx) }
+        val animRight = remember { Animatable((visualSelectedIndex + 1) * realTabWidthPx - paddingPx) }
         val animDragY = remember { Animatable(0f) }
         val flightDynamics = remember { Animatable(0f) }
 
@@ -166,9 +171,9 @@ fun DraggablePreviewModeSelector(
         var previousIndex by remember { mutableStateOf(selectedIndex) }
         var pressedTabIndex by remember { mutableStateOf(-1) }
 
-        LaunchedEffect(selectedIndex, realTabWidthPx, segmentCount, advancedEffectsEnabled) {
-            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+        LaunchedEffect(selectedIndex, visualSelectedIndex, realTabWidthPx, segmentCount, advancedEffectsEnabled) {
+            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
 
             val isTabChangedByClick = previousIndex != selectedIndex && !isDragging
             val indexDistance = kotlin.math.abs(selectedIndex - previousIndex).coerceAtLeast(1)
@@ -273,7 +278,7 @@ fun DraggablePreviewModeSelector(
         Box(
             modifier = Modifier
                 .fillMaxSize()
-                .pointerInput(selectedIndex, realTabWidthPx) {
+                .pointerInput(selectedIndex, visualSelectedIndex, realTabWidthPx, isRtl) {
                     var isDragActiveOnPill = false
                     val touchMargin = 8.dp.toPx()
                     var dragTargetLeft = 0f
@@ -304,7 +309,8 @@ fun DraggablePreviewModeSelector(
                             isDragActiveOnPill = false
                             isDragging = false
                             val currentLeft = animLeft.value - paddingPx
-                            val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+                            val visualTargetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, segmentCount - 1)
+                            val targetIndex = rtlMirrorIndex(visualTargetIndex, segmentCount, isRtl)
 
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
@@ -315,8 +321,8 @@ fun DraggablePreviewModeSelector(
                                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                                 onSelectMode(modes[targetIndex].first)
                             } else {
-                                val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-                                val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                                val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                                val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
                                 coroutineScope.launch {
                                     launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }
                                     launch { animRight.animateTo(targetRight, spring(stiffness = 500f, dampingRatio = 0.70f)) }
@@ -327,8 +333,8 @@ fun DraggablePreviewModeSelector(
                             if (!isDragActiveOnPill) return@detectDragGestures
                             isDragActiveOnPill = false
                             isDragging = false
-                            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-                            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
                                 launch { animLeft.animateTo(targetLeft, spring(stiffness = 500f, dampingRatio = 0.70f)) }

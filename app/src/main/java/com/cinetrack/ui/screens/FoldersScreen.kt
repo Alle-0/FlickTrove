@@ -26,6 +26,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -718,13 +719,19 @@ fun FoldersScreenContent(
     if (folderTransitionState.targetState || !folderTransitionState.isIdle) {
         stableMenuFolder?.let { folder ->
             Box(
+                contentAlignment = AbsoluteAlignment.TopLeft,
                 modifier = Modifier
                     .fillMaxSize()
                     .zIndex(2000f)
                     .pointerInput(Unit) { detectTapGestures { activeMenuFolder = null } }
             ) {
                 val density = androidx.compose.ui.platform.LocalDensity.current
-                val offsetX = with(density) { activeMenuBounds.left.toDp() + 32.dp }
+                val screenWidthDp = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp
+                val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
+                val rawOffsetX = with(density) {
+                    if (isRtl) activeMenuBounds.right.toDp() - 200.dp else activeMenuBounds.left.toDp() + 32.dp
+                }
+                val offsetX = rawOffsetX.coerceIn(8.dp, (screenWidthDp - 208.dp).coerceAtLeast(8.dp))
                 val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
                 
                 AnimatedVisibility(

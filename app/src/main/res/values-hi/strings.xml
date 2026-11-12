@@ -229,6 +229,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">प्रारंभ स्क्रीन</string>
     <string name="settings_default_start_tab_desc">ऐप लॉन्च होने पर डिफ़ॉल्ट स्क्रीन चुनें</string>
     <string name="settings_default_start_home">देखनी हैं</string>
@@ -292,7 +293,7 @@
     <string name="settings_terms_service">सेवा की शर्तें</string>
     <string name="settings_privacy_policy">गोपनीयता नीति</string>
     <string name="settings_tmdb_notice">यह उत्पाद TMDB API का उपयोग करता है लेकिन TMDB द्वारा समर्थित या प्रमाणित नहीं है।</string>
-    <string name="settings_giphy_notice">GIPHY द्वारा संचालित GIFs</string>
+    <string name="settings_klipy_notice">KLIPY द्वारा संचालित GIFs</string>
     <string name="settings_omdb_notice">OMDb API द्वारा प्रदान किया गया अतिरिक्त डेटा और रेटिंग।</string>
     <string name="settings_tvdb_notice">TheTVDB द्वारा प्रदान किया गया सीरीज़ मेटाडेटा।</string>
     <string name="settings_trakt_notice">Trakt.tv द्वारा संचालित सिंक और आँकड़े।</string>
@@ -1266,6 +1267,15 @@
     <string name="comment_tap_to_reveal">देखने के लिए टैप करें</string>
     <string name="comment_image_preview">[छवि]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">GIF लोड करने में असमर्थ</string>
+    <string name="gif_picker_empty">कोई GIF उपलब्ध नहीं है</string>
+    <string name="gif_picker_search_empty">\"%1$s\" के लिए कोई GIF नहीं मिला</string>
+    <string name="gif_picker_retry">पुनः प्रयास करें</string>
+    <string name="gif_picker_cd_clear">साफ़ करें</string>
+    <string name="comment_stickers">स्टिकर</string>
+    <string name="sticker_picker_load_error">स्टिकर लोड करने में असमर्थ</string>
+    <string name="sticker_picker_empty">कोई स्टिकर उपलब्ध नहीं</string>
+    <string name="sticker_picker_search_empty">\"%1$s\" के लिए कोई स्टिकर नहीं मिला</string>
     <string name="report_success">रिपोर्ट सफलतापूर्वक भेजी गई</string>
     <string name="report_cooldown">आप पिछले 24 घंटों में इसकी रिपोर्ट पहले ही कर चुके हैं</string>
     <string name="report_error">रिपोर्ट भेजने में त्रुटि</string>
@@ -2127,4 +2137,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">फ़ॉर्मेटिंग गाइड</string>
+    <string name="comment_tip_bold">गहरा बोल्ड टेक्स्ट</string>
+    <string name="comment_tip_italic">इटैलिक शैली</string>
+    <string name="comment_tip_strikethrough">कटा हुआ टेक्स्ट</string>
+    <string name="comment_tip_list">बुलेट या नंबर वाली सूचियाँ (1.)</string>
+    <string name="comment_tip_quote">उद्धरण ब्लॉक</string>
+    <string name="comment_tip_media_tag_syntax">#movie</string>
+    <string name="comment_tip_media_tag">फ़िल्म या सीरीज़ जोड़ें: पाठक की भाषा में उसका पेज खोलता है</string>
+    <string name="comment_tip_attachments">नीचे के बार से इमेज या GIF जोड़ें</string>
+    <string name="comment_tip_links">पेस्ट किए गए URL सुरक्षा पूर्वावलोकन के साथ खुलते हैं</string>
+    <string name="comment_tip_spoiler">टैप करने तक पूरा कमेंट धुंधला करने के लिए Spoiler चालू करें</string>
+    <string name="comment_tip_max_chars">सीमा: अधिकतम %1$d वर्ण</string>
+    <string name="comment_tag_search_hint">टैग करने के लिए किसी फ़िल्म या सीरीज़ का नाम लिखें...</string>
 </resources>

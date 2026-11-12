@@ -36,8 +36,11 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.input.pointer.pointerInput
+import com.cinetrack.ui.utils.rtlMirrorIndex
 import androidx.compose.foundation.gestures.detectDragGestures
 import androidx.compose.animation.core.Animatable
 import androidx.compose.runtime.mutableStateOf
@@ -105,12 +108,14 @@ fun CategoryTabSelector(
         }
         val realTabWidth = with(LocalDensity.current) { realTabWidthPx.toDp() }
 
+        val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+        val visualSelectedIndex = rtlMirrorIndex(selectedIndex, options.size, isRtl)
         val coroutineScope = rememberCoroutineScope()
         val paddingPx = with(LocalDensity.current) { 3.dp.toPx() }
         val normalWidthPx = (realTabWidthPx - 2 * paddingPx).coerceAtLeast(1f)
 
-        val animLeft = remember { Animatable(selectedIndex * realTabWidthPx + paddingPx) }
-        val animRight = remember { Animatable((selectedIndex + 1) * realTabWidthPx - paddingPx) }
+        val animLeft = remember { Animatable(visualSelectedIndex * realTabWidthPx + paddingPx) }
+        val animRight = remember { Animatable((visualSelectedIndex + 1) * realTabWidthPx - paddingPx) }
         val animDragY = remember { Animatable(0f) }
         val flightDynamics = remember { Animatable(0f) }
 
@@ -122,9 +127,9 @@ fun CategoryTabSelector(
         // Apple-style Leading & Trailing edge spring physics
         val advancedEffectsEnabled = com.cinetrack.LocalAdvancedVisualEffects.current
 
-        LaunchedEffect(selectedIndex, realTabWidthPx, options.size, advancedEffectsEnabled) {
-            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+        LaunchedEffect(selectedIndex, visualSelectedIndex, realTabWidthPx, options.size, advancedEffectsEnabled) {
+            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
 
             val isTabChangedByClick = previousIndex != selectedIndex && !isDragging
             val indexDistance = kotlin.math.abs(selectedIndex - previousIndex).coerceAtLeast(1)
@@ -236,7 +241,7 @@ fun CategoryTabSelector(
             modifier = Modifier
                 .width(realTabWidth * options.size)
                 .fillMaxHeight()
-                .pointerInput(selectedIndex, realTabWidthPx) {
+                .pointerInput(selectedIndex, visualSelectedIndex, realTabWidthPx, isRtl) {
                     var isDragActiveOnPill = false
                     val touchMargin = 8.dp.toPx()
                     var dragTargetLeft = 0f
@@ -268,7 +273,8 @@ fun CategoryTabSelector(
                             isDragActiveOnPill = false
                             isDragging = false
                             val currentLeft = animLeft.value - paddingPx
-                            val targetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                            val visualTargetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                            val targetIndex = rtlMirrorIndex(visualTargetIndex, options.size, isRtl)
                             
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
@@ -278,8 +284,8 @@ fun CategoryTabSelector(
                                 haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                                 onOptionClick(targetIndex)
                             } else {
-                                val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-                                val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                                val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                                val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
                                 coroutineScope.launch {
                                     launch {
                                         animLeft.animateTo(
@@ -300,8 +306,8 @@ fun CategoryTabSelector(
                             if (!isDragActiveOnPill) return@detectDragGestures
                             isDragActiveOnPill = false
                             isDragging = false
-                            val targetLeft = selectedIndex * realTabWidthPx + paddingPx
-                            val targetRight = (selectedIndex + 1) * realTabWidthPx - paddingPx
+                            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
                             coroutineScope.launch {
                                 launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
                                 launch {

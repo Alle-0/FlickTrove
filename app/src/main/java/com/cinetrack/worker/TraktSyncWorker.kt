@@ -398,13 +398,18 @@ class TraktSyncWorker @AssistedInject constructor(
                         } catch (_: Exception) { null }
                     } else null
                     val bestWatchedDate = lastWatchedAt ?: showEpisodeDates.values.maxOrNull()
+                    val bestWatchedMillis = com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(bestWatchedDate)
 
                     if (existingHistory.isNotEmpty()) {
                         val latestEntity = existingHistory.maxByOrNull { it.watchedAt } ?: existingHistory.first()
-                        if (epDatesJson != null && epDatesJson != latestEntity.episodeDates) {
+                        val latestEntityMillis = com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(latestEntity.watchedAt)
+                        val shouldUpdateDate = bestWatchedDate != null && bestWatchedMillis > latestEntityMillis
+                        val shouldUpdateEpDates = epDatesJson != null && epDatesJson != latestEntity.episodeDates
+                        if (shouldUpdateDate || shouldUpdateEpDates) {
                             movieRepository.updateWatchHistory(
                                 latestEntity.copy(
-                                    episodeDates = epDatesJson,
+                                    watchedAt = bestWatchedDate?.takeIf { shouldUpdateDate } ?: latestEntity.watchedAt,
+                                    episodeDates = if (shouldUpdateEpDates) epDatesJson else latestEntity.episodeDates,
                                     syncStatus = "pending"
                                 )
                             )
@@ -437,6 +442,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                 favorite = if (!isCompleted && totalWatched > 0) true else newShow.favorite,
                                 watchedEpisodes = seasonsMap,
                                 progress = progressVal,
+                                watchedAt = bestWatchedDate ?: newShow.watchedAt,
                                 syncStatus = "synced",
                                 clientUpdatedAt = System.currentTimeMillis()
                             )
@@ -509,7 +515,14 @@ class TraktSyncWorker @AssistedInject constructor(
                         }
                         val progressVal = if (totalEps > 0) (totalWatched.toDouble() / totalEps.toDouble()).coerceIn(0.0, 1.0) else 0.0
 
-                        if (seasonsMap != local.watchedEpisodes || local.watched != isCompleted || local.favorite != shouldBeFavorite || updatedNumberOfEpisodes != local.numberOfEpisodes || local.progress != progressVal || updatedPosterPath != local.posterPath) {
+                        val localWatchedMillis = com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(local.watchedAt)
+                        val resolvedWatchedAt = if (bestWatchedDate != null && bestWatchedMillis > localWatchedMillis) {
+                            bestWatchedDate
+                        } else {
+                            local.watchedAt
+                        }
+
+                        if (seasonsMap != local.watchedEpisodes || local.watched != isCompleted || local.favorite != shouldBeFavorite || updatedNumberOfEpisodes != local.numberOfEpisodes || local.progress != progressVal || updatedPosterPath != local.posterPath || resolvedWatchedAt != local.watchedAt) {
                             android.util.Log.e("TRAKT_DEBUG", "SYNC: Aggiorno stato per '$showTitle' (Visti: $totalWatched/$totalEps, favorite: $shouldBeFavorite, watched: $isCompleted, progress: $progressVal)")
                             episodeUpdates.add(
                                 local.copy(
@@ -520,6 +533,7 @@ class TraktSyncWorker @AssistedInject constructor(
                                     progress = progressVal,
                                     posterPath = updatedPosterPath,
                                     backdropPath = updatedBackdropPath,
+                                    watchedAt = resolvedWatchedAt,
                                     syncStatus = "synced",
                                     clientUpdatedAt = System.currentTimeMillis()
                                 )

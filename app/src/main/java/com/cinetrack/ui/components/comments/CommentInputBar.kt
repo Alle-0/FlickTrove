@@ -9,10 +9,14 @@ import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.horizontalScroll
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.interaction.collectIsPressedAsState
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
+import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -21,6 +25,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.ui.AbsoluteAlignment
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -32,8 +37,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.geometry.Rect
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.LayoutCoordinates
+import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
@@ -59,13 +66,21 @@ import androidx.fragment.app.FragmentActivity
 import coil3.compose.AsyncImage
 import coil3.imageLoader
 import coil3.request.ImageRequest
+import coil3.request.crossfade
 import com.cinetrack.R
 import com.cinetrack.data.model.AppComment
+import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.utils.MarkdownVisualTransformation
+import com.cinetrack.ui.utils.TaggedMediaRef
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.horizontalFadingEdges
 import com.cinetrack.ui.utils.premiumScrollbar
+import com.cinetrack.ui.utils.stripTmdbMediaLinkForPreview
 import com.cinetrack.ui.utils.verticalFadingEdges
+import com.cinetrack.util.ImageQuality
+import com.cinetrack.util.ImageType
 import com.cinetrack.util.VibrationHelper
+import com.cinetrack.util.buildTmdbImageUrl
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import kotlinx.coroutines.delay
@@ -104,17 +119,64 @@ fun CommentInputBar(
     focusRequester: FocusRequester,
     postToCommsUni: Boolean = true,
     onPostToCommsUniChanged: ((Boolean) -> Unit)? = null,
-    destinationToggleEnabled: Boolean = true
+    destinationToggleEnabled: Boolean = true,
+    selectedMediaTags: List<TaggedMediaRef> = emptyList(),
+    onSelectedMediaTagsChanged: (List<TaggedMediaRef>) -> Unit = {},
+    mediaTagSuggestions: List<TaggedMediaRef> = emptyList(),
+    isSearchingMediaTags: Boolean = false,
+    onSearchMediaTags: (String) -> Unit = {},
+    onClearMediaTagSuggestions: () -> Unit = {},
+    onOpenWritingTips: ((Rect?) -> Unit)? = null
 ) {
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
     val imageLoader = context.imageLoader
     var isInputExpanded by remember { mutableStateOf(false) }
     var isMarkdownMenuExpanded by remember { mutableStateOf(false) }
+    var dismissedHashIndex by remember { mutableStateOf<Int?>(null) }
+
+    val activeHashtag = remember(inputText.text, inputText.selection, selectedMediaTags) {
+        if (!inputText.selection.collapsed) null
+        else findActiveHashtagQuery(inputText.text, inputText.selection.start, selectedMediaTags)
+    }
+
+    LaunchedEffect(inputText.text) {
+        if (selectedMediaTags.isNotEmpty()) {
+            val pruned = selectedMediaTags.filter { inputText.text.contains("#${it.title}") }
+            if (pruned.size != selectedMediaTags.size) {
+                onSelectedMediaTagsChanged(pruned)
+            }
+        }
+    }
+
+    LaunchedEffect(activeHashtag?.hashIndex, activeHashtag?.query) {
+        val currentHash = activeHashtag
+        if (currentHash == null) {
+            dismissedHashIndex = null
+            onClearMediaTagSuggestions()
+        } else {
+            if (dismissedHashIndex != null && dismissedHashIndex != currentHash.hashIndex) {
+                dismissedHashIndex = null
+            }
+            if (dismissedHashIndex != currentHash.hashIndex && currentHash.query.length >= 2) {
+                onSearchMediaTags(currentHash.query)
+            } else {
+                onClearMediaTagSuggestions()
+            }
+        }
+    }
+
+    val showMediaTagSuggestions = activeHashtag != null &&
+        dismissedHashIndex != activeHashtag.hashIndex &&
+        (activeHashtag.query.length < 2 || isSearchingMediaTags || mediaTagSuggestions.isNotEmpty())
+
+    val highlightedMediaTags = remember(selectedMediaTags) {
+        selectedMediaTags.map { "#${it.title}" }.toSet()
+    }
 
     val density = LocalDensity.current
     val isKeyboardOpen = WindowInsets.ime.getBottom(density) > 0
-    val isExpanded = isInputExpanded || isKeyboardOpen || inputText.text.isNotEmpty() || attachedMedia.isNotEmpty() || replyingTo != null
+    val isExpanded = isInputExpanded || isKeyboardOpen || inputText.text.isNotEmpty() || attachedMedia.isNotEmpty() || replyingTo != null || showMediaTagSuggestions
     val isCompact = !isExpanded
 
     val outerCorner by animateDpAsState(
@@ -257,7 +319,7 @@ fun CommentInputBar(
                                 style = MaterialTheme.typography.labelSmall
                             )
                             val previewMediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-                            val cleanText = replyTarget.text.replace(previewMediaRegex, "").trim()
+                            val cleanText = stripTmdbMediaLinkForPreview(replyTarget.text.replace(previewMediaRegex, "")).trim()
                             val previewText = if (cleanText.isEmpty() && previewMediaRegex.containsMatchIn(replyTarget.text)) {
                                 stringResource(R.string.comment_image_preview)
                             } else {
@@ -300,7 +362,143 @@ fun CommentInputBar(
                     )
                 }
             } else {
-                val maxChar = 4000
+                val maxChar = 8000
+
+                // Live #movie / #tv tag suggestions expanding the input bar upward
+                AnimatedVisibility(
+                    visible = showMediaTagSuggestions,
+                    enter = fadeIn(tween(150)) + expandVertically(tween(180)),
+                    exit = fadeOut(tween(120)) + shrinkVertically(tween(150))
+                ) {
+                    val activeMatch = activeHashtag
+                    if (activeMatch != null) {
+                        Column(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(bottom = 8.dp)
+                                .clip(RoundedCornerShape(16.dp))
+                                .background(Color.White.copy(alpha = 0.05f))
+                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
+                                .padding(6.dp)
+                        ) {
+                            Row(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.SpaceBetween
+                            ) {
+                                Row(
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_film),
+                                        contentDescription = null,
+                                        tint = accentColor,
+                                        modifier = Modifier.size(13.dp)
+                                    )
+                                    Text(
+                                        text = "#${activeMatch.query}",
+                                        color = Color.White.copy(alpha = 0.85f),
+                                        fontSize = 12.sp,
+                                        fontWeight = FontWeight.SemiBold,
+                                        maxLines = 1,
+                                        overflow = TextOverflow.Ellipsis
+                                    )
+                                }
+                                Box(
+                                    modifier = Modifier
+                                        .size(24.dp)
+                                        .bounceClick {
+                                            dismissedHashIndex = activeMatch.hashIndex
+                                            onClearMediaTagSuggestions()
+                                        },
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Icon(
+                                        painter = painterResource(id = R.drawable.ic_x),
+                                        contentDescription = null,
+                                        tint = Color.White.copy(alpha = 0.65f),
+                                        modifier = Modifier.size(12.dp)
+                                    )
+                                }
+                            }
+
+                            Spacer(modifier = Modifier.height(4.dp))
+
+                            if (activeMatch.query.length < 2) {
+                                Text(
+                                    text = stringResource(R.string.comment_tag_search_hint),
+                                    color = Color.White.copy(alpha = 0.55f),
+                                    fontSize = 12.sp,
+                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
+                                )
+                            } else if (isSearchingMediaTags && mediaTagSuggestions.isEmpty()) {
+                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
+                                    repeat(2) {
+                                        Row(
+                                            modifier = Modifier
+                                                .fillMaxWidth()
+                                                .height(52.dp)
+                                                .clip(RoundedCornerShape(10.dp))
+                                                .shimmerEffect()
+                                        ) {}
+                                    }
+                                }
+                            } else {
+                                val suggestionListState = rememberLazyListState()
+                                LaunchedEffect(activeMatch.query) {
+                                    suggestionListState.scrollToItem(0)
+                                }
+                                LazyColumn(
+                                    state = suggestionListState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .heightIn(max = 176.dp)
+                                        .verticalFadingEdges(
+                                            lazyListState = suggestionListState,
+                                            topEdgeHeight = 18.dp,
+                                            bottomEdgeHeight = 18.dp
+                                        ),
+                                    verticalArrangement = Arrangement.spacedBy(4.dp)
+                                ) {
+                                    items(
+                                        items = mediaTagSuggestions,
+                                        key = { "${it.mediaType}_${it.id}" }
+                                    ) { suggestion ->
+                                        MediaTagSuggestionRow(
+                                            suggestion = suggestion,
+                                            accentColor = accentColor,
+                                            imageLoader = imageLoader,
+                                            onClick = {
+                                                val currentText = inputText.text
+                                                val start = activeMatch.hashIndex.coerceIn(0, currentText.length)
+                                                val end = activeMatch.replaceEndIndex.coerceIn(start, currentText.length)
+                                                val inserted = "#${suggestion.title} "
+                                                val updatedText = currentText.substring(0, start) + inserted + currentText.substring(end)
+                                                val newCursor = start + inserted.length
+                                                onInputTextChanged(
+                                                    TextFieldValue(
+                                                        text = updatedText,
+                                                        selection = TextRange(newCursor)
+                                                    )
+                                                )
+                                                val nextTags = selectedMediaTags.filterNot {
+                                                    it.id == suggestion.id && it.mediaType == suggestion.mediaType && it.title == suggestion.title
+                                                } + suggestion
+                                                onSelectedMediaTagsChanged(nextTags)
+                                                dismissedHashIndex = null
+                                                onClearMediaTagSuggestions()
+                                            }
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
 
                 // Attached Media Previews
                 if (attachedMedia.isNotEmpty()) {
@@ -415,7 +613,12 @@ fun CommentInputBar(
                                 lineHeight = 20.sp
                             ),
                             cursorBrush = SolidColor(accentColor),
-                            visualTransformation = remember { MarkdownVisualTransformation() }
+                            visualTransformation = remember(highlightedMediaTags, accentColor) {
+                                MarkdownVisualTransformation(
+                                    highlightedMediaTags = highlightedMediaTags,
+                                    accentColor = accentColor
+                                )
+                            }
                         )
                         if (inputText.text.isEmpty()) {
                             Text(
@@ -607,7 +810,16 @@ fun CommentInputBar(
                                     }
                                 }
 
+                                val mdListState = rememberLazyListState()
                                 LazyRow(
+                                    state = mdListState,
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .horizontalFadingEdges(
+                                            lazyListState = mdListState,
+                                            leftEdgeWidth = 14.dp,
+                                            rightEdgeWidth = 14.dp
+                                        ),
                                     horizontalArrangement = Arrangement.spacedBy(6.dp),
                                     contentPadding = PaddingValues(horizontal = 2.dp)
                                 ) {
@@ -617,141 +829,203 @@ fun CommentInputBar(
                                     item { MdBtnPill(onClick = { mdAction("> ", "") }) { Text("Quote", color = Color.White, fontSize = 11.sp) } }
                                     item { MdBtnPill(onClick = { mdAction("- ", "") }) { Text("• List", color = Color.White, fontSize = 11.sp) } }
                                     item { MdBtnPill(onClick = { mdAction("1. ", "") }) { Text("1. List", color = Color.White, fontSize = 11.sp) } }
+                                    item {
+                                        MdBtnPill(
+                                            onClick = {
+                                                val pos = inputText.selection.start.coerceIn(0, inputText.text.length)
+                                                val needsSpace = pos > 0 && !inputText.text[pos - 1].isWhitespace()
+                                                mdAction(if (needsSpace) " #" else "#", "")
+                                            }
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                                            ) {
+                                                Icon(
+                                                    painter = painterResource(id = R.drawable.ic_film),
+                                                    contentDescription = null,
+                                                    tint = accentColor,
+                                                    modifier = Modifier.size(11.dp)
+                                                )
+                                                Text(
+                                                    text = "#",
+                                                    color = Color.White,
+                                                    fontSize = 12.sp,
+                                                    fontWeight = FontWeight.Bold
+                                                )
+                                            }
+                                        }
+                                    }
                                 }
                             }
                         }
 
                         // Action Toolbar — no send button here (it lives next to the text box)
+                        val bottomToolsScrollState = rememberScrollState()
                         Row(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .padding(top = 10.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            // Foto (Doppia funzione: Scatta foto o Galleria)
-                            Box(
+                            Row(
                                 modifier = Modifier
-                                    .size(32.dp)
-                                    .bounceClick(enabled = attachedMedia.isEmpty() && !isUploadingImage) {
-                                        if (!isUploadingImage) onPickImage()
-                                    }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f)),
-                                contentAlignment = Alignment.Center
+                                    .weight(1f)
+                                    .horizontalFadingEdges(
+                                        scrollState = bottomToolsScrollState,
+                                        leftEdgeWidth = 14.dp,
+                                        rightEdgeWidth = 14.dp
+                                    )
+                                    .horizontalScroll(bottomToolsScrollState),
+                                verticalAlignment = Alignment.CenterVertically
                             ) {
-                                if (isUploadingImage) {
-                                    CircularProgressIndicator(modifier = Modifier.size(16.dp), color = accentColor, strokeWidth = 2.dp)
-                                } else {
-                                    val fotoAlpha = if (attachedMedia.isEmpty()) 0.75f else 0.25f
+                                // Foto (Doppia funzione: Scatta foto o Galleria)
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .bounceClick(enabled = attachedMedia.isEmpty() && !isUploadingImage) {
+                                            if (!isUploadingImage) onPickImage()
+                                        }
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.05f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    if (isUploadingImage) {
+                                        CircularProgressIndicator(modifier = Modifier.size(16.dp), color = accentColor, strokeWidth = 2.dp)
+                                    } else {
+                                        val fotoAlpha = if (attachedMedia.isEmpty()) 0.75f else 0.25f
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_image),
+                                            contentDescription = stringResource(R.string.comment_pick_gallery),
+                                            tint = Color.White.copy(alpha = fotoAlpha),
+                                            modifier = Modifier.size(16.dp)
+                                        )
+                                    }
+                                }
+
+                                Spacer(modifier = Modifier.width(6.dp))
+
+                                // GIF
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .bounceClick(enabled = attachedMedia.isEmpty()) {
+                                            onPickGif()
+                                        }
+                                        .clip(CircleShape)
+                                        .background(Color.White.copy(alpha = 0.05f)),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    val gifAlpha = if (attachedMedia.isEmpty()) 0.75f else 0.25f
                                     Icon(
-                                        painter = painterResource(id = R.drawable.ic_image),
-                                        contentDescription = stringResource(R.string.comment_pick_gallery),
-                                        tint = Color.White.copy(alpha = fotoAlpha),
+                                        painter = painterResource(id = R.drawable.ic_gif),
+                                        contentDescription = "GIF",
+                                        tint = Color.White.copy(alpha = gifAlpha),
                                         modifier = Modifier.size(16.dp)
                                     )
                                 }
-                            }
 
-                            Spacer(modifier = Modifier.width(6.dp))
+                                Spacer(modifier = Modifier.width(6.dp))
 
-                            // GIF
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .bounceClick(enabled = attachedMedia.isEmpty()) {
-                                        onPickGif()
-                                    }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f)),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                val gifAlpha = if (attachedMedia.isEmpty()) 0.75f else 0.25f
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_gif),
-                                    contentDescription = "GIF",
-                                    tint = Color.White.copy(alpha = gifAlpha),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(6.dp))
-
-                            // Markdown pencil toggle
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .bounceClick { isMarkdownMenuExpanded = !isMarkdownMenuExpanded }
-                                    .clip(CircleShape)
-                                    .background(if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.45f) else Color.Transparent, CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_pencil),
-                                    contentDescription = "Markdown",
-                                    tint = if (isMarkdownMenuExpanded) accentColor else Color.White.copy(alpha = 0.75f),
-                                    modifier = Modifier.size(16.dp)
-                                )
-                            }
-
-                            Spacer(modifier = Modifier.width(6.dp))
-
-                            // Spoiler pill button
-                            Box(
-                                modifier = Modifier
-                                    .height(32.dp)
-                                    .bounceClick {
-                                        VibrationHelper.vibrateTick(context)
-                                        onSpoilerChanged(!isSpoiler)
-                                    }
-                                    .clip(CircleShape)
-                                    .background(
-                                        if (isSpoiler) accentColor.copy(alpha = 0.16f)
-                                        else Color.White.copy(alpha = 0.06f)
-                                    )
-                                    .border(
-                                        1.dp,
-                                        if (isSpoiler) accentColor.copy(alpha = 0.40f)
-                                        else Color.White.copy(alpha = 0.15f),
-                                        CircleShape
-                                    )
-                                    .padding(horizontal = 11.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.Center
+                                // Markdown pencil toggle
+                                Box(
+                                    modifier = Modifier
+                                        .size(32.dp)
+                                        .bounceClick { isMarkdownMenuExpanded = !isMarkdownMenuExpanded }
+                                        .clip(CircleShape)
+                                        .background(if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.18f) else Color.White.copy(alpha = 0.05f))
+                                        .border(1.dp, if (isMarkdownMenuExpanded) accentColor.copy(alpha = 0.45f) else Color.Transparent, CircleShape),
+                                    contentAlignment = Alignment.Center
                                 ) {
                                     Icon(
-                                        painter = painterResource(id = if (isSpoiler) R.drawable.ic_eye_off else R.drawable.ic_eye),
-                                        contentDescription = stringResource(R.string.comment_spoiler_toggle),
-                                        tint = if (isSpoiler) accentColor else Color.White.copy(alpha = 0.65f),
-                                        modifier = Modifier.size(14.dp)
+                                        painter = painterResource(id = R.drawable.ic_pencil),
+                                        contentDescription = "Markdown",
+                                        tint = if (isMarkdownMenuExpanded) accentColor else Color.White.copy(alpha = 0.75f),
+                                        modifier = Modifier.size(16.dp)
                                     )
-                                    Spacer(modifier = Modifier.width(5.dp))
-                                    Text(
-                                        text = stringResource(R.string.comment_spoiler_toggle),
-                                        style = MaterialTheme.typography.labelSmall.copy(
-                                            fontWeight = FontWeight.Bold,
-                                            fontSize = 11.sp,
-                                            lineHeight = 11.sp,
-                                            platformStyle = PlatformTextStyle(includeFontPadding = false),
-                                            lineHeightStyle = LineHeightStyle(
-                                                alignment = LineHeightStyle.Alignment.Center,
-                                                trim = LineHeightStyle.Trim.Both
-                                            )
-                                        ),
-                                        color = if (isSpoiler) accentColor else Color.White.copy(alpha = 0.65f),
-                                        maxLines = 1
-                                    )
+                                }
+
+                                Spacer(modifier = Modifier.width(6.dp))
+
+                                // Spoiler pill button
+                                Box(
+                                    modifier = Modifier
+                                        .height(32.dp)
+                                        .bounceClick {
+                                            VibrationHelper.vibrateTick(context)
+                                            onSpoilerChanged(!isSpoiler)
+                                        }
+                                        .clip(CircleShape)
+                                        .background(
+                                            if (isSpoiler) accentColor.copy(alpha = 0.16f)
+                                            else Color.White.copy(alpha = 0.06f)
+                                        )
+                                        .border(
+                                            1.dp,
+                                            if (isSpoiler) accentColor.copy(alpha = 0.40f)
+                                            else Color.White.copy(alpha = 0.15f),
+                                            CircleShape
+                                        )
+                                        .padding(horizontal = 11.dp),
+                                    contentAlignment = Alignment.Center
+                                ) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        horizontalArrangement = Arrangement.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = if (isSpoiler) R.drawable.ic_eye_off else R.drawable.ic_eye),
+                                            contentDescription = stringResource(R.string.comment_spoiler_toggle),
+                                            tint = if (isSpoiler) accentColor else Color.White.copy(alpha = 0.65f),
+                                            modifier = Modifier.size(14.dp)
+                                        )
+                                        Spacer(modifier = Modifier.width(5.dp))
+                                        Text(
+                                            text = stringResource(R.string.comment_spoiler_toggle),
+                                            style = MaterialTheme.typography.labelSmall.copy(
+                                                fontWeight = FontWeight.Bold,
+                                                fontSize = 11.sp,
+                                                lineHeight = 11.sp,
+                                                platformStyle = PlatformTextStyle(includeFontPadding = false),
+                                                lineHeightStyle = LineHeightStyle(
+                                                    alignment = LineHeightStyle.Alignment.Center,
+                                                    trim = LineHeightStyle.Trim.Both
+                                                )
+                                            ),
+                                            color = if (isSpoiler) accentColor else Color.White.copy(alpha = 0.65f),
+                                            maxLines = 1
+                                        )
+                                    }
+                                }
+
+                                if (onOpenWritingTips != null) {
+                                    var tipsButtonBounds by remember { mutableStateOf<Rect?>(null) }
+                                    Spacer(modifier = Modifier.width(6.dp))
+                                    Box(
+                                        modifier = Modifier
+                                            .size(32.dp)
+                                            .onGloballyPositioned { coords ->
+                                                tipsButtonBounds = coords.boundsInWindow()
+                                            }
+                                            .bounceClick { onOpenWritingTips(tipsButtonBounds) }
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.06f))
+                                            .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape),
+                                        contentAlignment = Alignment.Center
+                                    ) {
+                                        Icon(
+                                            painter = painterResource(id = R.drawable.ic_question_mark_pieno),
+                                            contentDescription = stringResource(R.string.comment_writing_tips_title),
+                                            tint = Color.White.copy(alpha = 0.70f),
+                                            modifier = Modifier.size(20.dp)
+                                        )
+                                    }
                                 }
                             }
 
-                            // Spacer pushes destination to the far right
-                            Spacer(modifier = Modifier.weight(1f))
-
-                            // Delivery destination pill
+                            // Delivery destination pill (pinned to the far right)
                             if (onPostToCommsUniChanged != null) {
+                                Spacer(modifier = Modifier.width(8.dp))
                                 val isDestinationActive = destinationToggleEnabled
                                 Box(
                                     modifier = Modifier
@@ -823,7 +1097,8 @@ fun CommentInputBar(
         if (isFlying) {
             Box(
                 modifier = Modifier
-                    .offset {
+                    .align(AbsoluteAlignment.TopLeft)
+                    .absoluteOffset {
                         IntOffset(
                             x = (launchOrigin.x + flightOffsetX.value.dp.toPx()).roundToInt(),
                             y = (launchOrigin.y + flightOffsetY.value.dp.toPx()).roundToInt()
@@ -878,5 +1153,151 @@ private fun MdBtnPill(onClick: () -> Unit, content: @Composable () -> Unit) {
         contentAlignment = Alignment.Center
     ) {
         content()
+    }
+}
+
+private data class ActiveHashtagMatch(
+    val hashIndex: Int,
+    val replaceEndIndex: Int,
+    val query: String
+)
+
+private fun findActiveHashtagQuery(
+    text: String,
+    cursor: Int,
+    selectedTags: List<TaggedMediaRef>
+): ActiveHashtagMatch? {
+    val safeCursor = cursor.coerceIn(0, text.length)
+    val beforeCursor = text.substring(0, safeCursor)
+    val lineStart = beforeCursor.lastIndexOf('\n') + 1
+
+    var hashIdx = -1
+    for (i in (safeCursor - 1) downTo lineStart) {
+        if (beforeCursor[i] == '#') {
+            val prevIsBoundary = i == 0 || beforeCursor[i - 1].isWhitespace()
+            if (prevIsBoundary) {
+                hashIdx = i
+                break
+            }
+        }
+    }
+    if (hashIdx == -1) return null
+
+    // Ignore '#' if it belongs to an already-confirmed selected media tag
+    for (tag in selectedTags) {
+        val token = "#${tag.title}"
+        if (text.startsWith(token, startIndex = hashIdx)) {
+            val tokenEnd = hashIdx + token.length
+            if (safeCursor <= tokenEnd || (safeCursor > tokenEnd && text.getOrNull(tokenEnd)?.isWhitespace() == true)) {
+                return null
+            }
+        }
+    }
+
+    val rawQuery = text.substring(hashIdx + 1, safeCursor)
+    if (rawQuery.startsWith(" ") || rawQuery.length > 50 || rawQuery.contains("  ") || rawQuery.count { it == ' ' } > 5) return null
+    val query = rawQuery.trim()
+
+    return ActiveHashtagMatch(
+        hashIndex = hashIdx,
+        replaceEndIndex = safeCursor,
+        query = query
+    )
+}
+
+@Composable
+private fun MediaTagSuggestionRow(
+    suggestion: TaggedMediaRef,
+    accentColor: Color,
+    imageLoader: coil3.ImageLoader,
+    onClick: () -> Unit
+) {
+    val context = LocalContext.current
+    val posterUrl = remember(suggestion.posterPath) {
+        buildTmdbImageUrl(suggestion.posterPath, ImageType.POSTER, ImageQuality.LOW)
+    }
+    val typeLabel = stringResource(
+        if (suggestion.mediaType == "tv") R.string.notif_media_tv else R.string.notif_media_movie
+    )
+    val subtitle = remember(typeLabel, suggestion.releaseYear) {
+        if (!suggestion.releaseYear.isNullOrBlank()) "$typeLabel • ${suggestion.releaseYear}" else typeLabel
+    }
+
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .bounceClick { onClick() }
+            .clip(RoundedCornerShape(10.dp))
+            .background(Color.White.copy(alpha = 0.06f))
+            .padding(5.dp),
+        verticalAlignment = Alignment.CenterVertically,
+        horizontalArrangement = Arrangement.spacedBy(10.dp)
+    ) {
+        Box(
+            modifier = Modifier
+                .size(width = 28.dp, height = 42.dp)
+                .clip(RoundedCornerShape(5.dp))
+                .background(Color.White.copy(alpha = 0.08f)),
+            contentAlignment = Alignment.Center
+        ) {
+            if (posterUrl != null) {
+                AsyncImage(
+                    model = ImageRequest.Builder(context)
+                        .data(posterUrl)
+                        .crossfade(true)
+                        .build(),
+                    imageLoader = imageLoader,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = Modifier.fillMaxSize()
+                )
+            } else {
+                Icon(
+                    painter = painterResource(
+                        id = if (suggestion.mediaType == "tv") R.drawable.ic_tv else R.drawable.ic_film
+                    ),
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.45f),
+                    modifier = Modifier.size(14.dp)
+                )
+            }
+        }
+
+        Column(
+            modifier = Modifier.weight(1f),
+            verticalArrangement = Arrangement.spacedBy(3.dp)
+        ) {
+            Text(
+                text = suggestion.title,
+                color = Color.White,
+                style = MaterialTheme.typography.bodyMedium.copy(
+                    fontSize = 13.sp,
+                    lineHeight = 16.sp,
+                    fontWeight = FontWeight.SemiBold,
+                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+            Text(
+                text = subtitle,
+                color = Color.White.copy(alpha = 0.55f),
+                style = MaterialTheme.typography.bodySmall.copy(
+                    fontSize = 11.sp,
+                    lineHeight = 13.sp,
+                    platformStyle = PlatformTextStyle(includeFontPadding = false)
+                ),
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis
+            )
+        }
+
+        Text(
+            text = "#",
+            color = accentColor.copy(alpha = 0.85f),
+            fontSize = 13.sp,
+            fontWeight = FontWeight.Bold,
+            modifier = Modifier.padding(end = 6.dp)
+        )
     }
 }

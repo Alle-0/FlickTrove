@@ -12,10 +12,13 @@ import com.cinetrack.data.model.isSameCommentText
 import com.cinetrack.data.model.isSameMediaType
 import com.cinetrack.data.api.CommsUniConversationStats
 import com.cinetrack.data.api.CommsUniOrigin
+import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.repository.CommsUniRepository
 import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.ActionFeedbackManager
+import com.cinetrack.ui.utils.TaggedMediaRef
 import com.cinetrack.ui.utils.UiText
+import com.cinetrack.ui.utils.extractTmdbMediaRefsFromText
 import com.cinetrack.R
 import com.cinetrack.util.TranslationManager
 import com.google.firebase.auth.FirebaseAuth
@@ -25,14 +28,19 @@ import java.util.Locale
 import java.util.TimeZone
 import dagger.hilt.android.lifecycle.HiltViewModel
 import com.google.mlkit.nl.translate.TranslateLanguage
+import kotlinx.coroutines.Job
 import kotlinx.coroutines.async
+import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -250,11 +258,35 @@ class CommsUniViewModel @Inject constructor(
     private val _showTranslationPrompt = MutableStateFlow<Pair<String, String>?>(null)
     val showTranslationPrompt: StateFlow<Pair<String, String>?> = _showTranslationPrompt.asStateFlow()
 
+    // #movie / #tv hashtag search & cross-language resolution
+    private val _mediaTagSuggestions = MutableStateFlow<List<TaggedMediaRef>>(emptyList())
+    val mediaTagSuggestions: StateFlow<List<TaggedMediaRef>> = _mediaTagSuggestions.asStateFlow()
+
+    private val _isSearchingMediaTags = MutableStateFlow(false)
+    val isSearchingMediaTags: StateFlow<Boolean> = _isSearchingMediaTags.asStateFlow()
+
+    private val _taggedMediaTitles = MutableStateFlow<Map<String, String>>(emptyMap())
+    val taggedMediaTitles: StateFlow<Map<String, String>> = _taggedMediaTitles.asStateFlow()
+
+    private val _taggedMediaPosters = MutableStateFlow<Map<String, String>>(emptyMap())
+    val taggedMediaPosters: StateFlow<Map<String, String>> = _taggedMediaPosters.asStateFlow()
+
+    private var mediaTagSearchJob: Job? = null
+    private val resolvedOrInFlightMediaTags = java.util.Collections.synchronizedSet(mutableSetOf<String>())
+    private val mediaTagSemaphore = Semaphore(4)
+
     fun dismissTranslationPrompt() {
         _showTranslationPrompt.value = null
     }
 
     init {
+        viewModelScope.launch {
+            _comments.collect { list ->
+                if (list.isNotEmpty()) {
+                    resolveMediaTagsForComments(list)
+                }
+            }
+        }
         viewModelScope.launch {
             commsUniRepository.liveCommentLikes.collect { overrides ->
                 if (overrides.isNotEmpty() && _comments.value.isNotEmpty()) {
@@ -774,11 +806,15 @@ class CommsUniViewModel @Inject constructor(
                         url.contains("klipy.com", ignoreCase = true) -> "klipy"
                         else -> "flicktrove"
                     }
+                    val pathWithoutQuery = url.substringBefore("?")
                     val contentType = when {
-                        url.endsWith(".gif", ignoreCase = true) || provider == "giphy" || provider == "tenor" -> "image/gif"
-                        url.endsWith(".png", ignoreCase = true) -> "image/png"
-                        url.endsWith(".jpg", ignoreCase = true) || url.endsWith(".jpeg", ignoreCase = true) -> "image/jpeg"
-                        url.endsWith(".avif", ignoreCase = true) -> "image/avif"
+                        pathWithoutQuery.endsWith(".gif", ignoreCase = true) -> "image/gif"
+                        pathWithoutQuery.endsWith(".png", ignoreCase = true) -> "image/png"
+                        pathWithoutQuery.endsWith(".jpg", ignoreCase = true) ||
+                            pathWithoutQuery.endsWith(".jpeg", ignoreCase = true) -> "image/jpeg"
+                        pathWithoutQuery.endsWith(".webp", ignoreCase = true) -> "image/webp"
+                        pathWithoutQuery.endsWith(".avif", ignoreCase = true) -> "image/avif"
+                        provider == "giphy" || provider == "tenor" || provider == "klipy" -> "image/gif"
                         else -> "image/webp"
                     }
                     com.cinetrack.data.api.CommsUniWriteAttachment(
@@ -1180,6 +1216,7 @@ class CommsUniViewModel @Inject constructor(
 
             if (anySuccess) {
                 untrackMyCommentId(commentId)
+                badgeRepository.recordCommentDeleted()
                 // Se non è già stato eliminato tramite CommentRepository su Firestore, elimina le immagini da Supabase Storage
                 if (!firestoreDeleted) {
                     allMediaUrls.forEach { imageUrl ->
@@ -1530,8 +1567,114 @@ class CommsUniViewModel @Inject constructor(
         )
     }
 
+    fun searchMediaTags(query: String) {
+        val cleanQuery = query.trim()
+        mediaTagSearchJob?.cancel()
+        if (cleanQuery.length < 2) {
+            _mediaTagSuggestions.value = emptyList()
+            _isSearchingMediaTags.value = false
+            return
+        }
+
+        mediaTagSearchJob = viewModelScope.launch {
+            _isSearchingMediaTags.value = true
+            delay(300)
+            val results = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
+                try {
+                    val tmdbResults = movieRepository.searchMulti(cleanQuery, page = 1)
+                        .mapNotNull { item ->
+                            when (item) {
+                                is TMDBSearchResult.MovieResult -> {
+                                    val title = item.title?.trim().orEmpty()
+                                    if (title.isEmpty()) null else TaggedMediaRef(
+                                        id = item.id,
+                                        mediaType = "movie",
+                                        title = title,
+                                        posterPath = item.posterPath,
+                                        releaseYear = item.releaseDate?.take(4)?.takeIf { it.isNotBlank() }
+                                    )
+                                }
+                                is TMDBSearchResult.TvResult -> {
+                                    val name = item.name?.trim().orEmpty()
+                                    if (name.isEmpty()) null else TaggedMediaRef(
+                                        id = item.id,
+                                        mediaType = "tv",
+                                        title = name,
+                                        posterPath = item.posterPath,
+                                        releaseYear = item.firstAirDate?.take(4)?.takeIf { it.isNotBlank() }
+                                    )
+                                }
+                                else -> null
+                            }
+                        }
+                        .take(8)
+                    if (tmdbResults.isNotEmpty()) {
+                        tmdbResults
+                    } else {
+                        searchLocalMediaTags(cleanQuery)
+                    }
+                } catch (_: Exception) {
+                    searchLocalMediaTags(cleanQuery)
+                }
+            }
+            _mediaTagSuggestions.value = results
+            _isSearchingMediaTags.value = false
+        }
+    }
+
+    private suspend fun searchLocalMediaTags(cleanQuery: String): List<TaggedMediaRef> {
+        return try {
+            movieRepository.searchLocalMovies(cleanQuery)
+                .mapNotNull { movie ->
+                    val title = (movie.title ?: movie.name)?.trim().orEmpty()
+                    if (title.isEmpty()) null else TaggedMediaRef(
+                        id = movie.id,
+                        mediaType = if (movie.mediaType == "tv") "tv" else "movie",
+                        title = title,
+                        posterPath = movie.posterPath,
+                        releaseYear = (movie.releaseYear ?: movie.releaseDate ?: movie.firstAirDate)?.take(4)?.takeIf { it.isNotBlank() }
+                    )
+                }
+                .take(8)
+        } catch (_: Exception) {
+            emptyList()
+        }
+    }
+
+    fun clearMediaTagSuggestions() {
+        mediaTagSearchJob?.cancel()
+        _mediaTagSuggestions.value = emptyList()
+        _isSearchingMediaTags.value = false
+    }
+
+    private fun resolveMediaTagsForComments(comments: List<com.cinetrack.data.model.AppComment>) {
+        val refs = comments
+            .flatMap { extractTmdbMediaRefsFromText(it.text) }
+            .distinct()
+            .filter { (type, id) ->
+                val key = "$type:$id"
+                !_taggedMediaTitles.value.containsKey(key) && resolvedOrInFlightMediaTags.add(key)
+            }
+        if (refs.isEmpty()) return
+
+        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
+            val resolved = com.cinetrack.ui.utils.resolveTmdbMediaTagsMetadata(
+                refs = refs,
+                movieRepository = movieRepository,
+                semaphore = mediaTagSemaphore
+            )
+            if (resolved.titles.isNotEmpty()) {
+                _taggedMediaTitles.value = _taggedMediaTitles.value + resolved.titles
+            }
+            if (resolved.posters.isNotEmpty()) {
+                _taggedMediaPosters.value = _taggedMediaPosters.value + resolved.posters
+            }
+        }
+    }
+
     override fun onCleared() {
         super.onCleared()
+        mediaTagSearchJob?.cancel()
         translationManager.closeAll()
     }
 }

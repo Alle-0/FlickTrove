@@ -90,6 +90,7 @@ class FlickTroveWidget : GlanceAppWidget() {
             val locale = java.util.Locale.forLanguageTag(tag.replace("_", "-"))
             val config = android.content.res.Configuration(context.resources.configuration)
             config.setLocale(locale)
+            config.setLayoutDirection(locale)
             context.createConfigurationContext(config)
         } else {
             context

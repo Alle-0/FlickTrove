@@ -6,6 +6,10 @@ import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.graphics.Color
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
+import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.ColorUtils
 
 private val DarkColorScheme = darkColorScheme(
@@ -71,10 +75,21 @@ fun FlickTroveTheme(
         onPrimary = ColorUtils.contentColorForAccent(accentColor),
         secondary = ColorUtils.calculateHarmonicSecondary(accentColor)
     )
+
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val isArabic = LocalConfiguration.current.locales.let { !it.isEmpty && it[0]?.language == "ar" }
+    val resolvedTypography = if (isRtl || isArabic) {
+        Typography.copy(
+            bodyLarge = Typography.bodyLarge.copy(letterSpacing = 0.sp),
+            labelSmall = Typography.labelSmall.copy(letterSpacing = 0.sp)
+        )
+    } else {
+        Typography
+    }
     
     MaterialTheme(
         colorScheme = colorScheme,
-        typography = Typography,
+        typography = resolvedTypography,
         content = content
     )
 }

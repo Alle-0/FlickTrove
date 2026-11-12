@@ -24,6 +24,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -99,6 +100,8 @@ fun FilterSortSection(
                         add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))
                         add(FilterOption("first_watched_at", stringResource(R.string.filter_sort_first_watched_at)))
                         add(FilterOption("rewatch_count", stringResource(R.string.filter_sort_rewatch_count)))
+                    } else if (category != "movie") {
+                        add(FilterOption("last_watched_at", stringResource(R.string.filter_sort_last_watched_at)))
                     }
                     if (isFolder) {
                         add(FilterOption("manual", stringResource(R.string.filter_sort_manual)))
@@ -377,10 +380,18 @@ fun FilterTvStatusSection(
     onToggle: () -> Unit,
     onSortConfigChanged: (SortConfig) -> Unit
 ) {
+    val normalizedStatuses = remember(isVisti, sortConfig.selectedStatuses) {
+        if (isVisti) {
+            sortConfig.selectedStatuses.map { if (it == "up_to_date") "returning" else it }.distinct()
+        } else {
+            sortConfig.selectedStatuses
+        }
+    }
+
     ExpandableSection(
         title = stringResource(R.string.filter_status),
         isExpanded = isExpanded,
-        badgeCount = sortConfig.selectedStatuses.size,
+        badgeCount = normalizedStatuses.size,
         onToggle = onToggle
     ) {
         val statuses = if (!isVisti) {
@@ -391,7 +402,9 @@ fun FilterTvStatusSection(
             )
         } else {
             listOf(
-                "up_to_date" to stringResource(R.string.filter_status_up_to_date)
+                "returning" to stringResource(R.string.status_returning_series),
+                "ended" to stringResource(R.string.status_ended),
+                "canceled" to stringResource(R.string.status_canceled)
             )
         }
 
@@ -401,13 +414,13 @@ fun FilterTvStatusSection(
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             statuses.forEach { (statusId, label) ->
-                val isSelected = statusId in sortConfig.selectedStatuses
+                val isSelected = statusId in normalizedStatuses
                 FilterChip(
                     label = label.uppercase(),
                     isSelected = isSelected,
                     onClick = {
-                        val newList = if (isSelected) sortConfig.selectedStatuses - statusId
-                        else sortConfig.selectedStatuses + statusId
+                        val newList = if (isSelected) normalizedStatuses - statusId
+                        else normalizedStatuses + statusId
                         onSortConfigChanged(sortConfig.copy(selectedStatuses = newList))
                     }
                 )
@@ -565,8 +578,12 @@ fun FilterPlatformsSection(
         badgeCount = sortConfig.selectedProviders.size,
         onToggle = onToggle
     ) {
-        val currentLang = configuration.locales[0]?.language?.lowercase() ?: java.util.Locale.getDefault().language.lowercase()
-        val availableProviders = remember(currentLang) { ProviderConstants.getAvailableProviders(currentLang) }
+        val cachedProviders by ProviderConstants.cachedProvidersFlow.collectAsStateWithLifecycle()
+        val locale = configuration.locales[0] ?: java.util.Locale.getDefault()
+        val watchRegion = remember(locale) { com.cinetrack.util.RegionResolver.resolveFromLocale(locale) }
+        val availableProviders = remember(watchRegion, cachedProviders) {
+            ProviderConstants.getAvailableProvidersForRegion(watchRegion)
+        }
         val providersListState = androidx.compose.foundation.lazy.rememberLazyListState()
         LazyRow(
             state = providersListState,

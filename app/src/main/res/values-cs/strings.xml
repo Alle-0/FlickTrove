@@ -306,7 +306,7 @@
     <string name="settings_terms_service">Podmínky služby</string>
     <string name="settings_privacy_policy">Zásady ochrany osobních údajů</string>
     <string name="settings_tmdb_notice">Tento produkt využívá rozhraní TMDB API, ale není schválen ani certifikován službou TMDB.</string>
-    <string name="settings_giphy_notice">GIFy poskytuje služba GIPHY</string>
+    <string name="settings_klipy_notice">GIFy poskytuje služba KLIPY</string>
     <string name="settings_omdb_notice">Další data a hodnocení poskytuje rozhraní OMDb API.</string>
     <string name="settings_tvdb_notice">Metadata seriálů poskytuje TheTVDB.</string>
     <string name="settings_trakt_notice">Synchronizaci a statistiky zajišťuje Trakt.tv.</string>
@@ -1376,6 +1376,15 @@
     <string name="comment_tap_to_reveal">Klepnutím zobrazit</string>
     <string name="comment_image_preview">[Obrázek]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Nepodařilo se načíst GIFy</string>
+    <string name="gif_picker_empty">Žádné GIFy nejsou k dispozici</string>
+    <string name="gif_picker_search_empty">Pro „%1$s“ nebyly nalezeny žádné GIFy</string>
+    <string name="gif_picker_retry">Zkusit znovu</string>
+    <string name="gif_picker_cd_clear">Vymazat</string>
+    <string name="comment_stickers">Nálepky</string>
+    <string name="sticker_picker_load_error">Nepodařilo se načíst nálepky</string>
+    <string name="sticker_picker_empty">Žádné nálepky nejsou k dispozici</string>
+    <string name="sticker_picker_search_empty">Pro „%1$s“ nebyly nalezeny žádné nálepky</string>
     <string name="report_success">Nahlášení úspěšně odesláno</string>
     <string name="report_cooldown">Tuto položku jste již v posledních 24 hodinách nahlásili</string>
     <string name="report_error">Chyba při odesílání nahlášení</string>
@@ -2087,6 +2096,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">Navigace a gesta</string>
     <string name="settings_bottom_bar_swipe">Přejetí spodní lišty (filmy/seriály)</string>
@@ -2095,4 +2105,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Průvodce formátováním</string>
+    <string name="comment_tip_bold">Tučné zvýraznění</string>
+    <string name="comment_tip_italic">Kurzíva</string>
+    <string name="comment_tip_strikethrough">Přeškrtnutý text</string>
+    <string name="comment_tip_list">Odrážkové nebo číslované seznamy (1.)</string>
+    <string name="comment_tip_quote">Blok citace</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Propojte film nebo seriál: otevře kartu v jazyce čtenáře</string>
+    <string name="comment_tip_attachments">Přidejte obrázky nebo GIFy ze spodní lišty</string>
+    <string name="comment_tip_links">Vložené odkazy lze otevřít s náhledem zabezpečení</string>
+    <string name="comment_tip_spoiler">Zapněte Spoiler pro rozmazání komentáře až do klepnutí</string>
+    <string name="comment_tip_max_chars">Limit: max. %1$d znaků</string>
+    <string name="comment_tag_search_hint">Napište název filmu nebo seriálu pro označení...</string>
 </resources>

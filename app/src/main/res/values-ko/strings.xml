@@ -237,6 +237,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">시작 화면</string>
     <string name="settings_default_start_tab_desc">앱 시작 시 처음으로 열릴 화면을 선택하세요</string>
     <string name="settings_default_start_feed">홈</string>
@@ -303,7 +304,7 @@
     <string name="settings_terms_service">서비스 이용약관</string>
     <string name="settings_privacy_policy">개인정보 처리방침</string>
     <string name="settings_tmdb_notice">본 제품은 TMDB API를 사용하지만 TMDB의 인증 또는 승인을 받지 않았습니다.</string>
-    <string name="settings_giphy_notice">GIFs powered by GIPHY</string>
+    <string name="settings_klipy_notice">GIFs powered by KLIPY</string>
     <string name="settings_omdb_notice">추가 메타데이터 및 평점은 OMDb API에서 제공받습니다.</string>
     <string name="settings_tvdb_notice">시리즈 메타데이터는 TheTVDB에서 제공합니다.</string>
     <string name="settings_trakt_notice">동기화 및 통계 기능은 Trakt.tv에서 지원합니다.</string>
@@ -1353,6 +1354,15 @@
     <string name="comment_tap_to_reveal">탭하여 내용 확인</string>
     <string name="comment_image_preview">[이미지]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">GIF를 불러올 수 없습니다</string>
+    <string name="gif_picker_empty">사용 가능한 GIF가 없습니다</string>
+    <string name="gif_picker_search_empty">\"%1$s\"에 대한 GIF를 찾을 수 없습니다</string>
+    <string name="gif_picker_retry">다시 시도</string>
+    <string name="gif_picker_cd_clear">지우기</string>
+    <string name="comment_stickers">스티커</string>
+    <string name="sticker_picker_load_error">스티커를 불러올 수 없습니다</string>
+    <string name="sticker_picker_empty">사용 가능한 스티커가 없습니다</string>
+    <string name="sticker_picker_search_empty">\"%1$s\"에 대한 스티커를 찾을 수 없습니다</string>
     <string name="report_success">신고가 정상 접수되었습니다</string>
     <string name="report_cooldown">최근 24시간 내에 이미 신고한 항목입니다</string>
     <string name="report_error">신고 전송 중 오류 발생</string>
@@ -2135,4 +2145,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">서식 가이드</string>
+    <string name="comment_tip_bold">굵게 강조</string>
+    <string name="comment_tip_italic">기울임꼴 스타일</string>
+    <string name="comment_tip_strikethrough">취소선 텍스트</string>
+    <string name="comment_tip_list">글머리 기호 또는 번호 매기기 목록 (1.)</string>
+    <string name="comment_tip_quote">인용 블록</string>
+    <string name="comment_tip_media_tag_syntax">#영화</string>
+    <string name="comment_tip_media_tag">영화 또는 시리즈 연결: 읽는 사람의 언어로 상세 페이지 열기</string>
+    <string name="comment_tip_attachments">하단 바에서 이미지 또는 GIF 추가</string>
+    <string name="comment_tip_links">붙여넣은 URL은 안전 미리보기와 함께 클릭할 수 있습니다</string>
+    <string name="comment_tip_spoiler">스포일러를 켜면 탭할 때까지 댓글 전체가 흐리게 가려집니다</string>
+    <string name="comment_tip_max_chars">제한: 최대 %1$d자</string>
+    <string name="comment_tag_search_hint">태그할 영화 또는 시리즈 제목을 입력하세요...</string>
 </resources>

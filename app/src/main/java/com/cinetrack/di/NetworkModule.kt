@@ -432,14 +432,14 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    @Named("giphy_retrofit")
-    fun provideGiphyRetrofit(
+    @Named("klipy_retrofit")
+    fun provideKlipyRetrofit(
         json: Json,
         okHttpClient: OkHttpClient
     ): Retrofit {
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
-            .baseUrl("https://api.giphy.com/v1/")
+            .baseUrl("https://api.klipy.com/api/v1/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()
@@ -447,7 +447,7 @@ object NetworkModule {
 
     @Provides
     @Singleton
-    fun provideGiphyService(@Named("giphy_retrofit") retrofit: Retrofit): com.cinetrack.data.api.GiphyService {
-        return retrofit.create(com.cinetrack.data.api.GiphyService::class.java)
+    fun provideKlipyService(@Named("klipy_retrofit") retrofit: Retrofit): com.cinetrack.data.api.KlipyService {
+        return retrofit.create(com.cinetrack.data.api.KlipyService::class.java)
     }
 }

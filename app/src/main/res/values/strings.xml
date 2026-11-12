@@ -237,6 +237,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">Start Screen</string>
     <string name="settings_default_start_tab_desc">Choose the default screen on app launch</string>
     <string name="settings_default_start_feed">HOME</string>
@@ -316,7 +317,7 @@
     <string name="settings_terms_service">Terms of Service</string>
     <string name="settings_privacy_policy">Privacy Policy</string>
     <string name="settings_tmdb_notice">This product uses the TMDB API but is not endorsed or certified by TMDB.</string>
-    <string name="settings_giphy_notice">GIFs powered by GIPHY</string>
+    <string name="settings_klipy_notice">GIFs powered by KLIPY</string>
     <string name="settings_omdb_notice">Additional data and ratings provided by OMDb API.</string>
     <string name="settings_tvdb_notice">Series metadata provided by TheTVDB.</string>
     <string name="settings_trakt_notice">Sync and stats powered by Trakt.tv.</string>
@@ -1388,6 +1389,15 @@
     <string name="comment_tap_to_reveal">Tap to reveal</string>
     <string name="comment_image_preview">[Image]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Unable to load GIFs</string>
+    <string name="gif_picker_empty">No GIFs available</string>
+    <string name="gif_picker_search_empty">No GIFs found for \"%1$s\"</string>
+    <string name="gif_picker_retry">Retry</string>
+    <string name="gif_picker_cd_clear">Clear</string>
+    <string name="comment_stickers">Stickers</string>
+    <string name="sticker_picker_load_error">Unable to load Stickers</string>
+    <string name="sticker_picker_empty">No Stickers available</string>
+    <string name="sticker_picker_search_empty">No Stickers found for \"%1$s\"</string>
     <string name="report_success">Report sent successfully</string>
     <string name="report_cooldown">You have already reported this in the last 24 hours</string>
     <string name="report_error">Error sending report</string>
@@ -2141,4 +2151,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Formatting guide</string>
+    <string name="comment_tip_bold">Strong emphasis</string>
+    <string name="comment_tip_italic">Italic emphasis</string>
+    <string name="comment_tip_strikethrough">Crossed-out text</string>
+    <string name="comment_tip_list">Bulleted or numbered lists (1.)</string>
+    <string name="comment_tip_quote">Quote block</string>
+    <string name="comment_tip_media_tag_syntax">#movie</string>
+    <string name="comment_tip_media_tag">Link a movie or series: opens its page in the reader\'s language</string>
+    <string name="comment_tip_attachments">Add images or GIFs from the bottom bar</string>
+    <string name="comment_tip_links">Pasted URLs become clickable with a link preview</string>
+    <string name="comment_tip_spoiler">Toggle Spoiler to blur the full comment until tapped</string>
+    <string name="comment_tip_max_chars">Limit: %1$d characters max</string>
+    <string name="comment_tag_search_hint">Type a movie or TV series title to tag it...</string>
 </resources>

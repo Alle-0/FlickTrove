@@ -32,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import com.cinetrack.ui.viewmodel.FilterPill
 
 @Composable
@@ -53,14 +55,14 @@ fun SearchRecentSearchesRow(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), 
                 fontSize = 10.sp, 
                 fontWeight = FontWeight.Bold, 
-                letterSpacing = 1.sp
+                letterSpacing = rtlSafeLetterSpacing(1.sp)
             )
             Text(
                 text = stringResource(R.string.search_clear_all),
                 color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
                 fontSize = 10.sp,
                 fontWeight = FontWeight.Bold,
-                letterSpacing = 0.5.sp,
+                letterSpacing = rtlSafeLetterSpacing(0.5.sp),
                 modifier = Modifier.bounceClick { onClearAll() }.padding(horizontal = 4.dp, vertical = 2.dp)
             )
         }
@@ -132,7 +134,7 @@ fun SearchSuggestedFiltersRow(
                 color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), 
                 fontSize = 10.sp, 
                 fontWeight = FontWeight.Bold, 
-                letterSpacing = 1.sp
+                letterSpacing = rtlSafeLetterSpacing(1.sp)
             )
             Spacer(modifier = Modifier.width(6.dp))
             Icon(
@@ -141,6 +143,7 @@ fun SearchSuggestedFiltersRow(
                 tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                 modifier = Modifier
                     .size(12.dp)
+                    .mirrorInRtl()
                     .rotate(rotationAngle)
             )
         }

@@ -15,7 +15,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.nativeCanvas
 import androidx.compose.ui.graphics.toArgb
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.data.model.Movie
@@ -40,6 +42,7 @@ fun Top10MovieCard(
     onMessage: (String) -> Unit = {}
 ) {
     val accentColor = MaterialTheme.colorScheme.primary
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     Box(
         modifier = Modifier
@@ -48,20 +51,24 @@ fun Top10MovieCard(
     ) {
         val bgColor = MaterialTheme.colorScheme.background
         
-        // Large outlined rank number — stroke only, accent color, bleeds off left/bottom edge
+        // Large outlined rank number — stroke only, accent color, bleeds off start/bottom edge
         androidx.compose.foundation.Canvas(
             modifier = Modifier
                 .align(Alignment.BottomStart)
                 .size(width = 100.dp, height = 110.dp)
                 .offset(x = (-8).dp, y = 22.dp)
         ) {
+            val drawAlign = if (isRtl) android.graphics.Paint.Align.RIGHT else android.graphics.Paint.Align.LEFT
+            val textX = if (isRtl) size.width else 0f
+            val baseTypeface = android.graphics.Typeface.create(
+                android.graphics.Typeface.DEFAULT_BOLD,
+                android.graphics.Typeface.BOLD
+            )
             val outlinePaint = android.graphics.Paint().apply {
                 isAntiAlias = true
                 textSize = 148.sp.toPx()
-                typeface = android.graphics.Typeface.create(
-                    android.graphics.Typeface.DEFAULT_BOLD,
-                    android.graphics.Typeface.BOLD
-                )
+                typeface = baseTypeface
+                textAlign = drawAlign
                 style = android.graphics.Paint.Style.STROKE
                 strokeWidth = 7f // Double thickness because fill covers inner half
                 strokeJoin = android.graphics.Paint.Join.ROUND
@@ -71,22 +78,21 @@ fun Top10MovieCard(
             val fillPaint = android.graphics.Paint().apply {
                 isAntiAlias = true
                 textSize = 148.sp.toPx()
-                typeface = android.graphics.Typeface.create(
-                    android.graphics.Typeface.DEFAULT_BOLD,
-                    android.graphics.Typeface.BOLD
-                )
+                typeface = baseTypeface
+                textAlign = drawAlign
                 style = android.graphics.Paint.Style.FILL
                 color = bgColor.toArgb()
             }
+            val rankText = rank.toString()
             drawContext.canvas.nativeCanvas.drawText(
-                rank.toString(),
-                0f,
+                rankText,
+                textX,
                 size.height * 0.85f,
                 outlinePaint
             )
             drawContext.canvas.nativeCanvas.drawText(
-                rank.toString(),
-                0f,
+                rankText,
+                textX,
                 size.height * 0.85f,
                 fillPaint
             )

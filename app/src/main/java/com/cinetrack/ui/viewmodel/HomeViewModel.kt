@@ -83,6 +83,7 @@ class HomeViewModel @Inject constructor(
     private val settingsRepository: com.cinetrack.data.repository.SettingsRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
+    private val selectContinueWatchingTvUseCase: com.cinetrack.domain.SelectContinueWatchingTvUseCase,
     private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
     private val simklAuthRepository: com.cinetrack.data.repository.SimklAuthRepository
 ) : ViewModel() {
@@ -447,11 +448,16 @@ class HomeViewModel @Inject constructor(
         val hasFeedError: Boolean = false
     )
 
+    private val tvLatestWatchedAtFlow: Flow<Map<Long, Long>> = repository.getAllWatchHistoryFlow()
+        .map { histories -> selectContinueWatchingTvUseCase.buildLatestWatchMillisMap(histories) }
+        .distinctUntilChanged()
+
     private val filteredFeedFlow: Flow<FilteredFeedData> = combine(
         _feedState,
         repository.getLocalMoviesFlow(),
+        tvLatestWatchedAtFlow,
         settingsRepository.hideSavedFromDiscovery
-    ) { feedState, localMovies, hideSaved ->
+    ) { feedState, localMovies, tvLatestWatchedAt, hideSaved ->
         val allLocalCompositeIds = localMovies.map { it.compositeId }.toSet()
         val localCompositeIds = if (hideSaved) allLocalCompositeIds else emptySet()
 
@@ -463,8 +469,6 @@ class HomeViewModel @Inject constructor(
         fun forceFilterRecommendations(list: ImmutableList<Movie>): ImmutableList<Movie> {
             return list.filter { !allLocalCompositeIds.contains(it.compositeId) }.toImmutableList()
         }
-
-        val localTvMap = localMovies.filter { it.mediaType == "tv" }.associateBy { it.id }
 
         FilteredFeedData(
             recommendedMovies = forceFilterRecommendations(feedState.recommendedMovies),
@@ -480,16 +484,9 @@ class HomeViewModel @Inject constructor(
             trendingMovies = feedState.trendingMovies,
             trendingTv = feedState.trendingTv,
             magazineNews = feedState.magazineNews,
-            continueWatchingTv = feedState.continueWatchingTv.mapNotNull { tv ->
-                // FIX: se la serie è stata eliminata (pending_delete), getAllFlow() la filtra e
-                // localTvMap non la conterrà più. In questo caso saltiamo la card anziché
-                // usare il vecchio valore dalla cache del feed, che la farebbe rimanere visibile.
-                val localTv = localTvMap[tv.id] ?: return@mapNotNull null
-                if (!localTv.dropped) {
-                    val next = localTv.calculateNextEpisode()
-                    if (next != null && !next.isUpToDateWithAirDate && next.remainingTotal > 0) localTv else null
-                } else null
-            }.toImmutableList(),
+            // Calcola "Continua a guardare" direttamente dai dati locali e da watch_history
+            // così resta sempre aggiornato e ordinato per data di visione reale (anche con cache feed attiva).
+            continueWatchingTv = selectContinueWatchingTvUseCase(localMovies, tvLatestWatchedAt),
             becauseYouWatchedMovie = feedState.becauseYouWatchedMovie,
             becauseYouWatchedTv = feedState.becauseYouWatchedTv,
             isFeedLoading = !feedState.isLoaded && !feedState.hasError,
@@ -504,7 +501,8 @@ class HomeViewModel @Inject constructor(
             foldersFlow = repository.getFoldersFlow(),
             preferencesFlow = preferenceRepository.userPreferencesFlow,
             searchQueryFlow = _searchQuery.debounce(300).distinctUntilChanged(),
-            activeTabFlow = _activeTab
+            activeTabFlow = _activeTab,
+            watchHistoryFlow = repository.getAllWatchHistoryFlow()
         ),
         filteredFeedFlow,
         _boxOfficeWinner

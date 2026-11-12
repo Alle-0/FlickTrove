@@ -439,11 +439,23 @@ class SimklSyncWorker @AssistedInject constructor(
                 val oldWatched = local.watched
                 val oldRating = local.personalRating
                 
+                val remoteWatchedAt = item.last_watched_at?.takeIf { it.isNotBlank() }
+                val resolvedWatchedAt = if (
+                    remoteWatchedAt != null &&
+                    com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(remoteWatchedAt) >
+                    com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(local.watchedAt)
+                ) {
+                    remoteWatchedAt
+                } else {
+                    local.watchedAt
+                }
+
                 val updated = local.copy(
                     watched = isWatched,
                     favorite = isWatchlist,
                     dropped = isDropped,
                     personalRating = newRating ?: local.personalRating,
+                    watchedAt = resolvedWatchedAt,
                     syncStatus = "synced"
                 )
                 updatesToSave.add(updated)
@@ -502,6 +514,7 @@ class SimklSyncWorker @AssistedInject constructor(
                                     favorite = isWatchlist,
                                     dropped = isDropped,
                                     personalRating = newRating,
+                                    watchedAt = itemData?.last_watched_at?.takeIf { it.isNotBlank() },
                                     syncStatus = "synced"
                                 )
                                 

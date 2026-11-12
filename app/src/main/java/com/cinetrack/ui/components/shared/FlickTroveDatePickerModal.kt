@@ -25,6 +25,7 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.ColorUtils
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.components.updates.MonthYearPickerDialog
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
@@ -142,7 +143,7 @@ fun FlickTroveDatePickerModal(
                             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                             contentDescription = "Next Month",
                             tint = Color.White,
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp).mirrorInRtl()
                         )
                     }
                 }

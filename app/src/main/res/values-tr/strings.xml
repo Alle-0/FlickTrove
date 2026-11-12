@@ -237,6 +237,7 @@
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
     <string name="settings_default_start_tab">Başlangıç Ekranı</string>
     <string name="settings_default_start_tab_desc">Uygulama açılışındaki varsayılan ekranı seçin</string>
     <string name="settings_default_start_feed">ANA SAYFA</string>
@@ -303,7 +304,7 @@
     <string name="settings_terms_service">Kullanım Koşulları</string>
     <string name="settings_privacy_policy">Gizlilik Politikası</string>
     <string name="settings_tmdb_notice">Bu ürün TMDB API\'sini kullanır ancak TMDB tarafından onaylanmamış veya sertifikalandırılmamıştır.</string>
-    <string name="settings_giphy_notice">GIF\'ler GIPHY tarafından sağlanmaktadır</string>
+    <string name="settings_klipy_notice">GIF\'ler KLIPY tarafından sağlanmaktadır</string>
     <string name="settings_omdb_notice">Ek veriler ve puanlar OMDb API tarafından sağlanmaktadır.</string>
     <string name="settings_tvdb_notice">Dizi meta verileri TheTVDB tarafından sağlanmaktadır.</string>
     <string name="settings_trakt_notice">Senkronizasyon ve istatistikler Trakt.tv tarafından sağlanmaktadır.</string>
@@ -1353,6 +1354,15 @@
     <string name="comment_tap_to_reveal">Görmek için dokunun</string>
     <string name="comment_image_preview">[Görsel]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">GIF\'ler yüklenemedi</string>
+    <string name="gif_picker_empty">Kullanılabilir GIF yok</string>
+    <string name="gif_picker_search_empty">\"%1$s\" için GIF bulunamadı</string>
+    <string name="gif_picker_retry">Yeniden dene</string>
+    <string name="gif_picker_cd_clear">Temizle</string>
+    <string name="comment_stickers">Çıkartmalar</string>
+    <string name="sticker_picker_load_error">Çıkartmalar yüklenemedi</string>
+    <string name="sticker_picker_empty">Kullanılabilir çıkartma yok</string>
+    <string name="sticker_picker_search_empty">\"%1$s\" için çıkartma bulunamadı</string>
     <string name="report_success">Bildirim başarıyla gönderildi</string>
     <string name="report_cooldown">Bunu son 24 saat içinde zaten bildirdiniz</string>
     <string name="report_error">Bildirim gönderilirken hata oluştu</string>
@@ -2135,4 +2145,18 @@
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Biçimlendirme kılavuzu</string>
+    <string name="comment_tip_bold">Kalın vurgulama</string>
+    <string name="comment_tip_italic">İtalik stil</string>
+    <string name="comment_tip_strikethrough">Üstü çizili metin</string>
+    <string name="comment_tip_list">Madde işaretli veya numaralı listeler (1.)</string>
+    <string name="comment_tip_quote">Alıntı bloğu</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Film veya dizi bağla: okuyucunun dilinde sayfasını açar</string>
+    <string name="comment_tip_attachments">Alt çubuktan görsel veya GIF ekleyin</string>
+    <string name="comment_tip_links">Yapıştırılan URL\'ler güvenlik önizlemesiyle tıklanabilir olur</string>
+    <string name="comment_tip_spoiler">Dokunulana kadar tüm yorumu bulanıklaştırmak için Spoiler\'ı açın</string>
+    <string name="comment_tip_max_chars">Sınır: en fazla %1$d karakter</string>
+    <string name="comment_tag_search_hint">Etiketlemek için bir film veya dizi adı yaz...</string>
 </resources>

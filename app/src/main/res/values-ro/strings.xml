@@ -321,7 +321,7 @@ Sigur vrei să continui?</string>
     <string name="settings_terms_service">Termeni și condiții</string>
     <string name="settings_privacy_policy">Politica de confidențialitate</string>
     <string name="settings_tmdb_notice">Acest produs folosește API-ul TMDB, dar nu este aprobat sau certificat de TMDB.</string>
-    <string name="settings_giphy_notice">GIF-uri oferite de GIPHY</string>
+    <string name="settings_klipy_notice">GIF-uri oferite de KLIPY</string>
     <string name="settings_omdb_notice">Date suplimentare și evaluări furnizate de OMDb API.</string>
     <string name="settings_tvdb_notice">Metadatele serialelor furnizate de TheTVDB.</string>
     <string name="settings_trakt_notice">Sincronizare și statistici oferite de Trakt.tv.</string>
@@ -1395,6 +1395,15 @@ Introdu cel puțin 3 caractere</string>
     <string name="comment_tap_to_reveal">Apasă pentru a dezvălui</string>
     <string name="comment_image_preview">[Imagine]</string>
     <string name="comment_gif">GIF</string>
+    <string name="gif_picker_load_error">Nu s-au putut încărca GIF-urile</string>
+    <string name="gif_picker_empty">Niciun GIF disponibil</string>
+    <string name="gif_picker_search_empty">Nu s-au găsit GIF-uri pentru „%1$s”</string>
+    <string name="gif_picker_retry">Reîncearcă</string>
+    <string name="gif_picker_cd_clear">Șterge</string>
+    <string name="comment_stickers">Stickere</string>
+    <string name="sticker_picker_load_error">Nu s-au putut încărca stickerele</string>
+    <string name="sticker_picker_empty">Niciun sticker disponibil</string>
+    <string name="sticker_picker_search_empty">Nu s-au găsit stickere pentru „%1$s”</string>
     <string name="report_success">Raport trimis cu succes</string>
     <string name="report_cooldown">Ai raportat deja acest element în ultimele 24 de ore</string>
     <string name="report_error">Eroare la trimiterea raportului</string>
@@ -2109,6 +2118,7 @@ Cod de invitație: %3$s</string>
     <string name="settings_language_el">Ελληνικά</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
+    <string name="settings_language_ar">العربية</string>
 
     <string name="settings_group_navigation_gestures">Navigare și gesturi</string>
     <string name="settings_bottom_bar_swipe">Glisare bară inferioară (filme/seriale)</string>
@@ -2117,4 +2127,18 @@ Cod de invitație: %3$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
     <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
     <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+
+    <string name="comment_writing_tips_title">Ghid de formatare</string>
+    <string name="comment_tip_bold">Evidențiere îngroșată</string>
+    <string name="comment_tip_italic">Stil cursiv</string>
+    <string name="comment_tip_strikethrough">Text tăiat</string>
+    <string name="comment_tip_list">Liste cu marcatori sau numerotate (1.)</string>
+    <string name="comment_tip_quote">Bloc de citat</string>
+    <string name="comment_tip_media_tag_syntax">#film</string>
+    <string name="comment_tip_media_tag">Conectează un film sau serial: deschide pagina în limba cititorului</string>
+    <string name="comment_tip_attachments">Adaugă imagini sau GIF-uri din bara de jos</string>
+    <string name="comment_tip_links">Adresele URL lipite devin clicabile cu previzualizare de siguranță</string>
+    <string name="comment_tip_spoiler">Activează Spoiler pentru a estompa întregul comentariu până la atingere</string>
+    <string name="comment_tip_max_chars">Limită: maximum %1$d caractere</string>
+    <string name="comment_tag_search_hint">Scrie titlul unui film sau serial pentru a-l eticheta...</string>
 </resources>

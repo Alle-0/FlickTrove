@@ -51,7 +51,7 @@ internal object AgeRatingResolver {
 
     val TEEN_12_CERTS = setOf(
         "PG-13", "PG12", "PG-12", "12", "12+", "12A", "FSK 12", "13+", "13A",
-        "UA 13+", "U/A 13+", "UA13+", "U/A13+", "UA 12+", "U/A 12+", "R-13", "R13"
+        "UA 13+", "U/A 13+", "UA13+", "U/A13+", "UA 12+", "U/A 12+", "R-13", "R13", "R12", "R-12"
     )
 
     val TEEN_14_CERTS = setOf(
@@ -59,7 +59,7 @@ internal object AgeRatingResolver {
     )
 
     val TEEN_15_CERTS = setOf(
-        "15", "15+", "R15+", "R-15", "R15"
+        "15", "15+", "R15+", "R-15", "R15", "PG15", "PG-15"
     )
 
     val TEEN_16_CERTS = setOf(

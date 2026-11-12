@@ -17,6 +17,12 @@ import java.util.TimeZone
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
+enum class TvProductionStatus {
+    RETURNING,
+    ENDED,
+    CANCELED
+}
+
 
 @Serializable
 @Entity(
@@ -474,6 +480,18 @@ data class Movie(
 
             // Default to true only when we have at least some date evidence
             return true
+        }
+
+    @get:Exclude
+    val tvProductionStatus: TvProductionStatus?
+        get() {
+            if (mediaType != "tv") return null
+            return when (status?.trim()?.lowercase(Locale.ROOT)) {
+                "ended" -> TvProductionStatus.ENDED
+                "canceled", "cancelled" -> TvProductionStatus.CANCELED
+                "returning series", "in production", "planned", "pilot", "post production", "rumored" -> TvProductionStatus.RETURNING
+                else -> null
+            }
         }
 
     @get:Exclude

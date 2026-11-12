@@ -372,7 +372,12 @@ internal fun CoverSelectionView(
                         modifier = Modifier
                             .bounceClick(scaleDown = 0.92f) {
                                 when (coverTab) {
-                                    0 -> onConfigChange(config.copy(customPosterPath = null))
+                                    0 -> onConfigChange(
+                                        config.copy(
+                                            customPosterPath = null,
+                                            customLogoPath = if (config.hasManualLogoOverride) config.customLogoPath else null
+                                        )
+                                    )
                                     1 -> onConfigChange(config.copy(customBackdropPath = null))
                                     else -> onConfigChange(config.copy(customLogoPath = null, hasManualLogoOverride = false))
                                 }
@@ -560,7 +565,12 @@ internal fun CoverSelectionView(
                                                 onConfigChange(
                                                     config.copy(
                                                         customPosterPath = newPath,
-                                                        customLogoPath = if (!config.hasManualLogoOverride && matchedLogo != null) matchedLogo else config.customLogoPath
+                                                        customLogoPath = when {
+                                                            config.hasManualLogoOverride -> config.customLogoPath
+                                                            newPath == null -> null
+                                                            matchedLogo != null -> matchedLogo
+                                                            else -> config.customLogoPath
+                                                        }
                                                     )
                                                 )
                                             }

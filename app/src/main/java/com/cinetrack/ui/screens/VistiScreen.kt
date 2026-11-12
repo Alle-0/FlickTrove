@@ -192,6 +192,11 @@ fun VistiScreenContent(
     }
 
     var filterButtonBounds = remember { arrayOf<Rect?>(null) }
+    val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() ||
+                           uiState.sortConfig.selectedProviders.isNotEmpty() ||
+                           uiState.sortConfig.selectedDecades.isNotEmpty() ||
+                           uiState.sortConfig.selectedCountries.isNotEmpty() ||
+                           (uiState.activeTab == "tv" && uiState.sortConfig.selectedStatuses.isNotEmpty())
 
     MovieActionsWrapper(
         hazeState = hazeState ?: HazeState(),
@@ -241,7 +246,7 @@ fun VistiScreenContent(
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
                     Text(
-                        text = if (uiState.searchQuery.isEmpty()) stringResource(R.string.library_empty_seen) else stringResource(R.string.search_no_results),
+                        text = if (uiState.searchQuery.isEmpty() && !hasActiveFilters) stringResource(R.string.library_empty_seen) else stringResource(R.string.search_no_results),
                         color = Color.White.copy(alpha = 0.5f),
                         style = MaterialTheme.typography.bodyLarge
                     )
@@ -406,10 +411,6 @@ fun VistiScreenContent(
                 }
             }
 
-
-            val hasActiveFilters = uiState.sortConfig.selectedGenres.isNotEmpty() || 
-                                   uiState.sortConfig.selectedProviders.isNotEmpty() || 
-                                   uiState.sortConfig.selectedDecades.isNotEmpty()
 
             Row(
                 modifier = Modifier.align(Alignment.CenterEnd),

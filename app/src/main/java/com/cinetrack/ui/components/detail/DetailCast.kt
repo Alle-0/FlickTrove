@@ -32,6 +32,8 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import coil3.compose.AsyncImage
 import com.cinetrack.data.api.CastMember
 import com.cinetrack.data.api.CrewMember
@@ -136,7 +138,7 @@ fun DetailCast(
                             text = stringResource(R.string.detail_crew).uppercase(),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                letterSpacing = rtlSafeLetterSpacing(1.sp)
                             ),
                             color = Color.White.copy(alpha = 0.65f)
                         )
@@ -145,7 +147,7 @@ fun DetailCast(
                             painter = painterResource(id = R.drawable.ic_right),
                             contentDescription = "See All",
                             tint = Color.White.copy(alpha = 0.65f),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp).mirrorInRtl()
                         )
                     }
                 }
@@ -200,7 +202,7 @@ fun DetailCast(
                         text = stringResource(R.string.detail_cast),
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 3.sp
+                            letterSpacing = rtlSafeLetterSpacing(3.sp)
                         ),
                         color = Color.White.copy(alpha = 0.65f)
                     )
@@ -209,7 +211,7 @@ fun DetailCast(
                         painter = painterResource(id = R.drawable.ic_right),
                         contentDescription = "See All",
                         tint = Color.White.copy(alpha = 0.65f),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(16.dp).mirrorInRtl()
                     )
                 }
 
@@ -222,7 +224,7 @@ fun DetailCast(
                             text = stringResource(R.string.detail_crew).uppercase(),
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
-                                letterSpacing = 1.sp
+                                letterSpacing = rtlSafeLetterSpacing(1.sp)
                             ),
                             color = Color.White.copy(alpha = 0.65f)
                         )
@@ -231,7 +233,7 @@ fun DetailCast(
                             painter = painterResource(id = R.drawable.ic_right),
                             contentDescription = "See All",
                             tint = Color.White.copy(alpha = 0.65f),
-                            modifier = Modifier.size(16.dp)
+                            modifier = Modifier.size(16.dp).mirrorInRtl()
                         )
                     }
                 }

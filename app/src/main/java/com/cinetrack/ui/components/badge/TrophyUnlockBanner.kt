@@ -57,6 +57,7 @@ import com.cinetrack.data.repository.TrophyUnlockBannerEvent
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.viewmodel.TrophyRoomViewModel
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
@@ -272,7 +273,9 @@ private fun InitialBootstrapBannerContent(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
             contentDescription = null,
             tint = Color.White.copy(alpha = 0.45f),
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier
+                .size(16.dp)
+                .mirrorInRtl()
         )
     }
 }
@@ -373,7 +376,9 @@ private fun SingleBadgeBannerContent(
             imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
             contentDescription = null,
             tint = Color.White.copy(alpha = 0.45f),
-            modifier = Modifier.size(16.dp)
+            modifier = Modifier
+                .size(16.dp)
+                .mirrorInRtl()
         )
     }
 }

@@ -24,6 +24,7 @@ import com.cinetrack.R
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import dev.chrisbanes.haze.HazeState
 import java.time.YearMonth
 import java.time.format.TextStyle
@@ -96,7 +97,7 @@ fun MonthYearPickerDialog(
                     ImageVector.vectorResource(id = R.drawable.ic_right),
                     contentDescription = stringResource(R.string.updates_calendar_next_year),
                     tint = Color.White,
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier.size(20.dp).mirrorInRtl()
                 )
             }
         }

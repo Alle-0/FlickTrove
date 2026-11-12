@@ -303,7 +303,7 @@ class FolderDetailViewModel @Inject constructor(
                     filtered.sortedWith(compareBy<Movie> { orderMap[it.compositeId] ?: Int.MAX_VALUE }.thenBy { it.compositeId })
                 }
             }
-            "watched_at" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
+            "last_watched_at", "watched_at" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.watchedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "release_date" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.releaseDate ?: it.firstAirDate ?: "" }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })
             "title" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.title ?: it.name ?: "" }.thenBy { it.id })
             "added_at", "created_at" -> if (isDesc) filtered.sortedWith(compareByDescending<Movie> { it.clientUpdatedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id }) else filtered.sortedWith(compareBy<Movie> { it.clientUpdatedAt }.thenBy { it.title ?: it.name ?: "" }.thenBy { it.id })

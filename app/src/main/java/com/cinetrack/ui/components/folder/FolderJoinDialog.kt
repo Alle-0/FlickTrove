@@ -36,9 +36,7 @@ import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
 import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.graphics.SolidColor
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.AnnotatedString
 import androidx.compose.ui.text.SpanStyle
@@ -49,8 +47,8 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.zIndex
-import coil3.compose.AsyncImage
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import com.cinetrack.util.toComposeColor
 import dev.chrisbanes.haze.HazeState
 
@@ -313,42 +311,9 @@ fun FolderJoinDialog(
                                     )
                                 }
                             } else {
-                                Box(
-                                    modifier = Modifier
-                                        .width(40.dp + ((topItems.size - 1) * 22).dp)
-                                        .height(60.dp),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    topItems.forEachIndexed { index, item ->
-                                        val centerIndex = (topItems.size - 1) / 2f
-                                        val currentRotation = if (topItems.size <= 1) 0f else {
-                                            val maxRotation = 15f
-                                            val rotationStep = (maxRotation * 2) / (topItems.size - 1)
-                                            -maxRotation + (index * rotationStep)
-                                        }
-                                        val xOffset = (index - centerIndex) * 14f
-
-                                        Box(
-                                            modifier = Modifier
-                                                .offset(x = xOffset.dp)
-                                                .size(width = 40.dp, height = 60.dp)
-                                                .graphicsLayer {
-                                                    rotationZ = currentRotation
-                                                    transformOrigin = TransformOrigin(0.5f, 1.1f)
-                                                }
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .border(1.5.dp, Color(0xFF13151A), RoundedCornerShape(10.dp))
-                                                .zIndex((topItems.size - index).toFloat())
-                                        ) {
-                                            AsyncImage(
-                                                model = "https://image.tmdb.org/t/p/w200${item.posterPath}",
-                                                contentDescription = null,
-                                                contentScale = ContentScale.Crop,
-                                                modifier = Modifier.fillMaxSize()
-                                            )
-                                        }
-                                    }
-                                }
+                                FolderCoverFan(
+                                    posterPaths = topItems.map { it.posterPath }
+                                )
                             }
 
                             Spacer(Modifier.width(16.dp))
@@ -370,7 +335,7 @@ fun FolderJoinDialog(
                                         text = folder.title,
                                         style = MaterialTheme.typography.titleLarge.copy(
                                             fontWeight = FontWeight.Bold,
-                                            letterSpacing = (-0.3).sp
+                                            letterSpacing = rtlSafeLetterSpacing((-0.3).sp)
                                         ),
                                         color = Color.White,
                                         maxLines = 1,

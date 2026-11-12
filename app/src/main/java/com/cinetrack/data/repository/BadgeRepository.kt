@@ -32,6 +32,8 @@ import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.sync.Mutex
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.tasks.await
 import java.time.Instant
 import java.time.LocalDate
@@ -307,8 +309,8 @@ class BadgeRepository @Inject constructor(
                         val catalogItem = OFFICIAL_TROPHY_ROOM_CATALOG.firstOrNull { it.badge.id == id } ?: continue
                         val badge = catalogItem.badge
                         val userEntity = userBadgeMap[id]
-                        val tier = userEntity?.let { evaluationEngine.parseTierSafe(it.currentTier, badge.fixedTier ?: badge.initialProgressiveTier) }
-                            ?: badge.fixedTier ?: badge.initialProgressiveTier
+                        if (userEntity?.isUnlocked != true) continue
+                        val tier = evaluationEngine.parseTierSafe(userEntity.currentTier, badge.fixedTier ?: badge.initialProgressiveTier)
                         val stepPhrase = badge.progressiveSteps[tier]?.milestonePhrase ?: badge.defaultDescription
 
                         result.add(
@@ -319,7 +321,7 @@ class BadgeRepository @Inject constructor(
                                 category = badge.category,
                                 iconKind = badge.iconKind,
                                 subtitle = stepPhrase,
-                                isFirstUnlock = userEntity?.currentTier == badge.initialProgressiveTier.name
+                                isFirstUnlock = userEntity.currentTier == badge.initialProgressiveTier.name
                             )
                         )
                     }
@@ -389,10 +391,35 @@ class BadgeRepository @Inject constructor(
         }
     }
 
+    private val commentCountMutex = Mutex()
+
     fun recordCommentWritten() {
-        val newCount = badgePrefs.getInt("comments_written_count", 0) + 1
-        badgePrefs.edit().putInt("comments_written_count", newCount).apply()
-        evaluateBadgesAsync()
+        updateCommentWrittenCount(delta = 1)
+    }
+
+    fun recordCommentDeleted() {
+        updateCommentWrittenCount(delta = -1)
+    }
+
+    private fun updateCommentWrittenCount(delta: Int) {
+        repositoryScope.launch {
+            commentCountMutex.withLock {
+                val baseCount = if (badgePrefs.contains("comments_written_count")) {
+                    badgePrefs.getInt("comments_written_count", 0)
+                } else {
+                    badgeDao.getBadgeById("badge_comments")?.progressCurrent ?: 0
+                }
+                val newCount = (baseCount + delta).coerceAtLeast(0)
+                badgePrefs.edit().putInt("comments_written_count", newCount).apply()
+            }
+            try {
+                evaluateAllBadges()
+                syncPendingBadgesToFirestore()
+                fetchGlobalRarityStats()
+            } catch (e: Exception) {
+                android.util.Log.e("BadgeRepository", "Error evaluating badges asynchronously", e)
+            }
+        }
     }
 
     fun recordBackupRestored() {
@@ -1026,9 +1053,9 @@ class BadgeRepository @Inject constructor(
             val tierUpgraded = prevEntity != null && prevEntity.isUnlocked && evaluationEngine.isHigherTier(calculatedTier, evaluationEngine.parseTierSafe(prevEntity.currentTier, PreviewBadgeTier.SUPER_8))
 
             val unlockedDate = when {
+                !isUnlocked -> null
                 prevEntity?.unlockedDate != null -> prevEntity.unlockedDate
-                isUnlocked -> todayStr
-                else -> null
+                else -> todayStr
             }
 
             val entity = UserBadgeEntity(
@@ -1072,9 +1099,9 @@ class BadgeRepository @Inject constructor(
             val tierUpgraded = prevEntity != null && prevEntity.isUnlocked && evaluationEngine.isHigherTier(calculatedTier, evaluationEngine.parseTierSafe(prevEntity.currentTier, PreviewBadgeTier.SUPER_8))
 
             val unlockedDate = when {
+                !isUnlocked -> null
                 prevEntity?.unlockedDate != null -> prevEntity.unlockedDate
-                isUnlocked -> todayStr
-                else -> null
+                else -> todayStr
             }
 
             val entity = UserBadgeEntity(

@@ -38,6 +38,7 @@ import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.viewmodel.CalculatedStats
 import dev.chrisbanes.haze.HazeState
 import androidx.compose.foundation.border
@@ -46,6 +47,7 @@ import androidx.compose.animation.core.*
 import com.cinetrack.ui.components.badge.FlickTroveBadgeEmblem
 import com.cinetrack.ui.components.badge.OFFICIAL_TROPHY_ROOM_CATALOG
 import com.cinetrack.ui.components.badge.TrophyRoomItemUi
+import com.cinetrack.ui.components.folder.FolderCoverFan
 
 @Composable
 fun GeneralStatsCard(
@@ -104,7 +106,9 @@ fun GeneralStatsCard(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = "View Stats",
                     tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier
+                        .size(20.dp)
+                        .mirrorInRtl()
                 )
             }
             
@@ -300,7 +304,9 @@ fun MyFoldersCard(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = "View All Folders",
                     tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier
+                        .size(20.dp)
+                        .mirrorInRtl()
                 )
             }
             
@@ -403,42 +409,15 @@ fun FolderPreviewItem(
                 )
             }
         } else {
-            Box(
-                modifier = Modifier
-                    .width(38.dp + ((topItems.size - 1) * 20).dp)
-                    .height(56.dp),
-                contentAlignment = Alignment.Center
-            ) {
-                topItems.forEachIndexed { index, movie ->
-                    val centerIndex = (topItems.size - 1) / 2f
-                    val currentRotation = if (topItems.size <= 1) 0f else {
-                        val maxRotation = 15f
-                        val rotationStep = (maxRotation * 2) / (topItems.size - 1)
-                        -maxRotation + (index * rotationStep)
-                    }
-                    val xOffset = (index - centerIndex) * 12f
-
-                    Box(
-                        modifier = Modifier
-                            .offset(x = xOffset.dp)
-                            .size(width = 38.dp, height = 56.dp)
-                            .graphicsLayer {
-                                rotationZ = currentRotation
-                                transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 1.1f)
-                            }
-                            .clip(RoundedCornerShape(8.dp))
-                            .border(1.dp, Color(0xFF13151A), RoundedCornerShape(8.dp))
-                            .zIndex((topItems.size - index).toFloat())
-                    ) {
-                        coil3.compose.AsyncImage(
-                            model = "https://image.tmdb.org/t/p/w200${movie.posterPath}",
-                            contentDescription = null,
-                            contentScale = androidx.compose.ui.layout.ContentScale.Crop,
-                            modifier = Modifier.fillMaxSize()
-                        )
-                    }
-                }
-            }
+            FolderCoverFan(
+                posterPaths = topItems.map { it.posterPath },
+                posterWidth = 38.dp,
+                posterHeight = 56.dp,
+                slotSpacing = 20.dp,
+                offsetStepDp = 12f,
+                cornerRadius = 8.dp,
+                borderWidth = 1.dp
+            )
         }
 
         Spacer(modifier = Modifier.height(8.dp))
@@ -528,7 +507,9 @@ fun YourFlowCard(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = "Play Flow",
                     tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier
+                        .size(20.dp)
+                        .mirrorInRtl()
                 )
             }
             
@@ -646,7 +627,9 @@ fun TrophyShowcaseCard(
                         painter = painterResource(id = R.drawable.ic_right),
                         contentDescription = "Open Trophy Room",
                         tint = Color.White.copy(alpha = 0.7f),
-                        modifier = Modifier.size(20.dp)
+                        modifier = Modifier
+                            .size(20.dp)
+                            .mirrorInRtl()
                     )
                 } else {
                     Row(
@@ -785,7 +768,9 @@ fun HistoryDiaryCard(
                     painter = painterResource(id = R.drawable.ic_right),
                     contentDescription = "Open Diary",
                     tint = Color.White.copy(alpha = 0.7f),
-                    modifier = Modifier.size(20.dp)
+                    modifier = Modifier
+                        .size(20.dp)
+                        .mirrorInRtl()
                 )
             }
 

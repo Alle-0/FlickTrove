@@ -36,6 +36,7 @@ fun Modifier.bounceClick(
     enabled: Boolean = true,
     shape: Shape? = null,
     onPress: (() -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
     onClick: () -> Unit
 ): Modifier = bounceClickWithOffset(
     scaleDown = scaleDown,
@@ -46,6 +47,7 @@ fun Modifier.bounceClick(
     enabled = enabled,
     shape = shape,
     onPress = onPress?.let { action -> { _ -> action() } },
+    interactionSource = interactionSource,
     onClick = { _ -> onClick() }
 )
 
@@ -65,12 +67,13 @@ fun Modifier.bounceClickWithOffset(
     enabled: Boolean = true,
     shape: Shape? = null,
     onPress: ((Offset) -> Unit)? = null,
+    interactionSource: MutableInteractionSource? = null,
     onClick: (Offset) -> Unit
 ): Modifier = composed {
     val haptic = LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
     val vibrationEnabled = LocalVibrationEnabled.current
-    val interactionSource = remember { MutableInteractionSource() }
+    val actualInteractionSource = interactionSource ?: remember { MutableInteractionSource() }
     val scale = remember { Animatable(1f) }
     
     var lastOffset by remember { mutableStateOf(Offset.Zero) }
@@ -79,13 +82,13 @@ fun Modifier.bounceClickWithOffset(
     val currentOnPress by rememberUpdatedState(onPress)
 
     val shouldAnimate = animateOnPress
-    LaunchedEffect(interactionSource, enabled, shouldAnimate) {
+    LaunchedEffect(actualInteractionSource, enabled, shouldAnimate) {
         if (!enabled || !shouldAnimate) {
             scale.snapTo(1f)
             return@LaunchedEffect
         }
         var pressJob: kotlinx.coroutines.Job? = null
-        interactionSource.interactions.collect { interaction ->
+        actualInteractionSource.interactions.collect { interaction ->
             when (interaction) {
                 is androidx.compose.foundation.interaction.PressInteraction.Press -> {
                     pressJob = launch {
@@ -128,7 +131,7 @@ fun Modifier.bounceClickWithOffset(
             }
         }
         .combinedClickable(
-            interactionSource = interactionSource,
+            interactionSource = actualInteractionSource,
             indication = null,
             enabled = enabled,
             onClick = { 

@@ -23,6 +23,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.YearMonth
@@ -121,7 +122,7 @@ fun CalendarMonthWidget(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = "Successivo",
                         tint = Color.White,
-                        modifier = Modifier.size(22.dp)
+                        modifier = Modifier.size(22.dp).mirrorInRtl()
                     )
                 }
             }
