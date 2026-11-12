@@ -22,6 +22,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.*
@@ -45,6 +46,7 @@ fun FluidRatingBar(
 ) {
     val haptic = LocalHapticFeedback.current
     val density = LocalDensity.current
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val gapPx = remember(density) { with(density) { 8.dp.toPx() } }
     var containerSize by remember { mutableStateOf(IntSize.Zero) }
 
@@ -64,7 +66,7 @@ fun FluidRatingBar(
     Box(
         modifier = modifier
             .onSizeChanged { containerSize = it }
-            .pointerInput(numStars, maxRating) {
+            .pointerInput(numStars, maxRating, isRtl) {
                 awaitEachGesture {
                     val down = awaitFirstDown(requireUnconsumed = false)
                     val w = containerSize.width.toFloat()
@@ -72,7 +74,7 @@ fun FluidRatingBar(
                     
                     down.consume()
 
-                    var curRating = calculateRatingFromX(down.position.x, w, maxRating, numStars, gapPx)
+                    var curRating = calculateRatingFromX(down.position.x, w, maxRating, numStars, gapPx, isRtl)
                     currentOnRatingChange(curRating)
                     haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
 
@@ -86,7 +88,7 @@ fun FluidRatingBar(
                         }
                         if (change.position != down.position) {
                             change.consume()
-                            val newRating = calculateRatingFromX(change.position.x, w, maxRating, numStars, gapPx)
+                            val newRating = calculateRatingFromX(change.position.x, w, maxRating, numStars, gapPx, isRtl)
                             if (newRating != curRating) {
                                 curRating = newRating
                                 currentOnRatingChange(curRating)
@@ -177,9 +179,12 @@ fun PremiumStar(
                                 layoutDirection: LayoutDirection,
                                 density: Density
                             ): Outline {
-                                return Outline.Rectangle(
+                                val rect = if (layoutDirection == LayoutDirection.Rtl) {
+                                    Rect(size.width * (1f - fillRatio), 0f, size.width, size.height)
+                                } else {
                                     Rect(0f, 0f, size.width * fillRatio, size.height)
-                                )
+                                }
+                                return Outline.Rectangle(rect)
                             }
                         }
                     }
@@ -195,13 +200,21 @@ fun PremiumStar(
     }
 }
 
-private fun calculateRatingFromX(x: Float, totalWidth: Float, maxRating: Double, numStars: Int, gapPx: Float): Double {
+private fun calculateRatingFromX(
+    x: Float,
+    totalWidth: Float,
+    maxRating: Double,
+    numStars: Int,
+    gapPx: Float,
+    isRtl: Boolean = false
+): Double {
     if (totalWidth <= 0f || numStars <= 0) return 0.0
     
     val starSize = (totalWidth - (numStars - 1) * gapPx) / numStars
     val starBlockWidth = starSize + gapPx
     
-    val clampedX = x.coerceIn(0f, totalWidth)
+    val logicalX = if (isRtl) (totalWidth - x) else x
+    val clampedX = logicalX.coerceIn(0f, totalWidth)
     val starIndex = (clampedX / starBlockWidth).toInt().coerceIn(0, numStars - 1)
     val localX = clampedX - starIndex * starBlockWidth
     

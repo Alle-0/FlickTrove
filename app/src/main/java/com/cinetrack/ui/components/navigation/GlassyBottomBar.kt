@@ -18,10 +18,10 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.absoluteOffset
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
@@ -52,7 +52,6 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
-import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.res.stringResource
@@ -101,6 +100,7 @@ fun GlassyBottomBar(
     val context = LocalContext.current
     val vibrationEnabled = LocalVibrationEnabled.current
     val density = LocalDensity.current
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     // Synchronous physical drag state for 100% zero-latency tracking (fast swipes)
     var dragX by remember { mutableFloatStateOf(0f) }
@@ -120,6 +120,7 @@ fun GlassyBottomBar(
 
     val currentOnSwitchMediaMode by rememberUpdatedState(onSwitchMediaMode)
     val currentVibrationEnabled by rememberUpdatedState(vibrationEnabled)
+    val currentIsRtl by rememberUpdatedState(isRtl)
     val isSwipeEnabled = onSwitchMediaMode != null && !isDimmed
 
     LaunchedEffect(isSwipeEnabled) {
@@ -164,16 +165,18 @@ fun GlassyBottomBar(
                 },
                 onDragEnd = {
                     val finalDragDp = dragX / density.density
+                    val rightTargetMode = if (currentIsRtl) "movie" else "tv"
+                    val leftTargetMode = if (currentIsRtl) "tv" else "movie"
                     if (finalDragDp >= thresholdRawDp) {
                         if (currentVibrationEnabled) {
                             VibrationHelper.vibrateClick(context)
                         }
-                        currentOnSwitchMediaMode?.invoke("tv")
+                        currentOnSwitchMediaMode?.invoke(rightTargetMode)
                     } else if (finalDragDp <= -thresholdRawDp) {
                         if (currentVibrationEnabled) {
                             VibrationHelper.vibrateClick(context)
                         }
-                        currentOnSwitchMediaMode?.invoke("movie")
+                        currentOnSwitchMediaMode?.invoke(leftTargetMode)
                     }
                     hasFiredHaptic = false
                     launchSpringReturn(dragX)
@@ -214,8 +217,8 @@ fun GlassyBottomBar(
             .padding(horizontal = 24.dp)
             .padding(bottom = 20.dp, top = 4.dp)
             .height(60.dp)
-            .offset {
-                if (onSwitchMediaMode == null) return@offset IntOffset.Zero
+            .absoluteOffset {
+                if (onSwitchMediaMode == null) return@absoluteOffset IntOffset.Zero
                 val raw = effectiveRaw
                 val rawDp = raw / density.density
                 val sign = if (raw >= 0f) 1f else -1f
@@ -420,8 +423,13 @@ fun GlassyBottomBar(
                         )
                     }
 
+                    val activeLabel = if (isDraggingRight) {
+                        if (isRtl) movieLabel else tvLabel
+                    } else {
+                        if (isRtl) tvLabel else movieLabel
+                    }
                     Text(
-                        text = if (isDraggingRight) tvLabel else movieLabel,
+                        text = activeLabel,
                         color = contentColor,
                         style = MaterialTheme.typography.titleMedium,
                         fontWeight = FontWeight.Black,
@@ -538,6 +546,7 @@ private fun RowScope.NavItem(
             )
             
             if (isSelected && animatedIconRes != null) {
+                val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
                 val animatedIcon = AnimatedImageVector.animatedVectorResource(id = animatedIconRes)
                 var atEnd by androidx.compose.runtime.remember { androidx.compose.runtime.mutableStateOf(false) }
                 androidx.compose.runtime.LaunchedEffect(Unit) {
@@ -551,7 +560,8 @@ private fun RowScope.NavItem(
                     modifier = Modifier
                         .size(22.dp)
                         .graphicsLayer {
-                            scaleX = iconScale.value
+                            // rememberAnimatedVectorPainter hardcodes autoMirror = true; un-mirror in RTL to match static icons
+                            scaleX = if (isRtl) -iconScale.value else iconScale.value
                             scaleY = iconScale.value
                         }
                 )

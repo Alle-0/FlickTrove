@@ -119,6 +119,7 @@ object MovieMapper {
             "hi" -> listOf("IN")
             "ru" -> listOf("RU")
             "da" -> listOf("DK")
+            "fi" -> listOf("FI")
             "sv" -> listOf("SE")
             "no" -> listOf("NO")
             "pl" -> listOf("PL")
@@ -201,7 +202,7 @@ object MovieMapper {
 
     val SUPPORTED_RATING_COUNTRIES = setOf(
         "IT", "DE", "FR", "ES", "BR", "RU", "IN", "GB", "US", "JP", "KR", "ID", "TR",
-        "PL", "NL", "PT", "CZ", "GR", "HU", "RO", "SE", "TH", "UA", "VN", "SA", "AE", "EG"
+        "PL", "NL", "PT", "CZ", "GR", "HU", "RO", "SE", "TH", "UA", "VN", "SA", "AE", "EG", "DK", "FI"
     )
 
     fun extractCertificationWithCountry(

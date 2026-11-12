@@ -238,6 +238,8 @@
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
     <string name="settings_default_start_tab">启动页面</string>
     <string name="settings_default_start_tab_desc">选择启动应用时默认打开的屏幕</string>
     <string name="settings_default_start_feed">首页</string>

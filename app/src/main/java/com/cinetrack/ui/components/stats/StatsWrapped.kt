@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import coil3.compose.AsyncImage
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.ImageQuality
@@ -189,6 +190,7 @@ fun WrappedBannerPill(
                             modifier = Modifier
                                 .size(24.dp)
                                 .offset(x = 1.5.dp)
+                                .mirrorInRtl()
                                 .graphicsLayer { rotationZ = rotation }
                         )
                     }

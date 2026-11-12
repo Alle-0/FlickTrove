@@ -405,10 +405,11 @@ fun UpdatesScreen(
                     }
 
                     // Calendar View Switcher
+                    val switcherSlideDir = com.cinetrack.ui.utils.rtlSlideDirection()
                     androidx.compose.animation.AnimatedVisibility(
                         visible = pagerState.currentPage == 1,
-                        enter = fadeIn() + slideInHorizontally { it / 2 },
-                        exit = fadeOut() + slideOutHorizontally { it / 2 },
+                        enter = fadeIn() + slideInHorizontally { (it / 2) * switcherSlideDir },
+                        exit = fadeOut() + slideOutHorizontally { (it / 2) * switcherSlideDir },
                         modifier = Modifier
                             .align(Alignment.CenterEnd)
                             .padding(end = 16.dp)

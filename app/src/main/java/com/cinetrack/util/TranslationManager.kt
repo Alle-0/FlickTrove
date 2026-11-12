@@ -567,6 +567,8 @@ class TranslationManager @Inject constructor(
             "th" -> TranslateLanguage.THAI
             "uk" -> TranslateLanguage.UKRAINIAN
             "vi" -> TranslateLanguage.VIETNAMESE
+            "da" -> TranslateLanguage.DANISH
+            "fi" -> TranslateLanguage.FINNISH
             else -> TranslateLanguage.ENGLISH
         }
     }
@@ -597,6 +599,8 @@ class TranslationManager @Inject constructor(
             TranslateLanguage.THAI -> "th"
             TranslateLanguage.UKRAINIAN -> "uk"
             TranslateLanguage.VIETNAMESE -> "vi"
+            TranslateLanguage.DANISH -> "da"
+            TranslateLanguage.FINNISH -> "fi"
             else -> mlkitLang.lowercase().take(2).ifEmpty { "en" }
         }
     }

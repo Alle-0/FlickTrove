@@ -230,6 +230,8 @@
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
     <string name="settings_default_start_tab">Tela Inicial</string>
     <string name="settings_default_start_tab_desc">Escolha a tela padrão ao abrir o aplicativo</string>
     <string name="settings_default_start_home">PARA ASSISTIR</string>

@@ -320,6 +320,7 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                         CinematicBackground(modifier = Modifier.fillMaxSize())
                         Box(modifier = Modifier.fillMaxSize().haze(contentHazeState)) {
                             val activeSecondaryTab = if (currentTab in primaryTabs) null else currentTab
+                            val slideDir = com.cinetrack.ui.utils.rtlSlideDirection()
 
                                 AnimatedContent(
                                     targetState = activeSecondaryTab,
@@ -353,11 +354,11 @@ class MainScreen(val initialTabStr: String? = null) : Screen {
                                             // Same tab class (e.g. rename of FolderDetailTab): no animation
                                             EnterTransition.None togetherWith ExitTransition.None
                                         } else if (targetDepth > initialDepth) {
-                                            slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it }) togetherWith
-                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it })
+                                            slideInHorizontally(animationSpec = tween(300), initialOffsetX = { it * slideDir }) togetherWith
+                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { -it * slideDir })
                                         } else if (targetDepth < initialDepth) {
-                                            slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it }) togetherWith
-                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { it })
+                                            slideInHorizontally(animationSpec = tween(300), initialOffsetX = { -it * slideDir }) togetherWith
+                                                    slideOutHorizontally(animationSpec = tween(300), targetOffsetX = { it * slideDir })
                                         } else {
                                             fadeIn(animationSpec = tween(200)) togetherWith fadeOut(animationSpec = tween(200))
                                         }

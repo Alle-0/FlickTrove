@@ -39,6 +39,7 @@ import androidx.compose.ui.res.vectorResource
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.rtlSafeLetterSpacing
+import com.cinetrack.ui.utils.rtlSlideDirection
 @Composable
 fun GlassyDrawer(
     hazeState: HazeState,
@@ -135,17 +136,18 @@ fun GlassyDrawer(
                 )
             }
             val scrollState = rememberScrollState()
+            val slideDir = rtlSlideDirection()
 
             androidx.compose.animation.AnimatedContent(
                 targetState = currentMenu,
                 label = "DrawerMenuTransition",
                 transitionSpec = {
                     if (targetState != "MAIN") {
-                        (androidx.compose.animation.slideInHorizontally { width -> width } + androidx.compose.animation.fadeIn()).togetherWith(
-                        (androidx.compose.animation.slideOutHorizontally { width -> -width } + androidx.compose.animation.fadeOut()))
+                        (androidx.compose.animation.slideInHorizontally { width -> width * slideDir } + androidx.compose.animation.fadeIn()).togetherWith(
+                        (androidx.compose.animation.slideOutHorizontally { width -> -width * slideDir } + androidx.compose.animation.fadeOut()))
                     } else {
-                        (androidx.compose.animation.slideInHorizontally { width -> -width } + androidx.compose.animation.fadeIn()).togetherWith(
-                        (androidx.compose.animation.slideOutHorizontally { width -> width } + androidx.compose.animation.fadeOut()))
+                        (androidx.compose.animation.slideInHorizontally { width -> -width * slideDir } + androidx.compose.animation.fadeIn()).togetherWith(
+                        (androidx.compose.animation.slideOutHorizontally { width -> width * slideDir } + androidx.compose.animation.fadeOut()))
                     }
                 },
                 modifier = Modifier.weight(1f)

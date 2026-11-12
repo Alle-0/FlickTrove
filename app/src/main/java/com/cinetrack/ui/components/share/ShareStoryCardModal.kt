@@ -65,6 +65,7 @@ import com.cinetrack.ui.components.shared.FlickTroveBottomSheet
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.ColorUtils
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rtlSlideDirection
 import com.cinetrack.util.ImageQuality
 import com.cinetrack.util.ImageType
 import com.cinetrack.util.VibrationHelper
@@ -163,16 +164,17 @@ fun ShareStoryCardModal(
         hazeState = hazeState,
         dragOnlyFromHandle = true
     ) {
+        val slideDir = rtlSlideDirection()
         AnimatedContent(
             targetState = isSelectingCover,
             transitionSpec = {
                 if (targetState) {
-                    (slideInHorizontally { width -> width } + fadeIn()).togetherWith(
-                        slideOutHorizontally { width -> -width } + fadeOut()
+                    (slideInHorizontally { width -> width * slideDir } + fadeIn()).togetherWith(
+                        slideOutHorizontally { width -> -width * slideDir } + fadeOut()
                     )
                 } else {
-                    (slideInHorizontally { width -> -width } + fadeIn()).togetherWith(
-                        slideOutHorizontally { width -> width } + fadeOut()
+                    (slideInHorizontally { width -> -width * slideDir } + fadeIn()).togetherWith(
+                        slideOutHorizontally { width -> width * slideDir } + fadeOut()
                     )
                 }
             },

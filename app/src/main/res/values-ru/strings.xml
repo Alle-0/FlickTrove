@@ -231,6 +231,8 @@
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
     <string name="settings_default_start_tab">Начальный экран</string>
     <string name="settings_default_start_tab_desc">Выберите экран по умолчанию при запуске приложения</string>
     <string name="settings_default_start_home">БУДУ СМОТРЕТЬ</string>

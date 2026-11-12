@@ -222,6 +222,8 @@
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
     <string name="settings_default_start_tab">Pantalla de inicio</string>
     <string name="settings_default_start_tab_desc">Elige la pantalla predeterminada al abrir la app</string>
     <string name="settings_default_start_home">POR VER</string>

@@ -34,6 +34,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.ui.history.model.WatchTimelineEntry
+import com.cinetrack.ui.utils.mirrorInRtl
 import kotlinx.coroutines.delay
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -473,6 +474,7 @@ private fun MonthTimelineHeader(
                         tint = accentColor.copy(alpha = 0.75f),
                         modifier = Modifier
                             .size(14.dp)
+                            .mirrorInRtl()
                             .graphicsLayer { rotationZ = chevronRotation }
                     )
                 }

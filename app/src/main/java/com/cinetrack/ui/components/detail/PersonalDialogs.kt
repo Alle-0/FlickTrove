@@ -51,6 +51,7 @@ import androidx.compose.ui.unit.IntSize
 import androidx.compose.ui.layout.onSizeChanged
 import dev.chrisbanes.haze.HazeState
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import com.cinetrack.ui.components.shared.FluidRatingBar
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import android.Manifest
@@ -94,7 +95,7 @@ fun RatingPickerBox(
                     stringResource(R.string.dialog_rating_drag),
                     style = MaterialTheme.typography.labelSmall,
                     color = Color.White.copy(alpha = 0.5f),
-                    letterSpacing = 2.sp,
+                    letterSpacing = rtlSafeLetterSpacing(2.sp),
                     fontWeight = FontWeight.Black
                 )
                 

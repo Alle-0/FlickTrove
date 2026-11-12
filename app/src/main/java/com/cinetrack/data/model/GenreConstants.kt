@@ -444,6 +444,66 @@ object GenreConstants {
         10768L to "حرب وسياسة"
     )
 
+    private val DANISH_NAMES = mapOf(
+        28L to "Action",
+        12L to "Eventyr",
+        16L to "Animation",
+        35L to "Komedie",
+        80L to "Krimi",
+        99L to "Dokumentar",
+        18L to "Drama",
+        10751L to "Familie",
+        14L to "Fantasy",
+        36L to "Historie",
+        27L to "Gyser",
+        10402L to "Musik",
+        9648L to "Mysterium",
+        10749L to "Romantik",
+        878L to "Science Fiction",
+        10770L to "TV-film",
+        53L to "Thriller",
+        10752L to "Krig",
+        37L to "Western",
+        10759L to "Action & Eventyr",
+        10762L to "Børn",
+        10763L to "Nyheder",
+        10764L to "Reality",
+        10765L to "Sci-Fi & Fantasy",
+        10766L to "Soap",
+        10767L to "Talkshow",
+        10768L to "Krig & Politik"
+    )
+
+    private val FINNISH_NAMES = mapOf(
+        28L to "Toiminta",
+        12L to "Seikkailu",
+        16L to "Animaatio",
+        35L to "Komedia",
+        80L to "Rikos",
+        99L to "Dokumentti",
+        18L to "Draama",
+        10751L to "Perhe",
+        14L to "Fantasia",
+        36L to "Historia",
+        27L to "Kauhu",
+        10402L to "Musiikki",
+        9648L to "Mysteeri",
+        10749L to "Romantiikka",
+        878L to "Scifi",
+        10770L to "TV-elokuva",
+        53L to "Trilleri",
+        10752L to "Sota",
+        37L to "Lännenelokuva",
+        10759L to "Toiminta & Seikkailu",
+        10762L to "Lapset",
+        10763L to "Uutiset",
+        10764L to "Reality",
+        10765L to "Scifi & Fantasia",
+        10766L to "Saippuaooppera",
+        10767L to "Keskusteluohjelma",
+        10768L to "Sota & Politiikka"
+    )
+
     fun getLocalizedName(id: Long, languageCode: String, defaultName: String): String {
         val lang = languageCode.lowercase()
         return when {
@@ -460,6 +520,8 @@ object GenreConstants {
             lang.startsWith("id") || lang.startsWith("in") -> INDONESIAN_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             lang.startsWith("hi") -> HINDI_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             lang.startsWith("ar") -> ARABIC_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
+            lang.startsWith("da") -> DANISH_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
+            lang.startsWith("fi") -> FINNISH_NAMES[id] ?: ENGLISH_NAMES[id] ?: defaultName
             else -> ENGLISH_NAMES[id] ?: defaultName
         }
     }

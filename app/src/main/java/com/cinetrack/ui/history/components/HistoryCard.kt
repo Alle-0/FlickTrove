@@ -43,6 +43,7 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.cinetrack.R
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.shared.LocalMovieActions
 import com.cinetrack.ui.history.model.WatchTimelineEntry
@@ -319,6 +320,7 @@ fun HistoryCard(
                                                 tint = sessionColor.copy(alpha = 0.85f),
                                                 modifier = Modifier
                                                     .size(10.dp)
+                                                    .mirrorInRtl()
                                                     .graphicsLayer { rotationZ = chevronRotation }
                                             )
                                         }

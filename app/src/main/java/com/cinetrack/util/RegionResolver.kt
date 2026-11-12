@@ -110,6 +110,8 @@ object RegionResolver {
             "uk" -> "UA"
             "vi" -> "VN"
             "ar" -> "SA"
+            "da" -> "DK"
+            "fi" -> "FI"
             else -> "US"
         }
     }

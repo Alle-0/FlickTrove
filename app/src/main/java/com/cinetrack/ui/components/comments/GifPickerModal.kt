@@ -48,8 +48,11 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.cinetrack.R
 import com.cinetrack.data.model.KlipyMediaType
+import com.cinetrack.ui.components.common.SegmentedControl
+import com.cinetrack.ui.components.common.SegmentedOption
 import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
+import com.cinetrack.ui.utils.LocalVibrationEnabled
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
@@ -69,8 +72,10 @@ fun GifPickerModal(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
+    val context = LocalContext.current
     val density = androidx.compose.ui.platform.LocalDensity.current
     val focusManager = LocalFocusManager.current
+    val vibrationEnabled = LocalVibrationEnabled.current
 
     val isKeyboardOpen = WindowInsets.ime.getBottom(density) > 0
     val animatedGridHeight by animateDpAsState(
@@ -79,71 +84,59 @@ fun GifPickerModal(
         label = "gifPickerGridHeight"
     )
 
+    // R_outer = 32.dp (FlickTroveModal) = P (16.dp) + r_inner (16.dp -> 32.dp pill height / 16.dp tiles)
     FlickTroveModal(
         isVisible = isVisible,
         onDismissRequest = onDismiss,
         hazeState = hazeState,
         maxWidth = 500.dp,
         maxWidthFraction = 0.96f,
-        contentPadding = PaddingValues(start = 18.dp, end = 18.dp, top = 20.dp, bottom = 18.dp)
+        contentPadding = PaddingValues(16.dp)
     ) {
         Column(
             modifier = Modifier.fillMaxWidth(),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
-            // Header Bar with GIF / Stickers segmented toggle
+            // Header Bar with FlickTrove SegmentedControl (GIF / Stickers)
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Row(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.06f))
-                        .border(1.dp, Color.White.copy(alpha = 0.10f), CircleShape)
-                        .padding(3.dp),
-                    horizontalArrangement = Arrangement.spacedBy(4.dp),
-                    verticalAlignment = Alignment.CenterVertically
+                Box(
+                    modifier = Modifier.weight(1f),
+                    contentAlignment = Alignment.CenterStart
                 ) {
-                    KlipyMediaType.entries.forEach { mediaType ->
-                        val isSelected = uiState.selectedType == mediaType
-                        val labelRes = if (mediaType == KlipyMediaType.GIF) {
-                            R.string.comment_gif
-                        } else {
-                            R.string.comment_stickers
-                        }
-                        Box(
-                            modifier = Modifier
-                                .bounceClick(scaleDown = 0.94f) {
-                                    viewModel.selectMediaType(mediaType)
-                                }
-                                .clip(CircleShape)
-                                .background(
-                                    if (isSelected) accentColor.copy(alpha = 0.24f) else Color.Transparent
-                                )
-                                .border(
-                                    width = 1.dp,
-                                    color = if (isSelected) accentColor.copy(alpha = 0.60f) else Color.Transparent,
-                                    shape = CircleShape
-                                )
-                                .padding(horizontal = 14.dp, vertical = 6.dp),
-                            contentAlignment = Alignment.Center
-                        ) {
-                            Text(
-                                text = stringResource(labelRes),
-                                style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold),
-                                color = if (isSelected) Color.White else Color.White.copy(alpha = 0.55f),
-                                maxLines = 1
+                    SegmentedControl(
+                        options = listOf(
+                            SegmentedOption(
+                                value = KlipyMediaType.GIF,
+                                title = stringResource(R.string.comment_gif)
+                            ),
+                            SegmentedOption(
+                                value = KlipyMediaType.STICKER,
+                                title = stringResource(R.string.comment_stickers)
                             )
+                        ),
+                        selected = uiState.selectedType,
+                        accentColor = accentColor,
+                        vibrationEnabled = vibrationEnabled,
+                        context = context,
+                        modifier = Modifier.widthIn(max = 200.dp),
+                        height = 32.dp,
+                        isPill = true,
+                        onSelect = { mediaType ->
+                            viewModel.selectMediaType(mediaType)
                         }
-                    }
+                    )
                 }
+
+                Spacer(modifier = Modifier.width(12.dp))
 
                 ModalCloseButton(onClick = onDismiss)
             }
 
-            Spacer(modifier = Modifier.height(14.dp))
+            Spacer(modifier = Modifier.height(12.dp))
 
             val focusRequester = remember { FocusRequester() }
             var isSearchFocused by remember { mutableStateOf(false) }
@@ -310,7 +303,6 @@ fun GifPickerModal(
                     }
 
                     else -> {
-                        val context = LocalContext.current
                         key(uiState.selectedType) {
                             val gridState = rememberLazyStaggeredGridState()
 
@@ -332,7 +324,7 @@ fun GifPickerModal(
                             LazyVerticalStaggeredGrid(
                                 columns = StaggeredGridCells.Fixed(columnCount),
                                 state = gridState,
-                                contentPadding = PaddingValues(start = 6.dp, end = 6.dp, top = 4.dp, bottom = 8.dp),
+                                contentPadding = PaddingValues(top = 2.dp),
                                 horizontalArrangement = Arrangement.spacedBy(8.dp),
                                 verticalItemSpacing = 8.dp,
                                 modifier = Modifier
@@ -358,7 +350,7 @@ fun GifPickerModal(
                                                 onGifSelected(item.fullUrl)
                                                 onDismiss()
                                             }
-                                            .clip(RoundedCornerShape(12.dp))
+                                            .clip(RoundedCornerShape(16.dp))
                                             .background(Color.White.copy(alpha = 0.06f)),
                                         contentAlignment = Alignment.Center
                                     ) {
@@ -407,8 +399,11 @@ fun GifPickerModal(
 
 @Composable
 private fun GifPickerSkeletonGrid(columns: Int = 2) {
+    val tileShape = RoundedCornerShape(16.dp)
     Column(
-        modifier = Modifier.fillMaxSize(),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(top = 2.dp),
         verticalArrangement = Arrangement.spacedBy(8.dp)
     ) {
         if (columns == 3) {
@@ -423,7 +418,7 @@ private fun GifPickerSkeletonGrid(columns: Int = 2) {
                             modifier = Modifier
                                 .weight(1f)
                                 .height(height)
-                                .clip(RoundedCornerShape(12.dp))
+                                .clip(tileShape)
                                 .background(Color.White.copy(alpha = 0.05f))
                         )
                     }
@@ -438,14 +433,14 @@ private fun GifPickerSkeletonGrid(columns: Int = 2) {
                     modifier = Modifier
                         .weight(1f)
                         .height(130.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(tileShape)
                         .background(Color.White.copy(alpha = 0.05f))
                 )
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(90.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(tileShape)
                         .background(Color.White.copy(alpha = 0.05f))
                 )
             }
@@ -457,14 +452,14 @@ private fun GifPickerSkeletonGrid(columns: Int = 2) {
                     modifier = Modifier
                         .weight(1f)
                         .height(95.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(tileShape)
                         .background(Color.White.copy(alpha = 0.05f))
                 )
                 Box(
                     modifier = Modifier
                         .weight(1f)
                         .height(135.dp)
-                        .clip(RoundedCornerShape(12.dp))
+                        .clip(tileShape)
                         .background(Color.White.copy(alpha = 0.05f))
                 )
             }

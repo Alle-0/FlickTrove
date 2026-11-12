@@ -45,12 +45,12 @@ internal object AgeRatingResolver {
     )
 
     val GUIDANCE_CERTS = setOf(
-        "PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "10", "10+",
+        "PG", "TV-PG", "TV-Y7", "TV-Y7-FV", "6", "6+", "FSK 6", "7", "7+", "7A", "K7", "10", "10+",
         "UA", "U/A", "UA 7+", "U/A 7+", "UA7+", "U/A7+", "UA 6+", "U/A 6+", "UA6+", "U/A6+"
     )
 
     val TEEN_12_CERTS = setOf(
-        "PG-13", "PG12", "PG-12", "12", "12+", "12A", "FSK 12", "13+", "13A",
+        "PG-13", "PG12", "PG-12", "11", "12", "12+", "12A", "FSK 12", "K12", "13+", "13A",
         "UA 13+", "U/A 13+", "UA13+", "U/A13+", "UA 12+", "U/A 12+", "R-13", "R13", "R12", "R-12"
     )
 
@@ -63,12 +63,12 @@ internal object AgeRatingResolver {
     )
 
     val TEEN_16_CERTS = setOf(
-        "16", "16+", "NC16", "NC-16", "VM16", "FSK 16",
+        "16", "16+", "NC16", "NC-16", "VM16", "FSK 16", "K16",
         "UA 16+", "U/A 16+", "UA16+", "U/A16+", "UA 15+", "U/A 15+", "R-16", "R16"
     )
 
     val ADULT_18_CERTS = setOf(
-        "NC-17", "18", "18+", "19", "21+", "FSK 18", "M18", "R21", "18A", "R-18", "R18", "R18+",
+        "NC-17", "18", "18+", "19", "21+", "FSK 18", "K18", "M18", "R21", "18A", "R-18", "R18", "R18+",
         "UA 18+", "U/A 18+", "UA18+", "U/A18+"
     )
 

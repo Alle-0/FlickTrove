@@ -2119,6 +2119,8 @@ Cod de invitație: %3$s</string>
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
 
     <string name="settings_group_navigation_gestures">Navigare și gesturi</string>
     <string name="settings_bottom_bar_swipe">Glisare bară inferioară (filme/seriale)</string>

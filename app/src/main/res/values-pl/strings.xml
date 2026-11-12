@@ -249,6 +249,8 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
     <string name="settings_default_start_tab">Ekran startowy</string>
     <string name="settings_default_start_tab_desc">Wybierz domyślny ekran po uruchomieniu aplikacji</string>
     <string name="settings_default_start_feed">GŁÓWNA</string>

@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.local.entities.WatchHistoryEntity
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.data.model.Movie
 import com.cinetrack.util.getEpisodeWatchDate
 import com.cinetrack.ui.components.shared.FlickTroveDatePickerModal
@@ -275,6 +276,7 @@ fun EpisodeWatchDatesModal(
                                                 tint = accentColor.copy(alpha = 0.75f),
                                                 modifier = Modifier
                                                     .size(13.dp)
+                                                    .mirrorInRtl()
                                                     .graphicsLayer { rotationZ = chevronRotation }
                                             )
                                         }

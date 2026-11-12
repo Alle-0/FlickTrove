@@ -238,6 +238,8 @@
     <string name="settings_language_vi">Tiếng Việt</string>
     <string name="settings_language_th">ไทย</string>
     <string name="settings_language_ar">العربية</string>
+    <string name="settings_language_da">Dansk</string>
+    <string name="settings_language_fi">Suomi</string>
     <string name="settings_default_start_tab">시작 화면</string>
     <string name="settings_default_start_tab_desc">앱 시작 시 처음으로 열릴 화면을 선택하세요</string>
     <string name="settings_default_start_feed">홈</string>

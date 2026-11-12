@@ -44,6 +44,7 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.premiumScrollbar
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.toComposeColor
@@ -501,7 +502,9 @@ private fun FolderItem(
                         painter = painter,
                         contentDescription = "Selected",
                         tint = folderColor,
-                        modifier = Modifier.size(15.dp)
+                        modifier = Modifier
+                            .size(15.dp)
+                            .mirrorInRtl()
                     )
                 }
             }

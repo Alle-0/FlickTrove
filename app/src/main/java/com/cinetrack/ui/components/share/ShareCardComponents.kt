@@ -20,6 +20,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -41,6 +42,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.layout.onSizeChanged
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -48,6 +50,7 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.isSpecified
@@ -150,24 +153,26 @@ internal fun ShareHeroRating(
             tint = ColorUtils.lightenForText(accentColor, 1.35f),
             modifier = Modifier.size(starSize)
         )
-        Row(
-            verticalAlignment = Alignment.Bottom,
-            horizontalArrangement = Arrangement.spacedBy(2.dp)
-        ) {
-            Text(
-                text = String.format(Locale.US, "%.1f", effectiveRating),
-                fontSize = ratingFontSize,
-                fontWeight = FontWeight.Black,
-                color = ColorUtils.lightenForText(accentColor, 1.35f),
-                lineHeight = ratingFontSize
-            )
-            Text(
-                text = "/10",
-                fontSize = scaleFontSize,
-                fontWeight = FontWeight.Bold,
-                color = ColorUtils.lightenForText(accentColor, 1.35f).copy(alpha = 0.75f),
-                modifier = Modifier.padding(bottom = 2.dp)
-            )
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(
+                verticalAlignment = Alignment.Bottom,
+                horizontalArrangement = Arrangement.spacedBy(2.dp)
+            ) {
+                Text(
+                    text = String.format(Locale.US, "%.1f", effectiveRating),
+                    fontSize = ratingFontSize,
+                    fontWeight = FontWeight.Black,
+                    color = ColorUtils.lightenForText(accentColor, 1.35f),
+                    lineHeight = ratingFontSize
+                )
+                Text(
+                    text = "/10",
+                    fontSize = scaleFontSize,
+                    fontWeight = FontWeight.Bold,
+                    color = ColorUtils.lightenForText(accentColor, 1.35f).copy(alpha = 0.75f),
+                    modifier = Modifier.padding(bottom = 2.dp)
+                )
+            }
         }
     }
 }

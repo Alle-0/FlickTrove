@@ -28,6 +28,7 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.theme.OnSurfaceMuted
 import com.cinetrack.ui.theme.PrimaryTeal
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.data.local.entities.FolderEntity
 import com.cinetrack.util.toComposeColor
@@ -460,7 +461,9 @@ private fun QuickFolderItem(
                         painter = painter,
                         contentDescription = null,
                         tint = folderColor,
-                        modifier = Modifier.size(15.dp)
+                        modifier = Modifier
+                            .size(15.dp)
+                            .mirrorInRtl()
                     )
                 }
             }

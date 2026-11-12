@@ -432,7 +432,7 @@ fun MovieCard(
                                 modifier = Modifier.size(((if (isLarge) 13.5f else 11.5f) * multiplier).dp)
                             )
                             Text(
-                                text = String.format("%.1f", displayRating),
+                                text = String.format(java.util.Locale.US, "%.1f", displayRating),
                                 color = MaterialTheme.colorScheme.primary,
                                 fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
                                 fontWeight = FontWeight.Black,

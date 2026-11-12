@@ -157,7 +157,7 @@ fun DetailPersonalZone(
             }
             PersonalAction(
                 label = stringResource(R.string.personal_zone_rate),
-                value = if (expandedAction == "rate" || previewRating > 0) String.format("%.1f", previewRating) else "—",
+                value = if (expandedAction == "rate" || previewRating > 0) String.format(java.util.Locale.US, "%.1f", previewRating) else "—",
                 hasValue = (expandedAction == "rate" || previewRating > 0),
                 isRateAction = true,
                 icon = ImageVector.vectorResource(id = R.drawable.ic_star_piena),

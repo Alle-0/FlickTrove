@@ -40,3 +40,10 @@ fun rtlMirrorIndex(index: Int, count: Int, isRtl: Boolean): Int {
     if (index < 0 || count <= 0) return index
     return if (isRtl) (count - 1 - index).coerceIn(0, count - 1) else index.coerceIn(0, count - 1)
 }
+
+/**
+ * Returns `1` in LTR or `-1` in RTL so physical pixel `slideInHorizontally` / `slideOutHorizontally`
+ * transitions follow the active layout direction (entering from start-side, exiting toward start-side on back).
+ */
+@Composable
+fun rtlSlideDirection(): Int = if (LocalLayoutDirection.current == LayoutDirection.Rtl) -1 else 1

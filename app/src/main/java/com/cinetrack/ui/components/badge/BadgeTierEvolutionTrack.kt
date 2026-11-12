@@ -30,14 +30,18 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 
 // 2. TIMELINE EVOLUTIVA DEI 5 TIERS (SPUNTA TICK SU TUTTI I NODI CONQUISTATI)
 // ════════════════════════════════════════════════════════════════════
@@ -60,6 +64,7 @@ fun BadgeTierEvolutionTrack(
 ) {
     val currentOrdinal = tierSteps.indexOf(currentTier).takeIf { it >= 0 } ?: 0
     val isCompletedAll = isUnlocked && currentOrdinal == tierSteps.lastIndex
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     val animatedStepProgress by animateFloatAsState(
         targetValue = stepProgressFraction.coerceIn(0f, 1f),
@@ -90,7 +95,7 @@ fun BadgeTierEvolutionTrack(
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 9.sp,
                     fontWeight = FontWeight.ExtraBold,
-                    letterSpacing = 1.2.sp
+                    letterSpacing = rtlSafeLetterSpacing(1.2.sp)
                 ),
                 color = Color.White.copy(alpha = 0.50f)
             )
@@ -108,7 +113,7 @@ fun BadgeTierEvolutionTrack(
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontSize = 8.5.sp,
                             fontWeight = FontWeight.Black,
-                            letterSpacing = 0.8.sp
+                            letterSpacing = rtlSafeLetterSpacing(0.8.sp)
                         ),
                         color = currentTier.primaryColor
                     )
@@ -141,6 +146,9 @@ fun BadgeTierEvolutionTrack(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(24.dp)
+                        .graphicsLayer {
+                            if (isRtl) scaleX = -1f
+                        }
                 ) {
                     val colW = size.width / stepCount.toFloat()
                     val strokeH = 2.5.dp.toPx()

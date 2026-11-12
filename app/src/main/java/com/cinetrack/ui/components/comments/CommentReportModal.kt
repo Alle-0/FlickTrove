@@ -39,6 +39,7 @@ import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.mirrorInRtl
+import com.cinetrack.ui.utils.rtlSlideDirection
 import dev.chrisbanes.haze.HazeState
 
 private enum class CommentModalStep {
@@ -102,17 +103,18 @@ fun CommentReportModal(
         Box(
             modifier = Modifier.fillMaxWidth()
         ) {
+            val slideDir = rtlSlideDirection()
             AnimatedContent(
                 targetState = currentStep,
                 transitionSpec = {
                     val isGoingBack = (initialState == CommentModalStep.OTHER_DETAIL && targetState == CommentModalStep.REASONS) ||
                             (targetState == CommentModalStep.MENU)
                     if (isGoingBack) {
-                        (slideInHorizontally { -it / 3 } + fadeIn(tween(200)))
-                            .togetherWith(slideOutHorizontally { it / 3 } + fadeOut(tween(150)))
+                        (slideInHorizontally { (-it / 3) * slideDir } + fadeIn(tween(200)))
+                            .togetherWith(slideOutHorizontally { (it / 3) * slideDir } + fadeOut(tween(150)))
                     } else {
-                        (slideInHorizontally { it / 3 } + fadeIn(tween(200)))
-                            .togetherWith(slideOutHorizontally { -it / 3 } + fadeOut(tween(150)))
+                        (slideInHorizontally { (it / 3) * slideDir } + fadeIn(tween(200)))
+                            .togetherWith(slideOutHorizontally { (-it / 3) * slideDir } + fadeOut(tween(150)))
                     }
                 },
                 modifier = Modifier

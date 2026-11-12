@@ -43,6 +43,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.repository.BadgeRepository
+import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.bounceClick
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.launch
@@ -287,6 +288,7 @@ fun ExecutiveProducerDonationSection(
                             tint = if (isExpanded) Color.White else Color.White.copy(alpha = 0.40f),
                             modifier = Modifier
                                 .size(14.dp)
+                                .mirrorInRtl()
                                 .graphicsLayer { rotationZ = arrowRotation }
                         )
                     }

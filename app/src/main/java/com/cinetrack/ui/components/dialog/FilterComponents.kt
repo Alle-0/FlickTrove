@@ -2,6 +2,7 @@ package com.cinetrack.ui.components.dialog
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.graphics.vector.ImageVector
 import com.cinetrack.R
+import com.cinetrack.ui.utils.mirrorInRtl
 
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.animation.*
@@ -144,6 +145,7 @@ fun ExpandableSection(
                         tint = if (isExpanded) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
                         modifier = Modifier
                             .size(20.dp)
+                            .mirrorInRtl()
                             .graphicsLayer(rotationZ = rotation)
                     )
                 }

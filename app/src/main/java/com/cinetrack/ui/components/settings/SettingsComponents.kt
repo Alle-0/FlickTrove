@@ -175,6 +175,7 @@ fun SettingsSection(
                 tint = OnSurfaceMuted,
                 modifier = Modifier
                     .size(24.dp)
+                    .mirrorInRtl()
                     .graphicsLayer {
                         rotationZ = arrowRotation
                     }

@@ -83,6 +83,8 @@ fun SettingsGeneralPreferencesSection(
                     "vi" -> stringResource(R.string.settings_language_vi)
                     "th" -> stringResource(R.string.settings_language_th)
                     "ar" -> stringResource(R.string.settings_language_ar)
+                    "da" -> stringResource(R.string.settings_language_da)
+                    "fi" -> stringResource(R.string.settings_language_fi)
                     else -> contentLanguage
                 }
                 Text(

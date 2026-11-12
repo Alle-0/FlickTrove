@@ -43,6 +43,7 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
+import com.cinetrack.ui.utils.rtlSlideDirection
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.SurpriseCompany
 import com.cinetrack.ui.viewmodel.SurpriseMeViewModel
@@ -211,22 +212,23 @@ private fun SurpriseMeContent(
                 4 -> LoadingStep(isGhost = true)
             }
         } else {
+            val slideDir = rtlSlideDirection()
             AnimatedContent(
                 targetState = step,
                 transitionSpec = {
                     val duration = 400
                     if (targetState > initialState) {
-                        (slideInHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> width / 2 } + 
+                        (slideInHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> (width / 2) * slideDir } + 
                          fadeIn(animationSpec = tween(duration)) + 
                          scaleIn(initialScale = 0.85f, animationSpec = tween(duration, easing = FastOutSlowInEasing))) togetherWith 
-                        (slideOutHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> -width / 2 } + 
+                        (slideOutHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> (-width / 2) * slideDir } + 
                          fadeOut(animationSpec = tween(duration)) + 
                          scaleOut(targetScale = 0.85f, animationSpec = tween(duration, easing = FastOutSlowInEasing)))
                     } else {
-                        (slideInHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> -width / 2 } + 
+                        (slideInHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> (-width / 2) * slideDir } + 
                          fadeIn(animationSpec = tween(duration)) + 
                          scaleIn(initialScale = 0.85f, animationSpec = tween(duration, easing = FastOutSlowInEasing))) togetherWith 
-                        (slideOutHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> width / 2 } + 
+                        (slideOutHorizontally(animationSpec = tween(duration, easing = FastOutSlowInEasing)) { width -> (width / 2) * slideDir } + 
                          fadeOut(animationSpec = tween(duration)) + 
                          scaleOut(targetScale = 0.85f, animationSpec = tween(duration, easing = FastOutSlowInEasing)))
                     }.using(SizeTransform(clip = false))

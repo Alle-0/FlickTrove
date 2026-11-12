@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 import java.time.LocalDate
 import java.time.YearMonth
 import java.time.format.DateTimeFormatter
@@ -425,6 +426,7 @@ private fun RemindersMonthHeader(
                         tint = accentColor.copy(alpha = 0.75f),
                         modifier = Modifier
                             .size(14.dp)
+                            .mirrorInRtl()
                             .graphicsLayer { rotationZ = chevronRotation }
                     )
                 }

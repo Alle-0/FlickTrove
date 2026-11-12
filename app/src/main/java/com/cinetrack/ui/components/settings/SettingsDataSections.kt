@@ -409,6 +409,7 @@ var creditsExpanded by remember { mutableStateOf(false) }
                         tint = OnSurfaceMuted,
                         modifier = Modifier
                             .size(18.dp)
+                            .mirrorInRtl()
                             .rotate(rotation)
                     )
                 }

@@ -41,6 +41,7 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Episode
 import com.cinetrack.data.model.Season
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.mirrorInRtl
 
 /**
  * Collapsible Season Accordion Card with Spring animation (Pro-Tip #2)
@@ -106,6 +107,7 @@ internal fun SeasonAccordionCard(
                     tint = if (isFullyWatched) Color(0xFF00E676) else if (isExpanded) Color.White else Color.White.copy(alpha = 0.4f),
                     modifier = Modifier
                         .size(16.dp)
+                        .mirrorInRtl()
                         .rotate(rotationAngle)
                 )
 

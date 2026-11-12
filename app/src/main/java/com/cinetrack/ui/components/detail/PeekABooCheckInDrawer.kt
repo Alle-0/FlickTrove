@@ -26,10 +26,12 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.zIndex
@@ -40,6 +42,7 @@ import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rtlSlideDirection
 import com.cinetrack.ui.utils.verticalFadingEdges
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
@@ -220,15 +223,16 @@ fun CheckInModal(
                             ModalCloseButton(onClick = { dismissAll() })
                         }
 
+                        val slideDir = rtlSlideDirection()
                         AnimatedContent(
                             targetState = currentPage,
                             transitionSpec = {
                                 if (targetState > initialState) {
-                                    slideInHorizontally { width -> width } + fadeIn() togetherWith
-                                            slideOutHorizontally { width -> -width } + fadeOut()
+                                    slideInHorizontally { width -> width * slideDir } + fadeIn() togetherWith
+                                            slideOutHorizontally { width -> -width * slideDir } + fadeOut()
                                 } else {
-                                    slideInHorizontally { width -> -width } + fadeIn() togetherWith
-                                            slideOutHorizontally { width -> width } + fadeOut()
+                                    slideInHorizontally { width -> -width * slideDir } + fadeIn() togetherWith
+                                            slideOutHorizontally { width -> width * slideDir } + fadeOut()
                                 }.using(SizeTransform(clip = false))
                             },
                             label = "Page Transition",
@@ -246,34 +250,36 @@ fun CheckInModal(
 
                                         // Large Rating Display on top (matching QuickRatingModal)
                                         if (rating > 0) {
-                                            Row(
-                                                verticalAlignment = Alignment.Bottom,
-                                                horizontalArrangement = Arrangement.Center,
-                                                modifier = Modifier
-                                                    .padding(bottom = 12.dp)
-                                                    .graphicsLayer {
-                                                        scaleX = numberScale.value
-                                                        scaleY = numberScale.value
-                                                    }
-                                            ) {
-                                                Text(
-                                                    text = "%.1f".format(rating),
-                                                    style = MaterialTheme.typography.displayLarge.copy(
-                                                        fontWeight = FontWeight.Black,
-                                                        fontSize = 52.sp,
-                                                        letterSpacing = (-2).sp
-                                                    ),
-                                                    color = accentColor,
-                                                    textAlign = TextAlign.Center
-                                                )
-                                                Text(
-                                                    text = "/ 10",
-                                                    style = MaterialTheme.typography.headlineSmall.copy(
-                                                        fontWeight = FontWeight.Bold,
-                                                        color = Color.White.copy(alpha = 0.25f)
-                                                    ),
-                                                    modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
-                                                )
+                                            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                                                Row(
+                                                    verticalAlignment = Alignment.Bottom,
+                                                    horizontalArrangement = Arrangement.Center,
+                                                    modifier = Modifier
+                                                        .padding(bottom = 12.dp)
+                                                        .graphicsLayer {
+                                                            scaleX = numberScale.value
+                                                            scaleY = numberScale.value
+                                                        }
+                                                ) {
+                                                    Text(
+                                                        text = String.format(java.util.Locale.US, "%.1f", rating),
+                                                        style = MaterialTheme.typography.displayLarge.copy(
+                                                            fontWeight = FontWeight.Black,
+                                                            fontSize = 52.sp,
+                                                            letterSpacing = (-2).sp
+                                                        ),
+                                                        color = accentColor,
+                                                        textAlign = TextAlign.Center
+                                                    )
+                                                    Text(
+                                                        text = "/ 10",
+                                                        style = MaterialTheme.typography.headlineSmall.copy(
+                                                            fontWeight = FontWeight.Bold,
+                                                            color = Color.White.copy(alpha = 0.25f)
+                                                        ),
+                                                        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+                                                    )
+                                                }
                                             }
                                         } else {
                                             Text(

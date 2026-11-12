@@ -26,7 +26,10 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.utils.bounceClick
 import kotlinx.coroutines.launch
@@ -58,6 +61,7 @@ fun SymbiontPagerIndicator(
 
     val distance = dotSize + spacing
     val canvasWidth = dotSize + (distance * (pageCount - 1).coerceAtLeast(0))
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     // Tracciamento velocità di scorrimento (distingue swipe lenti da swipe veloci o auto-scroll)
     var currentSpeedPagesPerSec by remember { mutableFloatStateOf(1.5f) }
@@ -90,6 +94,9 @@ fun SymbiontPagerIndicator(
             modifier = Modifier
                 .width(canvasWidth)
                 .height(dotSize)
+                .graphicsLayer {
+                    if (isRtl) scaleX = -1f
+                }
         ) {
             val canvasHeightPx = size.height
             val centerY = canvasHeightPx / 2f
@@ -198,6 +205,7 @@ fun SymbiontPagerIndicator(
 
     val distance = dotSize + spacing
     val canvasWidth = dotSize + (distance * (pageCount - 1).coerceAtLeast(0))
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     val headProgress = remember { Animatable(currentPage.toFloat()) }
     val tailProgress = remember { Animatable(currentPage.toFloat()) }
@@ -254,6 +262,9 @@ fun SymbiontPagerIndicator(
             modifier = Modifier
                 .width(canvasWidth)
                 .height(dotSize)
+                .graphicsLayer {
+                    if (isRtl) scaleX = -1f
+                }
         ) {
             val centerY = size.height / 2f
             val dotRadius = dotSize.toPx() / 2f

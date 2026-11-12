@@ -23,13 +23,16 @@ import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.ui.utils.bounceClick
+import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -101,7 +104,7 @@ fun QuickRatingModal(
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
                                 color = Color.White.copy(alpha = 0.4f),
-                                letterSpacing = 1.sp
+                                letterSpacing = rtlSafeLetterSpacing(1.sp)
                             )
                         )
                         if (initialRating > 0.0 && currentRating != initialRating) {
@@ -109,7 +112,7 @@ fun QuickRatingModal(
                                 text = stringResource(R.string.quick_rating_previous, initialRating),
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     fontWeight = FontWeight.Bold,
-                                    letterSpacing = 1.sp
+                                    letterSpacing = rtlSafeLetterSpacing(1.sp)
                                 ),
                                 color = accentColor.copy(alpha = 0.6f)
                             )
@@ -119,34 +122,36 @@ fun QuickRatingModal(
             }
 
             // Large Rating Display
-            Row(
-                verticalAlignment = Alignment.Bottom,
-                modifier = Modifier
-                    .padding(bottom = 16.dp)
-                    .graphicsLayer {
-                        scaleX = numberScale.value
-                        scaleY = numberScale.value
-                    }
-            ) {
-                Text(
-                    text = "%.1f".format(currentRating),
-                    style = MaterialTheme.typography.displayLarge.copy(
-                        fontWeight = FontWeight.Black,
-                        fontSize = 54.sp,
-                        letterSpacing = (-2).sp
-                    ),
-                    color = accentColor,
-                    modifier = Modifier.widthIn(min = 100.dp),
-                    textAlign = TextAlign.Center
-                )
-                Text(
-                    text = "/ 10",
-                    style = MaterialTheme.typography.headlineSmall.copy(
-                        fontWeight = FontWeight.Bold,
-                        color = Color.White.copy(alpha = 0.2f)
-                    ),
-                    modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
-                )
+            CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+                Row(
+                    verticalAlignment = Alignment.Bottom,
+                    modifier = Modifier
+                        .padding(bottom = 16.dp)
+                        .graphicsLayer {
+                            scaleX = numberScale.value
+                            scaleY = numberScale.value
+                        }
+                ) {
+                    Text(
+                        text = String.format(java.util.Locale.US, "%.1f", currentRating),
+                        style = MaterialTheme.typography.displayLarge.copy(
+                            fontWeight = FontWeight.Black,
+                            fontSize = 54.sp,
+                            letterSpacing = (-2).sp
+                        ),
+                        color = accentColor,
+                        modifier = Modifier.widthIn(min = 100.dp),
+                        textAlign = TextAlign.Center
+                    )
+                    Text(
+                        text = "/ 10",
+                        style = MaterialTheme.typography.headlineSmall.copy(
+                            fontWeight = FontWeight.Bold,
+                            color = Color.White.copy(alpha = 0.2f)
+                        ),
+                        modifier = Modifier.padding(bottom = 8.dp, start = 4.dp)
+                    )
+                }
             }
 
             // Star Rating Bar

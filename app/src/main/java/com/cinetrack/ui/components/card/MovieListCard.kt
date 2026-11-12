@@ -307,7 +307,7 @@ fun MovieListCard(
                 
                 val displayRating = personalRating ?: movie.personalRating
                 val hasRating = displayRating != null && displayRating > 0.0
-                val vote = if (hasRating) String.format("%.1f", displayRating) else ""
+                val vote = if (hasRating) String.format(java.util.Locale.US, "%.1f", displayRating) else ""
                 
                 val contextLocale = LocalConfiguration.current.locales[0].language
                 val genres = remember(movie.genreIds, movie.genreNamesString, contextLocale) {
