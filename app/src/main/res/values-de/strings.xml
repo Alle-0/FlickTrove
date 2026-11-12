@@ -1387,7 +1387,7 @@
     <string name="simkl_connect_error">Fehler bei der Verbindung mit SIMKL</string>
     <string name="simkl_connect">Mit SIMKL verbinden</string>
     <string name="simkl_sync_desc">App ➔ SIMKL: Sofort\nSIMKL ➔ App: 6 Std.</string>
-    <string name="home_hero_featured">FEATURED</string>
+    <string name="home_hero_featured">EMPFOHLEN</string>
     <string name="home_section_watchlist">Aus deiner Watchlist</string>
     <string name="home_section_watchlist_upcoming">Demnächst aus deiner Watchlist</string>
     <string name="match_score">Match</string>
@@ -2142,8 +2142,8 @@
     <string name="settings_bottom_bar_swipe_desc">Wische auf der Navigationsleiste horizontal, um zwischen Filmen und Serien zu wechseln</string>
     <string name="settings_msg_bottom_bar_swipe">Navigationsleisten-Wischgeste %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Realistische optische Linsenbrechung und chromatische Dispersion. Für klassisches Milchglas ausschalten.</string>
+    <string name="settings_msg_liquid_glass">Liquid-Glass-Effekt %1$s</string>
 
     <string name="comment_writing_tips_title">Formatierungshilfe</string>
     <string name="comment_tip_bold">Starke Betonung (Fett)</string>

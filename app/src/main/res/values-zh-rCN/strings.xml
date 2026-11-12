@@ -2145,8 +2145,8 @@
     <string name="settings_bottom_bar_swipe_desc">水平滑动底部导航栏以在电影和电视剧之间切换</string>
     <string name="settings_msg_bottom_bar_swipe">底部导航栏滑动 %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">真实的光学透镜折射与色散效果。关闭以使用经典磨砂玻璃。</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass 效果 %1$s</string>
 
     <string name="comment_writing_tips_title">格式指南</string>
     <string name="comment_tip_bold">粗体强调</string>

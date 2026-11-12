@@ -2105,8 +2105,8 @@
     <string name="settings_bottom_bar_swipe_desc">Přejetím po navigační liště vodorovně přepínejte mezi filmy a seriály</string>
     <string name="settings_msg_bottom_bar_swipe">Přejetí spodní lišty %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Realistický lom optické čočky a chromatická disperze. Vypněte pro klasické matné sklo.</string>
+    <string name="settings_msg_liquid_glass">Efekt tekutého skla %1$s</string>
 
     <string name="comment_writing_tips_title">Průvodce formátováním</string>
     <string name="comment_tip_bold">Tučné zvýraznění</string>

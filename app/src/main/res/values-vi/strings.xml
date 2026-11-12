@@ -2105,8 +2105,8 @@
     <string name="settings_bottom_bar_swipe_desc">Vuốt ngang trên thanh điều hướng để chuyển đổi giữa Phim và Phim bộ</string>
     <string name="settings_msg_bottom_bar_swipe">Vuốt thanh dưới %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Khúc xạ thấu kính quang học chân thực và tán sắc màu. Tắt để dùng kính mờ cổ điển.</string>
+    <string name="settings_msg_liquid_glass">Hiệu ứng Liquid Glass %1$s</string>
 
     <string name="comment_writing_tips_title">Hướng dẫn định dạng</string>
     <string name="comment_tip_bold">Nhấn mạnh in đậm</string>

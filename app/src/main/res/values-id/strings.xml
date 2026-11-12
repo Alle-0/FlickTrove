@@ -2144,8 +2144,8 @@
     <string name="settings_bottom_bar_swipe_desc">Gesek bilah navigasi secara horizontal untuk beralih antara Film dan Serial TV</string>
     <string name="settings_msg_bottom_bar_swipe">Gesek bilah bawah %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Pembiasan lensa optik realistis dan dispersi kromatik. Matikan untuk kaca buram klasik.</string>
+    <string name="settings_msg_liquid_glass">Efek Liquid Glass %1$s</string>
 
     <string name="comment_writing_tips_title">Panduan format</string>
     <string name="comment_tip_bold">Penekanan tebal</string>

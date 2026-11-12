@@ -2145,8 +2145,8 @@
     <string name="settings_bottom_bar_swipe_desc">Filmler ve diziler arasında geçiş yapmak için alt çubuğu yatay kaydırın</string>
     <string name="settings_msg_bottom_bar_swipe">Alt çubuk kaydırma %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Gerçekçi optik lens kırılması ve kromatik dağılım. Klasik buzlu cam için kapatın.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass efekti %1$s</string>
 
     <string name="comment_writing_tips_title">Biçimlendirme kılavuzu</string>
     <string name="comment_tip_bold">Kalın vurgulama</string>

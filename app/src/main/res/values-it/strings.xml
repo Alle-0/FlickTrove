@@ -142,7 +142,7 @@
     <string name="stats_dhm">%1$dg %2$dh %3$dm</string>
     <string name="stats_hm">%1$dh %2$dm</string>
     <string name="stats_m">%1$dm</string>
-    <string name="stats_cinephile_legacy">THE CINEPHILE\'S LEGACY</string>
+    <string name="stats_cinephile_legacy">L\'EREDITÀ DEL CINEFILO</string>
     <string name="stats_one_movie">1 film</string>
     <string name="stats_many_movies">%1$d film</string>
     <string name="stats_share_title_msg">Condividi le tue statistiche</string>

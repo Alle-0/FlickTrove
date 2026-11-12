@@ -2139,8 +2139,8 @@
     <string name="settings_bottom_bar_swipe_desc">Проведите по нижней панели по горизонтали для переключения между фильмами и сериалами</string>
     <string name="settings_msg_bottom_bar_swipe">Свайп нижней панели %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Реалистичное оптическое преломление линзы и хроматическая дисперсия. Выключите для классического матового стекла.</string>
+    <string name="settings_msg_liquid_glass">Эффект Liquid Glass %1$s</string>
 
     <string name="comment_writing_tips_title">Справка по форматированию</string>
     <string name="comment_tip_bold">Жирное выделение</string>

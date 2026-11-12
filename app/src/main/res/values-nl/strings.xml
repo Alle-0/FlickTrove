@@ -2105,8 +2105,8 @@
     <string name="settings_bottom_bar_swipe_desc">Veeg horizontaal over de navigatiebalk om te schakelen tussen films en tv-series</string>
     <string name="settings_msg_bottom_bar_swipe">Navigatiebalk-veeggebaar %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Realistische optische lensbreking en chromatische dispersie. Schakel uit voor klassiek matglas.</string>
+    <string name="settings_msg_liquid_glass">Liquid Glass-effect %1$s</string>
 
     <string name="comment_writing_tips_title">Opmaakgids</string>
     <string name="comment_tip_bold">Vetgedrukte nadruk</string>

@@ -2141,8 +2141,8 @@
     <string name="settings_bottom_bar_swipe_desc">Desliza la barra horizontalmente para alternar entre películas y series</string>
     <string name="settings_msg_bottom_bar_swipe">Deslizar barra de navegación %1$s</string>
     <string name="settings_liquid_glass_title">Liquid Glass Effect</string>
-    <string name="settings_liquid_glass_desc">Realistic optical lens refraction and chromatic dispersion. Turn off for classic frosted glass.</string>
-    <string name="settings_msg_liquid_glass">Liquid Glass effect %1$s</string>
+    <string name="settings_liquid_glass_desc">Refracción óptica realista de lente y dispersión cromática. Desactiva para vidrio esmerilado clásico.</string>
+    <string name="settings_msg_liquid_glass">Efecto Liquid Glass %1$s</string>
 
     <string name="comment_writing_tips_title">Guía de formato</string>
     <string name="comment_tip_bold">Énfasis en negrita</string>
