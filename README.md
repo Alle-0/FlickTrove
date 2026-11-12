@@ -65,8 +65,14 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 <div align="center">
   <a href="https://github.com/Alle-0/FlickTrove/releases/latest">
-    <img src="https://img.shields.io/badge/Download_APK-Latest_Release-2DD4BF?style=for-the-badge&logo=android&logoColor=black" alt="Download APK" />
+    <img src="https://img.shields.io/badge/Download_APK-Latest_Release-F386F8?style=for-the-badge&logo=android&logoColor=black" alt="Download APK" />
   </a>
+  <br><br>
+  <a href="https://github.com/Alle-0/FlickTrove/releases/latest">
+    <img src="https://api.qrserver.com/v1/create-qr-code/?size=120x120&data=https://github.com/Alle-0/FlickTrove/releases/latest&bgcolor=ffffff&color=0d1117&margin=8" width="120" height="120" alt="Scan QR code to download FlickTrove APK" />
+  </a>
+  <br>
+  <sub>Scan from your phone to jump straight to the latest APK release</sub>
 </div>
 
 <br>
@@ -112,6 +118,11 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
     </td>
   </tr>
 </table>
+
+<p align="center">
+  <b>Migrate in seconds from:</b>&nbsp;
+  <code>Letterboxd</code> · <code>IMDb</code> · <code>Trakt.tv</code> · <code>SIMKL</code> · <code>TVTime</code> · <code>Serializd</code> · <code>Cinemaniac</code> · <code>CSV / JSON / YAML</code>
+</p>
 
 <details>
   <summary><b><img src="docs/assets/readme_icons/lista_+.svg" width="18" height="18" align="absmiddle" /> Explore all features (Discovery, TV Tracking, Import, 28+ Languages & more)</b></summary>
