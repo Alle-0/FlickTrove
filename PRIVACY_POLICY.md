@@ -1,6 +1,6 @@
 # Privacy Policy
 
-**Last Updated:** October 31, 2026
+**Last Updated:** November 12, 2026
 
 This Privacy Policy describes how the "FlickTrove" application (hereinafter referred to as the "App") collects, uses, protects, and retains user information, in full compliance with the General Data Protection Regulation (GDPR - EU Regulation 2016/679) and current privacy laws regarding the protection of personal data.
 
@@ -29,6 +29,7 @@ FlickTrove uses essential third-party infrastructures to function. These provide
 * **Firebase (Google):** Used for secure authentication (Firebase Auth), real-time cloud saving (Firestore), and crash diagnostics/stability monitoring (Crashlytics and Analytics). *See the Google/Firebase Privacy Policy for more details.*
 * **Payment Processors (PayPal & Ko-fi):** Voluntary contributions to the project are processed externally by PayPal (PayPal Inc.) and Ko-fi (Ko-fi Labs Ltd). These payment gateways operate as independent data controllers for billing and processing your payments in accordance with their respective privacy policies. FlickTrove only receives the transactional confirmation payload necessary to verify supporter badges and does not process financial payment details.
 * **Supabase:** Used for serverless Edge Functions, cloud storage for user-uploaded custom avatars and comment images, and as the backend database for **Collaborative Shared Folders** (storing shared folder metadata, membership rosters, temporary invite tokens, and shared watchlist items with Row-Level Security). *See the Supabase Privacy Policy for more details.*
+* **KLIPY API:** Used to allow users to search and attach GIFs and Stickers within comments. When searching or sharing GIFs or Stickers, search queries, an anonymous non-PII client identifier, and your device's IP address may be sent to KLIPY's servers. Please review the KLIPY Privacy Policy for further details.
 * **TMDB, TheTVDB, OMDB, Trakt & SIMKL APIs:** The App communicates with The Movie Database (TMDB), TheTVDB, Open Movie Database (OMDB), Trakt.tv, and SIMKL servers to retrieve plots, posters, ratings, and information about movies, actors, and TV shows.
 * **Trakt.tv & SIMKL Account Synchronization:** If you connect your Trakt.tv or SIMKL account, FlickTrove securely authenticates via industry-standard OAuth 2.0 (including PKCE) to synchronize your watch history, personal ratings, watchlist, and custom lists/folders between your device and their cloud platforms. Please refer to the respective Privacy Policies of Trakt.tv and SIMKL for information on how your external account data is processed and stored.
 * **News Feeds (Everyeye.it, BadTaste.it, Collider.com & ScreenRant.com):** When you open the "Latest News" tab, the App directly fetches RSS feeds from external publishers (Everyeye.it and BadTaste.it for Italian, or Collider.com and ScreenRant.com for English). Please note that connecting to these external RSS feeds exposes your device's IP address to their respective servers according to their privacy policies.

@@ -90,16 +90,16 @@ FlickTrove is not just a tracker, it's a personal cinema companion and media lib
 - 🤝 **Collaborative Shared Folders**: Invite friends and family to curate watchlists together in real-time. Share folders via temporary alphanumeric invite codes (`FT-XXXXX`) or direct links, collaborate with up to 25 simultaneous members, manage permissions with Owner and Collaborator roles, and enjoy instantaneous optimistic updates with full offline support.
 - 🎨 **Seasonal Adaptive App Icons**: Personalize your home screen with themed launcher icons (including Halloween, Christmas) with an interactive in-app live preview carousel.
 - 🔍 **Natural Language Search & TMDB Catalog**: Instant search across the entire TMDB catalog for movies, TV shows, and people. Powered by a comprehensive bilingual keyword dictionary for semantic mood and theme lookups.
-- 🎬 **Episodic TV Tracking**: Full TV series lifecycle management. Spunta episodes and seasons, track next upcoming air dates, monitor up-to-date completion status, and preserve your watched episode history even when dropping or pausing shows.
+- 🎬 **Episodic TV Tracking**: Full TV series lifecycle management. Check off episodes and seasons, track next upcoming air dates, monitor up-to-date completion status, and preserve your watched episode history even when dropping or pausing shows.
 - ☁️ **Cloud & Live Sync**: Native Firebase Firestore backup alongside seamless, two-way background synchronization with **Trakt.tv** and **SIMKL** (OAuth 2.0 with PKCE) for watch history, personal ratings, watchlist, and custom folders via Android WorkManager.
 - 📴 **Offline-First Architecture**: Access your entire library, update watch states, rate titles, and take personal notes without an internet connection, backed by a solid local Room database.
-- 🌍 **28 Languages & Regional Age Ratings**: Full app-wide native localization supporting 28 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇵🇹 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇹🇼 🇮🇩 🇹🇷 🇵🇱 🇳🇱 🇨🇿 🇺🇦 🇭🇺 🇷🇴 🇸🇪 🇬🇷 🇻🇳 🇹🇭 🇸🇦 🇩🇰 🇫🇮) with localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC, Kijkwijzer).
+- 🌍 **28 Languages, Full RTL & Regional Age Ratings**: Full app-wide native localization supporting 28 languages and regional locales (🇮🇹 🇬🇧 🇺🇸 🇩🇪 🇪🇸 🇫🇷 🇧🇷 🇵🇹 🇷🇺 🇮🇳 🇯🇵 🇰🇷 🇨🇳 🇹🇼 🇮🇩 🇹🇷 🇵🇱 🇳🇱 🇨🇿 🇺🇦 🇭🇺 🇷🇴 🇸🇪 🇬🇷 🇻🇳 🇹🇭 🇸🇦 🇩🇰 🇫🇮) with complete Right-to-Left (RTL) layout mirroring and localized regional film certifications (MPAA, Eirin, KMRB, LSF, RTÜK, FSK, CNC, ICAA, ClassInd, CBFC, BBFC, Kijkwijzer, KAVI).
 - 🍿 **Streaming Providers & Trailers**: Discover where to stream, buy, or rent any title in your country, powered by JustWatch data via TMDB, alongside high-definition in-app YouTube trailers.
 - 📅 **Release Reminders & Notifications**: Never miss theatrical premieres or streaming releases with local calendar notifications and customizable alert schedules.
 - 📰 **Film Magazine & Editorial Collections**: Dedicated news section featuring articles from top film publications alongside curated editorial spotlight collections.
-- 📊 **Advanced Statistics & Cinephile Wrapped**: Comprehensive watch time breakdowns (days, hours, minutes), genre distributions, release decade heatmaps, favorite actor/director frequency, and shareable Wrapped cards.
+- 📊 **Advanced Statistics, Flow Persona & Cinephile Wrapped**: Comprehensive watch time breakdowns (days, hours, minutes), genre distributions, release decade heatmaps, favorite actor/director frequency, and shareable Wrapped & Flow Persona PNG cards.
 - 🌍 **Global Anonymous Ratings**: Your personal ratings contribute anonymously and idempotently to the global FlickTrove rating, visible alongside TMDB, IMDb, Rotten Tomatoes, and Metacritic scores.
-- 💬 **Community & Federated Social Network**: Write reviews, rate titles, format with Markdown, tag spoilers, and interact with the federated **CommsUni (commsuni.tv)** network. Features dedicated isolated threads for individual TV episodes (`EpisodeDiscussionPickerModal`), native camera and photo picker integration, and a zoomable media viewer.
+- 💬 **Community & Federated Social Network**: Write reviews up to 8,000 characters, rate titles, format with Markdown, tag spoilers, link `#Movie`/`#TV` titles with cross-language inline poster chips, attach **KLIPY** GIFs & Stickers, and interact with the federated **CommsUni (commsuni.tv)** network. Features dedicated isolated threads for individual TV episodes (`EpisodeDiscussionPickerModal`), native camera and photo picker integration, and a zoomable media viewer.
 - 📱 **Interactive Glance Widgets**: Glanceable Android home screen widgets for viewing your movie watchlist, now watching, and TV series in progress with direct episode check-off from your launcher.
 - 🔄 **Universal Data Import**: Effortless migration engine recognizing backup exports from **Letterboxd**, **IMDb**, **Trakt.tv**, **SIMKL**, **TVTime**, **Serializd**, **Cinemaniac**, and custom **CSV/JSON/YAML** files.
 - 🛡️ **Privacy & Safe Environment**: Built-in reporting system to flag inappropriate content, zero third-party telemetry, and full local backup export/import capabilities.
@@ -118,7 +118,7 @@ FlickTrove is not just a tracker, it's a personal cinema companion and media lib
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/HomeFeed.webp" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/YourList-Watched.webp" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_AliceInBorderland.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_Lupin.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Advanced Statistics</b></td>
