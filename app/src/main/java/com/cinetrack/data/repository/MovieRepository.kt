@@ -879,7 +879,9 @@ class MovieRepository @Inject constructor(
 
     suspend fun getMovieLogo(id: Long, isTv: Boolean): String? {
         val mediaType = if (isTv) "tv" else "movie"
-        val cacheKey = "logo:$mediaType:$id"
+        val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
+        val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage.substringBefore("-")
+        val cacheKey = "logo:$mediaType:$id:$currentLang"
         (memoryDetailsCache[cacheKey] as? String)?.let { return it }
 
         // Check if full detail is already cached in memory or Room
@@ -889,16 +891,14 @@ class MovieRepository @Inject constructor(
                 jsonStr?.let { json.decodeFromString<com.cinetrack.data.api.MovieDetailResponse>(it) }
             } catch (e: Exception) { null }
 
-        val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
-        val currentLang = if (rawLanguage == "system") java.util.Locale.getDefault().language else rawLanguage
-
-        if (cachedDetail?.images?.logos != null) {
-            val logos = cachedDetail.images.logos
-            val best = logos.firstOrNull { it.iso6391 == currentLang } ?: logos.firstOrNull { it.iso6391 == "en" } ?: logos.firstOrNull()
-            val path = best?.filePath
-            if (path != null) {
-                memoryDetailsCache[cacheKey] = path
-                return path
+        val cachedLogos = cachedDetail?.images?.logos
+        val cachedFallback = cachedLogos?.let { logos ->
+            (logos.firstOrNull { it.iso6391 == currentLang } ?: logos.firstOrNull { it.iso6391 == "en" } ?: logos.firstOrNull())?.filePath
+        }
+        if (cachedLogos != null && (currentLang == "en" || cachedLogos.any { it.iso6391 == currentLang })) {
+            if (cachedFallback != null) {
+                memoryDetailsCache[cacheKey] = cachedFallback
+                return cachedFallback
             }
         }
 
@@ -906,13 +906,13 @@ class MovieRepository @Inject constructor(
             val response = if (isTv) tmdbService.getTVBasicDetails(id) else tmdbService.getMovieBasicDetails(id)
             val logos = response.images?.logos
             val best = logos?.firstOrNull { it.iso6391 == currentLang } ?: logos?.firstOrNull { it.iso6391 == "en" } ?: logos?.firstOrNull()
-            val path = best?.filePath
+            val path = best?.filePath ?: cachedFallback
             if (path != null) {
                 memoryDetailsCache[cacheKey] = path
             }
             path
         } catch (e: Exception) {
-            null
+            cachedFallback
         }
     }
 

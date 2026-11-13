@@ -25,6 +25,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
+import com.cinetrack.ui.utils.mirrorInRtl
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.SoftwareKeyboardController
@@ -207,7 +208,7 @@ fun DiscoverMoreTrendingButton(
                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                 contentDescription = null,
                 tint = accentColor,
-                modifier = Modifier.size(13.dp)
+                modifier = Modifier.size(13.dp).mirrorInRtl()
             )
         }
     }
@@ -257,7 +258,7 @@ fun DiscoverMoreTrendingCard(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = null,
                         tint = accentColor,
-                        modifier = Modifier.size(18.dp)
+                        modifier = Modifier.size(18.dp).mirrorInRtl()
                     )
                 }
                 Spacer(modifier = Modifier.width(14.dp))
@@ -308,7 +309,7 @@ fun DiscoverMoreTrendingCard(
                         imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
                         contentDescription = null,
                         tint = accentColor,
-                        modifier = Modifier.size(24.dp)
+                        modifier = Modifier.size(24.dp).mirrorInRtl()
                     )
                 }
                 Spacer(modifier = Modifier.height(16.dp))

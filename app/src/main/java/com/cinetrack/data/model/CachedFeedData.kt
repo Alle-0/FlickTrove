@@ -28,13 +28,18 @@ data class CachedFeedData(
     val continueWatchingTv: List<Movie> = emptyList(),
     val becauseYouWatchedMovie: BecauseYouWatchedData? = null,
     val becauseYouWatchedTv: BecauseYouWatchedData? = null,
-    val logoPaths: Map<Long, String> = emptyMap()
+    val logoPaths: Map<Long, String> = emptyMap(),
+    val language: String? = null
 ) {
-    fun toFeedState(): FeedState {
+    fun toFeedState(includeLogos: Boolean = true): FeedState {
         fun attachLogos(list: List<Movie>): List<Movie> {
             return list.map { movie ->
-                val logo = logoPaths[movie.id]
-                if (logo != null) movie.apply { this.logoPath = logo } else movie
+                if (!includeLogos) {
+                    movie.apply { this.logoPath = null }
+                } else {
+                    val logo = logoPaths[movie.id]
+                    if (logo != null) movie.apply { this.logoPath = logo } else movie
+                }
             }
         }
 
@@ -61,7 +66,7 @@ data class CachedFeedData(
     }
 
     companion object {
-        fun fromFeedState(feedState: FeedState): CachedFeedData {
+        fun fromFeedState(feedState: FeedState, language: String? = null): CachedFeedData {
             val collectedLogos = mutableMapOf<Long, String>()
             (feedState.trendingMovies + feedState.trendingTv + feedState.recommendedMovies + feedState.recommendedTv).forEach { movie ->
                 movie.logoPath?.let { collectedLogos[movie.id] = it }
@@ -84,7 +89,8 @@ data class CachedFeedData(
                 continueWatchingTv = feedState.continueWatchingTv,
                 becauseYouWatchedMovie = feedState.becauseYouWatchedMovie?.let { BecauseYouWatchedData(it.first, it.second) },
                 becauseYouWatchedTv = feedState.becauseYouWatchedTv?.let { BecauseYouWatchedData(it.first, it.second) },
-                logoPaths = collectedLogos
+                logoPaths = collectedLogos,
+                language = language
             )
         }
     }

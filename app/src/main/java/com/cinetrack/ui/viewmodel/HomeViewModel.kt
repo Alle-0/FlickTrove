@@ -322,6 +322,15 @@ class HomeViewModel @Inject constructor(
                     _activeTab.value = newDefault
                 }
         }
+        viewModelScope.launch {
+            preferenceRepository.userPreferencesFlow
+                .map { it.contentLanguage }
+                .distinctUntilChanged()
+                .drop(1)
+                .collect {
+                    executeFetchFeed(forceRefresh = true)
+                }
+        }
         fetchFeed()
         loadBoxOfficeWinner()
         loadTroveRevealState()
@@ -345,12 +354,19 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private fun resolveContentLanguage(): String {
+        val raw = preferenceRepository.getContentLanguage()
+        return if (raw == "system") java.util.Locale.getDefault().language else raw.substringBefore("-")
+    }
+
     private suspend fun executeFetchFeed(forceRefresh: Boolean = false) {
+        val currentLang = resolveContentLanguage()
         // 1. Legge prima la cache Room per un rendering istantaneo (T=0ms)
         val cachedEntity = repository.getCachedHomeFeedEntity()
         val cachedData = repository.getCachedHomeFeed()
+        val languageMatches = cachedData?.language == currentLang
         if (cachedData != null) {
-            _feedState.value = cachedData.toFeedState()
+            _feedState.value = cachedData.toFeedState(includeLogos = languageMatches)
             loadTroveRevealState()
         } else if (!_feedState.value.isLoaded) {
             _feedState.value = FeedState(isLoaded = false, hasError = false)
@@ -358,7 +374,7 @@ class HomeViewModel @Inject constructor(
 
         // 2. Controllo validità cache (6 ORE: 6 * 60 * 60 * 1000L)
         val cacheAgeMs = cachedEntity?.updatedAt?.let { System.currentTimeMillis() - it } ?: Long.MAX_VALUE
-        val isCacheValid = !forceRefresh && cachedData != null && (cacheAgeMs < 6 * 60 * 60 * 1000L)
+        val isCacheValid = !forceRefresh && cachedData != null && languageMatches && (cacheAgeMs < 6 * 60 * 60 * 1000L)
 
         if (isCacheValid) {
             // Cache valida per 6 ore: non rieseguire la rete per proteggere le quote Firestore/TMDB
@@ -371,7 +387,7 @@ class HomeViewModel @Inject constructor(
             _feedState.value = freshFeed
             loadTroveRevealState()
             // Salva nella cache Room per i successivi accessi
-            repository.saveCachedHomeFeed(com.cinetrack.data.model.CachedFeedData.fromFeedState(freshFeed))
+            repository.saveCachedHomeFeed(com.cinetrack.data.model.CachedFeedData.fromFeedState(freshFeed, currentLang))
         } catch (e: Exception) {
             // Se non c'è cache pregressa, mostra lo stato di errore
             if (!_feedState.value.isLoaded) {
