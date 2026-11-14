@@ -6,6 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import com.cinetrack.data.local.database.FlickTroveDatabase
 import com.cinetrack.util.NotificationHelper
+import com.cinetrack.util.NotificationTracker
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +29,12 @@ class ReminderWorker @AssistedInject constructor(
         try {
             val notifEnabled = settingsRepository.notificationsReleases.first()
             val hasPermission = NotificationHelper.hasNotificationPermission(context)
-            val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE) // "yyyy-MM-dd"
+            val now = LocalDate.now()
+            val today = now.format(DateTimeFormatter.ISO_LOCAL_DATE) // "yyyy-MM-dd"
+            val sevenDaysAgo = now.minusDays(7).format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val threeDaysAgo = now.minusDays(3).format(DateTimeFormatter.ISO_LOCAL_DATE)
+
+            NotificationTracker.cleanupStaleEntries(context)
             
             val favorites = database.favoriteDao().getAll()
             
@@ -39,7 +45,10 @@ class ReminderWorker @AssistedInject constructor(
                 if (item.mediaType == "movie") {
                     val rDate = item.releaseDate
                     if (!rDate.isNullOrEmpty() && rDate <= today) {
-                        if (!item.remindersMuted && notifEnabled && hasPermission) {
+                        // Strict AND condition: notify only if within the last 7 days and not yet notified
+                        val shouldNotify = rDate >= sevenDaysAgo && !NotificationTracker.wasReleaseNotified(context, "movie", item.id, rDate)
+
+                        if (shouldNotify && !item.remindersMuted && notifEnabled && hasPermission) {
                             NotificationHelper.showReleaseNotificationSync(
                                 context = context,
                                 movieTitle = item.displayName,
@@ -47,21 +56,24 @@ class ReminderWorker @AssistedInject constructor(
                                 mediaType = item.mediaType,
                                 posterPath = item.posterPath
                             )
+                            NotificationTracker.markReleaseNotified(context, "movie", item.id, rDate)
                         }
+
                         val updated = item.copy(
                             favorite = true,
                             reminder = false,
-                            migratedAt = today,
+                            migratedAt = if (rDate >= sevenDaysAgo) today else item.migratedAt,
                             clientUpdatedAt = System.currentTimeMillis(),
                             syncStatus = "pending"
                         )
                         database.favoriteDao().insert(updated)
                     }
                 } else if (item.mediaType == "tv") {
-                    if (item.migratedAt == today) continue
+                    // Check if the show itself premiered recently (Doze resilience)
+                    val premiereDate = item.firstAirDate
+                    val isRecentPremiere = !premiereDate.isNullOrEmpty() && premiereDate <= today && premiereDate >= threeDaysAgo
 
-                    // Check if the show itself premieres today
-                    if (item.firstAirDate == today) {
+                    if (isRecentPremiere && !NotificationTracker.wasReleaseNotified(context, "tv", item.id, premiereDate)) {
                         if (!item.remindersMuted && notifEnabled && hasPermission) {
                             NotificationHelper.showReleaseNotificationSync(
                                 context = context,
@@ -71,29 +83,36 @@ class ReminderWorker @AssistedInject constructor(
                                 posterPath = item.posterPath
                             )
                         }
+                        NotificationTracker.markReleaseNotified(context, "tv", item.id, premiereDate)
                         val updated = item.copy(
                             migratedAt = today,
                             clientUpdatedAt = System.currentTimeMillis(),
                             syncStatus = "pending"
                         )
                         database.favoriteDao().insert(updated)
-                    } else if (item.nextEpisodeAirDate == today) {
+                    } else {
+                        val epAirDate = item.nextEpisodeAirDate
+                        val isRecentEpisode = !epAirDate.isNullOrEmpty() && epAirDate <= today && epAirDate >= threeDaysAgo
                         val epString = item.nextEpisodeString ?: "nuovo episodio"
-                        if (!item.remindersMuted && notifEnabled && hasPermission) {
-                            NotificationHelper.showEpisodeReleaseNotificationSync(
-                                context = context,
-                                showTitle = item.displayName,
-                                showId = item.id,
-                                episodeString = epString,
-                                posterPath = item.posterPath
+
+                        if (isRecentEpisode && !NotificationTracker.wasEpisodeNotified(context, item.id, epString)) {
+                            if (!item.remindersMuted && notifEnabled && hasPermission) {
+                                NotificationHelper.showEpisodeReleaseNotificationSync(
+                                    context = context,
+                                    showTitle = item.displayName,
+                                    showId = item.id,
+                                    episodeString = epString,
+                                    posterPath = item.posterPath
+                                )
+                            }
+                            NotificationTracker.markEpisodeNotified(context, item.id, epString, today)
+                            val updated = item.copy(
+                                migratedAt = today,
+                                clientUpdatedAt = System.currentTimeMillis(),
+                                syncStatus = "pending"
                             )
+                            database.favoriteDao().insert(updated)
                         }
-                        val updated = item.copy(
-                            migratedAt = today,
-                            clientUpdatedAt = System.currentTimeMillis(),
-                            syncStatus = "pending"
-                        )
-                        database.favoriteDao().insert(updated)
                     }
                 }
             }

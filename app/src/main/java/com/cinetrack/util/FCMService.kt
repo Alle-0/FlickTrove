@@ -11,10 +11,24 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.messaging.FirebaseMessagingService
 import com.google.firebase.messaging.RemoteMessage
+import dagger.hilt.EntryPoint
+import dagger.hilt.InstallIn
+import dagger.hilt.android.EntryPointAccessors
+import dagger.hilt.components.SingletonComponent
+import com.cinetrack.data.repository.SettingsRepository
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 
 @Suppress("DEPRECATION")
 class FCMService : FirebaseMessagingService() {
 
+    @EntryPoint
+    @InstallIn(SingletonComponent::class)
+    interface FCMEntryPoint {
+        fun settingsRepository(): SettingsRepository
+    }
+
+    @Suppress("OVERRIDE_DEPRECATION", "DEPRECATION")
     override fun onNewToken(token: String) {
         super.onNewToken(token)
         Log.d("FCMService", "Refreshed token: \$token")
@@ -90,6 +104,30 @@ class FCMService : FirebaseMessagingService() {
         val commentId = data["commentId"]
 
         if (title.isNotEmpty() && NotificationHelper.hasNotificationPermission(this)) {
+            // Respect user preference from settings
+            try {
+                val entryPoint = EntryPointAccessors.fromApplication(
+                    applicationContext,
+                    FCMEntryPoint::class.java
+                )
+                val socialEnabled = runBlocking {
+                    try {
+                        entryPoint.settingsRepository().notificationsSocial.first()
+                    } catch (e: Exception) {
+                        true
+                    }
+                }
+                if (!socialEnabled) {
+                    Log.d("FCMService", "Social notifications disabled by user preferences. Dropping message.")
+                    return
+                }
+            } catch (e: Exception) {
+                // Defensive fallback: continue if entry point lookup fails
+            }
+
+            val rawHash = (commentId ?: "${mediaId}_$title").hashCode() and 0x000FFFFF
+            val notifId = (NotificationHelper.OFFSET_SOCIAL + rawHash).toInt()
+
             val intent = Intent(this, MainActivity::class.java).apply {
                 flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 action = "com.cinetrack.FLICKTROVE_SOCIAL_NOTIFICATION"
@@ -116,30 +154,38 @@ class FCMService : FirebaseMessagingService() {
             
             val pendingIntent = PendingIntent.getActivity(
                 this,
-                (System.currentTimeMillis() % 10000).toInt(), // unique request code
+                notifId,
                 intent,
                 PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
             )
 
-            // Download image synchronously for the LargeIcon and BigPicture
+            // Download image synchronously for the LargeIcon and BigPicture with timeout
             var largeIconBitmap: android.graphics.Bitmap? = null
             if (mediaImage.isNotEmpty()) {
                 try {
                     val fullImageUrl = if (mediaImage.startsWith("/")) "https://image.tmdb.org/t/p/w500$mediaImage" else mediaImage
                     val url = java.net.URL(fullImageUrl)
-                    largeIconBitmap = android.graphics.BitmapFactory.decodeStream(url.openStream())
+                    val conn = url.openConnection() as java.net.HttpURLConnection
+                    conn.connectTimeout = 5000
+                    conn.readTimeout = 5000
+                    conn.doInput = true
+                    conn.connect()
+                    conn.inputStream.use { input ->
+                        largeIconBitmap = android.graphics.BitmapFactory.decodeStream(input)
+                    }
                 } catch (e: Exception) {
                     Log.w("FCMService", "Failed to download media image for notification", e)
                 }
             }
 
-            val builder = NotificationCompat.Builder(this, "flicktrove_episodes")
+            val builder = NotificationCompat.Builder(this, NotificationHelper.SOCIAL_CHANNEL_ID)
                 .setSmallIcon(R.drawable.ic_notification)
                 .setContentTitle(title)
                 .setContentText(body)
                 .setPriority(NotificationCompat.PRIORITY_HIGH)
                 .setColor(0xFF00BFA5.toInt())
                 .setAutoCancel(true)
+                .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .setContentIntent(pendingIntent)
                 
             if (largeIconBitmap != null) {
@@ -154,7 +200,7 @@ class FCMService : FirebaseMessagingService() {
                 builder.setStyle(NotificationCompat.BigTextStyle().bigText(body))
             }
 
-            NotificationManagerCompat.from(this).notify((System.currentTimeMillis() % 10000).toInt(), builder.build())
+            NotificationManagerCompat.from(this).notify(NotificationHelper.TAG_SOCIAL, notifId, builder.build())
         }
     }
 }

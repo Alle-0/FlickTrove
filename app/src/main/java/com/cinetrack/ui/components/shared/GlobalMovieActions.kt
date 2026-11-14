@@ -52,6 +52,7 @@ fun GlobalMovieActions(
                 onDismissComplete = { manager.clearActiveMovie() },
                 pressOffset = manager.popupPressOffset,
                 cardPosition = manager.popupCardPosition,
+                cardSize = manager.popupCardSize,
                 hazeState = hazeState,
                 onEditDate = manager.onEditWatchDateCallback,
                 onQuickVote = { manager.openRating(it) },

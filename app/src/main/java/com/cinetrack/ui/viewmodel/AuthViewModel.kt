@@ -30,6 +30,7 @@ import android.content.Context
 import kotlinx.coroutines.async
 import kotlinx.coroutines.awaitAll
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withTimeoutOrNull
 
 sealed interface AuthState {
     object Unauthenticated : AuthState
@@ -582,6 +583,21 @@ class AuthViewModel @Inject constructor(
 
     fun logout() {
         viewModelScope.launch {
+            val uid = auth.currentUser?.uid
+            if (uid != null) {
+                // Must be deleted BEFORE auth.signOut() so Firestore Security Rules have valid JWT credentials
+                withTimeoutOrNull(2500L) {
+                    try {
+                        Firebase.firestore.collection("user_fcm_tokens").document(uid).delete().await()
+                    } catch (_: Exception) {
+                        // Ignore network/offline failures
+                    }
+                }
+                try {
+                    val syncPrefs = context.getSharedPreferences("fcm_and_version_sync_prefs", Context.MODE_PRIVATE)
+                    syncPrefs.edit().remove("last_fcm_token_$uid").apply()
+                } catch (_: Exception) {}
+            }
             auth.signOut()
             movieRepository.clearAllData()
             badgeRepository.clearAllData()
@@ -724,6 +740,9 @@ class AuthViewModel @Inject constructor(
             if (!authorId.isNullOrBlank()) {
                 batch.delete(firestore.collection("commsuni_authors").document(authorId))
             }
+
+            // Elimina il token FCM registrato per questo utente
+            batch.delete(firestore.collection("user_fcm_tokens").document(uid))
 
             // Elimina il documento genitore delle notifiche social e le relative sottocollezioni
             batch.delete(firestore.collection("user_social_notifications").document(uid))

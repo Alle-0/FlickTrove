@@ -7,6 +7,7 @@ import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import com.cinetrack.data.repository.SettingsRepository
 import com.cinetrack.util.NotificationHelper
+import com.cinetrack.util.NotificationTracker
 import dagger.hilt.EntryPoint
 import dagger.hilt.InstallIn
 import dagger.hilt.android.EntryPointAccessors
@@ -107,8 +108,14 @@ class TVUpdateWorker(
                         }
                         repository.saveMovie(updated)
 
-                        // Notify only if there are genuinely released new episodes and the user wants it
-                        if (hadNewAiredEps && notifEnabled && hasPermission && !show.dropped && !show.remindersMuted) {
+                        // Check if this episode was already notified by ReminderWorker (bidirectional dedup)
+                        val airedEpString = latest.lastEpisodeToAir?.let {
+                            "S${it.seasonNumber.toString().padStart(2, '0')}E${it.episodeNumber.toString().padStart(2, '0')}"
+                        }
+                        val alreadyNotified = airedEpString != null && NotificationTracker.wasEpisodeNotified(applicationContext, show.id, airedEpString)
+
+                        // Notify only if there are genuinely released new episodes, not yet notified, and the user wants it
+                        if (hadNewAiredEps && notifEnabled && hasPermission && !show.dropped && !show.remindersMuted && !alreadyNotified) {
                             NotificationHelper.showNewEpisodesNotificationSync(
                                 context = applicationContext,
                                 showTitle = show.title ?: show.name ?: "Serie TV",
@@ -116,6 +123,9 @@ class TVUpdateWorker(
                                 newEpisodesCount = effectiveNewEps,
                                 posterPath = show.posterPath
                             )
+                            if (airedEpString != null) {
+                                NotificationTracker.markEpisodeNotified(applicationContext, show.id, airedEpString, today)
+                            }
                         }
                     }
                 } catch (e: Exception) {

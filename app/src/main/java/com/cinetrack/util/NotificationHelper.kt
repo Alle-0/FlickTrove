@@ -24,16 +24,32 @@ import kotlinx.coroutines.launch
 object NotificationHelper {
 
     // ── Release channel (film/serie in uscita oggi) ──────────────────────────
-    private const val RELEASE_CHANNEL_ID   = "flicktrove_releases"
+    const val RELEASE_CHANNEL_ID   = "flicktrove_releases"
     private const val RELEASE_CHANNEL_NAME = "Nuove Uscite"
     private const val RELEASE_CHANNEL_DESC =
         "Avvisi quando un film o una serie che segui è disponibile"
 
     // ── New-episodes channel (episodi aggiornati) ─────────────────────────────
-    private const val EPISODES_CHANNEL_ID   = "flicktrove_episodes"
+    const val EPISODES_CHANNEL_ID   = "flicktrove_episodes"
     private const val EPISODES_CHANNEL_NAME = "Nuovi Episodi"
     private const val EPISODES_CHANNEL_DESC =
         "Avvisi quando vengono trovati nuovi episodi per le serie che guardi"
+
+    // ── Social channel (commenti, risposte e community) ───────────────────────
+    const val SOCIAL_CHANNEL_ID   = "flicktrove_social"
+    private const val SOCIAL_CHANNEL_NAME = "Community & Social"
+    private const val SOCIAL_CHANNEL_DESC =
+        "Avvisi per commenti, risposte e interazioni con la community"
+
+    // ── Safe ID Namespace Offsets & Tags (Anti-Collision for TMDB IDs > 1.000.000) ──
+    const val OFFSET_RELEASE = 0L
+    const val OFFSET_EPISODES_UPDATES = 100_000_000L
+    const val OFFSET_EPISODES_RELEASE = 200_000_000L
+    const val OFFSET_SOCIAL = 300_000_000L
+
+    const val TAG_RELEASE = "flicktrove_release"
+    const val TAG_EPISODES = "flicktrove_episodes"
+    const val TAG_SOCIAL = "flicktrove_social"
 
     // Accent color (teal) – matches NeonTeal in the app theme
     private const val ACCENT_COLOR = 0xFF00BFA5.toInt()
@@ -66,8 +82,21 @@ object NotificationHelper {
                 description = EPISODES_CHANNEL_DESC
             }
 
+            // Social channel – high importance
+            val socialChannel = NotificationChannel(
+                SOCIAL_CHANNEL_ID,
+                SOCIAL_CHANNEL_NAME,
+                NotificationManager.IMPORTANCE_HIGH
+            ).apply {
+                description = SOCIAL_CHANNEL_DESC
+                enableLights(true)
+                lightColor = ACCENT_COLOR
+                enableVibration(true)
+            }
+
             manager.createNotificationChannel(releaseChannel)
             manager.createNotificationChannel(episodesChannel)
+            manager.createNotificationChannel(socialChannel)
         }
     }
 
@@ -103,9 +132,10 @@ object NotificationHelper {
         if (!hasNotificationPermission(context)) return
 
         val intent = buildDeepLinkIntent(context, movieId, mediaType)
+        val notifId = (movieId + OFFSET_RELEASE).toInt()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            movieId.toInt(),
+            notifId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -144,7 +174,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .build()
 
-            NotificationManagerCompat.from(context).notify(movieId.toInt(), notification)
+            NotificationManagerCompat.from(context).notify(TAG_RELEASE, notifId, notification)
         }
     }
 
@@ -158,9 +188,10 @@ object NotificationHelper {
         if (!hasNotificationPermission(context)) return
 
         val intent = buildDeepLinkIntent(context, movieId, mediaType)
+        val notifId = (movieId + OFFSET_RELEASE).toInt()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            movieId.toInt(),
+            notifId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -199,7 +230,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .build()
 
-            NotificationManagerCompat.from(context).notify(movieId.toInt(), notification)
+            NotificationManagerCompat.from(context).notify(TAG_RELEASE, notifId, notification)
         }
     }
 
@@ -228,10 +259,10 @@ object NotificationHelper {
         if (!hasNotificationPermission(context)) return
 
         val intent = buildDeepLinkIntent(context, showId, "tv")
+        val notifId = (showId + OFFSET_EPISODES_RELEASE).toInt()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            // Offset for episode release
-            (showId + 2_000_000L).toInt(),
+            notifId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -269,7 +300,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .build()
 
-            NotificationManagerCompat.from(context).notify((showId + 2_000_000L).toInt(), notification)
+            NotificationManagerCompat.from(context).notify(TAG_EPISODES, notifId, notification)
         }
     }
 
@@ -283,9 +314,10 @@ object NotificationHelper {
         if (!hasNotificationPermission(context)) return
 
         val intent = buildDeepLinkIntent(context, showId, "tv")
+        val notifId = (showId + OFFSET_EPISODES_RELEASE).toInt()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            (showId + 2_000_000L).toInt(),
+            notifId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -323,7 +355,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_REMINDER)
                 .build()
 
-            NotificationManagerCompat.from(context).notify((showId + 2_000_000L).toInt(), notification)
+            NotificationManagerCompat.from(context).notify(TAG_EPISODES, notifId, notification)
         }
     }
 
@@ -344,11 +376,10 @@ object NotificationHelper {
         if (!hasNotificationPermission(context)) return
 
         val intent = buildDeepLinkIntent(context, showId, "tv")
+        val notifId = (showId + OFFSET_EPISODES_UPDATES).toInt()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            // Use a different request code range (offset by Int.MAX_VALUE/2) to avoid
-            // collisions with release notifications
-            (showId + 1_000_000L).toInt(),
+            notifId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -389,7 +420,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .build()
 
-            NotificationManagerCompat.from(context).notify((showId + 1_000_000L).toInt(), notification)
+            NotificationManagerCompat.from(context).notify(TAG_EPISODES, notifId, notification)
         }
     }
 
@@ -403,9 +434,10 @@ object NotificationHelper {
         if (!hasNotificationPermission(context)) return
 
         val intent = buildDeepLinkIntent(context, showId, "tv")
+        val notifId = (showId + OFFSET_EPISODES_UPDATES).toInt()
         val pendingIntent = PendingIntent.getActivity(
             context,
-            (showId + 1_000_000L).toInt(),
+            notifId,
             intent,
             PendingIntent.FLAG_IMMUTABLE or PendingIntent.FLAG_UPDATE_CURRENT
         )
@@ -446,7 +478,7 @@ object NotificationHelper {
                 .setCategory(NotificationCompat.CATEGORY_SOCIAL)
                 .build()
 
-            NotificationManagerCompat.from(context).notify((showId + 1_000_000L).toInt(), notification)
+            NotificationManagerCompat.from(context).notify(TAG_EPISODES, notifId, notification)
         }
     }
 

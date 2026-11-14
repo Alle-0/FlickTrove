@@ -104,7 +104,7 @@ class TraktInstantWriteWorker @AssistedInject constructor(
                 }
                 "ACTION_ADD_LIST_ITEMS" -> {
                     if (listId != -1L) {
-                        val added = inputData.getStringArray("ITEMS_ADDED") ?: emptyArray()
+                        val added = inputData.getNullableStringArray("ITEMS_ADDED")?.filterNotNull()?.toTypedArray() ?: emptyArray()
                         val request = buildListItemsRequest(added)
                         traktService.addListItems(listId, request)
                         return@withContext Result.success()
@@ -112,7 +112,7 @@ class TraktInstantWriteWorker @AssistedInject constructor(
                 }
                 "ACTION_REMOVE_LIST_ITEMS" -> {
                     if (listId != -1L) {
-                        val removed = inputData.getStringArray("ITEMS_REMOVED") ?: emptyArray()
+                        val removed = inputData.getNullableStringArray("ITEMS_REMOVED")?.filterNotNull()?.toTypedArray() ?: emptyArray()
                         val request = buildListItemsRequest(removed)
                         traktService.removeListItems(listId, request)
                         return@withContext Result.success()

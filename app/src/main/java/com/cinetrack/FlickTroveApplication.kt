@@ -116,6 +116,12 @@ class FlickTroveApplication : Application(), Configuration.Provider, SingletonIm
                 .setConstraints(localConstraints)
                 .build()
             workManager.enqueue(immediateWidgetRefresh)
+
+            // Trigger immediate local release reminder catch-up on app startup (Doze resilience)
+            val immediateReminderCatchup = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ReminderWorker>()
+                .setConstraints(localConstraints)
+                .build()
+            workManager.enqueueUniqueWork("ReminderStartupCatchup", androidx.work.ExistingWorkPolicy.KEEP, immediateReminderCatchup)
             
             // Trigger an immediate sync for Trakt and SIMKL on app startup.
             val immediateTraktSync = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()

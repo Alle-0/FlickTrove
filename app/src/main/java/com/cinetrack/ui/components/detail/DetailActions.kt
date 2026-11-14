@@ -207,7 +207,7 @@ fun DetailActions(
         val availableSideActions = remember(movie.mediaType, optimisticWatchState, movie.status, movieStatus) {
             if (movie.mediaType == "movie") {
                 if (optimisticWatchState == WatchState.WATCHED) listOf(SideAction.REWATCH, SideAction.TRASH)
-                else listOf(SideAction.NOTIFICATIONS, SideAction.TRASH)
+                else listOf(SideAction.TRASH)
             } else {
                 if (optimisticWatchState == WatchState.WATCHED) {
                     if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
