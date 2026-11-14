@@ -718,10 +718,8 @@ fun TrophyDetailContent(
                 }
             }
 
-            val hasTrailingBottomSection = (item.badge.category == BadgeTypeCategory.PROGRESSIVE_TIERS && !isMaxTier)
-            if (hasTrailingBottomSection) {
-                Spacer(modifier = Modifier.height(8.dp))
-            }
+            // Spaziatura inferiore gestita uniformemente da Box.padding(bottom = 16.dp)
+            // per garantire perfetta concentricità (32dp outer - 16dp padding = 16dp inner)
         }
     }
 }

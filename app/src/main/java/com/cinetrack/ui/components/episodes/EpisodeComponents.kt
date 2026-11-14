@@ -66,6 +66,7 @@ internal fun EpisodeCard(
     Box(
         modifier = Modifier
             .fillMaxWidth()
+            .height(84.dp)
             .bounceClick(
                 onLongClick = { onInfoClick() }
             ) { onToggle() }
@@ -77,7 +78,12 @@ internal fun EpisodeCard(
                 RoundedCornerShape(20.dp)
             )
     ) {
-        Row(modifier = Modifier.padding(12.dp), verticalAlignment = Alignment.CenterVertically) {
+        Row(
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 12.dp),
+            verticalAlignment = Alignment.CenterVertically
+        ) {
             val thumbModel = episode.stillPath?.let {
                 buildTmdbImageUrl(it, ImageType.BACKDROP, LocalImageQuality.current)
             } ?: fallbackBackdropPath?.let {
@@ -98,7 +104,8 @@ internal fun EpisodeCard(
             Column(
                 modifier = Modifier
                     .weight(1f)
-                    .padding(start = 12.dp, end = 8.dp)
+                    .padding(start = 12.dp, end = 8.dp),
+                verticalArrangement = Arrangement.Center
             ) {
                 val context = LocalContext.current
                 val airDateInfo = remember(episode.airDate) {

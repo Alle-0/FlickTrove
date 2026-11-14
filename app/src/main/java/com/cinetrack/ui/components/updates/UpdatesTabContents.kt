@@ -4,12 +4,13 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
-import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
@@ -17,6 +18,7 @@ import com.cinetrack.R
 import com.cinetrack.data.model.GroupedSocialNotification
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.TrophyUpdateNotification
+import com.cinetrack.ui.components.shared.shimmerEffect
 
 @Composable
 fun NotificationsTabContent(
@@ -60,15 +62,14 @@ fun NotificationsTabContent(
             }
 
             if (isLoading) {
-                item {
+                items(count = 3, contentType = { "skeleton" }) {
                     Box(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(32.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
-                    }
+                            .height(96.dp)
+                            .clip(RoundedCornerShape(24.dp))
+                            .shimmerEffect()
+                    )
                 }
             } else {
                 val hasUpdates = newEpisodes.isNotEmpty() || releasedRecently.isNotEmpty() || trophyNotifications.isNotEmpty()

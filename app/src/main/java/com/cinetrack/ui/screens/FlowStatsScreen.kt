@@ -83,6 +83,7 @@ import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.stats.CountingText
 import com.cinetrack.ui.components.stats.YearSelectionButton
 import com.cinetrack.ui.components.stats.statsCard
+import com.cinetrack.ui.components.shared.shimmerEffect
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.viewmodel.FlowPersona
 import com.cinetrack.ui.viewmodel.FlowViewModel
@@ -190,9 +191,11 @@ object FlowStatsTab : Tab {
                         )
                     }
 
-                    // Stato Vuoto vs Contenuto
+                    // Loading vs Stato Vuoto vs Contenuto
                     val persona = flowUiState.flowPersona
-                    if (persona == null && flowUiState.topVibes.isEmpty() && flowUiState.topMvps.isEmpty()) {
+                    if (flowUiState.isLoading) {
+                        FlowStatsSkeleton()
+                    } else if (persona == null && flowUiState.topVibes.isEmpty() && flowUiState.topMvps.isEmpty()) {
                         Box(
                             modifier = Modifier
                                 .fillMaxWidth()
@@ -1419,5 +1422,67 @@ private fun shareFlowPersona(context: Context, personaTitle: String) {
         context.startActivity(shareIntent)
     } catch (_: Exception) {
         // Fallback silenzioso
+    }
+}
+
+@Composable
+private fun FlowStatsSkeleton() {
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp),
+        verticalArrangement = Arrangement.spacedBy(28.dp)
+    ) {
+        // 1. Persona Card Placeholder
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(230.dp)
+                .clip(RoundedCornerShape(24.dp))
+                .shimmerEffect()
+        )
+
+        // 2. Vibes Section Header & Chart Placeholder
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(
+                modifier = Modifier
+                    .width(160.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .shimmerEffect()
+            )
+            Box(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(180.dp)
+                    .clip(RoundedCornerShape(24.dp))
+                    .shimmerEffect()
+            )
+        }
+
+        // 3. MVPs Section Placeholder
+        Column(verticalArrangement = Arrangement.spacedBy(14.dp)) {
+            Box(
+                modifier = Modifier
+                    .width(140.dp)
+                    .height(20.dp)
+                    .clip(RoundedCornerShape(6.dp))
+                    .shimmerEffect()
+            )
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                repeat(3) {
+                    Box(
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(110.dp)
+                            .clip(RoundedCornerShape(20.dp))
+                            .shimmerEffect()
+                    )
+                }
+            }
+        }
     }
 }

@@ -60,6 +60,7 @@ fun BadgeTierEvolutionTrack(
         PreviewBadgeTier.MM_70,
         PreviewBadgeTier.THE_FINAL_CUT
     ),
+    shape: androidx.compose.ui.graphics.Shape = RoundedCornerShape(16.dp),
     modifier: Modifier = Modifier
 ) {
     val currentOrdinal = tierSteps.indexOf(currentTier).takeIf { it >= 0 } ?: 0
@@ -75,12 +76,12 @@ fun BadgeTierEvolutionTrack(
     Column(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(20.dp))
+            .clip(shape)
             .background(Color.White.copy(alpha = 0.05f))
             .border(
                 width = 1.dp,
                 color = Color.White.copy(alpha = 0.08f),
-                shape = RoundedCornerShape(20.dp)
+                shape = shape
             )
             .padding(vertical = 14.dp, horizontal = 16.dp)
     ) {
@@ -222,12 +223,12 @@ fun BadgeTierEvolutionTrack(
                             Box(
                                 modifier = Modifier
                                     .size(if (isCurrent) 24.dp else 16.dp)
-                                    .clip(CircleShape)
                                     .background(
                                         when {
                                             isNodeAchieved -> stepTier.primaryColor
                                             else -> Color(0xFF141722)
-                                        }
+                                        },
+                                        shape = CircleShape
                                     )
                                     .border(
                                         width = if (isCurrent) 2.dp else 1.dp,
@@ -237,7 +238,8 @@ fun BadgeTierEvolutionTrack(
                                             else -> Color.White.copy(alpha = 0.18f)
                                         },
                                         shape = CircleShape
-                                    ),
+                                    )
+                                    .clip(CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (isNodeAchieved) {

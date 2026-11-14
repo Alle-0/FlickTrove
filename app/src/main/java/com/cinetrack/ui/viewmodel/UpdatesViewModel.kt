@@ -69,7 +69,7 @@ class UpdatesViewModel @Inject constructor(
                 val today = java.time.LocalDate.now().format(java.time.format.DateTimeFormatter.ISO_LOCAL_DATE)
                 val movies = repository.getLocalMoviesFlow().first()
                 val tvShows = movies.filter {
-                    it.mediaType == "tv" && !it.dropped && (it.reminder || it.favorite) &&
+                    it.mediaType == "tv" && !it.dropped && (it.reminder || it.favorite || it.watched) &&
                     it.status != "Ended" && it.status != "Canceled"
                 }
 
@@ -220,7 +220,7 @@ class UpdatesViewModel @Inject constructor(
     ) { movies, trophyNotifs, socialNotifs, socialUnread ->
             val today = java.time.LocalDate.now().toString()
             val updateList = movies.filter { 
-                (!it.dropped && (it.newEpisodesFound ?: 0) > 0) || it.reminder == true || it.migratedAt == today || (it.mediaType == "tv" && !it.dropped)
+                (!it.dropped && (it.newEpisodesFound ?: 0) > 0) || it.reminder == true || it.migratedAt == today || (it.mediaType == "tv" && !it.dropped && (it.favorite || it.watched))
             }
                 .sortedByDescending { it.clientUpdatedAt }
             val unreadMovieNotifCount = movies.count {

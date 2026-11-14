@@ -11,7 +11,6 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.nestedscroll.NestedScrollConnection
 import androidx.compose.ui.input.nestedscroll.nestedScroll
-import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
@@ -90,46 +89,7 @@ fun EpisodesAccordionView(
     }
 
     val listState = rememberLazyListState()
-    val density = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
-    var hasInitialScrolled by remember { mutableStateOf(false) }
-
-    // Auto-scroll on launch to bring the active season and unwatched episode into view
-    LaunchedEffect(canonicalSeasons, upNextInfo?.seasonNumber, seasonDetails[upNextInfo?.seasonNumber]) {
-        if (hasInitialScrolled || upNextInfo == null || canonicalSeasons.isEmpty()) return@LaunchedEffect
-
-        val targetSeasonNum = upNextInfo.seasonNumber
-        val seasonIdx = canonicalSeasons.indexOfFirst { it.seasonNumber == targetSeasonNum }
-        if (seasonIdx < 0) return@LaunchedEffect
-
-        val targetSeasonData = seasonDetails[targetSeasonNum]
-        val targetEpNum = upNextInfo.episodeNumber
-        val targetEpIndex = targetSeasonData?.episodes?.indexOfFirst { it.episodeNumber == targetEpNum }
-            ?.takeIf { it >= 0 }
-            ?: (targetEpNum - 1).coerceAtLeast(0)
-
-        val itemIndex = 3 + seasonIdx
-        val targetOffsetDp = if (targetEpIndex <= 1) {
-            0.dp
-        } else {
-            // Header ~56dp + divider 1dp + top padding 10dp = 67dp.
-            // Each episode is ~100dp. Offset by 80dp so target episode sits comfortably near the top.
-            (67 + (targetEpIndex * 100) - 80).coerceAtLeast(0).dp
-        }
-        val offsetPx = with(density) { targetOffsetDp.roundToPx() }
-
-        if (targetSeasonData != null) {
-            delay(100)
-            listState.animateScrollToItem(itemIndex, offsetPx)
-            hasInitialScrolled = true
-        } else {
-            delay(300)
-            if (!hasInitialScrolled) {
-                listState.animateScrollToItem(itemIndex, offsetPx)
-                hasInitialScrolled = true
-            }
-        }
-    }
 
     LazyColumn(
         state = listState,

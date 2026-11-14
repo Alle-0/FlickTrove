@@ -432,51 +432,15 @@ fun UpdateCard(
 
             // Action / Status Section
             if (actualIsReminder) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.padding(start = 4.dp)
-                ) {
-                    val hintReminder = stringResource(R.string.card_hint_manage_reminder)
-                    Box(
-                        modifier = Modifier
-                            .size(34.dp)
-                            .clip(CircleShape)
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.22f), CircleShape)
-                            .clickable(
-                                interactionSource = remember { MutableInteractionSource() },
-                                indication = null
-                            ) {
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-                                if (actionFeedbackManager != null) {
-                                    actionFeedbackManager.emit(
-                                        UiText.StringResource(R.string.card_hint_manage_reminder)
-                                    )
-                                } else {
-                                    android.widget.Toast.makeText(context, hintReminder, android.widget.Toast.LENGTH_SHORT).show()
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_bell_piena),
-                            contentDescription = hintReminder,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(15.dp)
-                        )
-                    }
-
-                    Spacer(modifier = Modifier.width(6.dp))
-
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                        contentDescription = null,
-                        tint = Color.White.copy(alpha = 0.25f),
-                        modifier = Modifier
-                            .size(14.dp)
-                            .mirrorInRtl()
-                    )
-                }
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                    contentDescription = null,
+                    tint = Color.White.copy(alpha = 0.25f),
+                    modifier = Modifier
+                        .padding(end = 4.dp)
+                        .size(14.dp)
+                        .mirrorInRtl()
+                )
             } else {
                 Box(
                     modifier = Modifier
@@ -594,7 +558,7 @@ data class ReminderItem(
 )
 
 fun Movie.generateReminderItems(today: String): List<ReminderItem> {
-    val isEligible = this.reminder || (this.mediaType == "tv" && !this.dropped)
+    val isEligible = this.reminder || (this.mediaType == "tv" && !this.dropped && (this.favorite || this.watched))
     if (!isEligible) return emptyList()
 
     if (this.mediaType == "movie") {

@@ -91,7 +91,8 @@ data class FlowUiState(
     val flowPersona: FlowPersona? = null,
     val timeRange: TimeRange = TimeRange.AllTime,
     val availableYears: ImmutableList<Int> = persistentListOf(),
-    val filterConfig: FlowFilterConfig = FlowFilterConfig()
+    val filterConfig: FlowFilterConfig = FlowFilterConfig(),
+    val isLoading: Boolean = true
 )
 
 @HiltViewModel
@@ -290,7 +291,8 @@ class FlowViewModel @Inject constructor(
                 flowPersona = persona,
                 timeRange = range,
                 availableYears = years.toImmutableList(),
-                filterConfig = filterConfig
+                filterConfig = filterConfig,
+                isLoading = false
             )
         }
     }

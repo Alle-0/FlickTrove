@@ -83,7 +83,7 @@ internal fun SeasonAccordionCard(
     Surface(
         modifier = Modifier.fillMaxWidth(),
         color = if (isFullyWatched) Color(0xFF00E676).copy(alpha = 0.05f) else Color.White.copy(alpha = 0.03f),
-        shape = RoundedCornerShape(20.dp),
+        shape = RoundedCornerShape(28.dp),
         border = BorderStroke(
             width = 1.dp,
             color = if (isFullyWatched) Color(0xFF00E676).copy(alpha = 0.20f)
@@ -177,7 +177,7 @@ internal fun SeasonAccordionCard(
                     Column(
                         modifier = Modifier
                             .fillMaxWidth()
-                            .padding(horizontal = 8.dp, vertical = 10.dp),
+                            .padding(8.dp),
                         verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
                         if (seasonData?.episodes != null) {
@@ -227,7 +227,7 @@ private fun EpisodeSkeletonList(count: Int) {
             Surface(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(92.dp),
+                    .height(84.dp),
                 shape = RoundedCornerShape(20.dp),
                 color = Color.White.copy(alpha = 0.03f),
                 border = BorderStroke(1.dp, Color.White.copy(alpha = 0.04f))
@@ -235,7 +235,7 @@ private fun EpisodeSkeletonList(count: Int) {
                 Row(
                     modifier = Modifier
                         .fillMaxSize()
-                        .padding(12.dp),
+                        .padding(start = 8.dp, top = 8.dp, bottom = 8.dp, end = 12.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Thumbnail placeholder (120x68 matching EpisodeCard)

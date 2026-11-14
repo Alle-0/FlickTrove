@@ -583,7 +583,7 @@ fun MovieCard(
                                             if (!effectiveWatched && !effectiveFavorite && !effectiveReminder) {
                                                 optimisticReminder = true
                                                 onAction(movie)
-                                            } else if (showActionHint) {
+                                            } else {
                                                 onMessage(hintReminder)
                                             }
                                         } else if (isTv) {

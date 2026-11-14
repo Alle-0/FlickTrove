@@ -76,9 +76,15 @@ class CycleMovieStatusUseCase @Inject constructor(
                 android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Watched -> Stay Watched] (Action ignored)")
                 current
             }
+
+            // Case 2: State: Reminder (Bell) -> Idempotent (Stay Reminder, manage only in detail)
+            current.reminder -> {
+                android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Reminder -> Stay Reminder] (Action ignored, manage in detail)")
+                current
+            }
             
-            // Case 2: State: To See (Eye/Bell) -> Next step
-            current.favorite || current.reminder -> {
+            // Case 3: State: To See (Eye) -> Move to Watched
+            current.favorite -> {
                 if (current.isReleased) {
                     android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [To See -> Watched] (isReleased=true)")
                     badgeRepository.recordMovieWatched(current.id)
@@ -113,19 +119,12 @@ class CycleMovieStatusUseCase @Inject constructor(
                         )
                     }
                 } else {
-                    android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [To See -> Untracked] (isReleased=false, toggling OFF reminder)")
-                    // Unreleased: Toggle OFF reminder
-                    current.copy(
-                        favorite = false,
-                        reminder = false,
-                        watched = false,
-                        dropped = false,
-                        clientUpdatedAt = System.currentTimeMillis()
-                    )
+                    android.util.Log.d("CycleMovieStatusUseCase", "cycleMovieStatus: Branch [Unreleased Favorite -> Stay Reminder] (manage in detail)")
+                    current
                 }
             }
             
-            // Case 3: State: Untracked (+) -> Move to To See (Eye/Bell)
+            // Case 4: State: Untracked (+) -> Move to To See (Eye/Bell)
             else -> {
                 badgeRepository.recordMovieBookmarked(current.id)
                 if (current.isReleased) {

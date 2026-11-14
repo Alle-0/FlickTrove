@@ -33,6 +33,7 @@ import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.card.FlowMovieCard
 import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.MovieActionsWrapper
+import com.cinetrack.ui.components.shared.MovieCardSkeleton
 import com.cinetrack.ui.viewmodel.FlowViewModel
 import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.HazeStyle
@@ -86,7 +87,23 @@ object FlowTab : Tab {
                             .fillMaxSize()
                             .padding(horizontal = 16.dp)
                     ) {
-                        if (flowUiState.movies.isEmpty()) {
+                        if (flowUiState.isLoading) {
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                contentPadding = PaddingValues(
+                                    top = paddingValues.calculateTopPadding() + WindowInsets.statusBars.asPaddingValues().calculateTopPadding() + 120.dp,
+                                    bottom = paddingValues.calculateBottomPadding() + 100.dp
+                                ),
+                                horizontalArrangement = Arrangement.spacedBy(16.dp),
+                                verticalArrangement = Arrangement.spacedBy(16.dp),
+                                modifier = Modifier.fillMaxSize(),
+                                userScrollEnabled = false
+                            ) {
+                                items(count = 8, contentType = { "skeleton" }) {
+                                    MovieCardSkeleton(width = androidx.compose.ui.unit.Dp.Unspecified)
+                                }
+                            }
+                        } else if (flowUiState.movies.isEmpty()) {
                             Box(
                                 modifier = Modifier
                                     .fillMaxSize()
