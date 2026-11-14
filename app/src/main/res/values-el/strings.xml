@@ -1129,6 +1129,10 @@ Trakt ➔ Εφαρμογή: 6 ώρες</string>
     <string name="msg_action_watched">«%1$s» σημειώθηκε ως προβληθέν</string>
     <string name="msg_action_favorite">«%1$s» προστέθηκε στα Προς παρακολούθηση</string>
     <string name="msg_action_reminder">Η υπενθύμιση για το «%1$s» ορίστηκε</string>
+    <string name="msg_reminders_muted">Οι υπενθυμίσεις για \"%1$s\" τέθηκαν σε σίγαση</string>
+    <string name="msg_reminders_unmuted">Οι υπενθυμίσεις για \"%1$s\" ενεργοποιήθηκαν</string>
+    <string name="action_mute_reminders">Σίγαση υπενθυμίσεων</string>
+    <string name="action_unmute_reminders">Ενεργοποίηση υπενθυμίσεων</string>
     <string name="msg_action_updated">«%1$s» ενημερώθηκε</string>
     <string name="msg_action_dropped">«%1$s» εγκαταλείφθηκε</string>
     <string name="episodes_info_desc">Πληροφορίες επεισοδίου</string>

@@ -38,6 +38,7 @@ fun DetailActions(
     onEpisodesClick: (() -> Unit)? = null,
     onManageRewatches: (() -> Unit)? = null,
     onPreviewWatch: (() -> Unit)? = null,
+    onToggleRemindersMuted: (() -> Unit)? = null,
     modifier: Modifier = Modifier
 ) {
     val haptic = LocalHapticFeedback.current
@@ -49,12 +50,14 @@ fun DetailActions(
     // Stato ottimistico per scatenare l'animazione a 0 ms di latenza, 
     // ancor prima che il ViewModel / Database confermino il salvataggio
     var optimisticWatchState by remember(watchState) { mutableStateOf(watchState) }
+    var optimisticRemindersMuted by remember(movie.remindersMuted) { mutableStateOf(movie.remindersMuted) }
     
     val currentOnStateChange by rememberUpdatedState(onStateChange)
     val currentOnRemove by rememberUpdatedState(onRemove)
     val currentOnEpisodesClick by rememberUpdatedState(onEpisodesClick)
     val currentOnManageRewatches by rememberUpdatedState(onManageRewatches)
     val currentOnPreviewWatch by rememberUpdatedState(onPreviewWatch)
+    val currentOnToggleRemindersMuted by rememberUpdatedState(onToggleRemindersMuted)
     
     // Use a single transition for all coordinated animations
     val transition = updateTransition(targetState = optimisticWatchState, label = "DetailActionsTransition")
@@ -204,13 +207,13 @@ fun DetailActions(
         val availableSideActions = remember(movie.mediaType, optimisticWatchState, movie.status, movieStatus) {
             if (movie.mediaType == "movie") {
                 if (optimisticWatchState == WatchState.WATCHED) listOf(SideAction.REWATCH, SideAction.TRASH)
-                else listOf(SideAction.TRASH)
+                else listOf(SideAction.NOTIFICATIONS, SideAction.TRASH)
             } else {
                 if (optimisticWatchState == WatchState.WATCHED) {
                     if (isTvCompletedAndEnded) listOf(SideAction.REWATCH, SideAction.TRASH)
-                    else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
+                    else listOf(SideAction.REWATCH, SideAction.DROP, SideAction.NOTIFICATIONS, SideAction.TRASH)
                 } else {
-                    listOf(SideAction.REWATCH, SideAction.DROP, SideAction.TRASH)
+                    listOf(SideAction.REWATCH, SideAction.DROP, SideAction.NOTIFICATIONS, SideAction.TRASH)
                 }
             }
         }
@@ -309,6 +312,7 @@ fun DetailActions(
                         availableSideActions = availableSideActions,
                         currentSideActionIndex = currentSideActionIndex,
                         optimisticWatchState = optimisticWatchState,
+                        isRemindersMuted = optimisticRemindersMuted,
                         trashColor = trashColor,
                         displayColor = displayColor,
                         hazeState = hazeState,
@@ -326,6 +330,10 @@ fun DetailActions(
                                     currentOnStateChange(next)
                                 }
                                 SideAction.REWATCH -> currentOnManageRewatches?.invoke()
+                                SideAction.NOTIFICATIONS -> {
+                                    optimisticRemindersMuted = !optimisticRemindersMuted
+                                    currentOnToggleRemindersMuted?.invoke()
+                                }
                             }
                         }
                     )
@@ -336,5 +344,5 @@ fun DetailActions(
 }
 
 enum class SideAction {
-    REWATCH, DROP, TRASH
+    REWATCH, DROP, NOTIFICATIONS, TRASH
 }

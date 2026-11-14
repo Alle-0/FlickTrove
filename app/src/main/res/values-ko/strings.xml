@@ -1091,6 +1091,10 @@
     <string name="msg_action_watched">\"%1$s\" 시청 완료로 표시됨</string>
     <string name="msg_action_favorite">\"%1$s\" 볼 작품에 추가됨</string>
     <string name="msg_action_reminder">\"%1$s\" 알림 설정됨</string>
+    <string name="msg_reminders_muted">\"%1$s\" 알림 음소거됨</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" 알림 활성화됨</string>
+    <string name="action_mute_reminders">알림 음소거</string>
+    <string name="action_unmute_reminders">알림 활성화</string>
     <string name="msg_action_updated">\"%1$s\" 업데이트됨</string>
     <string name="msg_action_dropped">\"%1$s\" 시청 중단됨</string>
     <string name="episodes_info_desc">에피소드 정보</string>

@@ -1110,6 +1110,10 @@
     <string name="msg_action_watched">Đã đánh dấu \"%1$s\" là đã xem</string>
     <string name="msg_action_favorite">Đã thêm \"%1$s\" vào Cần xem</string>
     <string name="msg_action_reminder">Đã đặt lời nhắc cho \"%1$s\"</string>
+    <string name="msg_reminders_muted">Đã tắt tiếng nhắc nhở cho \"%1$s\"</string>
+    <string name="msg_reminders_unmuted">Đã bật nhắc nhở cho \"%1$s\"</string>
+    <string name="action_mute_reminders">Tắt tiếng nhắc nhở</string>
+    <string name="action_unmute_reminders">Bật nhắc nhở</string>
     <string name="msg_action_updated">Đã cập nhật \"%1$s\"</string>
     <string name="msg_action_dropped">Đã ngừng theo dõi \"%1$s\"</string>
     <string name="episodes_info_desc">Thông tin tập phim</string>

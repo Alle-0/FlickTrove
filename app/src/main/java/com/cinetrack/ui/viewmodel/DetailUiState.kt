@@ -69,6 +69,7 @@ sealed class DetailEvent {
     object ToggleWatched : DetailEvent()
     data class SetWatchState(val state: WatchState, val customWatchDate: java.time.Instant? = null) : DetailEvent()
     object Refresh : DetailEvent()
+    object ToggleRemindersMuted : DetailEvent()
     data class Rate(val rating: Double?) : DetailEvent()
     data class UpdateNote(val note: String) : DetailEvent()
     data class LoadSeasonDetails(val seasonNumber: Int) : DetailEvent()

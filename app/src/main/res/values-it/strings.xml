@@ -1056,6 +1056,10 @@
     <string name="msg_action_watched">\"%1$s\" segnato come visto</string>
     <string name="msg_action_favorite">\"%1$s\" aggiunto a Da Vedere</string>
     <string name="msg_action_reminder">\"%1$s\" promemoria impostato</string>
+    <string name="msg_reminders_muted">\"%1$s\" promemoria silenziati</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" promemoria attivi</string>
+    <string name="action_mute_reminders">Silenzia promemoria</string>
+    <string name="action_unmute_reminders">Attiva promemoria</string>
     <string name="msg_action_updated">\"%1$s\" aggiornato</string>
     <string name="msg_action_dropped">\"%1$s\" droppato</string>
     <string name="episodes_info_desc">Informazioni Episodio</string>

@@ -558,6 +558,7 @@ data class ReminderItem(
 )
 
 fun Movie.generateReminderItems(today: String): List<ReminderItem> {
+    if (this.remindersMuted) return emptyList()
     val isEligible = this.reminder || (this.mediaType == "tv" && !this.dropped && (this.favorite || this.watched))
     if (!isEligible) return emptyList()
 

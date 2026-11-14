@@ -1120,6 +1120,10 @@
     <string name="msg_action_watched">ทำเครื่องหมายว่าดู "%1$s" แล้ว</string>
     <string name="msg_action_favorite">เพิ่ม "%1$s" ในรายการที่ต้องดูแล้ว</string>
     <string name="msg_action_reminder">ตั้งการแจ้งเตือนสำหรับ "%1$s" แล้ว</string>
+    <string name="msg_reminders_muted">ปิดเสียงเตือน \"%1$s\" แล้ว</string>
+    <string name="msg_reminders_unmuted">เปิดเตือน \"%1$s\" แล้ว</string>
+    <string name="action_mute_reminders">ปิดเสียงเตือน</string>
+    <string name="action_unmute_reminders">เปิดการเตือน</string>
     <string name="msg_action_updated">อัปเดต "%1$s" แล้ว</string>
     <string name="msg_action_dropped">หยุดดู "%1$s" แล้ว</string>
     <string name="episodes_info_desc">ข้อมูลตอน</string>

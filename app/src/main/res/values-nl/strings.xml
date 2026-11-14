@@ -1124,6 +1124,10 @@
     <string name="msg_action_watched">\"%1$s\" gemarkeerd als gezien</string>
     <string name="msg_action_favorite">\"%1$s\" toegevoegd aan Kijklijst</string>
     <string name="msg_action_reminder">Herinnering ingesteld voor \"%1$s\"</string>
+    <string name="msg_reminders_muted">\"%1$s\" herinneringen gedempt</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" herinneringen actief</string>
+    <string name="action_mute_reminders">Herinneringen dempen</string>
+    <string name="action_unmute_reminders">Herinneringen inschakelen</string>
     <string name="msg_action_updated">\"%1$s\" bijgewerkt</string>
     <string name="msg_action_dropped">\"%1$s\" gestopt</string>
     <string name="episodes_info_desc">Afleveringsinformatie</string>

@@ -546,6 +546,7 @@ class MovieDetailViewModel @Inject constructor(
         when (event) {
             DetailEvent.ToggleFavorite -> toggleFavorite()
             DetailEvent.ToggleWatched -> toggleWatched()
+            DetailEvent.ToggleRemindersMuted -> toggleRemindersMuted()
             is DetailEvent.SetWatchState -> setWatchState(event.state, event.customWatchDate)
             DetailEvent.Refresh -> viewModelScope.launch { fetchFromTMDB(movieId, mediaType == "tv") }
             is DetailEvent.Rate -> updateRating(event.rating)
@@ -646,6 +647,24 @@ class MovieDetailViewModel @Inject constructor(
                 val movieToDelete = target ?: (if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie)
                 repository.deleteMovie(movieToDelete)
                 badgeRepository.evaluateBadgesAsync()
+            }
+        }
+    }
+
+    fun toggleRemindersMuted() {
+        val state = uiState.value as? DetailUiState.Success ?: return
+        viewModelScope.launch {
+            movieUpdateMutex.withLock {
+                val previousMovie = repository.getMovie(state.movieEntry.id, state.movieEntry.mediaType) ?: state.movieEntry
+                val newMuted = !previousMovie.remindersMuted
+                val updated = previousMovie.copy(
+                    remindersMuted = newMuted,
+                    clientUpdatedAt = System.currentTimeMillis(),
+                    syncStatus = "pending"
+                )
+                repository.saveMovie(updated)
+                val msgRes = if (newMuted) R.string.msg_reminders_muted else R.string.msg_reminders_unmuted
+                actionFeedbackManager.emit(UiText.StringResource(msgRes, updated.displayName))
             }
         }
     }

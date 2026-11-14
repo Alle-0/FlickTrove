@@ -1129,6 +1129,10 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="msg_action_watched">\"%1$s\" megnézettként megjelölve</string>
     <string name="msg_action_favorite">\"%1$s\" hozzáadva a Megnézendőkhöz</string>
     <string name="msg_action_reminder">\"%1$s\" emlékeztető beállítva</string>
+    <string name="msg_reminders_muted">\"%1$s\" emlékeztetők elnémítva</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" emlékeztetők aktívak</string>
+    <string name="action_mute_reminders">Emlékeztetők némítása</string>
+    <string name="action_unmute_reminders">Emlékeztetők bekapcsolása</string>
     <string name="msg_action_updated">\"%1$s\" frissítve</string>
     <string name="msg_action_dropped">\"%1$s\" abbahagyva</string>
     <string name="episodes_info_desc">Epizód információ</string>

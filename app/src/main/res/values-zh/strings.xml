@@ -1091,6 +1091,10 @@
     <string name="msg_action_watched">“%1$s” 已标为看过</string>
     <string name="msg_action_favorite">“%1$s” 已加入想看</string>
     <string name="msg_action_reminder">“%1$s” 提醒已设置</string>
+    <string name="msg_reminders_muted">\"%1$s\" 提醒已静音</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" 提醒已开启</string>
+    <string name="action_mute_reminders">静音提醒</string>
+    <string name="action_unmute_reminders">开启提醒</string>
     <string name="msg_action_updated">“%1$s” 已更新</string>
     <string name="msg_action_dropped">“%1$s” 已标为弃剧</string>
     <string name="episodes_info_desc">分集信息</string>

@@ -862,6 +862,9 @@ fun MovieDetailScreenContent(
                                         onPreviewWatch = {
                                             isPreviewWatchPrompt = true
                                             showWatchDatePrompt = true
+                                        },
+                                        onToggleRemindersMuted = {
+                                            viewModel.onEvent(DetailEvent.ToggleRemindersMuted)
                                         }
                                     )
                                 }

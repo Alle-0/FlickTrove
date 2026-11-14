@@ -1129,6 +1129,10 @@ Introdu cel puțin 3 caractere</string>
     <string name="msg_action_watched">"%1$s" marcat ca vizionat</string>
     <string name="msg_action_favorite">"%1$s" adăugat la De văzut</string>
     <string name="msg_action_reminder">"%1$s" memento setat</string>
+    <string name="msg_reminders_muted">Mementouri reduse la tăcere pentru \"%1$s\"</string>
+    <string name="msg_reminders_unmuted">Mementouri active pentru \"%1$s\"</string>
+    <string name="action_mute_reminders">Dezactivează sunetul mementourilor</string>
+    <string name="action_unmute_reminders">Activează mementourile</string>
     <string name="msg_action_updated">"%1$s" actualizat</string>
     <string name="msg_action_dropped">"%1$s" abandonat</string>
     <string name="episodes_info_desc">Informații episod</string>

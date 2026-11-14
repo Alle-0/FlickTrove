@@ -1091,6 +1091,10 @@
     <string name="msg_action_watched">\"%1$s\" izlendi olarak işaretlendi</string>
     <string name="msg_action_favorite">\"%1$s\" İzleneceklere eklendi</string>
     <string name="msg_action_reminder">\"%1$s\" hatırlatıcısı ayarlandı</string>
+    <string name="msg_reminders_muted">\"%1$s\" hatırlatıcıları sessize alındı</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" hatırlatıcıları aktif</string>
+    <string name="action_mute_reminders">Hatırlatıcıları sessize al</string>
+    <string name="action_unmute_reminders">Hatırlatıcıları etkinleştir</string>
     <string name="msg_action_updated">\"%1$s\" güncellendi</string>
     <string name="msg_action_dropped">\"%1$s\" bırakıldı</string>
     <string name="episodes_info_desc">Bölüm Bilgileri</string>

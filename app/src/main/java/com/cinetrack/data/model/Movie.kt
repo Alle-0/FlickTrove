@@ -149,6 +149,12 @@ data class Movie(
     @set:PropertyName("reminder")
     var reminder: Boolean = false,
     
+    @SerialName("reminders_muted")
+    @get:PropertyName("reminders_muted")
+    @set:PropertyName("reminders_muted")
+    @ColumnInfo(name = "reminders_muted", defaultValue = "0")
+    var remindersMuted: Boolean = false,
+    
     @get:PropertyName("dropped")
     @set:PropertyName("dropped")
     @ColumnInfo(name = "dropped", defaultValue = "0")

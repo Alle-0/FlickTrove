@@ -1123,6 +1123,10 @@
     <string name="msg_action_watched">تم تحديد \"%1$s\" كمشاهد</string>
     <string name="msg_action_favorite">أُضيف \"%1$s\" إلى للمشاهدة</string>
     <string name="msg_action_reminder">تم ضبط تذكير لـ \"%1$s\"</string>
+    <string name="msg_reminders_muted">تم كتم تذكيرات \"%1$s\"</string>
+    <string name="msg_reminders_unmuted">تم تفعيل تذكيرات \"%1$s\"</string>
+    <string name="action_mute_reminders">كتم التذكيرات</string>
+    <string name="action_unmute_reminders">تفعيل التذكيرات</string>
     <string name="msg_action_updated">تم تحديث \"%1$s\"</string>
     <string name="msg_action_dropped">تم إيقاف \"%1$s\"</string>
     <string name="episodes_info_desc">معلومات الحلقة</string>

@@ -1134,6 +1134,10 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="msg_action_watched">\"%1$s\" – oznaczono jako obejrzane</string>
     <string name="msg_action_favorite">\"%1$s\" – dodano do Do obejrzenia</string>
     <string name="msg_action_reminder">\"%1$s\" – ustawiono przypomnienie</string>
+    <string name="msg_reminders_muted">\"%1$s\" przypomnienia wyciszone</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" przypomnienia aktywne</string>
+    <string name="action_mute_reminders">Wycisz przypomnienia</string>
+    <string name="action_unmute_reminders">Włącz przypomnienia</string>
     <string name="msg_action_updated">\"%1$s\" – zaktualizowano</string>
     <string name="msg_action_dropped">\"%1$s\" – porzucono</string>
     <string name="episodes_info_desc">Informacje o odcinku</string>

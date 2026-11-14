@@ -129,6 +129,7 @@ class DetailUiStateMapper @Inject constructor(
                     favorite = local.favorite,
                     watched = local.watched,
                     reminder = local.reminder,
+                    remindersMuted = local.remindersMuted,
                     progress = local.progress,
                     watchedEpisodes = local.watchedEpisodes,
                     watchedAt = local.watchedAt,

@@ -1091,6 +1091,10 @@
     <string name="msg_action_watched">\"%1$s\" ditandai sudah ditonton</string>
     <string name="msg_action_favorite">\"%1$s\" ditambahkan ke Ingin Ditonton</string>
     <string name="msg_action_reminder">pengingat \"%1$s\" diatur</string>
+    <string name="msg_reminders_muted">Pengingat \"%1$s\" dibisukan</string>
+    <string name="msg_reminders_unmuted">Pengingat \"%1$s\" aktif</string>
+    <string name="action_mute_reminders">Bisukan pengingat</string>
+    <string name="action_unmute_reminders">Aktifkan pengingat</string>
     <string name="msg_action_updated">\"%1$s\" diperbarui</string>
     <string name="msg_action_dropped">\"%1$s\" ditinggalkan</string>
     <string name="episodes_info_desc">Informasi Episode</string>

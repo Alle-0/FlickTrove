@@ -1125,6 +1125,10 @@
     <string name="msg_action_watched">\"%1$s\" markeret som set</string>
     <string name="msg_action_favorite">\"%1$s\" føjet til At se</string>
     <string name="msg_action_reminder">\"%1$s\" påmindelse sat</string>
+    <string name="msg_reminders_muted">\"%1$s\" påmindelser slået fra</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" påmindelser aktive</string>
+    <string name="action_mute_reminders">Slå påmindelser fra</string>
+    <string name="action_unmute_reminders">Aktivér påmindelser</string>
     <string name="msg_action_updated">\"%1$s\" opdateret</string>
     <string name="msg_action_dropped">\"%1$s\" droppet</string>
     <string name="episodes_info_desc">Afsnitsinformation</string>

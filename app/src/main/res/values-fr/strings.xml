@@ -1005,6 +1005,10 @@
     <string name="msg_action_watched">Â« %1$s Â» marqué comme vu</string>
     <string name="msg_action_favorite">Â« %1$s Â» ajouté à À voir</string>
     <string name="msg_action_reminder">Rappel configuré pour Â« %1$s Â»</string>
+    <string name="msg_reminders_muted">\"%1$s\" rappels mis en sourdine</string>
+    <string name="msg_reminders_unmuted">\"%1$s\" rappels activés</string>
+    <string name="action_mute_reminders">Mettre en sourdine</string>
+    <string name="action_unmute_reminders">Activer les rappels</string>
     <string name="msg_action_updated">Â« %1$s Â» mis à jour</string>
     <string name="msg_action_dropped">Â« %1$s Â» abandonnée</string>
     <string name="episodes_info_desc">Informations sur l\'épisode</string>
