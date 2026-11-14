@@ -30,6 +30,8 @@ import kotlin.math.roundToInt
 import kotlin.math.ceil
 import kotlin.math.pow
 import kotlinx.coroutines.launch
+import com.cinetrack.ui.utils.LocalVibrationEnabled
+import com.cinetrack.util.VibrationHelper
 import com.cinetrack.R
 
 @Composable
@@ -45,6 +47,8 @@ fun FluidRatingBar(
     onRatingSettled: ((Double) -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val vibrationEnabled = LocalVibrationEnabled.current
     val density = LocalDensity.current
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
     val gapPx = remember(density) { with(density) { 8.dp.toPx() } }
@@ -76,7 +80,11 @@ fun FluidRatingBar(
 
                     var curRating = calculateRatingFromX(down.position.x, w, maxRating, numStars, gapPx, isRtl)
                     currentOnRatingChange(curRating)
-                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    if (vibrationEnabled) {
+                        VibrationHelper.vibrateTick(context)
+                    } else {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                    }
 
                     // Track drag movements
                     while (true) {
@@ -92,7 +100,11 @@ fun FluidRatingBar(
                             if (newRating != curRating) {
                                 curRating = newRating
                                 currentOnRatingChange(curRating)
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                if (vibrationEnabled) {
+                                    VibrationHelper.vibrateTick(context)
+                                } else {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                }
                             }
                         }
                     }
@@ -100,7 +112,11 @@ fun FluidRatingBar(
                     // Finger released (whether from a quick tap or a drag)
                     if (curRating > 0.0) {
                         currentOnRatingSettled?.invoke(curRating)
-                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        if (vibrationEnabled) {
+                            VibrationHelper.vibrateClick(context)
+                        } else {
+                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        }
                     } else {
                         currentOnRatingSettled?.invoke(0.0)
                     }

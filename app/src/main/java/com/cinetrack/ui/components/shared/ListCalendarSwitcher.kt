@@ -49,6 +49,8 @@ import com.cinetrack.ui.utils.rtlMirrorIndex
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import com.cinetrack.ui.utils.LocalVibrationEnabled
+import com.cinetrack.util.VibrationHelper
 import com.cinetrack.LocalAdvancedVisualEffects
 import com.cinetrack.R
 import com.cinetrack.ui.utils.ColorUtils
@@ -82,6 +84,8 @@ fun ListCalendarSwitcher(
     inactiveIconTint: Color = Color.White.copy(alpha = 0.55f)
 ) {
     val haptic = LocalHapticFeedback.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val vibrationEnabled = LocalVibrationEnabled.current
     val coroutineScope = rememberCoroutineScope()
     val density = LocalDensity.current
 
@@ -263,7 +267,11 @@ fun ListCalendarSwitcher(
                             }
 
                             if (targetIndex != selectedIndex) {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                if (vibrationEnabled) {
+                                    VibrationHelper.vibrateClick(context)
+                                } else {
+                                    haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                }
                                 onSelectMode(targetIndex == 1)
                             } else {
                                 val targetLeft = visualSelectedIndex * tabWidthPx + paddingPx
@@ -349,7 +357,11 @@ fun ListCalendarSwitcher(
                                     val released = tryAwaitRelease()
                                     isSelectedTabPressed = false
                                     if (released && selectedIndex != 0) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        if (vibrationEnabled) {
+                                            VibrationHelper.vibrateTick(context)
+                                        } else {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        }
                                         onSelectMode(false)
                                     }
                                 }
@@ -377,7 +389,11 @@ fun ListCalendarSwitcher(
                                     val released = tryAwaitRelease()
                                     isSelectedTabPressed = false
                                     if (released && selectedIndex != 1) {
-                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        if (vibrationEnabled) {
+                                            VibrationHelper.vibrateTick(context)
+                                        } else {
+                                            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        }
                                         onSelectMode(true)
                                     }
                                 }

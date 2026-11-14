@@ -41,6 +41,7 @@ import com.cinetrack.data.api.CastMember
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
+import com.cinetrack.ui.utils.LocalVibrationEnabled
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.rtlSlideDirection
 import com.cinetrack.ui.utils.verticalFadingEdges
@@ -76,6 +77,7 @@ fun CheckInModal(
 ) {
     val haptic = LocalHapticFeedback.current
     val context = androidx.compose.ui.platform.LocalContext.current
+    val vibrationEnabled = LocalVibrationEnabled.current
 
     var currentPage by remember { mutableIntStateOf(0) }
     var rating by remember(movie?.personalRating) { mutableDoubleStateOf(movie?.personalRating ?: 0.0) }
@@ -360,7 +362,11 @@ fun CheckInModal(
                                                         isDisabled = isDisabled,
                                                         accentColor = accentColor,
                                                         onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            if (vibrationEnabled) {
+                                                                VibrationHelper.vibrateTick(context)
+                                                            } else {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            }
                                                             selectedVibes = if (isSelected) {
                                                                 selectedVibes - vibe
                                                             } else {
@@ -426,7 +432,11 @@ fun CheckInModal(
                                                         characterImageUrl = charImageUrl,
                                                         mvpPercentage = realPercentage,
                                                         onClick = {
-                                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            if (vibrationEnabled) {
+                                                                VibrationHelper.vibrateTick(context)
+                                                            } else {
+                                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                                            }
                                                             selectedMvp = if (isMvp) null else actor
                                                         }
                                                     )
@@ -455,7 +465,11 @@ fun CheckInModal(
                             accentColor = accentColor,
                             persistPreviousDots = true,
                             onDotClick = { index ->
-                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                if (vibrationEnabled) {
+                                    VibrationHelper.vibrateTick(context)
+                                } else {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                }
                                 currentPage = index
                             }
                         )
@@ -473,7 +487,11 @@ fun CheckInModal(
                                     modifier = Modifier
                                         .size(40.dp)
                                         .bounceClick(scaleDown = 0.90f) {
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            if (vibrationEnabled) {
+                                                VibrationHelper.vibrateTick(context)
+                                            } else {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            }
                                             currentPage -= 1
                                         }
                                         .clip(RoundedCornerShape(16.dp))
@@ -518,12 +536,18 @@ fun CheckInModal(
                                         .fillMaxSize()
                                         .bounceClick(scaleDown = if (isSaving) 1f else 0.96f) {
                                             if (isSaving) return@bounceClick
-                                            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            if (vibrationEnabled) {
+                                                VibrationHelper.vibrateTick(context)
+                                            } else {
+                                                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                            }
                                             if (currentPage < 2) {
                                                 currentPage += 1
                                             } else {
                                                 isSaving = true
-                                                VibrationHelper.vibrateClick(context)
+                                                if (vibrationEnabled) {
+                                                    VibrationHelper.vibrateClick(context)
+                                                }
                                                 coroutineScope.launch {
                                                     burstProgress.animateTo(
                                                         targetValue = 1f,

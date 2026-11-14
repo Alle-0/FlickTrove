@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.utils.LocalVibrationEnabled
+import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
 
 /**
@@ -90,6 +92,8 @@ private fun SymbiontFluidCanvas(
 ) {
     val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
+    val context = androidx.compose.ui.platform.LocalContext.current
+    val vibrationEnabled = LocalVibrationEnabled.current
     val accentColor = androidx.compose.material3.MaterialTheme.colorScheme.primary
     val currentProgress = remember(progress) { progress.coerceAtLeast(0f) }
 
@@ -117,7 +121,11 @@ private fun SymbiontFluidCanvas(
 
     LaunchedEffect(isDetached) {
         if (isDetached && !hasHapticTriggered) {
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            if (vibrationEnabled) {
+                VibrationHelper.vibrateClick(context)
+            } else {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            }
             hasHapticTriggered = true
         } else if (!isDetached && currentProgress < 0.1f) {
             hasHapticTriggered = false
