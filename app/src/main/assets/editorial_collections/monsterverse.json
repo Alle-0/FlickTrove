@@ -20,14 +20,14 @@
     },
     {
       "timelineIndex": 3,
-      "mediaType": "tv",
-      "tmdbId": 202411,
+      "mediaType": "movie",
+      "tmdbId": 124905,
       "addedAt": "2026-11-14T20:50:00Z"
     },
     {
       "timelineIndex": 4,
-      "mediaType": "movie",
-      "tmdbId": 124905,
+      "mediaType": "tv",
+      "tmdbId": 202411,
       "addedAt": "2026-11-14T20:50:00Z"
     },
     {

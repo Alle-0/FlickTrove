@@ -8,20 +8,20 @@
   "items": [
     {
       "timelineIndex": 1,
-      "mediaType": "tv",
-      "tmdbId": 157239,
-      "addedAt": "2026-11-14T20:50:00Z"
-    },
-    {
-      "timelineIndex": 2,
       "mediaType": "movie",
       "tmdbId": 70981,
       "addedAt": "2026-11-14T20:50:00Z"
     },
     {
-      "timelineIndex": 3,
+      "timelineIndex": 2,
       "mediaType": "movie",
       "tmdbId": 126889,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 3,
+      "mediaType": "tv",
+      "tmdbId": 157239,
       "addedAt": "2026-11-14T20:50:00Z"
     },
     {
