@@ -338,7 +338,7 @@ class SearchViewModel @Inject constructor(
                             
                             val rawCollections = if (page == 1) {
                                 val editorialCollections = editorialCollectionRepository.getAllCollections()
-                                val matched = editorialCollections.filter { it.title.contains(query, ignoreCase = true) || it.description.contains(query, ignoreCase = true) }.map { ed ->
+                                val matched = editorialCollections.filter { it.matchesQuery(query) }.map { ed ->
                                     TMDBSearchResult.CollectionResult(
                                         id = kotlin.math.abs(ed.id.hashCode()).toLong(),
                                         name = ed.title,
@@ -494,6 +494,22 @@ class SearchViewModel @Inject constructor(
 
     private suspend fun performLocalSearch(query: String, category: String): List<TMDBSearchResult> {
         if (query.isBlank()) return emptyList()
+        if (category == "collection") {
+            val editorialCollections = editorialCollectionRepository.getAllCollections()
+            return editorialCollections.filter { it.matchesQuery(query) }.map { ed ->
+                TMDBSearchResult.CollectionResult(
+                    id = kotlin.math.abs(ed.id.hashCode()).toLong(),
+                    name = ed.title,
+                    posterPath = ed.posterPath,
+                    backdropPath = ed.backdropPath,
+                    overview = ed.description,
+                    partsCount = ed.items.size,
+                    partsIds = ed.items.map { it.tmdbId },
+                    editorialId = ed.id,
+                    hasTvSeries = ed.items.any { it.mediaType == "tv" }
+                )
+            }
+        }
         val mediaType = if (category == "person" || category == "collection") "" else category
         val exactResults = repository.searchLocalMovies(query, mediaType)
         val finalMovies = if (exactResults.isNotEmpty() || query.length < 4) {

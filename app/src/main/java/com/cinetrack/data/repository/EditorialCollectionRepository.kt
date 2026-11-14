@@ -66,6 +66,11 @@ class EditorialCollectionRepository @Inject constructor(
                     seasonScope = itemObj.optString("seasonScope").takeIf { it.isNotBlank() }
                 )
             }
+            val keywordsArray = obj.optJSONArray("keywords")
+            val keywords = if (keywordsArray != null) {
+                (0 until keywordsArray.length()).map { keywordsArray.getString(it) }
+            } else emptyList()
+
             val col = EditorialCollection(
                 id = obj.optString("id", collectionId),
                 title = obj.optString("title"),
@@ -73,7 +78,8 @@ class EditorialCollectionRepository @Inject constructor(
                 backdropPath = obj.optString("backdropPath").takeIf { it.isNotBlank() },
                 posterPath = obj.optString("posterPath").takeIf { it.isNotBlank() },
                 items = items,
-                createdAt = obj.optString("createdAt")
+                createdAt = obj.optString("createdAt"),
+                keywords = keywords
             )
             localize(col)
         } catch (e: Exception) {
