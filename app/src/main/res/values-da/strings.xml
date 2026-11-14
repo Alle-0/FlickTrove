@@ -960,6 +960,14 @@
     <string name="editorial_mcu_desc">Den komplette MCU Sacred Timeline: den definitive narrative rækkefølge, der forener film, TV-serier (Defenders, Agent Carter) og animation. Oplev hele den episke saga i præcis kronologisk rækkefølge.</string>
     <string name="editorial_star_wars_title">Star Wars: Canon Timeline</string>
     <string name="editorial_star_wars_desc">Den komplette officielle Lucasfilm-kanon-tidslinje: fra The High Republic og Jedi-ordenens fald til Den Galaktiske Borgerkrig og Den Første Ordens fremkomst i præcis diegetisk rækkefølge.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">Den definitive gyser-tidslinje: oplev Warren-parrets sager, hjemsøgte genstande og dæmoner fra 1952 til 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Den komplette tidslinje for Titanerne og Monarch: fra efterkrigstidens Stillehav til den Hule Jord i film og serier.</string>
+    <string name="editorial_middle_earth_title">Midgård: Tolkiens tidslinje</string>
+    <string name="editorial_middle_earth_desc">Ardas store saga: fra den Anden Tidsalder og Ringene til den Tredje Tidsalder og Herskerringens fald.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">Den kanoniske Xenomorph-tidslinje: fra Jordens første kontakt i 2092 til det 24. århundrede.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" fjernet</string>
     <string name="msg_item_deleted">\"%1$s\" slettet</string>
@@ -2171,4 +2179,10 @@
     <string name="comment_tip_spoiler">Slå Spoiler til for at sløre hele kommentaren, indtil der trykkes på den</string>
     <string name="comment_tip_max_chars">Grænse: maks. %1$d tegn</string>
     <string name="comment_tag_search_hint">Skriv titlen på en film eller TV-serie for at tagge den...</string>
+
+    <string name="editorial_season_scope_single">Sæson %1$s</string>
+    <string name="editorial_season_scope_range">Sæson %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

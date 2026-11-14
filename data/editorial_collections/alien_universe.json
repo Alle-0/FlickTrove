@@ -1,0 +1,58 @@
+{
+  "id": "alien_universe",
+  "title": "Alien Universe",
+  "description": "La linea temporale canonica dell'evoluzione Xenomorfa e della Weyland-Yutani: dal primo contagio terrestre nel 2092 fino al 24° secolo.",
+  "backdropPath": "/6X42JnSMdo3dPAswOHUuvebdTq7.jpg",
+  "posterPath": "/lmtyube1ggCYCPAOxKSRNT93fj2.jpg",
+  "createdAt": "2026-11-14T20:50:00Z",
+  "items": [
+    {
+      "timelineIndex": 1,
+      "mediaType": "tv",
+      "tmdbId": 157239,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 2,
+      "mediaType": "movie",
+      "tmdbId": 70981,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 3,
+      "mediaType": "movie",
+      "tmdbId": 126889,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 4,
+      "mediaType": "movie",
+      "tmdbId": 348,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 5,
+      "mediaType": "movie",
+      "tmdbId": 945961,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 6,
+      "mediaType": "movie",
+      "tmdbId": 679,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 7,
+      "mediaType": "movie",
+      "tmdbId": 8077,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 8,
+      "mediaType": "movie",
+      "tmdbId": 8078,
+      "addedAt": "2026-11-14T20:50:00Z"
+    }
+  ]
+}

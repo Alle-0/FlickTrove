@@ -962,6 +962,14 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="editorial_mcu_desc">Повна Священна хронологія MCU: точний хронологічний порядок фільмів, серіалів та анімації. Проживіть усю сагу крок за кроком.</string>
     <string name="editorial_star_wars_title">Зоряні війни: Канонічна хронологія</string>
     <string name="editorial_star_wars_desc">Офіційна канонічна хронологія Lucasfilm: від Розквіту Республіки до Падіння Ордену та Війни Клонів у дієгетичному порядку.</string>
+    <string name="editorial_conjuring_title">Всесвіт Закляття</string>
+    <string name="editorial_conjuring_desc">Хронологія жаху: архіви подружжя Воррен, прокляті артефакти та демонічні сили з 1952 по 1981 рік.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Повна хронологія Титанів та «Монарха»: від повоєнного Тихого океану до Порожнистої Землі у кіно та серіалах.</string>
+    <string name="editorial_middle_earth_title">Середзем\'я: Хронологія Толкіна</string>
+    <string name="editorial_middle_earth_desc">Епопея Арди: від Другої Епохи та виковування Перснів Влади до Третьої Епохи та падіння Єдиного Персня.</string>
+    <string name="editorial_alien_title">Всесвіт Чужого</string>
+    <string name="editorial_alien_desc">Канонічна хронологія Ксеноморфів: від першого контакту у 2092 році до космічного виживання у XXIV столітті.</string>
     <string name="msg_item_added_action">«%1$s» %2$s</string>
     <string name="msg_item_removed">«%1$s» видалено</string>
     <string name="msg_item_deleted">«%1$s» видалено</string>
@@ -2145,4 +2153,10 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="comment_tip_spoiler">Увімкніть Спойлер, щоб розмити весь коментар до натискання</string>
     <string name="comment_tip_max_chars">Ліміт: щонайбільше %1$d символів</string>
     <string name="comment_tag_search_hint">Введіть назву фільму або серіалу, щоб позначити...</string>
+
+    <string name="editorial_season_scope_single">Сезон %1$s</string>
+    <string name="editorial_season_scope_range">Сезони %1$s</string>
+
+    <string name="editorial_season_episode_scope">С%1$s • ЕП. %2$s</string>
+    <string name="editorial_episode_scope">ЕП. %1$s</string>
 </resources>

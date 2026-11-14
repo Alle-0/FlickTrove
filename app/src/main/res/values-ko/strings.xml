@@ -926,6 +926,14 @@
     <string name="editorial_mcu_desc">MCU 신성한 타임라인의 완성: 영화, TV 시리즈(디펜더스, 에이전트 카터), 애니메이션을 잇는 결정적인 서사 순서. 정확한 시간 순서로 전체 서사시를 경험하세요.</string>
     <string name="editorial_star_wars_title">스타워즈: 공식 캐넌 타임라인</string>
     <string name="editorial_star_wars_desc">루카스필름 공식 캐넌 타임라인 전체: 고공화국과 제다이의 몰락부터 은하 내전과 퍼스트 오더의 부흥까지 정확한 이야기 순서대로 감상하세요.</string>
+    <string name="editorial_conjuring_title">컨저링 유니버스</string>
+    <string name="editorial_conjuring_desc">공포의 결정판 연대기: 1952년부터 1981년까지 워렌 부부의 파일, 저주받은 유물, 악령의 기록을 순서대로 확인하세요.</string>
+    <string name="editorial_monsterverse_title">몬스터버스</string>
+    <string name="editorial_monsterverse_desc">타이탄과 모나크의 연대기: 전후 태평양부터 지구 공동(할로우 어스)까지 영화와 드라마를 아우르는 타임라인.</string>
+    <string name="editorial_middle_earth_title">중간계: 톨킨 연대기</string>
+    <string name="editorial_middle_earth_desc">아르다의 대서사시: 제2시대의 반지 제작부터 제3시대 절대반지의 파괴까지.</string>
+    <string name="editorial_alien_title">에이리언 유니버스</string>
+    <string name="editorial_alien_desc">제노모프 공식 타임라인: 2092년 지구 최초 접촉부터 24세기 심우주 생존기까지.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" 삭제됨</string>
     <string name="msg_item_deleted">\"%1$s\" 삭제됨</string>
@@ -2165,4 +2173,10 @@
     <string name="comment_tip_spoiler">스포일러를 켜면 탭할 때까지 댓글 전체가 흐리게 가려집니다</string>
     <string name="comment_tip_max_chars">제한: 최대 %1$d자</string>
     <string name="comment_tag_search_hint">태그할 영화 또는 시리즈 제목을 입력하세요...</string>
+
+    <string name="editorial_season_scope_single">시즌 %1$s</string>
+    <string name="editorial_season_scope_range">시즌 %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

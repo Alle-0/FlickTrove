@@ -945,6 +945,14 @@
     <string name="editorial_mcu_desc">Kompletní Posvátná časová osa MCU: definitivní příběhové pořadí propojující filmy, seriály (Defenders, Agent Carter) i animaci. Zažijte celou epickou ságu v přesné chronologické posloupnosti.</string>
     <string name="editorial_star_wars_title">Star Wars: Kánonická časová osa</string>
     <string name="editorial_star_wars_desc">Kompletní oficiální kánonická časová osa od Lucasfilmu: od Vrcholné republiky a Pádu Jediů přes Galaktickou občanskou válku až po Vzestup Prvního řádu v přesném dějovém pořadí.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">Definitivní chronologie děsu: prozkoumejte složky Warrenových, prokleté předměty a démonické síly od roku 1952 do 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Kompletní časová osa Titánů a Monarchu: od poválečného Pacifiku až po Dutou Zemi ve filmu i televizi.</string>
+    <string name="editorial_middle_earth_title">Středozem: Tolkienova chronologie</string>
+    <string name="editorial_middle_earth_desc">Epos o Ardě: od Druhého věku a kování Prstenů moci po Třetí věk a zkázu Jednoho prstenu.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">Kanonická časová osa Vetřelců: od prvního kontaktu na Zemi v roce 2092 až po přežití ve 24. století.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" odebráno</string>
     <string name="msg_item_deleted">\"%1$s\" smazáno</string>
@@ -2125,4 +2133,10 @@
     <string name="comment_tip_spoiler">Zapněte Spoiler pro rozmazání komentáře až do klepnutí</string>
     <string name="comment_tip_max_chars">Limit: max. %1$d znaků</string>
     <string name="comment_tag_search_hint">Napište název filmu nebo seriálu pro označení...</string>
+
+    <string name="editorial_season_scope_single">%1$s. Série</string>
+    <string name="editorial_season_scope_range">%1$s. Série</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • DÍL %2$s</string>
+    <string name="editorial_episode_scope">DÍL %1$s</string>
 </resources>

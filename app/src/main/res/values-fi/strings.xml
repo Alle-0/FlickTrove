@@ -960,6 +960,14 @@
     <string name="editorial_mcu_desc">Täydellinen MCU Sacred Timeline: lopullinen kerronnallinen järjestys, joka yhdistää elokuvat, TV-sarjat (Defenders, Agent Carter) ja animaatiot. Koe koko eeppinen saaga tarkassa aikajärjestyksessä.</string>
     <string name="editorial_star_wars_title">Star Wars: Canon Timeline</string>
     <string name="editorial_star_wars_desc">Täydellinen virallinen Lucasfilm-kaanonin aikajana: High Republicista ja jedien tuhosta Galaktiseen sisällissotaan ja Ensimmäisen ritarikunnan nousuun tarkassa diegeettisessä järjestyksessä.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">Kauhujen virallinen aikajana: koe Warrenien tapaukset, kirotut esineet ja demoniset ilmiöt vuosilta 1952–1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Titaanien ja Monarchin täysi aikajana: Tyynenmeren sotien jälkeisestä ajasta Onttoon maahan elokuvissa ja sarjoissa.</string>
+    <string name="editorial_middle_earth_title">Keski-Maa: Tolkienin aikajana</string>
+    <string name="editorial_middle_earth_desc">Ardan eeppinen saaga: Toisesta ajasta ja Sormusten takomisesta Kolmanteen aikaan ja Valtasormuksen tuhoon.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">Xenomorphien virallinen aikajana: vuoden 2092 ensikohtaamisesta aina 2300-luvun avaruusselviytymiseen.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" poistettu</string>
     <string name="msg_item_deleted">\"%1$s\" poistettu</string>
@@ -2171,4 +2179,10 @@
     <string name="comment_tip_spoiler">Ota Juonipaljastus käyttöön sumentaaksesi koko kommentin napautukseen asti</string>
     <string name="comment_tip_max_chars">Raja: enintään %1$d merkkiä</string>
     <string name="comment_tag_search_hint">Kirjoita elokuvan tai TV-sarjan nimi merkitäksesi sen...</string>
+
+    <string name="editorial_season_scope_single">Kausi %1$s</string>
+    <string name="editorial_season_scope_range">Kaudet %1$s</string>
+
+    <string name="editorial_season_episode_scope">K%1$s • JAKSO %2$s</string>
+    <string name="editorial_episode_scope">JAKSO %1$s</string>
 </resources>

@@ -964,6 +964,14 @@ Prova att förenkla sökningen</string>
     <string name="editorial_mcu_desc">Hela MCU Sacred Timeline: den definitiva berättelseordningen som förenar filmer, TV-serier (Defenders, Agent Carter) och animation. Upplev hela den episka sagan i exakt kronologisk ordning.</string>
     <string name="editorial_star_wars_title">Star Wars: Canon Timeline</string>
     <string name="editorial_star_wars_desc">Den kompletta officiella kanoniska tidslinjen från Lucasfilm: från The High Republic och Jediordens fall till det galaktiska inbördeskriget och Första ordningens uppgång i exakt diegetisk ordning.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">Den definitiva skräcktidslinjen: upplev makarna Warrens arkiv, hemsökta föremål och demoner från 1952 till 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Hela tidslinjen för Titanerna och Monarch: från efterkrigstidens Stilla havet till den Ihåliga Jorden i film och TV.</string>
+    <string name="editorial_middle_earth_title">Midgård: Tolkiens tidslinje</string>
+    <string name="editorial_middle_earth_desc">Sagan om Arda: från den Andra åldern och Ringarnas smidande till den Tredje åldern och Härskarringens fall.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">Xenomorphernas kanoniska tidslinje: från första kontakten 2092 till rymdöverlevnad på 2300-talet.</string>
     <string name="msg_item_added_action">"%1$s" %2$s</string>
     <string name="msg_item_removed">"%1$s" borttagen</string>
     <string name="msg_item_deleted">"%1$s" raderad</string>
@@ -2144,4 +2152,10 @@ Prova att förenkla sökningen</string>
     <string name="comment_tip_spoiler">Aktivera Spoiler för att göra hela kommentaren suddig tills den trycks</string>
     <string name="comment_tip_max_chars">Gräns: högst %1$d tecken</string>
     <string name="comment_tag_search_hint">Skriv titeln på en film eller serie för att tagga...</string>
+
+    <string name="editorial_season_scope_single">Säsong %1$s</string>
+    <string name="editorial_season_scope_range">Säsonger %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • AVSN. %2$s</string>
+    <string name="editorial_episode_scope">AVSN. %1$s</string>
 </resources>

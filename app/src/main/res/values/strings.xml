@@ -960,6 +960,14 @@
     <string name="editorial_mcu_desc">The complete MCU Sacred Timeline: the definitive narrative order uniting movies, TV series (Defenders, Agent Carter), and animation. Experience the entire epic saga in exact chronological sequence.</string>
     <string name="editorial_star_wars_title">Star Wars: Canon Timeline</string>
     <string name="editorial_star_wars_desc">The complete official Lucasfilm canon timeline: from The High Republic and Fall of the Jedi to the Galactic Civil War and Rise of the First Order in exact diegetic order.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">The definitive horror timeline: experience the Warren files, haunted artifacts, and demonic manifestations in exact chronological order from 1952 to 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">The complete Titans and Monarch timeline: from post-war Pacific to Hollow Earth across movies, animated and live-action series.</string>
+    <string name="editorial_middle_earth_title">Middle-earth: Tolkien Timeline</string>
+    <string name="editorial_middle_earth_desc">The epic saga of Arda: from the Second Age and the forging of the Rings to the Third Age and the fall of the One Ring.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">The canonical Xenomorph timeline: from Earth\'s first encounter in 2092 to deep-space survival in the 24th century.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" removed</string>
     <string name="msg_item_deleted">\"%1$s\" deleted</string>
@@ -2171,4 +2179,10 @@
     <string name="comment_tip_spoiler">Toggle Spoiler to blur the full comment until tapped</string>
     <string name="comment_tip_max_chars">Limit: %1$d characters max</string>
     <string name="comment_tag_search_hint">Type a movie or TV series title to tag it...</string>
+
+    <string name="editorial_season_scope_single">Season %1$s</string>
+    <string name="editorial_season_scope_range">Seasons %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

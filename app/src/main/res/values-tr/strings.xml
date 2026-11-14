@@ -926,6 +926,14 @@
     <string name="editorial_mcu_desc">MCU\'nun eksiksiz Kutsal Zaman Çizelgesi: filmleri, TV dizilerini (Defenders, Agent Carter) ve animasyonları bir araya getiren kesin anlatı sırası. Tüm destanı tam kronolojik sırayla deneyimleyin.</string>
     <string name="editorial_star_wars_title">Star Wars: Kanon Zaman Çizelgesi</string>
     <string name="editorial_star_wars_desc">Eksiksiz resmi Lucasfilm kanon zaman çizelgesi: Yüksek Cumhuriyet ve Jedi\'ların Çöküşü\'nden Galaktik İç Savaş\'a ve İlk Düzen\'in Yükselişi\'ne kadar tam hikaye akışı sırasında.</string>
+    <string name="editorial_conjuring_title">Korku Seansı Evreni</string>
+    <string name="editorial_conjuring_desc">Korkunun kesin kronolojisi: Warren dosyalarını, lanetli nesneleri ve şeytani varlıkları 1952\'den 1981\'e kadar takip edin.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Titanlar ve Monarch\'ın tam zaman çizelgesi: Pasifik savaş sonrasından Oyuk Dünya\'ya sinema ve televizyon yolculuğu.</string>
+    <string name="editorial_middle_earth_title">Orta Dünya: Tolkien Kronolojisi</string>
+    <string name="editorial_middle_earth_desc">Arda\'nın epik destanı: İkinci Çağ ve Güç Yüzükleri\'nin dövülmesinden Üçüncü Çağ ve Tek Yüzük\'ün yok edilişine.</string>
+    <string name="editorial_alien_title">Alien Evreni</string>
+    <string name="editorial_alien_desc">Ksenomorf resmi zaman çizelgesi: 2092\'deki ilk temastan 24. yüzyıldaki derin uzay hayatta kalma mücadelesine.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" kaldırıldı</string>
     <string name="msg_item_deleted">\"%1$s\" silindi</string>
@@ -2165,4 +2173,10 @@
     <string name="comment_tip_spoiler">Dokunulana kadar tüm yorumu bulanıklaştırmak için Spoiler\'ı açın</string>
     <string name="comment_tip_max_chars">Sınır: en fazla %1$d karakter</string>
     <string name="comment_tag_search_hint">Etiketlemek için bir film veya dizi adı yaz...</string>
+
+    <string name="editorial_season_scope_single">%1$s. Sezon</string>
+    <string name="editorial_season_scope_range">%1$s. Sezon</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • B%2$s</string>
+    <string name="editorial_episode_scope">%1$s. Bölüm</string>
 </resources>

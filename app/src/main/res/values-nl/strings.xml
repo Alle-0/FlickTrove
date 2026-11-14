@@ -959,6 +959,14 @@
     <string name="editorial_mcu_desc">De complete heilige tijdlijn van het MCU: de definitieve verhaallijn die films, tv-series (Defenders, Agent Carter) en animatie verenigt. Beleef de volledige epische saga in exacte chronologische volgorde.</string>
     <string name="editorial_star_wars_title">Star Wars: Canon-tijdlijn</string>
     <string name="editorial_star_wars_desc">De complete officiële canon-tijdlijn van Lucasfilm: van The High Republic en Fall of the Jedi tot de Galactische Burgeroorlog en Rise of the First Order in exacte chronologische volgorde.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">De definitieve horror-tijdlijn: ontdek de Warren-dossiers, vervloekte voorwerpen en demonen van 1952 tot 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">De complete tijdlijn van Titans en Monarch: van naoorlogs Pacific tot de Holle Aarde in films en series.</string>
+    <string name="editorial_middle_earth_title">Midden-aarde: Tolkien-chronologie</string>
+    <string name="editorial_middle_earth_desc">Het epos van Arda: van de Tweede Era en het smeden van de Ringen tot de Derde Era en de val van de Ene Ring.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">De canonieke Xenomorph-tijdlijn: van het eerste contact op Aarde in 2092 tot overleving in de 24e eeuw.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" verwijderd</string>
     <string name="msg_item_deleted">\"%1$s\" gewist</string>
@@ -2125,4 +2133,10 @@
     <string name="comment_tip_spoiler">Schakel Spoiler in om de hele reactie te vervagen tot erop wordt getikt</string>
     <string name="comment_tip_max_chars">Limiet: maximaal %1$d tekens</string>
     <string name="comment_tag_search_hint">Typ de titel van een film of serie om te taggen...</string>
+
+    <string name="editorial_season_scope_single">Seizoen %1$s</string>
+    <string name="editorial_season_scope_range">Seizoenen %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • AFL. %2$s</string>
+    <string name="editorial_episode_scope">AFL. %1$s</string>
 </resources>

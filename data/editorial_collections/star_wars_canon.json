@@ -1,0 +1,176 @@
+{
+  "id": "star_wars_canon",
+  "title": "Star Wars: Cronologia Canonica",
+  "description": "La cronologia integrale del canone ufficiale Lucasfilm: dall'Alta Repubblica e la Caduta dei Jedi fino alla Guerra Civile Galattica e all'Ascesa del Primo Ordine nell'esatta sequenza diegetica.",
+  "backdropPath": "/zqkmTXzjkAgXmEWLRsY4UpTWCeo.jpg",
+  "posterPath": "/fai0rspsNeJCS69wHNjOdWxcI7P.jpg",
+  "createdAt": "2026-10-02T23:00:00Z",
+  "items": [
+    {
+      "timelineIndex": 1,
+      "mediaType": "tv",
+      "tmdbId": 202998,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 2,
+      "mediaType": "tv",
+      "tmdbId": 114479,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 3,
+      "mediaType": "movie",
+      "tmdbId": 1893,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 4,
+      "mediaType": "movie",
+      "tmdbId": 1894,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 5,
+      "mediaType": "movie",
+      "tmdbId": 12180,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 6,
+      "mediaType": "tv",
+      "tmdbId": 4194,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 7,
+      "mediaType": "movie",
+      "tmdbId": 1895,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 8,
+      "mediaType": "tv",
+      "tmdbId": 105971,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 9,
+      "mediaType": "movie",
+      "tmdbId": 348350,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 10,
+      "mediaType": "tv",
+      "tmdbId": 92830,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 11,
+      "mediaType": "tv",
+      "tmdbId": 83867,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 12,
+      "mediaType": "tv",
+      "tmdbId": 60554,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 13,
+      "mediaType": "movie",
+      "tmdbId": 330459,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 14,
+      "mediaType": "movie",
+      "tmdbId": 11,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 15,
+      "mediaType": "movie",
+      "tmdbId": 1891,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 16,
+      "mediaType": "movie",
+      "tmdbId": 1892,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 17,
+      "mediaType": "tv",
+      "tmdbId": 82856,
+      "addedAt": "2026-10-02T23:00:00Z",
+      "seasonScope": "Stagioni 1–2"
+    },
+    {
+      "timelineIndex": 18,
+      "mediaType": "tv",
+      "tmdbId": 115036,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 19,
+      "mediaType": "tv",
+      "tmdbId": 82856,
+      "addedAt": "2026-10-02T23:00:00Z",
+      "seasonScope": "Stagione 3"
+    },
+    {
+      "timelineIndex": 20,
+      "mediaType": "tv",
+      "tmdbId": 114461,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 21,
+      "mediaType": "tv",
+      "tmdbId": 202879,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 22,
+      "mediaType": "movie",
+      "tmdbId": 1228710,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 23,
+      "mediaType": "tv",
+      "tmdbId": 79093,
+      "addedAt": "2026-10-02T23:00:00Z",
+      "seasonScope": "Stagione 1"
+    },
+    {
+      "timelineIndex": 24,
+      "mediaType": "movie",
+      "tmdbId": 140607,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 25,
+      "mediaType": "movie",
+      "tmdbId": 181808,
+      "addedAt": "2026-10-02T23:00:00Z"
+    },
+    {
+      "timelineIndex": 26,
+      "mediaType": "tv",
+      "tmdbId": 79093,
+      "addedAt": "2026-10-02T23:00:00Z",
+      "seasonScope": "Stagione 2"
+    },
+    {
+      "timelineIndex": 27,
+      "mediaType": "movie",
+      "tmdbId": 181812,
+      "addedAt": "2026-10-02T23:00:00Z"
+    }
+  ]
+}

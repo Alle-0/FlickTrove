@@ -926,6 +926,14 @@
     <string name="editorial_mcu_desc">MCU神聖時間軸の完全版：映画、TVシリーズ（ディフェンダーズ、エージェント・カーター）、アニメーションを繋ぐ決定版の物語順。壮大なサーガを正確な時系列順で体験しよう。</string>
     <string name="editorial_star_wars_title">スター・ウォーズ：正史タイムライン</string>
     <string name="editorial_star_wars_desc">ルーカスフィルム公式正史の完全タイムライン：高共和国時代、ジェダイの崩壊から銀河内乱、ファースト・オーダーの台頭までを正確な物語順で体験。</string>
+    <string name="editorial_conjuring_title">死霊館ユニバース</string>
+    <string name="editorial_conjuring_desc">恐怖の正統年代記：ウォーレン夫妻の事件ファイル、呪われた品々、悪霊の跳梁を1952年から1981年まで完全再現。</string>
+    <string name="editorial_monsterverse_title">モンスター・ヴァース</string>
+    <string name="editorial_monsterverse_desc">タイタンとモナークの完全タイムライン：戦後太平洋から地下空洞まで、映画とドラマを網羅。</string>
+    <string name="editorial_middle_earth_title">中つ国：トールキン年代記</string>
+    <string name="editorial_middle_earth_desc">アルダの壮大な歴史：第二紀の指輪創造から第三紀の冥王サウロン失脚までを時系列で網羅。</string>
+    <string name="editorial_alien_title">エイリアン・ユニバース</string>
+    <string name="editorial_alien_desc">ゼノモーフの公式タイムライン：2092年の地球初接触から24世紀の深宇宙サバイバルまで。</string>
     <string name="msg_item_added_action">「%1$s」を%2$s</string>
     <string name="msg_item_removed">「%1$s」を削除しました</string>
     <string name="msg_item_deleted">「%1$s」を削除しました</string>
@@ -2165,4 +2173,10 @@
     <string name="comment_tip_spoiler">ネタバレをオンにするとタップするまでコメント全体にぼかしが入ります</string>
     <string name="comment_tip_max_chars">上限：最大%1$d文字</string>
     <string name="comment_tag_search_hint">タグ付けする映画やドラマのタイトルを入力...</string>
+
+    <string name="editorial_season_scope_single">シーズン%1$s</string>
+    <string name="editorial_season_scope_range">シーズン%1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

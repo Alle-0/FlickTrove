@@ -926,6 +926,14 @@
     <string name="editorial_mcu_desc">Garis Waktu Sakral MCU lengkap: urutan narasi definitif yang menggabungkan film, serial TV (Defenders, Agent Carter), dan animasi. Nikmati seluruh kisah epik dalam urutan kronologis yang tepat.</string>
     <string name="editorial_star_wars_title">Star Wars: Garis Waktu Kanon</string>
     <string name="editorial_star_wars_desc">Garis waktu kanon resmi Lucasfilm yang lengkap: dari High Republic dan Runtuhnya Jedi hingga Perang Saudara Galaksi dan Bangkitnya First Order dalam urutan diegetik yang tepat.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">Kronologi horor terlengkap: ikuti berkas Warren, artefak berhantu, dan manifestasi iblis dari tahun 1952 hingga 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Garis waktu lengkap Titan dan Monarch: dari pascaperang Pasifik hingga Rongga Bumi di film dan serial TV.</string>
+    <string name="editorial_middle_earth_title">Middle-earth: Kronologi Tolkien</string>
+    <string name="editorial_middle_earth_desc">Kisah epik Arda: dari Zaman Kedua dan penempaan Cincin Kekuatan hingga Zaman Ketiga dan hancurnya Cincin Utama.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">Garis waktu kanonik Xenomorph: dari kontak pertama di Bumi tahun 2092 hingga luar angkasa abad ke-24.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" dihapus</string>
     <string name="msg_item_deleted">\"%1$s\" dihapus</string>
@@ -2164,4 +2172,10 @@
     <string name="comment_tip_spoiler">Aktifkan Spoiler untuk mengaburkan seluruh komentar hingga disentuh</string>
     <string name="comment_tip_max_chars">Batas: maksimal %1$d karakter</string>
     <string name="comment_tag_search_hint">Ketik judul film atau serial TV untuk menandainya...</string>
+
+    <string name="editorial_season_scope_single">Musim %1$s</string>
+    <string name="editorial_season_scope_range">Musim %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

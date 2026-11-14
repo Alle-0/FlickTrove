@@ -841,6 +841,14 @@
     <string name="editorial_mcu_desc">La Sagrada Línea Temporal completa del MCU: el orden narrativo definitivo que une películas, series de TV (Defenders, Agent Carter) y animación. Vive todo el arco épico en su secuencia cronológica exacta.</string>
     <string name="editorial_star_wars_title">Star Wars: Cronología Canónica</string>
     <string name="editorial_star_wars_desc">La cronología completa del canon oficial de Lucasfilm: desde la Alta República y la Caída de los Jedi hasta la Guerra Civil Galáctica y el Ascenso de la Primera Orden en riguroso orden diegético.</string>
+    <string name="editorial_conjuring_title">El Universo The Conjuring</string>
+    <string name="editorial_conjuring_desc">La cronología definitiva del terror: experimenta los archivos Warren, los artefactos malditos y las presencias demoníacas de 1952 a 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">La cronología completa de los Titanes y Monarch: desde la posguerra en el Pacífico hasta la Tierra Hueca en cine y televisión.</string>
+    <string name="editorial_middle_earth_title">Tierra Media: Cronología de Tolkien</string>
+    <string name="editorial_middle_earth_desc">La saga épica de Arda: desde la Segunda Edad y la forja de los Anillos hasta la Tercera Edad y la caída del Anillo Único.</string>
+    <string name="editorial_alien_title">Universo Alien</string>
+    <string name="editorial_alien_desc">La cronología canónica de los Xenomorfos: desde el primer contacto en 2092 hasta la supervivencia espacial en el siglo XXIV.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" eliminado</string>
     <string name="msg_item_deleted">\"%1$s\" borrado</string>
@@ -2161,4 +2169,10 @@
     <string name="comment_tip_spoiler">Activa Spoiler para difuminar todo el comentario hasta tocarlo</string>
     <string name="comment_tip_max_chars">Límite: máximo %1$d caracteres</string>
     <string name="comment_tag_search_hint">Escribe el título de una película o serie para etiquetarla...</string>
+
+    <string name="editorial_season_scope_single">Temporada %1$s</string>
+    <string name="editorial_season_scope_range">Temporadas %1$s</string>
+
+    <string name="editorial_season_episode_scope">T%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

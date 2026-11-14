@@ -958,6 +958,14 @@
     <string name="editorial_mcu_desc">A Linha do Tempo Sagrada completa do MCU: a ordem narrativa definitiva que reúne filmes, séries de TV (Defenders, Agent Carter) e animações. Viva todo o arco épico na sequência cronológica exata.</string>
     <string name="editorial_star_wars_title">Star Wars: Cronologia Canônica</string>
     <string name="editorial_star_wars_desc">A cronologia completa do cânone oficial da Lucasfilm: da Alta República e Queda dos Jedi até a Guerra Civil Galáctica e Ascensão da Primeira Ordem na sequência narrativa exata.</string>
+    <string name="editorial_conjuring_title">Universo The Conjuring</string>
+    <string name="editorial_conjuring_desc">A cronologia definitiva do terror: explore os arquivos Warren, artefactos amaldiçoados e manifestações demoníacas de 1952 a 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">A cronologia completa dos Titãs e da Monarch: do pós-guerra no Pacífico até à Terra Oca no cinema e na televisão.</string>
+    <string name="editorial_middle_earth_title">Terra-média: Cronologia de Tolkien</string>
+    <string name="editorial_middle_earth_desc">A saga épica de Arda: da Segunda Era e a forja dos Anéis até à Terceira Era e à queda do Um Anel.</string>
+    <string name="editorial_alien_title">Universo Alien</string>
+    <string name="editorial_alien_desc">A linha do tempo canónica dos Xenomorfos: do primeiro contacto em 2092 até à sobrevivência no século XXIV.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" removido</string>
     <string name="msg_item_deleted">\"%1$s\" eliminado</string>
@@ -2119,4 +2127,10 @@
     <string name="comment_tip_spoiler">Ative Spoiler para desfocar todo o comentário até tocar</string>
     <string name="comment_tip_max_chars">Limite: máximo de %1$d caracteres</string>
     <string name="comment_tag_search_hint">Escreve o título de um filme ou série para marcar...</string>
+
+    <string name="editorial_season_scope_single">Temporada %1$s</string>
+    <string name="editorial_season_scope_range">Temporadas %1$s</string>
+
+    <string name="editorial_season_episode_scope">T%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

@@ -964,6 +964,14 @@ Introdu cel puțin 3 caractere</string>
     <string name="editorial_mcu_desc">Cronologia sacră completă a MCU: ordinea narativă definitivă ce reunește filme, seriale (Defenders, Agent Carter) și animații. Trăiește întreaga saga în ordine cronologică exactă.</string>
     <string name="editorial_star_wars_title">Star Wars: Cronologia canonică</string>
     <string name="editorial_star_wars_desc">Cronologia oficială completă a canonului Lucasfilm: de la Înalta Republică și Căderea Ordinului Jedi până la Războiul Civil Galactic și Ascensiunea Primului Ordin în ordine diegetică exactă.</string>
+    <string name="editorial_conjuring_title">Universul Trăind printre demoni</string>
+    <string name="editorial_conjuring_desc">Cronologia definitivă a groazei: dosarele soților Warren, artefactele blestemate și manifestările demonice din 1952 până în 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Cronologia completă a Titanilor și Monarch: de la Pacificul postbelic până la Pământul Gol în cinema și seriale.</string>
+    <string name="editorial_middle_earth_title">Pământul de Mijloc: Cronologia Tolkien</string>
+    <string name="editorial_middle_earth_desc">Saga epică din Arda: de la Al Doilea Ev și făurirea Inelelor până la Al Treilea Ev și distrugerea Inelului Suprem.</string>
+    <string name="editorial_alien_title">Universul Alien</string>
+    <string name="editorial_alien_desc">Cronologia canonică a Xenomorfilor: de la primul contact de pe Pământ din 2092 până în secolul al XXIV-lea.</string>
     <string name="msg_item_added_action">"%1$s" %2$s</string>
     <string name="msg_item_removed">"%1$s" eliminat</string>
     <string name="msg_item_deleted">"%1$s" șters</string>
@@ -2147,4 +2155,10 @@ Cod de invitație: %3$s</string>
     <string name="comment_tip_spoiler">Activează Spoiler pentru a estompa întregul comentariu până la atingere</string>
     <string name="comment_tip_max_chars">Limită: maximum %1$d caractere</string>
     <string name="comment_tag_search_hint">Scrie titlul unui film sau serial pentru a-l eticheta...</string>
+
+    <string name="editorial_season_scope_single">Sezonul %1$s</string>
+    <string name="editorial_season_scope_range">Sezoanele %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

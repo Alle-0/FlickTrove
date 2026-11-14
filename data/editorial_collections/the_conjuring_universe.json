@@ -1,0 +1,70 @@
+{
+  "id": "the_conjuring_universe",
+  "title": "The Conjuring Universe",
+  "description": "La cronologia diegetica del terrore: l'ordine cronologico completo dei casi dei coniugi Warren e delle manifestazioni demoniache dal 1952 al 1981.",
+  "backdropPath": "/kHZaX0vuhZdbuq0WKU3BpA9WIQ0.jpg",
+  "posterPath": "/z5VKhNSQKQyxm0co68HAkCqHnmX.jpg",
+  "createdAt": "2026-11-14T20:50:00Z",
+  "items": [
+    {
+      "timelineIndex": 1,
+      "mediaType": "movie",
+      "tmdbId": 439079,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 2,
+      "mediaType": "movie",
+      "tmdbId": 396422,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 3,
+      "mediaType": "movie",
+      "tmdbId": 968051,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 4,
+      "mediaType": "movie",
+      "tmdbId": 250546,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 5,
+      "mediaType": "movie",
+      "tmdbId": 138843,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 6,
+      "mediaType": "movie",
+      "tmdbId": 521029,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 7,
+      "mediaType": "movie",
+      "tmdbId": 480414,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 8,
+      "mediaType": "movie",
+      "tmdbId": 259693,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 9,
+      "mediaType": "movie",
+      "tmdbId": 423108,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 10,
+      "mediaType": "movie",
+      "tmdbId": 1038392,
+      "addedAt": "2026-11-14T20:50:00Z"
+    }
+  ]
+}

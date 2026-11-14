@@ -969,6 +969,14 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="editorial_mcu_desc">Kompletna Święta Oś Czasu MCU: ostateczny porządek narracyjny łączący filmy, seriale (Defenders, Agent Carter) i animacje. Przeżyj całą epicką sagę w dokładnej kolejności chronologicznej.</string>
     <string name="editorial_star_wars_title">Gwiezdne Wojny: Kanoniczna Oś Czasu</string>
     <string name="editorial_star_wars_desc">Kompletna oficjalna chronologia kanonu Lucasfilm: od Wielkiej Republiki i Upadku Jedi po Galaktyczną Wojnę Domową i Narodziny Najwyższego Porządku w ścisłym porządku diegetycznym.</string>
+    <string name="editorial_conjuring_title">Uniwersum Obecności</string>
+    <string name="editorial_conjuring_desc">Kompletna chronologia grozy: akta Warrenów, nawiedzone artefakty i demoniczne manifestacje od 1952 do 1981 roku.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Pełna chronologia Tytanów i Monarchu: od powojennego Pacyfiku po Pustą Ziemię w kinie i telewizji.</string>
+    <string name="editorial_middle_earth_title">Śródziemie: Chronologia Tolkiena</string>
+    <string name="editorial_middle_earth_desc">Epos Ardy: od Drugiej Ery i wykuwania Pierścieni po Trzecią Erę i upadek Jedynego Pierścienia.</string>
+    <string name="editorial_alien_title">Uniwersum Obcego</string>
+    <string name="editorial_alien_desc">Kanoniczna oś czasu Ksenomorfów: od pierwszego kontaktu na Ziemi w 2092 roku po XXIV wiek.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">Usunięto \"%1$s\"</string>
     <string name="msg_item_deleted">Skasowano \"%1$s\"</string>
@@ -2135,4 +2143,10 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="comment_tip_spoiler">Włącz Spoiler, aby rozmyć cały komentarz do momentu dotknięcia</string>
     <string name="comment_tip_max_chars">Limit: maks. %1$d znaków</string>
     <string name="comment_tag_search_hint">Wpisz tytuł filmu lub serialu, aby go oznaczyć...</string>
+
+    <string name="editorial_season_scope_single">Sezon %1$s</string>
+    <string name="editorial_season_scope_range">Sezony %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • ODC. %2$s</string>
+    <string name="editorial_episode_scope">ODC. %1$s</string>
 </resources>

@@ -1,0 +1,909 @@
+[
+  {
+    "id": "alien_universe",
+    "title": "Alien Universe",
+    "description": "La linea temporale canonica dell'evoluzione Xenomorfa e della Weyland-Yutani: dal primo contagio terrestre nel 2092 fino al 24° secolo.",
+    "backdropPath": "/6X42JnSMdo3dPAswOHUuvebdTq7.jpg",
+    "posterPath": "/lmtyube1ggCYCPAOxKSRNT93fj2.jpg",
+    "createdAt": "2026-11-14T20:50:00Z",
+    "items": [
+      {
+        "timelineIndex": 1,
+        "mediaType": "tv",
+        "tmdbId": 157239,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 2,
+        "mediaType": "movie",
+        "tmdbId": 70981,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 3,
+        "mediaType": "movie",
+        "tmdbId": 126889,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 4,
+        "mediaType": "movie",
+        "tmdbId": 348,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 5,
+        "mediaType": "movie",
+        "tmdbId": 945961,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 6,
+        "mediaType": "movie",
+        "tmdbId": 679,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 7,
+        "mediaType": "movie",
+        "tmdbId": 8077,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 8,
+        "mediaType": "movie",
+        "tmdbId": 8078,
+        "addedAt": "2026-11-14T20:50:00Z"
+      }
+    ]
+  },
+  {
+    "id": "middle_earth",
+    "title": "Middle-earth: Terra di Mezzo",
+    "description": "La cronologia epica di Arda ideata da J.R.R. Tolkien: dalla Seconda Era e la forgiatura degli Anelli alla Terza Era e la caduta dell'Unico Anello.",
+    "backdropPath": "/bccR2CGTWVVSZAG0yqmy3DIvhTX.jpg",
+    "posterPath": "/4rTZZfmmMliEmINLHES28WCKq6c.jpg",
+    "createdAt": "2026-11-14T20:50:00Z",
+    "items": [
+      {
+        "timelineIndex": 1,
+        "mediaType": "tv",
+        "tmdbId": 84773,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 2,
+        "mediaType": "movie",
+        "tmdbId": 839033,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 3,
+        "mediaType": "movie",
+        "tmdbId": 49051,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 4,
+        "mediaType": "movie",
+        "tmdbId": 57158,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 5,
+        "mediaType": "movie",
+        "tmdbId": 122917,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 6,
+        "mediaType": "movie",
+        "tmdbId": 1090869,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 7,
+        "mediaType": "movie",
+        "tmdbId": 120,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 8,
+        "mediaType": "movie",
+        "tmdbId": 121,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 9,
+        "mediaType": "movie",
+        "tmdbId": 122,
+        "addedAt": "2026-11-14T20:50:00Z"
+      }
+    ]
+  },
+  {
+    "id": "monsterverse",
+    "title": "MonsterVerse",
+    "description": "La cronologia diegetica dei Titani e di Monarch: dal dopoguerra nel Pacifico alla Terra Cava attraverso cinema e televisione.",
+    "backdropPath": "/psZ5CETZoaq2VRnxk95HuxOnI5D.jpg",
+    "posterPath": "/eKGuZeLrQ36zI0Qw09c1mhNAKw9.jpg",
+    "createdAt": "2026-11-14T20:50:00Z",
+    "items": [
+      {
+        "timelineIndex": 1,
+        "mediaType": "movie",
+        "tmdbId": 293167,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 2,
+        "mediaType": "tv",
+        "tmdbId": 117678,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 3,
+        "mediaType": "tv",
+        "tmdbId": 202411,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 4,
+        "mediaType": "movie",
+        "tmdbId": 124905,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 5,
+        "mediaType": "movie",
+        "tmdbId": 373571,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 6,
+        "mediaType": "movie",
+        "tmdbId": 399566,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 7,
+        "mediaType": "movie",
+        "tmdbId": 823464,
+        "addedAt": "2026-11-14T20:50:00Z"
+      }
+    ]
+  },
+  {
+    "id": "the_conjuring_universe",
+    "title": "The Conjuring Universe",
+    "description": "La cronologia diegetica del terrore: l'ordine cronologico completo dei casi dei coniugi Warren e delle manifestazioni demoniache dal 1952 al 1981.",
+    "backdropPath": "/kHZaX0vuhZdbuq0WKU3BpA9WIQ0.jpg",
+    "posterPath": "/z5VKhNSQKQyxm0co68HAkCqHnmX.jpg",
+    "createdAt": "2026-11-14T20:50:00Z",
+    "items": [
+      {
+        "timelineIndex": 1,
+        "mediaType": "movie",
+        "tmdbId": 439079,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 2,
+        "mediaType": "movie",
+        "tmdbId": 396422,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 3,
+        "mediaType": "movie",
+        "tmdbId": 968051,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 4,
+        "mediaType": "movie",
+        "tmdbId": 250546,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 5,
+        "mediaType": "movie",
+        "tmdbId": 138843,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 6,
+        "mediaType": "movie",
+        "tmdbId": 521029,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 7,
+        "mediaType": "movie",
+        "tmdbId": 480414,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 8,
+        "mediaType": "movie",
+        "tmdbId": 259693,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 9,
+        "mediaType": "movie",
+        "tmdbId": 423108,
+        "addedAt": "2026-11-14T20:50:00Z"
+      },
+      {
+        "timelineIndex": 10,
+        "mediaType": "movie",
+        "tmdbId": 1038392,
+        "addedAt": "2026-11-14T20:50:00Z"
+      }
+    ]
+  },
+  {
+    "id": "marvel_mcu",
+    "title": "Marvel Cinematic Universe",
+    "description": "La Sacra Linea Temporale completa del MCU: l'ordine narrativo definitivo che unisce film, serie TV (Defenders, Agent Carter), cortometraggi One-Shot e varianti del multiverso nell'esatta sequenza cronologica degli eventi.",
+    "backdropPath": "/2UNUv4NJdC36E5myDHACBJ99EwL.jpg",
+    "posterPath": "/7WsyChQLEftFiDOVTGkv3hFpyyt.jpg",
+    "createdAt": "2026-10-02T18:30:00Z",
+    "items": [
+      {
+        "timelineIndex": 1,
+        "mediaType": "tv",
+        "tmdbId": 241388,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 2,
+        "mediaType": "movie",
+        "tmdbId": 1771,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 3,
+        "mediaType": "movie",
+        "tmdbId": 211387,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 4,
+        "mediaType": "tv",
+        "tmdbId": 61550,
+        "seasonScope": "Stagioni 1–2",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 5,
+        "mediaType": "movie",
+        "tmdbId": 617126,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 6,
+        "mediaType": "movie",
+        "tmdbId": 299537,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 7,
+        "mediaType": "movie",
+        "tmdbId": 1726,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 8,
+        "mediaType": "movie",
+        "tmdbId": 10138,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 9,
+        "mediaType": "movie",
+        "tmdbId": 1724,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 10,
+        "mediaType": "movie",
+        "tmdbId": 76535,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 11,
+        "mediaType": "movie",
+        "tmdbId": 10195,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 12,
+        "mediaType": "movie",
+        "tmdbId": 76122,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 13,
+        "mediaType": "movie",
+        "tmdbId": 24428,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 14,
+        "mediaType": "movie",
+        "tmdbId": 119569,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 15,
+        "mediaType": "movie",
+        "tmdbId": 76338,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 16,
+        "mediaType": "movie",
+        "tmdbId": 68721,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 17,
+        "mediaType": "movie",
+        "tmdbId": 253980,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 18,
+        "mediaType": "movie",
+        "tmdbId": 100402,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 19,
+        "mediaType": "movie",
+        "tmdbId": 118340,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 20,
+        "mediaType": "movie",
+        "tmdbId": 283995,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 21,
+        "mediaType": "tv",
+        "tmdbId": 232125,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 22,
+        "mediaType": "tv",
+        "tmdbId": 61889,
+        "seasonScope": "Stagione 1",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 23,
+        "mediaType": "tv",
+        "tmdbId": 38472,
+        "seasonScope": "Stagione 1",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 24,
+        "mediaType": "movie",
+        "tmdbId": 99861,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 25,
+        "mediaType": "movie",
+        "tmdbId": 102899,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 26,
+        "mediaType": "tv",
+        "tmdbId": 62126,
+        "seasonScope": "Stagione 1",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 27,
+        "mediaType": "tv",
+        "tmdbId": 62127,
+        "seasonScope": "Stagione 1",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 28,
+        "mediaType": "tv",
+        "tmdbId": 62285,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 29,
+        "mediaType": "movie",
+        "tmdbId": 271110,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 30,
+        "mediaType": "movie",
+        "tmdbId": 497698,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 31,
+        "mediaType": "movie",
+        "tmdbId": 284054,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 32,
+        "mediaType": "movie",
+        "tmdbId": 315635,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 33,
+        "mediaType": "tv",
+        "tmdbId": 67178,
+        "seasonScope": "Stagione 1",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 34,
+        "mediaType": "movie",
+        "tmdbId": 284052,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 35,
+        "mediaType": "movie",
+        "tmdbId": 284053,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 36,
+        "mediaType": "movie",
+        "tmdbId": 363088,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 37,
+        "mediaType": "movie",
+        "tmdbId": 299536,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 38,
+        "mediaType": "movie",
+        "tmdbId": 299534,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 39,
+        "mediaType": "tv",
+        "tmdbId": 84958,
+        "seasonScope": "Stagione 1",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 40,
+        "mediaType": "tv",
+        "tmdbId": 85271,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 41,
+        "mediaType": "movie",
+        "tmdbId": 566525,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 42,
+        "mediaType": "tv",
+        "tmdbId": 88396,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 43,
+        "mediaType": "movie",
+        "tmdbId": 429617,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 44,
+        "mediaType": "movie",
+        "tmdbId": 524434,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 45,
+        "mediaType": "movie",
+        "tmdbId": 557,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 46,
+        "mediaType": "movie",
+        "tmdbId": 558,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 47,
+        "mediaType": "movie",
+        "tmdbId": 559,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 48,
+        "mediaType": "movie",
+        "tmdbId": 1930,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 49,
+        "mediaType": "movie",
+        "tmdbId": 102382,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 50,
+        "mediaType": "movie",
+        "tmdbId": 634649,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 51,
+        "mediaType": "movie",
+        "tmdbId": 453395,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 52,
+        "mediaType": "tv",
+        "tmdbId": 88329,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 53,
+        "mediaType": "tv",
+        "tmdbId": 92749,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 54,
+        "mediaType": "movie",
+        "tmdbId": 505642,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 55,
+        "mediaType": "tv",
+        "tmdbId": 122226,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 56,
+        "mediaType": "tv",
+        "tmdbId": 92783,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 57,
+        "mediaType": "tv",
+        "tmdbId": 92782,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 58,
+        "mediaType": "movie",
+        "tmdbId": 894205,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 59,
+        "mediaType": "movie",
+        "tmdbId": 616037,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 60,
+        "mediaType": "movie",
+        "tmdbId": 774752,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 61,
+        "mediaType": "tv",
+        "tmdbId": 114471,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 62,
+        "mediaType": "movie",
+        "tmdbId": 640146,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 63,
+        "mediaType": "tv",
+        "tmdbId": 84958,
+        "seasonScope": "Stagione 2",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 64,
+        "mediaType": "movie",
+        "tmdbId": 447365,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 65,
+        "mediaType": "tv",
+        "tmdbId": 114472,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 66,
+        "mediaType": "movie",
+        "tmdbId": 609681,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 67,
+        "mediaType": "tv",
+        "tmdbId": 138501,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 68,
+        "mediaType": "tv",
+        "tmdbId": 202555,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 69,
+        "mediaType": "movie",
+        "tmdbId": 822119,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 70,
+        "mediaType": "movie",
+        "tmdbId": 986056,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 71,
+        "mediaType": "tv",
+        "tmdbId": 198178,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 72,
+        "mediaType": "movie",
+        "tmdbId": 969681,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 73,
+        "mediaType": "tv",
+        "tmdbId": 91363,
+        "seasonScope": "Stagioni 1–2",
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 74,
+        "mediaType": "tv",
+        "tmdbId": 138505,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 75,
+        "mediaType": "movie",
+        "tmdbId": 533535,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 76,
+        "mediaType": "tv",
+        "tmdbId": 213375,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 77,
+        "mediaType": "movie",
+        "tmdbId": 1003596,
+        "addedAt": "2026-11-14T21:00:00Z"
+      },
+      {
+        "timelineIndex": 78,
+        "mediaType": "movie",
+        "tmdbId": 1003598,
+        "addedAt": "2026-11-14T21:00:00Z"
+      }
+    ]
+  },
+  {
+    "id": "star_wars_canon",
+    "title": "Star Wars: Cronologia Canonica",
+    "description": "La cronologia integrale del canone ufficiale Lucasfilm: dall'Alta Repubblica e la Caduta dei Jedi fino alla Guerra Civile Galattica e all'Ascesa del Primo Ordine nell'esatta sequenza diegetica.",
+    "backdropPath": "/zqkmTXzjkAgXmEWLRsY4UpTWCeo.jpg",
+    "posterPath": "/fai0rspsNeJCS69wHNjOdWxcI7P.jpg",
+    "createdAt": "2026-10-02T23:00:00Z",
+    "items": [
+      {
+        "timelineIndex": 1,
+        "mediaType": "tv",
+        "tmdbId": 202998,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 2,
+        "mediaType": "tv",
+        "tmdbId": 114479,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 3,
+        "mediaType": "movie",
+        "tmdbId": 1893,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 4,
+        "mediaType": "movie",
+        "tmdbId": 1894,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 5,
+        "mediaType": "movie",
+        "tmdbId": 12180,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 6,
+        "mediaType": "tv",
+        "tmdbId": 4194,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 7,
+        "mediaType": "movie",
+        "tmdbId": 1895,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 8,
+        "mediaType": "tv",
+        "tmdbId": 105971,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 9,
+        "mediaType": "movie",
+        "tmdbId": 348350,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 10,
+        "mediaType": "tv",
+        "tmdbId": 92830,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 11,
+        "mediaType": "tv",
+        "tmdbId": 83867,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 12,
+        "mediaType": "tv",
+        "tmdbId": 60554,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 13,
+        "mediaType": "movie",
+        "tmdbId": 330459,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 14,
+        "mediaType": "movie",
+        "tmdbId": 11,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 15,
+        "mediaType": "movie",
+        "tmdbId": 1891,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 16,
+        "mediaType": "movie",
+        "tmdbId": 1892,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 17,
+        "mediaType": "tv",
+        "tmdbId": 82856,
+        "addedAt": "2026-10-02T23:00:00Z",
+        "seasonScope": "Stagioni 1–2"
+      },
+      {
+        "timelineIndex": 18,
+        "mediaType": "tv",
+        "tmdbId": 115036,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 19,
+        "mediaType": "tv",
+        "tmdbId": 82856,
+        "addedAt": "2026-10-02T23:00:00Z",
+        "seasonScope": "Stagione 3"
+      },
+      {
+        "timelineIndex": 20,
+        "mediaType": "tv",
+        "tmdbId": 114461,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 21,
+        "mediaType": "tv",
+        "tmdbId": 202879,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 22,
+        "mediaType": "movie",
+        "tmdbId": 1228710,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 23,
+        "mediaType": "tv",
+        "tmdbId": 79093,
+        "addedAt": "2026-10-02T23:00:00Z",
+        "seasonScope": "Stagione 1"
+      },
+      {
+        "timelineIndex": 24,
+        "mediaType": "movie",
+        "tmdbId": 140607,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 25,
+        "mediaType": "movie",
+        "tmdbId": 181808,
+        "addedAt": "2026-10-02T23:00:00Z"
+      },
+      {
+        "timelineIndex": 26,
+        "mediaType": "tv",
+        "tmdbId": 79093,
+        "addedAt": "2026-10-02T23:00:00Z",
+        "seasonScope": "Stagione 2"
+      },
+      {
+        "timelineIndex": 27,
+        "mediaType": "movie",
+        "tmdbId": 181812,
+        "addedAt": "2026-10-02T23:00:00Z"
+      }
+    ]
+  }
+]

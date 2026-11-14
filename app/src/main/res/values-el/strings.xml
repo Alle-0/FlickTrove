@@ -964,6 +964,14 @@ Trakt ➔ Εφαρμογή: 6 ώρες</string>
     <string name="editorial_mcu_desc">Το πλήρες MCU Sacred Timeline: η απόλυτη αφηγηματική σειρά που ενώνει ταινίες, σειρές (Defenders, Agent Carter) και κινούμενα σχέδια. Ζήστε ολόκληρο το επικό έπος σε ακριβή χρονολογική σειρά.</string>
     <string name="editorial_star_wars_title">Star Wars: Χρονολόγιο Canon</string>
     <string name="editorial_star_wars_desc">Το πλήρες επίσημο χρονολόγιο Lucasfilm canon: από το The High Republic και την Πτώση των Τζεντάι μέχρι τον Γαλαξιακό Εμφύλιο Πόλεμο και την Άνοδο του Πρώτου Τάγματος σε ακριβή διηγηματική σειρά.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">Η απόλυτη χρονολογία τρόμου: ζήστε τις υποθέσεις των Γουόρεν, τα καταραμένα αντικείμενα και τα δαιμονικά φαινόμενα από το 1952 έως το 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Η πλήρης ιστορία των Τιτάνων και της Monarch: από τον μεταπολεμικό Ειρηνικό έως την Κοίλη Γη σε σινεμά και τηλεόραση.</string>
+    <string name="editorial_middle_earth_title">Μέση Γη: Χρονολόγιο Τόλκιν</string>
+    <string name="editorial_middle_earth_desc">Το έπος της Άρντα: από τη Δεύτερη Εποχή και τη σφυρηλάτηση των Δαχτυλιδιών έως την Τρίτη Εποχή και την πτώση του Ενός.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">Το επίσημο χρονολόγιο των Ξενομόρφων: από την πρώτη επαφή στη Γη το 2092 έως τον 24ο αιώνα.</string>
     <string name="msg_item_added_action">«%1$s» %2$s</string>
     <string name="msg_item_removed">«%1$s» αφαιρέθηκε</string>
     <string name="msg_item_deleted">«%1$s» διαγράφηκε</string>
@@ -2147,4 +2155,10 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="comment_tip_spoiler">Ενεργοποιήστε το Spoiler για θόλωση σχολίου μέχρι το άγγιγμα</string>
     <string name="comment_tip_max_chars">Όριο: έως %1$d χαρακτήρες</string>
     <string name="comment_tag_search_hint">Πληκτρολογήστε τίτλο ταινίας ή σειράς για επισήμανση...</string>
+
+    <string name="editorial_season_scope_single">Σεζόν %1$s</string>
+    <string name="editorial_season_scope_range">Σεζόν %1$s</string>
+
+    <string name="editorial_season_episode_scope">Σ%1$s • ΕΠ. %2$s</string>
+    <string name="editorial_episode_scope">ΕΠ. %1$s</string>
 </resources>

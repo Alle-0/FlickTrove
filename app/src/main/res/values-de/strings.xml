@@ -840,6 +840,14 @@
     <string name="editorial_mcu_desc">Die vollständige Heilige Zeitlinie des MCU: Die definitive narrative Reihenfolge, die Filme, TV-Serien (Defenders, Agent Carter) und Animation vereint. Erlebe die gesamte epische Saga in exakter chronologischer Reihenfolge.</string>
     <string name="editorial_star_wars_title">Star Wars: Kanon-Zeitstrahl</string>
     <string name="editorial_star_wars_desc">Die vollständige offizielle Lucasfilm-Kanon-Timeline: von der Hohen Republik und dem Niedergang der Jedi bis zum Galaktischen Bürgerkrieg und dem Aufstieg der Ersten Ordnung in exakter diegetischer Reihenfolge.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universum</string>
+    <string name="editorial_conjuring_desc">Die ultimative Horror-Chronologie: Erlebe die Warren-Akten, verfluchte Relikte und dämonische Heimsuchungen von 1952 bis 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Die vollständige Titanen- und Monarch-Timeline: von der Nachkriegszeit im Pazifik bis zur Hohlerde in Film und Serie.</string>
+    <string name="editorial_middle_earth_title">Mittelerde: Tolkien-Chronologie</string>
+    <string name="editorial_middle_earth_desc">Das Epos von Arda: vom Zweiten Zeitalter und dem Schmieden der Ringe bis zum Dritten Zeitalter und dem Fall des Einen Rings.</string>
+    <string name="editorial_alien_title">Alien Universum</string>
+    <string name="editorial_alien_desc">Die kanonische Xenomorph-Timeline: vom ersten Erd-Kontakt im Jahr 2092 bis zum Überlebenskampf im 24. Jahrhundert.</string>
     <string name="msg_item_added_action">„%1$s“ %2$s</string>
     <string name="msg_item_removed">„%1$s“ entfernt</string>
     <string name="msg_item_deleted">„%1$s“ gelöscht</string>
@@ -2162,4 +2170,10 @@
     <string name="comment_tip_spoiler">Spoiler aktivieren, um den Kommentar bis zum Tippen zu verwischen</string>
     <string name="comment_tip_max_chars">Limit: max. %1$d Zeichen</string>
     <string name="comment_tag_search_hint">Gib einen Film- oder Serientitel zum Markieren ein...</string>
+
+    <string name="editorial_season_scope_single">Staffel %1$s</string>
+    <string name="editorial_season_scope_range">Staffeln %1$s</string>
+
+    <string name="editorial_season_episode_scope">ST. %1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

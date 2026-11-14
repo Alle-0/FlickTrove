@@ -447,9 +447,10 @@ fun CollectionDetailScreenContent(
                                         ).apply {
                                             this.logoPath = movie.logoPath ?: fav.logoPath
                                             this.matchScore = movie.matchScore ?: fav.matchScore
+                                            this.seasonScope = movie.seasonScope
                                         }
                                     } else {
-                                        if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie") else movie
+                                        if (movie.mediaType.isBlank()) movie.copy(mediaType = "movie").apply { this.seasonScope = movie.seasonScope } else movie
                                     }
                                     val mediaType = effectiveMovie.mediaType.ifBlank { "movie" }
                                     val folderColors = uiState.movieFolderColors["${mediaType}_${effectiveMovie.id}"]

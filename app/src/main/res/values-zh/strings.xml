@@ -926,6 +926,14 @@
     <string name="editorial_mcu_desc">漫威電影宇宙完整神聖時間線：融合電影、電視影集（捍衛者聯盟、卡特探員）與動畫的終極敘事順序。依照精確的時間順序體驗這部壯闊史詩。</string>
     <string name="editorial_star_wars_title">星際大戰：正史時間線</string>
     <string name="editorial_star_wars_desc">完整的盧卡斯影業官方正史時間線：從高共和國時代與絕地的隕落，到銀河內戰及第一軍團的崛起，依照精確的敘事順序展開。</string>
+    <string name="editorial_conjuring_title">厲陰宅宇宙</string>
+    <string name="editorial_conjuring_desc">恐怖編年史：體驗華倫夫婦檔案、詛咒聖物與惡靈出沒從1952年到1981年的確切時間線。</string>
+    <string name="editorial_monsterverse_title">怪獸宇宙</string>
+    <string name="editorial_monsterverse_desc">泰坦巨獸與君主組織完整時間線：從戰後太平洋到空心地球的電影與影集完整收錄。</string>
+    <string name="editorial_middle_earth_title">中土世界：托爾金編年史</string>
+    <string name="editorial_middle_earth_desc">阿爾達的壯麗史詩：從第二紀元鑄造魔戒到第三紀元至尊魔戒覆滅。</string>
+    <string name="editorial_alien_title">異形宇宙</string>
+    <string name="editorial_alien_desc">異形正統編年史：從2092年地球初次接觸到24世紀的深空求生。</string>
     <string name="msg_item_added_action">“%1$s” %2$s</string>
     <string name="msg_item_removed">“%1$s” 已移除</string>
     <string name="msg_item_deleted">“%1$s” 已删除</string>
@@ -2165,4 +2173,10 @@
     <string name="comment_tip_spoiler">開啟劇透遮罩，點擊前將模糊整則留言</string>
     <string name="comment_tip_max_chars">字數上限：最多 %1$d 字元</string>
     <string name="comment_tag_search_hint">输入电影或剧集名称以添加标签...</string>
+
+    <string name="editorial_season_scope_single">第 %1$s 季</string>
+    <string name="editorial_season_scope_range">第 %1$s 季</string>
+
+    <string name="editorial_season_episode_scope">第%1$s季 • 第%2$s集</string>
+    <string name="editorial_episode_scope">第%1$s集</string>
 </resources>

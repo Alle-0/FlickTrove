@@ -414,6 +414,11 @@ data class Movie(
     @set:Exclude
     var originalLanguage: String? = null
 
+    @Ignore
+    @get:Exclude
+    @set:Exclude
+    var seasonScope: String? = null
+
     // --- Computed Properties ---
 
     @get:Exclude

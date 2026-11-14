@@ -1,0 +1,52 @@
+{
+  "id": "monsterverse",
+  "title": "MonsterVerse",
+  "description": "La cronologia diegetica dei Titani e di Monarch: dal dopoguerra nel Pacifico alla Terra Cava attraverso cinema e televisione.",
+  "backdropPath": "/psZ5CETZoaq2VRnxk95HuxOnI5D.jpg",
+  "posterPath": "/eKGuZeLrQ36zI0Qw09c1mhNAKw9.jpg",
+  "createdAt": "2026-11-14T20:50:00Z",
+  "items": [
+    {
+      "timelineIndex": 1,
+      "mediaType": "movie",
+      "tmdbId": 293167,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 2,
+      "mediaType": "tv",
+      "tmdbId": 117678,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 3,
+      "mediaType": "tv",
+      "tmdbId": 202411,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 4,
+      "mediaType": "movie",
+      "tmdbId": 124905,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 5,
+      "mediaType": "movie",
+      "tmdbId": 373571,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 6,
+      "mediaType": "movie",
+      "tmdbId": 399566,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 7,
+      "mediaType": "movie",
+      "tmdbId": 823464,
+      "addedAt": "2026-11-14T20:50:00Z"
+    }
+  ]
+}

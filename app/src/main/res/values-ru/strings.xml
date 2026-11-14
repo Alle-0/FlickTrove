@@ -849,6 +849,14 @@
     <string name="editorial_mcu_desc">Полная Священная временная линия киновселенной Marvel: каноничный хронологический порядок, объединяющий фильмы, сериалы (Защитники, Агент Картер) и анимацию. Проживите всю эпическую сагу в точной хронологической последовательности.</string>
     <string name="editorial_star_wars_title">Звёздные войны: Каноническая хронология</string>
     <string name="editorial_star_wars_desc">Полная официальная каноническая хронология Lucasfilm: от эпохи Расцвета Республики и падения джедаев до Галактической гражданской войны и возвышения Первого Ордена в точном повествовательном порядке.</string>
+    <string name="editorial_conjuring_title">Вселенная Заклятия</string>
+    <string name="editorial_conjuring_desc">Хронология ужаса: архивы супругов Уоррен, проклятые артефакты и демонические сущности с 1952 по 1981 год.</string>
+    <string name="editorial_monsterverse_title">Вселенная Монстров (MonsterVerse)</string>
+    <string name="editorial_monsterverse_desc">Полная хронология Титанов и организации «Монарх»: от послевоенного Тихого океана до Полой Земли.</string>
+    <string name="editorial_middle_earth_title">Средиземье: Хронология Толкина</string>
+    <string name="editorial_middle_earth_desc">Эпопея Арды: от Второй Эпохи и создания Колец Власти до Третьей Эпохи и уничтожения Единого Кольца.</string>
+    <string name="editorial_alien_title">Вселенная Чужого</string>
+    <string name="editorial_alien_desc">Каноническая хронология Ксеноморфов: от первого земного контакта в 2092 году до глубин космоса XXIV века.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" удален</string>
     <string name="msg_item_deleted">\"%1$s\" удален(о)</string>
@@ -2159,4 +2167,10 @@
     <string name="comment_tip_spoiler">Включите Спойлер, чтобы размыть весь комментарий до нажатия</string>
     <string name="comment_tip_max_chars">Лимит: не более %1$d символов</string>
     <string name="comment_tag_search_hint">Введите название фильма или сериала, чтобы отметить...</string>
+
+    <string name="editorial_season_scope_single">Сезон %1$s</string>
+    <string name="editorial_season_scope_range">Сезоны %1$s</string>
+
+    <string name="editorial_season_episode_scope">С%1$s • ЭП. %2$s</string>
+    <string name="editorial_episode_scope">ЭП. %1$s</string>
 </resources>

@@ -847,6 +847,14 @@
     <string name="editorial_mcu_desc">MCU की संपूर्ण सेक्रेड टाइमलाइन: फिल्मों, टीवी सीरीज़ (Defenders, Agent Carter) और एनिमेशन को जोड़ने वाला निश्चित कथा क्रम। सटीक कालानुक्रमिक क्रम में पूरे महाकाव्य को जीएं।</string>
     <string name="editorial_star_wars_title">स्टार वार्स: कैनन समयरेखा</string>
     <string name="editorial_star_wars_desc">आधिकारिक लुकासफिल्म कैनन की पूरी समयरेखा: हाई रिपब्लिक और जेडी के पतन से लेकर गैलेक्टिक गृहयुद्ध और फर्स्ट ऑर्डर के उदय तक, सटीक कथाक्रम में।</string>
+    <string name="editorial_conjuring_title">द कॉन्ज्यूरिंग यूनिवर्स</string>
+    <string name="editorial_conjuring_desc">हॉरर की निश्चित समयरेखा: 1952 से 1981 तक वॉरेन फाइलों, शापित वस्तुओं और आसुरी शक्तियों का कालक्रम।</string>
+    <string name="editorial_monsterverse_title">मॉन्स्टरवर्स (MonsterVerse)</string>
+    <string name="editorial_monsterverse_desc">टाइटन्स और मोनार्क की पूर्ण समयरेखा: युद्धोत्तर प्रशांत महासागर से लेकर हॉलो अर्थ तक सिनेमा और टीवी में।</string>
+    <string name="editorial_middle_earth_title">मिडिल-अर्थ: टॉल्किन टाइमलाइन</string>
+    <string name="editorial_middle_earth_desc">अर्डा की महागाथा: दूसरे युग और अंगूठियों के निर्माण से लेकर तीसरे युग और एक मुख्य अंगूठी के विनाश तक।</string>
+    <string name="editorial_alien_title">एलियन यूनिवर्स</string>
+    <string name="editorial_alien_desc">ज़ेनोमॉर्फ की आधिकारिक समयरेखा: 2092 में पृथ्वी पर पहले संपर्क से लेकर 24वीं सदी के गहरे अंतरिक्ष में अस्तित्व तक।</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" हटा दिया गया</string>
     <string name="msg_item_deleted">\"%1$s\" हटा दिया गया</string>
@@ -2157,4 +2165,10 @@
     <string name="comment_tip_spoiler">टैप करने तक पूरा कमेंट धुंधला करने के लिए Spoiler चालू करें</string>
     <string name="comment_tip_max_chars">सीमा: अधिकतम %1$d वर्ण</string>
     <string name="comment_tag_search_hint">टैग करने के लिए किसी फ़िल्म या सीरीज़ का नाम लिखें...</string>
+
+    <string name="editorial_season_scope_single">सीज़न %1$s</string>
+    <string name="editorial_season_scope_range">सीज़न %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

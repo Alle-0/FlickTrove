@@ -964,6 +964,14 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="editorial_mcu_desc">A teljes MCU Szent Idővonal: a filmeket, tévésorozatokat (Defenders, Agent Carter) és animációkat egyesítő definitív narratív sorrend. Éld át a teljes sagát pontos kronológiai sorrendben.</string>
     <string name="editorial_star_wars_title">Star Wars: Kánon Idővonal</string>
     <string name="editorial_star_wars_desc">A Lucasfilm hivatalos kánon idővonala: A Köztársaság Fénykorától és a Jedik Bukásától a Galaktikus Polgárháborún át az Első Rend Felemelkedéséig, pontos diegetikus sorrendben.</string>
+    <string name="editorial_conjuring_title">Démonok között univerzum</string>
+    <string name="editorial_conjuring_desc">A rettegés hivatalos idővonala: Warrenék esetei, elátkozott tárgyak és démoni kísértések 1952-től 1981-ig.</string>
+    <string name="editorial_monsterverse_title">Szörnyuniverzum (MonsterVerse)</string>
+    <string name="editorial_monsterverse_desc">A Titánok és a Monarch teljes idővonala: a háború utáni Csendes-óceántól a Belső Földig filmen és sorozatban.</string>
+    <string name="editorial_middle_earth_title">Középfölde: Tolkien-kronológia</string>
+    <string name="editorial_middle_earth_desc">Arda epikus krónikája: a Másodkor Gyűrűkovácsolásától a Harmadkor végéig és az Egy Gyűrű pusztulásáig.</string>
+    <string name="editorial_alien_title">Alien Univerzum</string>
+    <string name="editorial_alien_desc">A Xenomorphok kánon idővonala: a 2092-es első földi kapcsolattól a 24. századi mélyűri túlélésig.</string>
     <string name="msg_item_added_action">„%1$s” %2$s</string>
     <string name="msg_item_removed">„%1$s” eltávolítva</string>
     <string name="msg_item_deleted">„%1$s” törölve</string>
@@ -2144,4 +2152,10 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="comment_tip_spoiler">Kapcsolja be a Spoilert a hozzászólás elhomályosításához koppintásig</string>
     <string name="comment_tip_max_chars">Korlát: legfeljebb %1$d karakter</string>
     <string name="comment_tag_search_hint">Írd be egy film vagy sorozat címét a megjelöléshez...</string>
+
+    <string name="editorial_season_scope_single">%1$s. Évad</string>
+    <string name="editorial_season_scope_range">%1$s. Évad</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • RÉSZ %2$s</string>
+    <string name="editorial_episode_scope">%1$s. Rész</string>
 </resources>

@@ -23,5 +23,8 @@ data class EditorialCollectionItem(
     var timelineIndex: Int = 0,
     
     @get:PropertyName("addedAt") @set:PropertyName("addedAt")
-    var addedAt: String = ""
+    var addedAt: String = "",
+
+    @get:PropertyName("seasonScope") @set:PropertyName("seasonScope")
+    var seasonScope: String? = null
 )

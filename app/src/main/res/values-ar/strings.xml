@@ -958,6 +958,14 @@
     <string name="editorial_mcu_desc">الخط الزمني المقدّس الكامل لعالم MCU: الترتيب السردي الحاسم الذي يجمع الأفلام والمسلسلات (Defenders وAgent Carter) والرسوم المتحركة. عش الملحمة الكاملة بتسلسلها الزمني الدقيق.</string>
     <string name="editorial_star_wars_title">Star Wars: الخط الزمني الرسمي</string>
     <string name="editorial_star_wars_desc">الخط الزمني الرسمي الكامل لـ Lucasfilm: من عهد الجمهورية العليا وسقوط الجيداي إلى الحرب الأهلية المجرية وصعود النظام الأول بالترتيب السردي الدقيق.</string>
+    <string name="editorial_conjuring_title">عالم الشعوذة (The Conjuring)</string>
+    <string name="editorial_conjuring_desc">التسلسل الزمني الكامل للرعب: استكشف ملفات عائلة وارن والقطع المسكونة والكيانات الشيطانية من عام 1952 إلى 1981.</string>
+    <string name="editorial_monsterverse_title">عالم الوحوش (MonsterVerse)</string>
+    <string name="editorial_monsterverse_desc">الجدول الزمني للجبابرة ومنظمة مونارك: من المحيط الهادئ بعد الحرب إلى الأرض المجوفة عبر السينما والتلفزيون.</string>
+    <string name="editorial_middle_earth_title">الأرض الوسطى: التسلسل الزمني لتولكين</string>
+    <string name="editorial_middle_earth_desc">ملحمة آردا الكبرى: من العصر الثاني وصياغة الخواتم إلى العصر الثالث وسقوط الخاتم الأوحد.</string>
+    <string name="editorial_alien_title">عالم الفضائيين (Alien)</string>
+    <string name="editorial_alien_desc">الخط الزمني القانوني لكائنات الزينومورف: من أول اتصال بالأرض في 2092 حتى الفضاء السحيق في القرن 24.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">تمت إزالة \"%1$s\"</string>
     <string name="msg_item_deleted">تم حذف \"%1$s\"</string>
@@ -2122,4 +2130,10 @@
     <string name="comment_tip_spoiler">فعّل خيار الحرق لطمس كامل التعليق حتى يتم الضغط عليه</string>
     <string name="comment_tip_max_chars">الحد الأقصى: %1$d حرفًا</string>
     <string name="comment_tag_search_hint">اكتب اسم فيلم أو مسلسل لوسمه...</string>
+
+    <string name="editorial_season_scope_single">الموسم %1$s</string>
+    <string name="editorial_season_scope_range">المواسم %1$s</string>
+
+    <string name="editorial_season_episode_scope">م%1$s • ح%2$s</string>
+    <string name="editorial_episode_scope">الحلقة %1$s</string>
 </resources>

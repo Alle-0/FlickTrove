@@ -1,0 +1,64 @@
+{
+  "id": "middle_earth",
+  "title": "Middle-earth: Terra di Mezzo",
+  "description": "La cronologia epica di Arda ideata da J.R.R. Tolkien: dalla Seconda Era e la forgiatura degli Anelli alla Terza Era e la caduta dell'Unico Anello.",
+  "backdropPath": "/bccR2CGTWVVSZAG0yqmy3DIvhTX.jpg",
+  "posterPath": "/4rTZZfmmMliEmINLHES28WCKq6c.jpg",
+  "createdAt": "2026-11-14T20:50:00Z",
+  "items": [
+    {
+      "timelineIndex": 1,
+      "mediaType": "tv",
+      "tmdbId": 84773,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 2,
+      "mediaType": "movie",
+      "tmdbId": 839033,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 3,
+      "mediaType": "movie",
+      "tmdbId": 49051,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 4,
+      "mediaType": "movie",
+      "tmdbId": 57158,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 5,
+      "mediaType": "movie",
+      "tmdbId": 122917,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 6,
+      "mediaType": "movie",
+      "tmdbId": 1090869,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 7,
+      "mediaType": "movie",
+      "tmdbId": 120,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 8,
+      "mediaType": "movie",
+      "tmdbId": 121,
+      "addedAt": "2026-11-14T20:50:00Z"
+    },
+    {
+      "timelineIndex": 9,
+      "mediaType": "movie",
+      "tmdbId": 122,
+      "addedAt": "2026-11-14T20:50:00Z"
+    }
+  ]
+}

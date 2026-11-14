@@ -893,6 +893,14 @@
     <string name="editorial_mcu_desc">La Sacra Linea Temporale completa del MCU: l\'ordine narrativo definitivo che unisce i film, le serie TV (Defenders, Agent Carter) e l\'animazione. Vivi l\'intero arco epico nell\'esatta sequenza cronologica.</string>
     <string name="editorial_star_wars_title">Star Wars: Cronologia Canonica</string>
     <string name="editorial_star_wars_desc">La cronologia integrale del canone ufficiale Lucasfilm: dall\'Alta Repubblica e la Caduta dei Jedi fino alla Guerra Civile Galattica e all\'Ascesa del Primo Ordine nell\'esatta sequenza diegetica.</string>
+    <string name="editorial_conjuring_title">The Conjuring Universe</string>
+    <string name="editorial_conjuring_desc">La cronologia diegetica del terrore: l\'ordine cronologico completo dei casi dei coniugi Warren e delle manifestazioni demoniache dal 1952 al 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">La cronologia diegetica dei Titani e di Monarch: dal dopoguerra nel Pacifico alla Terra Cava attraverso cinema e televisione.</string>
+    <string name="editorial_middle_earth_title">Terra di Mezzo: Cronologia Tolkien</string>
+    <string name="editorial_middle_earth_desc">La cronologia epica di Arda ideata da J.R.R. Tolkien: dalla Seconda Era e la forgiatura degli Anelli alla Terza Era e la caduta dell\'Unico Anello.</string>
+    <string name="editorial_alien_title">Alien Universe</string>
+    <string name="editorial_alien_desc">La linea temporale canonica dell\'evoluzione Xenomorfa e della Weyland-Yutani: dal primo contagio terrestre nel 2092 fino al 24° secolo.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">\"%1$s\" rimosso</string>
     <string name="msg_item_deleted">\"%1$s\" eliminato</string>
@@ -2170,4 +2178,10 @@
     <string name="comment_tip_spoiler">Attiva Spoiler per sfocare l\'intero commento fino al tocco</string>
     <string name="comment_tip_max_chars">Limite massimo: %1$d caratteri</string>
     <string name="comment_tag_search_hint">Scrivi il titolo di un film o serie TV per taggarlo...</string>
+
+    <string name="editorial_season_scope_single">Stagione %1$s</string>
+    <string name="editorial_season_scope_range">Stagioni %1$s</string>
+
+    <string name="editorial_season_episode_scope">ST. %1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

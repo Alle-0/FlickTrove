@@ -31,8 +31,66 @@ class EditorialCollectionRepository @Inject constructor(
                 title = context.getString(R.string.editorial_star_wars_title),
                 description = context.getString(R.string.editorial_star_wars_desc)
             )
+            "the_conjuring_universe" -> col.copy(
+                title = context.getString(R.string.editorial_conjuring_title),
+                description = context.getString(R.string.editorial_conjuring_desc)
+            )
+            "monsterverse" -> col.copy(
+                title = context.getString(R.string.editorial_monsterverse_title),
+                description = context.getString(R.string.editorial_monsterverse_desc)
+            )
+            "middle_earth" -> col.copy(
+                title = context.getString(R.string.editorial_middle_earth_title),
+                description = context.getString(R.string.editorial_middle_earth_desc)
+            )
+            "alien_universe" -> col.copy(
+                title = context.getString(R.string.editorial_alien_title),
+                description = context.getString(R.string.editorial_alien_desc)
+            )
             else -> col
         }
+    }
+
+    private fun loadFromAssets(collectionId: String): EditorialCollection? {
+        return try {
+            val jsonStr = context.assets.open("editorial_collections/$collectionId.json").bufferedReader().use { it.readText() }
+            val obj = org.json.JSONObject(jsonStr)
+            val itemsArray = obj.getJSONArray("items")
+            val items = (0 until itemsArray.length()).map { i ->
+                val itemObj = itemsArray.getJSONObject(i)
+                com.cinetrack.data.model.EditorialCollectionItem(
+                    tmdbId = itemObj.optLong("tmdbId"),
+                    mediaType = itemObj.optString("mediaType"),
+                    timelineIndex = itemObj.optInt("timelineIndex"),
+                    addedAt = itemObj.optString("addedAt"),
+                    seasonScope = itemObj.optString("seasonScope").takeIf { it.isNotBlank() }
+                )
+            }
+            val col = EditorialCollection(
+                id = obj.optString("id", collectionId),
+                title = obj.optString("title"),
+                description = obj.optString("description"),
+                backdropPath = obj.optString("backdropPath").takeIf { it.isNotBlank() },
+                posterPath = obj.optString("posterPath").takeIf { it.isNotBlank() },
+                items = items,
+                createdAt = obj.optString("createdAt")
+            )
+            localize(col)
+        } catch (e: Exception) {
+            null
+        }
+    }
+
+    private fun loadAllFromAssets(): List<EditorialCollection> {
+        val collectionIds = listOf(
+            "marvel_mcu",
+            "star_wars_canon",
+            "the_conjuring_universe",
+            "monsterverse",
+            "middle_earth",
+            "alien_universe"
+        )
+        return collectionIds.mapNotNull { loadFromAssets(it) }
     }
 
     suspend fun getCollection(collectionId: String): EditorialCollection? {
@@ -49,11 +107,11 @@ class EditorialCollectionRepository @Inject constructor(
                 val col = doc.toObject(EditorialCollection::class.java)?.copy(id = doc.id)
                 col?.let { localize(it) }
             } else {
-                null
+                loadFromAssets(collectionId)
             }
         } catch (e: Exception) {
             e.printStackTrace()
-            null
+            loadFromAssets(collectionId)
         }
     }
 
@@ -79,12 +137,13 @@ class EditorialCollectionRepository @Inject constructor(
                     val col = doc.toObject(EditorialCollection::class.java)?.copy(id = doc.id)
                     col?.let { localize(it) }
                 }
-                cachedCollections = result
+                val finalResult = if (result.isNotEmpty()) result else loadAllFromAssets()
+                cachedCollections = finalResult
                 lastCacheTime = System.currentTimeMillis()
-                result
+                finalResult
             } catch (e: Exception) {
                 e.printStackTrace()
-                cachedCollections ?: emptyList()
+                cachedCollections ?: loadAllFromAssets()
             }
         }
     }
@@ -96,7 +155,14 @@ class EditorialCollectionRepository @Inject constructor(
             async {
                 val movie = movieRepository.getMediaDetails(item.tmdbId, item.mediaType == "tv")
                 if (movie != null) {
-                    Pair(movie, item.timelineIndex)
+                    val scopedMovie = if (!item.seasonScope.isNullOrBlank()) {
+                        movie.copy().apply {
+                            this.logoPath = movie.logoPath
+                            this.matchScore = movie.matchScore
+                            this.seasonScope = item.seasonScope
+                        }
+                    } else movie
+                    Pair(scopedMovie, item.timelineIndex)
                 } else null
             }
         }

@@ -955,6 +955,14 @@
     <string name="editorial_mcu_desc">ลำดับเวลาศักดิ์สิทธิ์ของ MCU ที่สมบูรณ์: ลำดับการเล่าเรื่องที่รวมภาพยนตร์ ซีรีส์ และแอนิเมชัน สัมผัสเรื่องราวมหากาพย์ตามลำดับเวลาที่แน่นอน</string>
     <string name="editorial_star_wars_title">Star Wars: เส้นเวลาตามเนื้อเรื่องหลัก</string>
     <string name="editorial_star_wars_desc">เส้นเวลาทางการที่สมบูรณ์ของ Lucasfilm: ตั้งแต่ The High Republic จนถึง Rise of the First Order ตามลำดับเหตุการณ์อย่างแม่นยำ</string>
+    <string name="editorial_conjuring_title">จักรวาลเดอะคอนเจอริ่ง (The Conjuring)</string>
+    <string name="editorial_conjuring_desc">ลำดับเวลาสยองขวัญฉบับสมบูรณ์: สัมผัสคดีของครอบครัววอร์เรน วัตถุต้องสาป และวิญญาณร้ายตั้งแต่ปี 1952 ถึง 1981</string>
+    <string name="editorial_monsterverse_title">มอนสเตอร์เวิร์ส (MonsterVerse)</string>
+    <string name="editorial_monsterverse_desc">เส้นเวลาของเหล่าไททันและโมนาร์ก: จากยุคหลังสงครามในแปซิฟิกสู่โลกกลวงทั้งภาพยนตร์และซีรีส์</string>
+    <string name="editorial_middle_earth_title">มิดเดิลเอิร์ธ: ลำดับเวลาโทลคีน</string>
+    <string name="editorial_middle_earth_desc">มหากาพย์แห่งอาร์ดา: ตั้งแต่ยุคที่สองและการหลอมแหวนแห่งอำนาจจนถึงการล่มสลายของแหวนเอกในยุคที่สาม</string>
+    <string name="editorial_alien_title">จักรวาลเอเลี่ยน (Alien Universe)</string>
+    <string name="editorial_alien_desc">ลำดับเวลาอย่างเป็นทางการของซีโนมอร์ฟ: จากการเผชิญหน้าบนโลกในปี 2092 สู่การเอาชีวิตรอดในอวกาศศตวรรษที่ 24</string>
     <string name="msg_item_added_action">"%1$s" %2$s</string>
     <string name="msg_item_removed">"%1$s" ถูกนำออกแล้ว</string>
     <string name="msg_item_deleted">"%1$s" ถูกลบแล้ว</string>
@@ -2138,4 +2146,10 @@
     <string name="comment_tip_spoiler">เปิด Spoiler เพื่อเบลอความคิดเห็นทั้งหมดจนกว่าจะแตะ</string>
     <string name="comment_tip_max_chars">จำกัด: สูงสุด %1$d ตัวอักษร</string>
     <string name="comment_tag_search_hint">พิมพ์ชื่อภาพยนตร์หรือซีรีส์เพื่อแท็ก...</string>
+
+    <string name="editorial_season_scope_single">ซีซัน %1$s</string>
+    <string name="editorial_season_scope_range">ซีซัน %1$s</string>
+
+    <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
+    <string name="editorial_episode_scope">EP. %1$s</string>
 </resources>

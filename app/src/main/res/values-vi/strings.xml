@@ -945,6 +945,14 @@
     <string name="editorial_mcu_desc">Dòng thời gian thiêng liêng MCU hoàn chỉnh: thứ tự kể chuyện dứt khoát kết hợp phim điện ảnh, phim truyền hình (Defenders, Agent Carter) và hoạt hình. Trải nghiệm toàn bộ thiên sử thi hoành tráng theo trình tự thời gian chính xác.</string>
     <string name="editorial_star_wars_title">Star Wars: Dòng thời gian chuẩn Canon</string>
     <string name="editorial_star_wars_desc">Toàn bộ dòng thời gian chuẩn chính thức của Lucasfilm: từ The High Republic và Fall of the Jedi đến Galactic Civil War và Rise of the First Order theo đúng thứ tự kể chuyện.</string>
+    <string name="editorial_conjuring_title">Vũ trụ The Conjuring</string>
+    <string name="editorial_conjuring_desc">Dòng thời gian kinh dị chính thức: khám phá hồ sơ nhà Warren, cổ vật bị ám và quỷ dữ từ năm 1952 đến 1981.</string>
+    <string name="editorial_monsterverse_title">MonsterVerse</string>
+    <string name="editorial_monsterverse_desc">Dòng thời gian đầy đủ của các Titan và Monarch: từ Thái Bình Dương thời hậu chiến đến Trái Đất Rỗng qua phim ảnh.</string>
+    <string name="editorial_middle_earth_title">Trung Địa: Niên đại Tolkien</string>
+    <string name="editorial_middle_earth_desc">Sử thi Arda: từ Kỷ Đệ Nhị và việc rèn những Chiếc Nhẫn đến Kỷ Đệ Tam và sự sụp đổ của Chiếc Nhẫn Quyền Lực.</string>
+    <string name="editorial_alien_title">Vũ trụ Alien</string>
+    <string name="editorial_alien_desc">Dòng thời gian chính thức của Xenomorph: từ cuộc chạm trán năm 2092 đến sự sống còn trong thế kỷ 24.</string>
     <string name="msg_item_added_action">\"%1$s\" %2$s</string>
     <string name="msg_item_removed">Đã xóa \"%1$s\"</string>
     <string name="msg_item_deleted">Đã xóa \"%1$s\"</string>
@@ -2125,4 +2133,10 @@
     <string name="comment_tip_spoiler">Bật Spoiler để làm mờ toàn bộ bình luận cho đến khi chạm</string>
     <string name="comment_tip_max_chars">Giới hạn: tối đa %1$d ký tự</string>
     <string name="comment_tag_search_hint">Nhập tên phim hoặc series để gắn thẻ...</string>
+
+    <string name="editorial_season_scope_single">Mùa %1$s</string>
+    <string name="editorial_season_scope_range">Mùa %1$s</string>
+
+    <string name="editorial_season_episode_scope">M%1$s • T%2$s</string>
+    <string name="editorial_episode_scope">TẬP %1$s</string>
 </resources>

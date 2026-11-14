@@ -345,6 +345,7 @@ fun MovieCard(
                 badges.filter { it.text !in disabledBadges }.take(maxBadges)
             }
 
+            val hasSeasonScope = !movie.seasonScope.isNullOrBlank()
             androidx.compose.animation.AnimatedVisibility(
                 visible = showBadges && maxBadges > 0 && visibleBadges.isNotEmpty(),
                 enter = fadeIn(tween(250)) + scaleIn(tween(250, easing = FastOutSlowInEasing), initialScale = 0.8f),
@@ -405,39 +406,107 @@ fun MovieCard(
                         .align(Alignment.BottomStart)
                         .padding(
                             start = if (isLarge) 16.dp else 12.dp, 
-                            end = if (!showActionButton) (if (isLarge) 16.dp else 12.dp) else (if (isLarge) 52.dp else 36.dp), 
+                            end = if (isLarge) 16.dp else 12.dp, 
                             bottom = if (hasRating) (if (isLarge) 13.dp else 9.dp) else (if (isLarge) 15.dp else 11.dp)
                         ),
                     verticalArrangement = Arrangement.spacedBy(1.dp)
                 ) {
-                    Text(
-                        text = movie.title ?: movie.name ?: "",
-                        color = Color.White.copy(alpha = 0.9f),
-                        fontSize = ((if (isLarge) 14.5f else 13f) * multiplier).sp,
-                        fontWeight = FontWeight.Bold,
-                        maxLines = 2,
-                        lineHeight = ((if (isLarge) 17.5f else 16f) * multiplier).sp,
-                        overflow = TextOverflow.Ellipsis,
-                        style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-                    )
-                    if (hasRating) {
+                    if (hasSeasonScope) {
+                        val formattedScope = remember(movie.seasonScope, context) {
+                            val raw = movie.seasonScope!!.trim()
+                            val seasonRegex = Regex("(?i)\\b(?:stagion[ie]|seasons?|staffeln?|temporadas?|saisons?|st\\.?|s)(?:\\s*|\\b)([0-9]+(?:\\s*[\u2013\u2014\\-]\\s*[0-9]+)?)")
+                            val epRegex = Regex("(?i)\\b(?:episod[io]|episodes?|ep\\.?|e)(?:\\s*|\\b)([0-9]+(?:\\s*[\u2013\u2014\\-]\\s*[0-9]+)?)")
+
+                            val sMatch = seasonRegex.find(raw)
+                            val eMatch = epRegex.find(raw)
+
+                            val localized = when {
+                                sMatch != null && eMatch != null -> {
+                                    val sVal = sMatch.groupValues[1].replace("-", "\u2013").trim()
+                                    val eVal = eMatch.groupValues[1].replace("-", "\u2013").trim()
+                                    context.getString(R.string.editorial_season_episode_scope, sVal, eVal)
+                                }
+                                sMatch != null -> {
+                                    val sVal = sMatch.groupValues[1].replace("-", "\u2013").trim()
+                                    if (sVal.contains("\u2013")) {
+                                        context.getString(R.string.editorial_season_scope_range, sVal)
+                                    } else {
+                                        context.getString(R.string.editorial_season_scope_single, sVal)
+                                    }
+                                }
+                                eMatch != null -> {
+                                    val eVal = eMatch.groupValues[1].replace("-", "\u2013").trim()
+                                    context.getString(R.string.editorial_episode_scope, eVal)
+                                }
+                                else -> raw
+                            }
+                            localized.replace(" ", "\u00A0").uppercase()
+                        }
                         Row(
                             verticalAlignment = Alignment.CenterVertically,
-                            horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            horizontalArrangement = Arrangement.spacedBy(3.5.dp),
+                            modifier = Modifier
+                                .padding(bottom = 3.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(Color(0xFF0369A1).copy(alpha = 0.40f))
+                                .border(0.8.dp, Color(0xFF38BDF8).copy(alpha = 0.85f), RoundedCornerShape(50))
+                                .padding(horizontal = 6.dp, vertical = 2.dp)
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_tv),
                                 contentDescription = null,
-                                tint = MaterialTheme.colorScheme.primary,
-                                modifier = Modifier.size(((if (isLarge) 13.5f else 11.5f) * multiplier).dp)
+                                tint = Color(0xFF38BDF8),
+                                modifier = Modifier.size(9.dp)
                             )
                             Text(
-                                text = String.format(java.util.Locale.US, "%.1f", displayRating),
-                                color = MaterialTheme.colorScheme.primary,
-                                fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
-                                fontWeight = FontWeight.Black,
+                                text = formattedScope,
+                                color = Color(0xFFE0F2FE),
+                                fontSize = 9.sp,
+                                fontWeight = FontWeight.ExtraBold,
+                                letterSpacing = 0.4.sp,
+                                maxLines = 1,
+                                softWrap = false,
                                 style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
                             )
+                        }
+                    }
+
+                    val titleEndPadding = if (!showActionButton) 0.dp else (if (isLarge) 36.dp else 24.dp)
+                    Column(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(end = titleEndPadding),
+                        verticalArrangement = Arrangement.spacedBy(1.dp)
+                    ) {
+                        Text(
+                            text = movie.title ?: movie.name ?: "",
+                            color = Color.White.copy(alpha = 0.9f),
+                            fontSize = ((if (isLarge) 14.5f else 13f) * multiplier).sp,
+                            fontWeight = FontWeight.Bold,
+                            maxLines = 2,
+                            lineHeight = ((if (isLarge) 17.5f else 16f) * multiplier).sp,
+                            overflow = TextOverflow.Ellipsis,
+                            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                        )
+                        if (hasRating) {
+                            Row(
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(4.dp)
+                            ) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_star_piena),
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(((if (isLarge) 13.5f else 11.5f) * multiplier).dp)
+                                )
+                                Text(
+                                    text = String.format(java.util.Locale.US, "%.1f", displayRating),
+                                    color = MaterialTheme.colorScheme.primary,
+                                    fontSize = ((if (isLarge) 13.5f else 11.5f) * multiplier).sp,
+                                    fontWeight = FontWeight.Black,
+                                    style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
+                                )
+                            }
                         }
                     }
                 }
