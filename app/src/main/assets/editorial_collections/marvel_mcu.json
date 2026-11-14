@@ -28,7 +28,6 @@
       "timelineIndex": 4,
       "mediaType": "tv",
       "tmdbId": 61550,
-      "seasonScope": "Stagioni 1–2",
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
@@ -131,8 +130,7 @@
       "timelineIndex": 21,
       "mediaType": "tv",
       "tmdbId": 232125,
-      "addedAt": "2026-11-14T21:00:00Z",
-      "seasonScope": "Stagioni 1–2"
+      "addedAt": "2026-11-14T21:00:00Z"
     },
     {
       "timelineIndex": 22,
@@ -500,7 +498,6 @@
       "timelineIndex": 80,
       "mediaType": "tv",
       "tmdbId": 91363,
-      "seasonScope": "Stagioni 1–2",
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {

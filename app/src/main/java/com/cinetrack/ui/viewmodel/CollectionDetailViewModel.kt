@@ -229,14 +229,25 @@ class CollectionDetailViewModel @Inject constructor(
 
         val sortedParts = when (sortConfig.sortType) {
             "release_date" -> {
+                // When sorting by release date, deduplicate series that were diegetically split in the timeline
+                // so each show appears once at its premiere release date without duplicate cloned cards
+                val distinctItems = filteredItems.distinctBy { "${it.first.mediaType}_${it.first.id}" }
+                    .map { (movie, index) ->
+                        if (!movie.seasonScope.isNullOrBlank()) {
+                            Pair(movie.copy().apply { seasonScope = null }, index)
+                        } else {
+                            Pair(movie, index)
+                        }
+                    }
+
                 if (sortConfig.sortDirection == "desc") {
-                    filteredItems.sortedWith(
+                    distinctItems.sortedWith(
                         compareByDescending<Pair<Movie, Int>> { (movie, _) ->
                             movie.effectiveReleaseDate ?: ""
                         }.thenByDescending { it.second }
                     )
                 } else {
-                    filteredItems.sortedWith(
+                    distinctItems.sortedWith(
                         compareBy<Pair<Movie, Int>> { (movie, _) ->
                             movie.effectiveReleaseDate ?: "9999-99-99"
                         }.thenBy { it.second }

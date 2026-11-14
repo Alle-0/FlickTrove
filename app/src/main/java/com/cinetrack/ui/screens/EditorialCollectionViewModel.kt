@@ -28,6 +28,7 @@ class EditorialCollectionViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(EditorialCollectionUiState())
     val uiState: StateFlow<EditorialCollectionUiState> = _uiState.asStateFlow()
+    private var rawMovies: List<Pair<Movie, Int>> = emptyList()
 
     fun loadCollection(collectionId: String) {
         if (_uiState.value.collection?.id == collectionId) return
@@ -39,6 +40,7 @@ class EditorialCollectionViewModel @Inject constructor(
                 val collection = repository.getCollection(collectionId)
                 if (collection != null) {
                     val movies = repository.getCollectionMovies(collectionId)
+                    rawMovies = movies
                     _uiState.update { 
                         it.copy(
                             isLoading = false,
@@ -60,7 +62,7 @@ class EditorialCollectionViewModel @Inject constructor(
             val newOrder = !state.isChronologicalOrder
             state.copy(
                 isChronologicalOrder = newOrder,
-                movies = sortMovies(state.movies, newOrder)
+                movies = sortMovies(rawMovies, newOrder)
             )
         }
     }
@@ -69,11 +71,19 @@ class EditorialCollectionViewModel @Inject constructor(
         return if (isChronological) {
             movies.sortedBy { it.second } // Sort by timelineIndex
         } else {
-            movies.sortedWith(
-                compareBy<Pair<Movie, Int>> { (movie, _) ->
-                    movie.effectiveReleaseDate ?: "9999-99-99"
-                }.thenBy { it.second }
-            )
+            movies.distinctBy { "${it.first.mediaType}_${it.first.id}" }
+                .map { (movie, index) ->
+                    if (!movie.seasonScope.isNullOrBlank()) {
+                        Pair(movie.copy().apply { seasonScope = null }, index)
+                    } else {
+                        Pair(movie, index)
+                    }
+                }
+                .sortedWith(
+                    compareBy<Pair<Movie, Int>> { (movie, _) ->
+                        movie.effectiveReleaseDate ?: "9999-99-99"
+                    }.thenBy { it.second }
+                )
         }
     }
 }
