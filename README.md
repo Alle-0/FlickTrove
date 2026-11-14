@@ -276,6 +276,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 - [ ] **Match with friends (Cine-Match):** See movies you and your friends have watched, and get recommendations based on your combined tastes (powered by the pre-computed 360° `TasteVector` matrix).
 - [ ] **Media Server Live Scrobbling (Jellyfin, Plex, Emby):** Real-time automated scrobbling and episode tracking from self-hosted home media servers via serverless cloud webhooks at zero cost.
+- [ ] **WeTrakr (wetrkr) API Integration:** Bidirectional synchronization, watchlist, history, ratings, and scrobbling support with the WeTrakr API ([wetrakr.com](https://wetrakr.com/)) alongside Trakt and SIMKL.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.
 - [ ] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters, on Streaming, or on Physical Media (4K UHD / Blu-Ray).
