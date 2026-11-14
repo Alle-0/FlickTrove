@@ -131,354 +131,404 @@
       "timelineIndex": 21,
       "mediaType": "tv",
       "tmdbId": 232125,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "addedAt": "2026-11-14T21:00:00Z",
+      "seasonScope": "Stagioni 1–2"
     },
     {
       "timelineIndex": 22,
       "mediaType": "tv",
       "tmdbId": 61889,
-      "seasonScope": "Stagione 1",
-      "addedAt": "2026-11-14T21:00:00Z"
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 1"
     },
     {
       "timelineIndex": 23,
       "mediaType": "tv",
       "tmdbId": 38472,
-      "seasonScope": "Stagione 1",
-      "addedAt": "2026-11-14T21:00:00Z"
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 1"
     },
     {
       "timelineIndex": 24,
       "mediaType": "movie",
       "tmdbId": 99861,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 25,
       "mediaType": "movie",
       "tmdbId": 102899,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 26,
       "mediaType": "tv",
-      "tmdbId": 62126,
-      "seasonScope": "Stagione 1",
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 61889,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 2"
     },
     {
       "timelineIndex": 27,
       "mediaType": "tv",
-      "tmdbId": 62127,
-      "seasonScope": "Stagione 1",
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 62126,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 1"
     },
     {
       "timelineIndex": 28,
       "mediaType": "tv",
-      "tmdbId": 62285,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 62127,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 1"
     },
     {
       "timelineIndex": 29,
-      "mediaType": "movie",
-      "tmdbId": 271110,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "mediaType": "tv",
+      "tmdbId": 62285,
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 30,
       "mediaType": "movie",
-      "tmdbId": 497698,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 271110,
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 31,
       "mediaType": "movie",
-      "tmdbId": 284054,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 497698,
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 32,
       "mediaType": "movie",
-      "tmdbId": 315635,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 284054,
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 33,
-      "mediaType": "tv",
-      "tmdbId": 67178,
-      "seasonScope": "Stagione 1",
-      "addedAt": "2026-11-14T21:00:00Z"
+      "mediaType": "movie",
+      "tmdbId": 315635,
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 34,
-      "mediaType": "movie",
-      "tmdbId": 284052,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "mediaType": "tv",
+      "tmdbId": 67178,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 1"
     },
     {
       "timelineIndex": 35,
       "mediaType": "movie",
-      "tmdbId": 284053,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "tmdbId": 284052,
+      "addedAt": "2026-11-15T00:10:00Z"
     },
     {
       "timelineIndex": 36,
-      "mediaType": "movie",
-      "tmdbId": 363088,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "mediaType": "tv",
+      "tmdbId": 38472,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 2"
     },
     {
       "timelineIndex": 37,
-      "mediaType": "movie",
-      "tmdbId": 299536,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "mediaType": "tv",
+      "tmdbId": 62126,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 2"
     },
     {
       "timelineIndex": 38,
-      "mediaType": "movie",
-      "tmdbId": 299534,
-      "addedAt": "2026-11-14T21:00:00Z"
+      "mediaType": "tv",
+      "tmdbId": 62127,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 2"
     },
     {
       "timelineIndex": 39,
+      "mediaType": "tv",
+      "tmdbId": 61889,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 3"
+    },
+    {
+      "timelineIndex": 40,
+      "mediaType": "movie",
+      "tmdbId": 284053,
+      "addedAt": "2026-11-15T00:10:00Z"
+    },
+    {
+      "timelineIndex": 41,
+      "mediaType": "tv",
+      "tmdbId": 67178,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 2"
+    },
+    {
+      "timelineIndex": 42,
+      "mediaType": "tv",
+      "tmdbId": 38472,
+      "addedAt": "2026-11-15T00:10:00Z",
+      "seasonScope": "Stagione 3"
+    },
+    {
+      "timelineIndex": 43,
+      "mediaType": "movie",
+      "tmdbId": 363088,
+      "addedAt": "2026-11-15T00:10:00Z"
+    },
+    {
+      "timelineIndex": 44,
+      "mediaType": "movie",
+      "tmdbId": 299536,
+      "addedAt": "2026-11-15T00:10:00Z"
+    },
+    {
+      "timelineIndex": 45,
+      "mediaType": "movie",
+      "tmdbId": 299534,
+      "addedAt": "2026-11-15T00:10:00Z"
+    },
+    {
+      "timelineIndex": 46,
       "mediaType": "tv",
       "tmdbId": 84958,
       "seasonScope": "Stagione 1",
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 40,
+      "timelineIndex": 47,
       "mediaType": "tv",
       "tmdbId": 85271,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 41,
+      "timelineIndex": 48,
       "mediaType": "movie",
       "tmdbId": 566525,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 42,
+      "timelineIndex": 49,
       "mediaType": "tv",
       "tmdbId": 88396,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 43,
+      "timelineIndex": 50,
       "mediaType": "movie",
       "tmdbId": 429617,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 44,
+      "timelineIndex": 51,
       "mediaType": "movie",
       "tmdbId": 524434,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 45,
+      "timelineIndex": 52,
       "mediaType": "movie",
       "tmdbId": 557,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 46,
+      "timelineIndex": 53,
       "mediaType": "movie",
       "tmdbId": 558,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 47,
+      "timelineIndex": 54,
       "mediaType": "movie",
       "tmdbId": 559,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 48,
+      "timelineIndex": 55,
       "mediaType": "movie",
       "tmdbId": 1930,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 49,
+      "timelineIndex": 56,
       "mediaType": "movie",
       "tmdbId": 102382,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 50,
+      "timelineIndex": 57,
       "mediaType": "movie",
       "tmdbId": 634649,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 51,
+      "timelineIndex": 58,
       "mediaType": "movie",
       "tmdbId": 453395,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 52,
+      "timelineIndex": 59,
       "mediaType": "tv",
       "tmdbId": 88329,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 53,
+      "timelineIndex": 60,
       "mediaType": "tv",
       "tmdbId": 92749,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 54,
+      "timelineIndex": 61,
       "mediaType": "movie",
       "tmdbId": 505642,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 55,
+      "timelineIndex": 62,
       "mediaType": "tv",
       "tmdbId": 122226,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 56,
+      "timelineIndex": 63,
       "mediaType": "tv",
       "tmdbId": 92783,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 57,
+      "timelineIndex": 64,
       "mediaType": "tv",
       "tmdbId": 92782,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 58,
+      "timelineIndex": 65,
       "mediaType": "movie",
       "tmdbId": 894205,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 59,
+      "timelineIndex": 66,
       "mediaType": "movie",
       "tmdbId": 616037,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 60,
+      "timelineIndex": 67,
       "mediaType": "movie",
       "tmdbId": 774752,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 61,
+      "timelineIndex": 68,
       "mediaType": "tv",
       "tmdbId": 114471,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 62,
+      "timelineIndex": 69,
       "mediaType": "movie",
       "tmdbId": 640146,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 63,
+      "timelineIndex": 70,
       "mediaType": "tv",
       "tmdbId": 84958,
       "seasonScope": "Stagione 2",
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 64,
+      "timelineIndex": 71,
       "mediaType": "movie",
       "tmdbId": 447365,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 65,
+      "timelineIndex": 72,
       "mediaType": "tv",
       "tmdbId": 114472,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 66,
+      "timelineIndex": 73,
       "mediaType": "movie",
       "tmdbId": 609681,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 67,
+      "timelineIndex": 74,
       "mediaType": "tv",
       "tmdbId": 138501,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 68,
+      "timelineIndex": 75,
       "mediaType": "tv",
       "tmdbId": 202555,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 69,
+      "timelineIndex": 76,
       "mediaType": "movie",
       "tmdbId": 822119,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 70,
+      "timelineIndex": 77,
       "mediaType": "movie",
       "tmdbId": 986056,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 71,
+      "timelineIndex": 78,
       "mediaType": "tv",
       "tmdbId": 198178,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 72,
+      "timelineIndex": 79,
       "mediaType": "movie",
       "tmdbId": 969681,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 73,
+      "timelineIndex": 80,
       "mediaType": "tv",
       "tmdbId": 91363,
       "seasonScope": "Stagioni 1–2",
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 74,
+      "timelineIndex": 81,
       "mediaType": "tv",
       "tmdbId": 138505,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 75,
+      "timelineIndex": 82,
       "mediaType": "movie",
       "tmdbId": 533535,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 76,
+      "timelineIndex": 83,
       "mediaType": "tv",
       "tmdbId": 213375,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 77,
+      "timelineIndex": 84,
       "mediaType": "movie",
       "tmdbId": 1003596,
       "addedAt": "2026-11-14T21:00:00Z"
     },
     {
-      "timelineIndex": 78,
+      "timelineIndex": 85,
       "mediaType": "movie",
       "tmdbId": 1003598,
       "addedAt": "2026-11-14T21:00:00Z"
