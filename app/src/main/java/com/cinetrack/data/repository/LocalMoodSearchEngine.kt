@@ -851,7 +851,7 @@ class LocalMoodSearchEngine @Inject constructor(
                 releaseDate = item.movie.releaseDate,
                 genreIds = item.movie.genreIds ?: emptyList(),
                 overview = item.movie.overview,
-                aiReason = item.bespokeReason
+                aiReason = null
             )
         }
 

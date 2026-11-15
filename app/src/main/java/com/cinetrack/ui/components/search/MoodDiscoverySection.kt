@@ -421,42 +421,6 @@ fun MoodDiscoverySection(
             }
         }
 
-        // 5. Cinematic Vibe Card (Results overview - displayed strictly in AI mode with genuine vibe analysis)
-        if (isMoodAiMode && !vibeTitle.isNullOrBlank()) {
-            Spacer(modifier = Modifier.height(12.dp))
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 16.dp)
-                    .clip(RoundedCornerShape(14.dp))
-                    .hazeGlass(
-                        state = hazeState,
-                        shape = RoundedCornerShape(14.dp),
-                        style = HazeStyles.PremiumDark
-                    )
-                    .border(1.dp, accentColor.copy(alpha = 0.25f), RoundedCornerShape(14.dp))
-                    .padding(14.dp)
-            ) {
-                Column {
-                    Text(
-                        text = vibeTitle,
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = accentColor,
-                        letterSpacing = rtlSafeLetterSpacing(0.3.sp)
-                    )
-                    if (!vibeDescription.isNullOrBlank()) {
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Text(
-                            text = vibeDescription,
-                            fontSize = 11.sp,
-                            lineHeight = 15.sp,
-                            fontStyle = FontStyle.Italic,
-                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.65f)
-                        )
-                    }
-                }
-            }
-        }
+
     }
 }

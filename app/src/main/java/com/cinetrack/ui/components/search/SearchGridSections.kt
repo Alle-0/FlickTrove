@@ -178,17 +178,17 @@ fun SearchGridMovieItem(
                             modifier = Modifier
                                 .fillMaxWidth()
                                 .background(Color.White.copy(alpha = 0.07f), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 6.dp, vertical = 4.dp)
+                                .padding(horizontal = 7.dp, vertical = 5.dp)
                         ) {
                             Text(
                                 text = aiReason,
                                 style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 9.5.sp,
+                                    fontSize = 10.sp,
                                     fontStyle = FontStyle.Italic,
-                                    lineHeight = 12.5.sp
+                                    lineHeight = 13.5.sp
                                 ),
-                                color = Color.White.copy(alpha = 0.88f),
-                                maxLines = 2,
+                                color = Color.White.copy(alpha = 0.90f),
+                                maxLines = 4,
                                 overflow = TextOverflow.Ellipsis
                             )
                         }

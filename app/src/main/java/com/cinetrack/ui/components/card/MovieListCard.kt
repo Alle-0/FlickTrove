@@ -404,10 +404,10 @@ fun MovieListCard(
                         style = MaterialTheme.typography.bodySmall.copy(
                             fontSize = 11.sp,
                             fontStyle = FontStyle.Italic,
-                            lineHeight = 14.sp
+                            lineHeight = 14.5.sp
                         ),
-                        color = Color.White.copy(alpha = 0.88f),
-                        maxLines = 2,
+                        color = Color.White.copy(alpha = 0.90f),
+                        maxLines = 4,
                         overflow = TextOverflow.Ellipsis
                     )
                 }
