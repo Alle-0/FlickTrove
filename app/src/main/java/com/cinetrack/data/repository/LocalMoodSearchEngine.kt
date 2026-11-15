@@ -398,6 +398,22 @@ class LocalMoodSearchEngine @Inject constructor(
             anchorMovieIds = listOf(857L, 28L, 530915L, 600L, 49046L, 792L),
             rationaleTemplateIt = "Realismo implacabile, polvere da sparo e il sacrificio straziante di uomini messi alla prova dal fronte.",
             rationaleTemplateEn = "Raw, visceral immersion into the chaos and profound human cost of warfare on the front lines."
+        ),
+
+        // --- METAMORFOSI & MUTAZIONE UOMO-INSETTO ---
+        CinematicArchetype(
+            id = "metamorphosis_mutation",
+            nameIt = "Metamorfosi, Insetti & Mutazioni",
+            nameEn = "Metamorphosis & Insect Mutation",
+            triggersIt = listOf("metamorfosi", "trasformazione", "uomo insetto", "ragazzo insetto", "diventa un insetto", "diventa una libellula", "diventa un ragno", "mutazione genetica", "morso da un ragno", "morso da un insetto", "morso da", "superhero movie", "la mosca", "uomo mosca"),
+            triggersEn = listOf("metamorphosis", "transformation", "turn into an insect", "turns into an insect", "become a dragonfly", "becomes a dragonfly", "become a spider", "becomes a spider", "become an insect", "bitten by a spider", "bitten by an insect", "bitten by", "genetic mutation", "insect human", "body mutation", "superhero movie", "the fly"),
+            primaryGenres = listOf(878L, 35L),
+            secondaryGenres = listOf(28L, 27L),
+            mandatoryKeywords = listOf(10283L, 9717L),
+            secondaryKeywords = listOf(4379L, 18035L),
+            anchorMovieIds = listOf(11918L, 9426L, 557L, 17654L, 9799L),
+            rationaleTemplateIt = "Mutazioni genetiche prodigiose o surreali in cui il confine tra essere umano e insetto svanisce.",
+            rationaleTemplateEn = "Wild genetic mutations and transformations where the boundary between human and insect blurs."
         )
     )
 
@@ -690,9 +706,7 @@ class LocalMoodSearchEngine @Inject constructor(
 
             for (m in (resC + resA + resB + resD)) {
                 // Strictly exclude unreleased future movies (release_date > today)
-                val relYear = extractYearFromDate(m.releaseDate)
-                val isFutureMovie = relYear != null && relYear > LocalDate.now().year
-                if (m.id > 0L && !isFutureMovie && !candidateMap.containsKey(m.id)) {
+                if (m.id > 0L && isMovieReleased(m.releaseDate) && !candidateMap.containsKey(m.id)) {
                     candidateMap[m.id] = m
                 }
             }
@@ -711,8 +725,7 @@ class LocalMoodSearchEngine @Inject constructor(
                     )
                 ).results
                 for (m in fallbackResults) {
-                    val relYear = extractYearFromDate(m.releaseDate)
-                    if (relYear != null && relYear <= LocalDate.now().year) {
+                    if (m.id > 0L && isMovieReleased(m.releaseDate) && !candidateMap.containsKey(m.id)) {
                         candidateMap[m.id] = m
                     }
                 }
@@ -817,7 +830,7 @@ class LocalMoodSearchEngine @Inject constructor(
             ScoredCandidate(m, score, franchiseKey, reason)
         }
 
-        // 6. Franchise Anti-Monopoly Deduplication
+        // 6. Franchise Anti-Monopoly & Title Deduplication
         // Maximum 1 movie per franchise gets full points; subsequent entries receive heavy penalties
         val franchiseGroupCounts = mutableMapOf<String, Int>()
         val deduplicatedSorted = scoredList.sortedByDescending { it.score }.map { candidate ->
@@ -836,9 +849,24 @@ class LocalMoodSearchEngine @Inject constructor(
             }
         }.sortedByDescending { it.score }
 
+        // Strict Title Anti-Monopoly: Never recommend multiple movies with the identical normalized title
+        val titleSeen = mutableSetOf<String>()
+        val titleDeduplicated = mutableListOf<ScoredCandidate>()
+        for (cand in deduplicatedSorted) {
+            val normTitle = normalizeTitleForDeduplication(cand.movie.title)
+            if (normTitle.length >= 3) {
+                if (!titleSeen.contains(normTitle)) {
+                    titleSeen.add(normTitle)
+                    titleDeduplicated.add(cand)
+                }
+            } else {
+                titleDeduplicated.add(cand)
+            }
+        }
+
         // Filter out candidates with severe negative scores (e.g. random movies with 0 keyword matches)
-        val filteredResults = deduplicatedSorted.filter { it.score >= 10.0 }
-        val finalCandidateList = if (filteredResults.isNotEmpty()) filteredResults else deduplicatedSorted
+        val filteredResults = titleDeduplicated.filter { it.score >= 10.0 }
+        val finalCandidateList = if (filteredResults.isNotEmpty()) filteredResults else titleDeduplicated
 
         // 7. Map to final results
         val finalMovies = finalCandidateList.take(15).map { item ->
@@ -1032,6 +1060,23 @@ class LocalMoodSearchEngine @Inject constructor(
     private fun extractYearFromDate(dateStr: String?): Int? {
         if (dateStr.isNullOrBlank() || dateStr.length < 4) return null
         return dateStr.take(4).toIntOrNull()
+    }
+
+    private fun isMovieReleased(releaseDate: String?): Boolean {
+        if (releaseDate.isNullOrBlank()) return false
+        return try {
+            val date = LocalDate.parse(releaseDate.take(10))
+            !date.isAfter(LocalDate.now())
+        } catch (_: Exception) {
+            val yr = extractYearFromDate(releaseDate)
+            yr != null && yr <= LocalDate.now().year
+        }
+    }
+
+    private fun normalizeTitleForDeduplication(title: String?): String {
+        if (title.isNullOrBlank()) return ""
+        return title.lowercase(Locale.ROOT)
+            .replace(Regex("""[^a-z0-9]"""), "")
     }
 
     private fun capitalizeWords(input: String): String {
