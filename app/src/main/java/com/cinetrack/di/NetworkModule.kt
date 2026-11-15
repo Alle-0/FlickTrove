@@ -395,6 +395,25 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideSupabaseMoodSearchApi(
+        @Named("supabase_okhttp") okHttpClient: OkHttpClient,
+        json: Json
+    ): com.cinetrack.data.api.SupabaseMoodSearchApi {
+        val moodOkHttpClient = okHttpClient.newBuilder()
+            .connectTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(35, java.util.concurrent.TimeUnit.SECONDS)
+            .writeTimeout(25, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+        return Retrofit.Builder()
+            .baseUrl(Keys.getSupabaseUrl())
+            .client(moodOkHttpClient)
+            .addConverterFactory(json.asConverterFactory("application/json".toMediaType()))
+            .build()
+            .create(com.cinetrack.data.api.SupabaseMoodSearchApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideCommsUniInterceptor(): com.cinetrack.data.api.CommsUniInterceptor {
         return com.cinetrack.data.api.CommsUniInterceptor()
     }

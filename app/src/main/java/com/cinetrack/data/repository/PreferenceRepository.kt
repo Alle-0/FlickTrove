@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.io.IOException
+import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -108,6 +109,9 @@ class PreferenceRepository @Inject constructor(
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
         val ENABLE_BOTTOM_BAR_SWIPE = booleanPreferencesKey("enable_bottom_bar_swipe")
         val LAST_TASTE_VECTOR_SYNC_TIMESTAMP = longPreferencesKey("last_taste_vector_sync_timestamp")
+        val MOOD_SEARCH_LAST_EPOCH_DAY = longPreferencesKey("mood_search_last_epoch_day")
+        val MOOD_SEARCH_COUNT = intPreferencesKey("mood_search_count")
+        const val DAILY_MOOD_SEARCH_QUOTA = 3
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -549,6 +553,44 @@ class PreferenceRepository @Inject constructor(
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.LAST_TASTE_VECTOR_SYNC_TIMESTAMP] = timestamp
         }
+    }
+
+    private val moodQuotaMutex = kotlinx.coroutines.sync.Mutex()
+
+    val moodSearchesRemainingFlow: Flow<Int> = dataStore.data
+        .catch { emit(emptyPreferences()) }
+        .map { prefs ->
+            val todayEpochDay = java.time.LocalDate.now().toEpochDay()
+            val savedEpochDay = prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] ?: 0L
+            if (savedEpochDay < todayEpochDay) {
+                PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
+            } else {
+                prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
+            }
+        }
+
+    suspend fun getMoodSearchesRemaining(): Int {
+        val prefs = dataStore.data.first()
+        val todayEpochDay = java.time.LocalDate.now().toEpochDay()
+        val savedEpochDay = prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] ?: 0L
+        return if (savedEpochDay < todayEpochDay) PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA else (prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA)
+    }
+
+    suspend fun consumeMoodSearchQuota(): Boolean = moodQuotaMutex.withLock {
+        val todayEpochDay = java.time.LocalDate.now().toEpochDay()
+        var success = false
+        dataStore.edit { prefs ->
+            val savedEpochDay = prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] ?: 0L
+            val currentCount = if (savedEpochDay < todayEpochDay) PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA else (prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA)
+            if (currentCount > 0) {
+                prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] = todayEpochDay
+                prefs[PreferencesKeys.MOOD_SEARCH_COUNT] = currentCount - 1
+                success = true
+            } else {
+                success = false
+            }
+        }
+        success
     }
 
     suspend fun clearAll() {

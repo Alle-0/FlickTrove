@@ -69,6 +69,11 @@ fun SearchContentGrid(
     onEmitMessage: (String) -> Unit,
     onRetry: () -> Unit,
     onLoadNextPage: () -> Unit,
+    onMoodSelected: (String) -> Unit = {},
+    onMoodModeChanged: (Boolean) -> Unit = {},
+    onSelectMoodHistory: (com.cinetrack.data.model.MoodHistoryEntry) -> Unit = {},
+    onDeleteMoodHistory: (String) -> Unit = {},
+    onClearMoodHistory: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val shouldLoadMore = remember(gridState) {
@@ -162,7 +167,34 @@ fun SearchContentGrid(
                     uiState.sortConfig.selectedKeywords.isNotEmpty() ||
                     uiState.sortConfig.selectedDecades.isNotEmpty() ||
                     uiState.sortConfig.sortType != "popularity"
-            val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection")
+            val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection") && uiState.category != "mood"
+
+            if (uiState.category == "mood") {
+                val currentLang = if (uiState.preferences.contentLanguage == "system") {
+                    java.util.Locale.getDefault().language
+                } else {
+                    uiState.preferences.contentLanguage
+                }.lowercase()
+                val isLocalEligible = currentLang.startsWith("it") || currentLang.startsWith("en")
+
+                item(span = { GridItemSpan(12) }) {
+                    MoodDiscoverySection(
+                        remainingQuota = uiState.moodRemainingQuota,
+                        isLocalEligible = isLocalEligible,
+                        isMoodAiMode = uiState.isMoodAiMode,
+                        onMoodModeChanged = onMoodModeChanged,
+                        vibeTitle = uiState.moodVibeTitle,
+                        vibeDescription = uiState.moodVibeDescription,
+                        errorMessage = uiState.moodErrorMessage,
+                        isLoading = uiState.isLoading,
+                        onMoodSelected = onMoodSelected,
+                        moodHistory = uiState.moodHistory,
+                        onSelectMoodHistory = onSelectMoodHistory,
+                        onDeleteMoodHistory = onDeleteMoodHistory,
+                        onClearMoodHistory = onClearMoodHistory
+                    )
+                }
+            }
 
             if (showEmptySearch) {
                 if (uiState.category == "collection") {
@@ -262,7 +294,7 @@ fun SearchContentGrid(
                     }
                 }
 
-                if (uiState.query.isNotEmpty() && !uiState.isLoading && uiState.results.isEmpty()) {
+                if (uiState.query.isNotEmpty() && !uiState.isLoading && uiState.results.isEmpty() && uiState.category != "mood") {
                     item(span = { GridItemSpan(12) }) {
                         SearchNoResults(queryLength = uiState.query.length)
                     }

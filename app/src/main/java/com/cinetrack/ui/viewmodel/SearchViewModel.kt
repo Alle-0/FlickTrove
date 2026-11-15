@@ -30,6 +30,8 @@ import kotlinx.collections.immutable.persistentMapOf
 import kotlinx.collections.immutable.persistentSetOf
 import kotlinx.collections.immutable.toImmutableList
 import kotlinx.collections.immutable.toImmutableMap
+import com.cinetrack.data.model.MoodHistoryEntry
+import com.cinetrack.data.repository.MoodHistoryRepository
 
 data class FilterPill(val id: Long, val name: String, val isKeyword: Boolean = false)
 
@@ -54,7 +56,13 @@ data class SearchUiState(
     val errorMessage: String? = null,
     val suggestedFilters: ImmutableList<FilterPill> = persistentListOf(),
     val isLocalOnly: Boolean = false, // true when showing local library results due to POOR/OFFLINE connection
-    val editorialCollections: ImmutableList<com.cinetrack.data.model.EditorialCollection> = persistentListOf()
+    val editorialCollections: ImmutableList<com.cinetrack.data.model.EditorialCollection> = persistentListOf(),
+    val moodVibeTitle: String? = null,
+    val moodVibeDescription: String? = null,
+    val moodRemainingQuota: Int = 3,
+    val moodErrorMessage: String? = null,
+    val isMoodAiMode: Boolean = true,
+    val moodHistory: ImmutableList<MoodHistoryEntry> = persistentListOf()
 )
 
 @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -70,7 +78,9 @@ class SearchViewModel @Inject constructor(
     private val searchByIdUseCase: com.cinetrack.domain.SearchByIdUseCase,
     private val editorialCollectionRepository: com.cinetrack.data.repository.EditorialCollectionRepository,
     private val searchHistoryRepository: com.cinetrack.data.repository.SearchHistoryRepository,
-    private val mediaActionDelegate: MediaActionDelegate
+    private val mediaActionDelegate: MediaActionDelegate,
+    private val moodSearchRepository: com.cinetrack.data.repository.MoodSearchRepository,
+    private val moodHistoryRepository: MoodHistoryRepository
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -175,6 +185,11 @@ class SearchViewModel @Inject constructor(
             }
         }
         viewModelScope.launch {
+            moodHistoryRepository.historyFlow.collect { history ->
+                _uiState.update { it.copy(moodHistory = history.toImmutableList()) }
+            }
+        }
+        viewModelScope.launch {
             preferenceRepository.userPreferencesFlow.collect { prefs ->
                 _uiState.update { it.copy(preferences = prefs) }
             }
@@ -189,13 +204,98 @@ class SearchViewModel @Inject constructor(
             _uiState.map { it.query }
                 .debounce { q -> if (q.isEmpty()) 0L else 500L }
                 .distinctUntilChanged()
-                .collect { performSearch() }
+                .collect {
+                    // La ricerca Mood NON deve mai scattare con debounce automatico durante la digitazione
+                    // per evitare lo spreco istantaneo delle 5 ricerche giornaliere.
+                    if (_uiState.value.category != "mood") {
+                        performSearch()
+                    }
+                }
         }
         viewModelScope.launch {
             _uiState.map { it.category to it.sortConfig }
                 .drop(1)
                 .distinctUntilChanged()
-                .collect { performSearch() }
+                .collect { (cat, _) ->
+                    if (cat != "mood") {
+                        performSearch()
+                    }
+                }
+        }
+
+        viewModelScope.launch {
+            moodSearchRepository.remainingQuotaFlow.collect { quota ->
+                _uiState.update { it.copy(moodRemainingQuota = quota) }
+            }
+        }
+    }
+
+    fun submitMoodSearch(queryOverride: String? = null) {
+        val q = (queryOverride ?: _uiState.value.query).trim()
+        if (q.isNotEmpty()) {
+            executeMoodSearch(q, bypassCache = true)
+        }
+    }
+
+    fun setMoodAiMode(useAi: Boolean) {
+        val wasAi = _uiState.value.isMoodAiMode
+        _uiState.update { it.copy(isMoodAiMode = useAi) }
+        if (wasAi != useAi && _uiState.value.category == "mood" && _uiState.value.query.isNotBlank()) {
+            executeMoodSearch(_uiState.value.query.trim(), bypassCache = false)
+        }
+    }
+
+    fun executeMoodSearch(query: String, bypassCache: Boolean = false) {
+        if (query.isBlank()) return
+        searchJob?.cancel()
+        rawResults = emptyList()
+        applyStateFilters()
+        _uiState.update { 
+            it.copy(
+                query = query,
+                category = "mood",
+                isLoading = true, 
+                errorMessage = null,
+                moodErrorMessage = null
+            ) 
+        }
+        searchJob = viewModelScope.launch {
+            val contentLang = _uiState.value.preferences.contentLanguage
+            val targetLanguage = if (contentLang == "system") {
+                java.util.Locale.getDefault().toLanguageTag()
+            } else {
+                contentLang
+            }
+            val useAi = _uiState.value.isMoodAiMode
+            val result = moodSearchRepository.searchMoviesByMood(
+                query,
+                language = targetLanguage,
+                forceLocal = !useAi,
+                bypassCache = bypassCache
+            )
+            result.onSuccess { data ->
+                rawResults = data.movies
+                applyStateFilters()
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false,
+                        isEndReached = true,
+                        moodVibeTitle = data.vibeTitle,
+                        moodVibeDescription = data.vibeDescription,
+                        moodErrorMessage = null
+                    )
+                }
+            }.onFailure { ex ->
+                rawResults = emptyList()
+                applyStateFilters()
+                _uiState.update {
+                    it.copy(
+                        isLoading = false,
+                        isEndReached = true,
+                        moodErrorMessage = ex.message ?: "Errore durante la ricerca Mood"
+                    )
+                }
+            }
         }
     }
 
@@ -237,6 +337,17 @@ class SearchViewModel @Inject constructor(
         _uiState.update { it.copy(category = newCategory) }
         // Reset selected genres on category change to avoid cross-contamination of movie/tv genre IDs
         _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedGenres = emptyList())) }
+        if (newCategory == "mood") {
+            rawResults = emptyList()
+            applyStateFilters()
+            _uiState.update { 
+                it.copy(
+                    moodVibeTitle = null,
+                    moodVibeDescription = null,
+                    moodErrorMessage = null
+                ) 
+            }
+        }
     }
 
     fun updateSortConfig(config: SortConfig) {
@@ -252,6 +363,25 @@ class SearchViewModel @Inject constructor(
         val query = _uiState.value.query
         val category = _uiState.value.category
         _uiState.update { it.copy(errorMessage = null) }
+
+        if (category == "mood") {
+            if (query.isNotBlank() && query.length >= 3) {
+                executeMoodSearch(query)
+            } else {
+                rawResults = emptyList()
+                applyStateFilters()
+                _uiState.update { 
+                    it.copy(
+                        isLoading = false, 
+                        isEndReached = true,
+                        moodVibeTitle = null, 
+                        moodVibeDescription = null,
+                        moodErrorMessage = null
+                    ) 
+                }
+            }
+            return
+        }
 
         if (query.isEmpty()) {
             val config = _uiState.value.sortConfig
@@ -874,6 +1004,32 @@ class SearchViewModel @Inject constructor(
                 android.util.Log.e("SearchViewModel", "Error clearing recent searches", e)
             }
         }
+    }
+
+    fun selectMoodHistory(entry: MoodHistoryEntry) {
+        searchJob?.cancel()
+        rawResults = entry.movies
+        applyStateFilters()
+        _uiState.update {
+            it.copy(
+                query = entry.query,
+                category = "mood",
+                isMoodAiMode = entry.isAi,
+                isLoading = false,
+                isEndReached = true,
+                moodVibeTitle = if (entry.isAi) entry.vibeTitle else null,
+                moodVibeDescription = if (entry.isAi) entry.vibeDescription else null,
+                moodErrorMessage = null
+            )
+        }
+    }
+
+    fun deleteMoodHistory(query: String) {
+        moodHistoryRepository.deleteEntry(query)
+    }
+
+    fun clearMoodHistory() {
+        moodHistoryRepository.clearHistory()
     }
 
     fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)

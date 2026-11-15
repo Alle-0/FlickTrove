@@ -2136,4 +2136,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • DÍL %2$s</string>
     <string name="editorial_episode_scope">DÍL %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Popište atmosféru nebo náladu filmu...</string>
+    <string name="search_tab_mood">NÁLADA</string>
+    <string name="search_mood_badge_label">Filmové objevování podle nálady</string>
+    <string name="search_mood_quota_format">%1$d/3 dnes</string>
+    <string name="search_mood_quota_exhausted_short">0/3 dnes</string>
+    <string name="search_mood_quota_local_unlimited">Neomezeně</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">Algoritmus</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Popište vlastními slovy, na co máte chuť se podívat. Umělá inteligence vyhledá ideální filmy v celém katalogu TMDB.</string>
+    <string name="search_mood_exhausted_notice">Vyčerpali jste všech 3 vyhledávání podle nálady na dnešní den. Obnoví se o půlnoci!</string>
+    <string name="search_mood_inspirations_header">Rychlá inspirace:</string>
+    <string name="search_mood_analyzing">AI prohledává filmový katalog...</string>
+    <string name="mood_insp_1_title">Detektivní thriller v dešti</string>
+    <string name="mood_insp_1_prompt">Detektivní thriller v dešti</string>
+    <string name="mood_insp_2_title">Filozofická sci-fi v hlubokém vesmíru</string>
+    <string name="mood_insp_2_prompt">Filozofická sci-fi v hlubokém vesmíru</string>
+    <string name="mood_insp_3_title">Cynická a hořkosladká komedie</string>
+    <string name="mood_insp_3_prompt">Cynická a hořkosladká komedie</string>
+    <string name="mood_insp_4_title">Folklor horor v prastarých lesích</string>
+    <string name="mood_insp_4_prompt">Folklor horor v prastarých lesích</string>
+    <string name="mood_insp_5_title">Komorní psychologické drama v jedné místnosti</string>
+    <string name="mood_insp_5_prompt">Komorní psychologické drama v jedné místnosti</string>
+    <string name="mood_insp_6_title">Noční cyberpunk v dešti a neonu</string>
+    <string name="mood_insp_6_prompt">Noční cyberpunk v dešti a neonu</string>
+    <string name="mood_insp_7_title">Dobrodružství a přežití na širém moři</string>
+    <string name="mood_insp_7_prompt">Dobrodružství a přežití na širém moři</string>
+    <string name="mood_insp_8_title">Drsný autorský krimi film 70. let</string>
+    <string name="mood_insp_8_prompt">Drsný autorský krimi film 70. let</string>
 </resources>

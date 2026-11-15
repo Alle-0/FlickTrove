@@ -51,7 +51,8 @@ sealed class TMDBSearchResult {
         @SerialName("vote_average") val voteAverage: Double? = null,
         @SerialName("release_date") val releaseDate: String? = null,
         @SerialName("genre_ids") val genreIds: List<Long> = emptyList(),
-        val overview: String? = null
+        val overview: String? = null,
+        @SerialName("ai_reason") val aiReason: String? = null
     ) : TMDBSearchResult() {
         override val mediaType: String get() = "movie"
         override val displayTitle: String get() = title ?: ""
@@ -67,7 +68,8 @@ sealed class TMDBSearchResult {
         @SerialName("vote_average") val voteAverage: Double? = null,
         @SerialName("first_air_date") val firstAirDate: String? = null,
         @SerialName("genre_ids") val genreIds: List<Long> = emptyList(),
-        val overview: String? = null
+        val overview: String? = null,
+        @SerialName("ai_reason") val aiReason: String? = null
     ) : TMDBSearchResult() {
         override val mediaType: String get() = "tv"
         override val displayTitle: String get() = name ?: ""

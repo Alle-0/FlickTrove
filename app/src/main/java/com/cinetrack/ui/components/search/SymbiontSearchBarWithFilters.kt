@@ -109,23 +109,38 @@ fun SymbiontSearchBarWithFilters(
     focusRequester: FocusRequester,
     keyboardController: SoftwareKeyboardController?,
     onFilterBoundsMeasured: (Rect) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSubmitSearch: (() -> Unit)? = null
 ) {
-    val filtersVisible = category != "person" && category != "collection"
+    val rightControlVisible = category != "person" && category != "collection"
     val density = LocalDensity.current
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    // Progresso animato: 0f = filtri completamente inglobati (barra a tutta larghezza)
-    //                     1f = filtri completamente rigurgitati e stabilizzati a destra
-    val animProgress = remember { Animatable(if (filtersVisible) 1f else 0f) }
+    var lastActiveControl by remember { mutableStateOf(if (category == "mood") "mood" else "filter") }
+    LaunchedEffect(category) {
+        if (category == "mood") {
+            lastActiveControl = "mood"
+        } else if (category == "movie" || category == "tv") {
+            lastActiveControl = "filter"
+        }
+    }
+    val activeControl = if (rightControlVisible) {
+        if (category == "mood") "mood" else "filter"
+    } else {
+        lastActiveControl
+    }
+
+    // Progresso animato: 0f = controlli completamente inglobati (barra a tutta larghezza)
+    //                     1f = controlli completamente rigurgitati e stabilizzati a destra
+    val animProgress = remember { Animatable(if (rightControlVisible) 1f else 0f) }
     var hasSnappedBounce by remember { mutableStateOf(false) }
 
     val bounceOffsetX = remember { Animatable(0f) }
     val bounceScale = remember { Animatable(1f) }
     val searchBounceX = remember { Animatable(0f) }
 
-    LaunchedEffect(filtersVisible) {
-        if (filtersVisible) {
+    LaunchedEffect(rightControlVisible) {
+        if (rightControlVisible) {
             hasSnappedBounce = false
             animProgress.animateTo(
                 targetValue = 1f,
@@ -188,8 +203,8 @@ fun SymbiontSearchBarWithFilters(
     }
 
     // Rimbalzo morbido di arrivo quando la barra ingloba tutto a fine corsa (p -> 0)
-    LaunchedEffect(p <= 0.02f && !filtersVisible) {
-        if (p <= 0.02f && !filtersVisible) {
+    LaunchedEffect(p <= 0.02f && !rightControlVisible) {
+        if (p <= 0.02f && !rightControlVisible) {
             searchBounceX.snapTo(3f)
             searchBounceX.animateTo(
                 targetValue = 0f,
@@ -394,7 +409,14 @@ fun SymbiontSearchBarWithFilters(
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
-                        keyboardActions = KeyboardActions(onSearch = { onQueryChanged(query) }),
+                        keyboardActions = KeyboardActions(onSearch = {
+                            keyboardController?.hide()
+                            if (category == "mood") {
+                                onSubmitSearch?.invoke()
+                            } else {
+                                onQueryChanged(query)
+                            }
+                        }),
                         decorationBox = { innerTextField ->
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (query.isEmpty()) {
@@ -420,6 +442,7 @@ fun SymbiontSearchBarWithFilters(
                                             "tv" -> stringResource(R.string.search_placeholder_tv)
                                             "person" -> stringResource(R.string.search_placeholder_person)
                                             "collection" -> stringResource(R.string.search_placeholder_collection)
+                                            "mood" -> stringResource(R.string.search_placeholder_mood)
                                             else -> stringResource(R.string.search_placeholder_movie)
                                         }
                                     }
@@ -439,24 +462,28 @@ fun SymbiontSearchBarWithFilters(
                 }
 
                 if (query.isNotEmpty()) {
-                    Box(
-                        modifier = Modifier
-                            .size(40.dp)
-                            .bounceClick(scaleDown = 0.82f) {
-                            onTextFieldValueChange(TextFieldValue(""))
-                            onClearQuery()
-                            focusRequester.requestFocus()
-                            keyboardController?.show()
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Box(
+                            modifier = Modifier
+                                .size(36.dp)
+                                .bounceClick(scaleDown = 0.82f) {
+                                    onTextFieldValueChange(TextFieldValue(""))
+                                    onClearQuery()
+                                    focusRequester.requestFocus()
+                                    keyboardController?.show()
+                                }
+                                .clip(CircleShape),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                contentDescription = stringResource(R.string.search_content_desc_clear),
+                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
+                                modifier = Modifier.size(14.dp)
+                            )
                         }
-                        .clip(CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                            contentDescription = stringResource(R.string.search_content_desc_clear),
-                            tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f),
-                            modifier = Modifier.size(14.dp)
-                        )
+
+                        Spacer(modifier = Modifier.width(6.dp))
                     }
                 } else {
                     Spacer(modifier = Modifier.width(12.dp))
@@ -464,9 +491,9 @@ fun SymbiontSearchBarWithFilters(
             }
         }
 
-        // --- CONTROLLI E ICONE DEI FILTRI (Visibili a distacco avvenuto p >= 0.88) ---
+        // --- CONTROLLI E ICONE DEI FILTRI / CERCA (Visibili a distacco avvenuto p >= 0.88) ---
         if (isDetached) {
-            val buttonsAlpha = if (!filtersVisible) ((p - 0.88f) / 0.12f).coerceIn(0f, 1f) else 1f
+            val buttonsAlpha = if (!rightControlVisible) ((p - 0.88f) / 0.12f).coerceIn(0f, 1f) else 1f
 
             Row(
                 modifier = Modifier
@@ -500,47 +527,68 @@ fun SymbiontSearchBarWithFilters(
                     Spacer(modifier = Modifier.width(12.dp))
                 }
 
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .onGloballyPositioned { layoutCoordinates ->
-                            if (isDetached) {
-                                val position = layoutCoordinates.positionInWindow()
-                                onFilterBoundsMeasured(
-                                    Rect(
-                                        position.x,
-                                        position.y,
-                                        position.x + layoutCoordinates.size.width,
-                                        position.y + layoutCoordinates.size.height
-                                    )
-                                )
+                if (activeControl == "mood") {
+                    val primaryColor = MaterialTheme.colorScheme.primary
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .bounceClick {
+                                keyboardController?.hide()
+                                onSubmitSearch?.invoke()
                             }
-                        }
-                        .bounceClick {
-                            keyboardController?.hide()
-                            onFilterClick()
-                        }
-                        .background(symbioteColor, CircleShape)
-                        .then(
-                            if (hasActiveFilters) {
-                                val borderAlpha = if (isDetached) 1f else ((p - 0.68f) / 0.32f).coerceIn(0f, 1f)
-                                Modifier.border(
-                                    BorderStroke(
-                                        1.5.dp,
-                                        MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
-                                    ),
-                                    CircleShape
-                                )
-                            } else Modifier
-                        ),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
-                        contentDescription = stringResource(R.string.folder_detail_filters),
-                        tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
-                        modifier = Modifier.size(20.dp)
-                    )
+                            .background(primaryColor, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_lente),
+                            contentDescription = stringResource(R.string.search_content_desc),
+                            tint = Color.Black,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
+                } else {
+                    Box(
+                        modifier = Modifier
+                            .size(44.dp)
+                            .onGloballyPositioned { layoutCoordinates ->
+                                if (isDetached) {
+                                    val position = layoutCoordinates.positionInWindow()
+                                    onFilterBoundsMeasured(
+                                        Rect(
+                                            position.x,
+                                            position.y,
+                                            position.x + layoutCoordinates.size.width,
+                                            position.y + layoutCoordinates.size.height
+                                        )
+                                    )
+                                }
+                            }
+                            .bounceClick {
+                                keyboardController?.hide()
+                                onFilterClick()
+                            }
+                            .background(symbioteColor, CircleShape)
+                            .then(
+                                if (hasActiveFilters) {
+                                    val borderAlpha = if (isDetached) 1f else ((p - 0.68f) / 0.32f).coerceIn(0f, 1f)
+                                    Modifier.border(
+                                        BorderStroke(
+                                            1.5.dp,
+                                            MaterialTheme.colorScheme.primary.copy(alpha = borderAlpha)
+                                        ),
+                                        CircleShape
+                                    )
+                                } else Modifier
+                            ),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_filtri),
+                            contentDescription = stringResource(R.string.folder_detail_filters),
+                            tint = if (hasActiveFilters) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface,
+                            modifier = Modifier.size(20.dp)
+                        )
+                    }
                 }
             }
         }

@@ -103,7 +103,8 @@ fun SearchHeader(
     hazeState: HazeState,
     onHeaderHeightMeasured: (Dp) -> Unit,
     onFilterBoundsMeasured: (Rect) -> Unit,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    onSubmitSearch: (() -> Unit)? = null
 ) {
     val density = LocalDensity.current
 
@@ -175,7 +176,8 @@ fun SearchHeader(
                     focusRequester = focusRequester,
                     keyboardController = keyboardController,
                     onFilterBoundsMeasured = onFilterBoundsMeasured,
-                    modifier = Modifier.weight(1f)
+                    modifier = Modifier.weight(1f),
+                    onSubmitSearch = onSubmitSearch
                 )
             }
 
@@ -200,13 +202,15 @@ fun SearchHeader(
                 onDeleteSearch = { onDeleteRecentSearch(it) }
             )
 
-            SearchSuggestedFiltersRow(
-                suggestedFilters = suggestedFilters,
-                query = query,
-                isExpanded = preferences.isSearchSuggestionsExpanded,
-                onToggleExpanded = { onToggleSuggestionsExpanded() },
-                onFilterClick = { filter -> onSuggestedFilterClick(filter) }
-            )
+            if (category != "mood") {
+                SearchSuggestedFiltersRow(
+                    suggestedFilters = suggestedFilters,
+                    query = query,
+                    isExpanded = preferences.isSearchSuggestionsExpanded,
+                    onToggleExpanded = { onToggleSuggestionsExpanded() },
+                    onFilterClick = { filter -> onSuggestedFilterClick(filter) }
+                )
+            }
 
             SearchCategorySelector(
                 category = category,

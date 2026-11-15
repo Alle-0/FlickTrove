@@ -1,4 +1,4 @@
-package com.cinetrack.ui.components.comments
+﻿package com.cinetrack.ui.components.comments
 
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -50,7 +50,9 @@ import com.cinetrack.R
 import com.cinetrack.data.model.KlipyMediaType
 import com.cinetrack.ui.components.common.SegmentedControl
 import com.cinetrack.ui.components.common.SegmentedOption
-import com.cinetrack.ui.components.shared.FlickTroveModal
+import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.graphicsLayer
+import com.cinetrack.ui.components.shared.MorphGlassModal
 import com.cinetrack.ui.components.shared.ModalCloseButton
 import com.cinetrack.ui.utils.LocalVibrationEnabled
 import com.cinetrack.ui.utils.bounceClick
@@ -66,9 +68,9 @@ fun GifPickerModal(
     hazeState: HazeState,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     onGifSelected: (String) -> Unit,
+    triggerBounds: Rect? = null,
     viewModel: GifPickerViewModel = hiltViewModel()
 ) {
-    if (!isVisible) return
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val configuration = LocalConfiguration.current
@@ -84,17 +86,22 @@ fun GifPickerModal(
         label = "gifPickerGridHeight"
     )
 
-    // R_outer = 32.dp (FlickTroveModal) = P (16.dp) + r_inner (16.dp -> 32.dp pill height / 16.dp tiles)
-    FlickTroveModal(
+    // R_outer = 32.dp (MorphGlassModal) = P (16.dp) + r_inner (16.dp -> 32.dp pill height / 16.dp tiles)
+    MorphGlassModal(
         isVisible = isVisible,
         onDismissRequest = onDismiss,
+        triggerBounds = triggerBounds,
         hazeState = hazeState,
-        maxWidth = 500.dp,
-        maxWidthFraction = 0.96f,
-        contentPadding = PaddingValues(16.dp)
-    ) {
+        targetMaxWidth = 500.dp,
+        targetWidthFraction = 0.96f,
+        maxModalHeightFraction = 0.88f,
+        targetCornerRadius = 32.dp
+    ) { contentAlpha ->
         Column(
-            modifier = Modifier.fillMaxWidth(),
+            modifier = Modifier
+                .fillMaxWidth()
+                .graphicsLayer { alpha = contentAlpha }
+                .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
             // Header Bar with FlickTrove SegmentedControl (GIF / Stickers)

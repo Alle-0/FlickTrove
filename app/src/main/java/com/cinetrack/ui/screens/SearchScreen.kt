@@ -408,7 +408,25 @@ fun SearchScreenContent(
                                 onLongPress = { m, pressOffset, cardPos -> actionsState.onLongPress(m, pressOffset, cardPos) },
                                 onEmitMessage = { viewModel.emitMessage(UiText.DynamicString(it)) },
                                 onRetry = { viewModel.retry() },
-                                onLoadNextPage = { viewModel.loadNextPage() }
+                                onLoadNextPage = { viewModel.loadNextPage() },
+                                onMoodSelected = { prompt ->
+                                    textFieldValue = TextFieldValue(
+                                        text = prompt,
+                                        selection = androidx.compose.ui.text.TextRange(prompt.length)
+                                    )
+                                    viewModel.onQueryChanged(prompt)
+                                    viewModel.executeMoodSearch(prompt)
+                                },
+                                onMoodModeChanged = { viewModel.setMoodAiMode(it) },
+                                onSelectMoodHistory = { entry ->
+                                    textFieldValue = TextFieldValue(
+                                        text = entry.query,
+                                        selection = androidx.compose.ui.text.TextRange(entry.query.length)
+                                    )
+                                    viewModel.selectMoodHistory(entry)
+                                },
+                                onDeleteMoodHistory = { viewModel.deleteMoodHistory(it) },
+                                onClearMoodHistory = { viewModel.clearMoodHistory() }
                             )
                         }
                     }
@@ -459,7 +477,8 @@ fun SearchScreenContent(
                             hazeState = internalHazeState,
                             onHeaderHeightMeasured = { measured -> headerHeight = measured },
                             onFilterBoundsMeasured = { bounds -> filterBounds[0] = bounds },
-                            modifier = Modifier.align(Alignment.TopCenter)
+                            modifier = Modifier.align(Alignment.TopCenter),
+                            onSubmitSearch = { viewModel.submitMoodSearch(textFieldValue.text) }
                         )
 
                     // 3. Local-Only Banner (bottom, shown when offline/poor connection)

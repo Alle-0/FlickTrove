@@ -31,6 +31,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -101,6 +102,7 @@ fun SearchGridMovieItem(
     animatedVisibilityScope: AnimatedVisibilityScope?,
     staggerIndex: Int,
     keyboardController: SoftwareKeyboardController?,
+    aiReason: String? = null,
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
@@ -131,6 +133,7 @@ fun SearchGridMovieItem(
                     showFolderBookmarks = showFolderBookmarks,
                     hasAnimatedSet = hasAnimatedSet,
                     staggerIndex = staggerIndex,
+                    aiReason = aiReason,
                     onPress = { 
                         keyboardController?.hide()
                         onMovieClick(movie) 
@@ -142,29 +145,79 @@ fun SearchGridMovieItem(
                     onMessage = { onEmitMessage(it) }
                 )
             } else {
-                MovieCard(
-                    movie = movie,
-                    cardWidth = cardWidth,
-                    isFavorite = movieStatus?.favorite ?: false,
-                    isWatched = movieStatus?.watched ?: false,
-                    isReminder = movieStatus?.reminder ?: false,
-                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                    personalRating = movieStatus?.personalRating,
-                    folderColors = folderColors,
-                    showFolderBookmarks = showFolderBookmarks,
-                    hasAnimatedSet = hasAnimatedSet,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    staggerIndex = staggerIndex,
-                    onPress = { 
-                        keyboardController?.hide()
-                        onMovieClick(movie) 
-                    },
-                    onAction = { onToggleFavorite(movie) },
-                    onLongPress = { m, pressOffset, cardPos ->
-                        onLongPress(m, pressOffset, cardPos)
-                    },
-                    onMessage = { onEmitMessage(it) }
-                )
+                if (!aiReason.isNullOrBlank()) {
+                    Column(
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        modifier = Modifier.width(cardWidth)
+                    ) {
+                        MovieCard(
+                            movie = movie,
+                            cardWidth = cardWidth,
+                            isFavorite = movieStatus?.favorite ?: false,
+                            isWatched = movieStatus?.watched ?: false,
+                            isReminder = movieStatus?.reminder ?: false,
+                            progress = movieStatus?.progress?.toFloat() ?: 0f,
+                            personalRating = movieStatus?.personalRating,
+                            folderColors = folderColors,
+                            showFolderBookmarks = showFolderBookmarks,
+                            hasAnimatedSet = hasAnimatedSet,
+                            animatedVisibilityScope = animatedVisibilityScope,
+                            staggerIndex = staggerIndex,
+                            onPress = { 
+                                keyboardController?.hide()
+                                onMovieClick(movie) 
+                            },
+                            onAction = { onToggleFavorite(movie) },
+                            onLongPress = { m, pressOffset, cardPos ->
+                                onLongPress(m, pressOffset, cardPos)
+                            },
+                            onMessage = { onEmitMessage(it) }
+                        )
+                        Spacer(modifier = Modifier.height(4.dp))
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .background(Color.White.copy(alpha = 0.07f), RoundedCornerShape(8.dp))
+                                .padding(horizontal = 6.dp, vertical = 4.dp)
+                        ) {
+                            Text(
+                                text = aiReason,
+                                style = MaterialTheme.typography.bodySmall.copy(
+                                    fontSize = 9.5.sp,
+                                    fontStyle = FontStyle.Italic,
+                                    lineHeight = 12.5.sp
+                                ),
+                                color = Color.White.copy(alpha = 0.88f),
+                                maxLines = 2,
+                                overflow = TextOverflow.Ellipsis
+                            )
+                        }
+                    }
+                } else {
+                    MovieCard(
+                        movie = movie,
+                        cardWidth = cardWidth,
+                        isFavorite = movieStatus?.favorite ?: false,
+                        isWatched = movieStatus?.watched ?: false,
+                        isReminder = movieStatus?.reminder ?: false,
+                        progress = movieStatus?.progress?.toFloat() ?: 0f,
+                        personalRating = movieStatus?.personalRating,
+                        folderColors = folderColors,
+                        showFolderBookmarks = showFolderBookmarks,
+                        hasAnimatedSet = hasAnimatedSet,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        staggerIndex = staggerIndex,
+                        onPress = { 
+                            keyboardController?.hide()
+                            onMovieClick(movie) 
+                        },
+                        onAction = { onToggleFavorite(movie) },
+                        onLongPress = { m, pressOffset, cardPos ->
+                            onLongPress(m, pressOffset, cardPos)
+                        },
+                        onMessage = { onEmitMessage(it) }
+                    )
+                }
             }
         }
     }
@@ -747,6 +800,7 @@ fun LazyGridScope.searchResultsGridSection(
     ) { index, item ->
         when (item) {
             is TMDBSearchResult.MovieResult -> {
+                val effectiveOverview = item.aiReason ?: item.overview
                 val baseMovie = Movie(
                     id = item.id,
                     mediaType = "movie",
@@ -755,11 +809,15 @@ fun LazyGridScope.searchResultsGridSection(
                     backdropPath = item.backdropPath,
                     voteAverage = item.voteAverage,
                     releaseDate = item.releaseDate,
-                    overview = item.overview,
+                    overview = effectiveOverview,
                     genreIds = item.genreIds
                 )
                 val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
-                val movie = movieStatus ?: baseMovie
+                val movie = if (item.aiReason != null && movieStatus != null) {
+                    movieStatus.copy(overview = item.aiReason)
+                } else {
+                    movieStatus ?: baseMovie
+                }
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
                 SearchGridMovieItem(
                     modifier = Modifier.animateItem(
@@ -780,6 +838,7 @@ fun LazyGridScope.searchResultsGridSection(
                     animatedVisibilityScope = animatedVisibilityScope,
                     staggerIndex = index,
                     keyboardController = keyboardController,
+                    aiReason = item.aiReason,
                     onMovieClick = onMovieClick,
                     onToggleFavorite = onToggleFavorite,
                     onLongPress = onLongPress,
@@ -820,6 +879,7 @@ fun LazyGridScope.searchResultsGridSection(
                     animatedVisibilityScope = animatedVisibilityScope,
                     staggerIndex = index,
                     keyboardController = keyboardController,
+                    aiReason = item.aiReason,
                     onMovieClick = onMovieClick,
                     onToggleFavorite = onToggleFavorite,
                     onLongPress = onLongPress,

@@ -2136,4 +2136,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • AFL. %2$s</string>
     <string name="editorial_episode_scope">AFL. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Beschrijf de sfeer of filmstemming...</string>
+    <string name="search_tab_mood">SFEER</string>
+    <string name="search_mood_badge_label">Cinema Stemmingszoeker</string>
+    <string name="search_mood_quota_format">%1$d/3 vandaag</string>
+    <string name="search_mood_quota_exhausted_short">0/3 vandaag</string>
+    <string name="search_mood_quota_local_unlimited">Onbeperkt</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">Algoritme</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Beschrijf in je eigen woorden wat je wilt kijken. AI vindt de perfecte films in de hele TMDB-catalogus.</string>
+    <string name="search_mood_exhausted_notice">Je hebt al je 3 stemmingszoekopdrachten voor vandaag gebruikt. Ze worden om middernacht vernieuwd!</string>
+    <string name="search_mood_inspirations_header">Snelle inspiratie:</string>
+    <string name="search_mood_analyzing">AI doorzoekt de filmcatalogus...</string>
+    <string name="mood_insp_1_title">Detectivethriller in de regen</string>
+    <string name="mood_insp_1_prompt">Detectivethriller in de regen</string>
+    <string name="mood_insp_2_title">Filosofische scifi in de diepe ruimte</string>
+    <string name="mood_insp_2_prompt">Filosofische scifi in de diepe ruimte</string>
+    <string name="mood_insp_3_title">Cynische en bitterzoete komedie</string>
+    <string name="mood_insp_3_prompt">Cynische en bitterzoete komedie</string>
+    <string name="mood_insp_4_title">Folkhorror in eeuwenoude bossen</string>
+    <string name="mood_insp_4_prompt">Folkhorror in eeuwenoude bossen</string>
+    <string name="mood_insp_5_title">Psychologisch drama in één kamer</string>
+    <string name="mood_insp_5_prompt">Psychologisch drama in één kamer</string>
+    <string name="mood_insp_6_title">Nachtelijke cyberpunk met regen en neon</string>
+    <string name="mood_insp_6_prompt">Nachtelijke cyberpunk met regen en neon</string>
+    <string name="mood_insp_7_title">Avontuur en overleving op volle zee</string>
+    <string name="mood_insp_7_prompt">Avontuur en overleving op volle zee</string>
+    <string name="mood_insp_8_title">Rauwe auteursmisdaadfilm uit de jaren 70</string>
+    <string name="mood_insp_8_prompt">Rauwe auteursmisdaadfilm uit de jaren 70</string>
 </resources>

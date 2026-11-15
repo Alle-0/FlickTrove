@@ -2176,4 +2176,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">원하는 분위기나 감정을 입력하세요...</string>
+    <string name="search_tab_mood">분위기</string>
+    <string name="search_mood_badge_label">시네마 무드 탐색</string>
+    <string name="search_mood_quota_format">오늘 %1$d/3</string>
+    <string name="search_mood_quota_exhausted_short">오늘 0/3</string>
+    <string name="search_mood_quota_local_unlimited">무제한</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">알고리즘</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. AI가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
+    <string name="search_mood_exhausted_notice">오늘 제공된 5회의 무드 검색을 모두 사용했습니다. 자정에 충전됩니다!</string>
+    <string name="search_mood_inspirations_header">빠른 영감:</string>
+    <string name="search_mood_analyzing">AI가 영화 카탈로그를 탐색하고 있습니다...</string>
+    <string name="mood_insp_1_title">비 내리는 도시의 수사 스릴러</string>
+    <string name="mood_insp_1_prompt">비 내리는 도시의 수사 스릴러</string>
+    <string name="mood_insp_2_title">깊은 우주 속 철학적 SF</string>
+    <string name="mood_insp_2_prompt">깊은 우주 속 철학적 SF</string>
+    <string name="mood_insp_3_title">씁쓸하고 냉소적인 블랙 코미디</string>
+    <string name="mood_insp_3_prompt">씁쓸하고 냉소적인 블랙 코미디</string>
+    <string name="mood_insp_4_title">고대 숲과 미스터리 포크 호러</string>
+    <string name="mood_insp_4_prompt">고대 숲과 미스터리 포크 호러</string>
+    <string name="mood_insp_5_title">단 하나의 방에서 펼쳐지는 심리 드라마</string>
+    <string name="mood_insp_5_prompt">단 하나의 방에서 펼쳐지는 심리 드라마</string>
+    <string name="mood_insp_6_title">비와 네온사인 가득한 심야 사이버펑크</string>
+    <string name="mood_insp_6_prompt">비와 네온사인 가득한 심야 사이버펑크</string>
+    <string name="mood_insp_7_title">거친 대양에서의 생존과 모험</string>
+    <string name="mood_insp_7_prompt">거친 대양에서의 생존과 모험</string>
+    <string name="mood_insp_8_title">70년대 감성의 묵직한 작가주의 범죄물</string>
+    <string name="mood_insp_8_prompt">70년대 감성의 묵직한 작가주의 범죄물</string>
 </resources>

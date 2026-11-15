@@ -2175,4 +2175,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • ÉP. %2$s</string>
     <string name="editorial_episode_scope">ÉP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Décrivez l\'ambiance ou le style de film...</string>
+    <string name="search_tab_mood">HUMEUR</string>
+    <string name="search_mood_badge_label">Découverte Cinéma selon l\'Humeur</string>
+    <string name="search_mood_quota_format">%1$d/3 aujourd\'hui</string>
+    <string name="search_mood_quota_exhausted_short">0/3 aujourd\'hui</string>
+    <string name="search_mood_quota_local_unlimited">Illimité</string>
+    <string name="search_mood_mode_ai">IA</string>
+    <string name="search_mood_mode_local">Algorithme</string>
+    <string name="search_mood_mode_ai_tab">IA • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Décrivez avec vos propres mots ce que vous souhaitez regarder. L\'IA trouvera les films idéaux dans tout le catalogue TMDB.</string>
+    <string name="search_mood_exhausted_notice">Vous avez utilisé vos 3 recherches d\'humeur pour aujourd\'hui. Elles se rechargeront à minuit !</string>
+    <string name="search_mood_inspirations_header">Inspirations rapides :</string>
+    <string name="search_mood_analyzing">L\'IA explore le catalogue cinéma...</string>
+    <string name="mood_insp_1_title">Thriller policier sous la pluie</string>
+    <string name="mood_insp_1_prompt">Thriller policier sous la pluie</string>
+    <string name="mood_insp_2_title">Science-fiction philosophique dans l\'espace</string>
+    <string name="mood_insp_2_prompt">Science-fiction philosophique dans l\'espace</string>
+    <string name="mood_insp_3_title">Comédie cynique et douce-amère</string>
+    <string name="mood_insp_3_prompt">Comédie cynique et douce-amère</string>
+    <string name="mood_insp_4_title">Folk horror et forêts mystérieuses</string>
+    <string name="mood_insp_4_prompt">Folk horror et forêts mystérieuses</string>
+    <string name="mood_insp_5_title">Drame psychologique en huis clos</string>
+    <string name="mood_insp_5_prompt">Drame psychologique en huis clos</string>
+    <string name="mood_insp_6_title">Cyberpunk nocturne sous la pluie et le néon</string>
+    <string name="mood_insp_6_prompt">Cyberpunk nocturne sous la pluie et le néon</string>
+    <string name="mood_insp_7_title">Aventure et survie en haute mer</string>
+    <string name="mood_insp_7_prompt">Aventure et survie en haute mer</string>
+    <string name="mood_insp_8_title">Polar d\'auteur rugueux des années 70</string>
+    <string name="mood_insp_8_prompt">Polar d\'auteur rugueux des années 70</string>
 </resources>

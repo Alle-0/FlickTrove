@@ -2158,4 +2158,35 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
 
     <string name="editorial_season_episode_scope">Σ%1$s • ΕΠ. %2$s</string>
     <string name="editorial_episode_scope">ΕΠ. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Περιγράψτε την ατμόσφαιρα ή τη διάθεση της ταινίας...</string>
+    <string name="search_tab_mood">ΔΙΑΘΕΣΗ</string>
+    <string name="search_mood_badge_label">Κινηματογραφική Ανακάλυψη Διάθεσης</string>
+    <string name="search_mood_quota_format">%1$d/3 σήμερα</string>
+    <string name="search_mood_quota_exhausted_short">0/3 σήμερα</string>
+    <string name="search_mood_quota_local_unlimited">Απεριόριστο</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">Αλγόριθμος</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Περιγράψτε με δικά σας λόγια τι θέλετε να παρακολουθήσετε. Το AI θα βρει τις ιδανικές ταινίες σε ολόκληρο τον κατάλογο του TMDB.</string>
+    <string name="search_mood_exhausted_notice">Χρησιμοποιήσατε και τις 3 αναζητήσεις διάθεσης για σήμερα. Θα ανανεωθούν τα μεσάνυχτα!</string>
+    <string name="search_mood_inspirations_header">Γρήγορη έμπνευση:</string>
+    <string name="search_mood_analyzing">Το AI εξερευνά τον κινηματογραφικό κατάλογο...</string>
+    <string name="mood_insp_1_title">Αστυνομικό θρίλερ υπό βροχή</string>
+    <string name="mood_insp_1_prompt">Αστυνομικό θρίλερ υπό βροχή</string>
+    <string name="mood_insp_2_title">Φιλοσοφική επιστημονική φαντασία στο διάστημα</string>
+    <string name="mood_insp_2_prompt">Φιλοσοφική επιστημονική φαντασία στο διάστημα</string>
+    <string name="mood_insp_3_title">Κυνική και γλυκόπικρη κωμωδία</string>
+    <string name="mood_insp_3_prompt">Κυνική και γλυκόπικρη κωμωδία</string>
+    <string name="mood_insp_4_title">Φολκλόρ τρόμος σε αρχαία δάση</string>
+    <string name="mood_insp_4_prompt">Φολκλόρ τρόμος σε αρχαία δάση</string>
+    <string name="mood_insp_5_title">Ψυχολογικό δράμα δωματίου</string>
+    <string name="mood_insp_5_prompt">Ψυχολογικό δράμα δωματίου</string>
+    <string name="mood_insp_6_title">Νυχτερινό cyberpunk με βροχή και νέον</string>
+    <string name="mood_insp_6_prompt">Νυχτερινό cyberpunk με βροχή και νέον</string>
+    <string name="mood_insp_7_title">Περιπέτεια και επιβίωση στην ανοιχτή θάλασσα</string>
+    <string name="mood_insp_7_prompt">Περιπέτεια και επιβίωση στην ανοιχτή θάλασσα</string>
+    <string name="mood_insp_8_title">Ρεαλιστικό αστυνομικό έργο της δεκαετίας του 70</string>
+    <string name="mood_insp_8_prompt">Ρεαλιστικό αστυνομικό έργο της δεκαετίας του 70</string>
 </resources>

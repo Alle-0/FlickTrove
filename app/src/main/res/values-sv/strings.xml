@@ -2155,4 +2155,35 @@ Prova att förenkla sökningen</string>
 
     <string name="editorial_season_episode_scope">S%1$s • AVSN. %2$s</string>
     <string name="editorial_episode_scope">AVSN. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Beskriv stämningen eller filmens ton...</string>
+    <string name="search_tab_mood">STÄMNING</string>
+    <string name="search_mood_badge_label">Upptäck film efter stämning</string>
+    <string name="search_mood_quota_format">%1$d/3 i dag</string>
+    <string name="search_mood_quota_exhausted_short">0/3 i dag</string>
+    <string name="search_mood_quota_local_unlimited">Obegränsat</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">Algoritm</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Beskriv med egna ord vad du vill se. AI hittar de perfekta filmerna i hela TMDB-katalogen.</string>
+    <string name="search_mood_exhausted_notice">Du har använt alla 3 stämningssökningar för i dag. De återställs vid midnatt!</string>
+    <string name="search_mood_inspirations_header">Snabb inspiration:</string>
+    <string name="search_mood_analyzing">AI utforskar filmkatalogen...</string>
+    <string name="mood_insp_1_title">Detektivthriller i regnet</string>
+    <string name="mood_insp_1_prompt">Detektivthriller i regnet</string>
+    <string name="mood_insp_2_title">Filosofisk sci-fi i rymdens ensamhet</string>
+    <string name="mood_insp_2_prompt">Filosofisk sci-fi i rymdens ensamhet</string>
+    <string name="mood_insp_3_title">Cynisk och bittersöt komedi</string>
+    <string name="mood_insp_3_prompt">Cynisk och bittersöt komedi</string>
+    <string name="mood_insp_4_title">Folkskräck i uråldriga skogar</string>
+    <string name="mood_insp_4_prompt">Folkskräck i uråldriga skogar</string>
+    <string name="mood_insp_5_title">Psykologiskt kammarspel i ett rum</string>
+    <string name="mood_insp_5_prompt">Psykologiskt kammarspel i ett rum</string>
+    <string name="mood_insp_6_title">Nattlig cyberpunk i regn och neon</string>
+    <string name="mood_insp_6_prompt">Nattlig cyberpunk i regn och neon</string>
+    <string name="mood_insp_7_title">Äventyr och överlevnad på öppet hav</string>
+    <string name="mood_insp_7_prompt">Äventyr och överlevnad på öppet hav</string>
+    <string name="mood_insp_8_title">Rå och realistisk författarkriminalfilm från 70-talet</string>
+    <string name="mood_insp_8_prompt">Rå och realistisk författarkriminalfilm från 70-talet</string>
 </resources>

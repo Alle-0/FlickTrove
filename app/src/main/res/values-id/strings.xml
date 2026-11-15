@@ -2175,4 +2175,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Jelaskan suasana atau suasana hati film...</string>
+    <string name="search_tab_mood">SUASANA</string>
+    <string name="search_mood_badge_label">Eksplorasi Suasana Bioskop</string>
+    <string name="search_mood_quota_format">%1$d/3 hari ini</string>
+    <string name="search_mood_quota_exhausted_short">0/3 hari ini</string>
+    <string name="search_mood_quota_local_unlimited">Tak Terbatas</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">Algoritma</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Jelaskan dengan kata-kata Anda sendiri apa yang ingin Anda tonton. AI akan menemukan film ideal di seluruh katalog TMDB.</string>
+    <string name="search_mood_exhausted_notice">Anda telah menggunakan 3 pencarian suasana hari ini. Kuota akan diperbarui pada tengah malam!</string>
+    <string name="search_mood_inspirations_header">Inspirasi cepat:</string>
+    <string name="search_mood_analyzing">AI sedang menjelajahi katalog film...</string>
+    <string name="mood_insp_1_title">Thriller detektif di tengah hujan</string>
+    <string name="mood_insp_1_prompt">Thriller detektif di tengah hujan</string>
+    <string name="mood_insp_2_title">Fiksi ilmiah filosofis di luar angkasa</string>
+    <string name="mood_insp_2_prompt">Fiksi ilmiah filosofis di luar angkasa</string>
+    <string name="mood_insp_3_title">Komedi sinis dan pahit-manis</string>
+    <string name="mood_insp_3_prompt">Komedi sinis dan pahit-manis</string>
+    <string name="mood_insp_4_title">Folk horror di hutan purba penuh misteri</string>
+    <string name="mood_insp_4_prompt">Folk horror di hutan purba penuh misteri</string>
+    <string name="mood_insp_5_title">Drama psikologis intens dalam satu ruangan</string>
+    <string name="mood_insp_5_prompt">Drama psikologis intens dalam satu ruangan</string>
+    <string name="mood_insp_6_title">Cyberpunk malam bertabur hujan dan neon</string>
+    <string name="mood_insp_6_prompt">Cyberpunk malam bertabur hujan dan neon</string>
+    <string name="mood_insp_7_title">Petualangan dan bertahan hidup di samudera luas</string>
+    <string name="mood_insp_7_prompt">Petualangan dan bertahan hidup di samudera luas</string>
+    <string name="mood_insp_8_title">Film kriminal auteur realistis era 70-an</string>
+    <string name="mood_insp_8_prompt">Film kriminal auteur realistis era 70-an</string>
 </resources>

@@ -2146,4 +2146,35 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
 
     <string name="editorial_season_episode_scope">S%1$s • ODC. %2$s</string>
     <string name="editorial_episode_scope">ODC. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Opisz klimat lub nastrój filmu...</string>
+    <string name="search_tab_mood">NASTRÓJ</string>
+    <string name="search_mood_badge_label">Kinowe Odkrywanie Nastroju</string>
+    <string name="search_mood_quota_format">%1$d/3 dzisiaj</string>
+    <string name="search_mood_quota_exhausted_short">0/3 dzisiaj</string>
+    <string name="search_mood_quota_local_unlimited">Bez limitu</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">Algorytm</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Opisz własnymi słowami, co chcesz obejrzeć. AI znajdzie idealne filmy w całym katalogu TMDB.</string>
+    <string name="search_mood_exhausted_notice">Wykorzystano wszystkie 3 wyszukiwań nastroju na dziś. Odnowią się o północy!</string>
+    <string name="search_mood_inspirations_header">Szybkie inspiracje:</string>
+    <string name="search_mood_analyzing">AI przeszukuje katalog filmowy...</string>
+    <string name="mood_insp_1_title">Mroczny kryminał w strugach deszczu</string>
+    <string name="mood_insp_1_prompt">Mroczny kryminał w strugach deszczu</string>
+    <string name="mood_insp_2_title">Filozoficzne sci-fi w głębokim kosmosie</string>
+    <string name="mood_insp_2_prompt">Filozoficzne sci-fi w głębokim kosmosie</string>
+    <string name="mood_insp_3_title">Cyniczna i słodko-gorzka komedia</string>
+    <string name="mood_insp_3_prompt">Cyniczna i słodko-gorzka komedia</string>
+    <string name="mood_insp_4_title">Folk horror w prastarych lasach</string>
+    <string name="mood_insp_4_prompt">Folk horror w prastarych lasach</string>
+    <string name="mood_insp_5_title">Kameralny dramat psychologiczny w jednym pokoju</string>
+    <string name="mood_insp_5_prompt">Kameralny dramat psychologiczny w jednym pokoju</string>
+    <string name="mood_insp_6_title">Nocny cyberpunk w deszczu i neonach</string>
+    <string name="mood_insp_6_prompt">Nocny cyberpunk w deszczu i neonach</string>
+    <string name="mood_insp_7_title">Morska przygoda i walka o przetrwanie</string>
+    <string name="mood_insp_7_prompt">Morska przygoda i walka o przetrwanie</string>
+    <string name="mood_insp_8_title">Mocny kryminał autorski z lat 70.</string>
+    <string name="mood_insp_8_prompt">Mocny kryminał autorski z lat 70.</string>
 </resources>

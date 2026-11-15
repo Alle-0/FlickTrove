@@ -2133,4 +2133,35 @@
 
     <string name="editorial_season_episode_scope">م%1$s • ح%2$s</string>
     <string name="editorial_episode_scope">الحلقة %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">صِف الأجواء أو مزاج الفيلم...</string>
+    <string name="search_tab_mood">المزاج</string>
+    <string name="search_mood_badge_label">اكتشاف المزاج السينمائي</string>
+    <string name="search_mood_quota_format">%1$d/3 اليوم</string>
+    <string name="search_mood_quota_exhausted_short">0/3 اليوم</string>
+    <string name="search_mood_quota_local_unlimited">غير محدود</string>
+    <string name="search_mood_mode_ai">ذكاء اصطناعي</string>
+    <string name="search_mood_mode_local">خوارزمية</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">صِف بكلماتك الخاصة ما ترغب في مشاهدته. سيعثر الذكاء الاصطناعي على الأفلام المثالية عبر كتالوج TMDB بالكامل.</string>
+    <string name="search_mood_exhausted_notice">لقد استنفدت عمليات البحث الثلاث لهذا اليوم. ستتجدد عند منتصف الليل!</string>
+    <string name="search_mood_inspirations_header">إلهام سريع:</string>
+    <string name="search_mood_analyzing">الذكاء الاصطناعي يستكشف الكتالوج السينمائي...</string>
+    <string name="mood_insp_1_title">فيلم تحقيق بوليسي تحت المطر</string>
+    <string name="mood_insp_1_prompt">فيلم تحقيق بوليسي تحت المطر</string>
+    <string name="mood_insp_2_title">خيال علمي فلسفي في الفضاء العميق</string>
+    <string name="mood_insp_2_prompt">خيال علمي فلسفي في الفضاء العميق</string>
+    <string name="mood_insp_3_title">كوميديا ساخرة وحلوة ومرة</string>
+    <string name="mood_insp_3_prompt">كوميديا ساخرة وحلوة ومرة</string>
+    <string name="mood_insp_4_title">رعب فلكلوري في الغابات القديمة</string>
+    <string name="mood_insp_4_prompt">رعب فلكلوري في الغابات القديمة</string>
+    <string name="mood_insp_5_title">دراما نفسية مكثفة في غرفة واحدة</string>
+    <string name="mood_insp_5_prompt">دراما نفسية مكثفة في غرفة واحدة</string>
+    <string name="mood_insp_6_title">سايبربانك ليلي مع المطر وأضواء النيون</string>
+    <string name="mood_insp_6_prompt">سايبربانك ليلي مع المطر وأضواء النيون</string>
+    <string name="mood_insp_7_title">مغامرة وبقاء ملحمي في عرض المحيط</string>
+    <string name="mood_insp_7_prompt">مغامرة وبقاء ملحمي في عرض المحيط</string>
+    <string name="mood_insp_8_title">فيلم جريمة بوليسي كلاسيكي من السبعينيات</string>
+    <string name="mood_insp_8_prompt">فيلم جريمة بوليسي كلاسيكي من السبعينيات</string>
 </resources>

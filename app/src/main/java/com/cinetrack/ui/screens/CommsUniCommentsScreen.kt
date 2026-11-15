@@ -231,6 +231,7 @@ class CommsUniCommentsScreen(
         var commsUniButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var writingTipsButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var episodesButtonBounds by remember { mutableStateOf<Rect?>(null) }
+        var gifButtonBounds by remember { mutableStateOf<Rect?>(null) }
         var selectedMediaTags by androidx.compose.runtime.saveable.rememberSaveable(
             stateSaver = androidx.compose.runtime.saveable.listSaver(
                 save = { list ->
@@ -810,7 +811,10 @@ class CommsUniCommentsScreen(
                     onRemoveMedia = { removedUrl -> viewModel.deleteDraftCommentImage(removedUrl) },
                     isUploadingImage = isUploadingImage,
                     onPickImage = launchMediaChooser,
-                    onPickGif = { showGifPicker = true },
+                    onPickGif = { bounds ->
+                        gifButtonBounds = bounds
+                        showGifPicker = true
+                    },
                     onSendComment = {
                         if (inputText.text.isNotBlank() || attachedMedia.isNotEmpty()) {
                             val pId = replyingTo?.id
@@ -875,6 +879,7 @@ class CommsUniCommentsScreen(
             // GIF Picker Modal Overlay (Root level for full screen blur & safe insets)
             com.cinetrack.ui.components.comments.GifPickerModal(
                 isVisible = showGifPicker,
+                triggerBounds = gifButtonBounds,
                 onDismiss = { showGifPicker = false },
                 hazeState = globalHazeState,
                 accentColor = accentColor,

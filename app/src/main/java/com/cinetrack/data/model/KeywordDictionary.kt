@@ -3,6 +3,14 @@ package com.cinetrack.data.model
 object KeywordDictionary {
     // Mappa massiva generata di parole chiave (1.185 voci in italiano, 1.193 in inglese per 1.125 ID TMDB unici)
     val italianToTmdbKeywordIds = mapOf(
+        "poliziottesco" to 6149L, "giallo all'italiana" to 190479L, "giallo" to 12570L, "splatter" to 10292L,
+        "folk horror" to 10310L, "cosmic horror" to 177895L, "body horror" to 283085L, "lovecraftiano" to 177895L,
+        "peplum" to 5049L, "cappa e spada" to 1400L, "wuxia" to 779L, "space opera" to 195114L,
+        "heist" to 10051L, "colpo grosso" to 10051L, "hardboiled" to 703L, "whodunit" to 12570L,
+        "legal thriller" to 6148L, "processuale" to 11038L, "commedia all'italiana" to 35L, "commedia nera" to 10125L,
+        "demenziale" to 9716L, "mockumentary" to 11800L, "home invasion" to 10582L, "chanbara" to 1462L,
+        "western crepuscolare" to 37L, "sommergibile" to 1815L, "sottomarino" to 1815L, "spy story" to 470L,
+        "disaster movie" to 3521L, "catastrofico" to 3521L, "kaiju" to 161791L, "mecha" to 10046L,
         "distopia" to 4565L, "spazio" to 9882L, "alieni" to 9951L, "post-apocalittico" to 359337L,
         "cyberpunk" to 12190L, "robot" to 14544L, "viaggi nel tempo" to 4379L, "magia" to 2343L,
         "streghe" to 616L, "drago" to 12554L, "supereroi" to 9715L, "clonazione" to 11628L,
@@ -40,7 +48,7 @@ object KeywordDictionary {
         "attentato" to 441L, "rapimento" to 1930L, "ostaggio" to 1562L, "riscatto" to 1336L,
         "fuga dalla prigione" to 9777L, "evasione" to 9777L, "omicidio" to 9826L, "indagine" to 5340L,
         "detective" to 703L, "fbi" to 1812L, "cia" to 352434L, "kgb" to 3278L,
-        "mi6" to 14555L, "spionaggio" to 5265L, "agente segreto" to 4289L, "infiltrato" to 1568L,
+        "mi6" to 14555L, "spionaggio" to 5265L, "agente segreto" to 4289L, "agenzia segreta" to 2908L, "infiltrato" to 1568L, "gadget" to 10683L,
         "doppiogiochista" to 3637L, "inganno" to 9758L, "complotto" to 10410L, "società segreta" to 2908L,
         "illuminati" to 5960L, "massoneria" to 221928L, "crimine organizzato" to 10291L, "yakuza" to 1794L,
         "triade" to 41383L, "cartello della droga" to 10175L, "traffico di droga" to 2149L, "spacciatore" to 2231L,
@@ -344,7 +352,7 @@ object KeywordDictionary {
         "assassination" to 441L, "kidnapping" to 1930L, "hostage" to 1562L, "ransom" to 1336L,
         "prison escape" to 9777L, "escape" to 9777L, "murder" to 9826L, "investigation" to 5340L,
         "detective" to 703L, "fbi" to 1812L, "cia" to 352434L, "kgb" to 3278L,
-        "mi6" to 14555L, "espionage" to 5265L, "secret agent" to 4289L, "undercover" to 1568L,
+        "mi6" to 14555L, "espionage" to 5265L, "secret agent" to 4289L, "secret agency" to 2908L, "undercover" to 1568L, "gadget" to 10683L,
         "double agent" to 3637L, "deception" to 9758L, "conspiracy" to 10410L, "secret society" to 2908L,
         "illuminati" to 5960L, "freemasonry" to 221928L, "organized crime" to 10291L, "yakuza" to 1794L,
         "triad" to 41383L, "drug cartel" to 10175L, "drug trafficking" to 2149L, "drug dealer" to 2231L,

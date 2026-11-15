@@ -2156,4 +2156,35 @@ Trakt ➔ Додаток: 6 год</string>
 
     <string name="editorial_season_episode_scope">С%1$s • ЕП. %2$s</string>
     <string name="editorial_episode_scope">ЕП. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Опишіть атмосферу або настрій фільму...</string>
+    <string name="search_tab_mood">НАСТРІЙ</string>
+    <string name="search_mood_badge_label">Кінопошук за настроєм</string>
+    <string name="search_mood_quota_format">%1$d/3 сьогодні</string>
+    <string name="search_mood_quota_exhausted_short">0/3 сьогодні</string>
+    <string name="search_mood_quota_local_unlimited">Необмежено</string>
+    <string name="search_mood_mode_ai">ШІ</string>
+    <string name="search_mood_mode_local">Алгоритм</string>
+    <string name="search_mood_mode_ai_tab">ШІ • %1$d</string>
+    <string name="search_mood_mode_local_tab">АЛГО • ∞</string>
+    <string name="search_mood_intro_text">Опишіть власними словами, що ви хочете подивитися. ШІ підбере ідеальні фільми з усього каталогу TMDB.</string>
+    <string name="search_mood_exhausted_notice">Ви використали всі 3 пошуків за настроєм на сьогодні. Вони відновляться опівночі!</string>
+    <string name="search_mood_inspirations_header">Швидке натхнення:</string>
+    <string name="search_mood_analyzing">ШІ досліджує кінокаталог...</string>
+    <string name="mood_insp_1_title">Детективний трилер під дощем</string>
+    <string name="mood_insp_1_prompt">Детективний трилер під дощем</string>
+    <string name="mood_insp_2_title">Філософська наукова фантастика в космосі</string>
+    <string name="mood_insp_2_prompt">Філософська наукова фантастика в космосі</string>
+    <string name="mood_insp_3_title">Цинічна та гірко-солодка комедія</string>
+    <string name="mood_insp_3_prompt">Цинічна та гірко-солодка комедія</string>
+    <string name="mood_insp_4_title">Фолк-горор у стародавніх лісах</string>
+    <string name="mood_insp_4_prompt">Фолк-горор у стародавніх лісах</string>
+    <string name="mood_insp_5_title">Психологічна драма в одній кімнаті</string>
+    <string name="mood_insp_5_prompt">Психологічна драма в одній кімнаті</string>
+    <string name="mood_insp_6_title">Нічний кіберпанк під дощем і неоном</string>
+    <string name="mood_insp_6_prompt">Нічний кіберпанк під дощем і неоном</string>
+    <string name="mood_insp_7_title">Пригоди та виживання у відкритому океані</string>
+    <string name="mood_insp_7_prompt">Пригоди та виживання у відкритому океані</string>
+    <string name="mood_insp_8_title">Авторський кримінальний фільм 70-х років</string>
+    <string name="mood_insp_8_prompt">Авторський кримінальний фільм 70-х років</string>
 </resources>

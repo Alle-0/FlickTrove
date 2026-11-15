@@ -38,6 +38,7 @@ import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.text.font.FontStyle
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
@@ -80,6 +81,7 @@ fun MovieListCard(
     hazeState: HazeState? = null,
     staggerIndex: Int = -1,
     hasAnimatedSet: MutableSet<String>? = null,
+    aiReason: String? = null,
     onPress: (Movie) -> Unit = {},
     onLongPress: (Movie, Offset, Offset) -> Unit = { _, _, _ -> },
     onAction: (Movie) -> Unit = {},
@@ -391,6 +393,21 @@ fun MovieListCard(
                         style = MaterialTheme.typography.bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.Medium),
                         color = MaterialTheme.colorScheme.primary.copy(alpha = 0.90f),
                         maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
+
+                if (!aiReason.isNullOrBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = aiReason,
+                        style = MaterialTheme.typography.bodySmall.copy(
+                            fontSize = 11.sp,
+                            fontStyle = FontStyle.Italic,
+                            lineHeight = 14.sp
+                        ),
+                        color = Color.White.copy(alpha = 0.88f),
+                        maxLines = 2,
                         overflow = TextOverflow.Ellipsis
                     )
                 }

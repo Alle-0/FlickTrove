@@ -237,6 +237,12 @@ fun CategoryTabSelector(
         val primaryColor = indicatorColor ?: MaterialTheme.colorScheme.primary
         val pillPath = remember { Path() }
 
+        val indicatorAlpha by animateFloatAsState(
+            targetValue = if (indicatorColor == Color.Transparent) 0f else 1f,
+            animationSpec = tween(durationMillis = 220),
+            label = "indicatorAlpha"
+        )
+
         Box(
             modifier = Modifier
                 .width(realTabWidth * options.size)
@@ -406,6 +412,7 @@ fun CategoryTabSelector(
             Box(
                 modifier = Modifier
                     .matchParentSize()
+                    .graphicsLayer { alpha = indicatorAlpha }
                     .drawBehind {
                         val currentLeft = animLeft.value
                         val currentRight = animRight.value

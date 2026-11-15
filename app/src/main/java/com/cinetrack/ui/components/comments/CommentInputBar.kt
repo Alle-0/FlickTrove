@@ -111,7 +111,7 @@ fun CommentInputBar(
     onRemoveMedia: ((String) -> Unit)? = null,
     isUploadingImage: Boolean,
     onPickImage: () -> Unit,
-    onPickGif: () -> Unit = {},
+    onPickGif: (Rect?) -> Unit = {},
     onSendComment: () -> Unit,
     accentColor: Color,
     hazeState: HazeState,
@@ -677,11 +677,15 @@ fun CommentInputBar(
                                 Spacer(modifier = Modifier.width(6.dp))
 
                                 // GIF
+                                var gifButtonBounds by remember { mutableStateOf<Rect?>(null) }
                                 Box(
                                     modifier = Modifier
                                         .size(32.dp)
+                                        .onGloballyPositioned { coords ->
+                                            gifButtonBounds = coords.boundsInWindow()
+                                        }
                                         .bounceClick(enabled = attachedMedia.isEmpty()) {
-                                            onPickGif()
+                                            onPickGif(gifButtonBounds)
                                         }
                                         .clip(CircleShape)
                                         .background(Color.White.copy(alpha = 0.05f)),

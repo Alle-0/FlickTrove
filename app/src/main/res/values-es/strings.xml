@@ -2174,4 +2174,35 @@
 
     <string name="editorial_season_episode_scope">T%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Describe el ambiente o el estado de ánimo...</string>
+    <string name="search_tab_mood">ESTADO DE ÁNIMO</string>
+    <string name="search_mood_badge_label">Descubrimiento por Ánimo de Cine</string>
+    <string name="search_mood_quota_format">%1$d/3 hoy</string>
+    <string name="search_mood_quota_exhausted_short">0/3 hoy</string>
+    <string name="search_mood_quota_local_unlimited">Ilimitado</string>
+    <string name="search_mood_mode_ai">IA</string>
+    <string name="search_mood_mode_local">Algoritmo</string>
+    <string name="search_mood_mode_ai_tab">IA • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Describe con tus propias palabras lo que deseas ver. La IA encontrará las películas ideales en todo el catálogo de TMDB.</string>
+    <string name="search_mood_exhausted_notice">Has utilizado las 3 búsquedas por estado de ánimo de hoy. Se restablecerán esta noche a medianoche.</string>
+    <string name="search_mood_inspirations_header">Inspiraciones rápidas:</string>
+    <string name="search_mood_analyzing">La IA está explorando el catálogo cinematográfico...</string>
+    <string name="mood_insp_1_title">Thriller policíaco bajo la lluvia</string>
+    <string name="mood_insp_1_prompt">Thriller policíaco bajo la lluvia</string>
+    <string name="mood_insp_2_title">Ciencia ficción filosófica en el espacio</string>
+    <string name="mood_insp_2_prompt">Ciencia ficción filosófica en el espacio</string>
+    <string name="mood_insp_3_title">Comedia cínica y agridulce</string>
+    <string name="mood_insp_3_prompt">Comedia cínica y agridulce</string>
+    <string name="mood_insp_4_title">Terror folclórico en bosques ancestrales</string>
+    <string name="mood_insp_4_prompt">Terror folclórico en bosques ancestrales</string>
+    <string name="mood_insp_5_title">Drama psicológico en una sola habitación</string>
+    <string name="mood_insp_5_prompt">Drama psicológico en una sola habitación</string>
+    <string name="mood_insp_6_title">Cyberpunk nocturno con lluvia y neón</string>
+    <string name="mood_insp_6_prompt">Cyberpunk nocturno con lluvia y neón</string>
+    <string name="mood_insp_7_title">Aventura y supervivencia en alta mar</string>
+    <string name="mood_insp_7_prompt">Aventura y supervivencia en alta mar</string>
+    <string name="mood_insp_8_title">Cine policíaco de autor de los años 70</string>
+    <string name="mood_insp_8_prompt">Cine policíaco de autor de los años 70</string>
 </resources>

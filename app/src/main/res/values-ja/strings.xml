@@ -2176,4 +2176,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">観たい雰囲気や気分を入力...</string>
+    <string name="search_tab_mood">ムード</string>
+    <string name="search_mood_badge_label">シネマ・ムード・ディスカバリー</string>
+    <string name="search_mood_quota_format">本日 %1$d/3</string>
+    <string name="search_mood_quota_exhausted_short">本日 0/3</string>
+    <string name="search_mood_quota_local_unlimited">無制限</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">アルゴリズム</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">観たい作品の雰囲気を自由に入力してください。AIがTMDBカタログ全体から最適な映画を見つけ出します。</string>
+    <string name="search_mood_exhausted_notice">本日のムード検索上限（5回）に達しました。深夜0時にリセットされます。</string>
+    <string name="search_mood_inspirations_header">おすすめのヒント:</string>
+    <string name="search_mood_analyzing">AIが映画カタログを探索中...</string>
+    <string name="mood_insp_1_title">雨煙る本格サスペンス捜査</string>
+    <string name="mood_insp_1_prompt">雨煙る本格サスペンス捜査</string>
+    <string name="mood_insp_2_title">深宇宙の孤独と哲学的SF</string>
+    <string name="mood_insp_2_prompt">深宇宙の孤独と哲学的SF</string>
+    <string name="mood_insp_3_title">皮肉と哀愁のビタースイート喜劇</string>
+    <string name="mood_insp_3_prompt">皮肉と哀愁のビタースイート喜劇</string>
+    <string name="mood_insp_4_title">古の森と孤立集落のフォークホラー</string>
+    <string name="mood_insp_4_prompt">古の森と孤立集落のフォークホラー</string>
+    <string name="mood_insp_5_title">密室で繰り広げられる心理劇</string>
+    <string name="mood_insp_5_prompt">密室で繰り広げられる心理劇</string>
+    <string name="mood_insp_6_title">雨とネオンに煙る電脳サイバーパンク</string>
+    <string name="mood_insp_6_prompt">雨とネオンに煙る電脳サイバーパンク</string>
+    <string name="mood_insp_7_title">大洋の嵐と未知なる海洋アドベンチャー</string>
+    <string name="mood_insp_7_prompt">大洋の嵐と未知なる海洋アドベンチャー</string>
+    <string name="mood_insp_8_title">70年代の骨太で緊迫した作家主義サスペンス</string>
+    <string name="mood_insp_8_prompt">70年代の骨太で緊迫した作家主義サスペンス</string>
 </resources>

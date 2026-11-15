@@ -2173,4 +2173,35 @@
 
     <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">माहौल या फिल्म के मूड का वर्णन करें...</string>
+    <string name="search_tab_mood">मूड</string>
+    <string name="search_mood_badge_label">सिनेमा मूड डिस्कवरी</string>
+    <string name="search_mood_quota_format">आज %1$d/3</string>
+    <string name="search_mood_quota_exhausted_short">आज 0/3</string>
+    <string name="search_mood_quota_local_unlimited">असीमित</string>
+    <string name="search_mood_mode_ai">AI</string>
+    <string name="search_mood_mode_local">एल्गोरिदम</string>
+    <string name="search_mood_mode_ai_tab">AI • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">अपने शब्दों में बताएं कि आप क्या देखना चाहते हैं। एआई पूरे TMDB कैटलॉग से आदर्श फिल्में खोजेगा।</string>
+    <string name="search_mood_exhausted_notice">आपने आज की सभी 3 मूड खोजों का उपयोग कर लिया है। वे आधी रात को रीसेट हो जाएंगी!</string>
+    <string name="search_mood_inspirations_header">त्वरित प्रेरणाएँ:</string>
+    <string name="search_mood_analyzing">एआई सिनेमा कैटलॉग की खोज कर रहा है...</string>
+    <string name="mood_insp_1_title">बारिश में रहस्यमयी जासूसी थ्रिलर</string>
+    <string name="mood_insp_1_prompt">बारिश में रहस्यमयी जासूसी थ्रिलर</string>
+    <string name="mood_insp_2_title">गहरे अंतरिक्ष में दार्शनिक साइंस-फिक्शन</string>
+    <string name="mood_insp_2_prompt">गहरे अंतरिक्ष में दार्शनिक साइंस-फिक्शन</string>
+    <string name="mood_insp_3_title">व्यंग्यात्मक और खट्टी-मीठी कॉमेडी</string>
+    <string name="mood_insp_3_prompt">व्यंग्यात्मक और खट्टी-मीठी कॉमेडी</string>
+    <string name="mood_insp_4_title">प्राचीन जंगलों में लोक हॉरर और रहस्य</string>
+    <string name="mood_insp_4_prompt">प्राचीन जंगलों में लोक हॉरर और रहस्य</string>
+    <string name="mood_insp_5_title">एक ही कमरे में तीव्र मनोवैज्ञानिक ड्रामा</string>
+    <string name="mood_insp_5_prompt">एक ही कमरे में तीव्र मनोवैज्ञानिक ड्रामा</string>
+    <string name="mood_insp_6_title">बारिश और नियॉन लाइट्स में रात का साइबरपंक</string>
+    <string name="mood_insp_6_prompt">बारिश और नियॉन लाइट्स में रात का साइबरपंक</string>
+    <string name="mood_insp_7_title">खुले समंदर में साहसिक रोमांच और अस्तित्व</string>
+    <string name="mood_insp_7_prompt">खुले समंदर में साहसिक रोमांच और अस्तित्व</string>
+    <string name="mood_insp_8_title">70 के दशक का यथार्थवादी क्राइम सिनेमा</string>
+    <string name="mood_insp_8_prompt">70 के दशक का यथार्थवादी क्राइम सिनेमा</string>
 </resources>

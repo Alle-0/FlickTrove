@@ -2158,4 +2158,35 @@ Cod de invitație: %3$s</string>
 
     <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <!-- Cinema Mood Discovery -->
+    <string name="search_placeholder_mood">Descrie atmosfera sau starea filmului...</string>
+    <string name="search_tab_mood">STARE</string>
+    <string name="search_mood_badge_label">Descoperire după Atmosferă</string>
+    <string name="search_mood_quota_format">%1$d/3 astăzi</string>
+    <string name="search_mood_quota_exhausted_short">0/3 astăzi</string>
+    <string name="search_mood_quota_local_unlimited">Nelimitat</string>
+    <string name="search_mood_mode_ai">IA</string>
+    <string name="search_mood_mode_local">Algoritm</string>
+    <string name="search_mood_mode_ai_tab">IA • %1$d</string>
+    <string name="search_mood_mode_local_tab">ALGO • ∞</string>
+    <string name="search_mood_intro_text">Descrie cu propriile cuvinte ce vrei să vizionezi. AI va găsi filmele ideale în întregul catalog TMDB.</string>
+    <string name="search_mood_exhausted_notice">Ai folosit toate cele 3 căutări după atmosferă pentru astăzi. Se vor reîncărca la miezul nopții!</string>
+    <string name="search_mood_inspirations_header">Inspirații rapide:</string>
+    <string name="search_mood_analyzing">AI explorează catalogul cinematografic...</string>
+    <string name="mood_insp_1_title">Thriller polițist în ploaie</string>
+    <string name="mood_insp_1_prompt">Thriller polițist în ploaie</string>
+    <string name="mood_insp_2_title">Science fiction filosofic în spațiul cosmic</string>
+    <string name="mood_insp_2_prompt">Science fiction filosofic în spațiul cosmic</string>
+    <string name="mood_insp_3_title">Comedie cinică și dulce-amăruie</string>
+    <string name="mood_insp_3_prompt">Comedie cinică și dulce-amăruie</string>
+    <string name="mood_insp_4_title">Folk horror în păduri seculare</string>
+    <string name="mood_insp_4_prompt">Folk horror în păduri seculare</string>
+    <string name="mood_insp_5_title">Dramă psihologică într-o singură încăpere</string>
+    <string name="mood_insp_5_prompt">Dramă psihologică într-o singură încăpere</string>
+    <string name="mood_insp_6_title">Cyberpunk nocturn cu ploaie și neoane</string>
+    <string name="mood_insp_6_prompt">Cyberpunk nocturn cu ploaie și neoane</string>
+    <string name="mood_insp_7_title">Aventură și supraviețuire în largul mării</string>
+    <string name="mood_insp_7_prompt">Aventură și supraviețuire în largul mării</string>
+    <string name="mood_insp_8_title">Polițist de autor realist din anii 70</string>
+    <string name="mood_insp_8_prompt">Polițist de autor realist din anii 70</string>
 </resources>
