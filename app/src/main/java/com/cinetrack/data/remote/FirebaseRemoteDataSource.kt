@@ -1,4 +1,4 @@
-﻿package com.cinetrack.data.remote
+package com.cinetrack.data.remote
 
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.Folder
@@ -640,10 +640,11 @@ class FirebaseRemoteDataSource @Inject constructor(
                 
                 if (countDelta != 0L || ratingDelta != 0.0 || finalViewsDelta != 0L) {
                     val weekId = com.cinetrack.util.DateTimeUtils.getIsoWeekId()
+                    val subcollection = if (compositeId.startsWith("tv_")) "tv" else "movies"
                     
                     val weeklyRef = firestore.collection("trending_stats_weekly")
                         .document(weekId)
-                        .collection("movies")
+                        .collection(subcollection)
                         .document(compositeId)
                         
                     val trendingUpdates = mutableMapOf<String, Any>()
@@ -711,9 +712,10 @@ class FirebaseRemoteDataSource @Inject constructor(
             val batch = firestore.batch()
             
             for (update in chunk) {
+                val subcollection = if (update.compositeId.startsWith("tv_")) "tv" else "movies"
                 val weeklyRef = firestore.collection("trending_stats_weekly")
                     .document(weekId)
-                    .collection("movies")
+                    .collection(subcollection)
                     .document(update.compositeId)
                     
                 val trendingUpdates = mutableMapOf<String, Any>()
@@ -752,7 +754,7 @@ class FirebaseRemoteDataSource @Inject constructor(
                 val movies = (globalDoc.get("top10_movies") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
                 val tv = (globalDoc.get("top10_tv") as? List<*>)?.mapNotNull { it as? String } ?: emptyList()
 
-                if (isRecent && (movies.isNotEmpty() || tv.isNotEmpty())) {
+                if (isRecent && movies.isNotEmpty() && tv.isNotEmpty()) {
                     return Pair(movies, tv)
                 }
             }
@@ -764,29 +766,46 @@ class FirebaseRemoteDataSource @Inject constructor(
         val weekIds = com.cinetrack.util.DateTimeUtils.getRecentIsoWeekIds(weeksCount = 4)
 
         return try {
-            val snaps = coroutineScope {
-                weekIds.map { weekId ->
+            val (movieSnaps, tvSnaps) = coroutineScope {
+                val movieDeferred = weekIds.map { weekId ->
                     async {
                         try {
                             firestore.collection("trending_stats_weekly")
                                 .document(weekId)
                                 .collection("movies")
                                 .orderBy("view_count", com.google.firebase.firestore.Query.Direction.DESCENDING)
-                                .limit(100)
+                                .limit(30)
                                 .get()
                                 .await()
                         } catch (e: Exception) {
                             null
                         }
                     }
-                }.awaitAll().filterNotNull()
+                }
+                val tvDeferred = weekIds.map { weekId ->
+                    async {
+                        try {
+                            firestore.collection("trending_stats_weekly")
+                                .document(weekId)
+                                .collection("tv")
+                                .orderBy("view_count", com.google.firebase.firestore.Query.Direction.DESCENDING)
+                                .limit(20)
+                                .get()
+                                .await()
+                        } catch (e: Exception) {
+                            null
+                        }
+                    }
+                }
+                Pair(movieDeferred.awaitAll().filterNotNull(), tvDeferred.awaitAll().filterNotNull())
             }
 
             data class ScoredItem(val compositeId: String, val score: Long)
             val mergedMovieItems = mutableMapOf<String, Long>()
             val mergedTvItems = mutableMapOf<String, Long>()
 
-            for (snap in snaps) {
+            // Elabora documenti film (e fallback legacy tv_ presenti in collection movies)
+            for (snap in movieSnaps) {
                 for (doc in snap.documents) {
                     val views = doc.getLong("view_count") ?: 0L
                     val ratings = doc.getLong("rating_count") ?: 0L
@@ -797,6 +816,18 @@ class FirebaseRemoteDataSource @Inject constructor(
                         } else if (doc.id.startsWith("tv_")) {
                             mergedTvItems[doc.id] = (mergedTvItems[doc.id] ?: 0L) + score
                         }
+                    }
+                }
+            }
+
+            // Elabora documenti serie TV dalla sottocollezione dedicata tv
+            for (snap in tvSnaps) {
+                for (doc in snap.documents) {
+                    val views = doc.getLong("view_count") ?: 0L
+                    val ratings = doc.getLong("rating_count") ?: 0L
+                    val score = views + (ratings * 2)
+                    if (score > 0) {
+                        mergedTvItems[doc.id] = (mergedTvItems[doc.id] ?: 0L) + score
                     }
                 }
             }
@@ -815,14 +846,13 @@ class FirebaseRemoteDataSource @Inject constructor(
 
             // 3. Salva il nuovo calcolo nel documento globale per tutti gli altri utenti
             try {
-                top10DocRef.set(
-                    mapOf(
-                        "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp(),
-                        "top10_movies" to topMovies,
-                        "top10_tv" to topTv
-                    ),
-                    com.google.firebase.firestore.SetOptions.merge()
+                val updates = mutableMapOf<String, Any>(
+                    "updatedAt" to com.google.firebase.firestore.FieldValue.serverTimestamp()
                 )
+                if (topMovies.isNotEmpty()) updates["top10_movies"] = topMovies
+                if (topTv.isNotEmpty()) updates["top10_tv"] = topTv
+
+                top10DocRef.set(updates, com.google.firebase.firestore.SetOptions.merge())
             } catch (e: Exception) {
                 android.util.Log.w("FirebaseRemoteDataSource", "Failed to cache global top10 document", e)
             }
