@@ -36,10 +36,7 @@ object CommsUniMapper {
         }
 
         val allMediaUrls = mutableListOf<String>()
-        comment.mediaUrls.forEach { url ->
-            normalizeCommsUniUrl(url)?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
-        }
-        val primaryMediaUrl = normalizeCommsUniUrl(comment.media?.url ?: comment.media?.apiUrl ?: comment.imageUrl ?: comment.imageUrlSnake)
+        val primaryMediaUrl = normalizeCommsUniUrl(comment.media?.url ?: comment.media?.apiUrl ?: comment.imageUrl)
         primaryMediaUrl?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
         comment.attachments.forEach { att ->
             val attUrl = normalizeCommsUniUrl(att.url ?: att.apiUrl)
@@ -67,7 +64,7 @@ object CommsUniMapper {
         val effectiveLocalAvatar = normalizeCommsUniUrl(cachedLocalAvatar)?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
             ?: if (isMyComment) normalizeCommsUniUrl(com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString())?.takeIf { it.isNotBlank() && !it.startsWith("data:image") } else null
 
-        val fallbackUserAvatar = normalizeCommsUniUrl(comment.userAvatar)?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+        val fallbackUserAvatar = normalizeCommsUniUrl(comment.userAvatar)?.takeIf { it.isNotBlank() }
 
         val resolvedAvatar = if (isMyComment) {
             effectiveLocalAvatar ?: fallbackUserAvatar ?: ""

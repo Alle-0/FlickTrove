@@ -329,7 +329,7 @@ private fun CommentCard(
         if (clean == "[image]" || clean == "[gif]") "" else clean
     }
     val inlineMediaUrls = remember(comment.text) { mediaRegex.findAll(comment.text).map { it.groupValues[1] }.toList() }
-    val mediaUrls = remember(inlineMediaUrls, comment.effectiveAttachedMedia) { (inlineMediaUrls + comment.effectiveAttachedMedia).distinct() }
+    val mediaUrls = remember(inlineMediaUrls, comment.attachedMedia) { (inlineMediaUrls + comment.attachedMedia).distinct() }
 
     Box(
         modifier = Modifier

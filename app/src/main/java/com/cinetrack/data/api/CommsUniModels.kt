@@ -111,10 +111,6 @@ data class CommsUniComment(
     val media: CommsUniMedia? = null,
     val attachments: List<CommsUniMedia> = emptyList(),
     val imageUrl: String? = null,
-    @kotlinx.serialization.SerialName("image_url")
-    val imageUrlSnake: String? = null,
-    @kotlinx.serialization.SerialName("media_urls")
-    val mediaUrls: List<String> = emptyList(),
     val replies: List<CommsUniComment> = emptyList(),
     val fetchedReplyCount: Int = 0,
     val repliesComplete: Boolean = true,

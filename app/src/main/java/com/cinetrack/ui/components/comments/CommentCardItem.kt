@@ -208,8 +208,8 @@ fun CommentCardItem(
                     Color(0xFF2A2A2A)
                 }
             }
-            val effectiveAvatarUrl = remember(comment.effectiveAvatarUrl, isOwner, currentUserId) {
-                val candidate = comment.effectiveAvatarUrl.trim()
+            val effectiveAvatarUrl = remember(comment.userAvatarUrl, isOwner, currentUserId) {
+                val candidate = comment.userAvatarUrl.trim()
                 if (candidate.isNotBlank()) {
                     if (candidate.startsWith("/")) "https://api.commsuni.tv$candidate" else candidate
                 } else if (isOwner) {
@@ -423,9 +423,9 @@ fun CommentCardItem(
                     if (clean == "[image]" || clean == "[gif]") "" else clean
                 }
 
-                val mediaUrls = remember(comment.text, comment.effectiveAttachedMedia) {
+                val mediaUrls = remember(comment.text, comment.attachedMedia) {
                     val inlineMediaUrls = MEDIA_REGEX.findAll(comment.text).map { it.groupValues[1].trim() }.filter { it.isNotBlank() }.toList()
-                    val attached = comment.effectiveAttachedMedia.map { it.trim() }.filter { it.isNotBlank() }
+                    val attached = comment.attachedMedia.map { it.trim() }.filter { it.isNotBlank() }
                     (inlineMediaUrls + attached).map { url ->
                         if (url.startsWith("/")) "https://api.commsuni.tv$url" else url
                     }.distinct()
