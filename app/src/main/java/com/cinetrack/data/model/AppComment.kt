@@ -10,7 +10,15 @@ data class AppComment(
     val mediaType: String = "",
     val userId: String = "",
     val userDisplayName: String = "",
-    val userAvatarUrl: String = "",
+    @get:PropertyName("userAvatarUrl")
+    @set:PropertyName("userAvatarUrl")
+    var userAvatarUrl: String = "",
+    @get:PropertyName("user_avatar_url")
+    @set:PropertyName("user_avatar_url")
+    var userAvatarUrlSnake: String? = null,
+    @get:PropertyName("photoUrl")
+    @set:PropertyName("photoUrl")
+    var photoUrl: String? = null,
     val text: String = "",
     @ServerTimestamp
     val createdAt: Timestamp? = null,
@@ -33,7 +41,12 @@ data class AppComment(
     val originIcon: String? = null,
     val archivedLikes: Int = 0,
     val nativeLikes: Int = 0,
-    val attachedMedia: List<String> = emptyList(),
+    @get:PropertyName("attachedMedia")
+    @set:PropertyName("attachedMedia")
+    var attachedMedia: List<String> = emptyList(),
+    @get:PropertyName("attached_media")
+    @set:PropertyName("attached_media")
+    var attached_media: List<String>? = null,
     val rating: Double? = null,
     val language: String? = null,
     val firestoreId: String? = null,
@@ -41,11 +54,17 @@ data class AppComment(
     @set:PropertyName("isOnCommsUni")
     var isOnCommsUni: Boolean = false
 ) {
+    val effectiveAvatarUrl: String
+        get() = userAvatarUrl.trim().ifBlank { userAvatarUrlSnake?.trim()?.ifBlank { null } ?: photoUrl?.trim().orEmpty() }
+
+    val effectiveAttachedMedia: List<String>
+        get() = if (attachedMedia.isNotEmpty()) attachedMedia else attached_media.orEmpty()
+
     val isEffectivelyDeleted: Boolean
         get() = isDeleted ||
                 userId.isBlank() ||
-                (text.isBlank() && userDisplayName.isBlank() && attachedMedia.isEmpty()) ||
-                (text.trim().startsWith("[") && text.trim().endsWith("]") && attachedMedia.isEmpty() && (userDisplayName.isBlank() || (userDisplayName.trim().startsWith("[") && userDisplayName.trim().endsWith("]"))))
+                (text.isBlank() && userDisplayName.isBlank() && effectiveAttachedMedia.isEmpty()) ||
+                (text.trim().startsWith("[") && text.trim().endsWith("]") && effectiveAttachedMedia.isEmpty() && (userDisplayName.isBlank() || (userDisplayName.trim().startsWith("[") && userDisplayName.trim().endsWith("]"))))
 }
 
 enum class CommentSortOption { DATE, LIKES }
@@ -115,17 +134,19 @@ fun isSameAuthor(c1: AppComment, c2: AppComment): Boolean {
 
 fun isDuplicateComment(c1: AppComment, c2: AppComment): Boolean {
     if (c1.id.isNotBlank() && c2.id.isNotBlank() && c1.id == c2.id) return true
-    val sameMedia = if (c1.attachedMedia.isNotEmpty() || c2.attachedMedia.isNotEmpty()) {
-        c1.attachedMedia == c2.attachedMedia
+    val sameMedia = if (c1.effectiveAttachedMedia.isNotEmpty() || c2.effectiveAttachedMedia.isNotEmpty()) {
+        c1.effectiveAttachedMedia == c2.effectiveAttachedMedia
     } else true
     return isSameAuthor(c1, c2) && isSameCommentText(c1.text, c2.text) && sameMedia && c1.parentId == c2.parentId
 }
 
 fun mergeComments(primary: AppComment, secondary: AppComment): AppComment {
-    val avatar = primary.userAvatarUrl.trim().takeIf { it.isNotBlank() && !it.startsWith("data:image") }
-        ?: secondary.userAvatarUrl.trim().takeIf { it.isNotBlank() && !it.startsWith("data:image") }
-        ?: primary.userAvatarUrl.trim().takeIf { it.isNotBlank() }
-        ?: secondary.userAvatarUrl.trim().takeIf { it.isNotBlank() }
+    val primaryAvatar = primary.effectiveAvatarUrl
+    val secondaryAvatar = secondary.effectiveAvatarUrl
+    val avatar = primaryAvatar.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+        ?: secondaryAvatar.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+        ?: primaryAvatar.takeIf { it.isNotBlank() }
+        ?: secondaryAvatar.takeIf { it.isNotBlank() }
         ?: ""
     val name = (if (secondary.originSlug.equals("flicktrove", ignoreCase = true) && secondary.userDisplayName.isNotBlank() && !secondary.userDisplayName.contains("#")) secondary.userDisplayName else null)
         ?: (if (primary.originSlug.equals("flicktrove", ignoreCase = true) && primary.userDisplayName.isNotBlank() && !primary.userDisplayName.contains("#")) primary.userDisplayName else null)
@@ -146,7 +167,7 @@ fun mergeComments(primary: AppComment, secondary: AppComment): AppComment {
     val originIcon = primary.originIcon ?: secondary.originIcon
     val createdAt = primary.createdAt ?: secondary.createdAt
     val rating = primary.rating ?: secondary.rating
-    val attached = (primary.attachedMedia + secondary.attachedMedia).distinct()
+    val attached = (primary.effectiveAttachedMedia + secondary.effectiveAttachedMedia).distinct()
     val isOnCommsUni = primary.isOnCommsUni || secondary.isOnCommsUni
 
     return primary.copy(

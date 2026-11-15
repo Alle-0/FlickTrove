@@ -208,7 +208,23 @@ fun CommentCardItem(
                     Color(0xFF2A2A2A)
                 }
             }
-            var isImageError by remember(comment.userAvatarUrl) { mutableStateOf(false) }
+            val effectiveAvatarUrl = remember(comment.effectiveAvatarUrl, isOwner, currentUserId) {
+                val candidate = comment.effectiveAvatarUrl.trim()
+                if (candidate.isNotBlank()) {
+                    if (candidate.startsWith("/")) "https://api.commsuni.tv$candidate" else candidate
+                } else if (isOwner) {
+                    val uid = currentUserId ?: com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
+                    if (uid != null) {
+                        val commsPrefs = context.getSharedPreferences("commsuni_prefs", android.content.Context.MODE_PRIVATE)
+                        val namePrefs = context.getSharedPreferences("user_name_changes", android.content.Context.MODE_PRIVATE)
+                        val localCandidate = commsPrefs.getString("user_avatar_$uid", null)?.trim()?.takeIf { it.isNotBlank() }
+                            ?: namePrefs.getString("user_avatar_$uid", null)?.trim()?.takeIf { it.isNotBlank() }
+                            ?: com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()?.trim()?.takeIf { it.isNotBlank() }
+                        if (localCandidate?.startsWith("/") == true) "https://api.commsuni.tv$localCandidate" else localCandidate.orEmpty()
+                    } else ""
+                } else ""
+            }
+            var isImageError by remember(effectiveAvatarUrl) { mutableStateOf(false) }
 
             Box(
                 modifier = Modifier
@@ -233,7 +249,7 @@ fun CommentCardItem(
                     )
                 }
 
-                val safeAvatarUrl = comment.userAvatarUrl.trim()
+                val safeAvatarUrl = effectiveAvatarUrl
                 if (safeAvatarUrl.isNotBlank() && !isImageError) {
                     val modelData: Any = if (safeAvatarUrl.startsWith("data:image", ignoreCase = true) && safeAvatarUrl.contains("base64,")) {
                         try {
@@ -250,6 +266,16 @@ fun CommentCardItem(
                         model = ImageRequest.Builder(context)
                             .data(modelData)
                             .crossfade(true)
+                            .apply {
+                                if (safeAvatarUrl.contains("commsuni.tv")) {
+                                    httpHeaders(
+                                        coil3.network.NetworkHeaders.Builder()
+                                            .set("Authorization", "Bearer ${com.cinetrack.BuildConfig.COMMSUNI_API_KEY}")
+                                            .set("User-Agent", "FlickTrove-Android/${com.cinetrack.BuildConfig.VERSION_NAME}")
+                                            .build()
+                                    )
+                                }
+                            }
                             .build(),
                         imageLoader = imageLoader,
                         contentDescription = comment.userDisplayName,
@@ -397,9 +423,12 @@ fun CommentCardItem(
                     if (clean == "[image]" || clean == "[gif]") "" else clean
                 }
 
-                val mediaUrls = remember(comment.text, comment.attachedMedia) {
-                    val inlineMediaUrls = MEDIA_REGEX.findAll(comment.text).map { it.groupValues[1] }.toList()
-                    (inlineMediaUrls + comment.attachedMedia).distinct()
+                val mediaUrls = remember(comment.text, comment.effectiveAttachedMedia) {
+                    val inlineMediaUrls = MEDIA_REGEX.findAll(comment.text).map { it.groupValues[1].trim() }.filter { it.isNotBlank() }.toList()
+                    val attached = comment.effectiveAttachedMedia.map { it.trim() }.filter { it.isNotBlank() }
+                    (inlineMediaUrls + attached).map { url ->
+                        if (url.startsWith("/")) "https://api.commsuni.tv$url" else url
+                    }.distinct()
                 }
 
                 val parentDisplayName = remember(comment.depth, comment.parentId, flatTree) {

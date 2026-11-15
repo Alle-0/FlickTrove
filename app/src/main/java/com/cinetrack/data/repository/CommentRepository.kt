@@ -169,7 +169,7 @@ class CommentRepository @Inject constructor(
             mediaType = mediaType,
             userId = user.uid,
             userDisplayName = user.displayName.orEmpty(),
-            userAvatarUrl = user.photoUrl?.toString() ?: "",
+            userAvatarUrl = mediaImage?.trim()?.takeIf { it.isNotBlank() } ?: user.photoUrl?.toString() ?: "",
             text = text,
             isSpoiler = isSpoiler,
             parentId = parentId,

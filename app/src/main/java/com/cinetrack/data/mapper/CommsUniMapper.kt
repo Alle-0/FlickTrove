@@ -25,11 +25,24 @@ object CommsUniMapper {
     ): AppComment {
         val date = com.cinetrack.util.DateTimeUtils.parseIsoDate(comment.createdAt)
 
+        fun normalizeCommsUniUrl(rawUrl: String?): String? {
+            val trimmed = rawUrl?.trim() ?: return null
+            if (trimmed.isBlank()) return null
+            return if (trimmed.startsWith("/")) {
+                "https://api.commsuni.tv$trimmed"
+            } else {
+                trimmed
+            }
+        }
+
         val allMediaUrls = mutableListOf<String>()
-        val primaryMediaUrl = comment.media?.url ?: comment.media?.apiUrl ?: comment.imageUrl
-        primaryMediaUrl?.takeIf { it.isNotBlank() }?.let { allMediaUrls.add(it) }
+        comment.mediaUrls.forEach { url ->
+            normalizeCommsUniUrl(url)?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
+        }
+        val primaryMediaUrl = normalizeCommsUniUrl(comment.media?.url ?: comment.media?.apiUrl ?: comment.imageUrl ?: comment.imageUrlSnake)
+        primaryMediaUrl?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
         comment.attachments.forEach { att ->
-            val attUrl = att.url ?: att.apiUrl
+            val attUrl = normalizeCommsUniUrl(att.url ?: att.apiUrl)
             attUrl?.takeIf { it.isNotBlank() && !allMediaUrls.contains(it) }?.let { allMediaUrls.add(it) }
         }
 
@@ -51,13 +64,15 @@ object CommsUniMapper {
         val effectiveLocalName = cachedLocalName?.trim()?.takeIf { it.isNotBlank() }
             ?: if (isMyComment) com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.displayName?.trim()?.takeIf { it.isNotBlank() } else null
 
-        val effectiveLocalAvatar = cachedLocalAvatar?.trim()?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
-            ?: if (isMyComment) com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString()?.trim()?.takeIf { it.isNotBlank() && !it.startsWith("data:image") } else null
+        val effectiveLocalAvatar = normalizeCommsUniUrl(cachedLocalAvatar)?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
+            ?: if (isMyComment) normalizeCommsUniUrl(com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.photoUrl?.toString())?.takeIf { it.isNotBlank() && !it.startsWith("data:image") } else null
+
+        val fallbackUserAvatar = normalizeCommsUniUrl(comment.userAvatar)?.takeIf { it.isNotBlank() && !it.startsWith("data:image") }
 
         val resolvedAvatar = if (isMyComment) {
-            effectiveLocalAvatar ?: ""
-        } else if (!comment.userAvatar.isNullOrBlank()) {
-            comment.userAvatar.trim()
+            effectiveLocalAvatar ?: fallbackUserAvatar ?: ""
+        } else if (!fallbackUserAvatar.isNullOrBlank()) {
+            fallbackUserAvatar
         } else {
             ""
         }
