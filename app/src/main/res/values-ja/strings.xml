@@ -1141,12 +1141,9 @@
     <string name="person_offline_bio">オフラインモードでは完全な経歴データおよび詳細な作品リストは利用できません。\n端末に保存されている作品が下に表示されます。</string>
     <string name="whats_new_title">アプリが更新されました！</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• 複数日の視聴履歴: 再視聴を毎回正確に記録可能に。
-• 視聴日の確認設定: 視聴済みにする際、正確な日付を指定できるオプションを追加。
-• シンビオント・アクションピル: アクションバーが再視聴ボタンにスマート変化。
-• クラウド同期: Firebaseを通じて視聴履歴を安全にバックアップ・同期。
-• フィードバックの強化: Markdown記法と最大2000文字に対応。
-• UIの洗練とパフォーマンスの最適化。</string>
+    <string name="whats_new_fallback_notes">• 新機能、パフォーマンスの向上、よりスムーズなアニメーション
+• UIのブラッシュアップ、不具合の修正、全体的な安定性の向上
+• インターネットに接続して最新のアップデート内容をご確認ください！</string>
     <string name="whats_new_section_title">主なアップデート</string>
     <string name="whats_new_btn_start">始める！</string>
     <string name="github_update_title">新しいアップデートがあります</string>

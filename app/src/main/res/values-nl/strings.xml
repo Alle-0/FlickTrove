@@ -1174,12 +1174,9 @@
     <string name="person_offline_bio">Volledige biografische gegevens en uitgebreide filmografie zijn niet beschikbaar in de offlinemodus.\nTitels die in je lokale bibliotheek aanwezig zijn, worden hieronder getoond.</string>
     <string name="whats_new_title">App bijgewerkt!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Kijkgeschiedenis met meerdere datums: Houd elke keer bij dat je een film of serie opnieuw bekijkt.
-• Vragen om kijkdatum: Nieuwe instelling om de exacte kijkdatum te kiezen wanneer je een titel als gezien markeert.
-• Symbiont-actieknop: De actieknop aan de zijkant verandert nu slim in een ronde knop Opnieuw bekijken.
-• Cloudsynchronisatie: Je kijkgeschiedenis wordt veilig opgeslagen en gesynchroniseerd via Firebase.
-• Verbeterde feedback: Gebruik Markdown-opmaak en tot 2000 tekens bij het verzenden van feedback.
-• Algemene visuele verfijningen en prestatieverbeteringen.</string>
+    <string name="whats_new_fallback_notes">• Nieuwe functies, prestatieverbeteringen en vloeiendere animaties
+• Interface-verfijningen, bugfixes en betere stabiliteit
+• Maak verbinding met internet om alle hoogtepunten te bekijken!</string>
     <string name="whats_new_section_title">BELANGRIJKSTE VERNIEUWINGEN</string>
     <string name="whats_new_btn_start">Geweldig, laten we beginnen!</string>
     <string name="github_update_title">Nieuwe update beschikbaar</string>

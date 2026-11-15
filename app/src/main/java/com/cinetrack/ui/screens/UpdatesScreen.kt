@@ -270,7 +270,8 @@ fun UpdatesScreen(
                                                 currentMonth = currentMonth,
                                                 onMonthChanged = { currentMonth = it },
                                                 onShowMonthPicker = { showMonthPicker = true },
-                                                internalHazeState = internalHazeState
+                                                internalHazeState = internalHazeState,
+                                                onToggleReminder = { viewModel.toggleReminderMuted(it) }
                                             )
                                         } else {
                                             UpdatesTimelineView(
@@ -282,7 +283,8 @@ fun UpdatesScreen(
                                                     end = 16.dp, 
                                                     bottom = paddingValues.calculateBottomPadding() + 80.dp, 
                                                     top = 170.dp 
-                                                )
+                                                ),
+                                                onToggleReminder = { viewModel.toggleReminderMuted(it) }
                                             )
                                         }
                             }

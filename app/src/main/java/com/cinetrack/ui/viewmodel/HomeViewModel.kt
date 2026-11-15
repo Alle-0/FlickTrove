@@ -85,7 +85,8 @@ class HomeViewModel @Inject constructor(
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
     private val selectContinueWatchingTvUseCase: com.cinetrack.domain.SelectContinueWatchingTvUseCase,
     private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
-    private val simklAuthRepository: com.cinetrack.data.repository.SimklAuthRepository
+    private val simklAuthRepository: com.cinetrack.data.repository.SimklAuthRepository,
+    private val mediaActionDelegate: MediaActionDelegate
 ) : ViewModel() {
 
     private val initialMedia = preferenceRepository.initialDefaultMedia
@@ -706,66 +707,14 @@ class HomeViewModel @Inject constructor(
         }
     }
 
-    fun deleteMovie(movie: Movie) {
-        viewModelScope.launch {
-            try {
-                repository.deleteMovie(movie)
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
-                    try {
-                        repository.saveMovie(movie)
-                    } catch (e: Exception) {
-                        // ignore nested error
-                    }
-                }
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
-            }
-        }
-    }
+    fun deleteMovie(movie: Movie) = mediaActionDelegate.deleteMovie(viewModelScope, movie)
 
-    fun updateRating(movie: Movie, rating: Double) {
-        viewModelScope.launch {
-            try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
-            }
-        }
-    }
+    fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)
 
-    fun updateNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalNote = note))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
-            }
-        }
-    }
+    fun updateNote(movie: Movie, note: String) = mediaActionDelegate.updateNote(viewModelScope, movie, note)
 
-    fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) {
-        viewModelScope.launch {
-            try {
-                val compositeId = movie.compositeId
-                val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                    folder.itemIds - compositeId
-                } else {
-                    folder.itemIds + compositeId
-                }
-                repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                if (local == null) {
-                    repository.saveMovie(movie)
-                }
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating_folder))
-            }
-        }
-    }
+    fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) =
+        mediaActionDelegate.toggleItemInFolder(viewModelScope, folder, movie)
 
     private fun sortMovies(movies: List<Movie>, sort: SortConfig): List<Movie> {
         val isDesc = sort.sortDirection == "desc"

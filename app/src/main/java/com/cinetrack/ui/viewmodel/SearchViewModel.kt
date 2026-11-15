@@ -69,7 +69,8 @@ class SearchViewModel @Inject constructor(
     private val actionFeedbackManager: ActionFeedbackManager,
     private val searchByIdUseCase: com.cinetrack.domain.SearchByIdUseCase,
     private val editorialCollectionRepository: com.cinetrack.data.repository.EditorialCollectionRepository,
-    private val searchHistoryRepository: com.cinetrack.data.repository.SearchHistoryRepository
+    private val searchHistoryRepository: com.cinetrack.data.repository.SearchHistoryRepository,
+    private val mediaActionDelegate: MediaActionDelegate
 ) : ViewModel() {
 
     private val _uiState = MutableStateFlow(SearchUiState())
@@ -853,22 +854,7 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun deleteMovie(movie: Movie) {
-        viewModelScope.launch {
-            try {
-                repository.deleteMovie(movie)
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
-                    try {
-                        repository.saveMovie(movie)
-                    } catch (e: Exception) {
-                        // ignore nested error
-                    }
-                }
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
-            }
-        }
-    }
+    fun deleteMovie(movie: Movie) = mediaActionDelegate.deleteMovie(viewModelScope, movie)
 
     fun deleteRecentSearch(query: String) {
         viewModelScope.launch {
@@ -890,49 +876,11 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun updateRating(movie: Movie, rating: Double) {
-        viewModelScope.launch {
-            try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
-            }
-        }
-    }
+    fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)
 
-    fun updateNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalNote = note))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
-            }
-        }
-    }
+    fun updateNote(movie: Movie, note: String) = mediaActionDelegate.updateNote(viewModelScope, movie, note)
 
-    fun toggleItemInFolder(folder: FolderEntity, movie: Movie) {
-        viewModelScope.launch {
-            try {
-                val compositeId = "${movie.mediaType}_${movie.id}"
-                val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                    folder.itemIds - compositeId
-                } else {
-                    folder.itemIds + compositeId
-                }
-                repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                if (local == null) {
-                    repository.saveMovie(movie)
-                }
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating_folder))
-            }
-        }
-    }
+    fun toggleItemInFolder(folder: FolderEntity, movie: Movie) = mediaActionDelegate.toggleItemInFolder(viewModelScope, folder, movie)
 
     private fun Movie.toMovieResultInternal() = TMDBSearchResult.MovieResult(
         id = id,

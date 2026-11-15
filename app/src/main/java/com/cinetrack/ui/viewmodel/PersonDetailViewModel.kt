@@ -60,6 +60,7 @@ class PersonDetailViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val actionFeedbackManager: ActionFeedbackManager,
+    private val mediaActionDelegate: MediaActionDelegate,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
 
@@ -327,54 +328,12 @@ class PersonDetailViewModel @Inject constructor(
         }
     }
 
-    fun updateRating(movie: Movie, rating: Double) {
-        viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-        }
-    }
+    fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)
 
-    fun updateNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalNote = note))
-        }
-    }
+    fun updateNote(movie: Movie, note: String) = mediaActionDelegate.updateNote(viewModelScope, movie, note)
 
-    fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) {
-        viewModelScope.launch {
-            val compositeId = "${movie.mediaType}_${movie.id}"
-            val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                folder.itemIds - compositeId
-            } else {
-                folder.itemIds + compositeId
-            }
-            repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            if (local == null) {
-                repository.saveMovie(movie)
-            }
-        }
-    }
+    fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) =
+        mediaActionDelegate.toggleItemInFolder(viewModelScope, folder, movie)
 
-    fun deleteMovie(movie: Movie) {
-        viewModelScope.launch {
-            try {
-                val targetMediaType = movie.mediaType.ifBlank { "movie" }
-                val movieToDelete = if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie
-                repository.deleteMovie(movieToDelete)
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
-                    try {
-                        repository.saveMovie(movie)
-                    } catch (e: Exception) {
-                        // ignore nested error
-                    }
-                }
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
-            }
-        }
-    }
+    fun deleteMovie(movie: Movie) = mediaActionDelegate.deleteMovie(viewModelScope, movie)
 }

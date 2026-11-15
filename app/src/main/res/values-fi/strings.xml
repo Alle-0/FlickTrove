@@ -1175,12 +1175,9 @@
     <string name="person_offline_bio">Täydelliset elämäkertatiedot ja laaja filmografia eivät ole saatavilla offline-tilassa.\nPaikallisessa kirjastossasi olevat nimikkeet näytetään alla.</string>
     <string name="whats_new_title">Sovellus päivitetty!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Monipäiväinen katseluhistoria: Seuraa jokaista kertaa, kun katsot elokuvan tai TV-sarjan uudelleen.
-• Kysy katselupäivää: Uusi asetus tarkan katselupäivän valitsemiseen nimikettä katsotuksi merkittäessä.
-• Symbiont-toimintopilleri: Sivutoimintopilleri muuntuu nyt älykkäästi pyöreäksi Uusintakatselu-painikkeeksi.
-• Pilvisynkronointi: Katseluhistoriasi varmuuskopioidaan ja synkronoidaan turvallisesti Firebasen kautta.
-• Parannettu palaute: Käytä Markdown-muotoilua ja jopa 2000 merkkiä palautetta lähettäessäsi.
-• Yleinen käyttöliittymän viimeistely ja suorituskykyparannukset.</string>
+    <string name="whats_new_fallback_notes">• Uusia ominaisuuksia, suorituskykyparannuksia ja sulavammat animaatiot
+• Käyttöliittymän hienosäätöä, virheenkorjauksia ja parempi vakaus
+• Yhdistä internetiin nähdäksesi kaikki päivityksen uutuudet!</string>
     <string name="whats_new_section_title">TÄRKEIMMÄT KOHOKOHDAT</string>
     <string name="whats_new_btn_start">Mahtavaa, aloitetaan!</string>
     <string name="github_update_title">Uusi päivitys saatavilla</string>

@@ -1173,7 +1173,9 @@
     <string name="person_offline_bio">Dados biográficos completos e filmografia estendida não estão disponíveis no modo offline.\nOs títulos presentes em sua biblioteca local são exibidos abaixo.</string>
     <string name="whats_new_title">App Atualizada!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Novos botões de ação flutuantes e circulares (Voltar, Início, Partilhar) com desfoque Haze Blur sobrepostos de forma limpa ao conteúdo\n• Animação de clique de salto refinada, aplicada precisamente aos ícones internos sem distorcer o contentor de vidro\n• Corrigida a interferência de desfoque nos ícones nos ecrãs de Detalhes da Coleção e Pessoa\n• Polimento da interface e melhorias de desempenho</string>
+    <string name="whats_new_fallback_notes">• Novas funcionalidades, melhorias de desempenho e animações mais fluidas
+• Polimento da interface, correções de erros e maior estabilidade
+• Ligue-se à internet para ver todos os destaques da atualização!</string>
     <string name="whats_new_section_title">PRINCIPAIS DESTAQUES</string>
     <string name="whats_new_btn_start">Incrível, vamos lá!</string>
     <string name="github_update_title">Nova Atualização Disponível</string>

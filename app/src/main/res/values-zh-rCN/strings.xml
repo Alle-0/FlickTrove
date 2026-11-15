@@ -1141,12 +1141,9 @@
     <string name="person_offline_bio">离线模式下无法获取完整生平与拓展作品集。\n下方仅显示您本地媒体库中已存在的作品。</string>
     <string name="whats_new_title">应用已更新！</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• 多日期观看记录：记录您每次重温电影或剧集的精确时间。
-• 观看日期提示：将作品标记为已看时，可选择具体观看日期。
-• 智能共生操作胶囊：侧边操作栏智能变为圆形重温按钮。
-• 云端同步：通过 Firebase 安全备份和同步观看历史。
-• 反馈体验升级：支持 Markdown 格式且最多可输入 2000 字符。
-• 界面细节打磨与全方位性能优化。</string>
+    <string name="whats_new_fallback_notes">• 新功能、性能提升与更流畅的动画效果
+• 界面微调、问题修复与整体稳定性增强
+• 连接至网络以查看本次更新的完整精彩内容!</string>
     <string name="whats_new_section_title">主要亮点</string>
     <string name="whats_new_btn_start">太棒了，开始体验！</string>
     <string name="github_update_title">发现新版本</string>

@@ -49,7 +49,8 @@ data class BoxOfficeUiState(
 class BoxOfficeViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val mediaActionDelegate: MediaActionDelegate
 ) : ViewModel() {
 
     val weekendListState = LazyListState()
@@ -194,59 +195,14 @@ class BoxOfficeViewModel @Inject constructor(
         }
     }
 
-    fun deleteMovie(movie: Movie) {
-        viewModelScope.launch {
-            try {
-                repository.deleteMovie(movie)
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_removing))
-            }
-        }
-    }
+    fun deleteMovie(movie: Movie) = mediaActionDelegate.deleteMovie(viewModelScope, movie)
 
-    fun updateRating(movie: Movie, rating: Double) {
-        viewModelScope.launch {
-            try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
-            }
-        }
-    }
+    fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)
 
-    fun updateNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalNote = note))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
-            }
-        }
-    }
+    fun updateNote(movie: Movie, note: String) = mediaActionDelegate.updateNote(viewModelScope, movie, note)
 
-    fun toggleItemInFolder(folder: FolderEntity, movie: Movie) {
-        viewModelScope.launch {
-            try {
-                val compositeId = "${movie.mediaType}_${movie.id}"
-                val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                    folder.itemIds - compositeId
-                } else {
-                    folder.itemIds + compositeId
-                }
-                repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                if (local == null) {
-                    repository.saveMovie(movie)
-                }
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating_folder))
-            }
-        }
-    }
+    fun toggleItemInFolder(folder: FolderEntity, movie: Movie) =
+        mediaActionDelegate.toggleItemInFolder(viewModelScope, folder, movie)
 
     fun emitMessage(uiText: UiText) {
         actionFeedbackManager.emit(uiText)

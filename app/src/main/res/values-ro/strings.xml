@@ -1179,12 +1179,9 @@ Introdu cel puțin 3 caractere</string>
     <string name="person_offline_bio">Biografia completă și filmografia extinsă nu sunt disponibile în modul offline.\nTitlurile prezente în biblioteca locală sunt afișate mai jos.</string>
     <string name="whats_new_title">Aplicație actualizată!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Istoric vizionări multiple: Înregistrează fiecare revizionare a unui film sau serial.
-• Solicitare dată vizionare: Setare nouă pentru a alege data exactă a vizionării.
-• Buton acțiuni simbiotice: Butonul lateral se transformă inteligent într-un buton de Revizionare.
-• Sincronizare Cloud: Istoricul este salvat și sincronizat în siguranță via Firebase.
-• Feedback îmbunătățit: Suport pentru Markdown și până la 2000 de caractere.
-• Îmbunătățiri generale de interfață și performanță.</string>
+    <string name="whats_new_fallback_notes">• Funcții noi, îmbunătățiri de performanță și animații mai fluide
+• Rafinări ale interfeței, remedieri de erori și stabilitate sporită
+• Conectează-te la internet pentru a vedea toate noutățile actualizării!</string>
     <string name="whats_new_section_title">NOUTĂȚI PRINCIPALE</string>
     <string name="whats_new_btn_start">Grozav, să începem!</string>
     <string name="github_update_title">Actualizare nouă disponibilă</string>

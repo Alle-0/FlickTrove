@@ -1055,7 +1055,9 @@
     <string name="person_offline_bio">La biographie complète et la filmographie étendue ne sont pas disponibles en mode hors ligne.\nLes titres présents dans votre bibliothèque locale sont affichés ci-dessous.</string>
     <string name="whats_new_title">Application mise à jour !</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Nouveaux boutons d\'action circulaires flottants (Retour, Accueil, Partager) superposés avec effet Haze Blur\n• Animation de clic perfectionnée appliquée aux icônes sans déformer le conteneur en verre\n• Correction des interférences de flou sur les icônes dans les détails de Collections et Personnes\n• Ajustements de l\'interface et améliorations des performances</string>
+    <string name="whats_new_fallback_notes">• Nouvelles fonctionnalités, gains de performances et animations plus fluides
+• Finitions de l\'interface, corrections de bugs et stabilité renforcée
+• Connectez-vous à Internet pour découvrir toutes les nouveautés !</string>
     <string name="whats_new_section_title">POINTS FORTS</string>
     <string name="whats_new_btn_start">Super, c\'est parti !</string>
     <string name="github_update_title">Nouvelle mise à jour disponible</string>

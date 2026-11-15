@@ -1141,12 +1141,9 @@
     <string name="person_offline_bio">오프라인 상태에서는 전체 프로필 및 확장 필모그래피를 열람할 수 없습니다.\n내 로컬 보관함에 저장된 작품들만 아래에 표시됩니다.</string>
     <string name="whats_new_title">앱이 업데이트되었습니다!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• 다중 시청 기록: 여러 번 재시청한 기록을 완벽하게 추적합니다.
-• 시청일 지정 알림: 작품을 시청 완료로 표시할 때 날짜를 직접 선택할 수 있습니다.
-• 반응형 액션 바: 사이드 액션 바가 원형 재시청 버튼으로 스마트하게 변환됩니다.
-• 클라우드 동기화: Firebase를 통해 시청 기록을 안전하게 백업 및 동기화합니다.
-• 향상된 피드백: 마크다운 서식 지원 및 최대 2000자 작성 가능.
-• UI 디자인 다듬기 및 전반적인 성능 최적화.</string>
+    <string name="whats_new_fallback_notes">• 새로운 기능, 성능 개선 및 더욱 부드러워진 애니메이션
+• 인터페이스 개선, 버그 수정 및 전반적인 안정성 향상
+• 업데이트의 모든 새로운 기능을 보려면 인터넷에 연결하세요!</string>
     <string name="whats_new_section_title">주요 변경사항</string>
     <string name="whats_new_btn_start">시작하기!</string>
     <string name="github_update_title">새로운 업데이트 발견</string>

@@ -57,7 +57,6 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.LineHeightStyle
 import androidx.compose.ui.text.style.TextAlign
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
@@ -365,196 +364,30 @@ fun CommentInputBar(
                 val maxChar = 8000
 
                 // Live #movie / #tv tag suggestions expanding the input bar upward
-                AnimatedVisibility(
+                CommentHashtagSuggestionsCard(
                     visible = showMediaTagSuggestions,
-                    enter = fadeIn(tween(150)) + expandVertically(tween(180)),
-                    exit = fadeOut(tween(120)) + shrinkVertically(tween(150))
-                ) {
-                    val activeMatch = activeHashtag
-                    if (activeMatch != null) {
-                        Column(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(bottom = 8.dp)
-                                .clip(RoundedCornerShape(16.dp))
-                                .background(Color.White.copy(alpha = 0.05f))
-                                .border(1.dp, Color.White.copy(alpha = 0.1f), RoundedCornerShape(16.dp))
-                                .padding(6.dp)
-                        ) {
-                            Row(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(horizontal = 6.dp, vertical = 2.dp),
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.SpaceBetween
-                            ) {
-                                Row(
-                                    verticalAlignment = Alignment.CenterVertically,
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_film),
-                                        contentDescription = null,
-                                        tint = accentColor,
-                                        modifier = Modifier.size(13.dp)
-                                    )
-                                    Text(
-                                        text = "#${activeMatch.query}",
-                                        color = Color.White.copy(alpha = 0.85f),
-                                        fontSize = 12.sp,
-                                        fontWeight = FontWeight.SemiBold,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
-                                }
-                                Box(
-                                    modifier = Modifier
-                                        .size(24.dp)
-                                        .bounceClick {
-                                            dismissedHashIndex = activeMatch.hashIndex
-                                            onClearMediaTagSuggestions()
-                                        },
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_x),
-                                        contentDescription = null,
-                                        tint = Color.White.copy(alpha = 0.65f),
-                                        modifier = Modifier.size(12.dp)
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            if (activeMatch.query.length < 2) {
-                                Text(
-                                    text = stringResource(R.string.comment_tag_search_hint),
-                                    color = Color.White.copy(alpha = 0.55f),
-                                    fontSize = 12.sp,
-                                    modifier = Modifier.padding(horizontal = 6.dp, vertical = 4.dp)
-                                )
-                            } else if (isSearchingMediaTags && mediaTagSuggestions.isEmpty()) {
-                                Column(verticalArrangement = Arrangement.spacedBy(4.dp)) {
-                                    repeat(2) {
-                                        Row(
-                                            modifier = Modifier
-                                                .fillMaxWidth()
-                                                .height(52.dp)
-                                                .clip(RoundedCornerShape(10.dp))
-                                                .shimmerEffect()
-                                        ) {}
-                                    }
-                                }
-                            } else {
-                                val suggestionListState = rememberLazyListState()
-                                LaunchedEffect(activeMatch.query) {
-                                    suggestionListState.scrollToItem(0)
-                                }
-                                LazyColumn(
-                                    state = suggestionListState,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .heightIn(max = 176.dp)
-                                        .verticalFadingEdges(
-                                            lazyListState = suggestionListState,
-                                            topEdgeHeight = 18.dp,
-                                            bottomEdgeHeight = 18.dp
-                                        ),
-                                    verticalArrangement = Arrangement.spacedBy(4.dp)
-                                ) {
-                                    items(
-                                        items = mediaTagSuggestions,
-                                        key = { "${it.mediaType}_${it.id}" }
-                                    ) { suggestion ->
-                                        MediaTagSuggestionRow(
-                                            suggestion = suggestion,
-                                            accentColor = accentColor,
-                                            imageLoader = imageLoader,
-                                            onClick = {
-                                                val currentText = inputText.text
-                                                val start = activeMatch.hashIndex.coerceIn(0, currentText.length)
-                                                val end = activeMatch.replaceEndIndex.coerceIn(start, currentText.length)
-                                                val inserted = "#${suggestion.title} "
-                                                val updatedText = currentText.substring(0, start) + inserted + currentText.substring(end)
-                                                val newCursor = start + inserted.length
-                                                onInputTextChanged(
-                                                    TextFieldValue(
-                                                        text = updatedText,
-                                                        selection = TextRange(newCursor)
-                                                    )
-                                                )
-                                                val nextTags = selectedMediaTags.filterNot {
-                                                    it.id == suggestion.id && it.mediaType == suggestion.mediaType && it.title == suggestion.title
-                                                } + suggestion
-                                                onSelectedMediaTagsChanged(nextTags)
-                                                dismissedHashIndex = null
-                                                onClearMediaTagSuggestions()
-                                            }
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
+                    activeMatch = activeHashtag,
+                    isSearchingMediaTags = isSearchingMediaTags,
+                    mediaTagSuggestions = mediaTagSuggestions,
+                    accentColor = accentColor,
+                    inputText = inputText,
+                    onInputTextChanged = onInputTextChanged,
+                    selectedMediaTags = selectedMediaTags,
+                    onSelectedMediaTagsChanged = onSelectedMediaTagsChanged,
+                    onDismissMatch = {
+                        activeHashtag?.let { dismissedHashIndex = it.hashIndex }
+                    },
+                    onClearMediaTagSuggestions = onClearMediaTagSuggestions,
+                    imageLoader = imageLoader
+                )
 
                 // Attached Media Previews
-                if (attachedMedia.isNotEmpty()) {
-                    LazyRow(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(bottom = 8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp)
-                    ) {
-                        items(attachedMedia.size) { index ->
-                            val url = attachedMedia[index]
-                            val itemHazeState = remember { HazeState() }
-                            Box(
-                                modifier = Modifier
-                                    .size(58.dp)
-                                    .clip(RoundedCornerShape(14.dp))
-                            ) {
-                                AsyncImage(
-                                    model = ImageRequest.Builder(context).data(url).build(),
-                                    imageLoader = imageLoader,
-                                    contentDescription = "Attachment",
-                                    contentScale = ContentScale.Crop,
-                                    modifier = Modifier
-                                        .fillMaxSize()
-                                        .haze(itemHazeState)
-                                )
-                                Box(
-                                    modifier = Modifier
-                                        .align(Alignment.TopEnd)
-                                        .padding(4.dp)
-                                        .size(20.dp)
-                                        .bounceClick(scaleDown = 0.88f) {
-                                            onRemoveMedia?.invoke(url)
-                                            onAttachedMediaChanged(attachedMedia.filter { it != url })
-                                        }
-                                        .hazeGlass(
-                                            state = itemHazeState,
-                                            shape = CircleShape,
-                                            containerColor = Color.Black.copy(alpha = 0.50f),
-                                            blurRadius = 10.dp,
-                                            borderColor = Color.White.copy(alpha = 0.20f),
-                                            borderWidth = 1.dp
-                                        ),
-                                    contentAlignment = Alignment.Center
-                                ) {
-                                    Icon(
-                                        painter = painterResource(id = R.drawable.ic_x),
-                                        contentDescription = "Remove",
-                                        tint = Color.White,
-                                        modifier = Modifier.size(10.dp)
-                                    )
-                                }
-                            }
-                        }
-                    }
-                }
+                CommentAttachedMediaRow(
+                    attachedMedia = attachedMedia,
+                    onAttachedMediaChanged = onAttachedMediaChanged,
+                    onRemoveMedia = onRemoveMedia,
+                    imageLoader = imageLoader
+                )
 
                 // Main input Row: [TextBox weight(1f)] [Send — always here]
                 val inputScrollState = rememberScrollState()
@@ -791,74 +624,12 @@ fun CommentInputBar(
                         }
 
                         // Markdown formatting menu
-                        AnimatedVisibility(visible = isMarkdownMenuExpanded) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(vertical = 6.dp)
-                            ) {
-                                val mdAction = { prefix: String, suffix: String ->
-                                    val selection = inputText.selection
-                                    val text = inputText.text
-                                    if (selection.collapsed) {
-                                        val newText = text.substring(0, selection.start) + prefix + suffix + text.substring(selection.end)
-                                        onInputTextChanged(TextFieldValue(newText, selection = TextRange(selection.start + prefix.length)))
-                                    } else {
-                                        val newText = text.substring(0, selection.start) + prefix + text.substring(selection.start, selection.end) + suffix + text.substring(selection.end)
-                                        onInputTextChanged(TextFieldValue(newText, selection = TextRange(selection.end + prefix.length + suffix.length)))
-                                    }
-                                }
-
-                                val mdListState = rememberLazyListState()
-                                LazyRow(
-                                    state = mdListState,
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .horizontalFadingEdges(
-                                            lazyListState = mdListState,
-                                            leftEdgeWidth = 14.dp,
-                                            rightEdgeWidth = 14.dp
-                                        ),
-                                    horizontalArrangement = Arrangement.spacedBy(6.dp),
-                                    contentPadding = PaddingValues(horizontal = 2.dp)
-                                ) {
-                                    item { MdBtn(onClick = { mdAction("**", "**") }) { Text("B", fontWeight = FontWeight.Black, color = Color.White, fontSize = 13.sp) } }
-                                    item { MdBtn(onClick = { mdAction("*", "*") }) { Text("I", fontStyle = FontStyle.Italic, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp) } }
-                                    item { MdBtn(onClick = { mdAction("~~", "~~") }) { Text("S", textDecoration = TextDecoration.LineThrough, fontWeight = FontWeight.Bold, color = Color.White, fontSize = 13.sp) } }
-                                    item { MdBtnPill(onClick = { mdAction("> ", "") }) { Text("Quote", color = Color.White, fontSize = 11.sp) } }
-                                    item { MdBtnPill(onClick = { mdAction("- ", "") }) { Text("• List", color = Color.White, fontSize = 11.sp) } }
-                                    item { MdBtnPill(onClick = { mdAction("1. ", "") }) { Text("1. List", color = Color.White, fontSize = 11.sp) } }
-                                    item {
-                                        MdBtnPill(
-                                            onClick = {
-                                                val pos = inputText.selection.start.coerceIn(0, inputText.text.length)
-                                                val needsSpace = pos > 0 && !inputText.text[pos - 1].isWhitespace()
-                                                mdAction(if (needsSpace) " #" else "#", "")
-                                            }
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.spacedBy(4.dp)
-                                            ) {
-                                                Icon(
-                                                    painter = painterResource(id = R.drawable.ic_film),
-                                                    contentDescription = null,
-                                                    tint = accentColor,
-                                                    modifier = Modifier.size(11.dp)
-                                                )
-                                                Text(
-                                                    text = "#",
-                                                    color = Color.White,
-                                                    fontSize = 12.sp,
-                                                    fontWeight = FontWeight.Bold
-                                                )
-                                            }
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                        CommentMarkdownToolbar(
+                            visible = isMarkdownMenuExpanded,
+                            inputText = inputText,
+                            onInputTextChanged = onInputTextChanged,
+                            accentColor = accentColor
+                        )
 
                         // Action Toolbar — no send button here (it lives next to the text box)
                         val bottomToolsScrollState = rememberScrollState()
@@ -1123,181 +894,5 @@ fun CommentInputBar(
                 )
             }
         }
-    }
-}
-
-@Composable
-private fun MdBtn(onClick: () -> Unit, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .size(32.dp)
-            .bounceClick { onClick() }
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.08f)),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
-    }
-}
-
-/** Pill-shaped button for text-only formatting actions (Quote, List, ecc.) */
-@Composable
-private fun MdBtnPill(onClick: () -> Unit, content: @Composable () -> Unit) {
-    Box(
-        modifier = Modifier
-            .height(32.dp)
-            .bounceClick { onClick() }
-            .clip(CircleShape)
-            .background(Color.White.copy(alpha = 0.08f))
-            .padding(horizontal = 10.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        content()
-    }
-}
-
-private data class ActiveHashtagMatch(
-    val hashIndex: Int,
-    val replaceEndIndex: Int,
-    val query: String
-)
-
-private fun findActiveHashtagQuery(
-    text: String,
-    cursor: Int,
-    selectedTags: List<TaggedMediaRef>
-): ActiveHashtagMatch? {
-    val safeCursor = cursor.coerceIn(0, text.length)
-    val beforeCursor = text.substring(0, safeCursor)
-    val lineStart = beforeCursor.lastIndexOf('\n') + 1
-
-    var hashIdx = -1
-    for (i in (safeCursor - 1) downTo lineStart) {
-        if (beforeCursor[i] == '#') {
-            val prevIsBoundary = i == 0 || beforeCursor[i - 1].isWhitespace()
-            if (prevIsBoundary) {
-                hashIdx = i
-                break
-            }
-        }
-    }
-    if (hashIdx == -1) return null
-
-    // Ignore '#' if it belongs to an already-confirmed selected media tag
-    for (tag in selectedTags) {
-        val token = "#${tag.title}"
-        if (text.startsWith(token, startIndex = hashIdx)) {
-            val tokenEnd = hashIdx + token.length
-            if (safeCursor <= tokenEnd || (safeCursor > tokenEnd && text.getOrNull(tokenEnd)?.isWhitespace() == true)) {
-                return null
-            }
-        }
-    }
-
-    val rawQuery = text.substring(hashIdx + 1, safeCursor)
-    if (rawQuery.startsWith(" ") || rawQuery.length > 50 || rawQuery.contains("  ") || rawQuery.count { it == ' ' } > 5) return null
-    val query = rawQuery.trim()
-
-    return ActiveHashtagMatch(
-        hashIndex = hashIdx,
-        replaceEndIndex = safeCursor,
-        query = query
-    )
-}
-
-@Composable
-private fun MediaTagSuggestionRow(
-    suggestion: TaggedMediaRef,
-    accentColor: Color,
-    imageLoader: coil3.ImageLoader,
-    onClick: () -> Unit
-) {
-    val context = LocalContext.current
-    val posterUrl = remember(suggestion.posterPath) {
-        buildTmdbImageUrl(suggestion.posterPath, ImageType.POSTER, ImageQuality.LOW)
-    }
-    val typeLabel = stringResource(
-        if (suggestion.mediaType == "tv") R.string.notif_media_tv else R.string.notif_media_movie
-    )
-    val subtitle = remember(typeLabel, suggestion.releaseYear) {
-        if (!suggestion.releaseYear.isNullOrBlank()) "$typeLabel • ${suggestion.releaseYear}" else typeLabel
-    }
-
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .bounceClick { onClick() }
-            .clip(RoundedCornerShape(10.dp))
-            .background(Color.White.copy(alpha = 0.06f))
-            .padding(5.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.spacedBy(10.dp)
-    ) {
-        Box(
-            modifier = Modifier
-                .size(width = 28.dp, height = 42.dp)
-                .clip(RoundedCornerShape(5.dp))
-                .background(Color.White.copy(alpha = 0.08f)),
-            contentAlignment = Alignment.Center
-        ) {
-            if (posterUrl != null) {
-                AsyncImage(
-                    model = ImageRequest.Builder(context)
-                        .data(posterUrl)
-                        .crossfade(true)
-                        .build(),
-                    imageLoader = imageLoader,
-                    contentDescription = null,
-                    contentScale = ContentScale.Crop,
-                    modifier = Modifier.fillMaxSize()
-                )
-            } else {
-                Icon(
-                    painter = painterResource(
-                        id = if (suggestion.mediaType == "tv") R.drawable.ic_tv else R.drawable.ic_film
-                    ),
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.45f),
-                    modifier = Modifier.size(14.dp)
-                )
-            }
-        }
-
-        Column(
-            modifier = Modifier.weight(1f),
-            verticalArrangement = Arrangement.spacedBy(3.dp)
-        ) {
-            Text(
-                text = suggestion.title,
-                color = Color.White,
-                style = MaterialTheme.typography.bodyMedium.copy(
-                    fontSize = 13.sp,
-                    lineHeight = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    platformStyle = PlatformTextStyle(includeFontPadding = false)
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-            Text(
-                text = subtitle,
-                color = Color.White.copy(alpha = 0.55f),
-                style = MaterialTheme.typography.bodySmall.copy(
-                    fontSize = 11.sp,
-                    lineHeight = 13.sp,
-                    platformStyle = PlatformTextStyle(includeFontPadding = false)
-                ),
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis
-            )
-        }
-
-        Text(
-            text = "#",
-            color = accentColor.copy(alpha = 0.85f),
-            fontSize = 13.sp,
-            fontWeight = FontWeight.Bold,
-            modifier = Modifier.padding(end = 6.dp)
-        )
     }
 }

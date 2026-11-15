@@ -54,7 +54,8 @@ class FolderDetailViewModel @Inject constructor(
     private val globalErrorHandler: GlobalErrorHandler,
     private val savedStateHandle: SavedStateHandle,
     private val sharedFolderRepository: com.cinetrack.data.repository.SharedFolderRepository,
-    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase
+    private val cycleMovieStatusUseCase: CycleMovieStatusUseCase,
+    private val mediaActionDelegate: MediaActionDelegate
 ) : ViewModel() {
 
     private val _folderId = MutableStateFlow<String?>(null)
@@ -371,19 +372,11 @@ class FolderDetailViewModel @Inject constructor(
     }
 
     fun updateRating(movie: Movie, rating: Double) {
-        viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-        }
+        mediaActionDelegate.updateRating(viewModelScope, movie, rating)
     }
 
     fun updateNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalNote = note))
-        }
+        mediaActionDelegate.updateNote(viewModelScope, movie, note)
     }
 
     fun toggleWatched(movie: Movie) {
@@ -424,38 +417,7 @@ class FolderDetailViewModel @Inject constructor(
     }
 
     fun toggleItemInFolder(targetFolder: FolderEntity, movie: Movie) {
-        viewModelScope.launch {
-            val itemId = movie.compositeId
-            val isPresent = targetFolder.itemIds.contains(itemId)
-            if (!isPresent && targetFolder.isShared && targetFolder.itemIds.size >= targetFolder.maxItems) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.folder_max_items_reached))
-                return@launch
-            }
-            val updatedIds = if (isPresent) {
-                targetFolder.itemIds.filter { it != itemId }
-            } else {
-                targetFolder.itemIds + itemId
-            }
-            
-            repository.saveFolder(targetFolder.copy(
-                itemIds = updatedIds,
-                updatedAt = Instant.now().toString()
-            ))
-            
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            if (local == null) {
-                repository.saveMovie(movie)
-            }
-            
-            val title = movie.title ?: movie.name ?: ""
-            val folderName = targetFolder.name
-            actionFeedbackManager.emit(
-                if (isPresent) UiText.StringResource(R.string.msg_item_removed_from_folder, title)
-                else UiText.StringResource(R.string.msg_item_added_to_folder, title, folderName)
-            ) {
-                repository.saveFolder(targetFolder)
-            }
-        }
+        mediaActionDelegate.toggleItemInFolder(viewModelScope, targetFolder, movie)
     }
 
     fun deleteFolder() {

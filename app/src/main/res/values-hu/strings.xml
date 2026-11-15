@@ -1179,12 +1179,9 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="person_offline_bio">A teljes életrajzi adatok és filmográfia offline módban nem érhetők el.\nA helyi könyvtárban található címek alább láthatók.</string>
     <string name="whats_new_title">Alkalmazás frissítve!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Többdátumos megtekintési előzmények: Kövesse nyomon minden újranézést.
-• Rákérdezés a megtekintés dátumára: Új beállítás a pontos dátum kiválasztásához.
-• Szimbióta akciógomb: Az oldalsó gomb intelligensen átalakul kör alakú Újranézés gombra.
-• Felhő szinkronizálás: Előzményei biztonságban vannak a Firebase-en.
-• Továbbfejlesztett visszajelzés: Markdown formázás és akár 2000 karakter.
-• Általános felületi és teljesítménybeli javítások.</string>
+    <string name="whats_new_fallback_notes">• Új funkciók, teljesítményjavítások és gördülékenyebb animációk
+• Felületi finomhangolások, hibajavítások és nagyobb stabilitás
+• Csatlakozz az internethez a frissítés összes újdonságáért!</string>
     <string name="whats_new_section_title">FŐBB ÚJDONSÁGOK</string>
     <string name="whats_new_btn_start">Remek, vágjunk bele!</string>
     <string name="github_update_title">Új frissítés érhető el</string>

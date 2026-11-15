@@ -53,7 +53,8 @@ fun UpdatesCalendarView(
     currentMonth: java.time.YearMonth,
     onMonthChanged: (java.time.YearMonth) -> Unit,
     onShowMonthPicker: () -> Unit,
-    internalHazeState: HazeState? = null
+    internalHazeState: HazeState? = null,
+    onToggleReminder: ((Movie) -> Unit)? = null
 ) {
     var selectedDate by remember { mutableStateOf<LocalDate?>(null) }
     
@@ -118,10 +119,10 @@ fun UpdatesCalendarView(
                             label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
                             episodeBadge = item.episodeInfo,
                             rawDate = item.arrivalDate,
-                            iconRes = R.drawable.ic_bell_piena,
+                            iconRes = if (!item.movie.remindersMuted) R.drawable.ic_bell_piena else R.drawable.ic_bell,
                             color = MaterialTheme.colorScheme.primary,
                             isReminder = true,
-                            onAction = {},
+                            onAction = { onToggleReminder?.invoke(item.movie) },
                             onPress = { onMovieClick(item.movie) }
                         )
                     }

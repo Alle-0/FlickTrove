@@ -1141,12 +1141,9 @@
     <string name="person_offline_bio">Data biografi lengkap dan filmografi lanjutan tidak tersedia dalam mode offline.\nJudul yang ada di koleksi lokal Anda ditampilkan di bawah ini.</string>
     <string name="whats_new_title">Aplikasi Diperbarui!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Riwayat Tontonan Multi-Tanggal: Pantau setiap kali Anda menonton ulang film atau serial TV.
-• Konfirmasi Tanggal Nonton: Pengaturan baru untuk memilih tanggal menonton yang tepat saat menandai judul sebagai sudah ditonton.
-• Pil Aksi Symbiont: Pil aksi samping kini berubah secara cerdas menjadi tombol melingkar Tonton Ulang.
-• Sinkronisasi Cloud: Riwayat tontonan Anda dicadangkan dan disinkronkan dengan aman melalui Firebase.
-• Masukan Lebih Lanjut: Gunakan format Markdown dan hingga 2000 karakter saat mengirim masukan.
-• Penyempurnaan antarmuka umum dan peningkatan performa.</string>
+    <string name="whats_new_fallback_notes">• Fitur baru, peningkatan performa, dan animasi yang lebih mulus
+• Pemolesan antarmuka, perbaikan bug, dan stabilitas yang lebih baik
+• Hubungkan ke internet untuk melihat semua sorotan pembaruan!</string>
     <string name="whats_new_section_title">SOROTAN UTAMA</string>
     <string name="whats_new_btn_start">Keren, ayo mulai!</string>
     <string name="github_update_title">Pembaruan Baru Tersedia</string>

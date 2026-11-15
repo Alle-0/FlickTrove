@@ -1184,12 +1184,9 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="person_offline_bio">Pełne dane biograficzne i rozszerzona filmografia nie są dostępne w trybie offline.\nPoniżej wyświetlane są tytuły z Twojej lokalnej biblioteki.</string>
     <string name="whats_new_title">Aplikacja zaktualizowana!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Historia wielokrotnych seansów: Śledź każdy kolejny seans filmu lub serialu.
-• Pytaj o datę seansu: Nowe ustawienie pozwalające wybrać dokładną datę podczas oznaczania jako obejrzane.
-• Inteligentna pigułka akcji: Boczna pigułka płynnie przekształca się w okrągły przycisk ponownego seansu.
-• Kopia w chmurze: Twoja historia seansów jest bezpiecznie zapisywana i synchronizowana przez Firebase.
-• Ulepszone opinie: Formatowanie Markdown i do 2000 znaków podczas przesyłania zgłoszeń.
-• Poprawki interfejsu i optymalizacja wydajności.</string>
+    <string name="whats_new_fallback_notes">• Nowe funkcje, ulepszenia wydajności i płynniejsze animacje
+• Dopracowanie interfejsu, poprawki błędów i większa stabilność
+• Połącz się z internetem, aby zobaczyć wszystkie nowości!</string>
     <string name="whats_new_section_title">NAJWAŻNIEJSZE NOWOŚCI</string>
     <string name="whats_new_btn_start">Świetnie, zaczynajmy!</string>
     <string name="github_update_title">Dostępna nowa aktualizacja</string>

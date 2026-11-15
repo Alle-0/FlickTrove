@@ -1105,12 +1105,9 @@
     <string name="person_offline_default_name">Artista #%1$d</string>
     <string name="whats_new_title">App Aggiornata!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Cronologia Visioni Multipla: Tieni traccia di ogni volta che fai il rewatch di un film o serie TV.
-• Prompt per la data di visione: Nuova impostazione per scegliere la data esatta quando si segna un titolo come visto.
-• Pillola Azioni Simbionte: La pillola laterale ora si trasforma intelligentemente in un pulsante circolare per il Rewatch.
-• Sincronizzazione Cloud: La tua cronologia visioni è salvata in modo sicuro tramite Firebase.
-• Feedback Potenziato: Usa la formattazione Markdown e fino a 2000 caratteri nei tuoi feedback.
-• Miglioramenti generali dell\'interfaccia e delle prestazioni.</string>
+    <string name="whats_new_fallback_notes">• Nuove funzionalità, miglioramenti delle prestazioni e animazioni più fluide
+• Rifiniture dell\'interfaccia, correzioni di bug e maggiore stabilità
+• Connettiti a internet per scoprire tutte le novità dell\'aggiornamento!</string>
     <string name="whats_new_section_title">NOVITÀ PRINCIPALI</string>
     <string name="whats_new_btn_start">Ottimo, Iniziamo!</string>
     <string name="github_update_title">Nuovo Aggiornamento Disponibile</string>

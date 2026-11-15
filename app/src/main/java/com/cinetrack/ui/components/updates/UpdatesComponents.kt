@@ -45,6 +45,7 @@ import dagger.hilt.components.SingletonComponent
 import com.cinetrack.ui.utils.ActionFeedbackManager
 import com.cinetrack.ui.utils.UiText
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.TransformOrigin
 
 @EntryPoint
 @InstallIn(SingletonComponent::class)
@@ -287,7 +288,8 @@ fun UpdateCard(
         }.getOrNull()
     }
 
-    val actualIsReminder = isReminder || iconRes == R.drawable.ic_bell_piena
+    val actualIsReminder = isReminder || iconRes == R.drawable.ic_bell_piena || iconRes == R.drawable.ic_bell
+    var optimisticRemindersMuted by remember(movie.remindersMuted) { mutableStateOf(movie.remindersMuted) }
 
     val interactionSource = remember { MutableInteractionSource() }
     val isPressed by interactionSource.collectIsPressedAsState()
@@ -432,15 +434,72 @@ fun UpdateCard(
 
             // Action / Status Section
             if (actualIsReminder) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                    contentDescription = null,
-                    tint = Color.White.copy(alpha = 0.25f),
-                    modifier = Modifier
-                        .padding(end = 4.dp)
-                        .size(14.dp)
-                        .mirrorInRtl()
-                )
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.padding(start = 2.dp)
+                ) {
+                    val isReminderActive = !optimisticRemindersMuted && (movie.reminder || (movie.mediaType == "tv" && !movie.dropped && (movie.favorite || movie.watched)))
+                    val bellIcon = if (isReminderActive) R.drawable.ic_bell_piena else R.drawable.ic_bell
+                    val bellTint = if (isReminderActive) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.60f)
+                    val bellBg = if (isReminderActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.14f) else Color.White.copy(alpha = 0.06f)
+                    val bellBorder = if (isReminderActive) MaterialTheme.colorScheme.primary.copy(alpha = 0.30f) else Color.White.copy(alpha = 0.15f)
+
+                    val bellRotation = remember { Animatable(0f) }
+                    var bellHasInitialized by remember { mutableStateOf(false) }
+
+                    LaunchedEffect(isReminderActive) {
+                        if (bellHasInitialized && isReminderActive) {
+                            bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
+                            bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
+                            bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
+                            bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
+                            bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
+                        }
+                        bellHasInitialized = true
+                    }
+
+                    Box(
+                        modifier = Modifier
+                            .size(36.dp)
+                            .bounceClick(
+                                scaleDown = 0.82f,
+                                onClick = {
+                                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                                    optimisticRemindersMuted = !optimisticRemindersMuted
+                                    onAction()
+                                }
+                            )
+                            .clip(CircleShape)
+                            .background(bellBg)
+                            .border(1.dp, bellBorder, CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = bellIcon),
+                            contentDescription = stringResource(if (isReminderActive) R.string.action_mute_reminders else R.string.action_unmute_reminders),
+                            tint = bellTint,
+                            modifier = Modifier
+                                .size(18.dp)
+                                .graphicsLayer {
+                                    if (isReminderActive) {
+                                        rotationZ = bellRotation.value
+                                        transformOrigin = TransformOrigin(0.5f, 0.2f)
+                                    }
+                                }
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.width(6.dp))
+
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
+                        contentDescription = null,
+                        tint = Color.White.copy(alpha = 0.25f),
+                        modifier = Modifier
+                            .size(14.dp)
+                            .mirrorInRtl()
+                    )
+                }
             } else {
                 Box(
                     modifier = Modifier
@@ -558,7 +617,6 @@ data class ReminderItem(
 )
 
 fun Movie.generateReminderItems(today: String): List<ReminderItem> {
-    if (this.remindersMuted) return emptyList()
     val isEligible = this.reminder || (this.mediaType == "tv" && !this.dropped && (this.favorite || this.watched))
     if (!isEligible) return emptyList()
 

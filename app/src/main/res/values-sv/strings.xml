@@ -1179,12 +1179,9 @@ Prova att förenkla sökningen</string>
     <string name="person_offline_bio">Biografisk information och fullständig filmografi är inte tillgängliga offline.\nTitlar från ditt lokala bibliotek visas nedan.</string>
     <string name="whats_new_title">Appen har uppdaterats!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Visningshistorik med flera datum: Följ varje gång du ser om en film eller serie.
-• Fråga om visningsdatum: Välj exakt datum när en titel markeras som sedd.
-• Symbiont-knapp: Sidoknappen förvandlas smidigt till en cirkulär Se om-knapp.
-• Molnsynkning: Din visningshistorik säkerhetskopieras tryggt via Firebase.
-• Förbättrad feedback: Skriv med Markdown-formatering upp till 2000 tecken.
-• Allmänna förbättringar av gränssnitt och prestanda.</string>
+    <string name="whats_new_fallback_notes">• Nya funktioner, prestandaförbättringar och smidigare animationer
+• Finjusteringar av gränssnittet, buggfixar och ökad stabilitet
+• Anslut till internet för att se alla uppdateringens nyheter!</string>
     <string name="whats_new_section_title">VIKTIGASTE NYHETERNA</string>
     <string name="whats_new_btn_start">Grymt, låt oss börja!</string>
     <string name="github_update_title">Ny uppdatering tillgänglig</string>

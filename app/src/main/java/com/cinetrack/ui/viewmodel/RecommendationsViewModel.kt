@@ -49,7 +49,8 @@ class RecommendationsViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val settingsRepository: SettingsRepository,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val mediaActionDelegate: MediaActionDelegate
 ) : ViewModel() {
 
     private val _mediaType = MutableStateFlow("movie")
@@ -236,30 +237,11 @@ class RecommendationsViewModel @Inject constructor(
         return logo
     }
 
-    fun deleteMovie(movie: Movie) {
-        viewModelScope.launch {
-            repository.deleteMovie(movie)
-            actionFeedbackManager.emit(UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")) {
-                repository.saveMovie(movie)
-            }
-        }
-    }
+    fun deleteMovie(movie: Movie) = mediaActionDelegate.deleteMovie(viewModelScope, movie)
 
-    fun updateRating(movie: Movie, rating: Double) {
-        viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-        }
-    }
+    fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)
 
-    fun updateNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            repository.saveMovie(current.copy(personalNote = note))
-        }
-    }
+    fun updateNote(movie: Movie, note: String) = mediaActionDelegate.updateNote(viewModelScope, movie, note)
 
     fun getMovieFolderColors(movie: Movie): List<androidx.compose.ui.graphics.Color> {
         val compositeId = "${movie.mediaType}_${movie.id}"
@@ -273,21 +255,8 @@ class RecommendationsViewModel @Inject constructor(
         return folder?.itemIds?.contains(compositeId) == true
     }
 
-    fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) {
-        viewModelScope.launch {
-            val compositeId = "${movie.mediaType}_${movie.id}"
-            val newItemIds = if (folder.itemIds.contains(compositeId)) {
-                folder.itemIds - compositeId
-            } else {
-                folder.itemIds + compositeId
-            }
-            repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = java.time.Instant.now().toString()))
-            val local = repository.getMovie(movie.id, movie.mediaType)
-            if (local == null) {
-                repository.saveMovie(movie)
-            }
-        }
-    }
+    fun toggleItemInFolder(folder: com.cinetrack.data.local.entities.FolderEntity, movie: Movie) =
+        mediaActionDelegate.toggleItemInFolder(viewModelScope, folder, movie)
 
     private suspend fun fetchRecommendations(type: String, favorites: List<Movie>, page: Int, isAppend: Boolean = false, hideSaved: Boolean = false) {
         if (!isAppend) _isLoading.value = true

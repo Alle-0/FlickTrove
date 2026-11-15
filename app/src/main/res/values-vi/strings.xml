@@ -1160,12 +1160,9 @@
     <string name="person_offline_bio">Tiểu sử và danh sách phim đầy đủ không khả dụng ở chế độ ngoại tuyến.\nCác tác phẩm có trong thư viện của bạn được hiển thị bên dưới.</string>
     <string name="whats_new_title">Đã cập nhật ứng dụng!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Lịch sử xem nhiều ngày: Theo dõi mỗi lần bạn xem lại phim hoặc series.
-• Hỏi ngày xem: Cài đặt mới để chọn ngày chính xác khi đánh dấu đã xem.
-• Nút hành động thông minh: Nút bên cạnh tự động chuyển đổi thành nút Xem lại.
-• Đồng bộ đám mây: Dữ liệu được lưu trữ an toàn qua Firebase.
-• Phản hồi nâng cao: Hỗ trợ định dạng Markdown lên tới 2000 ký tự.
-• Tối ưu giao diện và hiệu năng.</string>
+    <string name="whats_new_fallback_notes">• Tính năng mới, cải thiện hiệu suất và hoạt ảnh mượt mà hơn
+• Tinh chỉnh giao diện, sửa lỗi và tăng cường độ ổn định
+• Kết nối internet để xem tất cả điểm nổi bật của bản cập nhật!</string>
     <string name="whats_new_section_title">ĐIỂM NỔI BẬT</string>
     <string name="whats_new_btn_start">Tuyệt vời, bắt đầu thôi!</string>
     <string name="github_update_title">Có bản cập nhật mới</string>

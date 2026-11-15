@@ -1059,7 +1059,9 @@
     <string name="person_offline_bio">पूर्ण जीवनी डेटा और विस्तारित फ़िल्मोग्राफी ऑफ़लाइन मोड में उपलब्ध नहीं हैं।\nआपकी स्थानीय लाइब्रेरी में मौजूद शीर्षक नीचे प्रदर्शित किए गए हैं।</string>
     <string name="whats_new_title">ऐप अपडेट किया गया!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• धुंधलेपन के साथ सामग्री पर सफाई से रखे गए नए फ्लोटिंग गोलाकार एक्शन बटन (बैक, होम, शेयर)\n• ग्लास कंटेनर को विकृत किए बिना आंतरिक आइकन पर ठीक से लागू परिष्कृत बाउंस क्लिक एनीमेशन\n• संग्रह और व्यक्ति विवरण स्क्रीन पर आइकन पर धुंधलापन हस्तक्षेप को ठीक किया गया\n• UI पॉलिश और प्रदर्शन सुधार</string>
+    <string name="whats_new_fallback_notes">• नई सुविधाएँ, प्रदर्शन में सुधार और सहज एनिमेशन
+• इंटरफ़ेस में सुधार, बग फिक्स और बेहतर स्थिरता
+• अपडेट की पूरी जानकारी देखने के लिए इंटरनेट से कनेक्ट करें!</string>
     <string name="whats_new_section_title">मुख्य आकर्षण</string>
     <string name="whats_new_btn_start">बहुत बढ़िया, चलिए चलते हैं!</string>
     <string name="github_update_title">नया अपडेट उपलब्ध है</string>

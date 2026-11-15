@@ -77,6 +77,7 @@ import androidx.compose.ui.semantics.onClick
 import androidx.compose.ui.semantics.role
 import androidx.compose.ui.semantics.semantics
 import com.cinetrack.ui.components.shared.LocalMovieActions
+import com.cinetrack.util.DateTimeUtils
 import dev.chrisbanes.haze.HazeState
 import kotlin.math.pow
 
@@ -339,11 +340,7 @@ fun ContinueWatchingSeriesCard(
 
     // Calculate future air date if up-to-date or unreleased
     val todayIso = remember {
-        try {
-            java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US).format(java.util.Date())
-        } catch (_: Exception) {
-            "2026-01-01"
-        }
+        DateTimeUtils.formatDateOnly(java.util.Date())
     }
 
     val nextAirDate = remember(movie, todayIso) {
@@ -370,30 +367,7 @@ fun ContinueWatchingSeriesCard(
 
     val formattedNextDate = remember(nextAirDate, movie.firstAirDate, movie.releaseDate, isReleased) {
         val rawDate = nextAirDate ?: if (!isReleased) (movie.firstAirDate ?: movie.releaseDate)?.take(10) else null
-        if (rawDate.isNullOrBlank()) null
-        else {
-            try {
-                if (rawDate.length >= 10) {
-                    val parser = java.text.SimpleDateFormat("yyyy-MM-dd", java.util.Locale.US)
-                    val date = parser.parse(rawDate)
-                    if (date != null) {
-                        val calDate = java.util.Calendar.getInstance().apply { time = date }
-                        val calNow = java.util.Calendar.getInstance()
-                        val pattern = if (calDate.get(java.util.Calendar.YEAR) != calNow.get(java.util.Calendar.YEAR)) {
-                            "d MMM yy"
-                        } else {
-                            "d MMM"
-                        }
-                        val formatter = java.text.SimpleDateFormat(pattern, java.util.Locale.getDefault())
-                        formatter.format(date)
-                    } else null
-                } else if (rawDate.length == 4) {
-                    rawDate
-                } else null
-            } catch (_: Exception) {
-                null
-            }
-        }
+        DateTimeUtils.formatAirDate(rawDate)
     }
 
     val epText = remember(nextInfo.seasonNumber, nextInfo.episodeNumber) {

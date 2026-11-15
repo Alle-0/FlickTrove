@@ -1,58 +1,28 @@
 package com.cinetrack.ui.components.card
-import androidx.compose.ui.res.stringResource
-import com.cinetrack.R
 
-import androidx.compose.ui.res.vectorResource
-import com.cinetrack.util.buildTmdbImageUrl
-import com.cinetrack.util.ImageType
-import com.cinetrack.util.ImageQuality
-import com.cinetrack.util.LocalImageQuality
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import com.cinetrack.ui.model.generateBadges
 import androidx.compose.animation.*
 import androidx.compose.animation.core.*
-import androidx.compose.foundation.gestures.awaitEachGesture
-import androidx.compose.foundation.gestures.awaitFirstDown
-import androidx.compose.foundation.gestures.waitForUpOrCancellation
-import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.semantics.contentDescription
-import androidx.compose.ui.semantics.role
-import androidx.compose.ui.semantics.semantics
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.rounded.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
-import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.zIndex
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.blur
-import androidx.compose.ui.draw.shadow
-import androidx.compose.ui.graphics.Brush
-import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.PathFillType
-import androidx.compose.ui.graphics.graphicsLayer
-import androidx.compose.ui.graphics.CompositingStrategy
-import androidx.compose.ui.graphics.TransformOrigin
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.geometry.Rect
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.ContentScale
-import com.cinetrack.ui.components.shared.LocalMovieActions
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.PlatformTextStyle
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.font.FontWeight
@@ -64,83 +34,17 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.allowHardware
 import coil3.request.crossfade
+import com.cinetrack.R
 import com.cinetrack.data.model.Movie
+import com.cinetrack.ui.components.shared.LocalMovieActions
+import com.cinetrack.ui.model.generateBadges
 import com.cinetrack.ui.model.getLocalizedText
-import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.*
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.components.glass.glassmorphic
+import com.cinetrack.util.ImageType
+import com.cinetrack.util.LocalImageQuality
+import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.util.toComposeColorOrNull
-import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.foundation.shape.GenericShape
 import dev.chrisbanes.haze.HazeState
-import dev.chrisbanes.haze.HazeStyle
-import dev.chrisbanes.haze.haze
-
-// --- Constants & Shapes ---
-
-private val FilmStripBookmarkShape = GenericShape { size, _ ->
-    val w = size.width
-    val h = size.height
-    fillType = PathFillType.EvenOdd
-    
-    moveTo(0f, 0f)
-    lineTo(w, 0f)
-    lineTo(w, h)
-    lineTo(w / 2f, h * 0.9f)
-    lineTo(0f, h)
-    close()
-    
-    val holeW = w * 0.15f
-    val holeH = h * 0.1f
-    val margin = w * 0.1f
-    val spacing = h * 0.22f
-    
-    var y = h * 0.2f
-    while (y + holeH < h * 0.85f) {
-        addRect(Rect(margin, y, margin + holeW, y + holeH))
-        addRect(Rect(w - margin - holeW, y, w - margin, y + holeH))
-        y += spacing
-    }
-}
-
-// --- Helper Composables ---
-
-
-
-@Composable
-fun MovieFolderBookmarks(
-    folderColors: List<Color>,
-    modifier: Modifier = Modifier
-) {
-    if (folderColors.isEmpty()) return
-    
-    val indicatorBrush = if (folderColors.size > 1) {
-        Brush.verticalGradient(folderColors)
-    } else {
-        Brush.linearGradient(listOf(folderColors.first(), folderColors.first()))
-    }
-
-    Box(
-        modifier = modifier
-            .padding(start = 14.dp)
-            .width(16.dp)
-            .height(28.dp)
-            .graphicsLayer {
-                shadowElevation = 8.dp.toPx()
-                shape = FilmStripBookmarkShape
-                clip = true
-            }
-            .background(indicatorBrush)
-            .border(
-                width = 0.5.dp,
-                color = Color.White.copy(alpha = 0.2f),
-                shape = FilmStripBookmarkShape
-            )
-    )
-}
-
-
 
 // --- Main Component ---
 
@@ -511,317 +415,25 @@ fun MovieCard(
                     }
                 }
 
-                val hintReminder = stringResource(R.string.card_hint_manage_reminder)
-                val hintEpisodes = stringResource(R.string.card_hint_manage_episodes)
-                
                 if (showActionButton) {
-                    val appAccent = MaterialTheme.colorScheme.primary
-                    val isReleased = movie.isReleased
-
-                    var optimisticFavorite by remember(isFavorite) { mutableStateOf(isFavorite) }
-                    var optimisticWatched by remember(isWatched) { mutableStateOf(isWatched) }
-                    var optimisticReminder by remember(isReminder) { mutableStateOf(isReminder) }
-
-                    val effectiveWatched = optimisticWatched
-                    val effectiveFavorite = optimisticFavorite
-                    val effectiveReminder = optimisticReminder
-
-                    val isPromemoriaAttiva = !isReleased && !effectiveWatched && (effectiveReminder || effectiveFavorite)
-                    val isOcchio = isReleased && !effectiveWatched && (effectiveReminder || effectiveFavorite)
-                    val isTick = effectiveWatched
-                    val isPlus = !effectiveWatched && isReleased && !isOcchio
-                    val isBellOutlined = !isReleased && !effectiveWatched && !(effectiveReminder || effectiveFavorite)
-
-                    val actionButtonScale = remember { Animatable(1f) }
-                    val actionIconScale = remember { Animatable(1f) }
-                    val actionScope = rememberCoroutineScope()
-
-                    val bellRotation = remember { Animatable(0f) }
-                    var bellHasInitialized by remember { mutableStateOf(false) }
-
-                    fun triggerActionAnimation() {
-                        actionScope.launch {
-                            if (isPlus) {
-                                // Shutter scale pop
-                                actionIconScale.snapTo(0.70f)
-                                actionIconScale.animateTo(
-                                    1.0f,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMediumLow
-                                    )
-                                )
-                            } else if (isOcchio) {
-                                // Iris expansion pop
-                                actionIconScale.snapTo(0.65f)
-                                actionIconScale.animateTo(
-                                    1.28f,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMediumLow
-                                    )
-                                )
-                                actionIconScale.animateTo(
-                                    1.0f,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMediumLow
-                                    )
-                                )
-                            } else if (isTick) {
-                                // Tick scale pop
-                                actionIconScale.snapTo(0.65f)
-                                actionIconScale.animateTo(
-                                    1.0f,
-                                    animationSpec = spring(
-                                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                                        stiffness = Spring.StiffnessMediumLow
-                                    )
-                                )
-                            } else if (!isReleased) {
-                                // Bell ring wobble
-                                bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                                bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                                bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                                bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                                bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                            }
-                        }
-                    }
-
-                    LaunchedEffect(isReminder, isFavorite) {
-                        if (bellHasInitialized && !isReleased && (isReminder || isFavorite)) {
-                            bellRotation.animateTo(-25f, tween(60, easing = LinearEasing))
-                            bellRotation.animateTo(20f, tween(100, easing = LinearEasing))
-                            bellRotation.animateTo(-15f, tween(100, easing = LinearEasing))
-                            bellRotation.animateTo(10f, tween(100, easing = LinearEasing))
-                            bellRotation.animateTo(0f, tween(100, easing = FastOutSlowInEasing))
-                        }
-                        bellHasInitialized = true
-                    }
-
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.BottomEnd)
-                            .padding(end = if (isLarge) 12.dp else 8.dp, bottom = if (isLarge) 12.dp else 8.dp)
-                            .size(if (isLarge) 34.dp else 24.dp)
-                            .graphicsLayer {
-                                scaleX = actionButtonScale.value
-                                scaleY = actionButtonScale.value
-                                clip = false
-                            }
-                            .semantics(mergeDescendants = true) {
-                                role = Role.Button
-                                this.contentDescription = "Action"
-                            }
-                            .pointerInput(Unit) {
-                                awaitEachGesture {
-                                    val down = awaitFirstDown(requireUnconsumed = false)
-                                    down.consume()
-                                    actionScope.launch {
-                                        actionButtonScale.animateTo(
-                                            0.80f,
-                                            animationSpec = spring(stiffness = 10000f, dampingRatio = Spring.DampingRatioNoBouncy)
-                                        )
-                                    }
-                                    val up = waitForUpOrCancellation()
-                                    if (up != null) {
-                                        up.consume()
-                                        actionScope.launch {
-                                            actionButtonScale.animateTo(
-                                                1.15f,
-                                                animationSpec = spring(stiffness = 12000f, dampingRatio = Spring.DampingRatioNoBouncy)
-                                            )
-                                            actionButtonScale.animateTo(
-                                                1.0f,
-                                                animationSpec = spring(
-                                                    stiffness = Spring.StiffnessMediumLow,
-                                                    dampingRatio = Spring.DampingRatioMediumBouncy
-                                                )
-                                            )
-                                        }
-
-                                        // Trigger ripple on the parent card from the button center on release
-                                        val rippleX = with(density) { cardWidth.toPx() - 20.dp.toPx() }
-                                        val rippleY = with(density) { cardHeight.toPx() - 20.dp.toPx() }
-                                        rippleState.trigger(Offset(rippleX, rippleY))
-                                        com.cinetrack.util.VibrationHelper.vibrateTick(context)
-                                        haptic.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.LongPress)
-
-                                        if (!isReleased && !effectiveWatched) {
-                                            if (!effectiveWatched && !effectiveFavorite && !effectiveReminder) {
-                                                optimisticReminder = true
-                                                onAction(movie)
-                                            } else {
-                                                onMessage(hintReminder)
-                                            }
-                                        } else if (isTv) {
-                                            if (!effectiveWatched && !effectiveFavorite && !effectiveReminder) {
-                                                optimisticFavorite = true
-                                                onAction(movie)
-                                            } else if (showActionHint) {
-                                                onMessage(hintEpisodes)
-                                            }
-                                        } else {
-                                            // Normal behavior for released movies: Plus -> Eye -> Check
-                                            if (!effectiveWatched && !effectiveFavorite && !effectiveReminder) {
-                                                optimisticFavorite = true
-                                                optimisticWatched = false
-                                                optimisticReminder = false
-                                            } else if (!effectiveWatched && (effectiveFavorite || effectiveReminder)) {
-                                                optimisticWatched = true
-                                                optimisticFavorite = false
-                                                optimisticReminder = false
-                                            }
-                                            onAction(movie)
-                                        }
-                                        triggerActionAnimation()
-                                    } else {
-                                        // Cancelled
-                                        actionScope.launch {
-                                            actionButtonScale.animateTo(
-                                                1.0f,
-                                                animationSpec = spring(
-                                                    stiffness = Spring.StiffnessMediumLow,
-                                                    dampingRatio = Spring.DampingRatioNoBouncy
-                                                )
-                                            )
-                                        }
-                                    }
-                                }
-                            },
-                        contentAlignment = Alignment.Center
-                    ) {
-                        // Outside "Da guardare" / "Continua a guardare", circular progress always reflects total series progress
-                        val targetCircularProgress = computedProgress
-                        val animatedCircularProgress by androidx.compose.animation.core.animateFloatAsState(
-                            targetValue = targetCircularProgress,
-                            animationSpec = androidx.compose.animation.core.spring(
-                                dampingRatio = androidx.compose.animation.core.Spring.DampingRatioNoBouncy,
-                                stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow
-                            ),
-                            label = "movieCardCircularProgress"
-                        )
-                        val isHasCircularProgress = isTv && !effectiveWatched && (isOcchio || isPromemoriaAttiva || computedProgress > 0f)
-
-                        val actionBg = when {
-                            effectiveWatched -> appAccent.copy(alpha = 0.1f) // Theme color for Watched
-                            isPromemoriaAttiva -> appAccent.copy(alpha = 0.1f) // Theme color for Reminder
-                            isOcchio -> HazeStyles.AccentYellow.copy(alpha = 0.1f) // Yellow for Eye/Favorite
-                            else -> HazeStyles.GlassColor.copy(alpha = 0.60f)
-                        }
-
-                        val actionBorder = when {
-                            effectiveWatched -> appAccent
-                            isPromemoriaAttiva -> appAccent
-                            isOcchio -> HazeStyles.AccentYellow
-                            else -> HazeStyles.GlassBorderColor
-                        }.copy(alpha = 0.3f)
-
-                        val actionTint = when {
-                            effectiveWatched -> appAccent
-                            isPromemoriaAttiva -> appAccent
-                            isOcchio -> HazeStyles.AccentYellow
-                            else -> Color.White
-                        }
-
-                        val iconSizeModifier = Modifier.size(
-                            if (isLarge) {
-                                if (isTick) 13.dp else if (isPlus) 16.dp else if (isOcchio) 20.dp else if (isBellOutlined) 20.dp else 21.dp
-                            } else {
-                                if (isTick) 10.dp else if (isPlus) 12.dp else if (isOcchio) 15.dp else if (isBellOutlined) 15.5.dp else 17.dp
-                            }
-                        )
-
-                        val buttonSize = if (isLarge) 30.dp else 22.dp
-                        val buttonModifier = Modifier
-                            .size(buttonSize)
-                            .background(color = actionBg, shape = CircleShape)
-                            .then(
-                                if (!isHasCircularProgress) Modifier.border(width = 1.dp, color = actionBorder, shape = CircleShape)
-                                else Modifier
-                            )
-
-                        Box(
-                            modifier = buttonModifier,
-                            contentAlignment = Alignment.Center
-                        ) {
-                            if (isHasCircularProgress) {
-                                androidx.compose.foundation.Canvas(modifier = Modifier.fillMaxSize()) {
-                                    val sw = if (isLarge) 2.dp.toPx() else 1.5.dp.toPx()
-                                    val strokeOffset = sw / 2
-                                    val arcSize = androidx.compose.ui.geometry.Size(size.width - sw, size.height - sw)
-                                    drawArc(
-                                        color = Color.White.copy(alpha = 0.15f),
-                                        startAngle = -90f,
-                                        sweepAngle = 360f,
-                                        useCenter = false,
-                                        topLeft = androidx.compose.ui.geometry.Offset(strokeOffset, strokeOffset),
-                                        size = arcSize,
-                                        style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw)
-                                    )
-                                    if (animatedCircularProgress > 0f) {
-                                        drawArc(
-                                            color = appAccent,
-                                            startAngle = -90f,
-                                            sweepAngle = 360f * animatedCircularProgress.coerceIn(0f, 1f),
-                                            useCenter = false,
-                                            topLeft = androidx.compose.ui.geometry.Offset(strokeOffset, strokeOffset),
-                                            size = arcSize,
-                                            style = androidx.compose.ui.graphics.drawscope.Stroke(width = sw, cap = androidx.compose.ui.graphics.StrokeCap.Round)
-                                        )
-                                    }
-                                }
-                            }
-                            Icon(
-                                imageVector = when {
-                                    isTick -> ImageVector.vectorResource(id = R.drawable.ic_tick_card)
-                                    !isReleased -> if (isPromemoriaAttiva) ImageVector.vectorResource(id = R.drawable.ic_bell_piena) else ImageVector.vectorResource(id = R.drawable.ic_bell)
-                                    isOcchio -> ImageVector.vectorResource(id = R.drawable.ic_eye)
-                                    else -> ImageVector.vectorResource(id = R.drawable.ic_plus)
-                                },
-                                contentDescription = "Action",
-                                tint = actionTint,
-                                modifier = iconSizeModifier.graphicsLayer {
-                                    scaleX = actionIconScale.value
-                                    scaleY = actionIconScale.value
-                                    rotationZ = if (!isReleased && isPromemoriaAttiva) {
-                                        bellRotation.value
-                                    } else {
-                                        0f
-                                    }
-                                    if (!isReleased && isPromemoriaAttiva) {
-                                        transformOrigin = androidx.compose.ui.graphics.TransformOrigin(0.5f, 0.2f)
-                                    }
-                                }
-                            )
-                        }
-                    }
+                    MovieCardActionButton(
+                        movie = movie,
+                        cardWidth = cardWidth,
+                        cardHeight = cardHeight,
+                        isFavorite = isFavorite,
+                        isWatched = isWatched,
+                        isReminder = isReminder,
+                        computedProgress = computedProgress,
+                        showActionHint = showActionHint,
+                        isLarge = isLarge,
+                        rippleState = rippleState,
+                        onAction = onAction,
+                        onMessage = onMessage,
+                        modifier = Modifier.align(Alignment.BottomEnd)
+                    )
                 }
             }
         }
     }
 }
-}
-
-@Composable
-fun MovieCardBadge(text: String, color: Color, modifier: Modifier = Modifier, hazeState: HazeState? = null, isLarge: Boolean = false) {
-    Box(
-        modifier = modifier
-            .background(Color.Black.copy(alpha = 0.65f), RoundedCornerShape(50))
-            .background(color.copy(alpha = 0.2f), RoundedCornerShape(50))
-            .border(0.5.dp, color.copy(alpha = 0.8f), RoundedCornerShape(50))
-            .padding(horizontal = if (isLarge) 8.dp else 6.dp, vertical = if (isLarge) 4.dp else 2.5.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = text,
-            color = Color.White,
-            fontSize = if (isLarge) 9.5.sp else 7.5.sp,
-            fontWeight = FontWeight.ExtraBold,
-            letterSpacing = 0.5.sp,
-            maxLines = 1,
-            style = TextStyle(platformStyle = PlatformTextStyle(includeFontPadding = false))
-        )
-    }
 }

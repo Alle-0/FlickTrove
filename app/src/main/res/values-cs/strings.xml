@@ -1160,12 +1160,9 @@
     <string name="person_offline_bio">Úplná biografická data a rozšířená filmografie nejsou v režimu offline k dispozici.\nNíže jsou zobrazeny tituly z vaší místní knihovny.</string>
     <string name="whats_new_title">Aplikace aktualizována!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Vícenásobná historie zhlédnutí: Zaznamenejte každé opakované zhlédnutí filmu či seriálu.
-• Výzva k zadání data: Nové nastavení pro výběr přesného data při označení za zhlédnuté.
-• Chytré tlačítko akcí: Postranní panel se elegantně promění v tlačítko opětovného zhlédnutí.
-• Cloudová synchronizace: Vaše historie sledování je bezpečně zálohována a synchronizována přes Firebase.
-• Vylepšená zpětná vazba: Podpora Markdownu a až 2000 znaků při odesílání hlášení.
-• Celkové vyladění rozhraní a zvýšení plynulosti.</string>
+    <string name="whats_new_fallback_notes">• Nové funkce, vylepšení výkonu a plynulejší animace
+• Vyladění rozhraní, opravy chyb a vyšší stabilita
+• Připojte se k internetu a podívejte se na všechny novinky aktualizace!</string>
     <string name="whats_new_section_title">HLAVNÍ NOVINKY</string>
     <string name="whats_new_btn_start">Skvělé, jdeme na to!</string>
     <string name="github_update_title">K dispozici je nová aktualizace</string>

@@ -2,6 +2,7 @@ package com.cinetrack.ui.viewmodel
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.repository.MovieRepository
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -51,6 +52,21 @@ class UpdatesViewModel @Inject constructor(
 
     fun emitMessage(message: UiText) {
         actionFeedbackManager.emit(message)
+    }
+
+    fun toggleReminderMuted(movie: Movie) {
+        viewModelScope.launch(Dispatchers.IO) {
+            val local = repository.getMovie(movie.id, movie.mediaType) ?: movie
+            val newMuted = !local.remindersMuted
+            val updated = local.copy(
+                remindersMuted = newMuted,
+                clientUpdatedAt = System.currentTimeMillis(),
+                syncStatus = "pending"
+            )
+            repository.saveMovie(updated)
+            val msgRes = if (newMuted) R.string.msg_reminders_muted else R.string.msg_reminders_unmuted
+            actionFeedbackManager.emit(UiText.StringResource(msgRes, updated.displayName))
+        }
     }
 
     private val _socialNotifications = MutableStateFlow<ImmutableList<GroupedSocialNotification>>(persistentListOf())

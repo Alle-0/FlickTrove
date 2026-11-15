@@ -65,8 +65,8 @@ import com.cinetrack.util.ImageType
 import com.cinetrack.util.buildTmdbImageUrl
 import com.cinetrack.ui.viewmodel.CommentsViewModel
 import com.cinetrack.ui.components.common.ZoomableImageViewerDialog
+import com.cinetrack.util.DateTimeUtils
 import kotlinx.coroutines.launch
-import java.text.SimpleDateFormat
 import java.util.Locale
 
 private val MEDIA_REGEX = Regex("!\\[.*?\\]\\((.*?)\\)")
@@ -652,7 +652,7 @@ fun CommentCardItem(
                                 minutes < 1 -> context.getString(R.string.comment_time_now)
                                 minutes < 60 -> context.getString(R.string.comment_time_mins_ago, minutes.toInt())
                                 hours < 24 -> context.getString(R.string.comment_time_hours_ago, hours.toInt())
-                                else -> SimpleDateFormat("dd MMM yy", Locale.getDefault()).format(date)
+                                else -> DateTimeUtils.formatShortDate(date)
                             }
                         }
                         Text(

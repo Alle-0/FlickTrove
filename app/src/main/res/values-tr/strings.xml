@@ -1141,12 +1141,9 @@
     <string name="person_offline_bio">Çevrimdışı modda tam biyografik veriler ve genişletilmiş filmografi kullanılamaz.\nYerel arşivinizde bulunan yapımlar aşağıda listelenmiştir.</string>
     <string name="whats_new_title">Uygulama Güncellendi!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Çoklu Tarihli İzleme Geçmişi: Bir film veya diziyi tekrar her izlediğinizde kaydedin.
-• İzleme Tarihi Sorusu: Bir yapımı izlendi olarak işaretlerken tam tarihi seçmek için yeni ayar.
-• Ortak Yaşar Eylem Butonu: Yan eylem butonu akıllıca dairesel bir Tekrar İzle butonuna dönüşür.
-• Bulut Senkronizasyonu: İzleme geçmişiniz Firebase üzerinden güvenle yedeklenir ve senkronize edilir.
-• Gelişmiş Geri Bildirim: Geri bildirim gönderirken Markdown formatı ve 2000 karaktere kadar destek.
-• Genel arayüz cilaları ve performans iyileştirmeleri.</string>
+    <string name="whats_new_fallback_notes">• Yeni özellikler, performans iyileştirmeleri ve daha akıcı animasyonlar
+• Arayüz geliştirmeleri, hata düzeltmeleri ve daha fazla kararlılık
+• Güncellemenin tüm yeniliklerini görmek için internete bağlanın!</string>
     <string name="whats_new_section_title">ÖNE ÇIKAN YENİLİKLER</string>
     <string name="whats_new_btn_start">Harika, başlayalım!</string>
     <string name="github_update_title">Yeni Güncelleme Mevcut</string>

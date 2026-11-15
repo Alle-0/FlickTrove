@@ -52,7 +52,8 @@ fun UpdatesTimelineView(
     listState: LazyListState,
     onMovieClick: (Movie) -> Unit,
     modifier: Modifier = Modifier,
-    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp)
+    contentPadding: PaddingValues = PaddingValues(horizontal = 16.dp, vertical = 8.dp),
+    onToggleReminder: ((Movie) -> Unit)? = null
 ) {
     if (reminders.isEmpty()) {
         Box(
@@ -174,7 +175,8 @@ fun UpdatesTimelineView(
                             staggerIndex = staggerIndex,
                             animatedEntryIds = animatedEntryIds,
                             today = today,
-                            onMovieClick = onMovieClick
+                            onMovieClick = onMovieClick,
+                            onToggleReminder = onToggleReminder
                         )
                     }
                 }
@@ -190,6 +192,7 @@ private fun androidx.compose.foundation.lazy.LazyItemScope.RemindersEntryRow(
     animatedEntryIds: MutableSet<String>,
     today: LocalDate,
     onMovieClick: (Movie) -> Unit,
+    onToggleReminder: ((Movie) -> Unit)?,
     modifier: Modifier = Modifier
 ) {
     val nodeColor = remember(item.arrivalDate, today) {
@@ -295,10 +298,10 @@ private fun androidx.compose.foundation.lazy.LazyItemScope.RemindersEntryRow(
                 label = stringResource(R.string.updates_arriving_prefix, formatReleaseDate(item.arrivalDate)),
                 episodeBadge = item.episodeInfo,
                 rawDate = item.arrivalDate,
-                iconRes = R.drawable.ic_bell_piena,
+                iconRes = if (!item.movie.remindersMuted) R.drawable.ic_bell_piena else R.drawable.ic_bell,
                 color = MaterialTheme.colorScheme.primary,
                 isReminder = true,
-                onAction = {},
+                onAction = { onToggleReminder?.invoke(item.movie) },
                 onPress = { onMovieClick(item.movie) },
                 modifier = Modifier.fillMaxWidth()
             )

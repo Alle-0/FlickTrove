@@ -126,6 +126,39 @@ object DateTimeUtils {
     }
 
     /**
+     * Formats an air date or release date string (e.g. "2026-11-20") to a concise human-readable form:
+     * "d MMM" if the year is the current year, or "d MMM yy" if it belongs to another year.
+     * Returns raw 4-digit years unchanged (e.g. "2026").
+     */
+    fun formatAirDate(rawDate: String?, locale: Locale = Locale.getDefault()): String? {
+        if (rawDate.isNullOrBlank()) return null
+        val trimmed = rawDate.trim()
+        if (trimmed.length == 4) return trimmed
+        if (trimmed.length < 10) return null
+        return try {
+            val localDate = java.time.LocalDate.parse(trimmed.substring(0, 10))
+            val currentYear = java.time.LocalDate.now().year
+            val pattern = if (localDate.year != currentYear) "d MMM yy" else "d MMM"
+            localDate.format(java.time.format.DateTimeFormatter.ofPattern(pattern, locale))
+        } catch (_: Exception) {
+            null
+        }
+    }
+
+    /**
+     * Formats a date as a short date string (e.g. "15 nov 26").
+     */
+    fun formatShortDate(date: Date, locale: Locale = Locale.getDefault()): String {
+        return try {
+            val instant = date.toInstant()
+            val localDate = instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+            localDate.format(java.time.format.DateTimeFormatter.ofPattern("dd MMM yy", locale))
+        } catch (_: Exception) {
+            formatDateOnly(date)
+        }
+    }
+
+    /**
      * Calculates the ISO 8601 week ID in the format "${weekYear}_W$week" (e.g. "2026_W45").
      * Uses UTC and IsoFields (ISO-8601 standard: week starts on Monday, year based on week)
      * to ensure global consistency on Firestore and prevent year-boundary desynchronization

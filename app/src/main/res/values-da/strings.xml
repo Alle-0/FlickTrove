@@ -1175,12 +1175,9 @@
     <string name="person_offline_bio">Fulde biografiske data og udvidet filmografi er ikke tilgængelige i offlinetilstand.\nTitler i dit lokale bibliotek vises nedenfor.</string>
     <string name="whats_new_title">App opdateret!</string>
     <string name="whats_new_version">FlickTrove v%1$s</string>
-    <string name="whats_new_fallback_notes">• Historik over flere visningsdatoer: Spor hver gang du ser en film eller TV-serie igen.
-• Spørg om visningsdato: Ny indstilling til at vælge den nøjagtige visningsdato, når du markerer en titel som set.
-• Symbiont-handlingspille: Sidehandlingspillen forvandles nu smart til en cirkulær Gensyn-knap.
-• Cloud-synkronisering: Din sehistorik sikkerhedskopieres og synkroniseres sikkert via Firebase.
-• Forbedret feedback: Brug Markdown-formatering og op til 2000 tegn, når du sender feedback.
-• Generel UI-finpudsning og ydeevneforbedringer.</string>
+    <string name="whats_new_fallback_notes">• Nye funktioner, forbedret ydeevne og mere flydende animationer
+• Finpudsning af brugerfladen, fejlrettelser og øget stabilitet
+• Opret forbindelse til internettet for at se alle nyhederne!</string>
     <string name="whats_new_section_title">VIGTIGSTE HØJDEPUNKTER</string>
     <string name="whats_new_btn_start">Fedt, lad os komme i gang!</string>
     <string name="github_update_title">Ny opdatering tilgængelig</string>

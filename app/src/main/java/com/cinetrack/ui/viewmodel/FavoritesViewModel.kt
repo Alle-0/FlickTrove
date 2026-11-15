@@ -46,7 +46,8 @@ class FavoritesViewModel @Inject constructor(
     private val movieRepository: MovieRepository,
     private val preferenceRepository: PreferenceRepository,
     private val updateEpisodesUseCase: UpdateEpisodesUseCase,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val mediaActionDelegate: MediaActionDelegate
 ) : ViewModel() {
 
     private val _syncingIds = MutableStateFlow<PersistentSet<Long>>(persistentSetOf())
@@ -164,19 +165,11 @@ class FavoritesViewModel @Inject constructor(
     }
 
     fun updateRating(movie: Movie, rating: Double?) {
-        viewModelScope.launch {
-            val local = movieRepository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            movieRepository.saveMovie(current.copy(personalRating = rating, votedAt = System.currentTimeMillis()))
-        }
+        mediaActionDelegate.updateRating(viewModelScope, movie, rating)
     }
 
     fun updateNote(movie: Movie, note: String?) {
-        viewModelScope.launch {
-            val local = movieRepository.getMovie(movie.id, movie.mediaType)
-            val current = local ?: movie
-            movieRepository.saveMovie(current.copy(personalNote = note))
-        }
+        mediaActionDelegate.updateNote(viewModelScope, movie, note)
     }
 
     fun updateEpisodes(movie: Movie, seasonNum: Int, episodeNums: List<Int>) {
