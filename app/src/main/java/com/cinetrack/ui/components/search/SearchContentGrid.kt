@@ -172,12 +172,8 @@ fun SearchContentGrid(
             val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection") && uiState.category != "mood"
 
             if (uiState.category == "mood") {
-                val currentLang = if (uiState.preferences.contentLanguage == "system") {
-                    java.util.Locale.getDefault().language
-                } else {
-                    uiState.preferences.contentLanguage
-                }.lowercase()
-                val isLocalEligible = currentLang.startsWith("it") || currentLang.startsWith("en")
+                // Tutte le 29 lingue sono ora supportate nativamente grazie allo spazio vettoriale multilingue bge-m3
+                val isLocalEligible = true
 
                 item(span = { GridItemSpan(12) }) {
                     MoodDiscoverySection(

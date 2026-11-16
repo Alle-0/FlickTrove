@@ -45,7 +45,7 @@ class MoodSearchRepository @Inject constructor(
 
     suspend fun getRemainingQuota(): Int = preferenceRepository.getMoodSearchesRemaining()
 
-    fun isLocalEligible(language: String): Boolean = localEngine.isSupportedLanguage(language)
+    fun isLocalEligible(language: String): Boolean = true
 
     suspend fun searchMoviesByMood(
         query: String,
