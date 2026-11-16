@@ -30,6 +30,11 @@ object KeywordDictionary {
         "prima guerra mondiale" to 2504L, "guerra del vietnam" to 2957L, "olocausto" to 375138L, "antica roma" to 5049L,
         "antico egitto" to 157894L, "vichinghi" to 5895L, "pirati" to 12988L, "dinosauri" to 358244L,
         "squali" to 275172L, "cani" to 357092L, "gatti" to 373797L, "cavalli" to 359916L,
+        "topo" to 2101L, "topi" to 2101L, "topolino" to 2101L, "topolina" to 2101L,
+        "ratto" to 12368L, "ratti" to 12368L, "roditore" to 10609L, "roditori" to 10609L,
+        "chef" to 238318L, "cuoco" to 238318L, "cuochi" to 238318L, "cucina" to 14819L, "cucinare" to 14819L,
+        "ristorante" to 1701L, "ristoranti" to 1701L, "alta cucina" to 14819L,
+        "leone" to 280454L, "leoni" to 280454L, "pesce" to 11860L, "pesci" to 11860L,
         "sirene" to 5938L, "angeli" to 290L, "dio" to 9649L, "religione" to 11001L,
         "suora" to 745L, "prete" to 10093L, "sette" to 6158L, "cannibalismo" to 278235L,
         "gore" to 10292L, "slasher" to 12339L, "found footage" to 163053L, "esorcismo" to 2626L,
@@ -337,6 +342,11 @@ object KeywordDictionary {
         "world war i" to 2504L, "vietnam war" to 2957L, "holocaust" to 375138L, "ancient rome" to 5049L,
         "ancient egypt" to 157894L, "vikings" to 5895L, "pirates" to 12988L, "dinosaurs" to 358244L,
         "sharks" to 275172L, "dogs" to 357092L, "cats" to 373797L, "horses" to 359916L,
+        "mouse" to 2101L, "mice" to 2101L, "rat" to 12368L, "rats" to 12368L,
+        "rodent" to 10609L, "rodents" to 10609L,
+        "chef" to 238318L, "chefs" to 238318L, "cook" to 238318L, "cooking" to 14819L,
+        "restaurant" to 1701L, "restaurants" to 1701L, "haute cuisine" to 14819L,
+        "lion" to 280454L, "lions" to 280454L, "fish" to 11860L,
         "mermaids" to 5938L, "angels" to 290L, "god" to 9649L, "religion" to 11001L,
         "nun" to 745L, "priest" to 10093L, "cults" to 6158L, "cannibalism" to 278235L,
         "gore" to 10292L, "slasher" to 12339L, "found footage" to 163053L, "exorcism" to 2626L,
@@ -660,7 +670,24 @@ object KeywordDictionary {
         "fuga" to "escape", "evasione" to "escape",
         "aereo" to "airplane", "dirottamento" to "hijacking",
         "treno" to "train",
-        "nave" to "ship", "naufragio" to "shipwreck"
+        "nave" to "ship", "naufragio" to "shipwreck",
+        "topo" to "mouse", "topi" to "mouse", "topolino" to "mouse", "topolina" to "mouse",
+        "ratto" to "rat", "ratti" to "rat", "roditore" to "rodent", "roditori" to "rodent",
+        "chef" to "chef", "cuoco" to "chef", "cuochi" to "chefs", "cucinare" to "cooking", "cucina" to "cooking",
+        "ristorante" to "restaurant", "ristoranti" to "restaurants",
+        "leone" to "lion", "leoni" to "lions",
+        "pesce" to "fish", "pesci" to "fish",
+        "cane" to "dog", "cani" to "dogs",
+        "gatto" to "cat", "gatti" to "cats",
+        "orso" to "bear", "orsi" to "bears",
+        "coniglio" to "rabbit", "conigli" to "rabbits",
+        "volpe" to "fox", "volpi" to "foxes",
+        "uccello" to "bird", "uccelli" to "birds",
+        "drago" to "dragon", "draghi" to "dragons",
+        "insetto" to "insect", "insetti" to "insects",
+        "formica" to "ant", "formiche" to "ants",
+        "ape" to "bee", "api" to "bees",
+        "diventa" to "becomes", "diventare" to "become"
     )
 
     // Dizionario di ricerca N:1 per forme flesse, verbi e variazioni colloquiali (separato dal dizionario canonico 1:1)
@@ -676,7 +703,11 @@ object KeywordDictionary {
         "gladiatore" to 1394L, "gladiatori" to 1394L, "arena" to 1395L, "colosseo" to 1395L,
         "libellula" to 286709L, "torneo mortale" to 282498L,
         "squalo" to 275172L, "squali" to 275172L,
-        "sottomarino" to 1815L, "sommergibile" to 1815L
+        "sottomarino" to 1815L, "sommergibile" to 1815L,
+        "topo" to 2101L, "topi" to 2101L, "topolino" to 2101L, "ratto" to 12368L, "ratti" to 12368L,
+        "roditore" to 10609L, "roditori" to 10609L,
+        "chef" to 238318L, "cuoco" to 238318L, "cuochi" to 238318L, "cucina" to 14819L, "cucinare" to 14819L,
+        "ristorante" to 1701L, "ristoranti" to 1701L, "alta cucina" to 14819L
     )
 
     val englishQuerySynonyms: Map<String, Long> = mapOf(
@@ -689,7 +720,11 @@ object KeywordDictionary {
         "trapped" to 271689L,
         "gladiator" to 1394L, "gladiators" to 1394L, "arena" to 1395L, "colosseum" to 1395L,
         "dragonfly" to 286709L, "death match" to 282498L, "survival tournament" to 282498L,
-        "shark" to 275172L, "sharks" to 275172L
+        "shark" to 275172L, "sharks" to 275172L,
+        "mouse" to 2101L, "mice" to 2101L, "rat" to 12368L, "rats" to 12368L,
+        "rodent" to 10609L, "rodents" to 10609L,
+        "chef" to 238318L, "chefs" to 238318L, "cook" to 238318L, "cooking" to 14819L,
+        "restaurant" to 1701L, "restaurants" to 1701L, "haute cuisine" to 14819L
     )
 
     fun getQuerySynonymsForLanguage(language: String): Map<String, Long> {
