@@ -276,12 +276,13 @@ fun SearchContentGrid(
             } else {
                 if (uiState.results.isEmpty() && uiState.isLoading) {
                     items(
-                        if (uiState.category == "person") 16 else if (uiState.category == "collection") 6 else 12,
+                        if (uiState.category == "person") 16 else if (uiState.category == "collection") 6 else if (uiState.category == "mood") 6 else 12,
                         contentType = { "skeleton" },
                         span = {
                             when (uiState.category) {
                                 "person" -> GridItemSpan(personSpan)
                                 "collection" -> GridItemSpan(collectionSpan)
+                                "mood" -> GridItemSpan(12)
                                 else -> GridItemSpan(movieSpan)
                             }
                         }
@@ -289,6 +290,7 @@ fun SearchContentGrid(
                         when (uiState.category) {
                             "person" -> PersonCardSkeleton(width = personCardWidth)
                             "collection" -> CollectionCardSkeleton()
+                            "mood" -> MoodCardSkeleton()
                             else -> MovieCardSkeleton(width = cardWidth)
                         }
                     }

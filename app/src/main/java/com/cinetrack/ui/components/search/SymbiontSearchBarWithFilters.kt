@@ -235,7 +235,7 @@ fun SymbiontSearchBarWithFilters(
         val cy = heightPx / 2f
         val rCapPx = heightPx / 2f
 
-        val showLayoutToggle = preferences.showLayoutToggle
+        val showLayoutToggle = preferences.showLayoutToggle && category != "mood"
         val filterGroupWidth = if (showLayoutToggle) (44.dp + 12.dp + 44.dp) else 44.dp
         val filterGroupWidthPx = with(density) { filterGroupWidth.toPx() }
         val gapPx = with(density) { 12.dp.toPx() }

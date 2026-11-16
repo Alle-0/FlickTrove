@@ -794,6 +794,7 @@ fun LazyGridScope.searchResultsGridSection(
             when (category) {
                 "person" -> GridItemSpan(personSpan)
                 "collection" -> GridItemSpan(collectionSpan)
+                "mood" -> GridItemSpan(12)
                 else -> GridItemSpan(movieSpan)
             }
         }
@@ -819,33 +820,62 @@ fun LazyGridScope.searchResultsGridSection(
                     movieStatus ?: baseMovie
                 }
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                SearchGridMovieItem(
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = tween(280),
-                        placementSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessMediumLow
+
+                if (category == "mood") {
+                    SearchMoodMovieCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                            .animateItem(
+                                fadeInSpec = tween(280),
+                                placementSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                fadeOutSpec = tween(200)
+                            ),
+                        movie = movie,
+                        movieStatus = movieStatus,
+                        folderColors = folderColors,
+                        aiReason = item.aiReason,
+                        staggerIndex = index,
+                        hasAnimatedSet = animatedMovieIds,
+                        keyboardController = keyboardController,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
+                    )
+                } else {
+                    SearchGridMovieItem(
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = tween(280),
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            fadeOutSpec = tween(200)
                         ),
-                        fadeOutSpec = tween(200)
-                    ),
-                    movie = movie,
-                    movieStatus = movieStatus,
-                    folderColors = folderColors,
-                    columns = columns,
-                    cardWidth = cardWidth,
-                    showFolderBookmarks = preferences.showFolderBookmarks,
-                    hasAnimatedSet = animatedMovieIds,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    staggerIndex = index,
-                    keyboardController = keyboardController,
-                    aiReason = item.aiReason,
-                    onMovieClick = onMovieClick,
-                    onToggleFavorite = onToggleFavorite,
-                    onLongPress = onLongPress,
-                    onEmitMessage = onEmitMessage
-                )
+                        movie = movie,
+                        movieStatus = movieStatus,
+                        folderColors = folderColors,
+                        columns = columns,
+                        cardWidth = cardWidth,
+                        showFolderBookmarks = preferences.showFolderBookmarks,
+                        hasAnimatedSet = animatedMovieIds,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        staggerIndex = index,
+                        keyboardController = keyboardController,
+                        aiReason = item.aiReason,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
+                    )
+                }
             }
             is TMDBSearchResult.TvResult -> {
+                val effectiveOverview = item.aiReason ?: item.overview
                 val baseMovie = Movie(
                     id = item.id,
                     mediaType = "tv",
@@ -854,37 +884,69 @@ fun LazyGridScope.searchResultsGridSection(
                     backdropPath = item.backdropPath,
                     voteAverage = item.voteAverage,
                     firstAirDate = item.firstAirDate,
-                    overview = item.overview,
+                    overview = effectiveOverview,
                     genreIds = item.genreIds
                 )
                 val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
-                val movie = movieStatus ?: baseMovie
+                val movie = if (item.aiReason != null && movieStatus != null) {
+                    movieStatus.copy(overview = item.aiReason)
+                } else {
+                    movieStatus ?: baseMovie
+                }
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                SearchGridMovieItem(
-                    modifier = Modifier.animateItem(
-                        fadeInSpec = tween(280),
-                        placementSpec = spring(
-                            dampingRatio = Spring.DampingRatioLowBouncy,
-                            stiffness = Spring.StiffnessMediumLow
+
+                if (category == "mood") {
+                    SearchMoodMovieCard(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp, vertical = 6.dp)
+                            .animateItem(
+                                fadeInSpec = tween(280),
+                                placementSpec = spring(
+                                    dampingRatio = Spring.DampingRatioLowBouncy,
+                                    stiffness = Spring.StiffnessMediumLow
+                                ),
+                                fadeOutSpec = tween(200)
+                            ),
+                        movie = movie,
+                        movieStatus = movieStatus,
+                        folderColors = folderColors,
+                        aiReason = item.aiReason,
+                        staggerIndex = index,
+                        hasAnimatedSet = animatedMovieIds,
+                        keyboardController = keyboardController,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
+                    )
+                } else {
+                    SearchGridMovieItem(
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = tween(280),
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            fadeOutSpec = tween(200)
                         ),
-                        fadeOutSpec = tween(200)
-                    ),
-                    movie = movie,
-                    movieStatus = movieStatus,
-                    folderColors = folderColors,
-                    columns = columns,
-                    cardWidth = cardWidth,
-                    showFolderBookmarks = preferences.showFolderBookmarks,
-                    hasAnimatedSet = animatedMovieIds,
-                    animatedVisibilityScope = animatedVisibilityScope,
-                    staggerIndex = index,
-                    keyboardController = keyboardController,
-                    aiReason = item.aiReason,
-                    onMovieClick = onMovieClick,
-                    onToggleFavorite = onToggleFavorite,
-                    onLongPress = onLongPress,
-                    onEmitMessage = onEmitMessage
-                )
+                        movie = movie,
+                        movieStatus = movieStatus,
+                        folderColors = folderColors,
+                        columns = columns,
+                        cardWidth = cardWidth,
+                        showFolderBookmarks = preferences.showFolderBookmarks,
+                        hasAnimatedSet = animatedMovieIds,
+                        animatedVisibilityScope = animatedVisibilityScope,
+                        staggerIndex = index,
+                        keyboardController = keyboardController,
+                        aiReason = item.aiReason,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
+                    )
+                }
             }
             is TMDBSearchResult.PersonResult -> {
                 PersonCard(
