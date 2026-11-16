@@ -22,5 +22,5 @@ object Keys {
     fun getSimklKey(): String = BuildConfig.SIMKL_CLIENT_ID
     fun getSimklSecret(): String = BuildConfig.SIMKL_CLIENT_SECRET
     fun getKlipyKey(): String = BuildConfig.KLIPY_API_KEY
-    fun getVectorizeSearchUrl(): String = "https://flicktrove-search.workers.dev/"
+    fun getVectorizeSearchUrl(): String = "https://flicktrove-search.flicktrove-api.workers.dev/"
 }
