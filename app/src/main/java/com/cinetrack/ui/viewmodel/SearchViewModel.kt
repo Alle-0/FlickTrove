@@ -239,10 +239,35 @@ class SearchViewModel @Inject constructor(
 
     fun setMoodAiMode(useAi: Boolean) {
         val remaining = _uiState.value.moodRemainingQuota
+        _uiState.update { it.copy(isMoodAiMode = useAi) }
+
+        // Se la query corrente ha già risultati salvati in cache per la nuova modalità, caricali a costo zero
+        val currentQuery = _uiState.value.query.trim()
+        if (_uiState.value.category == "mood" && currentQuery.isNotEmpty()) {
+            val cached = moodHistoryRepository.getCachedEntry(currentQuery, isAi = useAi)
+            if (cached != null) {
+                val cachedMovies = if (useAi) cached.resolveAiResults() else cached.resolveAlgoResults()
+                if (cachedMovies.isNotEmpty()) {
+                    searchJob?.cancel()
+                    rawResults = cachedMovies
+                    applyStateFilters()
+                    _uiState.update {
+                        it.copy(
+                            isLoading = false,
+                            isEndReached = true,
+                            moodVibeTitle = if (useAi) cached.resolveAiVibeTitle() else null,
+                            moodVibeDescription = if (useAi) cached.resolveAiVibeDescription() else null,
+                            moodErrorMessage = null
+                        )
+                    }
+                    return
+                }
+            }
+        }
+
         if (useAi && remaining <= 0) {
             emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
         }
-        _uiState.update { it.copy(isMoodAiMode = useAi) }
     }
 
     fun executeMoodSearch(query: String, bypassCache: Boolean = false) {
@@ -1014,17 +1039,25 @@ class SearchViewModel @Inject constructor(
 
     fun selectMoodHistory(entry: MoodHistoryEntry) {
         searchJob?.cancel()
-        rawResults = entry.movies
+        val currentMode = _uiState.value.isMoodAiMode
+        val resolvedMode = when {
+            currentMode && entry.hasAi() -> true
+            !currentMode && entry.hasAlgo() -> false
+            entry.hasAi() -> true
+            else -> false
+        }
+        val targetMovies = if (resolvedMode) entry.resolveAiResults() else entry.resolveAlgoResults()
+        rawResults = targetMovies
         applyStateFilters()
         _uiState.update {
             it.copy(
                 query = entry.query.take(1000),
                 category = "mood",
-                isMoodAiMode = entry.isAi,
+                isMoodAiMode = resolvedMode,
                 isLoading = false,
                 isEndReached = true,
-                moodVibeTitle = if (entry.isAi) entry.vibeTitle else null,
-                moodVibeDescription = if (entry.isAi) entry.vibeDescription else null,
+                moodVibeTitle = if (resolvedMode) entry.resolveAiVibeTitle() else null,
+                moodVibeDescription = if (resolvedMode) entry.resolveAiVibeDescription() else null,
                 moodErrorMessage = null
             )
         }

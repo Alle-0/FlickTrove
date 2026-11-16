@@ -62,18 +62,21 @@ class MoodSearchRepository @Inject constructor(
         // Se non è bypassCache ed è recente (< 24h), oppure se è una ricerca AI e le quote sono esaurite, riusa la cache!
         if (page == 1) {
             val cached = moodHistoryRepository.getCachedEntry(trimmedQuery, isAi = wantAi)
-            if (cached != null && cached.movies.isNotEmpty()) {
-                val ageMillis = System.currentTimeMillis() - cached.timestamp
-                val isUnder24Hours = ageMillis < 24 * 60 * 60 * 1000L
-                val shouldReturnCache = (!bypassCache && isUnder24Hours) || (wantAi && remaining <= 0)
-                if (shouldReturnCache) {
-                    return@runCatching MoodSearchResultData(
-                        vibeTitle = cached.vibeTitle,
-                        vibeDescription = cached.vibeDescription,
-                        totalCount = cached.movies.size,
-                        totalPages = 1,
-                        movies = cached.movies
-                    )
+            if (cached != null) {
+                val cachedMovies = if (wantAi) cached.resolveAiResults() else cached.resolveAlgoResults()
+                if (cachedMovies.isNotEmpty()) {
+                    val ageMillis = System.currentTimeMillis() - cached.timestamp
+                    val isUnder24Hours = ageMillis < 24 * 60 * 60 * 1000L
+                    val shouldReturnCache = (!bypassCache && isUnder24Hours) || (wantAi && remaining <= 0)
+                    if (shouldReturnCache) {
+                        return@runCatching MoodSearchResultData(
+                            vibeTitle = if (wantAi) cached.resolveAiVibeTitle() else cached.resolveAlgoVibeTitle(),
+                            vibeDescription = if (wantAi) cached.resolveAiVibeDescription() else cached.resolveAlgoVibeDescription(),
+                            totalCount = cachedMovies.size,
+                            totalPages = 1,
+                            movies = cachedMovies
+                        )
+                    }
                 }
             }
         }

@@ -69,21 +69,21 @@ data class MoodHistoryEntry(
     fun hasAi(): Boolean = !aiMovies.isNullOrEmpty() || (isAi && movies.isNotEmpty())
     fun hasAlgo(): Boolean = !algoMovies.isNullOrEmpty() || (!isAi && movies.isNotEmpty())
 
-    fun getAiResults(): List<TMDBSearchResult.MovieResult> =
+    fun resolveAiResults(): List<TMDBSearchResult.MovieResult> =
         aiMovies ?: if (isAi) movies else emptyList()
 
-    fun getAlgoResults(): List<TMDBSearchResult.MovieResult> =
+    fun resolveAlgoResults(): List<TMDBSearchResult.MovieResult> =
         algoMovies ?: if (!isAi) movies else emptyList()
 
-    fun getAiVibeTitle(): String =
+    fun resolveAiVibeTitle(): String =
         aiVibeTitle ?: if (isAi) vibeTitle else "Atmosfera Cinematografica"
 
-    fun getAiVibeDescription(): String =
+    fun resolveAiVibeDescription(): String =
         aiVibeDescription ?: if (isAi) vibeDescription else ""
 
-    fun getAlgoVibeTitle(): String =
+    fun resolveAlgoVibeTitle(): String =
         algoVibeTitle ?: if (!isAi) vibeTitle else "Atmosfera Cinematografica"
 
-    fun getAlgoVibeDescription(): String =
+    fun resolveAlgoVibeDescription(): String =
         algoVibeDescription ?: if (!isAi) vibeDescription else ""
 }
