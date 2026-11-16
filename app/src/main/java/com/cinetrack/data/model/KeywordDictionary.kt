@@ -641,7 +641,7 @@ object KeywordDictionary {
         "rapina" to "heist", "rapine" to "heist",
         "metamorfosi" to "metamorphosis", "trasformazione" to "transformation",
         "ricco" to "rich", "ricchi" to "rich", "magnate" to "tycoon", "uomo ricco" to "rich man",
-        "muore" to "dies", "morto" to "dead", "morte" to "death",
+        "muore" to "dies", "morto" to "dead", "morire" to "dies", "morte" to "death",
         "anni 20" to "1920s", "anni ruggenti" to "roaring twenties",
         "sopravvivenza" to "survival",
         "guerra" to "war",

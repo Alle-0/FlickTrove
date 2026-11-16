@@ -9,9 +9,11 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
 import java.time.LocalDate
 import java.util.Locale
+import java.util.concurrent.ConcurrentHashMap
 import javax.inject.Inject
 import javax.inject.Singleton
 import kotlin.math.abs
+import kotlin.math.ln
 import kotlin.math.min
 import kotlin.math.roundToInt
 
@@ -19,6 +21,18 @@ import kotlin.math.roundToInt
 class LocalMoodSearchEngine @Inject constructor(
     private val tmdbService: TMDBService
 ) {
+
+    // Thread-safe in-memory cache to eliminate network latency and prevent rate-limiting
+    private val anchorDetailsCache = ConcurrentHashMap<Long, Movie>()
+    private val keywordResolutionCache = ConcurrentHashMap<String, Long>()
+
+    data class ParsedQueryIntent(
+        val positiveText: String,
+        val negatedText: String?,
+        val negatedGenres: List<Long>,
+        val negatedKeywords: List<Long>,
+        val negatedTokens: List<String>
+    )
 
     data class CinematicArchetype(
         val id: String,
@@ -519,6 +533,7 @@ class LocalMoodSearchEngine @Inject constructor(
         "mcu_spiderman" to listOf("spider-man", "spiderman", "far from home", "homecoming", "no way home"),
         "mcu_avengers" to listOf("avengers", "endgame", "infinity war"),
         "star_wars" to listOf("star wars", "l'impero colpisce", "il ritorno dello jedi", "la minaccia fantasma"),
+        "star_trek" to listOf("star trek"),
         "harry_potter" to listOf("harry potter", "animali fantastici"),
         "fast_furious" to listOf("fast & furious", "fast and furious", "tokyo drift"),
         "john_wick" to listOf("john wick"),
@@ -529,6 +544,23 @@ class LocalMoodSearchEngine @Inject constructor(
         "jurassic" to listOf("jurassic park", "jurassic world"),
         "the_matrix" to listOf("matrix", "the matrix"),
         "lord_of_the_rings" to listOf("lord of the rings", "signore degli anelli", "lo hobbit", "the hobbit")
+    )
+
+    // Genre guards for short/ambiguous franchise triggers (length ≤ 8).
+    // If the candidate's genres don't overlap with these, it's NOT part of the franchise.
+    // Prevents "alien" (immigration doc, genre=99 Documentary) being grouped with Ridley Scott's Alien.
+    // Prevents "matrix" (business doc) being penalized as a sequel to The Matrix.
+    // 28=Action, 878=SciFi, 27=Horror, 12=Adventure, 14=Fantasy, 10749=Romance, 99=Documentary
+    private val franchiseGenreGuards: Map<String, Set<Long>> = mapOf(
+        "alien"     to setOf(27L, 878L, 28L),    // must be Horror/SciFi/Action — not Documentary
+        "the_matrix" to setOf(878L, 28L, 12L),   // must be SciFi/Action/Adventure
+        "star_wars"  to setOf(878L, 12L, 28L, 14L),
+        "star_trek"  to setOf(878L, 12L, 28L),
+        "terminator" to setOf(878L, 28L, 27L),
+        "jurassic"   to setOf(878L, 28L, 12L, 27L),
+        "mcu_avengers" to setOf(28L, 878L, 12L),
+        "mcu_spiderman" to setOf(28L, 878L, 12L),
+        "ocean"      to setOf(80L, 35L, 28L)     // Crime/Comedy/Action — not a nature documentary
     )
 
     fun isSupportedLanguage(language: String): Boolean {
@@ -548,6 +580,18 @@ class LocalMoodSearchEngine @Inject constructor(
         val tmdbLang = if (isItalian) "it-IT" else "en-US"
         val todayStr = LocalDate.now().toString()
 
+        val dictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "it" else "en")
+        val fallbackDictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "en" else "it")
+        val querySynonyms = KeywordDictionary.getQuerySynonymsForLanguage(if (isItalian) "it" else "en")
+        val fallbackQuerySynonyms = KeywordDictionary.getQuerySynonymsForLanguage(if (isItalian) "en" else "it")
+
+        // Parse negation clauses (e.g. "senza viaggi nel tempo", "without romance", "no gore")
+        val parsedIntent = parseQueryNegations(cleanQuery, isItalian, querySynonyms, dictionary)
+        val positiveQuery = parsedIntent.positiveText
+
+        // Detect iconic directors or actors (e.g. "Nolan", "Tarantino", "Scorsese", "DiCaprio")
+        val detectedPerson = detectIconicPerson(positiveQuery)
+
         // 1. NLP Query Parsing: Time Horizons & Eras (Only constrain release date if explicitly requested as production era)
         var specificYear: Int? = null
         var startYear: Int? = null
@@ -557,16 +601,16 @@ class LocalMoodSearchEngine @Inject constructor(
             "uscito nel", "uscita nel", "usciti nel", "uscite nel",
             "del 19", "del 20", "film del 19", "film del 20", "film del 18",
             "released in", "release in", "from 19", "from 20", "movie from", "film from"
-        ).any { cleanQuery.contains(it) }
+        ).any { positiveQuery.contains(it) }
 
         if (isExplicitReleaseYearRequested) {
             val singleYearRegex = Regex("""\b(19\d{2}|20[0-2]\d)\b""")
             val decadeItRegex = Regex("""\banni\s*(')?(\d{2}|\d{4})\b""")
             val decadeEnRegex = Regex("""\b(\d{2}|\d{4})(')?s\b""")
 
-            val singleYearMatch = singleYearRegex.find(cleanQuery)
-            val decadeItMatch = decadeItRegex.find(cleanQuery)
-            val decadeEnMatch = decadeEnRegex.find(cleanQuery)
+            val singleYearMatch = singleYearRegex.find(positiveQuery)
+            val decadeItMatch = decadeItRegex.find(positiveQuery)
+            val decadeEnMatch = decadeEnRegex.find(positiveQuery)
 
             if (decadeItMatch != null) {
                 val raw = decadeItMatch.groupValues[2]
@@ -589,48 +633,57 @@ class LocalMoodSearchEngine @Inject constructor(
             }
         }
 
-        val isVintageRequested = cleanQuery.contains("vintage") || cleanQuery.contains("classico") || cleanQuery.contains("bianco e nero") || cleanQuery.contains("black and white")
+        val isVintageRequested = positiveQuery.contains("vintage") || positiveQuery.contains("classico") || positiveQuery.contains("bianco e nero") || positiveQuery.contains("black and white")
         if (isVintageRequested && startYear == null) {
             endYear = 1979
         }
 
-        val isAnimationRequested = cleanQuery.contains("animazione") || cleanQuery.contains("cartone") || cleanQuery.contains("anime") || cleanQuery.contains("animation") || cleanQuery.contains("animated")
+        val isAnimationRequested = (positiveQuery.contains("animazione") || positiveQuery.contains("cartone") || positiveQuery.contains("anime") || positiveQuery.contains("animation") || positiveQuery.contains("animated")) && !parsedIntent.negatedGenres.contains(16L)
 
-        // 2. Multi-Level Archetype & Atmosphere Detection (Check both Italian and English triggers)
-        val isTransformationIntent = detectTransformationIntent(cleanQuery)
+        // 2. Multi-Level Archetype & Atmosphere Detection (Check positive query)
+        val isTransformationIntent = detectTransformationIntent(positiveQuery)
         val matchedArchetypes = archetypeCatalog.filter { archetype ->
             if (isTransformationIntent && archetype.id == "metamorphosis_mutation") {
                 return@filter true
             }
             val triggers = if (isItalian) archetype.triggersIt else archetype.triggersEn
             val alternateTriggers = if (isItalian) archetype.triggersEn else archetype.triggersIt
-            triggers.any { trigger -> matchesWordOrFuzzy(cleanQuery, trigger) } ||
-            alternateTriggers.any { trigger -> matchesWordOrFuzzy(cleanQuery, trigger) }
+            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) } ||
+            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) }
         }
 
         val matchedAtmospheres = atmosphereCatalog.filter { atm ->
             val triggers = if (isItalian) atm.triggersIt else atm.triggersEn
             val alternateTriggers = if (isItalian) atm.triggersEn else atm.triggersIt
-            triggers.any { trigger -> matchesWordOrFuzzy(cleanQuery, trigger) } ||
-            alternateTriggers.any { trigger -> matchesWordOrFuzzy(cleanQuery, trigger) }
+            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) } ||
+            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) }
         }
 
-        // 3. Keyword Extraction with Strict Boundaries & Dynamic TMDB Resolution
-        val dictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "it" else "en")
-        val fallbackDictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "en" else "it")
-        val querySynonyms = KeywordDictionary.getQuerySynonymsForLanguage(if (isItalian) "it" else "en")
-        val fallbackQuerySynonyms = KeywordDictionary.getQuerySynonymsForLanguage(if (isItalian) "en" else "it")
+        // 3. Keyword & Genre Extraction with Strict Boundaries, Morphological Stemming & Fuzzy Typo Tolerance
         val matchedKeywords = mutableListOf<Long>()
-        val contentTokens = extractSignificantContentTokens(cleanQuery, isItalian)
+        val matchedGenres = mutableListOf<Long>()
+        val contentTokens = extractSignificantContentTokens(positiveQuery, isItalian)
 
         for (token in contentTokens) {
-            val kwId = querySynonyms[token] ?: dictionary[token] ?: fallbackQuerySynonyms[token] ?: fallbackDictionary[token]
-            if (kwId != null && !matchedKeywords.contains(kwId)) {
+            val genreId = mapTokenToGenreId(token)
+            if (genreId != null && !matchedGenres.contains(genreId) && !parsedIntent.negatedGenres.contains(genreId)) {
+                matchedGenres.add(genreId)
+            }
+            val stemmed = stemWord(token, isItalian)
+            val kwId = querySynonyms[token]
+                ?: (if (stemmed != token) querySynonyms[stemmed] else null)
+                ?: dictionary[token]
+                ?: (if (stemmed != token) dictionary[stemmed] else null)
+                ?: findFuzzyDictionaryMatch(token, querySynonyms)
+                ?: findFuzzyDictionaryMatch(token, dictionary)
+                ?: fallbackQuerySynonyms[token]
+                ?: fallbackDictionary[token]
+            if (kwId != null && !matchedKeywords.contains(kwId) && !parsedIntent.negatedKeywords.contains(kwId)) {
                 matchedKeywords.add(kwId)
             }
         }
 
-        // Dynamic Keyword Resolution via TMDB searchKeyword API (with Italian->English token mapping)
+        // Dynamic Keyword Resolution via TMDB searchKeyword API (with memory cache and Italian->English token mapping)
         val unmappedTokens = contentTokens.filter { token ->
             !token.contains(" ") && token.length >= 4 &&
                 !querySynonyms.containsKey(token) &&
@@ -648,16 +701,20 @@ class LocalMoodSearchEngine @Inject constructor(
                         } else {
                             token
                         }
-                        try {
+                        keywordResolutionCache[searchToken] ?: try {
                             val kwRes = tmdbService.searchKeyword(searchToken)
-                            kwRes.getList().firstOrNull()?.id
+                            val resolvedId = kwRes.getList().firstOrNull()?.id
+                            if (resolvedId != null) {
+                                keywordResolutionCache[searchToken] = resolvedId
+                            }
+                            resolvedId
                         } catch (_: Exception) {
                             null
                         }
                     }
                 }
                 for (id in deferredKw.mapNotNull { it.await() }) {
-                    if (!matchedKeywords.contains(id)) {
+                    if (!matchedKeywords.contains(id) && !parsedIntent.negatedKeywords.contains(id)) {
                         matchedKeywords.add(id)
                     }
                 }
@@ -679,6 +736,7 @@ class LocalMoodSearchEngine @Inject constructor(
             targetGenres.addAll(atm.genreBonus)
             targetKeywords.addAll(atm.keywordIds)
         }
+        targetGenres.addAll(matchedGenres)
         targetKeywords.addAll(matchedKeywords)
 
         val distinctGenres = targetGenres.distinct()
@@ -688,9 +746,9 @@ class LocalMoodSearchEngine @Inject constructor(
         val candidateMap = mutableMapOf<Long, Movie>()
 
         coroutineScope {
-            // Stream A: Subgenre Discover (Quality focus, ONLY if genres or keywords matched!)
+            // Stream A: Subgenre Discover (Quality focus, ONLY if genres, keywords, or person matched!)
             val streamA = async {
-                if (distinctGenres.isNotEmpty() || distinctKeywords.isNotEmpty()) {
+                if (distinctGenres.isNotEmpty() || distinctKeywords.isNotEmpty() || detectedPerson != null) {
                     try {
                         val opts = mutableMapOf<String, String>(
                             "language" to tmdbLang,
@@ -705,6 +763,15 @@ class LocalMoodSearchEngine @Inject constructor(
                         if (distinctKeywords.isNotEmpty()) {
                             opts["with_keywords"] = distinctKeywords.take(4).joinToString("|")
                         }
+                        if (detectedPerson != null) {
+                            opts["with_people"] = detectedPerson.second.toString()
+                        }
+                        if (parsedIntent.negatedGenres.isNotEmpty()) {
+                            opts["without_genres"] = parsedIntent.negatedGenres.joinToString(",")
+                        }
+                        if (parsedIntent.negatedKeywords.isNotEmpty()) {
+                            opts["without_keywords"] = parsedIntent.negatedKeywords.take(3).joinToString(",")
+                        }
                         applyDateBounds(opts, specificYear, startYear, endYear)
                         tmdbService.discoverMovies(page = page, options = opts).results
                     } catch (_: Exception) {
@@ -715,9 +782,9 @@ class LocalMoodSearchEngine @Inject constructor(
                 }
             }
 
-            // Stream B: Subgenre Discover (Popularity & Crowd focus, ONLY if genres or keywords matched!)
+            // Stream B: Subgenre Discover (Popularity & Crowd focus, ONLY if genres, keywords, or person matched!)
             val streamB = async {
-                if (distinctGenres.isNotEmpty() || distinctKeywords.isNotEmpty()) {
+                if (distinctGenres.isNotEmpty() || distinctKeywords.isNotEmpty() || detectedPerson != null) {
                     try {
                         val opts = mutableMapOf<String, String>(
                             "language" to tmdbLang,
@@ -732,6 +799,15 @@ class LocalMoodSearchEngine @Inject constructor(
                         if (distinctKeywords.isNotEmpty()) {
                             opts["with_keywords"] = distinctKeywords.take(4).joinToString("|")
                         }
+                        if (detectedPerson != null) {
+                            opts["with_people"] = detectedPerson.second.toString()
+                        }
+                        if (parsedIntent.negatedGenres.isNotEmpty()) {
+                            opts["without_genres"] = parsedIntent.negatedGenres.joinToString(",")
+                        }
+                        if (parsedIntent.negatedKeywords.isNotEmpty()) {
+                            opts["without_keywords"] = parsedIntent.negatedKeywords.take(3).joinToString(",")
+                        }
                         applyDateBounds(opts, specificYear, startYear, endYear)
                         tmdbService.discoverMovies(page = page, options = opts).results
                     } catch (_: Exception) {
@@ -742,30 +818,33 @@ class LocalMoodSearchEngine @Inject constructor(
                 }
             }
 
-            // Stream C: Curated Golden Anchor Movie Injector (Always fetch if archetype matched)
+            // Stream C: Curated Golden Anchor Movie Injector (Always fetch if archetype matched, with coroutine parallelism & caching)
             val streamC = async {
-                val anchorIds = matchedArchetypes.flatMap { it.anchorMovieIds }.distinct()
-                val list = mutableListOf<Movie>()
-                for (id in anchorIds.take(7)) {
-                    try {
-                        val details = tmdbService.getMovieBasicDetails(id)
-                        val m = Movie(
-                            id = details.id,
-                            title = details.title,
-                            posterPath = details.posterPath,
-                            backdropPath = details.backdropPath,
-                            voteAverage = details.voteAverage,
-                            voteCount = details.voteCount ?: 500,
-                            releaseDate = details.releaseDate,
-                            genreIds = details.genres?.map { it.id } ?: emptyList(),
-                            overview = details.overview
-                        )
-                        list.add(m)
-                    } catch (_: Exception) {
-                        // ignore anchor fetch fail
-                    }
+                val anchorIds = matchedArchetypes.flatMap { it.anchorMovieIds }.distinct().take(7)
+                coroutineScope {
+                    anchorIds.map { id ->
+                        async {
+                            anchorDetailsCache[id] ?: try {
+                                val details = tmdbService.getMovieBasicDetails(id)
+                                val m = Movie(
+                                    id = details.id,
+                                    title = details.title,
+                                    posterPath = details.posterPath,
+                                    backdropPath = details.backdropPath,
+                                    voteAverage = details.voteAverage,
+                                    voteCount = details.voteCount ?: 500,
+                                    releaseDate = details.releaseDate,
+                                    genreIds = details.genres?.map { it.id } ?: emptyList(),
+                                    overview = details.overview
+                                )
+                                anchorDetailsCache[id] = m
+                                m
+                            } catch (_: Exception) {
+                                null
+                            }
+                        }
+                    }.mapNotNull { it.await() }
                 }
-                list
             }
 
             // Stream D: Thematic & Phrase Token Search on TMDB
@@ -846,15 +925,25 @@ class LocalMoodSearchEngine @Inject constructor(
 
         val primaryArchetype = matchedArchetypes.firstOrNull()
 
+        val bm25Scores = computeBm25Scores(
+            candidates = candidateMap.values.toList(),
+            queryTokens = contentTokens,
+            isItalian = isItalian
+        )
+
         val scoredList = candidateMap.values.mapNotNull { m ->
             var thematicRelevanceScore = 0.0
 
             // A. Archetype & Genre Relevancy Score
             val movieGenres = m.genreIds ?: emptyList()
-            if (primaryArchetype != null) {
-                val isAnchor = primaryArchetype.anchorMovieIds.contains(m.id)
-                if (isAnchor) thematicRelevanceScore += 50.0
+            val isAnchor = matchedArchetypes.any { it.anchorMovieIds.contains(m.id) }
+            if (isAnchor) {
+                val hasDivergingQueryGenres = distinctGenres.isNotEmpty() && distinctGenres.none { movieGenres.contains(it) }
+                val anchorBonus = if (hasDivergingQueryGenres) 20.0 else 50.0
+                thematicRelevanceScore += anchorBonus
+            }
 
+            if (primaryArchetype != null) {
                 val primaryOverlap = movieGenres.count { primaryArchetype.primaryGenres.contains(it) }
                 val secondaryOverlap = movieGenres.count { primaryArchetype.secondaryGenres.contains(it) }
                 thematicRelevanceScore += (primaryOverlap * 14.0).coerceAtMost(28.0)
@@ -869,39 +958,65 @@ class LocalMoodSearchEngine @Inject constructor(
                 thematicRelevanceScore += (overlap * 12.0).coerceAtMost(30.0)
             }
 
+            // Negation hard penalties
+            if (parsedIntent.negatedGenres.isNotEmpty() && movieGenres.any { parsedIntent.negatedGenres.contains(it) }) {
+                thematicRelevanceScore -= 80.0
+            }
+
             if (isAnimationRequested && movieGenres.contains(16L)) {
                 thematicRelevanceScore += 25.0
             }
 
-            // C. Semantic Overview & Title Alignment
+            // C. Semantic Overview & Title Alignment + BM25 Information Retrieval Score
             val overviewLower = (m.overview ?: "").lowercase(Locale.ROOT)
             val titleLower = (m.title ?: "").lowercase(Locale.ROOT)
             var textMatchBonus = 0.0
             var matchedTokenCount = 0
             for (token in contentTokens) {
                 if (token.length >= 4) {
-                    if (overviewLower.contains(token)) {
+                    val isOverviewMatch = if (token.length in 4..5 && !token.contains(" ")) {
+                        Regex("""(?i)\b${Regex.escape(token)}\b""").containsMatchIn(overviewLower)
+                    } else {
+                        overviewLower.contains(token)
+                    }
+                    if (isOverviewMatch) {
                         textMatchBonus += 12.0
                         matchedTokenCount++
                     }
-                    if (titleLower.contains(token)) {
+                    val isTitleMatch = if (token.length in 4..5 && !token.contains(" ")) {
+                        Regex("""(?i)\b${Regex.escape(token)}\b""").containsMatchIn(titleLower)
+                    } else {
+                        titleLower.contains(token)
+                    }
+                    if (isTitleMatch) {
                         textMatchBonus += 18.0
                         matchedTokenCount++
                     }
                 }
             }
+            if (parsedIntent.negatedTokens.any { it.length >= 4 && overviewLower.contains(it) }) {
+                thematicRelevanceScore -= 35.0
+            }
             thematicRelevanceScore += textMatchBonus.coerceAtMost(40.0)
+
+            // Inject BM25 text relevance score directly into thematic ranking
+            val bm25 = bm25Scores[m.id] ?: 0.0
+            thematicRelevanceScore += (bm25 * 1.5).coerceAtMost(55.0)
+
+            // Bonus for detected iconic directors/actors explicitly searched
+            if (detectedPerson != null) {
+                thematicRelevanceScore += 25.0
+            }
 
             // HARD GATE: ZERO THEMATIC RELEVANCE -> STRICT EXCLUSION!
             // Quality score (Bayesian) must NEVER allow a completely unrelated movie to pass!
-            // A movie must have substantive grounding: Anchor, Primary Genre Match, or Text Token Match!
+            // A movie must have substantive grounding: Anchor, Primary Genre Match, Text Token Match, BM25 match, or Iconic Person match!
             val primaryOverlap = if (primaryArchetype != null) {
                 movieGenres.count { primaryArchetype.primaryGenres.contains(it) }
             } else if (distinctGenres.isNotEmpty()) {
                 movieGenres.count { distinctGenres.contains(it) }
             } else 0
-            val isAnchor = primaryArchetype?.anchorMovieIds?.contains(m.id) == true
-            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || matchedTokenCount > 0
+            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || matchedTokenCount > 0 || bm25 >= 1.5 || detectedPerson != null
 
             if (!hasSubstantiveThematicGrounding || thematicRelevanceScore <= 0.0) {
                 return@mapNotNull null
@@ -935,7 +1050,7 @@ class LocalMoodSearchEngine @Inject constructor(
             }
 
             // F. Detect Franchise & Rationale
-            val franchiseKey = detectFranchiseKey(m.title ?: "")
+            val franchiseKey = detectFranchiseKey(m.title ?: "", m.genreIds ?: emptyList())
             val reason = generateBespokeReason(
                 movie = m,
                 archetype = primaryArchetype,
@@ -1025,12 +1140,25 @@ class LocalMoodSearchEngine @Inject constructor(
         return matchCount >= 1
     }
 
-    private fun detectFranchiseKey(title: String): String? {
+    private fun detectFranchiseKey(title: String, genreIds: List<Long> = emptyList()): String? {
         val lower = title.lowercase(Locale.ROOT)
         for ((key, triggers) in franchiseSignatures) {
-            if (triggers.any { lower.contains(it) }) {
-                return key
+            val titleMatch = triggers.any { lower.contains(it) }
+            if (!titleMatch) continue
+
+            // Guard against omonimia: short ambiguous triggers (≤8 chars) require that
+            // the candidate shares at least one genre with known franchise genres to avoid
+            // "Star Wars" ≠ "Star Trek", "Alien" (franchise) ≠ "Alien" (immigration doc), etc.
+            val matchedTrigger = triggers.first { lower.contains(it) }
+            if (matchedTrigger.length <= 8) {
+                val franchiseGenres = franchiseGenreGuards[key]
+                if (franchiseGenres != null && franchiseGenres.isNotEmpty()) {
+                    val hasGenreOverlap = genreIds.any { franchiseGenres.contains(it) }
+                    if (!hasGenreOverlap) continue   // Omonimia: genere incompatibile → skip
+                }
             }
+
+            return key
         }
         return null
     }
@@ -1077,9 +1205,11 @@ class LocalMoodSearchEngine @Inject constructor(
         val stopwordsIt = setOf(
             "un", "uno", "una", "dei", "degli", "delle", "il", "lo", "la", "i", "gli", "le",
             "in", "su", "a", "da", "con", "senza", "per", "tra", "fra", "di", "del", "dello", "della",
+            "sul", "sullo", "sulla", "sui", "sugli", "sulle", "nel", "nello", "nella", "nei", "negli", "nelle",
+            "dal", "dallo", "dalla", "dai", "dagli", "dalle", "al", "allo", "alla", "agli", "alle", "col",
             "che", "chi", "cui", "dove", "come", "quando", "cosa", "perché", "perche",
             "film", "cinema", "pellicola", "storia", "racconto", "tipo", "stile", "genere", "simile",
-            "alla", "allo", "agli", "alle", "vorrei", "vedere", "consigliami", "cercami", "mostrami",
+            "vorrei", "vedere", "consigliami", "cercami", "mostrami",
             "trovami", "consigli", "qualcosa", "bello", "belli", "famoso", "famosi", "migliori", "migliore",
             "diventa", "diventare", "diventano", "essere", "stato", "sono", "ha", "hanno", "chi", "quale", "quali",
             "persone", "persona", "gente", "qualcuno", "alcuni", "alcune", "uomo", "uomini", "donna", "donne",
@@ -1104,11 +1234,14 @@ class LocalMoodSearchEngine @Inject constructor(
         )
         val stopwords = if (isItalian) stopwordsIt else stopwordsEn
 
-        val rawWords = Regex("""\b\w+\b""")
+        val allWords = Regex("""\b\w+\b""")
             .findAll(query.lowercase(Locale.ROOT))
             .map { it.value }
-            .filter { it.length > 2 || it.matches(Regex("""\d{2}""")) }
             .toList()
+
+        val rawWords = allWords.filterIndexed { index, word ->
+            word.length > 2 || word.matches(Regex("""\d{2}""")) || (word.length == 1 && index + 1 < allWords.size && allWords[index + 1].matches(Regex("""\d{2}""")))
+        }
 
         val unigrams = rawWords.filter { !stopwords.contains(it) }
         val bigrams = rawWords.windowed(2).map { it.joinToString(" ") }
@@ -1138,11 +1271,10 @@ class LocalMoodSearchEngine @Inject constructor(
         val queryTokens = Regex("""\b\w+\b""").findAll(query).map { it.value }
         for (token in queryTokens) {
             if (token == target) return true
-            if (target.length >= 6 && token.startsWith(target.take(5))) return true
-            if (token.length >= 5 && target.endsWith(token)) return true // e.g. 'greta' vs 'segreta'
+            val lenDiff = abs(token.length - target.length)
             val dist = damerauLevenshtein(token, target)
-            if (target.length in 4..6 && dist <= 1) return true
-            if (target.length >= 7 && dist <= 2) return true
+            if (target.length in 4..6 && lenDiff <= 1 && dist <= 1) return true
+            if (target.length >= 7 && lenDiff <= 2 && dist <= 2) return true
         }
         return false
     }
@@ -1224,5 +1356,390 @@ class LocalMoodSearchEngine @Inject constructor(
         return input.split(" ").joinToString(" ") { word ->
             word.lowercase(Locale.ROOT).replaceFirstChar { if (it.isLowerCase()) it.titlecase(Locale.ROOT) else it.toString() }
         }
+    }
+
+    private fun parseQueryNegations(
+        query: String,
+        isItalian: Boolean,
+        querySynonyms: Map<String, Long>,
+        dictionary: Map<String, Long>
+    ): ParsedQueryIntent {
+        val lower = query.lowercase(Locale.ROOT)
+        val negationTriggers = if (isItalian) {
+            listOf("senza", "tranne", "ma non", "eccetto", "escludendo", "no")
+        } else {
+            listOf("without", "except", "but not", "excluding", "no")
+        }
+
+        var splitIndex = -1
+        var matchedTrigger = ""
+        for (trigger in negationTriggers) {
+            val idx = lower.indexOf(" $trigger ")
+            if (idx != -1 && (splitIndex == -1 || idx < splitIndex)) {
+                splitIndex = idx
+                matchedTrigger = trigger
+            } else if (lower.startsWith("$trigger ")) {
+                if (splitIndex == -1 || 0 < splitIndex) {
+                    splitIndex = 0
+                    matchedTrigger = trigger
+                }
+            }
+        }
+
+        if (splitIndex == -1) {
+            return ParsedQueryIntent(
+                positiveText = lower,
+                negatedText = null,
+                negatedGenres = emptyList(),
+                negatedKeywords = emptyList(),
+                negatedTokens = emptyList()
+            )
+        }
+
+        val positivePart = if (splitIndex == 0) "" else lower.substring(0, splitIndex).trim()
+        val afterTrigger = lower.substring(splitIndex + matchedTrigger.length + (if (splitIndex == 0) 1 else 2)).trim()
+
+        val clauseEnd = listOf(",", ";", " e ", " and ").map { afterTrigger.indexOf(it) }.filter { it != -1 }.minOrNull()
+        val negatedClause = if (clauseEnd != null) afterTrigger.substring(0, clauseEnd).trim() else afterTrigger
+
+        val negatedTokens = extractSignificantContentTokens(negatedClause, isItalian)
+        val negGenres = mutableListOf<Long>()
+        val negKeywords = mutableListOf<Long>()
+
+        for (token in negatedTokens) {
+            val genreId = mapTokenToGenreId(token)
+            if (genreId != null) {
+                negGenres.add(genreId)
+            }
+            val kwId = querySynonyms[token] ?: dictionary[token]
+            if (kwId != null) {
+                negKeywords.add(kwId)
+            }
+        }
+
+        return ParsedQueryIntent(
+            positiveText = positivePart.ifBlank { lower },
+            negatedText = negatedClause,
+            negatedGenres = negGenres.distinct(),
+            negatedKeywords = negKeywords.distinct(),
+            negatedTokens = negatedTokens
+        )
+    }
+
+    private fun mapTokenToGenreId(token: String): Long? {
+        return when (token) {
+            "azione", "action" -> 28L
+            "avventura", "adventure" -> 12L
+            "animazione", "animation", "cartone", "cartoni", "anime" -> 16L
+            "commedia", "comedy", "comico", "comici", "divertente" -> 35L
+            "crime", "crimine", "poliziesco", "gangster" -> 80L
+            "documentario", "documentary" -> 99L
+            "dramma", "drammatico", "drama" -> 18L
+            "famiglia", "family" -> 10751L
+            "fantasy", "fantastico" -> 14L
+            "storia", "storico", "history" -> 36L
+            "horror", "orrore", "paura" -> 27L
+            "musica", "musical", "music" -> 10402L
+            "mistero", "mystery", "giallo" -> 9648L
+            "romantico", "romance", "amore", "sentimentale" -> 10749L
+            "fantascienza", "sci-fi", "scifi", "science fiction" -> 878L
+            "thriller", "suspense" -> 53L
+            "guerra", "war", "bellico" -> 10752L
+            "western" -> 37L
+            else -> null
+        }
+    }
+
+    private fun findFuzzyDictionaryMatch(token: String, dict: Map<String, Long>): Long? {
+        if (token.length < 4) return null
+        val maxDist = if (token.length in 4..6) 1 else 2
+        for ((key, id) in dict) {
+            if (abs(key.length - token.length) <= maxDist) {
+                if (damerauLevenshtein(token, key) <= maxDist) {
+                    return id
+                }
+            }
+        }
+        return null
+    }
+
+    private fun stemWord(word: String, isItalian: Boolean): String {
+        val w = word.trim().lowercase(Locale.ROOT)
+        if (w.length <= 3) return w
+        return if (isItalian) stemItalian(w) else stemEnglish(w)
+    }
+
+    private fun stemItalian(word: String): String {
+        var w = word
+        // Remove common Italian suffixes (longest first)
+        val suffixes = listOf(
+            "amente", "amento", "amenti", "azione", "azioni", "atore", "atori",
+            "atrice", "atrici", "issimo", "issima", "issimi", "issime", "evole",
+            "evoli", "abile", "abili", "anza", "anze", "enza", "enze", "ando",
+            "endo", "ante", "ente", "anti", "enti", "arono", "erono", "irono",
+            "avano", "evano", "ivano", "eranno", "iranno", "ebbe", "ebbero",
+            "ammo", "emmo", "immo", "asse", "assero", "esse", "essero",
+            "isse", "issero", "are", "ere", "ire", "ato", "ata", "ati", "ate",
+            "uto", "uta", "uti", "ute", "ito", "ita", "iti", "ite"
+        )
+        for (suffix in suffixes) {
+            if (w.endsWith(suffix) && (w.length - suffix.length) >= 3) {
+                w = w.substring(0, w.length - suffix.length)
+                break
+            }
+        }
+        // Vocalic suffix reduction: strip trailing vowel if length > 3
+        if (w.length > 3 && (w.endsWith("e") || w.endsWith("o") || w.endsWith("a") || w.endsWith("i"))) {
+            w = w.substring(0, w.length - 1)
+        }
+        return w
+    }
+
+    private fun stemEnglish(word: String): String {
+        var w = word
+        // Plural / s-ending
+        if (w.endsWith("sses")) w = w.dropLast(2)
+        else if (w.endsWith("ies") && w.length > 4) w = w.dropLast(2)
+        else if (!w.endsWith("ss") && w.endsWith("s") && w.length > 3) w = w.dropLast(1)
+
+        val suffixes = listOf(
+            "ational", "tional", "ization", "fulness", "ousness", "bility",
+            "lessly", "ement", "ment", "able", "ible", "ness", "tion", "sion",
+            "izer", "ator", "ality", "ing", "ed", "ly"
+        )
+        for (suffix in suffixes) {
+            if (w.endsWith(suffix) && (w.length - suffix.length) >= 3) {
+                w = w.substring(0, w.length - suffix.length)
+                break
+            }
+        }
+        return w
+    }
+
+    private val iconicPeopleCatalog: Map<String, Long> = mapOf(
+        // Directors
+        "christopher nolan" to 525L,
+        "nolan" to 525L,
+        "quentin tarantino" to 138L,
+        "tarantino" to 138L,
+        "martin scorsese" to 1032L,
+        "scorsese" to 1032L,
+        "stanley kubrick" to 240L,
+        "kubrick" to 240L,
+        "steven spielberg" to 488L,
+        "spielberg" to 488L,
+        "denis villeneuve" to 137427L,
+        "villeneuve" to 137427L,
+        "david fincher" to 7467L,
+        "fincher" to 7467L,
+        "alfred hitchcock" to 2636L,
+        "hitchcock" to 2636L,
+        "ridley scott" to 578L,
+        "wes anderson" to 5655L,
+        "hayao miyazaki" to 608L,
+        "miyazaki" to 608L,
+        "guillermo del toro" to 10828L,
+        "del toro" to 10828L,
+        "james cameron" to 2710L,
+        "tim burton" to 510L,
+        "bong joon-ho" to 21684L,
+        "bong joon ho" to 21684L,
+        "francis ford coppola" to 1776L,
+        "coppola" to 1776L,
+        "federico fellini" to 4415L,
+        "fellini" to 4415L,
+        "sergio leone" to 4385L,
+        "paolo sorrentino" to 11517L,
+        "sorrentino" to 11517L,
+        "dario argento" to 10959L,
+        "david lynch" to 5602L,
+        "greta gerwig" to 63834L,
+        "jordan peele" to 97844L,
+        "yorgos lanthimos" to 228138L,
+        "lanthimos" to 228138L,
+        "woody allen" to 1243L,
+        "clint eastwood" to 190L,
+        "peter jackson" to 108L,
+        "george lucas" to 1L,
+        "akira kurosawa" to 5026L,
+        "kurosawa" to 5026L,
+        "ingmar bergman" to 6650L,
+        "bergman" to 6650L,
+        "pedro almodovar" to 444L,
+        "almodovar" to 444L,
+        "paul thomas anderson" to 4762L,
+        "guy ritchie" to 956L,
+        "sam raimi" to 7623L,
+        "damien chazelle" to 1310663L,
+        "chazelle" to 1310663L,
+
+        // Actors
+        "leonardo dicaprio" to 6193L,
+        "dicaprio" to 6193L,
+        "brad pitt" to 287L,
+        "tom cruise" to 500L,
+        "johnny depp" to 85L,
+        "robert de niro" to 380L,
+        "de niro" to 380L,
+        "al pacino" to 1158L,
+        "pacino" to 1158L,
+        "keanu reeves" to 6384L,
+        "christian bale" to 3894L,
+        "ryan gosling" to 30614L,
+        "tom hanks" to 31L,
+        "denzel washington" to 5292L,
+        "morgan freeman" to 192L,
+        "joaquin phoenix" to 73421L,
+        "cillian murphy" to 2037L,
+        "matthew mcconaughey" to 10297L,
+        "mcconaughey" to 10297L,
+        "margot robbie" to 234352L,
+        "scarlett johansson" to 1245L,
+        "emma stone" to 54693L,
+        "meryl streep" to 5064L,
+        "natalie portman" to 524L,
+        "florence pugh" to 1373737L,
+        "timothee chalamet" to 1190668L,
+        "chalamet" to 1190668L,
+        "zendaya" to 505710L,
+        "robert downey jr" to 3223L,
+        "harrison ford" to 3L,
+        "arnold schwarzenegger" to 1100L,
+        "schwarzenegger" to 1100L,
+        "sylvester stallone" to 976L,
+        "stallone" to 976L
+    )
+
+    fun detectIconicPerson(query: String): Pair<String, Long>? {
+        val lower = query.lowercase(Locale.ROOT)
+        val sortedEntries = iconicPeopleCatalog.entries.sortedByDescending { it.key.length }
+        for ((name, id) in sortedEntries) {
+            val pattern = Regex("""(?i)\b${Regex.escape(name)}\b""")
+            if (pattern.containsMatchIn(lower)) {
+                return Pair(name, id)
+            }
+        }
+        return null
+    }
+
+    private fun computeBm25Scores(
+        candidates: List<Movie>,
+        queryTokens: List<String>,
+        isItalian: Boolean
+    ): Map<Long, Double> {
+        if (candidates.isEmpty() || queryTokens.isEmpty()) return emptyMap()
+
+        val k1 = 1.2
+        // b=0.55: TMDB overviews have wildly inconsistent lengths (2 lines vs epic essays).
+        // Standard b=0.75 would over-penalize films with long synopses despite high relevance.
+        // 0.55 relaxes length normalization without disabling it entirely.
+        val b = 0.55
+        val nDocs = candidates.size.toDouble()
+
+        data class DocTokens(
+            val id: Long,
+            val titleTokens: List<String>,
+            val overviewTokens: List<String>,
+            val length: Int,
+            val rawOverview: String,
+            val rawTitle: String
+        )
+
+        val docList = candidates.map { m ->
+            val titleStr = (m.title ?: "").lowercase(Locale.ROOT)
+            val overviewStr = (m.overview ?: "").lowercase(Locale.ROOT)
+
+            val tTokens = titleStr.split(Regex("""\W+"""))
+                .filter { it.length > 2 || it.matches(Regex("""\d{2}""")) }
+                .flatMap { listOf(stemWord(it, isItalian), stemWord(it, false)) }
+
+            val oTokens = overviewStr.split(Regex("""\W+"""))
+                .filter { it.length > 2 || it.matches(Regex("""\d{2}""")) }
+                .flatMap { listOf(stemWord(it, isItalian), stemWord(it, false)) }
+
+            DocTokens(
+                id = m.id,
+                titleTokens = tTokens,
+                overviewTokens = oTokens,
+                length = tTokens.size * 2 + oTokens.size,
+                rawOverview = overviewStr,
+                rawTitle = titleStr
+            )
+        }
+
+        val avgDocLen = docList.map { it.length }.average().coerceAtLeast(1.0)
+        val expandedQueryTokens = queryTokens.flatMap { token ->
+            val en = KeywordDictionary.italianToEnglishSearchTokens[token]
+            val extra = mutableListOf<String>()
+            if (en != null && en != token) extra.add(en)
+            if (token == "morire" || token == "muore" || token == "morto" || token == "morte") {
+                extra.addAll(listOf("death", "dies", "dead"))
+            }
+            if (token == "ricco" || token == "ricchi" || token == "ricchezza") {
+                extra.addAll(listOf("rich", "wealth", "tycoon"))
+            }
+            if (token == "guerra" || token == "bellico") {
+                extra.addAll(listOf("war", "battle", "soldier"))
+            }
+            if (token == "spazio" || token == "spaziale") {
+                extra.addAll(listOf("space", "wormhole", "galaxy"))
+            }
+            listOf(token) + extra
+        }
+        val qStems = (expandedQueryTokens.map { stemWord(it.lowercase(Locale.ROOT), isItalian) } +
+                      expandedQueryTokens.map { stemWord(it.lowercase(Locale.ROOT), false) }).distinct()
+        val distinctStems = qStems
+
+        val docFreq = mutableMapOf<String, Int>()
+        for (stem in distinctStems) {
+            val count = docList.count { doc ->
+                doc.titleTokens.contains(stem) || doc.overviewTokens.contains(stem)
+            }
+            docFreq[stem] = count
+        }
+
+        val scores = mutableMapOf<Long, Double>()
+
+        for (doc in docList) {
+            var docScore = 0.0
+
+            for (stem in distinctStems) {
+                val df = (docFreq[stem] ?: 0).toDouble()
+                if (df == 0.0) continue
+
+                val idf = ln(1.0 + (nDocs - df + 0.5) / (df + 0.5)).coerceAtLeast(0.1)
+                val tfTitle = doc.titleTokens.count { it == stem }.toDouble()
+                val tfOverview = doc.overviewTokens.count { it == stem }.toDouble()
+                val effectiveTf = (tfTitle * 3.0) + tfOverview
+
+                if (effectiveTf > 0.0) {
+                    val numerator = effectiveTf * (k1 + 1.0)
+                    val denominator = effectiveTf + k1 * (1.0 - b + b * (doc.length.toDouble() / avgDocLen))
+                    docScore += idf * (numerator / denominator)
+                }
+            }
+
+            // Multi-word phrase bonus: if bigrams/trigrams from query appear sequentially in title or overview
+            val cleanQueryPhrase = queryTokens.joinToString(" ").lowercase(Locale.ROOT)
+            if (queryTokens.size >= 2 && cleanQueryPhrase.length >= 5) {
+                if (doc.rawTitle.contains(cleanQueryPhrase)) {
+                    docScore += 18.0
+                } else if (doc.rawOverview.contains(cleanQueryPhrase)) {
+                    docScore += 12.0
+                } else {
+                    val windowedPairs = queryTokens.windowed(2).map { it.joinToString(" ").lowercase(Locale.ROOT) }
+                    for (pair in windowedPairs) {
+                        if (pair.length >= 5) {
+                            if (doc.rawTitle.contains(pair)) docScore += 8.0
+                            else if (doc.rawOverview.contains(pair)) docScore += 5.0
+                        }
+                    }
+                }
+            }
+
+            scores[doc.id] = docScore
+        }
+
+        return scores
     }
 }

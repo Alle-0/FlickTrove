@@ -53,19 +53,20 @@ class MoodSearchRepository @Inject constructor(
         forceLocal: Boolean = false,
         bypassCache: Boolean = false
     ): Result<MoodSearchResultData> = runCatching {
-        val trimmedQuery = query.trim()
+        val trimmedQuery = query.trim().take(1000)
         val localEligible = isLocalEligible(language)
         val remaining = preferenceRepository.getMoodSearchesRemaining()
         val wantAi = !forceLocal
 
         // 0. Cache Hit Check: Ricorda le ricerche fatte per almeno 24 ore (Zero network, zero consumo quote)
-        // Se non è bypassCache, OPPURE se la ricerca in cache è più recente di 24 ore (o quota a 0), riusa la cache!
+        // Se non è bypassCache ed è recente (< 24h), oppure se è una ricerca AI e le quote sono esaurite, riusa la cache!
         if (page == 1) {
             val cached = moodHistoryRepository.getCachedEntry(trimmedQuery, isAi = wantAi)
             if (cached != null && cached.movies.isNotEmpty()) {
                 val ageMillis = System.currentTimeMillis() - cached.timestamp
                 val isUnder24Hours = ageMillis < 24 * 60 * 60 * 1000L
-                if (!bypassCache || isUnder24Hours || (wantAi && remaining <= 0)) {
+                val shouldReturnCache = (!bypassCache && isUnder24Hours) || (wantAi && remaining <= 0)
+                if (shouldReturnCache) {
                     return@runCatching MoodSearchResultData(
                         vibeTitle = cached.vibeTitle,
                         vibeDescription = cached.vibeDescription,
