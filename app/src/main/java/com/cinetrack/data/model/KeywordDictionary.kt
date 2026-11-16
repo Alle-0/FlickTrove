@@ -3,6 +3,10 @@ package com.cinetrack.data.model
 object KeywordDictionary {
     // Mappa massiva generata di parole chiave (1.185 voci in italiano, 1.193 in inglese per 1.125 ID TMDB unici)
     val italianToTmdbKeywordIds = mapOf(
+        "arena" to 1395L, "gladiatore" to 1394L, "gladiatori" to 1394L, "colosseo" to 1395L,
+        "soldati" to 13065L, "soldato" to 13065L, "linee nemiche" to 1956L, "dietro le linee nemiche" to 1956L,
+        "intrappolati" to 271689L, "intrappolato" to 271689L, "squalo" to 275172L, "squali" to 275172L,
+        "libellula" to 286709L, "torneo mortale" to 282498L,
         "poliziottesco" to 6149L, "giallo all'italiana" to 190479L, "giallo" to 12570L, "splatter" to 10292L,
         "folk horror" to 10310L, "cosmic horror" to 177895L, "body horror" to 283085L, "lovecraftiano" to 177895L,
         "peplum" to 5049L, "cappa e spada" to 1400L, "wuxia" to 779L, "space opera" to 195114L,
@@ -315,6 +319,10 @@ object KeywordDictionary {
     )
 
     val englishToTmdbKeywordIds = mapOf(
+        "arena" to 1395L, "gladiator" to 1394L, "gladiators" to 1394L, "colosseum" to 1395L,
+        "soldiers" to 13065L, "soldier" to 13065L, "behind enemy lines" to 1956L, "enemy lines" to 1956L,
+        "trapped" to 271689L, "dragonfly" to 286709L, "death match" to 282498L, "survival tournament" to 282498L,
+        "tournament" to 12563L, "shark" to 275172L,
         "dystopia" to 4565L, "space" to 9882L, "aliens" to 9951L, "post-apocalyptic" to 359337L,
         "cyberpunk" to 12190L, "robot" to 14544L, "time travel" to 4379L, "magic" to 2343L,
         "witches" to 616L, "dragon" to 12554L, "superheroes" to 9715L, "cloning" to 11628L,
@@ -619,6 +627,37 @@ object KeywordDictionary {
     fun getDictionaryForLanguage(language: String): Map<String, Long> {
         return if (language.startsWith("it")) italianToTmdbKeywordIds else englishToTmdbKeywordIds
     }
+
+    val italianToEnglishSearchTokens: Map<String, String> = mapOf(
+        "soldati" to "soldiers", "soldato" to "soldier",
+        "nemici" to "enemies", "nemico" to "enemy",
+        "linee" to "lines", "nemiche" to "enemy",
+        "intrappolati" to "trapped", "intrappolato" to "trapped",
+        "libellula" to "dragonfly",
+        "ragno" to "spider", "ragni" to "spiders",
+        "mosca" to "fly", "mosche" to "flies",
+        "arena" to "arena", "arene" to "arena",
+        "gladiatore" to "gladiator", "gladiatori" to "gladiators",
+        "squalo" to "shark", "squali" to "sharks",
+        "sottomarino" to "submarine", "sottomarini" to "submarines",
+        "rapina" to "heist", "rapine" to "heist",
+        "metamorfosi" to "metamorphosis", "trasformazione" to "transformation",
+        "sopravvivenza" to "survival",
+        "guerra" to "war",
+        "spionaggio" to "espionage", "spia" to "spy", "spie" to "spies",
+        "assassino" to "killer", "assassini" to "killers", "omicidio" to "murder",
+        "isola" to "island", "isole" to "islands",
+        "montagna" to "mountain", "montagne" to "mountains",
+        "neve" to "snow",
+        "spazio" to "space",
+        "alieno" to "alien", "alieni" to "aliens",
+        "mostro" to "monster", "mostri" to "monsters",
+        "prigione" to "prison", "carcere" to "prison",
+        "fuga" to "escape", "evasione" to "escape",
+        "aereo" to "airplane", "dirottamento" to "hijacking",
+        "treno" to "train",
+        "nave" to "ship", "naufragio" to "shipwreck"
+    )
 
     fun getLocalizedKeywordName(keywordId: Long, language: String, fallbackName: String? = null): String? {
         val dict = getDictionaryForLanguage(language)

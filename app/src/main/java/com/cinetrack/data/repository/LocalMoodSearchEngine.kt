@@ -389,15 +389,31 @@ class LocalMoodSearchEngine @Inject constructor(
             id = "war_epic",
             nameIt = "Epica Bellica & Fango delle Trincee",
             nameEn = "Gritty War & Battle Epic",
-            triggersIt = listOf("guerra", "film di guerra", "trincee", "seconda guerra mondiale", "sbarco in normandia", "vietnam", "soldati al fronte", "fratellanza sotto il fuoco"),
-            triggersEn = listOf("war", "war movie", "trenches", "world war", "ww2", "vietnam war", "soldiers on the frontline", "brotherhood in arms"),
+            triggersIt = listOf("guerra", "film di guerra", "trincee", "seconda guerra mondiale", "sbarco in normandia", "vietnam", "soldati al fronte", "fratellanza sotto il fuoco", "soldati", "soldato", "linee nemiche", "dietro le linee nemiche", "intrappolati", "linee del fronte"),
+            triggersEn = listOf("war", "war movie", "trenches", "world war", "ww2", "vietnam war", "soldiers on the frontline", "brotherhood in arms", "behind enemy lines", "soldiers", "trapped soldiers", "enemy lines"),
             primaryGenres = listOf(10752L),
             secondaryGenres = listOf(18L, 28L, 36L),
-            mandatoryKeywords = listOf(1956L, 1631L, 1968L),
-            secondaryKeywords = listOf(1327L),
-            anchorMovieIds = listOf(857L, 28L, 530915L, 600L, 49046L, 792L),
+            mandatoryKeywords = listOf(1956L, 1631L, 1968L, 13065L),
+            secondaryKeywords = listOf(1327L, 10349L),
+            anchorMovieIds = listOf(857L, 28L, 530915L, 600L, 49046L, 792L, 9361L),
             rationaleTemplateIt = "Realismo implacabile, polvere da sparo e il sacrificio straziante di uomini messi alla prova dal fronte.",
             rationaleTemplateEn = "Raw, visceral immersion into the chaos and profound human cost of warfare on the front lines."
+        ),
+
+        // --- GLADIATORI, ARENA & TORNEI MORTALI ---
+        CinematicArchetype(
+            id = "gladiator_arena",
+            nameIt = "Gladiatori, Arena & Tornei Mortali",
+            nameEn = "Gladiator, Arena & Survival Tournaments",
+            triggersIt = listOf("gladiatore", "gladiatori", "arena", "combattimento nell'arena", "combattimenti nell'arena", "combattere nell'arena", "torneo mortale", "colosseo", "lotta per la vita", "lotta per la gloria", "combattere per la vita", "combattere per la gloria", "spartacus style", "gladiator style", "giochi gladiatori"),
+            triggersEn = listOf("gladiator", "gladiators", "arena", "fight in an arena", "fight in a arena", "arena fight", "arena combat", "death match", "tournament to the death", "fight for life and glory", "battle for glory", "colosseum", "colosseum fight", "survival tournament", "hunger games style", "gladiator style", "spartacus style"),
+            primaryGenres = listOf(28L, 36L, 12L),
+            secondaryGenres = listOf(18L),
+            mandatoryKeywords = listOf(1394L, 1395L, 282498L),
+            secondaryKeywords = listOf(1160L, 1721L),
+            anchorMovieIds = listOf(98L, 70160L, 967L, 3176L, 59440L, 382272L, 2133L),
+            rationaleTemplateIt = "Scontri all'ultimo sangue nell'arena, gladiatori e sfide mortali in cui solo uno sopravvive per la gloria.",
+            rationaleTemplateEn = "Epic arena battles, gladiators, and deadly survival tournaments where only the strongest survive for glory."
         ),
 
         // --- METAMORFOSI & MUTAZIONE UOMO-INSETTO ---
@@ -541,7 +557,11 @@ class LocalMoodSearchEngine @Inject constructor(
         val isAnimationRequested = cleanQuery.contains("animazione") || cleanQuery.contains("cartone") || cleanQuery.contains("anime") || cleanQuery.contains("animation") || cleanQuery.contains("animated")
 
         // 2. Multi-Level Archetype & Atmosphere Detection (Check both Italian and English triggers)
+        val isTransformationIntent = detectTransformationIntent(cleanQuery)
         val matchedArchetypes = archetypeCatalog.filter { archetype ->
+            if (isTransformationIntent && archetype.id == "metamorphosis_mutation") {
+                return@filter true
+            }
             val triggers = if (isItalian) archetype.triggersIt else archetype.triggersEn
             val alternateTriggers = if (isItalian) archetype.triggersEn else archetype.triggersIt
             triggers.any { trigger -> matchesWordOrFuzzy(cleanQuery, trigger) } ||
@@ -555,7 +575,7 @@ class LocalMoodSearchEngine @Inject constructor(
             alternateTriggers.any { trigger -> matchesWordOrFuzzy(cleanQuery, trigger) }
         }
 
-        // 3. Keyword Extraction with Strict Boundaries
+        // 3. Keyword Extraction with Strict Boundaries & Dynamic TMDB Resolution
         val dictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "it" else "en")
         val fallbackDictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "en" else "it")
         val matchedKeywords = mutableListOf<Long>()
@@ -565,6 +585,36 @@ class LocalMoodSearchEngine @Inject constructor(
             val kwId = dictionary[token] ?: fallbackDictionary[token]
             if (kwId != null && !matchedKeywords.contains(kwId)) {
                 matchedKeywords.add(kwId)
+            }
+        }
+
+        // Dynamic Keyword Resolution via TMDB searchKeyword API (with Italian->English token mapping)
+        val unmappedTokens = contentTokens.filter { token ->
+            token.length >= 4 && !dictionary.containsKey(token) && !fallbackDictionary.containsKey(token)
+        }.take(3)
+
+        if (unmappedTokens.isNotEmpty()) {
+            coroutineScope {
+                val deferredKw = unmappedTokens.map { token ->
+                    async {
+                        val searchToken = if (isItalian) {
+                            KeywordDictionary.italianToEnglishSearchTokens[token] ?: token
+                        } else {
+                            token
+                        }
+                        try {
+                            val kwRes = tmdbService.searchKeyword(searchToken)
+                            kwRes.getList().firstOrNull()?.id
+                        } catch (_: Exception) {
+                            null
+                        }
+                    }
+                }
+                for (id in deferredKw.mapNotNull { it.await() }) {
+                    if (!matchedKeywords.contains(id)) {
+                        matchedKeywords.add(id)
+                    }
+                }
             }
         }
 
@@ -604,10 +654,10 @@ class LocalMoodSearchEngine @Inject constructor(
                             "primary_release_date.lte" to (endYear?.let { "$it-12-31" } ?: todayStr)
                         )
                         if (distinctGenres.isNotEmpty()) {
-                            opts["with_genres"] = distinctGenres.take(2).joinToString(",")
+                            opts["with_genres"] = distinctGenres.take(2).joinToString("|")
                         }
                         if (distinctKeywords.isNotEmpty()) {
-                            opts["with_keywords"] = distinctKeywords.take(3).joinToString("|")
+                            opts["with_keywords"] = distinctKeywords.take(4).joinToString("|")
                         }
                         applyDateBounds(opts, specificYear, startYear, endYear)
                         tmdbService.discoverMovies(page = page, options = opts).results
@@ -631,10 +681,10 @@ class LocalMoodSearchEngine @Inject constructor(
                             "primary_release_date.lte" to (endYear?.let { "$it-12-31" } ?: todayStr)
                         )
                         if (distinctGenres.isNotEmpty()) {
-                            opts["with_genres"] = distinctGenres.take(2).joinToString(",")
+                            opts["with_genres"] = distinctGenres.take(2).joinToString("|")
                         }
                         if (distinctKeywords.isNotEmpty()) {
-                            opts["with_keywords"] = distinctKeywords.take(2).joinToString("|")
+                            opts["with_keywords"] = distinctKeywords.take(4).joinToString("|")
                         }
                         applyDateBounds(opts, specificYear, startYear, endYear)
                         tmdbService.discoverMovies(page = page, options = opts).results
@@ -672,28 +722,30 @@ class LocalMoodSearchEngine @Inject constructor(
                 list
             }
 
-            // Stream D: Token Search on TMDB Movie Search (Crucial for queries with free vocabulary!)
+            // Stream D: Thematic & Phrase Token Search on TMDB
             val streamD = async {
                 val list = mutableListOf<Movie>()
-                // Search top 2 content tokens independently
-                for (token in contentTokens.take(2)) {
-                    if (token.length >= 4) {
-                        try {
-                            val res = tmdbService.searchMovie(token, page = page)
-                            list.addAll(res.results.take(8))
-                        } catch (_: Exception) {
-                            // ignore
-                        }
-                    }
-                }
-                // Also search the combined 2 content words
+                // Search multi-word phrase if available
                 if (contentTokens.size >= 2) {
                     try {
-                        val phrase = contentTokens.take(2).joinToString(" ")
+                        val phrase = contentTokens.take(3).joinToString(" ")
                         val res = tmdbService.searchMovie(phrase, page = page)
-                        list.addAll(res.results.take(8))
+                        list.addAll(res.results.take(6))
                     } catch (_: Exception) {
                         // ignore
+                    }
+                }
+                // Only search individual tokens if no archetypes matched and token is long enough (>= 5)
+                if (matchedArchetypes.isEmpty()) {
+                    for (token in contentTokens.take(2)) {
+                        if (token.length >= 5) {
+                            try {
+                                val res = tmdbService.searchMovie(token, page = page)
+                                list.addAll(res.results.take(4))
+                            } catch (_: Exception) {
+                                // ignore
+                            }
+                        }
                     }
                 }
                 list
@@ -705,8 +757,10 @@ class LocalMoodSearchEngine @Inject constructor(
             val resD = streamD.await()
 
             for (m in (resC + resA + resB + resD)) {
-                // Strictly exclude unreleased future movies (release_date > today)
-                if (m.id > 0L && isMovieReleased(m.releaseDate) && !candidateMap.containsKey(m.id)) {
+                // Hard Gates: Valid ID, valid poster image, minimum 20 votes, and already released
+                val hasPoster = !m.posterPath.isNullOrBlank()
+                val minVotes = (m.voteCount ?: 0) >= 20
+                if (m.id > 0L && hasPoster && minVotes && isMovieReleased(m.releaseDate) && !candidateMap.containsKey(m.id)) {
                     candidateMap[m.id] = m
                 }
             }
@@ -725,7 +779,9 @@ class LocalMoodSearchEngine @Inject constructor(
                     )
                 ).results
                 for (m in fallbackResults) {
-                    if (m.id > 0L && isMovieReleased(m.releaseDate) && !candidateMap.containsKey(m.id)) {
+                    val hasPoster = !m.posterPath.isNullOrBlank()
+                    val minVotes = (m.voteCount ?: 0) >= 20
+                    if (m.id > 0L && hasPoster && minVotes && isMovieReleased(m.releaseDate) && !candidateMap.containsKey(m.id)) {
                         candidateMap[m.id] = m
                     }
                 }
@@ -744,40 +800,40 @@ class LocalMoodSearchEngine @Inject constructor(
 
         val primaryArchetype = matchedArchetypes.firstOrNull()
 
-        val scoredList = candidateMap.values.map { m ->
-            var score = 0.0
+        val scoredList = candidateMap.values.mapNotNull { m ->
+            var thematicRelevanceScore = 0.0
 
-            // A. Bayesian Quality Score (0..35 pt)
-            val v = (m.voteCount ?: 0).toDouble()
-            val r = (m.voteAverage ?: 0.0)
-            val c = 6.4
-            val minVotes = 120.0
-            val bayesianRating = if (v > 0) ((v * r) + (minVotes * c)) / (v + minVotes) else c
-            val qualityScore = ((bayesianRating - 5.0).coerceAtLeast(0.0) / 4.0) * 35.0
-            score += qualityScore
-
-            // B. Genre Relevancy Score (0..35 pt)
+            // A. Archetype & Genre Relevancy Score
             val movieGenres = m.genreIds ?: emptyList()
             if (primaryArchetype != null) {
+                val isAnchor = primaryArchetype.anchorMovieIds.contains(m.id)
+                if (isAnchor) thematicRelevanceScore += 50.0
+
                 val primaryOverlap = movieGenres.count { primaryArchetype.primaryGenres.contains(it) }
                 val secondaryOverlap = movieGenres.count { primaryArchetype.secondaryGenres.contains(it) }
-                score += (primaryOverlap * 14.0).coerceAtMost(28.0)
-                score += (secondaryOverlap * 6.0).coerceAtMost(12.0)
+                thematicRelevanceScore += (primaryOverlap * 14.0).coerceAtMost(28.0)
+                thematicRelevanceScore += (secondaryOverlap * 6.0).coerceAtMost(12.0)
 
                 // Penalty for unrequested animation in serious/gritty archetypes
                 if (!isAnimationRequested && movieGenres.contains(16L)) {
-                    score -= 35.0
+                    thematicRelevanceScore -= 35.0
                 }
             } else if (distinctGenres.isNotEmpty()) {
                 val overlap = movieGenres.count { distinctGenres.contains(it) }
-                score += (overlap * 12.0).coerceAtMost(30.0)
+                thematicRelevanceScore += (overlap * 12.0).coerceAtMost(30.0)
             }
 
             if (isAnimationRequested && movieGenres.contains(16L)) {
-                score += 25.0
+                thematicRelevanceScore += 25.0
             }
 
-            // C. Semantic Overview & Title Alignment (0..40 pt)
+            // B. Keyword Matches
+            val movieKwOverlap = movieGenres.count { distinctKeywords.contains(it) }
+            if (movieKwOverlap > 0) {
+                thematicRelevanceScore += (movieKwOverlap * 15.0)
+            }
+
+            // C. Semantic Overview & Title Alignment
             val overviewLower = (m.overview ?: "").lowercase(Locale.ROOT)
             val titleLower = (m.title ?: "").lowercase(Locale.ROOT)
             var textMatchBonus = 0.0
@@ -794,32 +850,52 @@ class LocalMoodSearchEngine @Inject constructor(
                     }
                 }
             }
-            score += textMatchBonus.coerceAtMost(40.0)
+            thematicRelevanceScore += textMatchBonus.coerceAtMost(40.0)
 
-            // Heavy penalty if user had specific content words and this movie has zero relevance to them!
-            if (contentTokens.size >= 2 && matchedTokenCount == 0 && primaryArchetype == null) {
-                score -= 40.0
+            // HARD GATE: ZERO THEMATIC RELEVANCE -> STRICT EXCLUSION!
+            // Quality score (Bayesian) must NEVER allow a completely unrelated movie to pass!
+            // A movie must have substantive grounding: Anchor, Primary Genre Match, Keyword Match, or Text Token Match!
+            val primaryOverlap = if (primaryArchetype != null) {
+                movieGenres.count { primaryArchetype.primaryGenres.contains(it) }
+            } else if (distinctGenres.isNotEmpty()) {
+                movieGenres.count { distinctGenres.contains(it) }
+            } else 0
+            val isAnchor = primaryArchetype?.anchorMovieIds?.contains(m.id) == true
+            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || movieKwOverlap > 0 || matchedTokenCount > 0
+
+            if (!hasSubstantiveThematicGrounding || thematicRelevanceScore <= 0.0) {
+                return@mapNotNull null
             }
 
-            // D. Era & Decade Alignment (0..15 pt)
+            var totalScore = thematicRelevanceScore
+
+            // D. Bayesian Quality Boost (ONLY for thematically relevant movies!)
+            val v = (m.voteCount ?: 0).toDouble()
+            val r = (m.voteAverage ?: 0.0)
+            val c = 6.4
+            val minVotesThreshold = 120.0
+            val bayesianRating = if (v > 0) ((v * r) + (minVotesThreshold * c)) / (v + minVotesThreshold) else c
+            val voteWeight = (v / 80.0).coerceIn(0.2, 1.0)
+            val qualityBoost = (((bayesianRating - 5.0).coerceAtLeast(0.0) / 4.0) * 25.0) * voteWeight
+            totalScore += qualityBoost
+
+            // E. Era & Decade Alignment
             val year = extractYearFromDate(m.releaseDate)
             if (year != null) {
                 if (specificYear != null && year == specificYear) {
-                    score += 15.0
+                    totalScore += 15.0
                 } else if (startYear != null && endYear != null) {
                     if (year in startYear..endYear) {
-                        score += 15.0
+                        totalScore += 15.0
                     } else {
                         val dist = if (year < startYear) startYear - year else year - endYear
-                        score -= (dist * 1.5).coerceAtMost(25.0)
+                        totalScore -= (dist * 1.5).coerceAtMost(25.0)
                     }
                 }
             }
 
-            // E. Detect Franchise
+            // F. Detect Franchise & Rationale
             val franchiseKey = detectFranchiseKey(m.title ?: "")
-
-            // F. Synthesize Bespoke Editorial Justification
             val reason = generateBespokeReason(
                 movie = m,
                 archetype = primaryArchetype,
@@ -827,7 +903,7 @@ class LocalMoodSearchEngine @Inject constructor(
                 query = query
             )
 
-            ScoredCandidate(m, score, franchiseKey, reason)
+            ScoredCandidate(m, totalScore, franchiseKey, reason)
         }
 
         // 6. Franchise Anti-Monopoly & Title Deduplication
@@ -945,6 +1021,18 @@ class LocalMoodSearchEngine @Inject constructor(
         }
     }
 
+    private fun detectTransformationIntent(query: String): Boolean {
+        val lower = query.lowercase(Locale.ROOT)
+        val transformationMarkers = listOf(
+            "become", "becomes", "became", "becoming", "turned into", "turns into", "turning into",
+            "transformed", "transforming", "transformation", "mutates", "mutated", "mutation",
+            "bitten by", "bit by", "diventa", "diventare", "diventano", "diventato", "diventata",
+            "trasforma", "trasformarsi", "trasformano", "trasformato", "trasformazione",
+            "muta", "mutare", "mutato", "morso da"
+        )
+        return transformationMarkers.any { lower.contains(it) }
+    }
+
     private fun extractSignificantContentTokens(query: String, isItalian: Boolean): List<String> {
         val stopwordsIt = setOf(
             "un", "uno", "una", "dei", "degli", "delle", "il", "lo", "la", "i", "gli", "le",
@@ -953,7 +1041,10 @@ class LocalMoodSearchEngine @Inject constructor(
             "film", "cinema", "pellicola", "storia", "racconto", "tipo", "stile", "genere", "simile",
             "alla", "allo", "agli", "alle", "vorrei", "vedere", "consigliami", "cercami", "mostrami",
             "trovami", "consigli", "qualcosa", "bello", "belli", "famoso", "famosi", "migliori", "migliore",
-            "diventa", "diventare", "diventano", "essere", "stato", "sono", "ha", "hanno", "chi", "quale", "quali"
+            "diventa", "diventare", "diventano", "essere", "stato", "sono", "ha", "hanno", "chi", "quale", "quali",
+            "persone", "persona", "gente", "qualcuno", "alcuni", "alcune", "uomo", "uomini", "donna", "donne",
+            "ragazzo", "ragazzi", "ragazza", "ragazze", "tutti", "tutto", "tutta", "tutte", "molti", "molte",
+            "ogni", "ciascuno", "altro", "altri", "altre", "loro", "essi", "esse", "cose", "fanno", "fa", "fare", "guarda", "guardare"
         )
         val stopwordsEn = setOf(
             "a", "an", "the", "in", "on", "at", "to", "for", "with", "without", "by", "from",
@@ -964,7 +1055,12 @@ class LocalMoodSearchEngine @Inject constructor(
             "when", "why", "how", "become", "becomes", "became", "becoming", "turned", "turns",
             "turning", "get", "gets", "got", "getting", "is", "are", "was", "were", "be", "been",
             "being", "have", "has", "had", "having", "do", "does", "did", "doing", "can", "could",
-            "will", "would", "shall", "should", "may", "might", "must"
+            "will", "would", "shall", "should", "may", "might", "must",
+            "some", "people", "someone", "somebody", "anyone", "anybody", "everyone", "everybody",
+            "person", "persons", "man", "men", "woman", "women", "boy", "boys", "girl", "girls",
+            "guy", "guys", "folk", "folks", "they", "them", "their", "theirs", "one", "ones",
+            "many", "much", "few", "all", "any", "every", "other", "others", "lot", "lots",
+            "bunch", "thing", "things", "stuff", "watch", "watching", "see", "seeing"
         )
         val stopwords = if (isItalian) stopwordsIt else stopwordsEn
 
@@ -983,13 +1079,12 @@ class LocalMoodSearchEngine @Inject constructor(
         // If multi-word trigger, check if all significant words match in sequence or proximity
         val tWords = t.split(" ").filter { it.length >= 3 }
         if (tWords.size > 1) {
-            val allPresent = tWords.all { word ->
+            return tWords.all { word ->
                 containsWholeWordOrPhrase(q, word) || fuzzyMatchTokenInQuery(q, word)
             }
-            if (allPresent) return true
         }
 
-        // Fuzzy match single token
+        // Fuzzy match single token only
         return fuzzyMatchTokenInQuery(q, t)
     }
 
