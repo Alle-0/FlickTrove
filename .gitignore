@@ -58,6 +58,7 @@ firestore.rules
 # Logs & Firebase Temp Files
 # =========================
 *.log
+.wrangler/
 log.txt
 firebase-debug.log
 firebase-debug.*.log
