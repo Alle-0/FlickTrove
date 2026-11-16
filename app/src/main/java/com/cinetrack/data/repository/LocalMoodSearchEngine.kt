@@ -23,8 +23,47 @@ class LocalMoodSearchEngine @Inject constructor(
 ) {
 
     // Thread-safe in-memory cache to eliminate network latency and prevent rate-limiting
-    private val anchorDetailsCache = ConcurrentHashMap<Long, Movie>()
+    private val anchorDetailsCache = ConcurrentHashMap<String, Movie>()
     private val keywordResolutionCache = ConcurrentHashMap<String, Long>()
+
+    private val animalAndNonHumanTriggers = setOf(
+        // Italian
+        "topo", "topi", "topolino", "topolina", "topolini", "ratto", "ratti", "roditore", "roditori",
+        "pesce", "pesci", "pesciolino", "squalo", "squali", "balena", "balene", "delfino", "delfini",
+        "leone", "leoni", "leoncino", "tigre", "tigri", "pantera", "pantere", "leopardo",
+        "cane", "cani", "cagnolino", "cucciolo", "cuccioli", "gatto", "gatti", "gattino", "gattini",
+        "uccello", "uccelli", "uccellino", "aquila", "aquile", "falco", "gufo", "gufi", "pappagallo", "pappagalli",
+        "orso", "orsi", "orsetto", "volpe", "volpi", "lupo", "lupi", "lupacchiotto",
+        "coniglio", "conigli", "coniglietto", "lepre",
+        "panda", "elefante", "elefanti", "giraffa", "giraffe", "ippopotamo",
+        "scimmia", "scimmie", "gorilla", "scimpanze",
+        "dinosauro", "dinosauri", "drago", "draghi",
+        "insetto", "insetti", "ape", "api", "formica", "formiche", "coccinella", "ragno", "ragni",
+        "animale", "animali", "animaletto", "animaletti", "bestia", "bestie",
+        "giocattolo", "giocattoli", "pupazzo", "pupazzi", "burattino", "burattini",
+        "robot", "mostro", "mostri", "mostriciattolo",
+
+        // English
+        "mouse", "mice", "rat", "rats", "rodent", "rodents",
+        "fish", "fishes", "shark", "sharks", "whale", "whales", "dolphin", "dolphins",
+        "lion", "lions", "tiger", "tigers", "panther", "leopard",
+        "dog", "dogs", "puppy", "puppies", "cat", "cats", "kitten", "kittens",
+        "bird", "birds", "eagle", "hawk", "owl", "parrot",
+        "bear", "bears", "fox", "foxes", "wolf", "wolves",
+        "rabbit", "rabbits", "bunny", "bunnies", "hare",
+        "panda", "elephant", "elephants", "giraffe",
+        "monkey", "monkeys", "gorilla", "chimpanzee",
+        "dinosaur", "dinosaurs", "dragon", "dragons",
+        "insect", "insects", "bug", "bugs", "bee", "bees", "ant", "ants", "spider", "spiders",
+        "animal", "animals", "creature", "creatures", "beast", "beasts",
+        "toy", "toys", "puppet", "puppets",
+        "robot", "robots", "monster", "monsters"
+    )
+
+    private fun detectAnimalOrNonHumanSubject(query: String): Boolean {
+        val tokens = Regex("""\b\w+\b""").findAll(query.lowercase(Locale.ROOT)).map { it.value }
+        return tokens.any { animalAndNonHumanTriggers.contains(it) }
+    }
 
     private val stopwordsIt = setOf(
         "un", "uno", "una", "dei", "degli", "delle", "il", "lo", "la", "i", "gli", "le",
@@ -209,7 +248,7 @@ class LocalMoodSearchEngine @Inject constructor(
             secondaryGenres = listOf(35L, 53L),
             mandatoryKeywords = listOf(10594L, 179431L, 207317L),
             secondaryKeywords = listOf(1701L),
-            anchorMovieIds = listOf(593643L, 2062L, 286567L, 820067L, 212778L, 244786L),
+            anchorMovieIds = listOf(593643L, 2062L, 286567L, 820067L, 212778L),
             rationaleTemplateIt = "La tensione febbrile e l'ossessione perversa per la perfezione tra i fornelli dell'alta gastronomia.",
             rationaleTemplateEn = "Feverish tension and the relentless obsession with culinary perfection inside high-end kitchens."
         ),
@@ -1263,14 +1302,25 @@ class LocalMoodSearchEngine @Inject constructor(
 
     private fun detectTransformationIntent(query: String): Boolean {
         val lower = query.lowercase(Locale.ROOT)
-        val transformationMarkers = listOf(
-            "become", "becomes", "became", "becoming", "turned into", "turns into", "turning into",
-            "transformed", "transforming", "transformation", "mutates", "mutated", "mutation",
-            "bitten by", "bit by", "diventa", "diventare", "diventano", "diventato", "diventata",
-            "trasforma", "trasformarsi", "trasformano", "trasformato", "trasformazione",
-            "muta", "mutare", "mutato", "morso da"
+        val directMetamorphosisWords = listOf(
+            "metamorfosi", "trasformazione", "mutazione", "morso da", "morso di",
+            "metamorphosis", "transformation", "mutation", "mutant", "bitten by", "bit by"
         )
-        return transformationMarkers.any { lower.contains(it) }
+        if (directMetamorphosisWords.any { lower.contains(it) }) return true
+
+        val becomingWords = listOf(
+            "become", "becomes", "became", "becoming", "turned into", "turns into", "turning into",
+            "diventa", "diventare", "diventano", "diventato", "diventata", "trasforma", "trasformarsi"
+        )
+        val creatureTargets = listOf(
+            "insetto", "insetti", "mosca", "ragno", "ragni", "mostro", "mostri", "creatura", "creature",
+            "vampiro", "lupo mannaro", "licantropo", "zombie", "mutante", "mutanti",
+            "insect", "insects", "fly", "spider", "spiders", "monster", "monsters", "creature", "creatures",
+            "vampire", "werewolf"
+        )
+        val hasBecoming = becomingWords.any { lower.contains(it) }
+        val hasCreatureTarget = creatureTargets.any { lower.contains(it) }
+        return hasBecoming && hasCreatureTarget
     }
 
     private fun extractSignificantContentTokens(query: String, isItalian: Boolean): List<String> {
