@@ -22,10 +22,14 @@ data class SemanticMovieDto(
     val score: Double? = null
 ) {
     fun toMovieResult(): TMDBSearchResult.MovieResult {
+        val normalizedPoster = posterPath?.trim()?.takeIf { it.isNotBlank() }?.let { path ->
+            if (path.startsWith("http") || path.startsWith("/")) path else "/$path"
+        }
+
         return TMDBSearchResult.MovieResult(
             id = id,
             title = title,
-            posterPath = posterPath,
+            posterPath = normalizedPoster,
             releaseDate = year?.let { if (it.length == 4) "$it-01-01" else it },
             voteAverage = voteAverage,
             overview = null,
