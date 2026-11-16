@@ -609,14 +609,14 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                     .fillMaxWidth()
                     .padding(horizontal = 16.dp)
             ) {
-                Column(
-                    modifier = Modifier
+                val listModifier = if (expanded) {
+                    Modifier
                         .fillMaxWidth()
-                        .heightIn(max = if (expanded) 260.dp else Dp.Unspecified)
+                        .heightIn(max = 260.dp)
                         .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
                         .drawWithContent {
                             drawContent()
-                            if (expanded && scrollState.value < scrollState.maxValue) {
+                            if (scrollState.value < scrollState.maxValue) {
                                 drawRect(
                                     brush = Brush.verticalGradient(
                                         0f to Color.Black,
@@ -631,6 +631,14 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                         .nestedScroll(nestedScrollConnection)
                         .verticalScroll(scrollState)
                         .padding(vertical = 12.dp)
+                } else {
+                    Modifier
+                        .fillMaxWidth()
+                        .padding(vertical = 12.dp)
+                }
+
+                Column(
+                    modifier = listModifier
                 ) {
                     val displayList = if (expanded) vibes else vibes.take(7)
 
@@ -661,21 +669,23 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                     val scrollFraction by remember {
                         derivedStateOf { if (scrollState.maxValue > 0) scrollState.value.toFloat() / scrollState.maxValue else 0f }
                     }
-                    Box(
-                        modifier = Modifier
-                            .align(Alignment.TopEnd)
-                            .padding(top = 10.dp, bottom = 10.dp, end = 4.dp)
-                            .fillMaxHeight()
-                            .width(3.dp)
-                            .background(Color.White.copy(alpha = 0.05f), CircleShape)
-                    ) {
+                    if (scrollState.maxValue > 0) {
                         Box(
                             modifier = Modifier
-                                .fillMaxWidth()
-                                .fillMaxHeight(0.2f)
-                                .offset(y = (240 * scrollFraction).dp)
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape)
-                        )
+                                .align(Alignment.TopEnd)
+                                .padding(top = 10.dp, bottom = 10.dp, end = 4.dp)
+                                .height(240.dp)
+                                .width(3.dp)
+                                .background(Color.White.copy(alpha = 0.05f), CircleShape)
+                        ) {
+                            Box(
+                                modifier = Modifier
+                                    .fillMaxWidth()
+                                    .fillMaxHeight(0.2f)
+                                    .offset(y = (192 * scrollFraction).dp)
+                                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.5f), CircleShape)
+                            )
+                        }
                     }
                 }
             }

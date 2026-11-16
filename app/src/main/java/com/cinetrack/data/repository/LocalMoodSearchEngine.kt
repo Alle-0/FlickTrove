@@ -61,7 +61,7 @@ class LocalMoodSearchEngine @Inject constructor(
     )
 
     private fun detectAnimalOrNonHumanSubject(query: String): Boolean {
-        val tokens = Regex("""\b\w+\b""").findAll(query.lowercase(Locale.ROOT)).map { it.value }
+        val tokens = Regex("""\b[\w-]+\b""").findAll(query.lowercase(Locale.ROOT)).map { it.value.trim('-') }
         return tokens.any { animalAndNonHumanTriggers.contains(it) }
     }
 
@@ -78,6 +78,13 @@ class LocalMoodSearchEngine @Inject constructor(
         "persone", "persona", "gente", "qualcuno", "alcuni", "alcune", "uomo", "uomini", "donna", "donne",
         "ragazzo", "ragazzi", "ragazza", "ragazze", "tutti", "tutto", "tutta", "tutte", "molti", "molte",
         "ogni", "ciascuno", "altro", "altri", "altre", "loro", "essi", "esse", "cose", "fanno", "fa", "fare", "guarda", "guardare",
+        "parte", "parti", "partire", "partono", "partito", "partita", "partiti", "partite",
+        "va", "vanno", "andare", "andato", "andata", "andati", "andate",
+        "fa", "fanno", "fare", "fatto", "fatta",
+        "inizia", "iniziano", "iniziare", "iniziato", "iniziata",
+        "sta", "stanno", "stare", "sembra", "sembrano", "sembrare",
+        "arriva", "arrivare", "arrivano", "arrivato",
+        "esce", "uscire", "escono", "uscito",
         "porta", "portare", "portano", "portato",
         "trova", "trovare", "trovano", "trovato",
         "cerca", "cercare", "cercano", "cercato",
@@ -111,6 +118,10 @@ class LocalMoodSearchEngine @Inject constructor(
         "seeks", "seek", "sought", "discovers", "discover", "discovered",
         "begins", "begin", "begun", "tries", "try", "tried",
         "returns", "return", "returned", "leaves", "leave", "left",
+        "part", "parts", "departs", "depart", "departing", "departed",
+        "goes", "go", "going", "gone", "starts", "start", "starting", "started",
+        "stays", "stay", "staying", "seems", "seem", "seeming",
+        "arrives", "arrive", "arriving", "arrived",
         "lives", "live", "lived", "decides", "decide", "decided"
     )
 
@@ -210,13 +221,23 @@ class LocalMoodSearchEngine @Inject constructor(
             id = "time_loop",
             nameIt = "Time Loop & Paradossi Temporali",
             nameEn = "Time Loop & Paradoxes",
-            triggersIt = listOf("time loop", "loop temporale", "giorno che si ripete", "rivivere lo stesso giorno", "viaggio nel tempo", "viaggi nel tempo", "paradosso temporale", "macchina del tempo"),
-            triggersEn = listOf("time loop", "repeating day", "reliving the same day", "time travel", "temporal paradox", "time machine", "groundhog day style"),
+            triggersIt = listOf(
+                "time loop", "loop temporale", "giorno che si ripete", "rivivere lo stesso giorno",
+                "viaggio nel tempo", "viaggi nel tempo", "paradosso temporale", "macchina del tempo",
+                "spazio-temporale", "spaziotemporale", "spazio temporale", "viaggio spazio-temporale",
+                "viaggio spaziotemporale", "viaggi spazio-temporali", "viaggio temporale", "viaggi temporali",
+                "viaggiatore nel tempo", "viaggiatori nel tempo", "linea temporale", "continuum temporale"
+            ),
+            triggersEn = listOf(
+                "time loop", "repeating day", "reliving the same day", "time travel", "temporal paradox",
+                "time machine", "groundhog day style", "space-time", "spacetime", "space-time travel",
+                "spacetime travel", "temporal travel", "time traveler", "time travelers", "timeline"
+            ),
             primaryGenres = listOf(878L),
             secondaryGenres = listOf(53L, 35L, 9648L),
             mandatoryKeywords = listOf(10854L, 4379L),
-            secondaryKeywords = listOf(191132L, 207317L),
-            anchorMovieIds = listOf(137L, 137113L, 587792L, 45612L, 26466L, 122906L, 63L),
+            secondaryKeywords = listOf(191132L, 207317L, 5455L),
+            anchorMovieIds = listOf(105L, 137L, 137113L, 587792L, 45612L, 26466L, 122906L, 63L),
             rationaleTemplateIt = "Brillante rompicapo temporale in cui i protagonisti devono decifrare le regole di un continuum impazzito.",
             rationaleTemplateEn = "Brilliant temporal puzzle where characters must unravel the rules of a looping reality."
         ),
@@ -306,13 +327,25 @@ class LocalMoodSearchEngine @Inject constructor(
             id = "cyberpunk",
             nameIt = "Cyberpunk & Distopia High-Tech",
             nameEn = "Cyberpunk & High-Tech Dystopia",
-            triggersIt = listOf("cyberpunk", "hacker", "megacorporazioni", "innesti bionici", "cyborg", "neon e pioggia", "futuro distopico", "blade runner style", "intelligenza artificiale ribelle"),
-            triggersEn = listOf("cyberpunk", "hacker", "megacorporation", "bionic implants", "cyborg", "neon rain", "dystopian future", "blade runner style", "rogue ai"),
+            triggersIt = listOf(
+                "cyberpunk", "hacker", "megacorporazioni", "innesti bionici", "cyborg",
+                "neon e pioggia", "pioggia e neon", "neon", "futuro distopico", "blade runner style",
+                "intelligenza artificiale ribelle", "implanti neurali", "luci al neon",
+                "metropoli neon", "retrofuturismo", "synthwave", "distopia tecnologica"
+            ),
+            triggersEn = listOf(
+                "cyberpunk", "hacker", "megacorporation", "bionic implants", "cyborg",
+                "neon rain", "rain and neon", "neon lights", "dystopian future", "blade runner style",
+                "rogue ai", "neural implants", "neon metropolis", "retrofuturistic", "synthwave",
+                "tech dystopia", "cybernetic"
+            ),
             primaryGenres = listOf(878L),
-            secondaryGenres = listOf(28L, 53L),
+            secondaryGenres = listOf(28L, 53L, 18L),
             mandatoryKeywords = listOf(12190L, 2157L, 310L),
-            secondaryKeywords = listOf(4565L, 350338L),
-            anchorMovieIds = listOf(335984L, 603L, 9323L, 149L, 180L, 49049L, 500664L),
+            secondaryKeywords = listOf(4565L, 350338L, 256181L),
+            // Blade Runner (78) e Blade Runner 2049 (335984) vengono messi PRIMI:
+            // sono il manifesto assoluto del cyberpunk con pioggia e neon.
+            anchorMovieIds = listOf(78L, 335984L, 603L, 9323L, 149L, 180L, 49049L, 500664L),
             rationaleTemplateIt = "Futuro visivamente ipnotico dove tecnologia avanzata, metropoli al neon e corporazioni governano l'anima.",
             rationaleTemplateEn = "Hypnotic vision of high tech and low life, with neon metropolises, cybernetics, and corporate decay."
         ),
@@ -498,13 +531,13 @@ class LocalMoodSearchEngine @Inject constructor(
             id = "neo_noir",
             nameIt = "Neo-Noir & Notte Metropolitana",
             nameEn = "Neo-Noir & Urban Night",
-            triggersIt = listOf("neo-noir", "noir moderno", "metropoli notturna", "pioggia e asfalto", "detective disilluso", "corruzione metropolitana", "luci al neon", "drive style", "se7en style"),
-            triggersEn = listOf("neo-noir", "modern noir", "nocturnal city", "rainy streets", "cynical detective", "urban decay", "neon-drenched", "drive style", "se7en style"),
+            triggersIt = listOf("neo-noir", "noir moderno", "metropoli notturna", "pioggia e asfalto", "detective disilluso", "corruzione metropolitana", "luci al neon", "drive style", "se7en style", "pioggia battente", "pioggia torrenziale", "detective pioggia", "detective nella pioggia", "thriller piovoso", "investigatore privato"),
+            triggersEn = listOf("neo-noir", "modern noir", "nocturnal city", "rainy streets", "cynical detective", "urban decay", "neon-drenched", "drive style", "se7en style", "rain-drenched", "rain-soaked", "rain-slicked", "rain drenched", "detective thriller", "rainy detective", "rain detective", "rainy thriller"),
             primaryGenres = listOf(53L, 80L),
             secondaryGenres = listOf(9648L, 18L),
             mandatoryKeywords = listOf(9016L, 12190L, 703L),
-            secondaryKeywords = listOf(9826L),
-            anchorMovieIds = listOf(329L, 64690L, 242582L, 807L, 2118L, 414906L),
+            secondaryKeywords = listOf(9826L, 3840L),
+            anchorMovieIds = listOf(807L, 114472L, 64690L, 242582L, 2118L, 414906L),
             rationaleTemplateIt = "Asfalto bagnato di pioggia, ambiguità morale e fascino magnetico nei recessi oscuri della città.",
             rationaleTemplateEn = "Rain-slicked streets, deep moral ambiguity, and hypnotic atmospheric dread in the urban underbelly."
         ),
@@ -587,6 +620,33 @@ class LocalMoodSearchEngine @Inject constructor(
             anchorMovieIds = listOf(64682L, 98L, 903L, 14L, 101L, 1422L, 597L),
             rationaleTemplateIt = "Un arco narrativo straziante e memorabile, culminante in un epilogo drammatico e indimenticabile.",
             rationaleTemplateEn = "A poignant and heartbreaking narrative arc culminating in a devastating, unforgettable finale."
+        ),
+
+        // --- SUPEREROI & FUMETTI ---
+        CinematicArchetype(
+            id = "superhero_comic",
+            nameIt = "Supereroi & Fumetti",
+            nameEn = "Superhero & Comic Book",
+            triggersIt = listOf(
+                "supereroe", "supereroi", "superpotere", "superpoteri", "fumetto", "fumetti",
+                "eroe con superpoteri", "uomo ragno", "uomo pipistrello", "uomo d'acciaio",
+                "uomo di ferro", "marvel", "dc", "dc comics", "avengers", "batman style",
+                "superman style", "da un altro pianeta diventa", "viene da un altro pianeta",
+                "alien hero", "eroe alieno"
+            ),
+            triggersEn = listOf(
+                "superhero", "superheroes", "superpowers", "super powers", "comic book", "comics",
+                "hero with powers", "spider-man", "batman", "superman", "iron man",
+                "marvel", "dc", "dc comics", "avengers", "cape movie", "caped hero",
+                "from another planet becomes", "alien becomes hero", "gains powers", "gains superpowers"
+            ),
+            primaryGenres = listOf(28L, 878L),
+            secondaryGenres = listOf(12L, 14L, 35L),
+            mandatoryKeywords = listOf(9715L, 9717L),
+            secondaryKeywords = listOf(1701L, 310L, 14544L),
+            anchorMovieIds = listOf(1924L, 1726L, 155L, 299536L, 284054L, 299534L, 100402L, 271110L),
+            rationaleTemplateIt = "Poteri straordinari, mantelli e la battaglia eterna tra bene e male: il cinema che fa sognare generazioni.",
+            rationaleTemplateEn = "Extraordinary powers, capes, and the eternal battle between good and evil that has defined generations of cinema."
         )
     )
 
@@ -750,6 +810,7 @@ class LocalMoodSearchEngine @Inject constructor(
         }
 
         val isAnimationRequested = (positiveQuery.contains("animazione") || positiveQuery.contains("cartone") || positiveQuery.contains("anime") || positiveQuery.contains("animation") || positiveQuery.contains("animated")) && !parsedIntent.negatedGenres.contains(16L)
+        val hasAnimalOrNonHumanSubject = detectAnimalOrNonHumanSubject(positiveQuery)
 
         // 2. Multi-Level Archetype & Atmosphere Detection (Check positive query)
         val isTransformationIntent = detectTransformationIntent(positiveQuery)
@@ -759,21 +820,33 @@ class LocalMoodSearchEngine @Inject constructor(
             }
             val triggers = if (isItalian) archetype.triggersIt else archetype.triggersEn
             val alternateTriggers = if (isItalian) archetype.triggersEn else archetype.triggersIt
-            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, isItalian) } ||
-            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, !isItalian) }
+            triggers.any { trigger -> matchesArchetypeTriggerExact(positiveQuery, trigger, isItalian) } ||
+            alternateTriggers.any { trigger -> matchesArchetypeTriggerExact(positiveQuery, trigger, !isItalian) }
         }
 
         val matchedAtmospheres = atmosphereCatalog.filter { atm ->
             val triggers = if (isItalian) atm.triggersIt else atm.triggersEn
             val alternateTriggers = if (isItalian) atm.triggersEn else atm.triggersIt
-            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, isItalian) } ||
-            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, !isItalian) }
+            triggers.any { trigger -> matchesArchetypeTriggerExact(positiveQuery, trigger, isItalian) } ||
+            alternateTriggers.any { trigger -> matchesArchetypeTriggerExact(positiveQuery, trigger, !isItalian) }
         }
 
         // 3. Keyword & Genre Extraction with Strict Boundaries, Morphological Stemming & Fuzzy Typo Tolerance
         val matchedKeywords = mutableListOf<Long>()
         val matchedGenres = mutableListOf<Long>()
         val contentTokens = extractSignificantContentTokens(positiveQuery, isItalian)
+
+        // Aesthetic Intent Detection: user is searching by visual texture (neon, rain, dark) rather than plot narrative.
+        // The Hard Gate is relaxed in this mode and keyword bonuses are doubled.
+        val aestheticVocabulary = setOf(
+            "neon", "pioggia", "rain", "dark", "cupo", "gritty", "grintoso",
+            "piovoso", "rainy", "nebbia", "foggy", "fog", "fumo", "smoky",
+            "synthwave", "retrofuturismo", "retrofuturistic", "noir", "moody"
+        )
+        val isAestheticIntent = contentTokens.any { aestheticVocabulary.contains(it) } ||
+            positiveQuery.lowercase(java.util.Locale.ROOT).let { q ->
+                aestheticVocabulary.any { q.contains(it) }
+            }
 
         for (token in contentTokens) {
             val genreId = mapTokenToGenreId(token)
@@ -850,8 +923,19 @@ class LocalMoodSearchEngine @Inject constructor(
         targetGenres.addAll(matchedGenres)
         targetKeywords.addAll(matchedKeywords)
 
+        // If animal or non-human protagonist is searched, animation is a primary cinematic medium:
+        // include Animation (16L) in target genres so discover streams surface both live-action and animated candidates
+        if (hasAnimalOrNonHumanSubject && !targetGenres.contains(16L) && !parsedIntent.negatedGenres.contains(16L)) {
+            targetGenres.add(16L)
+        }
+
         val distinctGenres = targetGenres.distinct()
         val distinctKeywords = targetKeywords.distinct()
+
+        // DESPERATION MODE: If the engine has zero genres AND zero keywords, it means the query was
+        // not understood at all (e.g. "un uomo da un altro pianeta diventa un supereroe" before superhero archetype).
+        // Track this state to relax the Hard Gate downstream so Stream D BM25 results are allowed through.
+        val isDesperationMode = distinctGenres.isEmpty() && distinctKeywords.isEmpty() && matchedArchetypes.isEmpty() && detectedPerson == null
 
         // 4. Multi-Stream Concurrent Candidate Generation
         val candidateMap = mutableMapOf<Long, Movie>()
@@ -869,7 +953,7 @@ class LocalMoodSearchEngine @Inject constructor(
                             "primary_release_date.lte" to (endYear?.let { "$it-12-31" } ?: todayStr)
                         )
                         if (distinctGenres.isNotEmpty()) {
-                            opts["with_genres"] = distinctGenres.take(2).joinToString("|")
+                            opts["with_genres"] = distinctGenres.take(3).joinToString("|")
                         }
                         if (distinctKeywords.isNotEmpty()) {
                             opts["with_keywords"] = distinctKeywords.take(4).joinToString("|")
@@ -905,7 +989,7 @@ class LocalMoodSearchEngine @Inject constructor(
                             "primary_release_date.lte" to (endYear?.let { "$it-12-31" } ?: todayStr)
                         )
                         if (distinctGenres.isNotEmpty()) {
-                            opts["with_genres"] = distinctGenres.take(2).joinToString("|")
+                            opts["with_genres"] = distinctGenres.take(3).joinToString("|")
                         }
                         if (distinctKeywords.isNotEmpty()) {
                             opts["with_keywords"] = distinctKeywords.take(4).joinToString("|")
@@ -935,8 +1019,9 @@ class LocalMoodSearchEngine @Inject constructor(
                 coroutineScope {
                     anchorIds.map { id ->
                         async {
-                            anchorDetailsCache[id] ?: try {
-                                val details = tmdbService.getMovieBasicDetails(id)
+                            val cacheKey = "$id-$tmdbLang"
+                            anchorDetailsCache[cacheKey] ?: try {
+                                val details = tmdbService.getMovieBasicDetails(id, language = tmdbLang)
                                 val m = Movie(
                                     id = details.id,
                                     title = details.title,
@@ -948,7 +1033,7 @@ class LocalMoodSearchEngine @Inject constructor(
                                     genreIds = details.genres?.map { it.id } ?: emptyList(),
                                     overview = details.overview
                                 )
-                                anchorDetailsCache[id] = m
+                                anchorDetailsCache[cacheKey] = m
                                 m
                             } catch (_: Exception) {
                                 null
@@ -971,16 +1056,24 @@ class LocalMoodSearchEngine @Inject constructor(
                         // ignore
                     }
                 }
-                // Only search individual tokens if no archetypes matched and token is long enough (>= 5)
-                if (matchedArchetypes.isEmpty()) {
-                    for (token in contentTokens.take(2)) {
-                        if (token.length >= 5) {
-                            try {
-                                val res = tmdbService.searchMovie(token, page = page)
-                                list.addAll(res.results.take(4))
-                            } catch (_: Exception) {
-                                // ignore
-                            }
+                // Also search individual salient tokens if token is long enough (>= 4)
+                val tokensToSearch = if (matchedArchetypes.isEmpty()) {
+                    contentTokens.take(2)
+                } else {
+                    // Even if archetype matched, search non-archetype salient subject tokens (e.g. "topo")
+                    contentTokens.filter { token ->
+                        token.length >= 4 && !matchedArchetypes.any { arch ->
+                            (arch.triggersIt + arch.triggersEn).contains(token)
+                        }
+                    }.take(2)
+                }
+                for (token in tokensToSearch) {
+                    if (token.length >= 4) {
+                        try {
+                            val res = tmdbService.searchMovie(token, page = page)
+                            list.addAll(res.results.take(4))
+                        } catch (_: Exception) {
+                            // ignore
                         }
                     }
                 }
@@ -1060,8 +1153,9 @@ class LocalMoodSearchEngine @Inject constructor(
                 thematicRelevanceScore += (primaryOverlap * 14.0).coerceAtMost(28.0)
                 thematicRelevanceScore += (secondaryOverlap * 6.0).coerceAtMost(12.0)
 
-                // Penalty for unrequested animation in serious/gritty archetypes
-                if (!isAnimationRequested && movieGenres.contains(16L)) {
+                // Penalty for unrequested animation in serious/gritty archetypes.
+                // NEUTRALIZED when query mentions animals or non-human subjects!
+                if (!isAnimationRequested && !hasAnimalOrNonHumanSubject && movieGenres.contains(16L)) {
                     thematicRelevanceScore -= 35.0
                 }
             } else if (distinctGenres.isNotEmpty()) {
@@ -1074,8 +1168,12 @@ class LocalMoodSearchEngine @Inject constructor(
                 thematicRelevanceScore -= 80.0
             }
 
-            if (isAnimationRequested && movieGenres.contains(16L)) {
-                thematicRelevanceScore += 25.0
+            if (movieGenres.contains(16L)) {
+                if (isAnimationRequested) {
+                    thematicRelevanceScore += 25.0
+                } else if (hasAnimalOrNonHumanSubject) {
+                    thematicRelevanceScore += 18.0
+                }
             }
 
             // C. Semantic Overview & Title Alignment + BM25 Information Retrieval Score
@@ -1083,6 +1181,7 @@ class LocalMoodSearchEngine @Inject constructor(
             val titleLower = (m.title ?: "").lowercase(Locale.ROOT)
             var textMatchBonus = 0.0
             var matchedTokenCount = 0
+            var matchedTitleTokensCount = 0
             for (token in contentTokens) {
                 if (token.length >= 4) {
                     val isOverviewMatch = if (token.length in 4..5 && !token.contains(" ")) {
@@ -1100,7 +1199,7 @@ class LocalMoodSearchEngine @Inject constructor(
                         titleLower.contains(token)
                     }
                     if (isTitleMatch) {
-                        textMatchBonus += 18.0
+                        matchedTitleTokensCount++
                         matchedTokenCount++
                     }
                 }
@@ -1108,11 +1207,23 @@ class LocalMoodSearchEngine @Inject constructor(
             if (parsedIntent.negatedTokens.any { it.length >= 4 && overviewLower.contains(it) }) {
                 thematicRelevanceScore -= 35.0
             }
+
+            // Calibrated title bonus: avoid letting 1-word titles matching a single token
+            // in a long descriptive query steal the entire ranking.
+            val titleBonus = when {
+                matchedTitleTokensCount == 0 -> 0.0
+                contentTokens.size >= 2 && matchedTitleTokensCount == 1 -> 5.0
+                else -> 18.0 * matchedTitleTokensCount
+            }
+            textMatchBonus += titleBonus
             thematicRelevanceScore += textMatchBonus.coerceAtMost(40.0)
 
-            // Inject BM25 text relevance score directly into thematic ranking
+            // Inject BM25 text relevance score directly into thematic ranking.
+            // In Aesthetic Intent Mode, BM25 is amplified since synopses may lack visual keywords
+            // (e.g. Blade Runner's synopsis never says "neon" but the keyword tag does).
             val bm25 = bm25Scores[m.id] ?: 0.0
-            thematicRelevanceScore += (bm25 * 1.5).coerceAtMost(55.0)
+            val bm25Multiplier = if (isAestheticIntent) 2.5 else 1.5
+            thematicRelevanceScore += (bm25 * bm25Multiplier).coerceAtMost(60.0)
 
             // Bonus for detected iconic directors/actors explicitly searched
             if (detectedPerson != null) {
@@ -1129,7 +1240,16 @@ class LocalMoodSearchEngine @Inject constructor(
             } else 0
             val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || matchedTokenCount > 0 || bm25 >= 1.5 || detectedPerson != null
 
-            if (!hasSubstantiveThematicGrounding || thematicRelevanceScore <= 0.0) {
+            // DESPERATION MODE: When the engine has zero genres/keywords (complete parse failure),
+            // relax the Hard Gate. Any candidate with BM25 > 0 or any text match passes through.
+            // It's always better to show 10 imperfect results than a black screen.
+            val passesGate = if (isDesperationMode) {
+                bm25 > 0.0 || matchedTokenCount > 0 || thematicRelevanceScore > 0.0
+            } else {
+                hasSubstantiveThematicGrounding && thematicRelevanceScore > 0.0
+            }
+
+            if (!passesGate) {
                 return@mapNotNull null
             }
 
@@ -1326,56 +1446,76 @@ class LocalMoodSearchEngine @Inject constructor(
     private fun extractSignificantContentTokens(query: String, isItalian: Boolean): List<String> {
         val stopwords = if (isItalian) stopwordsIt else stopwordsEn
 
-        val allWords = Regex("""\b\w+\b""")
+        val allWords = Regex("""\b[\w-]+\b""")
             .findAll(query.lowercase(Locale.ROOT))
-            .map { it.value }
+            .map { it.value.trim('-') }
+            .filter { it.isNotBlank() }
             .toList()
 
         val rawWords = allWords.filterIndexed { index, word ->
             word.length > 2 || word.matches(Regex("""\d{2}""")) || (word.length == 1 && index + 1 < allWords.size && allWords[index + 1].matches(Regex("""\d{2}""")))
         }
 
-        val unigrams = rawWords.filter { !stopwords.contains(it) }
+        val unigrams = mutableListOf<String>()
+        for (w in rawWords) {
+            if (!stopwords.contains(w)) {
+                unigrams.add(w)
+                if (w.contains("-")) {
+                    val joint = w.replace("-", "")
+                    if (joint.isNotBlank() && !stopwords.contains(joint)) {
+                        unigrams.add(joint)
+                    }
+                    val parts = w.split("-").filter { it.length > 2 && !stopwords.contains(it) }
+                    unigrams.addAll(parts)
+                }
+            }
+        }
         val bigrams = rawWords.windowed(2).map { it.joinToString(" ") }
         val trigrams = rawWords.windowed(3).map { it.joinToString(" ") }
 
         return (unigrams + bigrams + trigrams).distinct()
     }
 
-    private fun matchesWordOrFuzzy(query: String, target: String, isItalian: Boolean = true): Boolean {
+    /**
+     * Hard-Lock Trigger Matching for Archetypes & Atmospheres.
+     * Archetypes inject high-impact Golden Anchors (+50 pts) and dominate candidate generation.
+     * To prevent lethal false positives (e.g. "drench" -> "trench" injecting WW2 war movies into rain-drenched detective thrillers),
+     * Archetypes and Atmospheres MUST NEVER trigger via fuzzy/Levenshtein matching.
+     * Only exact phrases, exact tokens, or strict morphological stems are permitted.
+     */
+    private fun matchesArchetypeTriggerExact(query: String, target: String, isItalian: Boolean = true): Boolean {
         val q = query.lowercase(Locale.ROOT)
         val t = target.lowercase(Locale.ROOT)
+
+        // 1. Exact phrase or whole-word match
         if (containsWholeWordOrPhrase(q, t)) return true
 
-        // If multi-word trigger, check if all significant words match in sequence or proximity
-        val tWords = t.split(" ").filter { it.length >= 3 || it.matches(Regex("""\d{2}""")) }
-        if (tWords.size > 1) {
-            return tWords.all { word ->
-                containsWholeWordOrPhrase(q, word) || fuzzyMatchTokenInQuery(q, word, isItalian)
+        // 2. Exact phrase match with hyphen normalization ("rain-drenched" <-> "rain drenched")
+        val qNormalized = q.replace("-", " ")
+        val tNormalized = t.replace("-", " ")
+        if (containsWholeWordOrPhrase(qNormalized, tNormalized)) return true
+
+        // 3. Strict token & morphological stem matching (NO Levenshtein distance)
+        val tWords = tNormalized.split(" ").filter { it.isNotBlank() }
+        val qTokens = Regex("""\b\w+\b""").findAll(qNormalized).map { it.value }.filter { it.isNotBlank() }.toList()
+        if (tWords.isEmpty() || qTokens.isEmpty()) return false
+
+        return if (tWords.size > 1) {
+            // Multi-word trigger: every word in trigger must be present in query (either exact or same morphological stem)
+            tWords.all { tWord ->
+                val tStem = stemWord(tWord, isItalian)
+                qTokens.any { qTok ->
+                    qTok == tWord || stemWord(qTok, isItalian) == tStem
+                }
+            }
+        } else {
+            // Single-word trigger: must match query token exactly or via identical morphological stem
+            val tWord = tWords.first()
+            val tStem = stemWord(tWord, isItalian)
+            qTokens.any { qTok ->
+                qTok == tWord || stemWord(qTok, isItalian) == tStem
             }
         }
-
-        // Fuzzy match single token only
-        return fuzzyMatchTokenInQuery(q, t, isItalian)
-    }
-
-    private fun fuzzyMatchTokenInQuery(query: String, target: String, isItalian: Boolean = true): Boolean {
-        val stopwords = if (isItalian) stopwordsIt else stopwordsEn
-        val queryTokens = Regex("""\b\w+\b""").findAll(query).map { it.value }
-        for (token in queryTokens) {
-            if (token == target) return true
-            // Hard guards against false positive typos:
-            // 1. Tokens under 4 letters must NEVER fuzzy match (prevents "che" -> "chef", "per" -> "war", etc.)
-            // 2. Stopwords must NEVER fuzzy match content targets
-            if (token.length < 4 || target.length < 4 || stopwords.contains(token)) continue
-            val lenDiff = abs(token.length - target.length)
-            val dist = damerauLevenshtein(token, target)
-            // For short words (4-5 letters), require EXACT same length (only 1 typo/substitution, no deletions like "che"->"chef")
-            if (target.length in 4..5 && lenDiff == 0 && dist <= 1) return true
-            if (target.length in 6..7 && lenDiff <= 1 && dist <= 1) return true
-            if (target.length >= 8 && lenDiff <= 2 && dist <= 2) return true
-        }
-        return false
     }
 
     private fun damerauLevenshtein(s1: String, s2: String): Int {
@@ -1541,7 +1681,11 @@ class LocalMoodSearchEngine @Inject constructor(
             "musica", "musical", "music" -> 10402L
             "mistero", "mystery", "giallo" -> 9648L
             "romantico", "romance", "amore", "sentimentale" -> 10749L
-            "fantascienza", "sci-fi", "scifi", "science fiction" -> 878L
+            "fantascienza", "sci-fi", "scifi", "science fiction",
+            "spazio-temporale", "spaziotemporale", "spazio temporale",
+            "viaggio spazio-temporale", "viaggio spaziotemporale",
+            "viaggio temporale", "viaggi temporali", "viaggio nel tempo", "viaggi nel tempo",
+            "time travel", "space-time", "spacetime" -> 878L
             "thriller", "suspense" -> 53L
             "guerra", "war", "bellico" -> 10752L
             "western" -> 37L
@@ -1550,9 +1694,11 @@ class LocalMoodSearchEngine @Inject constructor(
     }
 
     private fun findFuzzyDictionaryMatch(token: String, dict: Map<String, Long>): Long? {
-        if (token.length < 4) return null
-        val maxDist = if (token.length in 4..6) 1 else 2
+        // Safety guard: Never fuzzy match short words (<= 5 chars) to prevent accidental collisions (e.g. drench/trench, che/chef, bat/cat)
+        if (token.length <= 5) return null
+        val maxDist = if (token.length in 6..7) 1 else 2
         for ((key, id) in dict) {
+            if (key.length <= 5) continue
             if (abs(key.length - token.length) <= maxDist) {
                 if (damerauLevenshtein(token, key) <= maxDist) {
                     return id
@@ -1748,11 +1894,13 @@ class LocalMoodSearchEngine @Inject constructor(
             val titleStr = (m.title ?: "").lowercase(Locale.ROOT)
             val overviewStr = (m.overview ?: "").lowercase(Locale.ROOT)
 
-            val tTokens = titleStr.split(Regex("""\W+"""))
+            val tTokens = titleStr.split(Regex("""[^\w-]+"""))
+                .map { it.trim('-') }
                 .filter { it.length > 2 || it.matches(Regex("""\d{2}""")) }
                 .flatMap { listOf(stemWord(it, isItalian), stemWord(it, false)) }
 
-            val oTokens = overviewStr.split(Regex("""\W+"""))
+            val oTokens = overviewStr.split(Regex("""[^\w-]+"""))
+                .map { it.trim('-') }
                 .filter { it.length > 2 || it.matches(Regex("""\d{2}""")) }
                 .flatMap { listOf(stemWord(it, isItalian), stemWord(it, false)) }
 
@@ -1783,6 +1931,21 @@ class LocalMoodSearchEngine @Inject constructor(
             if (token == "spazio" || token == "spaziale") {
                 extra.addAll(listOf("space", "wormhole", "galaxy"))
             }
+            if (token == "spazio-temporale" || token == "spaziotemporale" || token == "spazio temporale" ||
+                token == "viaggio spazio-temporale" || token == "viaggio spaziotemporale" ||
+                token == "viaggio temporale" || token == "viaggi temporali" ||
+                token == "viaggio nel tempo" || token == "viaggi nel tempo" || token == "temporale") {
+                extra.addAll(listOf("time travel", "temporal", "timeloop", "spacetime", "space-time", "continuum", "paradox", "paradosso"))
+            }
+            if (token == "topo" || token == "topi" || token == "ratto" || token == "ratti" || token == "topolino") {
+                extra.addAll(listOf("mouse", "rat", "rodent", "mice", "rats", "rodents"))
+            }
+            if (token == "mouse" || token == "mice" || token == "rat" || token == "rats" || token == "rodent") {
+                extra.addAll(listOf("topo", "topi", "ratto", "ratti", "roditore", "roditori"))
+            }
+            if (token == "chef" || token == "cuoco" || token == "cuochi" || token == "cucina" || token == "cucinare") {
+                extra.addAll(listOf("chef", "cook", "cooking", "restaurant", "ristorante", "culinary"))
+            }
             listOf(token) + extra
         }
         val qStems = (expandedQueryTokens.map { stemWord(it.lowercase(Locale.ROOT), isItalian) } +
@@ -1802,6 +1965,24 @@ class LocalMoodSearchEngine @Inject constructor(
         for (doc in docList) {
             var docScore = 0.0
 
+            val isMultiWordQuery = queryTokens.size >= 2
+            val matchedTitleStems = distinctStems.filter { stem -> doc.titleTokens.contains(stem) }
+            val matchedTitleStemCount = matchedTitleStems.size
+            val titleCoverage = if (doc.titleTokens.isNotEmpty()) matchedTitleStemCount.toDouble() / doc.titleTokens.size.toDouble() else 0.0
+
+            // Calibrated Robertson–Spärck Jones title weighting:
+            // Single generic words in a multi-word descriptive query (e.g. "chef" in "un topo diventa uno chef")
+            // must NOT receive an inflated 3x title boost when matching short titles (like 2014's "Chef").
+            // Title multiplier is depowered to 1.0 (or 0.75 for 1-word titles on queries with 3+ tokens),
+            // and only activates to 2.5x when multiple query terms match the title or in short 1-word queries.
+            val titleMultiplier = when {
+                !isMultiWordQuery -> 2.5
+                matchedTitleStemCount >= 2 -> 2.5
+                titleCoverage >= 0.8 && doc.titleTokens.size >= 2 -> 2.0
+                doc.titleTokens.size == 1 && queryTokens.size >= 3 -> 0.75
+                else -> 1.0
+            }
+
             for (stem in distinctStems) {
                 val df = (docFreq[stem] ?: 0).toDouble()
                 if (df == 0.0) continue
@@ -1809,7 +1990,7 @@ class LocalMoodSearchEngine @Inject constructor(
                 val idf = ln(1.0 + (nDocs - df + 0.5) / (df + 0.5)).coerceAtLeast(0.1)
                 val tfTitle = doc.titleTokens.count { it == stem }.toDouble()
                 val tfOverview = doc.overviewTokens.count { it == stem }.toDouble()
-                val effectiveTf = (tfTitle * 3.0) + tfOverview
+                val effectiveTf = (tfTitle * titleMultiplier) + tfOverview
 
                 if (effectiveTf > 0.0) {
                     val numerator = effectiveTf * (k1 + 1.0)
