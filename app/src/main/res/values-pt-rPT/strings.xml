@@ -700,6 +700,13 @@
     <string name="surprise_mode_random_desc">Filme aleatório</string>
     <string name="surprise_mode_emotional">Emocional</string>
     <string name="surprise_mode_emotional_desc">A combinação perfeita</string>
+    <string name="surprise_mode_prompt">Escrever</string>
+    <string name="surprise_mode_prompt_desc">Descreva o que pretende ver</string>
+    <string name="surprise_prompt_title">O que gostaria de ver?</string>
+    <string name="surprise_prompt_placeholder">Descreva o ambiente, enredo ou género...</string>
+    <string name="surprise_prompt_chip_1">Reviravolta</string>
+    <string name="surprise_prompt_chip_2">Descontraído</string>
+    <string name="surprise_prompt_chip_3">Thriller sombrio</string>
     <string name="surprise_q_time">Quanto tempo tem?</string>
     <string name="surprise_time_short">Menos de 1h 40m</string>
     <string name="surprise_time_medium">Normal (~2h)</string>

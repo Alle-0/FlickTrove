@@ -704,6 +704,13 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="surprise_mode_random_desc">Випадковий фільм</string>
     <string name="surprise_mode_emotional">Емоційний</string>
     <string name="surprise_mode_emotional_desc">Ідеальне співпадіння</string>
+    <string name="surprise_mode_prompt">Описати</string>
+    <string name="surprise_mode_prompt_desc">Опишіть, що ви хочете подивитися</string>
+    <string name="surprise_prompt_title">Що бажаєте подивитися?</string>
+    <string name="surprise_prompt_placeholder">Опишіть атмосферу, сюжет або жанр...</string>
+    <string name="surprise_prompt_chip_1">Неочікуваний поворот</string>
+    <string name="surprise_prompt_chip_2">Легке кіно</string>
+    <string name="surprise_prompt_chip_3">Темний трилер</string>
     <string name="surprise_q_time">Скільки у вас часу?</string>
     <string name="surprise_time_short">Менше 1 год 40 хв</string>
     <string name="surprise_time_medium">Звичайний (~2 год)</string>

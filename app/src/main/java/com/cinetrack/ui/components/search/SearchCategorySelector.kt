@@ -1,12 +1,15 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.*
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -27,6 +30,9 @@ fun SearchCategorySelector(
     category: String,
     onCategoryChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
+    isMoodAiMode: Boolean = true,
+    moodRemainingQuota: Int = 3,
+    onMoodModeChanged: (Boolean) -> Unit = {},
     hazeState: HazeState? = null
 ) {
     val isMood = category == "mood"
@@ -36,6 +42,13 @@ fun SearchCategorySelector(
         "person" -> 2
         "collection" -> 3
         else -> 0
+    }
+
+    var previousCategory by remember { mutableStateOf("movie") }
+    LaunchedEffect(category) {
+        if (category != "mood") {
+            previousCategory = category
+        }
     }
 
     val options = listOf(
@@ -56,7 +69,7 @@ fun SearchCategorySelector(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Capsula 4 Tab TMDB Standard (Movies, TV, People, Collections) che occupa tutto lo spazio rimanente
+            // 1. Capsula Morphing: Si trasforma animata da [Movies, TV, People, Collections] a [AI • Quota, ALGO • ∞]
             Box(
                 modifier = Modifier
                     .weight(1f)
@@ -72,33 +85,70 @@ fun SearchCategorySelector(
                         )
                 )
 
-                CategoryTabSelector(
-                    options = options,
-                    selectedIndex = selectedIndex,
-                    onOptionClick = { index ->
-                        val categoryStr = when (index) {
-                            0 -> "movie"
-                            1 -> "tv"
-                            2 -> "person"
-                            else -> "collection"
-                        }
-                        onCategoryChanged(categoryStr)
+                AnimatedContent(
+                    targetState = isMood,
+                    transitionSpec = {
+                        (fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
+                                scaleIn(initialScale = 0.95f, animationSpec = tween(220)))
+                            .togetherWith(
+                                fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)) +
+                                        scaleOut(targetScale = 0.95f, animationSpec = tween(180))
+                            )
                     },
-                    modifier = Modifier.fillMaxWidth(),
-                    fillWidth = true,
-                    tabWidth = 80.dp,
-                    fontSize = 10.5.sp,
-                    indicatorColor = if (isMood) Color.Transparent else null
-                )
+                    label = "category_morphing_capsule"
+                ) { moodActive ->
+                    if (moodActive) {
+                        val effectiveAiMode = isMoodAiMode && moodRemainingQuota > 0
+                        CategoryTabSelector(
+                            options = listOf(
+                                stringResource(R.string.search_mood_mode_ai_tab, moodRemainingQuota),
+                                stringResource(R.string.search_mood_mode_local_tab)
+                            ),
+                            selectedIndex = if (effectiveAiMode) 0 else 1,
+                            onOptionClick = { index ->
+                                onMoodModeChanged(index == 0)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            fillWidth = true,
+                            tabWidth = 80.dp,
+                            fontSize = 10.5.sp,
+                            uppercase = true,
+                            enableDrag = moodRemainingQuota > 0
+                        )
+                    } else {
+                        CategoryTabSelector(
+                            options = options,
+                            selectedIndex = selectedIndex,
+                            onOptionClick = { index ->
+                                val categoryStr = when (index) {
+                                    0 -> "movie"
+                                    1 -> "tv"
+                                    2 -> "person"
+                                    else -> "collection"
+                                }
+                                onCategoryChanged(categoryStr)
+                            },
+                            modifier = Modifier.fillMaxWidth(),
+                            fillWidth = true,
+                            tabWidth = 80.dp,
+                            fontSize = 10.5.sp
+                        )
+                    }
+                }
             }
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // 2. Icona Mood a Lato (Opzione 1B: Zero Invasività)
+            // 2. Icona Mood a Lato: Vero e proprio switch toggle
             Box(
                 modifier = Modifier
                     .bounceClick(scaleDown = 0.90f) {
-                        onCategoryChanged("mood")
+                        if (isMood) {
+                            onCategoryChanged(previousCategory)
+                        } else {
+                            previousCategory = category
+                            onCategoryChanged("mood")
+                        }
                     }
                     .size(34.dp)
                     .then(

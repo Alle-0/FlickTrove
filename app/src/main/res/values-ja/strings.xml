@@ -671,6 +671,13 @@
     <string name="surprise_mode_random_desc">ランダムな映画</string>
     <string name="surprise_mode_emotional">気分に合わせる</string>
     <string name="surprise_mode_emotional_desc">ぴったりの作品</string>
+    <string name="surprise_mode_prompt">自由入力</string>
+    <string name="surprise_mode_prompt_desc">観たい作品の雰囲気を入力</string>
+    <string name="surprise_prompt_title">どんな作品が観たいですか？</string>
+    <string name="surprise_prompt_placeholder">雰囲気、ストーリー、ジャンルなど...</string>
+    <string name="surprise_prompt_chip_1">どんでん返し</string>
+    <string name="surprise_prompt_chip_2">気分爽快</string>
+    <string name="surprise_prompt_chip_3">ダークサスペンス</string>
     <string name="surprise_q_time">どれくらい時間がありますか？</string>
     <string name="surprise_time_short">1時間40分未満</string>
     <string name="surprise_time_medium">普通 (~2時間)</string>

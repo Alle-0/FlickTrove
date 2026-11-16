@@ -206,7 +206,7 @@ class SearchViewModel @Inject constructor(
                 .distinctUntilChanged()
                 .collect {
                     // La ricerca Mood NON deve mai scattare con debounce automatico durante la digitazione
-                    // per evitare lo spreco istantaneo delle 5 ricerche giornaliere.
+                    // per evitare lo spreco istantaneo delle 3 ricerche giornaliere.
                     if (_uiState.value.category != "mood") {
                         performSearch()
                     }
@@ -225,7 +225,12 @@ class SearchViewModel @Inject constructor(
 
         viewModelScope.launch {
             moodSearchRepository.remainingQuotaFlow.collect { quota ->
-                _uiState.update { it.copy(moodRemainingQuota = quota) }
+                _uiState.update { 
+                    it.copy(
+                        moodRemainingQuota = quota,
+                        isMoodAiMode = if (quota <= 0) false else it.isMoodAiMode
+                    ) 
+                }
             }
         }
     }
@@ -239,6 +244,11 @@ class SearchViewModel @Inject constructor(
 
     fun setMoodAiMode(useAi: Boolean) {
         val remaining = _uiState.value.moodRemainingQuota
+        if (useAi && remaining <= 0) {
+            _uiState.update { it.copy(isMoodAiMode = false) }
+            emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
+            return
+        }
         _uiState.update { it.copy(isMoodAiMode = useAi) }
 
         // Se la query corrente ha già risultati salvati in cache per la nuova modalità, caricali a costo zero
@@ -292,7 +302,7 @@ class SearchViewModel @Inject constructor(
             } else {
                 contentLang
             }
-            val useAi = _uiState.value.isMoodAiMode
+            val useAi = _uiState.value.isMoodAiMode && _uiState.value.moodRemainingQuota > 0
             val result = moodSearchRepository.searchMoviesByMood(
                 sanitized,
                 language = targetLanguage,
@@ -306,7 +316,7 @@ class SearchViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         isEndReached = true,
-                        isMoodAiMode = if (data.isQuotaFallback) false else it.isMoodAiMode,
+                        isMoodAiMode = if (data.isQuotaFallback || it.moodRemainingQuota <= 0) false else it.isMoodAiMode,
                         moodVibeTitle = data.vibeTitle,
                         moodVibeDescription = data.vibeDescription,
                         moodErrorMessage = null
@@ -373,6 +383,7 @@ class SearchViewModel @Inject constructor(
             applyStateFilters()
             _uiState.update { 
                 it.copy(
+                    isMoodAiMode = if (it.moodRemainingQuota <= 0) false else it.isMoodAiMode,
                     moodVibeTitle = null,
                     moodVibeDescription = null,
                     moodErrorMessage = null
@@ -1039,12 +1050,28 @@ class SearchViewModel @Inject constructor(
 
     fun selectMoodHistory(entry: MoodHistoryEntry) {
         searchJob?.cancel()
+        val remaining = _uiState.value.moodRemainingQuota
         val currentMode = _uiState.value.isMoodAiMode
-        val resolvedMode = when {
-            currentMode && entry.hasAi() -> true
-            !currentMode && entry.hasAlgo() -> false
-            entry.hasAi() -> true
-            else -> false
+        val resolvedMode = if (remaining <= 0) {
+            false
+        } else {
+            when {
+                currentMode && entry.hasAi() -> true
+                !currentMode && entry.hasAlgo() -> false
+                entry.hasAi() -> true
+                else -> false
+            }
+        }
+        if (!resolvedMode && !entry.hasAlgo()) {
+            _uiState.update {
+                it.copy(
+                    query = entry.query.take(1000),
+                    category = "mood",
+                    isMoodAiMode = false
+                )
+            }
+            executeMoodSearch(entry.query.take(1000))
+            return
         }
         val targetMovies = if (resolvedMode) entry.resolveAiResults() else entry.resolveAlgoResults()
         rawResults = targetMovies

@@ -594,6 +594,13 @@
     <string name="surprise_mode_random_desc">Случайный фильм</string>
     <string name="surprise_mode_emotional">Эмоциональный</string>
     <string name="surprise_mode_emotional_desc">Идеальное совпадение</string>
+    <string name="surprise_mode_prompt">Описать</string>
+    <string name="surprise_mode_prompt_desc">Опишите, что хотите посмотреть</string>
+    <string name="surprise_prompt_title">Что хочется посмотреть?</string>
+    <string name="surprise_prompt_placeholder">Опишите атмосферу, сюжет или жанр...</string>
+    <string name="surprise_prompt_chip_1">Неожиданный финал</string>
+    <string name="surprise_prompt_chip_2">Легкое кино</string>
+    <string name="surprise_prompt_chip_3">Мрачный триллер</string>
     <string name="surprise_q_time">Сколько у вас есть времени?</string>
     <string name="surprise_time_short">Меньше 1ч 40м</string>
     <string name="surprise_time_medium">Обычно (~2ч)</string>

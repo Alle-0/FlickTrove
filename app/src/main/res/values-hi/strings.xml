@@ -592,6 +592,13 @@
     <string name="surprise_mode_random_desc">यादृच्छिक फ़िल्म</string>
     <string name="surprise_mode_emotional">भावनात्मक</string>
     <string name="surprise_mode_emotional_desc">उत्तम मिलान</string>
+    <string name="surprise_mode_prompt">वर्णन करें</string>
+    <string name="surprise_mode_prompt_desc">बताएं कि आप क्या देखना चाहते हैं</string>
+    <string name="surprise_prompt_title">आप क्या देखना चाहते हैं?</string>
+    <string name="surprise_prompt_placeholder">माहौल, कहानी या शैली का वर्णन करें...</string>
+    <string name="surprise_prompt_chip_1">कहानी में मोड़</string>
+    <string name="surprise_prompt_chip_2">हल्का-फुल्का</string>
+    <string name="surprise_prompt_chip_3">डार्क थ्रिलर</string>
     <string name="surprise_q_time">आपके पास कितना समय है?</string>
     <string name="surprise_time_short">1घं 40मि से कम</string>
     <string name="surprise_time_medium">सामान्य (~2घं)</string>

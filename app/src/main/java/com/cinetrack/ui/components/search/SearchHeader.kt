@@ -1,6 +1,8 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
@@ -72,6 +74,7 @@ import com.cinetrack.R
 import com.cinetrack.data.model.KeywordDictionary
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
+import com.cinetrack.data.model.MoodHistoryEntry
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.nextGridColumns
@@ -108,7 +111,14 @@ fun SearchHeader(
     onHeaderHeightMeasured: (Dp) -> Unit,
     onFilterBoundsMeasured: (Rect) -> Unit,
     modifier: Modifier = Modifier,
-    onSubmitSearch: (() -> Unit)? = null
+    onSubmitSearch: (() -> Unit)? = null,
+    moodHistory: List<MoodHistoryEntry> = emptyList(),
+    isMoodAiMode: Boolean = true,
+    moodRemainingQuota: Int = 3,
+    onMoodModeChanged: (Boolean) -> Unit = {},
+    onSelectMoodHistory: (MoodHistoryEntry) -> Unit = {},
+    onDeleteMoodHistory: (String) -> Unit = {},
+    onClearMoodHistory: () -> Unit = {}
 ) {
     val density = LocalDensity.current
 
@@ -198,13 +208,32 @@ fun SearchHeader(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            SearchRecentSearchesRow(
-                recentSearches = recentSearches,
-                query = query,
-                onSearchClick = { onQueryChanged(it) },
-                onClearAll = { onClearRecentSearches() },
-                onDeleteSearch = { onDeleteRecentSearch(it) }
-            )
+            AnimatedContent(
+                targetState = category == "mood",
+                transitionSpec = {
+                    fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) togetherWith
+                            fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing))
+                },
+                label = "recent_searches_morph"
+            ) { isMood ->
+                if (isMood) {
+                    SearchRecentMoodsRow(
+                        moodHistory = moodHistory,
+                        query = query,
+                        onMoodClick = onSelectMoodHistory,
+                        onClearAll = onClearMoodHistory,
+                        onDeleteMood = onDeleteMoodHistory
+                    )
+                } else {
+                    SearchRecentSearchesRow(
+                        recentSearches = recentSearches,
+                        query = query,
+                        onSearchClick = { onQueryChanged(it) },
+                        onClearAll = { onClearRecentSearches() },
+                        onDeleteSearch = { onDeleteRecentSearch(it) }
+                    )
+                }
+            }
 
             AnimatedVisibility(
                 visible = category != "mood",
@@ -223,6 +252,9 @@ fun SearchHeader(
             SearchCategorySelector(
                 category = category,
                 onCategoryChanged = { onCategoryChanged(it) },
+                isMoodAiMode = isMoodAiMode,
+                moodRemainingQuota = moodRemainingQuota,
+                onMoodModeChanged = onMoodModeChanged,
                 hazeState = hazeState
             )
         }

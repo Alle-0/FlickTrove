@@ -585,6 +585,13 @@
     <string name="surprise_mode_random_desc">Zufälliger Film</string>
     <string name="surprise_mode_emotional">Gefühle</string>
     <string name="surprise_mode_emotional_desc">Das perfekte Match</string>
+    <string name="surprise_mode_prompt">Schreiben</string>
+    <string name="surprise_mode_prompt_desc">Beschreibe, was du sehen möchtest</string>
+    <string name="surprise_prompt_title">Worauf hast du Lust?</string>
+    <string name="surprise_prompt_placeholder">Beschreibe Stimmung, Handlung oder Genre...</string>
+    <string name="surprise_prompt_chip_1">Plottwist</string>
+    <string name="surprise_prompt_chip_2">Wohlfühlfilm</string>
+    <string name="surprise_prompt_chip_3">Düsterer Thriller</string>
     <string name="surprise_q_time">Wie viel Zeit hast du?</string>
     <string name="surprise_time_short">Weniger als 1 Std. 40 Min.</string>
     <string name="surprise_time_medium">Normal (~2 Std.)</string>

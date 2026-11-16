@@ -35,6 +35,7 @@ import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.rtlSafeLetterSpacing
 import com.cinetrack.ui.viewmodel.FilterPill
+import com.cinetrack.data.model.MoodHistoryEntry
 
 @Composable
 fun SearchRecentSearchesRow(
@@ -45,61 +46,158 @@ fun SearchRecentSearchesRow(
     onDeleteSearch: (String) -> Unit
 ) {
     if (recentSearches.isNotEmpty() && query.isEmpty()) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text(
-                stringResource(R.string.search_recent), 
-                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), 
-                fontSize = 10.sp, 
-                fontWeight = FontWeight.Bold, 
-                letterSpacing = rtlSafeLetterSpacing(1.sp)
-            )
-            Text(
-                text = stringResource(R.string.search_clear_all),
-                color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
-                fontSize = 10.sp,
-                fontWeight = FontWeight.Bold,
-                letterSpacing = rtlSafeLetterSpacing(0.5.sp),
-                modifier = Modifier.bounceClick { onClearAll() }.padding(horizontal = 4.dp, vertical = 2.dp)
-            )
-        }
-
-        LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth()) {
-            items(recentSearches, key = { it }, contentType = { "recent_search" }) { search ->
-                Box(
-                    modifier = Modifier
-                        .height(32.dp)
-                        .bounceClick { onSearchClick(search) }
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.08f))
-                        .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Row(
-                        modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
-                        verticalAlignment = Alignment.CenterVertically
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Text(
+                    stringResource(R.string.search_recent), 
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.4f), 
+                    fontSize = 10.sp, 
+                    fontWeight = FontWeight.Bold, 
+                    letterSpacing = rtlSafeLetterSpacing(1.sp)
+                )
+                Text(
+                    text = stringResource(R.string.search_clear_all),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = rtlSafeLetterSpacing(0.5.sp),
+                    modifier = Modifier.bounceClick { onClearAll() }.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(horizontalArrangement = Arrangement.spacedBy(8.dp), contentPadding = PaddingValues(horizontal = 16.dp), modifier = Modifier.fillMaxWidth()) {
+                items(recentSearches, key = { it }, contentType = { "recent_search" }) { search ->
+                    Box(
+                        modifier = Modifier
+                            .height(32.dp)
+                            .bounceClick { onSearchClick(search) }
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape),
+                        contentAlignment = Alignment.Center
                     ) {
-                        Text(search, color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, fontWeight = FontWeight.Medium)
-                        Spacer(modifier = Modifier.width(6.dp))
-                        CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
-                            Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
-                                contentDescription = stringResource(R.string.search_remove_recent),
-                                modifier = Modifier
-                                    .bounceClick(scaleDown = 0.8f) { onDeleteSearch(search) }
-                                    .size(18.dp)
-                                    .padding(4.dp),
-                                tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
-                            )
+                        Row(
+                            modifier = Modifier.padding(start = 12.dp, end = 8.dp, top = 4.dp, bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(search, color = MaterialTheme.colorScheme.onSurface, fontSize = 12.sp, fontWeight = FontWeight.Medium)
+                            Spacer(modifier = Modifier.width(6.dp))
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                    contentDescription = stringResource(R.string.search_remove_recent),
+                                    modifier = Modifier
+                                        .bounceClick(scaleDown = 0.8f) { onDeleteSearch(search) }
+                                        .size(18.dp)
+                                        .padding(4.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
                         }
                     }
                 }
             }
+            Spacer(modifier = Modifier.height(16.dp))
         }
-        Spacer(modifier = Modifier.height(16.dp))
+    }
+}
+
+@Composable
+fun SearchRecentMoodsRow(
+    moodHistory: List<MoodHistoryEntry>,
+    query: String,
+    onMoodClick: (MoodHistoryEntry) -> Unit,
+    onClearAll: () -> Unit,
+    onDeleteMood: (String) -> Unit
+) {
+    if (moodHistory.isNotEmpty() && query.isEmpty()) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(10.dp)
+                    )
+                    Spacer(modifier = Modifier.width(5.dp))
+                    Text(
+                        text = stringResource(R.string.search_recent).uppercase(),
+                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.85f),
+                        fontSize = 10.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = rtlSafeLetterSpacing(1.sp)
+                    )
+                }
+                Text(
+                    text = stringResource(R.string.search_clear_all),
+                    color = MaterialTheme.colorScheme.primary.copy(alpha = 0.8f),
+                    fontSize = 10.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = rtlSafeLetterSpacing(0.5.sp),
+                    modifier = Modifier.bounceClick { onClearAll() }.padding(horizontal = 4.dp, vertical = 2.dp)
+                )
+            }
+            Spacer(modifier = Modifier.height(8.dp))
+            LazyRow(
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                contentPadding = PaddingValues(horizontal = 16.dp),
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                items(moodHistory, key = { it.query }, contentType = { "recent_mood" }) { item ->
+                    Box(
+                        modifier = Modifier
+                            .height(32.dp)
+                            .bounceClick { onMoodClick(item) }
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.06f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(
+                            modifier = Modifier.padding(start = 10.dp, end = 6.dp, top = 4.dp, bottom = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Icon(
+                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                                contentDescription = null,
+                                modifier = Modifier.size(10.dp),
+                                tint = MaterialTheme.colorScheme.primary
+                            )
+                            Spacer(modifier = Modifier.width(5.dp))
+                            Text(
+                                text = item.query,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                fontSize = 12.sp,
+                                fontWeight = FontWeight.Medium,
+                                maxLines = 1
+                            )
+                            Spacer(modifier = Modifier.width(6.dp))
+                            CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides androidx.compose.ui.unit.Dp.Unspecified) {
+                                Icon(
+                                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_x),
+                                    contentDescription = stringResource(R.string.search_remove_recent),
+                                    modifier = Modifier
+                                        .bounceClick(scaleDown = 0.8f) { onDeleteMood(item.query) }
+                                        .size(18.dp)
+                                        .padding(4.dp),
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f)
+                                )
+                            }
+                        }
+                    }
+                }
+            }
+            Spacer(modifier = Modifier.height(16.dp))
+        }
     }
 }
 

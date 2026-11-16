@@ -706,6 +706,13 @@ Prova att förenkla sökningen</string>
     <string name="surprise_mode_random_desc">Slumpmässig film</string>
     <string name="surprise_mode_emotional">Känsla</string>
     <string name="surprise_mode_emotional_desc">Den perfekta matchningen</string>
+    <string name="surprise_mode_prompt">Beskriv</string>
+    <string name="surprise_mode_prompt_desc">Beskriv vad du vill titta på</string>
+    <string name="surprise_prompt_title">Vad känner du för att se?</string>
+    <string name="surprise_prompt_placeholder">Beskriv stämning, handling eller genre...</string>
+    <string name="surprise_prompt_chip_1">Oväntad vändning</string>
+    <string name="surprise_prompt_chip_2">Må bra-film</string>
+    <string name="surprise_prompt_chip_3">Mörk thriller</string>
     <string name="surprise_q_time">Hur mycket tid har du?</string>
     <string name="surprise_time_short">Mindre än 1 tim 40 min</string>
     <string name="surprise_time_medium">Normalt (~2 tim)</string>

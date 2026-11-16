@@ -171,29 +171,12 @@ fun SearchContentGrid(
                     uiState.sortConfig.sortType != "popularity"
             val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection") && uiState.category != "mood"
 
-            if (uiState.category == "mood") {
-                // Tutte le 29 lingue sono ora supportate nativamente grazie allo spazio vettoriale multilingue bge-m3
-                val isLocalEligible = true
-
+            if (uiState.category == "mood" && uiState.query.isEmpty() && uiState.results.isEmpty()) {
                 item(span = { GridItemSpan(12) }) {
                     MoodDiscoverySection(
-                        remainingQuota = uiState.moodRemainingQuota,
-                        isLocalEligible = isLocalEligible,
-                        isMoodAiMode = uiState.isMoodAiMode,
-                        onMoodModeChanged = onMoodModeChanged,
-                        vibeTitle = uiState.moodVibeTitle,
-                        vibeDescription = uiState.moodVibeDescription,
-                        errorMessage = uiState.moodErrorMessage,
                         isLoading = uiState.isLoading,
                         onMoodSelected = onMoodSelected,
-                        moodHistory = uiState.moodHistory,
-                        onSelectMoodHistory = onSelectMoodHistory,
-                        onDeleteMoodHistory = onDeleteMoodHistory,
-                        onClearMoodHistory = onClearMoodHistory,
-                        isRecentExpanded = uiState.preferences.isMoodRecentExpanded,
-                        isInspirationsExpanded = uiState.preferences.isMoodInspirationsExpanded,
-                        onToggleRecentExpanded = onToggleMoodRecentExpanded,
-                        onToggleInspirationsExpanded = onToggleMoodInspirationsExpanded
+                        errorMessage = uiState.moodErrorMessage
                     )
                 }
             }

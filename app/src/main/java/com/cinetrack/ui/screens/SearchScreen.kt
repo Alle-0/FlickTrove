@@ -494,7 +494,21 @@ fun SearchScreenContent(
                             onHeaderHeightMeasured = { measured -> headerHeight = measured },
                             onFilterBoundsMeasured = { bounds -> filterBounds[0] = bounds },
                             modifier = Modifier.align(Alignment.TopCenter),
-                            onSubmitSearch = { viewModel.submitMoodSearch(textFieldValue.text) }
+                            onSubmitSearch = { viewModel.submitMoodSearch(textFieldValue.text) },
+                            moodHistory = uiState.moodHistory,
+                            isMoodAiMode = uiState.isMoodAiMode,
+                            moodRemainingQuota = uiState.moodRemainingQuota,
+                            onMoodModeChanged = { viewModel.setMoodAiMode(it) },
+                            onSelectMoodHistory = { entry ->
+                                val sanitized = entry.query.take(1000)
+                                textFieldValue = TextFieldValue(
+                                    text = sanitized,
+                                    selection = androidx.compose.ui.text.TextRange(sanitized.length)
+                                )
+                                viewModel.selectMoodHistory(entry)
+                            },
+                            onDeleteMoodHistory = { viewModel.deleteMoodHistory(it) },
+                            onClearMoodHistory = { viewModel.clearMoodHistory() }
                         )
 
                     // 3. Local-Only Banner (bottom, shown when offline/poor connection)

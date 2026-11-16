@@ -671,6 +671,13 @@
     <string name="surprise_mode_random_desc">Rastgele film</string>
     <string name="surprise_mode_emotional">Duygusal</string>
     <string name="surprise_mode_emotional_desc">Mükemmel eşleşme</string>
+    <string name="surprise_mode_prompt">Yaz</string>
+    <string name="surprise_mode_prompt_desc">Ne izlemek istediğini anlat</string>
+    <string name="surprise_prompt_title">Nasıl bir şey izlemek istersin?</string>
+    <string name="surprise_prompt_placeholder">Atmosferi, konuyu veya türü anlat...</string>
+    <string name="surprise_prompt_chip_1">Ters köşe</string>
+    <string name="surprise_prompt_chip_2">Keyifli</string>
+    <string name="surprise_prompt_chip_3">Karanlık gerilim</string>
     <string name="surprise_q_time">Ne kadar vaktiniz var?</string>
     <string name="surprise_time_short">1 saat 40 dakikadan az</string>
     <string name="surprise_time_medium">Normal (~2 saat)</string>

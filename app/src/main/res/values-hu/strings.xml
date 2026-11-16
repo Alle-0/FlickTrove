@@ -706,6 +706,13 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="surprise_mode_random_desc">Véletlenszerű film</string>
     <string name="surprise_mode_emotional">Hangulati</string>
     <string name="surprise_mode_emotional_desc">A tökéletes választás</string>
+    <string name="surprise_mode_prompt">Leírás</string>
+    <string name="surprise_mode_prompt_desc">Írja le, mit szeretne nézni</string>
+    <string name="surprise_prompt_title">Mihez lenne ma kedve?</string>
+    <string name="surprise_prompt_placeholder">Írja le a hangulatot, cselekményt vagy műfajt...</string>
+    <string name="surprise_prompt_chip_1">Váratlan fordulat</string>
+    <string name="surprise_prompt_chip_2">Kellemes kikapcsolódás</string>
+    <string name="surprise_prompt_chip_3">Sötét thriller</string>
     <string name="surprise_q_time">Mennyi időd van?</string>
     <string name="surprise_time_short">Kevesebb mint 1ó 40p</string>
     <string name="surprise_time_medium">Átlagos (~2ó)</string>

@@ -24,11 +24,11 @@ data class MoodSearchResultData(
 )
 
 class MoodQuotaExhaustedException(
-    message: String = "Hai raggiunto il limite di 5 ricerche Mood per oggi. Si ricaricheranno a mezzanotte!"
+    message: String = "Daily Mood search quota exhausted. Resets at midnight!"
 ) : Exception(message)
 
 class MoodRateLimitException(
-    message: String = "I server sono momentaneamente affollati. Riprova tra un minuto."
+    message: String = "Servers are temporarily busy. Please try again shortly."
 ) : Exception(message)
 
 @Singleton
@@ -55,12 +55,11 @@ class MoodSearchRepository @Inject constructor(
         bypassCache: Boolean = false
     ): Result<MoodSearchResultData> = runCatching {
         val trimmedQuery = query.trim().take(1000)
-        val localEligible = isLocalEligible(language)
         val remaining = preferenceRepository.getMoodSearchesRemaining()
-        val wantAi = !forceLocal
+        val wantAi = !forceLocal && remaining > 0
 
         // 0. Cache Hit Check: Ricorda le ricerche fatte per almeno 24 ore (Zero network, zero consumo quote)
-        // Se non è bypassCache ed è recente (< 24h), oppure se è una ricerca AI e le quote sono esaurite, riusa la cache!
+        // Se non è bypassCache ed è recente (< 24h), riusa la cache per la modalità selezionata (AI o ALGO)
         if (page == 1) {
             val cached = moodHistoryRepository.getCachedEntry(trimmedQuery, isAi = wantAi)
             if (cached != null) {
@@ -68,7 +67,7 @@ class MoodSearchRepository @Inject constructor(
                 if (cachedMovies.isNotEmpty()) {
                     val ageMillis = System.currentTimeMillis() - cached.timestamp
                     val isUnder24Hours = ageMillis < 24 * 60 * 60 * 1000L
-                    val shouldReturnCache = (!bypassCache && isUnder24Hours) || (wantAi && remaining <= 0)
+                    val shouldReturnCache = !bypassCache && isUnder24Hours
                     if (shouldReturnCache) {
                         return@runCatching MoodSearchResultData(
                             vibeTitle = if (wantAi) cached.resolveAiVibeTitle() else cached.resolveAlgoVibeTitle(),
@@ -82,63 +81,19 @@ class MoodSearchRepository @Inject constructor(
             }
         }
 
-        // 0.5. Cloudflare Vectorize Semantic Search (Zero Quota, Zero Serverless Overhead)
-        if (wantAi && page == 1) {
-            try {
-                val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
-                if (semanticMovies.isNotEmpty()) {
-                    val vibeTitle = "Ricerca Semantica Vettoriale"
-                    val vibeDesc = "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
-                    moodHistoryRepository.saveEntry(
-                        MoodHistoryEntry(
-                            query = trimmedQuery,
-                            vibeTitle = vibeTitle,
-                            vibeDescription = vibeDesc,
-                            isAi = true,
-                            movies = semanticMovies
-                        )
-                    )
-                    return@runCatching MoodSearchResultData(
-                        vibeTitle = vibeTitle,
-                        vibeDescription = vibeDesc,
-                        totalCount = semanticMovies.size,
-                        totalPages = 1,
-                        movies = semanticMovies
-                    )
-                }
-            } catch (_: Exception) {
-                // Fallthrough silente su Vectorize vuoto o offline verso il motore locale
-            }
-        }
-
-        // 1. If user explicitly chose Local Engine or if AI quota is exhausted (for IT/EN)
+        // 1. Modalità ALGO (esplicita o per esaurimento quota AI):
+        // Pipeline: Cloudflare Vectorize (online) -> Fallback su Local Engine (offline)
         if (forceLocal || remaining <= 0) {
-            if (localEligible) {
-                val wasQuotaFallback = !forceLocal && remaining <= 0
-                val localResult = localEngine.searchLocalMood(
-                    query = trimmedQuery,
-                    language = language,
-                    page = page,
-                    isQuotaExhaustedFallback = wasQuotaFallback
-                )
-                if (localResult.movies.isNotEmpty()) {
-                    moodHistoryRepository.saveEntry(
-                        MoodHistoryEntry(
-                            query = trimmedQuery,
-                            vibeTitle = localResult.vibeTitle,
-                            vibeDescription = localResult.vibeDescription,
-                            isAi = false,
-                            movies = localResult.movies
-                        )
-                    )
-                }
-                return@runCatching localResult.copy(isQuotaFallback = wasQuotaFallback)
-            } else {
-                throw MoodQuotaExhaustedException(context.getString(R.string.search_mood_exhausted_notice))
-            }
+            val wasQuotaFallback = !forceLocal && remaining <= 0
+            return@runCatching performAlgoSearch(
+                trimmedQuery = trimmedQuery,
+                language = language,
+                page = page,
+                isQuotaFallback = wasQuotaFallback
+            )
         }
 
-        // 2. Network invocation to Supabase Edge Function (Gemini 3.8 Flash) with Smart Fallback on error
+        // 2. Modalità AI PURA: Invocazione diretta a Supabase Edge Function (Gemini LLM)
         try {
             val response = try {
                 api.searchMoviesByMood(
@@ -203,31 +158,77 @@ class MoodSearchRepository @Inject constructor(
                 totalPages = body.totalPages,
                 movies = mappedMovies
             )
-        } catch (cloudException: Exception) {
-            // 3. SMART HYBRID FALLBACK: If Cloud AI failed (401, timeout, offline, 500) and language is IT/EN,
-            // fallback immediately to the local algorithm so the user never encounters a broken experience!
-            if (localEligible) {
-                val fallbackResult = localEngine.searchLocalMood(
-                    query = trimmedQuery,
-                    language = language,
-                    page = page,
-                    isQuotaExhaustedFallback = false
-                )
-                if (fallbackResult.movies.isNotEmpty()) {
+        } catch (_: Exception) {
+            // 3. SMART HYBRID FALLBACK: se l'AI Cloud fallisce (429 rate limit, timeout, offline, 500),
+            // degrada trasparentemente sull'algoritmo (Cloudflare Vectorize -> Local Engine)
+            performAlgoSearch(
+                trimmedQuery = trimmedQuery,
+                language = language,
+                page = page,
+                isQuotaFallback = true
+            )
+        }
+    }
+
+    /**
+     * Pipeline di Fallback e Algoritmo (ALGO / Cloudflare Vectorize):
+     * 1. Livello 1: Cloudflare Vectorize (algoritmo semantico vettoriale bge-m3, zero consumo quote).
+     * 2. Livello 2: Se Cloudflare è offline, in errore o vuoto, scivola sul Local Engine (BM25 + TMDB offline sul dispositivo).
+     */
+    private suspend fun performAlgoSearch(
+        trimmedQuery: String,
+        language: String,
+        page: Int,
+        isQuotaFallback: Boolean
+    ): MoodSearchResultData {
+        // A. Tentativo 1: Algoritmo Vettoriale Cloudflare Vectorize (Zero Quota, Online)
+        if (page == 1) {
+            try {
+                val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
+                if (semanticMovies.isNotEmpty()) {
+                    val vibeTitle = if (isQuotaFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale"
+                    val vibeDesc = "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
                     moodHistoryRepository.saveEntry(
                         MoodHistoryEntry(
                             query = trimmedQuery,
-                            vibeTitle = fallbackResult.vibeTitle,
-                            vibeDescription = fallbackResult.vibeDescription,
-                            isAi = false,
-                            movies = fallbackResult.movies
+                            vibeTitle = vibeTitle,
+                            vibeDescription = vibeDesc,
+                            isAi = isQuotaFallback,
+                            movies = semanticMovies
                         )
                     )
+                    return MoodSearchResultData(
+                        vibeTitle = vibeTitle,
+                        vibeDescription = vibeDesc,
+                        totalCount = semanticMovies.size,
+                        totalPages = 1,
+                        movies = semanticMovies,
+                        isQuotaFallback = isQuotaFallback
+                    )
                 }
-                fallbackResult
-            } else {
-                throw cloudException
+            } catch (_: Exception) {
+                // Fallthrough silente verso l'algoritmo locale offline
             }
         }
+
+        // B. Tentativo 2: Algoritmo Locale Offline (LocalMoodSearchEngine, BM25 + TMDB sul device)
+        val localResult = localEngine.searchLocalMood(
+            query = trimmedQuery,
+            language = language,
+            page = page,
+            isQuotaExhaustedFallback = isQuotaFallback
+        )
+        if (localResult.movies.isNotEmpty()) {
+            moodHistoryRepository.saveEntry(
+                MoodHistoryEntry(
+                    query = trimmedQuery,
+                    vibeTitle = localResult.vibeTitle,
+                    vibeDescription = localResult.vibeDescription,
+                    isAi = isQuotaFallback,
+                    movies = localResult.movies
+                )
+            )
+        }
+        return localResult.copy(isQuotaFallback = isQuotaFallback)
     }
 }

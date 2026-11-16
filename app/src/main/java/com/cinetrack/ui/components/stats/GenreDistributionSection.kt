@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -176,8 +177,13 @@ fun GenreDistributionSection(
         )
     }
     
+    var animStarted by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        animStarted = true
+    }
+
     val initialAnim by animateFloatAsState(
-        targetValue = 1f,
+        targetValue = if (animStarted) 1f else 0f,
         animationSpec = tween(1200, easing = FastOutSlowInEasing),
         label = "initialAnim"
     )
@@ -260,6 +266,7 @@ fun GenreDistributionSection(
                     val centerX = size.width / 2f
                     val centerY = size.height / 2f
                     var currentStartAngle = -90f
+                    var selectedSliceDraw: (() -> Unit)? = null
                     
                     processedGenres.forEachIndexed { index, (genre, count) ->
                         val sweepAngle = (count.toFloat() / totalCount) * 360f * initialAnim
@@ -282,26 +289,39 @@ fun GenreDistributionSection(
                         val arcTopLeft = Offset(centerX - pathRadius + offsetX, centerY - pathRadius + offsetY)
                         
                         if (isSelected) {
+                            val startAngleCapture = currentStartAngle
+                            val sweepAngleCapture = sweepAngle
+                            selectedSliceDraw = {
+                                drawArc(
+                                    color = color.copy(alpha = 0.25f),
+                                    startAngle = startAngleCapture,
+                                    sweepAngle = sweepAngleCapture,
+                                    useCenter = false,
+                                    topLeft = arcTopLeft,
+                                    size = arcSize,
+                                    style = Stroke(width = currentStrokeWidth + 8.dp.toPx(), cap = StrokeCap.Round)
+                                )
+                                drawArc(
+                                    color = color.copy(alpha = alpha),
+                                    startAngle = startAngleCapture,
+                                    sweepAngle = sweepAngleCapture,
+                                    useCenter = false,
+                                    topLeft = arcTopLeft,
+                                    size = arcSize,
+                                    style = Stroke(width = currentStrokeWidth, cap = StrokeCap.Round)
+                                )
+                            }
+                        } else {
                             drawArc(
-                                color = color.copy(alpha = 0.25f),
+                                color = color.copy(alpha = alpha),
                                 startAngle = currentStartAngle,
                                 sweepAngle = sweepAngle,
                                 useCenter = false,
                                 topLeft = arcTopLeft,
                                 size = arcSize,
-                                style = Stroke(width = currentStrokeWidth + 8.dp.toPx(), cap = StrokeCap.Round)
+                                style = Stroke(width = currentStrokeWidth, cap = StrokeCap.Butt)
                             )
                         }
-                        
-                        drawArc(
-                            color = color.copy(alpha = alpha),
-                            startAngle = currentStartAngle,
-                            sweepAngle = sweepAngle,
-                            useCenter = false,
-                            topLeft = arcTopLeft,
-                            size = arcSize,
-                            style = Stroke(width = currentStrokeWidth, cap = if (isSelected) StrokeCap.Round else StrokeCap.Butt)
-                        )
                         
                         // Draw genre text label directly next to donut slice
                         val percentage = if (totalCount > 0) (count.toFloat() / totalCount * 100).roundToInt() else 0
@@ -362,6 +382,8 @@ fun GenreDistributionSection(
                         
                         currentStartAngle += sweepAngle
                     }
+                    
+                    selectedSliceDraw?.invoke()
                 }
                 
                 // 1. Organic Breathing Inner Neon Halo

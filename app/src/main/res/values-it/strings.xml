@@ -652,6 +652,13 @@
     <string name="surprise_mode_random_desc">Film a caso</string>
     <string name="surprise_mode_emotional">Emotivo</string>
     <string name="surprise_mode_emotional_desc">Il match perfetto</string>
+    <string name="surprise_mode_prompt">Scrivi</string>
+    <string name="surprise_mode_prompt_desc">Descrivi cosa cerchi all\'IA</string>
+    <string name="surprise_prompt_title">Cosa hai voglia di vedere?</string>
+    <string name="surprise_prompt_placeholder">Descrivi l\'atmosfera, trama o genere...</string>
+    <string name="surprise_prompt_chip_1">Colpo di scena</string>
+    <string name="surprise_prompt_chip_2">Spensierato</string>
+    <string name="surprise_prompt_chip_3">Thriller notturno</string>
     <string name="surprise_q_time">Quanto tempo hai?</string>
     <string name="surprise_time_short">Meno di 1h 40m</string>
     <string name="surprise_time_medium">Normale (~2h)</string>

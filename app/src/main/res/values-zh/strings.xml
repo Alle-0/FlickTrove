@@ -671,6 +671,13 @@
     <string name="surprise_mode_random_desc">随机挑选一部电影</string>
     <string name="surprise_mode_emotional">情绪匹配</string>
     <string name="surprise_mode_emotional_desc">寻找心情契合之选</string>
+    <string name="surprise_mode_prompt">描述偏好</string>
+    <string name="surprise_mode_prompt_desc">描述您想看的內容</string>
+    <string name="surprise_prompt_title">今晚想看點什麼？</string>
+    <string name="surprise_prompt_placeholder">描述氛圍、情節或類型...</string>
+    <string name="surprise_prompt_chip_1">劇情反轉</string>
+    <string name="surprise_prompt_chip_2">輕鬆療癒</string>
+    <string name="surprise_prompt_chip_3">懸疑驚悚</string>
     <string name="surprise_q_time">你现在有多少时间？</string>
     <string name="surprise_time_short">少于 1 小时 40 分钟</string>
     <string name="surprise_time_medium">普通片长 (~2小时)</string>

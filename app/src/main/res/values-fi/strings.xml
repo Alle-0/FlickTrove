@@ -702,6 +702,13 @@
     <string name="surprise_mode_random_desc">Satunnainen elokuva</string>
     <string name="surprise_mode_emotional">Tunteellinen</string>
     <string name="surprise_mode_emotional_desc">Täydellinen osuma</string>
+    <string name="surprise_mode_prompt">Kirjoita</string>
+    <string name="surprise_mode_prompt_desc">Kuvaile mitä haluat katsoa</string>
+    <string name="surprise_prompt_title">Mitä tekisi mieli katsoa?</string>
+    <string name="surprise_prompt_placeholder">Kuvaile tunnelmaa, juonta tai lajityyppiä...</string>
+    <string name="surprise_prompt_chip_1">Juonenkäänne</string>
+    <string name="surprise_prompt_chip_2">Hyvän mielen elokuva</string>
+    <string name="surprise_prompt_chip_3">Synkkä trilleri</string>
     <string name="surprise_q_time">Paljonko sinulla on aikaa?</string>
     <string name="surprise_time_short">Alle 1t 40m</string>
     <string name="surprise_time_medium">Normaali (~2t)</string>

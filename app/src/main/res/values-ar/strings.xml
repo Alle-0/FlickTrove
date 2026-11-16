@@ -700,6 +700,13 @@
     <string name="surprise_mode_random_desc">فيلم عشوائي</string>
     <string name="surprise_mode_emotional">عاطفي</string>
     <string name="surprise_mode_emotional_desc">الاختيار المثالي</string>
+    <string name="surprise_mode_prompt">اكتب</string>
+    <string name="surprise_mode_prompt_desc">صف ما ترغب في مشاهدته</string>
+    <string name="surprise_prompt_title">ما الذي ترغب في مشاهدته؟</string>
+    <string name="surprise_prompt_placeholder">صف الأجواء أو الحبكة أو النوع...</string>
+    <string name="surprise_prompt_chip_1">حبكة غير متوقعة</string>
+    <string name="surprise_prompt_chip_2">مبهج ومريح</string>
+    <string name="surprise_prompt_chip_3">إثارة وتشويق</string>
     <string name="surprise_q_time">كم من الوقت لديك؟</string>
     <string name="surprise_time_short">أقل من ساعة و40 دقيقة</string>
     <string name="surprise_time_medium">عادي (~ساعتين)</string>

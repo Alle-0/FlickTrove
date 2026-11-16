@@ -85,7 +85,8 @@ fun CategoryTabSelector(
     fontSize: androidx.compose.ui.unit.TextUnit = 12.sp,
     fillWidth: Boolean = false,
     indicatorColor: Color? = null,
-    uppercase: Boolean = true
+    uppercase: Boolean = true,
+    enableDrag: Boolean = true
 ) {
     val tabHeight = 34.dp
     val haptic = LocalHapticFeedback.current
@@ -247,145 +248,153 @@ fun CategoryTabSelector(
             modifier = Modifier
                 .width(realTabWidth * options.size)
                 .fillMaxHeight()
-                .pointerInput(selectedIndex, visualSelectedIndex, realTabWidthPx, isRtl) {
-                    var isDragActiveOnPill = false
-                    val touchMargin = 8.dp.toPx()
-                    var dragTargetLeft = 0f
-                    var dragTargetRight = 0f
-                    
-                    var dragTargetY = 0f
-                    
-                    detectDragGestures(
-                        onDragStart = { startOffset ->
-                            val currentLeft = animLeft.value
-                            val currentRight = animRight.value
-                            if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
-                                isDragActiveOnPill = true
+                .then(
+                    if (enableDrag) {
+                        Modifier.pointerInput(selectedIndex, visualSelectedIndex, realTabWidthPx, isRtl) {
+                            var isDragActiveOnPill = false
+                            val touchMargin = 8.dp.toPx()
+                            var dragTargetLeft = 0f
+                            var dragTargetRight = 0f
+                            
+                            var dragTargetY = 0f
+                            
+                            detectDragGestures(
+                                onDragStart = { startOffset ->
+                                    val currentLeft = animLeft.value
+                                    val currentRight = animRight.value
+                                    if (startOffset.x in (currentLeft - touchMargin)..(currentRight + touchMargin)) {
+                                        isDragActiveOnPill = true
+                                        isDragging = true
+                                        dragTargetLeft = currentLeft
+                                        dragTargetRight = currentRight
+                                        dragTargetY = 0f
+                                        coroutineScope.launch {
+                                            launch { animLeft.stop() }
+                                            launch { animRight.stop() }
+                                            launch { animDragY.stop() }
+                                        }
+                                    } else {
+                                        isDragActiveOnPill = false
+                                    }
+                                },
+                                onDragEnd = {
+                                    if (!isDragActiveOnPill) return@detectDragGestures
+                                    isDragActiveOnPill = false
+                                    isDragging = false
+                                    val currentLeft = animLeft.value - paddingPx
+                                    val visualTargetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
+                                    val targetIndex = rtlMirrorIndex(visualTargetIndex, options.size, isRtl)
+                                    
+                                    coroutineScope.launch {
+                                        launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                                    }
+                                    
+                                    if (targetIndex != selectedIndex) {
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                        onOptionClick(targetIndex)
+                                    }
+                                    
+                                    // Always snap indicator to visualSelectedIndex: ensures that if the parent
+                                    // rejects the change (e.g. quota exhausted), the pill springs back to its active tab
+                                    val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                                    val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
+                                    coroutineScope.launch {
+                                        launch {
+                                            animLeft.animateTo(
+                                                targetLeft,
+                                                spring(stiffness = 500f, dampingRatio = 0.70f)
+                                            )
+                                        }
+                                        launch {
+                                            animRight.animateTo(
+                                                targetRight,
+                                                spring(stiffness = 500f, dampingRatio = 0.70f)
+                                            )
+                                        }
+                                    }
+                                },
+                                onDragCancel = {
+                                    if (!isDragActiveOnPill) return@detectDragGestures
+                                    isDragActiveOnPill = false
+                                    isDragging = false
+                                    val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
+                                    val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
+                                    coroutineScope.launch {
+                                        launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
+                                        launch {
+                                            animLeft.animateTo(
+                                                targetLeft,
+                                                spring(stiffness = 500f, dampingRatio = 0.70f)
+                                            )
+                                        }
+                                        launch {
+                                            animRight.animateTo(
+                                                targetRight,
+                                                spring(stiffness = 500f, dampingRatio = 0.70f)
+                                            )
+                                        }
+                                    }
+                                }
+                            ) { change, dragAmount ->
+                                if (!isDragActiveOnPill) return@detectDragGestures
                                 isDragging = true
-                                dragTargetLeft = currentLeft
-                                dragTargetRight = currentRight
-                                dragTargetY = 0f
+                                change.consume()
+                                
+                                val dragX = dragAmount.x
+                                val dragYDelta = dragAmount.y
+                                
+                                dragTargetLeft += dragX
+                                dragTargetRight += dragX
+                                dragTargetY += dragYDelta
+                                
                                 coroutineScope.launch {
-                                    launch { animLeft.stop() }
-                                    launch { animRight.stop() }
-                                    launch { animDragY.stop() }
-                                }
-                            } else {
-                                isDragActiveOnPill = false
-                            }
-                        },
-                        onDragEnd = {
-                            if (!isDragActiveOnPill) return@detectDragGestures
-                            isDragActiveOnPill = false
-                            isDragging = false
-                            val currentLeft = animLeft.value - paddingPx
-                            val visualTargetIndex = (currentLeft / realTabWidthPx).roundToInt().coerceIn(0, options.size - 1)
-                            val targetIndex = rtlMirrorIndex(visualTargetIndex, options.size, isRtl)
-                            
-                            coroutineScope.launch {
-                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
-                            }
-                            
-                            if (targetIndex != selectedIndex) {
-                                haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-                                onOptionClick(targetIndex)
-                            } else {
-                                val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
-                                val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
-                                coroutineScope.launch {
-                                    launch {
+                                    val maxRight = options.size * realTabWidthPx - paddingPx
+                                    val maxLeft = maxRight - normalWidthPx
+                                    
+                                    var targetLeft = dragTargetLeft
+                                    var targetRight = dragTargetRight
+                                    
+                                    // Effetto squish (schiacciamento) controllato contro i bordi in X
+                                    val maxOverscroll = normalWidthPx * 0.8f 
+                                    if (dragTargetLeft < paddingPx) {
+                                         val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
+                                         val maxPenetration = paddingPx * 1.5f
+                                         val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                         targetLeft = paddingPx - penetration
+                                         targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f 
+                                     } else if (dragTargetRight > maxRight) {
+                                         val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
+                                         val maxPenetration = paddingPx * 1.5f
+                                         val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
+                                         targetRight = maxRight + penetration
+                                         targetLeft = maxLeft + overscroll * 0.15f
+                                     }
+
+                                    // Effetto Jelly + Inerzia
+                                    val leftStiffness = if (dragX > 0) 250f else if (dragX < 0) 800f else 600f
+                                    val rightStiffness = if (dragX > 0) 800f else if (dragX < 0) 250f else 600f
+
+                                    launch { animDragY.animateTo(dragTargetY, spring(stiffness = 1000f, dampingRatio = 0.7f)) }
+                                    
+                                    launch { 
                                         animLeft.animateTo(
-                                            targetLeft,
-                                            spring(stiffness = 500f, dampingRatio = 0.70f)
-                                        )
+                                            targetLeft, 
+                                            spring(stiffness = leftStiffness, dampingRatio = 0.65f)
+                                        ) 
                                     }
-                                    launch {
+                                    launch { 
                                         animRight.animateTo(
-                                            targetRight,
-                                            spring(stiffness = 500f, dampingRatio = 0.70f)
-                                        )
+                                            targetRight, 
+                                            spring(stiffness = rightStiffness, dampingRatio = 0.65f)
+                                        ) 
                                     }
                                 }
                             }
-                        },
-                        onDragCancel = {
-                            if (!isDragActiveOnPill) return@detectDragGestures
-                            isDragActiveOnPill = false
-                            isDragging = false
-                            val targetLeft = visualSelectedIndex * realTabWidthPx + paddingPx
-                            val targetRight = (visualSelectedIndex + 1) * realTabWidthPx - paddingPx
-                            coroutineScope.launch {
-                                launch { animDragY.animateTo(0f, spring(stiffness = 500f, dampingRatio = 0.6f)) }
-                                launch {
-                                    animLeft.animateTo(
-                                        targetLeft,
-                                        spring(stiffness = 500f, dampingRatio = 0.70f)
-                                    )
-                                }
-                                launch {
-                                    animRight.animateTo(
-                                        targetRight,
-                                        spring(stiffness = 500f, dampingRatio = 0.70f)
-                                    )
-                                }
-                            }
                         }
-                    ) { change, dragAmount ->
-                        if (!isDragActiveOnPill) return@detectDragGestures
-                        isDragging = true
-                        change.consume()
-                        
-                        val dragX = dragAmount.x
-                        val dragYDelta = dragAmount.y
-                        
-                        dragTargetLeft += dragX
-                        dragTargetRight += dragX
-                        dragTargetY += dragYDelta
-                        
-                        coroutineScope.launch {
-                            val maxRight = options.size * realTabWidthPx - paddingPx
-                            val maxLeft = maxRight - normalWidthPx
-                            
-                            var targetLeft = dragTargetLeft
-                            var targetRight = dragTargetRight
-                            
-                            // Effetto squish (schiacciamento) controllato contro i bordi in X
-                            val maxOverscroll = normalWidthPx * 0.8f 
-                            if (dragTargetLeft < paddingPx) {
-                                 val overscroll = (paddingPx - dragTargetLeft).coerceAtMost(maxOverscroll)
-                                 val maxPenetration = paddingPx * 1.5f
-                                 val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
-                                 targetLeft = paddingPx - penetration
-                                 targetRight = (paddingPx + normalWidthPx) - overscroll * 0.15f 
-                             } else if (dragTargetRight > maxRight) {
-                                 val overscroll = (dragTargetRight - maxRight).coerceAtMost(maxOverscroll)
-                                 val maxPenetration = paddingPx * 1.5f
-                                 val penetration = maxPenetration * (1f - kotlin.math.exp(-overscroll / 100f))
-                                 targetRight = maxRight + penetration
-                                 targetLeft = maxLeft + overscroll * 0.15f
-                             }
-
-                            // Effetto Jelly + Inerzia
-                            val leftStiffness = if (dragX > 0) 250f else if (dragX < 0) 800f else 600f
-                            val rightStiffness = if (dragX > 0) 800f else if (dragX < 0) 250f else 600f
-
-                            launch { animDragY.animateTo(dragTargetY, spring(stiffness = 1000f, dampingRatio = 0.7f)) }
-                            
-                            launch { 
-                                animLeft.animateTo(
-                                    targetLeft, 
-                                    spring(stiffness = leftStiffness, dampingRatio = 0.65f)
-                                ) 
-                            }
-                            launch { 
-                                animRight.animateTo(
-                                    targetRight, 
-                                    spring(stiffness = rightStiffness, dampingRatio = 0.65f)
-                                ) 
-                            }
-                        }
+                    } else {
+                        Modifier
                     }
-                }
+                )
         ) {
             // 1. Base Layer: Inactive muted grey labels
             CategoryTabItems(

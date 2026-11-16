@@ -17,6 +17,7 @@ import androidx.compose.material.icons.rounded.KeyboardDoubleArrowDown
 import androidx.compose.material.icons.rounded.KeyboardDoubleArrowUp
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -210,10 +211,26 @@ fun TopVibesSection(vibes: List<VibeStat>) {
         )
     }
 
+    var animStarted by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(Unit) {
+        animStarted = true
+    }
+
     val initialAnim by animateFloatAsState(
-        targetValue = 1f,
+        targetValue = if (animStarted) 1f else 0f,
         animationSpec = tween(1200, easing = FastOutSlowInEasing),
         label = "vibe_initialAnim"
+    )
+
+    var currentTotalCount by rememberSaveable { mutableIntStateOf(0) }
+    LaunchedEffect(totalCount) {
+        currentTotalCount = totalCount
+    }
+
+    val animatedTotalCount by animateIntAsState(
+        targetValue = currentTotalCount,
+        animationSpec = tween(durationMillis = 1200, easing = FastOutSlowInEasing),
+        label = "vibe_total_count"
     )
 
     val defaultAccentColor = vibes.firstOrNull()?.colorHex?.let { Color(it) } ?: MaterialTheme.colorScheme.primary
@@ -297,6 +314,7 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                     val centerY = canvasHeight / 2f
 
                     var currentStartAngle = -90f
+                    var selectedSliceDraw: (() -> Unit)? = null
 
                     processedVibes.forEachIndexed { i, vibe ->
                         val targetSweep = (vibe.count.toFloat() / totalCount) * 360f
@@ -319,23 +337,56 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                         val sliceOffsetX = cosVal * selectionOffset
                         val sliceOffsetY = sinVal * selectionOffset
 
-                        val arcSize = (donutRadius - (currentStrokeWidth / 2f)) * 2f
-
-                        drawArc(
-                            color = color.copy(alpha = alpha),
-                            startAngle = currentStartAngle + 1.2f,
-                            sweepAngle = maxOf(0.1f, sweepAngle - 2.4f),
-                            useCenter = false,
-                            topLeft = Offset(
-                                x = centerX - (arcSize / 2f) + sliceOffsetX,
-                                y = centerY - (arcSize / 2f) + sliceOffsetY
-                            ),
-                            size = Size(arcSize, arcSize),
-                            style = Stroke(
-                                width = currentStrokeWidth,
-                                cap = StrokeCap.Round
-                            )
+                        val pathRadius = donutRadius - (strokeWidthPx / 2f)
+                        val arcSize = pathRadius * 2f
+                        val arcTopLeft = Offset(
+                            x = centerX - pathRadius + sliceOffsetX,
+                            y = centerY - pathRadius + sliceOffsetY
                         )
+
+                        if (isSelected) {
+                            val startAngleCapture = currentStartAngle
+                            val sweepAngleCapture = sweepAngle
+                            selectedSliceDraw = {
+                                drawArc(
+                                    color = color.copy(alpha = 0.25f),
+                                    startAngle = startAngleCapture,
+                                    sweepAngle = sweepAngleCapture,
+                                    useCenter = false,
+                                    topLeft = arcTopLeft,
+                                    size = Size(arcSize, arcSize),
+                                    style = Stroke(
+                                        width = currentStrokeWidth + 8.dp.toPx(),
+                                        cap = StrokeCap.Round
+                                    )
+                                )
+                                drawArc(
+                                    color = color.copy(alpha = alpha),
+                                    startAngle = startAngleCapture,
+                                    sweepAngle = sweepAngleCapture,
+                                    useCenter = false,
+                                    topLeft = arcTopLeft,
+                                    size = Size(arcSize, arcSize),
+                                    style = Stroke(
+                                        width = currentStrokeWidth,
+                                        cap = StrokeCap.Round
+                                    )
+                                )
+                            }
+                        } else {
+                            drawArc(
+                                color = color.copy(alpha = alpha),
+                                startAngle = currentStartAngle,
+                                sweepAngle = sweepAngle,
+                                useCenter = false,
+                                topLeft = arcTopLeft,
+                                size = Size(arcSize, arcSize),
+                                style = Stroke(
+                                    width = currentStrokeWidth,
+                                    cap = StrokeCap.Butt
+                                )
+                            )
+                        }
 
                         // Disegno etichette esterne
                         val isOther = vibe.vibe == "OTHER"
@@ -431,6 +482,8 @@ fun TopVibesSection(vibes: List<VibeStat>) {
 
                         currentStartAngle += sweepAngle
                     }
+
+                    selectedSliceDraw?.invoke()
                 }
 
                 // Breathing Halo neon interno
@@ -543,12 +596,11 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                             Spacer(modifier = Modifier.height(2.dp))
 
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text(
-                                    text = "$count",
-                                    style = MaterialTheme.typography.titleMedium.copy(
-                                        fontWeight = FontWeight.Black,
-                                        color = countColor
-                                    )
+                                CountingText(
+                                    target = count,
+                                    color = countColor,
+                                    fontSize = MaterialTheme.typography.titleMedium.fontSize,
+                                    fontWeight = FontWeight.Black
                                 )
                                 Spacer(modifier = Modifier.width(4.dp))
                                 Text(
@@ -569,7 +621,7 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
-                                text = stringResource(R.string.flow_stats_vibe_count, totalCount),
+                                text = stringResource(R.string.flow_stats_vibe_count, animatedTotalCount),
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Black,
                                     color = animatedHaloColor

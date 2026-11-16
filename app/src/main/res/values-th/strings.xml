@@ -697,6 +697,13 @@
     <string name="surprise_mode_random_desc">ภาพยนตร์แบบสุ่ม</string>
     <string name="surprise_mode_emotional">ตามอารมณ์</string>
     <string name="surprise_mode_emotional_desc">แมตช์ที่สมบูรณ์แบบ</string>
+    <string name="surprise_mode_prompt">พิมพ์บอก</string>
+    <string name="surprise_mode_prompt_desc">อธิบายสิ่งที่คุณอยากรับชม</string>
+    <string name="surprise_prompt_title">คุณอยากรับชมอะไรในคืนนี้?</string>
+    <string name="surprise_prompt_placeholder">อธิบายบรรยากาศ โครงเรื่อง หรือแนวหนัง...</string>
+    <string name="surprise_prompt_chip_1">หักมุม</string>
+    <string name="surprise_prompt_chip_2">ฟีลกู๊ด</string>
+    <string name="surprise_prompt_chip_3">ระทึกขวัญเข้มข้น</string>
     <string name="surprise_q_time">คุณมีเวลาเท่าไร?</string>
     <string name="surprise_time_short">น้อยกว่า 1 ชม. 40 นาที</string>
     <string name="surprise_time_medium">ปกติ (~2 ชม.)</string>

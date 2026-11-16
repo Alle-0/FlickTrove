@@ -701,6 +701,13 @@
     <string name="surprise_mode_random_desc">Willekeurige film</string>
     <string name="surprise_mode_emotional">Op gevoel</string>
     <string name="surprise_mode_emotional_desc">De perfecte match</string>
+    <string name="surprise_mode_prompt">Beschrijf</string>
+    <string name="surprise_mode_prompt_desc">Beschrijf wat je wilt kijken</string>
+    <string name="surprise_prompt_title">Waar heb je zin in?</string>
+    <string name="surprise_prompt_placeholder">Beschrijf de sfeer, plot of genre...</string>
+    <string name="surprise_prompt_chip_1">Onverwachte wending</string>
+    <string name="surprise_prompt_chip_2">Vrolijk</string>
+    <string name="surprise_prompt_chip_3">Duistere thriller</string>
     <string name="surprise_q_time">Hoeveel tijd heb je?</string>
     <string name="surprise_time_short">Minder dan 1u 40m</string>
     <string name="surprise_time_medium">Normaal (~2u)</string>

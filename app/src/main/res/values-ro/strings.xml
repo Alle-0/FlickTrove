@@ -706,6 +706,13 @@ Introdu cel puțin 3 caractere</string>
     <string name="surprise_mode_random_desc">Film aleatoriu</string>
     <string name="surprise_mode_emotional">Emoțional</string>
     <string name="surprise_mode_emotional_desc">Potrivirea perfectă</string>
+    <string name="surprise_mode_prompt">Scrie</string>
+    <string name="surprise_mode_prompt_desc">Descrie ce ai vrea să vizionezi</string>
+    <string name="surprise_prompt_title">Ce ai chef să urmărești?</string>
+    <string name="surprise_prompt_placeholder">Descrie atmosfera, intriga sau genul...</string>
+    <string name="surprise_prompt_chip_1">Răsturnare de situație</string>
+    <string name="surprise_prompt_chip_2">Relaxant</string>
+    <string name="surprise_prompt_chip_3">Thriller întunecat</string>
     <string name="surprise_q_time">Cât timp ai la dispoziție?</string>
     <string name="surprise_time_short">Mai puțin de 1h 40m</string>
     <string name="surprise_time_medium">Normal (~2h)</string>

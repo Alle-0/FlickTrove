@@ -671,6 +671,13 @@
     <string name="surprise_mode_random_desc">무작위 영화 추천</string>
     <string name="surprise_mode_emotional">무드 맞춤</string>
     <string name="surprise_mode_emotional_desc">지금 기분에 딱 맞는 작품</string>
+    <string name="surprise_mode_prompt">직접 입력</string>
+    <string name="surprise_mode_prompt_desc">보고 싶은 분위기 설명하기</string>
+    <string name="surprise_prompt_title">어떤 영화가 보고 싶으신가요?</string>
+    <string name="surprise_prompt_placeholder">분위기, 줄거리, 장르 등을 적어보세요...</string>
+    <string name="surprise_prompt_chip_1">반전 결말</string>
+    <string name="surprise_prompt_chip_2">기분 좋은 힐링</string>
+    <string name="surprise_prompt_chip_3">어두운 스릴러</string>
     <string name="surprise_q_time">감상할 수 있는 시간은 어느 정도인가요?</string>
     <string name="surprise_time_short">1시간 40분 미만</string>
     <string name="surprise_time_medium">보통 러닝타임 (~2시간)</string>

@@ -711,6 +711,13 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="surprise_mode_random_desc">Losowy film</string>
     <string name="surprise_mode_emotional">Emocjonalny</string>
     <string name="surprise_mode_emotional_desc">Idealne dopasowanie</string>
+    <string name="surprise_mode_prompt">Opisz</string>
+    <string name="surprise_mode_prompt_desc">Opisz, co chcesz obejrzeć</string>
+    <string name="surprise_prompt_title">Na co masz dziś ochotę?</string>
+    <string name="surprise_prompt_placeholder">Opisz klimat, fabułę lub gatunek...</string>
+    <string name="surprise_prompt_chip_1">Zwrot akcji</string>
+    <string name="surprise_prompt_chip_2">Lekki i przyjemny</string>
+    <string name="surprise_prompt_chip_3">Mroczny thriller</string>
     <string name="surprise_q_time">Ile masz czasu?</string>
     <string name="surprise_time_short">Mniej niż 1 godz. 40 min.</string>
     <string name="surprise_time_medium">Standardowo (~2 godz.)</string>

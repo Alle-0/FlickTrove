@@ -687,6 +687,13 @@
     <string name="surprise_mode_random_desc">Phim ngẫu nhiên</string>
     <string name="surprise_mode_emotional">Cảm xúc</string>
     <string name="surprise_mode_emotional_desc">Lựa chọn hoàn hảo</string>
+    <string name="surprise_mode_prompt">Mô tả</string>
+    <string name="surprise_mode_prompt_desc">Mô tả điều bạn muốn xem</string>
+    <string name="surprise_prompt_title">Bạn muốn xem gì hôm nay?</string>
+    <string name="surprise_prompt_placeholder">Mô tả cảm xúc, cốt truyện hoặc thể loại...</string>
+    <string name="surprise_prompt_chip_1">Cú twist bất ngờ</string>
+    <string name="surprise_prompt_chip_2">Tươi vui nhẹ nhàng</string>
+    <string name="surprise_prompt_chip_3">Hồi hộp kịch tính</string>
     <string name="surprise_q_time">Bạn có bao nhiêu thời gian?</string>
     <string name="surprise_time_short">Dưới 1 giờ 40 phút</string>
     <string name="surprise_time_medium">Bình thường (~2 giờ)</string>

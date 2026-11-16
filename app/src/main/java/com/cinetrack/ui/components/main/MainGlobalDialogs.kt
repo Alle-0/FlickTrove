@@ -375,7 +375,7 @@ fun MainGlobalDialogs(
                     surpriseMeViewModel.recordMovieDiscovered(movie.id)
                     rootNavigator.push(MovieDetailScreen(movie.id, movie.mediaType))
                 } else {
-                    Toast.makeText(context, context.getString(R.string.main_surprise_me_not_found), Toast.LENGTH_SHORT).show()
+                    surpriseMeViewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(R.string.main_surprise_me_not_found))
                 }
             },
             onClose = onSurpriseMeClose

@@ -702,6 +702,13 @@
     <string name="surprise_mode_random_desc">Tilfældig film</string>
     <string name="surprise_mode_emotional">Følelsesladet</string>
     <string name="surprise_mode_emotional_desc">Det perfekte match</string>
+    <string name="surprise_mode_prompt">Beskriv</string>
+    <string name="surprise_mode_prompt_desc">Beskriv hvad du vil se</string>
+    <string name="surprise_prompt_title">Hvad har du lyst til at se?</string>
+    <string name="surprise_prompt_placeholder">Beskriv stemning, handling eller genre...</string>
+    <string name="surprise_prompt_chip_1">Plot twist</string>
+    <string name="surprise_prompt_chip_2">Feel-good</string>
+    <string name="surprise_prompt_chip_3">Mørk thriller</string>
     <string name="surprise_q_time">Hvor meget tid har du?</string>
     <string name="surprise_time_short">Under 1t 40m</string>
     <string name="surprise_time_medium">Normal (~2t)</string>

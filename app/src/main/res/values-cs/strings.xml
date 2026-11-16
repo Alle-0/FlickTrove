@@ -687,6 +687,13 @@
     <string name="surprise_mode_random_desc">Náhodný film</string>
     <string name="surprise_mode_emotional">Podle nálady</string>
     <string name="surprise_mode_emotional_desc">Přesně na míru</string>
+    <string name="surprise_mode_prompt">Napsat</string>
+    <string name="surprise_mode_prompt_desc">Popište, na co máte chuť</string>
+    <string name="surprise_prompt_title">Na co máte chuť se podívat?</string>
+    <string name="surprise_prompt_placeholder">Popište atmosféru, zápletku nebo žánr...</string>
+    <string name="surprise_prompt_chip_1">Nečekaný zvrat</string>
+    <string name="surprise_prompt_chip_2">Pohodový film</string>
+    <string name="surprise_prompt_chip_3">Temný thriller</string>
     <string name="surprise_q_time">Kolik máte času?</string>
     <string name="surprise_time_short">Méně než 1h 40m</string>
     <string name="surprise_time_medium">Běžně (~2h)</string>

@@ -671,6 +671,13 @@
     <string name="surprise_mode_random_desc">Film acak</string>
     <string name="surprise_mode_emotional">Emosional</string>
     <string name="surprise_mode_emotional_desc">Kecocokan sempurna</string>
+    <string name="surprise_mode_prompt">Tulis</string>
+    <string name="surprise_mode_prompt_desc">Jelaskan apa yang ingin kamu tonton</string>
+    <string name="surprise_prompt_title">Sedang ingin menonton apa?</string>
+    <string name="surprise_prompt_placeholder">Jelaskan suasana, alur, atau genre...</string>
+    <string name="surprise_prompt_chip_1">Plot twist</string>
+    <string name="surprise_prompt_chip_2">Menyenangkan</string>
+    <string name="surprise_prompt_chip_3">Thriller menegangkan</string>
     <string name="surprise_q_time">Berapa banyak waktu yang Anda miliki?</string>
     <string name="surprise_time_short">Kurang dari 1j 40m</string>
     <string name="surprise_time_medium">Normal (~2 jam)</string>

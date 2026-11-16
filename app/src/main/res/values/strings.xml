@@ -735,6 +735,13 @@
     <string name="surprise_mode_random_desc">Random movie</string>
     <string name="surprise_mode_emotional">Emotional</string>
     <string name="surprise_mode_emotional_desc">The perfect match</string>
+    <string name="surprise_mode_prompt">Describe</string>
+    <string name="surprise_mode_prompt_desc">Describe what you want to watch</string>
+    <string name="surprise_prompt_title">What do you feel like watching?</string>
+    <string name="surprise_prompt_placeholder">Describe the vibe, plot, or atmosphere...</string>
+    <string name="surprise_prompt_chip_1">Plot twist</string>
+    <string name="surprise_prompt_chip_2">Feel-good</string>
+    <string name="surprise_prompt_chip_3">Dark thriller</string>
     <string name="surprise_q_time">How much time do you have?</string>
     <string name="surprise_time_short">Less than 1h 40m</string>
     <string name="surprise_time_medium">Normal (~2h)</string>

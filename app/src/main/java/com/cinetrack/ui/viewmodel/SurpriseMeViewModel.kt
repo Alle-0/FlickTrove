@@ -42,12 +42,22 @@ data class SurpriseMeUiState(
 class SurpriseMeViewModel @Inject constructor(
     private val repository: MovieRepository,
     private val tmdbService: TMDBService,
-    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
+    private val moodSearchRepository: com.cinetrack.data.repository.MoodSearchRepository,
+    private val preferenceRepository: com.cinetrack.data.repository.PreferenceRepository,
+    private val actionFeedbackManager: com.cinetrack.ui.utils.ActionFeedbackManager
 ) : ViewModel() {
+
+    fun emitMessage(message: com.cinetrack.ui.utils.UiText) {
+        actionFeedbackManager.emit(message)
+    }
 
     fun recordMovieDiscovered(movieId: Long) {
         badgeRepository.recordSurpriseMeDiscovered(movieId)
     }
+
+    val remainingQuota: StateFlow<Int> = moodSearchRepository.remainingQuotaFlow
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), 3)
 
     private val _uiState = MutableStateFlow(SurpriseMeUiState())
     val uiState: StateFlow<SurpriseMeUiState> = _uiState.asStateFlow()
@@ -174,6 +184,53 @@ class SurpriseMeViewModel @Inject constructor(
             // Offline fallback
             val unwatched = localMovies.filter { !it.watched && !it.dropped }
             unwatched.filter { it.mediaType == "movie" }.randomOrNull() ?: unwatched.randomOrNull()
+        }
+    }
+
+    suspend fun getPromptMovie(prompt: String, forceLocal: Boolean = false): Movie? {
+        val trimmed = prompt.trim()
+        if (trimmed.isEmpty()) return getRandomMovie()
+
+        val localMovies = _uiState.value.localMovies
+        val watchedIds = localMovies.filter { it.watched || it.dropped }.map { it.id }.toSet()
+
+        val contentLang = preferenceRepository.getContentLanguage()
+        val targetLanguage = if (contentLang == "system") {
+            java.util.Locale.getDefault().toLanguageTag()
+        } else {
+            contentLang
+        }
+
+        return try {
+            val result = moodSearchRepository.searchMoviesByMood(
+                query = trimmed,
+                language = targetLanguage,
+                forceLocal = forceLocal
+            )
+            val data = result.getOrNull()
+            val movieResults = data?.movies.orEmpty()
+
+            val candidates = movieResults.filter { it.id !in watchedIds }
+            val chosen = if (candidates.isNotEmpty()) {
+                candidates.take(3).random()
+            } else {
+                movieResults.take(3).randomOrNull()
+            }
+
+            chosen?.let {
+                Movie(
+                    id = it.id,
+                    mediaType = "movie",
+                    title = it.title,
+                    posterPath = it.posterPath,
+                    backdropPath = it.backdropPath,
+                    voteAverage = it.voteAverage,
+                    releaseDate = it.releaseDate,
+                    overview = it.overview
+                )
+            } ?: getRandomMovie()
+        } catch (e: Exception) {
+            getRandomMovie()
         }
     }
 }

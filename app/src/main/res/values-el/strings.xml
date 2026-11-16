@@ -706,6 +706,13 @@ Trakt ➔ Εφαρμογή: 6 ώρες</string>
     <string name="surprise_mode_random_desc">Τυχαία ταινία</string>
     <string name="surprise_mode_emotional">Συναισθηματικό</string>
     <string name="surprise_mode_emotional_desc">Η τέλεια επιλογή</string>
+    <string name="surprise_mode_prompt">Περιγραφή</string>
+    <string name="surprise_mode_prompt_desc">Περιγράψτε τι θέλετε να δείτε</string>
+    <string name="surprise_prompt_title">Τι έχετε διάθεση να παρακολουθήσετε;</string>
+    <string name="surprise_prompt_placeholder">Περιγράψτε την ατμόσφαιρα, πλοκή ή είδος...</string>
+    <string name="surprise_prompt_chip_1">Ανατροπή πλοκής</string>
+    <string name="surprise_prompt_chip_2">Ευχάριστο</string>
+    <string name="surprise_prompt_chip_3">Σκοτεινό θρίλερ</string>
     <string name="surprise_q_time">Πόσο χρόνο έχετε;</string>
     <string name="surprise_time_short">Λιγότερο από 1ω 40λ</string>
     <string name="surprise_time_medium">Κανονική (~2ω)</string>
