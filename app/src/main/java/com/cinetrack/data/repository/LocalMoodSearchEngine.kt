@@ -430,6 +430,22 @@ class LocalMoodSearchEngine @Inject constructor(
             anchorMovieIds = listOf(11918L, 9426L, 557L, 17654L, 9799L),
             rationaleTemplateIt = "Mutazioni genetiche prodigiose o surreali in cui il confine tra essere umano e insetto svanisce.",
             rationaleTemplateEn = "Wild genetic mutations and transformations where the boundary between human and insect blurs."
+        ),
+
+        // --- RUGGENTI ANNI '20, OPULENZA & CADUTA DI UN MAGNATE ---
+        CinematicArchetype(
+            id = "roaring_twenties_wealth",
+            nameIt = "Ruggenti Anni '20 & Magnati",
+            nameEn = "Roaring Twenties & Wealth",
+            triggersIt = listOf("anni 20", "anni '20", "anni venti", "anni ruggenti", "uomo ricco", "grande gatsby", "gatsby", "magnate", "roaring twenties", "quarto potere"),
+            triggersEn = listOf("roaring twenties", "1920s", "rich man 1920s", "wealthy tycoon", "great gatsby", "gatsby style", "citizen kane style"),
+            primaryGenres = listOf(18L, 36L, 10749L),
+            secondaryGenres = listOf(80L),
+            mandatoryKeywords = listOf(207876L, 10329L, 257265L),
+            secondaryKeywords = listOf(34079L, 9398L),
+            anchorMovieIds = listOf(64682L, 15L, 7345L, 11034L, 804095L),
+            rationaleTemplateIt = "Feste sfarzose, l'opulenza effimera dei ruggenti anni '20 e la tragica caduta di un magnate enigmatico.",
+            rationaleTemplateEn = "Lavish parties, fleeting Roaring Twenties wealth, and the tragic demise of an enigmatic tycoon."
         )
     )
 
@@ -516,37 +532,45 @@ class LocalMoodSearchEngine @Inject constructor(
         val tmdbLang = if (isItalian) "it-IT" else "en-US"
         val todayStr = LocalDate.now().toString()
 
-        // 1. NLP Query Parsing: Time Horizons & Eras
+        // 1. NLP Query Parsing: Time Horizons & Eras (Only constrain release date if explicitly requested as production era)
         var specificYear: Int? = null
         var startYear: Int? = null
         var endYear: Int? = null
 
-        val singleYearRegex = Regex("""\b(19\d{2}|20[0-2]\d)\b""")
-        val decadeItRegex = Regex("""\banni\s*(')?(\d{2}|\d{4})\b""")
-        val decadeEnRegex = Regex("""\b(\d{2}|\d{4})(')?s\b""")
+        val isExplicitReleaseYearRequested = listOf(
+            "uscito nel", "uscita nel", "usciti nel", "uscite nel",
+            "del 19", "del 20", "film del 19", "film del 20", "film del 18",
+            "released in", "release in", "from 19", "from 20", "movie from", "film from"
+        ).any { cleanQuery.contains(it) }
 
-        val singleYearMatch = singleYearRegex.find(cleanQuery)
-        val decadeItMatch = decadeItRegex.find(cleanQuery)
-        val decadeEnMatch = decadeEnRegex.find(cleanQuery)
+        if (isExplicitReleaseYearRequested) {
+            val singleYearRegex = Regex("""\b(19\d{2}|20[0-2]\d)\b""")
+            val decadeItRegex = Regex("""\banni\s*(')?(\d{2}|\d{4})\b""")
+            val decadeEnRegex = Regex("""\b(\d{2}|\d{4})(')?s\b""")
 
-        if (decadeItMatch != null) {
-            val raw = decadeItMatch.groupValues[2]
-            val yr = if (raw.length == 2) {
-                val num = raw.toIntOrNull() ?: 80
-                if (num >= 30) 1900 + num else 2000 + num
-            } else raw.toIntOrNull() ?: 1980
-            startYear = (yr / 10) * 10
-            endYear = startYear + 9
-        } else if (decadeEnMatch != null) {
-            val raw = decadeEnMatch.groupValues[1]
-            val yr = if (raw.length == 2) {
-                val num = raw.toIntOrNull() ?: 80
-                if (num >= 30) 1900 + num else 2000 + num
-            } else raw.toIntOrNull() ?: 1980
-            startYear = (yr / 10) * 10
-            endYear = startYear + 9
-        } else if (singleYearMatch != null) {
-            specificYear = singleYearMatch.value.toIntOrNull()
+            val singleYearMatch = singleYearRegex.find(cleanQuery)
+            val decadeItMatch = decadeItRegex.find(cleanQuery)
+            val decadeEnMatch = decadeEnRegex.find(cleanQuery)
+
+            if (decadeItMatch != null) {
+                val raw = decadeItMatch.groupValues[2]
+                val yr = if (raw.length == 2) {
+                    val num = raw.toIntOrNull() ?: 80
+                    1900 + num
+                } else raw.toIntOrNull() ?: 1980
+                startYear = (yr / 10) * 10
+                endYear = startYear + 9
+            } else if (decadeEnMatch != null) {
+                val raw = decadeEnMatch.groupValues[1]
+                val yr = if (raw.length == 2) {
+                    val num = raw.toIntOrNull() ?: 80
+                    1900 + num
+                } else raw.toIntOrNull() ?: 1980
+                startYear = (yr / 10) * 10
+                endYear = startYear + 9
+            } else if (singleYearMatch != null) {
+                specificYear = singleYearMatch.value.toIntOrNull()
+            }
         }
 
         val isVintageRequested = cleanQuery.contains("vintage") || cleanQuery.contains("classico") || cleanQuery.contains("bianco e nero") || cleanQuery.contains("black and white")
@@ -590,7 +614,7 @@ class LocalMoodSearchEngine @Inject constructor(
 
         // Dynamic Keyword Resolution via TMDB searchKeyword API (with Italian->English token mapping)
         val unmappedTokens = contentTokens.filter { token ->
-            token.length >= 4 && !dictionary.containsKey(token) && !fallbackDictionary.containsKey(token)
+            !token.contains(" ") && token.length >= 4 && !dictionary.containsKey(token) && !fallbackDictionary.containsKey(token)
         }.take(3)
 
         if (unmappedTokens.isNotEmpty()) {
@@ -1064,11 +1088,17 @@ class LocalMoodSearchEngine @Inject constructor(
         )
         val stopwords = if (isItalian) stopwordsIt else stopwordsEn
 
-        return Regex("""\b\w+\b""")
+        val rawWords = Regex("""\b\w+\b""")
             .findAll(query.lowercase(Locale.ROOT))
             .map { it.value }
-            .filter { it.length >= 3 && !stopwords.contains(it) }
+            .filter { it.length > 2 || it.matches(Regex("""\d{2}""")) }
             .toList()
+
+        val unigrams = rawWords.filter { !stopwords.contains(it) }
+        val bigrams = rawWords.windowed(2).map { it.joinToString(" ") }
+        val trigrams = rawWords.windowed(3).map { it.joinToString(" ") }
+
+        return (unigrams + bigrams + trigrams).distinct()
     }
 
     private fun matchesWordOrFuzzy(query: String, target: String): Boolean {
