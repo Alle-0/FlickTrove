@@ -414,6 +414,25 @@ object NetworkModule {
 
     @Provides
     @Singleton
+    fun provideSemanticSearchApi(
+        okHttpClient: OkHttpClient,
+        json: Json
+    ): com.cinetrack.data.api.SemanticSearchApi {
+        val fastOkHttpClient = okHttpClient.newBuilder()
+            .connectTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
+            .build()
+        val contentType = "application/json".toMediaType()
+        return Retrofit.Builder()
+            .baseUrl(Keys.getVectorizeSearchUrl())
+            .client(fastOkHttpClient)
+            .addConverterFactory(json.asConverterFactory(contentType))
+            .build()
+            .create(com.cinetrack.data.api.SemanticSearchApi::class.java)
+    }
+
+    @Provides
+    @Singleton
     fun provideCommsUniInterceptor(): com.cinetrack.data.api.CommsUniInterceptor {
         return com.cinetrack.data.api.CommsUniInterceptor()
     }
