@@ -69,7 +69,7 @@ fun SearchCategorySelector(
             modifier = Modifier.fillMaxWidth(),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            // 1. Capsula Morphing: Si trasforma animata da [Movies, TV, People, Collections] a [AI • Quota, ALGO • ∞]
+            // 1. Capsula Morphing: Si trasforma animata da [Movies, TV, People, Collections] a [AI • Quota, IRIS • ∞]
             Box(
                 modifier = Modifier
                     .weight(1f)

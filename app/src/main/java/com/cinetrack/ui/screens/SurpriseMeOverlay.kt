@@ -488,7 +488,7 @@ private fun PromptStep(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // Mode Selector (IA • 3 | ALGO • ∞) placed directly beneath the title
+        // Mode Selector (IA • 3 | IRIS • ∞) placed directly beneath the title
         Box(
             modifier = Modifier
                 .background(Color.White.copy(alpha = 0.08f), CircleShape)
