@@ -36,6 +36,7 @@ class MoodSearchRepository @Inject constructor(
     @ApplicationContext private val context: Context,
     private val api: SupabaseMoodSearchApi,
     private val localEngine: LocalMoodSearchEngine,
+    private val semanticSearchRepository: SemanticSearchRepository,
     private val preferenceRepository: PreferenceRepository,
     private val moodHistoryRepository: MoodHistoryRepository
 ) {
@@ -78,6 +79,35 @@ class MoodSearchRepository @Inject constructor(
                         )
                     }
                 }
+            }
+        }
+
+        // 0.5. Cloudflare Vectorize Semantic Search (Zero Quota, Zero Serverless Overhead)
+        if (wantAi && page == 1) {
+            try {
+                val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
+                if (semanticMovies.isNotEmpty()) {
+                    val vibeTitle = "Ricerca Semantica Vettoriale"
+                    val vibeDesc = "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
+                    moodHistoryRepository.saveEntry(
+                        MoodHistoryEntry(
+                            query = trimmedQuery,
+                            vibeTitle = vibeTitle,
+                            vibeDescription = vibeDesc,
+                            isAi = true,
+                            movies = semanticMovies
+                        )
+                    )
+                    return@runCatching MoodSearchResultData(
+                        vibeTitle = vibeTitle,
+                        vibeDescription = vibeDesc,
+                        totalCount = semanticMovies.size,
+                        totalPages = 1,
+                        movies = semanticMovies
+                    )
+                }
+            } catch (_: Exception) {
+                // Fallthrough silente su Vectorize vuoto o offline verso il motore locale
             }
         }
 
