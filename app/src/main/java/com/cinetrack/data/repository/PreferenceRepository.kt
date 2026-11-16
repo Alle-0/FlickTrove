@@ -406,8 +406,6 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.HOME_SECTION_ORDER] = com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(prefs.homeSectionOrder).joinToString(",")
             preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = prefs.allowMobileDataUpdates
             preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] = prefs.enableBottomBarSwipe
-            preferences[PreferencesKeys.IS_MOOD_RECENT_EXPANDED] = prefs.isMoodRecentExpanded
-            preferences[PreferencesKeys.IS_MOOD_INSPIRATIONS_EXPANDED] = prefs.isMoodInspirationsExpanded
         }
     }
 
@@ -513,7 +511,6 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.DISABLED_BADGES] = badges
         }
     }
-
 
     // -------------------------------------------------------------------------
     // Scrigno del Trove – lettura e scrittura stato giornaliero (zero-net cost)

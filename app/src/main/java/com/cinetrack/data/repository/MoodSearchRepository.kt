@@ -19,7 +19,8 @@ data class MoodSearchResultData(
     val vibeDescription: String,
     val totalCount: Int,
     val totalPages: Int,
-    val movies: List<TMDBSearchResult.MovieResult>
+    val movies: List<TMDBSearchResult.MovieResult>,
+    val isQuotaFallback: Boolean = false
 )
 
 class MoodQuotaExhaustedException(
@@ -79,11 +80,12 @@ class MoodSearchRepository @Inject constructor(
         // 1. If user explicitly chose Local Engine or if AI quota is exhausted (for IT/EN)
         if (forceLocal || remaining <= 0) {
             if (localEligible) {
+                val wasQuotaFallback = !forceLocal && remaining <= 0
                 val localResult = localEngine.searchLocalMood(
                     query = trimmedQuery,
                     language = language,
                     page = page,
-                    isQuotaExhaustedFallback = !forceLocal && remaining <= 0
+                    isQuotaExhaustedFallback = wasQuotaFallback
                 )
                 if (localResult.movies.isNotEmpty()) {
                     moodHistoryRepository.saveEntry(
@@ -96,9 +98,9 @@ class MoodSearchRepository @Inject constructor(
                         )
                     )
                 }
-                return@runCatching localResult
+                return@runCatching localResult.copy(isQuotaFallback = wasQuotaFallback)
             } else {
-                throw MoodQuotaExhaustedException()
+                throw MoodQuotaExhaustedException(context.getString(R.string.search_mood_exhausted_notice))
             }
         }
 

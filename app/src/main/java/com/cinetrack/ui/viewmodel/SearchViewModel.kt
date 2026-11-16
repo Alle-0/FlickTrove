@@ -239,6 +239,10 @@ class SearchViewModel @Inject constructor(
 
     fun setMoodAiMode(useAi: Boolean) {
         val wasAi = _uiState.value.isMoodAiMode
+        val remaining = _uiState.value.moodRemainingQuota
+        if (useAi && remaining <= 0) {
+            emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
+        }
         _uiState.update { it.copy(isMoodAiMode = useAi) }
         if (wasAi != useAi && _uiState.value.category == "mood" && _uiState.value.query.isNotBlank()) {
             executeMoodSearch(_uiState.value.query.trim(), bypassCache = false)
@@ -280,10 +284,14 @@ class SearchViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         isEndReached = true,
+                        isMoodAiMode = if (data.isQuotaFallback) false else it.isMoodAiMode,
                         moodVibeTitle = data.vibeTitle,
                         moodVibeDescription = data.vibeDescription,
                         moodErrorMessage = null
                     )
+                }
+                if (data.isQuotaFallback) {
+                    emitMessage(UiText.StringResource(R.string.search_mood_quota_fallback_notice))
                 }
             }.onFailure { ex ->
                 rawResults = emptyList()

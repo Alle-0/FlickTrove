@@ -2189,6 +2189,9 @@
     <string name="search_mood_mode_local_tab">ALGO • ∞</string>
     <string name="search_mood_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. AI가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
     <string name="search_mood_exhausted_notice">오늘 제공된 5회의 무드 검색을 모두 사용했습니다. 자정에 충전됩니다!</string>
+    <string name="search_mood_exhausted_title">오늘의 AI 검색 한도 소진</string>
+    <string name="search_mood_switch_to_algo">알고리즘으로 전환 (무제한)</string>
+    <string name="search_mood_quota_fallback_notice">오늘의 AI 검색 한도 소진: 무제한 알고리즘으로 검색되었습니다.</string>
     <string name="search_mood_inspirations_header">빠른 영감:</string>
     <string name="search_mood_analyzing">AI가 영화 카탈로그를 탐색하고 있습니다...</string>
     <string name="mood_insp_1_title">비 내리는 도시의 수사 스릴러</string>

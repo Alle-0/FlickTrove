@@ -2195,6 +2195,9 @@
     <string name="search_mood_mode_local_tab">ALGO • ∞</string>
     <string name="search_mood_intro_text">Beskriv med dine egne ord, hvad du ønsker at se. AI finder de perfekte film i hele TMDB-kataloget.</string>
     <string name="search_mood_exhausted_notice">Du har brugt alle 3 stemningssøgninger i dag. De genoplades ved midnat!</string>
+    <string name="search_mood_exhausted_title">Daglige AI-søgninger opbrugt</string>
+    <string name="search_mood_switch_to_algo">Skift til algoritme (ubegrænset)</string>
+    <string name="search_mood_quota_fallback_notice">Daglige AI-søgninger opbrugt: søgt med ubegrænset algoritme.</string>
     <string name="search_mood_inspirations_header">Hurtig inspiration:</string>
     <string name="search_mood_analyzing">AI udforsker filmkataloget...</string>
     <string name="mood_insp_1_title">Detektivthriller i regnen</string>

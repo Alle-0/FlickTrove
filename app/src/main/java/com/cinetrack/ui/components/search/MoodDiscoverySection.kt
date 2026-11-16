@@ -8,6 +8,7 @@ import androidx.compose.animation.shrinkVertically
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -175,6 +176,18 @@ fun MoodDiscoverySection(
                     letterSpacing = rtlSafeLetterSpacing(1.sp)
                 )
             }
+        }
+
+        // Quota Exhausted Cinematic Banner (When AI mode is selected and remaining quota is 0)
+        AnimatedVisibility(
+            visible = isMoodAiMode && remainingQuota <= 0,
+            enter = fadeIn(tween(220)) + expandVertically(tween(260)),
+            exit = fadeOut(tween(180)) + shrinkVertically(tween(220))
+        ) {
+            MoodQuotaExhaustedBanner(
+                isLocalEligible = isLocalEligible,
+                onSwitchToAlgorithm = { onMoodModeChanged(false) }
+            )
         }
 
         // 2. Cronologia Mood (Ricerche recenti memorizzate in locale - Chiudibile)
@@ -421,7 +434,80 @@ fun MoodDiscoverySection(
                 )
             }
         }
+    }
+}
 
-
+@Composable
+private fun MoodQuotaExhaustedBanner(
+    isLocalEligible: Boolean,
+    onSwitchToAlgorithm: () -> Unit,
+    modifier: Modifier = Modifier
+) {
+    Box(
+        modifier = modifier
+            .fillMaxWidth()
+            .padding(horizontal = 16.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(16.dp))
+            .background(Color(0xFFE5A93C).copy(alpha = 0.08f))
+            .border(1.dp, Color(0xFFE5A93C).copy(alpha = 0.22f), RoundedCornerShape(16.dp))
+            .padding(horizontal = 14.dp, vertical = 12.dp)
+    ) {
+        Column(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_clessidra),
+                    contentDescription = null,
+                    tint = Color(0xFFE5A93C),
+                    modifier = Modifier.size(15.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text(
+                    text = stringResource(R.string.search_mood_exhausted_title).uppercase(),
+                    color = Color(0xFFE5A93C),
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = rtlSafeLetterSpacing(0.8.sp)
+                )
+            }
+            Spacer(modifier = Modifier.height(6.dp))
+            Text(
+                text = stringResource(R.string.search_mood_exhausted_notice),
+                color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.75f),
+                fontSize = 12.sp,
+                lineHeight = 16.sp
+            )
+            if (isLocalEligible) {
+                Spacer(modifier = Modifier.height(10.dp))
+                Row(
+                    modifier = Modifier
+                        .bounceClick(scaleDown = 0.95f) { onSwitchToAlgorithm() }
+                        .clip(CircleShape)
+                        .background(Color(0xFFE5A93C).copy(alpha = 0.16f))
+                        .border(1.dp, Color(0xFFE5A93C).copy(alpha = 0.35f), CircleShape)
+                        .padding(horizontal = 14.dp, vertical = 7.dp),
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                        contentDescription = null,
+                        tint = Color(0xFFE5A93C),
+                        modifier = Modifier.size(13.dp)
+                    )
+                    Spacer(modifier = Modifier.width(6.dp))
+                    Text(
+                        text = stringResource(R.string.search_mood_switch_to_algo).uppercase(),
+                        color = Color(0xFFE5A93C),
+                        fontSize = 10.5.sp,
+                        fontWeight = FontWeight.Bold,
+                        letterSpacing = rtlSafeLetterSpacing(0.8.sp)
+                    )
+                }
+            }
+        }
     }
 }
