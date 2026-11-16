@@ -437,8 +437,8 @@ class LocalMoodSearchEngine @Inject constructor(
             id = "roaring_twenties_wealth",
             nameIt = "Ruggenti Anni '20 & Magnati",
             nameEn = "Roaring Twenties & Wealth",
-            triggersIt = listOf("anni 20", "anni '20", "anni venti", "anni ruggenti", "uomo ricco", "grande gatsby", "gatsby", "magnate", "roaring twenties", "quarto potere"),
-            triggersEn = listOf("roaring twenties", "1920s", "rich man 1920s", "wealthy tycoon", "great gatsby", "gatsby style", "citizen kane style"),
+            triggersIt = listOf("anni 20", "anni '20", "anni venti", "anni ruggenti", "i 20", "i '20", "i venti", "uomo ricco", "grande gatsby", "gatsby", "magnate", "roaring twenties", "quarto potere"),
+            triggersEn = listOf("roaring twenties", "1920s", "the 20s", "the 20's", "twenties", "rich man 1920s", "wealthy tycoon", "great gatsby", "gatsby style", "citizen kane style"),
             primaryGenres = listOf(18L, 36L, 10749L),
             secondaryGenres = listOf(80L),
             mandatoryKeywords = listOf(207876L, 10329L, 257265L),
@@ -446,6 +446,22 @@ class LocalMoodSearchEngine @Inject constructor(
             anchorMovieIds = listOf(64682L, 15L, 7345L, 11034L, 804095L),
             rationaleTemplateIt = "Feste sfarzose, l'opulenza effimera dei ruggenti anni '20 e la tragica caduta di un magnate enigmatico.",
             rationaleTemplateEn = "Lavish parties, fleeting Roaring Twenties wealth, and the tragic demise of an enigmatic tycoon."
+        ),
+
+        // --- FINALE TRAGICO & MORTE DEL PROTAGONISTA ---
+        CinematicArchetype(
+            id = "tragic_hero_demise",
+            nameIt = "Finale Tragico & Eroi che Cadono",
+            nameEn = "Tragic Ending & Fall of the Hero",
+            triggersIt = listOf("muore alla fine", "muore alla fine del film", "morte alla fine", "muore alla fine della storia", "finale tragico", "morte del protagonista", "il protagonista muore", "sacrificio finale", "tragedia finale"),
+            triggersEn = listOf("dies at the end", "dies at the end of the movie", "dies at the end of the film", "death at the end", "tragic ending", "hero dies at the end", "protagonist dies", "final sacrifice"),
+            primaryGenres = listOf(18L),
+            secondaryGenres = listOf(80L, 53L, 36L),
+            mandatoryKeywords = listOf(34079L, 209592L),
+            secondaryKeywords = listOf(9872L, 10744L),
+            anchorMovieIds = listOf(64682L, 98L, 903L, 14L, 101L, 1422L, 597L),
+            rationaleTemplateIt = "Un arco narrativo straziante e memorabile, culminante in un epilogo drammatico e indimenticabile.",
+            rationaleTemplateEn = "A poignant and heartbreaking narrative arc culminating in a devastating, unforgettable finale."
         )
     )
 
@@ -526,7 +542,7 @@ class LocalMoodSearchEngine @Inject constructor(
         page: Int = 1,
         isQuotaExhaustedFallback: Boolean = false
     ): MoodSearchResultData {
-        val cleanQuery = query.trim().lowercase(Locale.ROOT)
+        val cleanQuery = query.trim().take(1000).lowercase(Locale.ROOT)
         // Detect whether the query is Italian, regardless of system locale settings
         val isItalian = detectItalian(cleanQuery, language)
         val tmdbLang = if (isItalian) "it-IT" else "en-US"
@@ -857,12 +873,6 @@ class LocalMoodSearchEngine @Inject constructor(
                 thematicRelevanceScore += 25.0
             }
 
-            // B. Keyword Matches
-            val movieKwOverlap = movieGenres.count { distinctKeywords.contains(it) }
-            if (movieKwOverlap > 0) {
-                thematicRelevanceScore += (movieKwOverlap * 15.0)
-            }
-
             // C. Semantic Overview & Title Alignment
             val overviewLower = (m.overview ?: "").lowercase(Locale.ROOT)
             val titleLower = (m.title ?: "").lowercase(Locale.ROOT)
@@ -884,14 +894,14 @@ class LocalMoodSearchEngine @Inject constructor(
 
             // HARD GATE: ZERO THEMATIC RELEVANCE -> STRICT EXCLUSION!
             // Quality score (Bayesian) must NEVER allow a completely unrelated movie to pass!
-            // A movie must have substantive grounding: Anchor, Primary Genre Match, Keyword Match, or Text Token Match!
+            // A movie must have substantive grounding: Anchor, Primary Genre Match, or Text Token Match!
             val primaryOverlap = if (primaryArchetype != null) {
                 movieGenres.count { primaryArchetype.primaryGenres.contains(it) }
             } else if (distinctGenres.isNotEmpty()) {
                 movieGenres.count { distinctGenres.contains(it) }
             } else 0
             val isAnchor = primaryArchetype?.anchorMovieIds?.contains(m.id) == true
-            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || movieKwOverlap > 0 || matchedTokenCount > 0
+            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || matchedTokenCount > 0
 
             if (!hasSubstantiveThematicGrounding || thematicRelevanceScore <= 0.0) {
                 return@mapNotNull null
@@ -1113,7 +1123,7 @@ class LocalMoodSearchEngine @Inject constructor(
         if (containsWholeWordOrPhrase(q, t)) return true
 
         // If multi-word trigger, check if all significant words match in sequence or proximity
-        val tWords = t.split(" ").filter { it.length >= 3 }
+        val tWords = t.split(" ").filter { it.length >= 3 || it.matches(Regex("""\d{2}""")) }
         if (tWords.size > 1) {
             return tWords.all { word ->
                 containsWholeWordOrPhrase(q, word) || fuzzyMatchTokenInQuery(q, word)

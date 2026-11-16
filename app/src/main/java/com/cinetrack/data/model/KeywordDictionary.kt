@@ -665,6 +665,7 @@ object KeywordDictionary {
         "muore" to 34079L, "morto" to 34079L, "morire" to 34079L, "morte" to 34079L,
         "ricco" to 10329L, "ricchi" to 10329L, "uomo ricco" to 10329L, "magnate" to 10329L, "ricchezza" to 10329L,
         "anni 20" to 207876L, "anni '20" to 207876L, "anni venti" to 207876L, "anni ruggenti" to 257265L,
+        "i 20" to 207876L, "i '20" to 207876L, "i venti" to 207876L,
         "fine del film" to 209592L,
         "soldati" to 13065L, "soldato" to 13065L,
         "linee nemiche" to 1956L, "dietro le linee nemiche" to 1956L,
