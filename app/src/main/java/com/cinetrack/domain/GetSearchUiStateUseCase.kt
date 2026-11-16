@@ -35,34 +35,49 @@ class GetSearchUiStateUseCase @Inject constructor() {
         val query = currentState.query
 
         val filteredResults = results.applyFilter(sortConfig).let { list ->
+            // In Cinema Mood Discovery, exclude films and series that the user has already watched
+            val unWatchedList = if (category == "mood") {
+                val watchedKeys = localMovies
+                    .filter { it.watched || (it.mediaType == "tv" && it.isTvUpToDateOrCompleted()) || it.watchedAt != null }
+                    .flatMap { listOf("${it.id}_${it.mediaType}", "${it.mediaType}_${it.id}", "${it.id}") }
+                    .toSet()
+                list.filter { item ->
+                    "${item.id}_${item.mediaType}" !in watchedKeys &&
+                    "${item.mediaType}_${item.id}" !in watchedKeys &&
+                    "${item.id}" !in watchedKeys
+                }
+            } else {
+                list
+            }
+
             val isDesc = sortConfig.sortDirection == "desc"
             val localMoviesMap = localMovies.associateBy { "${it.id}_${it.mediaType}" }
             
             when (sortConfig.sortType) {
                 "vote_average" -> {
-                    if (isDesc) list.sortedByDescending { it.voteAverage }
-                    else list.sortedBy { it.voteAverage }
+                    if (isDesc) unWatchedList.sortedByDescending { it.voteAverage }
+                    else unWatchedList.sortedBy { it.voteAverage }
                 }
                 "personal_rating" -> {
                     if (isDesc) {
-                        list.sortedByDescending { result ->
+                        unWatchedList.sortedByDescending { result ->
                             localMoviesMap["${result.id}_${result.mediaType}"]?.personalRating ?: 0.0
                         }
                     } else {
-                        list.sortedBy { result ->
+                        unWatchedList.sortedBy { result ->
                             localMoviesMap["${result.id}_${result.mediaType}"]?.personalRating ?: 0.0
                         }
                     }
                 }
                 "release_date" -> {
-                    if (isDesc) list.sortedByDescending { it.releaseDate }
-                    else list.sortedBy { it.releaseDate }
+                    if (isDesc) unWatchedList.sortedByDescending { it.releaseDate }
+                    else unWatchedList.sortedBy { it.releaseDate }
                 }
                 "title" -> {
-                    if (isDesc) list.sortedByDescending { it.title }
-                    else list.sortedBy { it.title }
+                    if (isDesc) unWatchedList.sortedByDescending { it.title }
+                    else unWatchedList.sortedBy { it.title }
                 }
-                else -> list
+                else -> unWatchedList
             }
         }
 
