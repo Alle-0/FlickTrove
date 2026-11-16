@@ -602,11 +602,13 @@ class LocalMoodSearchEngine @Inject constructor(
         // 3. Keyword Extraction with Strict Boundaries & Dynamic TMDB Resolution
         val dictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "it" else "en")
         val fallbackDictionary = KeywordDictionary.getDictionaryForLanguage(if (isItalian) "en" else "it")
+        val querySynonyms = KeywordDictionary.getQuerySynonymsForLanguage(if (isItalian) "it" else "en")
+        val fallbackQuerySynonyms = KeywordDictionary.getQuerySynonymsForLanguage(if (isItalian) "en" else "it")
         val matchedKeywords = mutableListOf<Long>()
         val contentTokens = extractSignificantContentTokens(cleanQuery, isItalian)
 
         for (token in contentTokens) {
-            val kwId = dictionary[token] ?: fallbackDictionary[token]
+            val kwId = querySynonyms[token] ?: dictionary[token] ?: fallbackQuerySynonyms[token] ?: fallbackDictionary[token]
             if (kwId != null && !matchedKeywords.contains(kwId)) {
                 matchedKeywords.add(kwId)
             }
@@ -614,7 +616,11 @@ class LocalMoodSearchEngine @Inject constructor(
 
         // Dynamic Keyword Resolution via TMDB searchKeyword API (with Italian->English token mapping)
         val unmappedTokens = contentTokens.filter { token ->
-            !token.contains(" ") && token.length >= 4 && !dictionary.containsKey(token) && !fallbackDictionary.containsKey(token)
+            !token.contains(" ") && token.length >= 4 &&
+                !querySynonyms.containsKey(token) &&
+                !dictionary.containsKey(token) &&
+                !fallbackQuerySynonyms.containsKey(token) &&
+                !fallbackDictionary.containsKey(token)
         }.take(3)
 
         if (unmappedTokens.isNotEmpty()) {

@@ -3,14 +3,9 @@ package com.cinetrack.data.model
 object KeywordDictionary {
     // Mappa massiva generata di parole chiave (1.185 voci in italiano, 1.193 in inglese per 1.125 ID TMDB unici)
     val italianToTmdbKeywordIds = mapOf(
-        "arena" to 1395L, "gladiatore" to 1394L, "gladiatori" to 1394L, "colosseo" to 1395L,
-        "soldati" to 13065L, "soldato" to 13065L, "linee nemiche" to 1956L, "dietro le linee nemiche" to 1956L,
-        "intrappolati" to 271689L, "intrappolato" to 271689L, "squalo" to 275172L, "squali" to 275172L,
-        "libellula" to 286709L, "torneo mortale" to 282498L,
-        "anni 20" to 207876L, "anni '20" to 207876L, "anni venti" to 207876L,
-        "ricco" to 10329L, "ricchi" to 10329L, "uomo ricco" to 10329L, "magnate" to 10329L,
-        "muore" to 34079L, "morto" to 34079L, "morire" to 34079L,
-        "fine del film" to 209592L,
+        "arena" to 1395L, "gladiatore" to 1394L, "soldato" to 13065L,
+        "intrappolato" to 271689L, "squalo" to 275172L, "libellula" to 286709L,
+        "torneo mortale" to 282498L, "anni '20" to 207876L,
         "poliziottesco" to 6149L, "giallo all'italiana" to 190479L, "giallo" to 12570L, "splatter" to 10292L,
         "folk horror" to 10310L, "cosmic horror" to 177895L, "body horror" to 283085L, "lovecraftiano" to 177895L,
         "peplum" to 5049L, "cappa e spada" to 1400L, "wuxia" to 779L, "space opera" to 195114L,
@@ -323,13 +318,9 @@ object KeywordDictionary {
     )
 
     val englishToTmdbKeywordIds = mapOf(
-        "arena" to 1395L, "gladiator" to 1394L, "gladiators" to 1394L, "colosseum" to 1395L,
-        "soldiers" to 13065L, "soldier" to 13065L, "behind enemy lines" to 1956L, "enemy lines" to 1956L,
-        "trapped" to 271689L, "dragonfly" to 286709L, "death match" to 282498L, "survival tournament" to 282498L,
-        "tournament" to 12563L, "shark" to 275172L,
-        "1920s" to 207876L, "20s" to 207876L, "roaring twenties" to 257265L,
-        "rich" to 10329L, "wealth" to 10329L, "wealthy" to 10329L, "rich man" to 10329L, "tycoon" to 10329L,
-        "dies" to 34079L, "death" to 34079L, "dying" to 34079L,
+        "arena" to 1395L, "gladiator" to 1394L, "soldier" to 13065L,
+        "trapped" to 271689L, "dragonfly" to 286709L, "death match" to 282498L,
+        "tournament" to 12563L, "shark" to 275172L, "1920s" to 207876L,
         "dystopia" to 4565L, "space" to 9882L, "aliens" to 9951L, "post-apocalyptic" to 359337L,
         "cyberpunk" to 12190L, "robot" to 14544L, "time travel" to 4379L, "magic" to 2343L,
         "witches" to 616L, "dragon" to 12554L, "superheroes" to 9715L, "cloning" to 11628L,
@@ -668,6 +659,38 @@ object KeywordDictionary {
         "treno" to "train",
         "nave" to "ship", "naufragio" to "shipwreck"
     )
+
+    // Dizionario di ricerca N:1 per forme flesse, verbi e variazioni colloquiali (separato dal dizionario canonico 1:1)
+    val italianQuerySynonyms: Map<String, Long> = mapOf(
+        "muore" to 34079L, "morto" to 34079L, "morire" to 34079L, "morte" to 34079L,
+        "ricco" to 10329L, "ricchi" to 10329L, "uomo ricco" to 10329L, "magnate" to 10329L, "ricchezza" to 10329L,
+        "anni 20" to 207876L, "anni '20" to 207876L, "anni venti" to 207876L, "anni ruggenti" to 257265L,
+        "fine del film" to 209592L,
+        "soldati" to 13065L, "soldato" to 13065L,
+        "linee nemiche" to 1956L, "dietro le linee nemiche" to 1956L,
+        "intrappolati" to 271689L, "intrappolato" to 271689L,
+        "gladiatore" to 1394L, "gladiatori" to 1394L, "arena" to 1395L, "colosseo" to 1395L,
+        "libellula" to 286709L, "torneo mortale" to 282498L,
+        "squalo" to 275172L, "squali" to 275172L,
+        "sottomarino" to 1815L, "sommergibile" to 1815L
+    )
+
+    val englishQuerySynonyms: Map<String, Long> = mapOf(
+        "dies" to 34079L, "death" to 34079L, "dying" to 34079L, "dead" to 34079L,
+        "rich" to 10329L, "wealth" to 10329L, "wealthy" to 10329L, "rich man" to 10329L, "tycoon" to 10329L,
+        "1920s" to 207876L, "20s" to 207876L, "roaring twenties" to 257265L,
+        "end of the movie" to 209592L,
+        "soldiers" to 13065L, "soldier" to 13065L,
+        "behind enemy lines" to 1956L, "enemy lines" to 1956L,
+        "trapped" to 271689L,
+        "gladiator" to 1394L, "gladiators" to 1394L, "arena" to 1395L, "colosseum" to 1395L,
+        "dragonfly" to 286709L, "death match" to 282498L, "survival tournament" to 282498L,
+        "shark" to 275172L, "sharks" to 275172L
+    )
+
+    fun getQuerySynonymsForLanguage(language: String): Map<String, Long> {
+        return if (language.startsWith("it")) italianQuerySynonyms else englishQuerySynonyms
+    }
 
     fun getLocalizedKeywordName(keywordId: Long, language: String, fallbackName: String? = null): String? {
         val dict = getDictionaryForLanguage(language)
