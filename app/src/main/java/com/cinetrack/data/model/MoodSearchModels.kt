@@ -55,8 +55,35 @@ data class MoodMovieItemDto(
 data class MoodHistoryEntry(
     val query: String,
     val timestamp: Long = System.currentTimeMillis(),
-    val vibeTitle: String,
-    val vibeDescription: String,
+    val vibeTitle: String = "Atmosfera Cinematografica",
+    val vibeDescription: String = "",
     val isAi: Boolean = true,
-    val movies: List<TMDBSearchResult.MovieResult> = emptyList()
-)
+    val movies: List<TMDBSearchResult.MovieResult> = emptyList(),
+    val aiVibeTitle: String? = null,
+    val aiVibeDescription: String? = null,
+    val aiMovies: List<TMDBSearchResult.MovieResult>? = null,
+    val algoVibeTitle: String? = null,
+    val algoVibeDescription: String? = null,
+    val algoMovies: List<TMDBSearchResult.MovieResult>? = null
+) {
+    fun hasAi(): Boolean = !aiMovies.isNullOrEmpty() || (isAi && movies.isNotEmpty())
+    fun hasAlgo(): Boolean = !algoMovies.isNullOrEmpty() || (!isAi && movies.isNotEmpty())
+
+    fun getAiResults(): List<TMDBSearchResult.MovieResult> =
+        aiMovies ?: if (isAi) movies else emptyList()
+
+    fun getAlgoResults(): List<TMDBSearchResult.MovieResult> =
+        algoMovies ?: if (!isAi) movies else emptyList()
+
+    fun getAiVibeTitle(): String =
+        aiVibeTitle ?: if (isAi) vibeTitle else "Atmosfera Cinematografica"
+
+    fun getAiVibeDescription(): String =
+        aiVibeDescription ?: if (isAi) vibeDescription else ""
+
+    fun getAlgoVibeTitle(): String =
+        algoVibeTitle ?: if (!isAi) vibeTitle else "Atmosfera Cinematografica"
+
+    fun getAlgoVibeDescription(): String =
+        algoVibeDescription ?: if (!isAi) vibeDescription else ""
+}

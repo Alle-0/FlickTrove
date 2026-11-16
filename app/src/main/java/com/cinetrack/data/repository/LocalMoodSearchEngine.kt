@@ -26,6 +26,55 @@ class LocalMoodSearchEngine @Inject constructor(
     private val anchorDetailsCache = ConcurrentHashMap<Long, Movie>()
     private val keywordResolutionCache = ConcurrentHashMap<String, Long>()
 
+    private val stopwordsIt = setOf(
+        "un", "uno", "una", "dei", "degli", "delle", "il", "lo", "la", "i", "gli", "le",
+        "in", "su", "a", "da", "con", "senza", "per", "tra", "fra", "di", "del", "dello", "della",
+        "sul", "sullo", "sulla", "sui", "sugli", "sulle", "nel", "nello", "nella", "nei", "negli", "nelle",
+        "dal", "dallo", "dalla", "dai", "dagli", "dalle", "al", "allo", "alla", "agli", "alle", "col",
+        "che", "chi", "cui", "dove", "come", "quando", "cosa", "perché", "perche",
+        "film", "cinema", "pellicola", "storia", "racconto", "tipo", "stile", "genere", "simile",
+        "vorrei", "vedere", "consigliami", "cercami", "mostrami",
+        "trovami", "consigli", "qualcosa", "bello", "belli", "famoso", "famosi", "migliori", "migliore",
+        "diventa", "diventare", "diventano", "essere", "stato", "sono", "ha", "hanno", "chi", "quale", "quali",
+        "persone", "persona", "gente", "qualcuno", "alcuni", "alcune", "uomo", "uomini", "donna", "donne",
+        "ragazzo", "ragazzi", "ragazza", "ragazze", "tutti", "tutto", "tutta", "tutte", "molti", "molte",
+        "ogni", "ciascuno", "altro", "altri", "altre", "loro", "essi", "esse", "cose", "fanno", "fa", "fare", "guarda", "guardare",
+        "porta", "portare", "portano", "portato",
+        "trova", "trovare", "trovano", "trovato",
+        "cerca", "cercare", "cercano", "cercato",
+        "scopre", "scoprire", "scoprono", "scoperto",
+        "inizia", "iniziare", "iniziano", "iniziato",
+        "prova", "provare", "provano", "provato",
+        "torna", "tornare", "tornano", "tornato", "tornerà", "tornera",
+        "lascia", "lasciare", "lasciano", "lasciato",
+        "vive", "vivere", "vivono", "vissuto",
+        "mette", "mettere", "mettono", "messo",
+        "decide", "decidere", "decidono", "deciso",
+        "vuole", "volere", "possono", "potere", "dovrebbe"
+    )
+
+    private val stopwordsEn = setOf(
+        "a", "an", "the", "in", "on", "at", "to", "for", "with", "without", "by", "from",
+        "about", "into", "through", "of", "movie", "movies", "film", "films", "cinema",
+        "flick", "flicks", "show", "story", "something", "like", "type", "kind", "style",
+        "similar", "want", "looking", "recommend", "find", "best", "good", "great", "top",
+        "that", "this", "these", "those", "who", "whom", "whose", "which", "what", "where",
+        "when", "why", "how", "become", "becomes", "became", "becoming", "turned", "turns",
+        "turning", "get", "gets", "got", "getting", "is", "are", "was", "were", "be", "been",
+        "being", "have", "has", "had", "having", "do", "does", "did", "doing", "can", "could",
+        "will", "would", "shall", "should", "may", "might", "must",
+        "some", "people", "someone", "somebody", "anyone", "anybody", "everyone", "everybody",
+        "person", "persons", "man", "men", "woman", "women", "boy", "boys", "girl", "girls",
+        "guy", "guys", "folk", "folks", "they", "them", "their", "theirs", "one", "ones",
+        "many", "much", "few", "all", "any", "every", "other", "others", "lot", "lots",
+        "bunch", "thing", "things", "stuff", "watch", "watching", "see", "seeing",
+        "brings", "bring", "brought", "finds", "find", "found",
+        "seeks", "seek", "sought", "discovers", "discover", "discovered",
+        "begins", "begin", "begun", "tries", "try", "tried",
+        "returns", "return", "returned", "leaves", "leave", "left",
+        "lives", "live", "lived", "decides", "decide", "decided"
+    )
+
     data class ParsedQueryIntent(
         val positiveText: String,
         val negatedText: String?,
@@ -62,6 +111,29 @@ class LocalMoodSearchEngine @Inject constructor(
     )
 
     private val archetypeCatalog: List<CinematicArchetype> = listOf(
+        // --- VIAGGIO DELL'EROE, ODISSEA & RITORNO A CASA ---
+        CinematicArchetype(
+            id = "hero_quest_journey_home",
+            nameIt = "Viaggio dell'Eroe & Ritorno a Casa",
+            nameEn = "The Hero's Quest & Epic Journey Home",
+            triggersIt = listOf(
+                "viaggio epico", "epico", "epica", "odissea", "viaggio verso casa",
+                "ritorno a casa", "viaggio a casa", "porta a casa", "viaggio dell'eroe",
+                "missione epica", "avventura epica", "lungo viaggio per tornare", "strada di casa"
+            ),
+            triggersEn = listOf(
+                "epic journey", "epic quest", "odyssey", "journey home", "quest",
+                "hero's journey", "epic adventure", "way back home", "epic voyage", "voyage home"
+            ),
+            primaryGenres = listOf(12L), // Adventure
+            secondaryGenres = listOf(14L, 878L, 18L), // Fantasy, Sci-Fi, Drama
+            mandatoryKeywords = listOf(209374L, 372264L, 9935L), // hero's journey, epic adventure, travel
+            secondaryKeywords = listOf(188270L, 4379L, 3801L), // epic battle, time travel, space travel
+            anchorMovieIds = listOf(120L, 122L, 157336L, 568L, 8358L, 424L), // LotR Fellowship, Return of the King, Interstellar, Apollo 13, Cast Away, O Brother
+            rationaleTemplateIt = "Una grandiosa odissea di avventura e coraggio in cui il viaggio stesso trasforma l'eroe verso la salvezza o il ritorno a casa.",
+            rationaleTemplateEn = "A majestic odyssey of discovery and courage where the journey itself transforms the hero in an epic quest toward home."
+        ),
+
         // --- MAGIA, ILLUSIONISMO & PRESTIGIATORI ---
         CinematicArchetype(
             id = "magic_illusionist",
@@ -648,15 +720,15 @@ class LocalMoodSearchEngine @Inject constructor(
             }
             val triggers = if (isItalian) archetype.triggersIt else archetype.triggersEn
             val alternateTriggers = if (isItalian) archetype.triggersEn else archetype.triggersIt
-            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) } ||
-            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) }
+            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, isItalian) } ||
+            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, !isItalian) }
         }
 
         val matchedAtmospheres = atmosphereCatalog.filter { atm ->
             val triggers = if (isItalian) atm.triggersIt else atm.triggersEn
             val alternateTriggers = if (isItalian) atm.triggersEn else atm.triggersIt
-            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) } ||
-            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger) }
+            triggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, isItalian) } ||
+            alternateTriggers.any { trigger -> matchesWordOrFuzzy(positiveQuery, trigger, !isItalian) }
         }
 
         // 3. Keyword & Genre Extraction with Strict Boundaries, Morphological Stemming & Fuzzy Typo Tolerance
@@ -1202,36 +1274,6 @@ class LocalMoodSearchEngine @Inject constructor(
     }
 
     private fun extractSignificantContentTokens(query: String, isItalian: Boolean): List<String> {
-        val stopwordsIt = setOf(
-            "un", "uno", "una", "dei", "degli", "delle", "il", "lo", "la", "i", "gli", "le",
-            "in", "su", "a", "da", "con", "senza", "per", "tra", "fra", "di", "del", "dello", "della",
-            "sul", "sullo", "sulla", "sui", "sugli", "sulle", "nel", "nello", "nella", "nei", "negli", "nelle",
-            "dal", "dallo", "dalla", "dai", "dagli", "dalle", "al", "allo", "alla", "agli", "alle", "col",
-            "che", "chi", "cui", "dove", "come", "quando", "cosa", "perché", "perche",
-            "film", "cinema", "pellicola", "storia", "racconto", "tipo", "stile", "genere", "simile",
-            "vorrei", "vedere", "consigliami", "cercami", "mostrami",
-            "trovami", "consigli", "qualcosa", "bello", "belli", "famoso", "famosi", "migliori", "migliore",
-            "diventa", "diventare", "diventano", "essere", "stato", "sono", "ha", "hanno", "chi", "quale", "quali",
-            "persone", "persona", "gente", "qualcuno", "alcuni", "alcune", "uomo", "uomini", "donna", "donne",
-            "ragazzo", "ragazzi", "ragazza", "ragazze", "tutti", "tutto", "tutta", "tutte", "molti", "molte",
-            "ogni", "ciascuno", "altro", "altri", "altre", "loro", "essi", "esse", "cose", "fanno", "fa", "fare", "guarda", "guardare"
-        )
-        val stopwordsEn = setOf(
-            "a", "an", "the", "in", "on", "at", "to", "for", "with", "without", "by", "from",
-            "about", "into", "through", "of", "movie", "movies", "film", "films", "cinema",
-            "flick", "flicks", "show", "story", "something", "like", "type", "kind", "style",
-            "similar", "want", "looking", "recommend", "find", "best", "good", "great", "top",
-            "that", "this", "these", "those", "who", "whom", "whose", "which", "what", "where",
-            "when", "why", "how", "become", "becomes", "became", "becoming", "turned", "turns",
-            "turning", "get", "gets", "got", "getting", "is", "are", "was", "were", "be", "been",
-            "being", "have", "has", "had", "having", "do", "does", "did", "doing", "can", "could",
-            "will", "would", "shall", "should", "may", "might", "must",
-            "some", "people", "someone", "somebody", "anyone", "anybody", "everyone", "everybody",
-            "person", "persons", "man", "men", "woman", "women", "boy", "boys", "girl", "girls",
-            "guy", "guys", "folk", "folks", "they", "them", "their", "theirs", "one", "ones",
-            "many", "much", "few", "all", "any", "every", "other", "others", "lot", "lots",
-            "bunch", "thing", "things", "stuff", "watch", "watching", "see", "seeing"
-        )
         val stopwords = if (isItalian) stopwordsIt else stopwordsEn
 
         val allWords = Regex("""\b\w+\b""")
@@ -1250,7 +1292,7 @@ class LocalMoodSearchEngine @Inject constructor(
         return (unigrams + bigrams + trigrams).distinct()
     }
 
-    private fun matchesWordOrFuzzy(query: String, target: String): Boolean {
+    private fun matchesWordOrFuzzy(query: String, target: String, isItalian: Boolean = true): Boolean {
         val q = query.lowercase(Locale.ROOT)
         val t = target.lowercase(Locale.ROOT)
         if (containsWholeWordOrPhrase(q, t)) return true
@@ -1259,22 +1301,29 @@ class LocalMoodSearchEngine @Inject constructor(
         val tWords = t.split(" ").filter { it.length >= 3 || it.matches(Regex("""\d{2}""")) }
         if (tWords.size > 1) {
             return tWords.all { word ->
-                containsWholeWordOrPhrase(q, word) || fuzzyMatchTokenInQuery(q, word)
+                containsWholeWordOrPhrase(q, word) || fuzzyMatchTokenInQuery(q, word, isItalian)
             }
         }
 
         // Fuzzy match single token only
-        return fuzzyMatchTokenInQuery(q, t)
+        return fuzzyMatchTokenInQuery(q, t, isItalian)
     }
 
-    private fun fuzzyMatchTokenInQuery(query: String, target: String): Boolean {
+    private fun fuzzyMatchTokenInQuery(query: String, target: String, isItalian: Boolean = true): Boolean {
+        val stopwords = if (isItalian) stopwordsIt else stopwordsEn
         val queryTokens = Regex("""\b\w+\b""").findAll(query).map { it.value }
         for (token in queryTokens) {
             if (token == target) return true
+            // Hard guards against false positive typos:
+            // 1. Tokens under 4 letters must NEVER fuzzy match (prevents "che" -> "chef", "per" -> "war", etc.)
+            // 2. Stopwords must NEVER fuzzy match content targets
+            if (token.length < 4 || target.length < 4 || stopwords.contains(token)) continue
             val lenDiff = abs(token.length - target.length)
             val dist = damerauLevenshtein(token, target)
-            if (target.length in 4..6 && lenDiff <= 1 && dist <= 1) return true
-            if (target.length >= 7 && lenDiff <= 2 && dist <= 2) return true
+            // For short words (4-5 letters), require EXACT same length (only 1 typo/substitution, no deletions like "che"->"chef")
+            if (target.length in 4..5 && lenDiff == 0 && dist <= 1) return true
+            if (target.length in 6..7 && lenDiff <= 1 && dist <= 1) return true
+            if (target.length >= 8 && lenDiff <= 2 && dist <= 2) return true
         }
         return false
     }
@@ -1719,20 +1768,17 @@ class LocalMoodSearchEngine @Inject constructor(
                 }
             }
 
-            // Multi-word phrase bonus: if bigrams/trigrams from query appear sequentially in title or overview
-            val cleanQueryPhrase = queryTokens.joinToString(" ").lowercase(Locale.ROOT)
-            if (queryTokens.size >= 2 && cleanQueryPhrase.length >= 5) {
-                if (doc.rawTitle.contains(cleanQueryPhrase)) {
-                    docScore += 18.0
-                } else if (doc.rawOverview.contains(cleanQueryPhrase)) {
-                    docScore += 12.0
-                } else {
-                    val windowedPairs = queryTokens.windowed(2).map { it.joinToString(" ").lowercase(Locale.ROOT) }
-                    for (pair in windowedPairs) {
-                        if (pair.length >= 5) {
-                            if (doc.rawTitle.contains(pair)) docScore += 8.0
-                            else if (doc.rawOverview.contains(pair)) docScore += 5.0
-                        }
+            // Multi-word N-gram scoring: if bigrams or trigrams from the query appear contiguously
+            // in title or overview, apply massive bonus (defeats movies that only have scattered words)
+            val multiWordPhrases = queryTokens.filter { it.contains(" ") && it.length >= 5 }.distinct()
+            for (phrase in multiWordPhrases) {
+                val phraseEn = KeywordDictionary.italianToEnglishSearchTokens[phrase]
+                val searchTargets = listOfNotNull(phrase, phraseEn).map { it.lowercase(Locale.ROOT) }
+                for (target in searchTargets) {
+                    if (doc.rawTitle.contains(target)) {
+                        docScore += 22.0
+                    } else if (doc.rawOverview.contains(target)) {
+                        docScore += 16.0
                     }
                 }
             }
