@@ -55,12 +55,12 @@ class MoodSearchRepository @Inject constructor(
         val trimmedQuery = query.trim()
         val localEligible = isLocalEligible(language)
         val remaining = preferenceRepository.getMoodSearchesRemaining()
-        val isRequestedAi = !forceLocal && remaining > 0
+        val wantAi = !forceLocal
 
         // 0. Cache Hit Check: If this exact query was already searched and cached FOR THIS ENGINE, return it directly!
-        // (Zero network, zero AI token consumption, 100% offline-ready)
+        // (Zero network, zero AI token consumption, 100% offline-ready - works even if remaining quota is 0!)
         if (page == 1 && !bypassCache) {
-            val cached = moodHistoryRepository.getCachedEntry(trimmedQuery, isAi = isRequestedAi)
+            val cached = moodHistoryRepository.getCachedEntry(trimmedQuery, isAi = wantAi)
             if (cached != null && cached.movies.isNotEmpty()) {
                 return@runCatching MoodSearchResultData(
                     vibeTitle = cached.vibeTitle,

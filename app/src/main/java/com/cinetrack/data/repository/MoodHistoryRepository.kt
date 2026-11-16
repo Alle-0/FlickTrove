@@ -43,27 +43,35 @@ class MoodHistoryRepository @Inject constructor(
     }
 
     fun saveEntry(entry: MoodHistoryEntry) {
-        scope.launch {
+        val trimmed = synchronized(this) {
             val current = _historyFlow.value.toMutableList()
             current.removeAll { it.query.equals(entry.query.trim(), ignoreCase = true) && it.isAi == entry.isAi }
             current.add(0, entry)
-            val trimmed = current.take(MAX_HISTORY_ENTRIES)
-            _historyFlow.value = trimmed
+            val list = current.take(MAX_HISTORY_ENTRIES)
+            _historyFlow.value = list
+            list
+        }
+        scope.launch {
             persist(trimmed)
         }
     }
 
     fun deleteEntry(query: String) {
+        val updated = synchronized(this) {
+            val list = _historyFlow.value.filterNot { it.query.equals(query.trim(), ignoreCase = true) }
+            _historyFlow.value = list
+            list
+        }
         scope.launch {
-            val updated = _historyFlow.value.filterNot { it.query.equals(query.trim(), ignoreCase = true) }
-            _historyFlow.value = updated
             persist(updated)
         }
     }
 
     fun clearHistory() {
-        scope.launch {
+        synchronized(this) {
             _historyFlow.value = emptyList()
+        }
+        scope.launch {
             persist(emptyList())
         }
     }
