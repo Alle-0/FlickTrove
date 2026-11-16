@@ -115,6 +115,8 @@ data class UserPreferences(
     val gridColumns: Int = 3,
     val showLayoutToggle: Boolean = false,
     val isSearchSuggestionsExpanded: Boolean = true,
+    val isMoodRecentExpanded: Boolean = true,
+    val isMoodInspirationsExpanded: Boolean = true,
     val notificationsReleases: Boolean = true,
     val notificationsSocial: Boolean = true,
     val showFolderBookmarks: Boolean = true,

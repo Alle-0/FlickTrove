@@ -72,6 +72,8 @@ class PreferenceRepository @Inject constructor(
         val GRID_COLUMNS = intPreferencesKey("grid_columns")
         val SHOW_LAYOUT_TOGGLE = booleanPreferencesKey("show_layout_toggle")
         val IS_SEARCH_SUGGESTIONS_EXPANDED = booleanPreferencesKey("is_search_suggestions_expanded")
+        val IS_MOOD_RECENT_EXPANDED = booleanPreferencesKey("is_mood_recent_expanded")
+        val IS_MOOD_INSPIRATIONS_EXPANDED = booleanPreferencesKey("is_mood_inspirations_expanded")
         val NOTIFICATIONS_RELEASES = booleanPreferencesKey("notifications_releases")
         val NOTIFICATIONS_SOCIAL = booleanPreferencesKey("notifications_social")
         val SHOW_FOLDER_BOOKMARKS = booleanPreferencesKey("show_folder_bookmarks")
@@ -136,6 +138,8 @@ class PreferenceRepository @Inject constructor(
                 gridColumns = preferences[PreferencesKeys.GRID_COLUMNS] ?: 3,
                 showLayoutToggle = preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] ?: false,
                 isSearchSuggestionsExpanded = preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] ?: true,
+                isMoodRecentExpanded = preferences[PreferencesKeys.IS_MOOD_RECENT_EXPANDED] ?: true,
+                isMoodInspirationsExpanded = preferences[PreferencesKeys.IS_MOOD_INSPIRATIONS_EXPANDED] ?: true,
                 notificationsReleases = preferences[PreferencesKeys.NOTIFICATIONS_RELEASES] ?: true,
                 notificationsSocial = preferences[PreferencesKeys.NOTIFICATIONS_SOCIAL] ?: true,
                 showFolderBookmarks = preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] ?: true,
@@ -368,6 +372,8 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.GRID_COLUMNS] = prefs.gridColumns
             preferences[PreferencesKeys.SHOW_LAYOUT_TOGGLE] = prefs.showLayoutToggle
             preferences[PreferencesKeys.IS_SEARCH_SUGGESTIONS_EXPANDED] = prefs.isSearchSuggestionsExpanded
+            preferences[PreferencesKeys.IS_MOOD_RECENT_EXPANDED] = prefs.isMoodRecentExpanded
+            preferences[PreferencesKeys.IS_MOOD_INSPIRATIONS_EXPANDED] = prefs.isMoodInspirationsExpanded
             preferences[PreferencesKeys.NOTIFICATIONS_RELEASES] = prefs.notificationsReleases
             preferences[PreferencesKeys.NOTIFICATIONS_SOCIAL] = prefs.notificationsSocial
             preferences[PreferencesKeys.SHOW_FOLDER_BOOKMARKS] = prefs.showFolderBookmarks
@@ -400,6 +406,20 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.HOME_SECTION_ORDER] = com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(prefs.homeSectionOrder).joinToString(",")
             preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = prefs.allowMobileDataUpdates
             preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] = prefs.enableBottomBarSwipe
+            preferences[PreferencesKeys.IS_MOOD_RECENT_EXPANDED] = prefs.isMoodRecentExpanded
+            preferences[PreferencesKeys.IS_MOOD_INSPIRATIONS_EXPANDED] = prefs.isMoodInspirationsExpanded
+        }
+    }
+
+    suspend fun updateMoodRecentExpanded(expanded: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_MOOD_RECENT_EXPANDED] = expanded
+        }
+    }
+
+    suspend fun updateMoodInspirationsExpanded(expanded: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.IS_MOOD_INSPIRATIONS_EXPANDED] = expanded
         }
     }
 

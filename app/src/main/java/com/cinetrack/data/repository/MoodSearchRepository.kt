@@ -57,18 +57,22 @@ class MoodSearchRepository @Inject constructor(
         val remaining = preferenceRepository.getMoodSearchesRemaining()
         val wantAi = !forceLocal
 
-        // 0. Cache Hit Check: If this exact query was already searched and cached FOR THIS ENGINE, return it directly!
-        // (Zero network, zero AI token consumption, 100% offline-ready - works even if remaining quota is 0!)
-        if (page == 1 && !bypassCache) {
+        // 0. Cache Hit Check: Ricorda le ricerche fatte per almeno 24 ore (Zero network, zero consumo quote)
+        // Se non è bypassCache, OPPURE se la ricerca in cache è più recente di 24 ore (o quota a 0), riusa la cache!
+        if (page == 1) {
             val cached = moodHistoryRepository.getCachedEntry(trimmedQuery, isAi = wantAi)
             if (cached != null && cached.movies.isNotEmpty()) {
-                return@runCatching MoodSearchResultData(
-                    vibeTitle = cached.vibeTitle,
-                    vibeDescription = cached.vibeDescription,
-                    totalCount = cached.movies.size,
-                    totalPages = 1,
-                    movies = cached.movies
-                )
+                val ageMillis = System.currentTimeMillis() - cached.timestamp
+                val isUnder24Hours = ageMillis < 24 * 60 * 60 * 1000L
+                if (!bypassCache || isUnder24Hours || (wantAi && remaining <= 0)) {
+                    return@runCatching MoodSearchResultData(
+                        vibeTitle = cached.vibeTitle,
+                        vibeDescription = cached.vibeDescription,
+                        totalCount = cached.movies.size,
+                        totalPages = 1,
+                        movies = cached.movies
+                    )
+                }
             }
         }
 

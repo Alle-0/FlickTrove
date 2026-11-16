@@ -74,6 +74,8 @@ fun SearchContentGrid(
     onSelectMoodHistory: (com.cinetrack.data.model.MoodHistoryEntry) -> Unit = {},
     onDeleteMoodHistory: (String) -> Unit = {},
     onClearMoodHistory: () -> Unit = {},
+    onToggleMoodRecentExpanded: () -> Unit = {},
+    onToggleMoodInspirationsExpanded: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val shouldLoadMore = remember(gridState) {
@@ -191,7 +193,11 @@ fun SearchContentGrid(
                         moodHistory = uiState.moodHistory,
                         onSelectMoodHistory = onSelectMoodHistory,
                         onDeleteMoodHistory = onDeleteMoodHistory,
-                        onClearMoodHistory = onClearMoodHistory
+                        onClearMoodHistory = onClearMoodHistory,
+                        isRecentExpanded = uiState.preferences.isMoodRecentExpanded,
+                        isInspirationsExpanded = uiState.preferences.isMoodInspirationsExpanded,
+                        onToggleRecentExpanded = onToggleMoodRecentExpanded,
+                        onToggleInspirationsExpanded = onToggleMoodInspirationsExpanded
                     )
                 }
             }

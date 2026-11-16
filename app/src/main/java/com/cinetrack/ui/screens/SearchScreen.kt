@@ -426,7 +426,9 @@ fun SearchScreenContent(
                                     viewModel.selectMoodHistory(entry)
                                 },
                                 onDeleteMoodHistory = { viewModel.deleteMoodHistory(it) },
-                                onClearMoodHistory = { viewModel.clearMoodHistory() }
+                                onClearMoodHistory = { viewModel.clearMoodHistory() },
+                                onToggleMoodRecentExpanded = { viewModel.toggleMoodRecentExpanded() },
+                                onToggleMoodInspirationsExpanded = { viewModel.toggleMoodInspirationsExpanded() }
                             )
                         }
                     }

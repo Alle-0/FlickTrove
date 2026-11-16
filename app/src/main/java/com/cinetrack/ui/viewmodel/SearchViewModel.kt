@@ -1080,6 +1080,28 @@ class SearchViewModel @Inject constructor(
             }
         }
     }
+
+    fun toggleMoodRecentExpanded() {
+        val current = _uiState.value.preferences.isMoodRecentExpanded
+        viewModelScope.launch {
+            try {
+                preferenceRepository.updateMoodRecentExpanded(!current)
+            } catch (e: Exception) {
+                android.util.Log.e("SearchViewModel", "Error updating mood recent expanded preference", e)
+            }
+        }
+    }
+
+    fun toggleMoodInspirationsExpanded() {
+        val current = _uiState.value.preferences.isMoodInspirationsExpanded
+        viewModelScope.launch {
+            try {
+                preferenceRepository.updateMoodInspirationsExpanded(!current)
+            } catch (e: Exception) {
+                android.util.Log.e("SearchViewModel", "Error updating mood inspirations expanded preference", e)
+            }
+        }
+    }
 }
 
 

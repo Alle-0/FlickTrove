@@ -84,12 +84,13 @@ fun MoodDiscoverySection(
     onSelectMoodHistory: (MoodHistoryEntry) -> Unit = {},
     onDeleteMoodHistory: (String) -> Unit = {},
     onClearMoodHistory: () -> Unit = {},
+    isRecentExpanded: Boolean = true,
+    isInspirationsExpanded: Boolean = true,
+    onToggleRecentExpanded: () -> Unit = {},
+    onToggleInspirationsExpanded: () -> Unit = {},
     hazeState: HazeState? = null
 ) {
     val accentColor = MaterialTheme.colorScheme.primary
-
-    var isRecentExpanded by rememberSaveable { mutableStateOf(true) }
-    var isInspirationsExpanded by rememberSaveable { mutableStateOf(true) }
 
     val recentChevronRotation by animateFloatAsState(
         targetValue = if (isRecentExpanded) 90f else 0f,
@@ -188,7 +189,7 @@ fun MoodDiscoverySection(
             ) {
                 Row(
                     modifier = Modifier
-                        .bounceClick { isRecentExpanded = !isRecentExpanded }
+                        .bounceClick { onToggleRecentExpanded() }
                         .padding(vertical = 4.dp),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -312,7 +313,7 @@ fun MoodDiscoverySection(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp)
-                .bounceClick { isInspirationsExpanded = !isInspirationsExpanded }
+                .bounceClick { onToggleInspirationsExpanded() }
                 .padding(vertical = 4.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
