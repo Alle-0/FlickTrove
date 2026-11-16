@@ -115,3 +115,7 @@ RELEASE_NOTES*.md
 /mockup*
 export*.py
 knowledge/
+
+.dev.vars*
+!.dev.vars.example
+!.env.example

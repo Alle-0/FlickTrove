@@ -19,7 +19,8 @@ data class SemanticMovieDto(
     val year: String? = null,
     @SerialName("poster_path") val posterPath: String? = null,
     @SerialName("vote_average") val voteAverage: Double? = null,
-    val score: Double? = null
+    val score: Double? = null,
+    @SerialName("ai_reason") val aiReason: String? = null
 ) {
     fun toMovieResult(): TMDBSearchResult.MovieResult {
         val normalizedPoster = posterPath?.trim()?.takeIf { it.isNotBlank() }?.let { path ->
@@ -33,7 +34,7 @@ data class SemanticMovieDto(
             releaseDate = year?.let { if (it.length == 4) "$it-01-01" else it },
             voteAverage = voteAverage,
             overview = null,
-            aiReason = score?.let { "Rilevanza semantica: ${(it * 100).toInt()}%" }
+            aiReason = aiReason ?: score?.let { "Rilevanza semantica: ${(it * 100).toInt()}%" }
         )
     }
 }
@@ -42,6 +43,7 @@ interface SemanticSearchApi {
     @GET("search")
     suspend fun searchSemantics(
         @Query("q") query: String,
+        @Query("lang") lang: String = "en",
         @Query("limit") limit: Int = 20
     ): Response<SemanticSearchResponse>
 }

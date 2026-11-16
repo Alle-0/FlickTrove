@@ -21,9 +21,10 @@ class SemanticSearchRepository @Inject constructor(
         if (sanitizedQuery.isBlank()) return emptyList()
 
         // 1. Tentativo veloce su Cloudflare Vectorize con timeout a 2.5 secondi
+        val langCode = language.take(2).lowercase()
         val cloudResults = try {
             withTimeoutOrNull(2500L) {
-                val response = api.searchSemantics(query = sanitizedQuery)
+                val response = api.searchSemantics(query = sanitizedQuery, lang = langCode)
                 if (response.isSuccessful) {
                     response.body()?.results?.map { it.toMovieResult() }
                 } else null
