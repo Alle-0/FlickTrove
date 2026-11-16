@@ -296,7 +296,7 @@ fun SearchContentGrid(
                         when (uiState.category) {
                             "person" -> PersonCardSkeleton(width = personCardWidth)
                             "collection" -> CollectionCardSkeleton()
-                            "mood" -> MoodCardSkeleton()
+                            "mood" -> SearchMoodEditorialCardSkeleton(modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
                             else -> MovieCardSkeleton(width = cardWidth)
                         }
                     }

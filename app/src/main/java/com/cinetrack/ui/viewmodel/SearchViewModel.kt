@@ -238,25 +238,22 @@ class SearchViewModel @Inject constructor(
     }
 
     fun setMoodAiMode(useAi: Boolean) {
-        val wasAi = _uiState.value.isMoodAiMode
         val remaining = _uiState.value.moodRemainingQuota
         if (useAi && remaining <= 0) {
             emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
         }
         _uiState.update { it.copy(isMoodAiMode = useAi) }
-        if (wasAi != useAi && _uiState.value.category == "mood" && _uiState.value.query.isNotBlank()) {
-            executeMoodSearch(_uiState.value.query.trim(), bypassCache = false)
-        }
     }
 
     fun executeMoodSearch(query: String, bypassCache: Boolean = false) {
-        if (query.isBlank()) return
+        val sanitized = query.trim().take(1000)
+        if (sanitized.isBlank()) return
         searchJob?.cancel()
         rawResults = emptyList()
         applyStateFilters()
         _uiState.update { 
             it.copy(
-                query = query,
+                query = sanitized,
                 category = "mood",
                 isLoading = true, 
                 errorMessage = null,
@@ -272,7 +269,7 @@ class SearchViewModel @Inject constructor(
             }
             val useAi = _uiState.value.isMoodAiMode
             val result = moodSearchRepository.searchMoviesByMood(
-                query,
+                sanitized,
                 language = targetLanguage,
                 forceLocal = !useAi,
                 bypassCache = bypassCache
@@ -309,19 +306,20 @@ class SearchViewModel @Inject constructor(
 
 
     fun onQueryChanged(newQuery: String) {
-        if (_uiState.value.query == newQuery) return
-        _uiState.update { it.copy(query = newQuery) }
+        val sanitizedQuery = newQuery.take(1000)
+        if (_uiState.value.query == sanitizedQuery) return
+        _uiState.update { it.copy(query = sanitizedQuery) }
         
-        if (newQuery.isNotEmpty() && _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) {
+        if (sanitizedQuery.isNotEmpty() && _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) {
             _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedKeywords = emptyList())) }
         }
         
         keywordSearchJob?.cancel()
-        if (newQuery.length >= 3) {
+        if (sanitizedQuery.length >= 3) {
             keywordSearchJob = viewModelScope.launch {
                 kotlinx.coroutines.delay(400)
                 try {
-                    val response = tmdbService.searchKeyword(query = newQuery)
+                    val response = tmdbService.searchKeyword(query = sanitizedQuery)
                     val pills = response.getList().take(6).map { 
                         FilterPill(it.id, it.name.replaceFirstChar { c -> c.uppercase() }, isKeyword = true) 
                     }
@@ -1020,7 +1018,7 @@ class SearchViewModel @Inject constructor(
         applyStateFilters()
         _uiState.update {
             it.copy(
-                query = entry.query,
+                query = entry.query.take(1000),
                 category = "mood",
                 isMoodAiMode = entry.isAi,
                 isLoading = false,

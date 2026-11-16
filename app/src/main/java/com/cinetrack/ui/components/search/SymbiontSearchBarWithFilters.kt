@@ -1,5 +1,9 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutLinearInEasing
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -61,6 +65,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
+import androidx.compose.ui.text.TextRange
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
@@ -112,52 +117,75 @@ fun SymbiontSearchBarWithFilters(
     modifier: Modifier = Modifier,
     onSubmitSearch: (() -> Unit)? = null
 ) {
-    val rightControlVisible = category != "person" && category != "collection"
+    val targetControl = when (category) {
+        "mood" -> "mood"
+        "movie", "tv" -> "filter"
+        else -> "none"
+    }
     val density = LocalDensity.current
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
-    var lastActiveControl by remember { mutableStateOf(if (category == "mood") "mood" else "filter") }
-    LaunchedEffect(category) {
-        if (category == "mood") {
-            lastActiveControl = "mood"
-        } else if (category == "movie" || category == "tv") {
-            lastActiveControl = "filter"
-        }
-    }
-    val activeControl = if (rightControlVisible) {
-        if (category == "mood") "mood" else "filter"
-    } else {
-        lastActiveControl
-    }
+    var displayedControl by remember { mutableStateOf(targetControl) }
 
     // Progresso animato: 0f = controlli completamente inglobati (barra a tutta larghezza)
     //                     1f = controlli completamente rigurgitati e stabilizzati a destra
-    val animProgress = remember { Animatable(if (rightControlVisible) 1f else 0f) }
+    val animProgress = remember { Animatable(if (targetControl != "none") 1f else 0f) }
     var hasSnappedBounce by remember { mutableStateOf(false) }
 
     val bounceOffsetX = remember { Animatable(0f) }
     val bounceScale = remember { Animatable(1f) }
     val searchBounceX = remember { Animatable(0f) }
 
-    LaunchedEffect(rightControlVisible) {
-        if (rightControlVisible) {
-            hasSnappedBounce = false
-            animProgress.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(
-                    durationMillis = 360,
-                    easing = FastOutSlowInEasing
-                )
-            )
+    LaunchedEffect(targetControl) {
+        if (targetControl == displayedControl) {
+            if (targetControl == "none") {
+                if (animProgress.value > 0f) {
+                    hasSnappedBounce = false
+                    animProgress.animateTo(
+                        targetValue = 0f,
+                        animationSpec = tween(
+                            durationMillis = 300,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                }
+            } else {
+                if (animProgress.value < 1f) {
+                    hasSnappedBounce = false
+                    animProgress.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(
+                            durationMillis = 360,
+                            easing = FastOutSlowInEasing
+                        )
+                    )
+                }
+            }
         } else {
-            hasSnappedBounce = false
-            animProgress.animateTo(
-                targetValue = 0f,
-                animationSpec = tween(
-                    durationMillis = 300,
-                    easing = FastOutSlowInEasing
+            // Cambio categoria con controllo differente: riassorbimento e rigurgito simbiotico
+            if (displayedControl != "none") {
+                hasSnappedBounce = false
+                animProgress.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(
+                        durationMillis = 240,
+                        easing = FastOutSlowInEasing
+                    )
                 )
-            )
+            }
+
+            displayedControl = targetControl
+
+            if (targetControl != "none") {
+                hasSnappedBounce = false
+                animProgress.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(
+                        durationMillis = 340,
+                        easing = FastOutSlowInEasing
+                    )
+                )
+            }
         }
     }
 
@@ -203,8 +231,8 @@ fun SymbiontSearchBarWithFilters(
     }
 
     // Rimbalzo morbido di arrivo quando la barra ingloba tutto a fine corsa (p -> 0)
-    LaunchedEffect(p <= 0.02f && !rightControlVisible) {
-        if (p <= 0.02f && !rightControlVisible) {
+    LaunchedEffect(p <= 0.02f && targetControl == "none") {
+        if (p <= 0.02f && targetControl == "none") {
             searchBounceX.snapTo(3f)
             searchBounceX.animateTo(
                 targetValue = 0f,
@@ -235,7 +263,7 @@ fun SymbiontSearchBarWithFilters(
         val cy = heightPx / 2f
         val rCapPx = heightPx / 2f
 
-        val showLayoutToggle = preferences.showLayoutToggle && (category == "movie" || category == "tv")
+        val showLayoutToggle = preferences.showLayoutToggle && displayedControl == "filter"
         val filterGroupWidth = if (showLayoutToggle) (44.dp + 12.dp + 44.dp) else 44.dp
         val filterGroupWidthPx = with(density) { filterGroupWidth.toPx() }
         val gapPx = with(density) { 12.dp.toPx() }
@@ -399,8 +427,21 @@ fun SymbiontSearchBarWithFilters(
                     BasicTextField(
                         value = textFieldValue,
                         onValueChange = {
-                            onTextFieldValueChange(it)
-                            onQueryChanged(it.text)
+                            if (it.text.length <= 1000) {
+                                onTextFieldValueChange(it)
+                                onQueryChanged(it.text)
+                            } else {
+                                val truncated = it.text.take(1000)
+                                val updated = it.copy(
+                                    text = truncated,
+                                    selection = TextRange(
+                                        it.selection.start.coerceAtMost(1000),
+                                        it.selection.end.coerceAtMost(1000)
+                                    )
+                                )
+                                onTextFieldValueChange(updated)
+                                onQueryChanged(truncated)
+                            }
                         },
                         modifier = Modifier
                             .weight(1f)
@@ -447,13 +488,22 @@ fun SymbiontSearchBarWithFilters(
                                         }
                                     }
                                     val hasActiveFilter = sortConfig.selectedGenres.isNotEmpty() || sortConfig.selectedKeywords.isNotEmpty()
-                                    Text(
-                                        text = placeholderText,
-                                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f),
-                                        fontSize = 14.sp,
-                                        maxLines = 1,
-                                        overflow = TextOverflow.Ellipsis
-                                    )
+                                    AnimatedContent(
+                                        targetState = placeholderText,
+                                        transitionSpec = {
+                                            fadeIn(animationSpec = tween(220, delayMillis = 60)) togetherWith
+                                                    fadeOut(animationSpec = tween(160))
+                                        },
+                                        label = "SearchBarPlaceholder"
+                                    ) { targetText ->
+                                        Text(
+                                            text = targetText,
+                                            color = MaterialTheme.colorScheme.onSurface.copy(alpha = if (hasActiveFilter) 0.6f else 0.3f),
+                                            fontSize = 14.sp,
+                                            maxLines = 1,
+                                            overflow = TextOverflow.Ellipsis
+                                        )
+                                    }
                                 }
                                 innerTextField()
                             }
@@ -493,7 +543,7 @@ fun SymbiontSearchBarWithFilters(
 
         // --- CONTROLLI E ICONE DEI FILTRI / CERCA (Visibili a distacco avvenuto p >= 0.88) ---
         if (isDetached) {
-            val buttonsAlpha = if (!rightControlVisible) ((p - 0.88f) / 0.12f).coerceIn(0f, 1f) else 1f
+            val buttonsAlpha = ((p - 0.88f) / 0.12f).coerceIn(0f, 1f)
 
             Row(
                 modifier = Modifier
@@ -527,7 +577,7 @@ fun SymbiontSearchBarWithFilters(
                     Spacer(modifier = Modifier.width(12.dp))
                 }
 
-                if (activeControl == "mood") {
+                if (displayedControl == "mood") {
                     val primaryColor = MaterialTheme.colorScheme.primary
                     Box(
                         modifier = Modifier

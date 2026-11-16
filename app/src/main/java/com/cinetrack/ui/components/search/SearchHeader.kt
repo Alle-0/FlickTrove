@@ -1,12 +1,16 @@
 package com.cinetrack.ui.components.search
 
 import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.Spring
 import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandHorizontally
+import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -202,7 +206,11 @@ fun SearchHeader(
                 onDeleteSearch = { onDeleteRecentSearch(it) }
             )
 
-            if (category != "mood") {
+            AnimatedVisibility(
+                visible = category != "mood",
+                enter = expandVertically(animationSpec = tween(240, easing = FastOutSlowInEasing)) + fadeIn(animationSpec = tween(200)),
+                exit = shrinkVertically(animationSpec = tween(220, easing = FastOutSlowInEasing)) + fadeOut(animationSpec = tween(180))
+            ) {
                 SearchSuggestedFiltersRow(
                     suggestedFilters = suggestedFilters,
                     query = query,

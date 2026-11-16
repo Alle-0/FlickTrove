@@ -410,18 +410,20 @@ fun SearchScreenContent(
                                 onRetry = { viewModel.retry() },
                                 onLoadNextPage = { viewModel.loadNextPage() },
                                 onMoodSelected = { prompt ->
+                                    val sanitized = prompt.take(1000)
                                     textFieldValue = TextFieldValue(
-                                        text = prompt,
-                                        selection = androidx.compose.ui.text.TextRange(prompt.length)
+                                        text = sanitized,
+                                        selection = androidx.compose.ui.text.TextRange(sanitized.length)
                                     )
-                                    viewModel.onQueryChanged(prompt)
-                                    viewModel.executeMoodSearch(prompt)
+                                    viewModel.onQueryChanged(sanitized)
+                                    viewModel.executeMoodSearch(sanitized)
                                 },
                                 onMoodModeChanged = { viewModel.setMoodAiMode(it) },
                                 onSelectMoodHistory = { entry ->
+                                    val sanitized = entry.query.take(1000)
                                     textFieldValue = TextFieldValue(
-                                        text = entry.query,
-                                        selection = androidx.compose.ui.text.TextRange(entry.query.length)
+                                        text = sanitized,
+                                        selection = androidx.compose.ui.text.TextRange(sanitized.length)
                                     )
                                     viewModel.selectMoodHistory(entry)
                                 },
@@ -445,8 +447,20 @@ fun SearchScreenContent(
                             initialKeywordName = initialKeywordName,
                             textFieldValue = textFieldValue,
                             onTextFieldValueChange = { textFieldValue = it },
-                            onQueryChanged = { viewModel.onQueryChanged(it) },
-                            onClearQuery = { viewModel.onQueryChanged("") },
+                            onQueryChanged = { q ->
+                                val sanitized = q.take(1000)
+                                if (textFieldValue.text != sanitized) {
+                                    textFieldValue = TextFieldValue(
+                                        text = sanitized,
+                                        selection = androidx.compose.ui.text.TextRange(sanitized.length)
+                                    )
+                                }
+                                viewModel.onQueryChanged(sanitized)
+                            },
+                            onClearQuery = {
+                                textFieldValue = TextFieldValue("")
+                                viewModel.onQueryChanged("")
+                            },
                             onBackClick = { onExitRequest.value?.invoke() },
                             onLayoutToggleClick = { nextCols ->
                                 viewModel.updatePreferences(uiState.preferences.copy(gridColumns = nextCols))

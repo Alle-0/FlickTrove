@@ -822,7 +822,7 @@ fun LazyGridScope.searchResultsGridSection(
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
 
                 if (category == "mood") {
-                    SearchMoodMovieCard(
+                    SearchMoodEditorialCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -842,9 +842,7 @@ fun LazyGridScope.searchResultsGridSection(
                         hasAnimatedSet = animatedMovieIds,
                         keyboardController = keyboardController,
                         onMovieClick = onMovieClick,
-                        onToggleFavorite = onToggleFavorite,
-                        onLongPress = onLongPress,
-                        onEmitMessage = onEmitMessage
+                        onLongPress = onLongPress
                     )
                 } else {
                     SearchGridMovieItem(
@@ -896,7 +894,7 @@ fun LazyGridScope.searchResultsGridSection(
                 val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
 
                 if (category == "mood") {
-                    SearchMoodMovieCard(
+                    SearchMoodEditorialCard(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp, vertical = 6.dp)
@@ -916,9 +914,7 @@ fun LazyGridScope.searchResultsGridSection(
                         hasAnimatedSet = animatedMovieIds,
                         keyboardController = keyboardController,
                         onMovieClick = onMovieClick,
-                        onToggleFavorite = onToggleFavorite,
-                        onLongPress = onLongPress,
-                        onEmitMessage = onEmitMessage
+                        onLongPress = onLongPress
                     )
                 } else {
                     SearchGridMovieItem(
