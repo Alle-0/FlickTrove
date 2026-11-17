@@ -13,6 +13,8 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.shrinkVertically
+import androidx.compose.animation.slideInHorizontally
+import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -211,8 +213,29 @@ fun SearchHeader(
             AnimatedContent(
                 targetState = category == "mood",
                 transitionSpec = {
-                    fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) togetherWith
-                            fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing))
+                    if (targetState) {
+                        (slideInHorizontally(
+                            animationSpec = spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
+                            initialOffsetX = { fullWidth -> (fullWidth * 0.30f).toInt() }
+                        ) + fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)))
+                            .togetherWith(
+                                slideOutHorizontally(
+                                    animationSpec = tween(180, easing = FastOutSlowInEasing),
+                                    targetOffsetX = { fullWidth -> (-fullWidth * 0.25f).toInt() }
+                                ) + fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing))
+                            )
+                    } else {
+                        (slideInHorizontally(
+                            animationSpec = spring(dampingRatio = 0.78f, stiffness = Spring.StiffnessMediumLow),
+                            initialOffsetX = { fullWidth -> (-fullWidth * 0.30f).toInt() }
+                        ) + fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)))
+                            .togetherWith(
+                                slideOutHorizontally(
+                                    animationSpec = tween(180, easing = FastOutSlowInEasing),
+                                    targetOffsetX = { fullWidth -> (fullWidth * 0.25f).toInt() }
+                                ) + fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing))
+                            )
+                    }
                 },
                 label = "recent_searches_morph"
             ) { isMood ->

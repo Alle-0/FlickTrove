@@ -1,5 +1,14 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.core.Animatable
+import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.RepeatMode
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateFloat
+import androidx.compose.animation.core.infiniteRepeatable
+import androidx.compose.animation.core.rememberInfiniteTransition
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -9,10 +18,14 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -46,6 +59,28 @@ fun MoodDiscoverySection(
     onToggleInspirationsExpanded: () -> Unit = {},
     hazeState: HazeState? = null
 ) {
+    val enterAnim = remember { Animatable(0f) }
+    LaunchedEffect(Unit) {
+        enterAnim.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        )
+    }
+
+    val infiniteTransition = rememberInfiniteTransition(label = "mood_discovery_pulse")
+    val pulseScale by infiniteTransition.animateFloat(
+        initialValue = 1f,
+        targetValue = 1.05f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "pulse_scale"
+    )
+
     Column(
         modifier = modifier
             .fillMaxWidth()
@@ -54,13 +89,20 @@ fun MoodDiscoverySection(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Icona centrale a sfera in vetro con sparkle Teal
+        // Icona centrale a sfera in vetro con sparkle Teal ed entrata elastica
         Box(
             modifier = Modifier
+                .graphicsLayer {
+                    val p = enterAnim.value
+                    scaleX = (0.78f + 0.22f * p) * pulseScale
+                    scaleY = (0.78f + 0.22f * p) * pulseScale
+                    alpha = p
+                    translationY = (1f - p) * 24f
+                }
                 .size(52.dp)
                 .clip(CircleShape)
                 .background(Color.White.copy(alpha = 0.04f))
-                .border(1.dp, Color.White.copy(alpha = 0.08f), CircleShape),
+                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
             contentAlignment = Alignment.Center
         ) {
             Icon(
@@ -78,7 +120,12 @@ fun MoodDiscoverySection(
             fontSize = 14.sp,
             fontWeight = FontWeight.SemiBold,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-            textAlign = TextAlign.Center
+            textAlign = TextAlign.Center,
+            modifier = Modifier.graphicsLayer {
+                val p = enterAnim.value
+                alpha = p
+                translationY = (1f - p) * 16f
+            }
         )
 
         Spacer(modifier = Modifier.height(6.dp))
@@ -90,7 +137,13 @@ fun MoodDiscoverySection(
             lineHeight = 16.5.sp,
             color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
             textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(max = 280.dp)
+            modifier = Modifier
+                .widthIn(max = 280.dp)
+                .graphicsLayer {
+                    val p = enterAnim.value
+                    alpha = p
+                    translationY = (1f - p) * 12f
+                }
         )
 
         if (!errorMessage.isNullOrBlank()) {

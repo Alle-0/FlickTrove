@@ -1,7 +1,12 @@
 package com.cinetrack.ui.components.search
 
 import androidx.compose.animation.*
+import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.animateDpAsState
+import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
@@ -12,8 +17,13 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.drawWithContent
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.drawscope.Stroke
+import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -58,6 +68,84 @@ fun SearchCategorySelector(
         stringResource(R.string.search_tab_collections)
     )
 
+    val haptic = LocalHapticFeedback.current
+    val primaryColor = MaterialTheme.colorScheme.primary
+    val shockwaveProgress = remember { Animatable(0f) }
+
+    LaunchedEffect(isMood) {
+        if (isMood) {
+            shockwaveProgress.snapTo(0f)
+            shockwaveProgress.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing)
+            )
+        }
+    }
+
+    val buttonBgColor by animateColorAsState(
+        targetValue = if (isMood) {
+            primaryColor.copy(alpha = 0.22f)
+        } else {
+            Color.White.copy(alpha = 0.05f)
+        },
+        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+        label = "mood_btn_bg"
+    )
+
+    val buttonBorderColor by animateColorAsState(
+        targetValue = if (isMood) {
+            primaryColor
+        } else {
+            Color.White.copy(alpha = 0.14f)
+        },
+        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+        label = "mood_btn_border"
+    )
+
+    val buttonBorderWidth by animateDpAsState(
+        targetValue = if (isMood) 1.5.dp else 1.dp,
+        animationSpec = spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow),
+        label = "mood_btn_border_width"
+    )
+
+    val iconTint by animateColorAsState(
+        targetValue = if (isMood) {
+            primaryColor
+        } else {
+            Color.White.copy(alpha = 0.50f)
+        },
+        animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+        label = "mood_icon_tint"
+    )
+
+    val iconRotation by animateFloatAsState(
+        targetValue = if (isMood) 360f else 0f,
+        animationSpec = spring(
+            dampingRatio = 0.54f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "mood_sparkle_rotation"
+    )
+
+    val iconScale by animateFloatAsState(
+        targetValue = if (isMood) 1.25f else 1.0f,
+        animationSpec = spring(
+            dampingRatio = 0.46f,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "mood_sparkle_scale"
+    )
+
+    val capsuleBorderColor by animateColorAsState(
+        targetValue = if (isMood) {
+            primaryColor.copy(alpha = 0.32f)
+        } else {
+            Color.White.copy(alpha = 0.08f)
+        },
+        animationSpec = tween(durationMillis = 280, easing = FastOutSlowInEasing),
+        label = "capsule_border_color"
+    )
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -79,21 +167,51 @@ fun SearchCategorySelector(
                 Spacer(
                     modifier = Modifier
                         .matchParentSize()
-                        .hazeGlass(
-                            state = hazeState,
-                            shape = CircleShape
+                        .then(
+                            if (hazeState != null) {
+                                Modifier.hazeGlass(
+                                    state = hazeState,
+                                    shape = CircleShape
+                                )
+                            } else {
+                                Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
+                            }
                         )
+                        .border(1.dp, capsuleBorderColor, CircleShape)
                 )
 
                 AnimatedContent(
                     targetState = isMood,
                     transitionSpec = {
-                        (fadeIn(animationSpec = tween(220, easing = FastOutSlowInEasing)) +
-                                scaleIn(initialScale = 0.95f, animationSpec = tween(220)))
-                            .togetherWith(
-                                fadeOut(animationSpec = tween(180, easing = FastOutSlowInEasing)) +
-                                        scaleOut(targetScale = 0.95f, animationSpec = tween(180))
-                            )
+                        if (targetState) {
+                            // Entrata in Mood: le categorie standard scivolano a sinistra, le tab Mood arrivano da destra con rimbalzo elastico
+                            (slideInHorizontally(
+                                animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
+                                initialOffsetX = { fullWidth -> (fullWidth * 0.40f).toInt() }
+                            ) + fadeIn(animationSpec = tween(240, easing = FastOutSlowInEasing)) +
+                                    scaleIn(initialScale = 0.90f, animationSpec = tween(240, easing = FastOutSlowInEasing)))
+                                .togetherWith(
+                                    slideOutHorizontally(
+                                        animationSpec = tween(180, easing = FastOutSlowInEasing),
+                                        targetOffsetX = { fullWidth -> (-fullWidth * 0.35f).toInt() }
+                                    ) + fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing)) +
+                                            scaleOut(targetScale = 0.92f, animationSpec = tween(160))
+                                )
+                        } else {
+                            // Uscita da Mood: le tab Mood scivolano a destra, le categorie standard tornano da sinistra
+                            (slideInHorizontally(
+                                animationSpec = spring(dampingRatio = 0.72f, stiffness = Spring.StiffnessMediumLow),
+                                initialOffsetX = { fullWidth -> (-fullWidth * 0.40f).toInt() }
+                            ) + fadeIn(animationSpec = tween(240, easing = FastOutSlowInEasing)) +
+                                    scaleIn(initialScale = 0.90f, animationSpec = tween(240, easing = FastOutSlowInEasing)))
+                                .togetherWith(
+                                    slideOutHorizontally(
+                                        animationSpec = tween(180, easing = FastOutSlowInEasing),
+                                        targetOffsetX = { fullWidth -> (fullWidth * 0.35f).toInt() }
+                                    ) + fadeOut(animationSpec = tween(160, easing = FastOutSlowInEasing)) +
+                                            scaleOut(targetScale = 0.92f, animationSpec = tween(160))
+                                )
+                        }
                     },
                     label = "category_morphing_capsule"
                 ) { moodActive ->
@@ -139,10 +257,26 @@ fun SearchCategorySelector(
 
             Spacer(modifier = Modifier.width(8.dp))
 
-            // 2. Icona Mood a Lato: Vero e proprio switch toggle
+            // 2. Icona Mood a Lato: Switch toggle cinematografico con shockwave e rotazione elastica
             Box(
                 modifier = Modifier
+                    .drawWithContent {
+                        drawContent()
+                        val progress = shockwaveProgress.value
+                        if (progress in 0.001f..0.999f) {
+                            val baseRadius = size.minDimension / 2f
+                            val radius = baseRadius + (progress * 18.dp.toPx())
+                            val alpha = (1f - progress).coerceIn(0f, 1f) * 0.70f
+                            drawCircle(
+                                color = primaryColor.copy(alpha = alpha),
+                                radius = radius,
+                                center = center,
+                                style = Stroke(width = (2.dp * (1f - progress * 0.4f)).toPx())
+                            )
+                        }
+                    }
                     .bounceClick(scaleDown = 0.90f) {
+                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
                         if (isMood) {
                             onCategoryChanged(previousCategory)
                         } else {
@@ -155,25 +289,24 @@ fun SearchCategorySelector(
                         if (hazeState != null) {
                             Modifier.hazeGlass(state = hazeState, shape = CircleShape)
                         } else {
-                            Modifier.background(Color.White.copy(alpha = 0.05f), CircleShape)
+                            Modifier
                         }
                     )
-                    .then(
-                        if (isMood) {
-                            Modifier
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.22f), CircleShape)
-                                .border(1.dp, MaterialTheme.colorScheme.primary, CircleShape)
-                        } else {
-                            Modifier.border(1.dp, Color.White.copy(alpha = 0.12f), CircleShape)
-                        }
-                    ),
+                    .background(buttonBgColor, CircleShape)
+                    .border(buttonBorderWidth, buttonBorderColor, CircleShape),
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
                     imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                     contentDescription = stringResource(R.string.search_tab_mood),
-                    tint = if (isMood) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.50f),
-                    modifier = Modifier.size(16.dp)
+                    tint = iconTint,
+                    modifier = Modifier
+                        .size(16.dp)
+                        .graphicsLayer {
+                            rotationZ = iconRotation
+                            scaleX = iconScale
+                            scaleY = iconScale
+                        }
                 )
             }
         }
