@@ -491,7 +491,7 @@ fun IrisMascot(
                     center = Offset(pupilCenterX, pupilCenterY)
                 )
 
-                // B. 6 Lamelle geometriche del diaframma (la ghiera/iride mobile)
+                // B1. Superfici geometriche delle 6 lamelle (livello z-index inferiore)
                 for (i in 0 until bladeCount) {
                     val phi = (effectiveAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
                     val nextPhi = (effectiveAngle + (i + 1) * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
@@ -527,8 +527,19 @@ fun IrisMascot(
                         path = bladePath,
                         color = Color(0xFF13181D).copy(alpha = 0.95f)
                     )
+                }
 
-                    // Bordo nitido di scorrimento della lamella
+                // B2. Bordi nitidi di scorrimento delle lamelle (livello z-index superiore, disegnati sopra per evitare che l'ultima lamella copra la prima)
+                for (i in 0 until bladeCount) {
+                    val phi = (effectiveAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
+                    val cosP = cos(phi)
+                    val sinP = sin(phi)
+
+                    val tx = pupilCenterX + innerR * cosP
+                    val ty = pupilCenterY + innerR * sinP
+                    val px = tx - tanLen * sinP
+                    val py = ty + tanLen * cosP
+
                     drawLine(
                         color = accentColor.copy(alpha = 0.85f),
                         start = Offset(px, py),
