@@ -2179,6 +2179,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="search_mood_exhausted_title">Денний ліміт пошуку з ШІ вичерпано</string>
     <string name="search_mood_switch_to_algo">Перейти на IRIS (необмежено)</string>
     <string name="search_mood_quota_fallback_notice">Денний ліміт пошуку з ШІ вичерпано: пошук виконано через IRIS (∞).</string>
+    <string name="search_mood_network_fallback_notice">ШІ тимчасово недоступний: пошук виконано через IRIS (∞).</string>
     <string name="search_mood_inspirations_header">Швидке натхнення:</string>
     <string name="search_mood_analyzing">ШІ досліджує кінокаталог...</string>
     <string name="mood_insp_1_title">Детективний трилер під дощем</string>

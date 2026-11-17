@@ -125,7 +125,7 @@ object NetworkModule {
     fun provideOMDBRetrofit(json: Json, okHttpClient: OkHttpClient): Retrofit {
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()
-            .baseUrl("https://www.omdbapi.com/")
+            .baseUrl("https://flicktrove-omdb.flicktrove-api.workers.dev/")
             .client(okHttpClient)
             .addConverterFactory(json.asConverterFactory(contentType))
             .build()

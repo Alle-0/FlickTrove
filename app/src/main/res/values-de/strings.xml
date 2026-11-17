@@ -2201,6 +2201,7 @@
     <string name="search_mood_exhausted_title">Tägliche KI-Suchen aufgebraucht</string>
     <string name="search_mood_switch_to_algo">Zu IRISus wechseln (unbegrenzt)</string>
     <string name="search_mood_quota_fallback_notice">Tägliche KI-Suchen aufgebraucht: Suche mit IRIS (∞) durchgeführt.</string>
+    <string name="search_mood_network_fallback_notice">KI vorübergehend nicht verfügbar: Suche mit IRIS (∞) durchgeführt.</string>
     <string name="search_mood_inspirations_header">Schnelle Inspirationen:</string>
     <string name="search_mood_analyzing">KI durchsucht den Filmkatalog...</string>
     <string name="mood_insp_1_title">Krimi-Thriller im Dauerregen</string>

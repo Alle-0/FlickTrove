@@ -2199,6 +2199,7 @@
     <string name="search_mood_exhausted_title">Günlük Yapay Zeka aramaları tükendi</string>
     <string name="search_mood_switch_to_algo">IRISaya geç (Sınırsız)</string>
     <string name="search_mood_quota_fallback_notice">Günlük Yapay Zeka aramaları tükendi: Arama IRIS (∞) ile yapıldı.</string>
+    <string name="search_mood_network_fallback_notice">Yapay Zeka geçici olarak kullanılamıyor: Arama IRIS (∞) ile yapıldı.</string>
     <string name="search_mood_inspirations_header">Hızlı ilhamlar:</string>
     <string name="search_mood_analyzing">Yapay zeka sinema kataloğunu inceliyor...</string>
     <string name="mood_insp_1_title">Yağmur altında dedektif gerilimi</string>

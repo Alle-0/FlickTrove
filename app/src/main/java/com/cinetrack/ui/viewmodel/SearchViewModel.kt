@@ -324,6 +324,8 @@ class SearchViewModel @Inject constructor(
                 }
                 if (data.isQuotaFallback) {
                     emitMessage(UiText.StringResource(R.string.search_mood_quota_fallback_notice))
+                } else if (data.isNetworkFallback) {
+                    emitMessage(UiText.StringResource(R.string.search_mood_network_fallback_notice))
                 }
             }.onFailure { ex ->
                 rawResults = emptyList()

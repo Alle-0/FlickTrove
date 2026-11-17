@@ -2199,6 +2199,7 @@
     <string name="search_mood_exhausted_title">本日のAI検索上限に達しました</string>
     <string name="search_mood_switch_to_algo">IRISに切り替え（無制限）</string>
     <string name="search_mood_quota_fallback_notice">本日のAI検索上限に達しました：IRIS (∞)で検索しました。</string>
+    <string name="search_mood_network_fallback_notice">AIは一時的に利用できません：IRIS (∞)で検索しました。</string>
     <string name="search_mood_inspirations_header">おすすめのヒント:</string>
     <string name="search_mood_analyzing">AIが映画カタログを探索中...</string>
     <string name="mood_insp_1_title">雨煙る本格サスペンス捜査</string>

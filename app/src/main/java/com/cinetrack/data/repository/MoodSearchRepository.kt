@@ -23,7 +23,8 @@ data class MoodSearchResultData(
     val totalCount: Int,
     val totalPages: Int,
     val movies: List<TMDBSearchResult.MovieResult>,
-    val isQuotaFallback: Boolean = false
+    val isQuotaFallback: Boolean = false,
+    val isNetworkFallback: Boolean = false
 )
 
 class MoodQuotaExhaustedException(
@@ -162,13 +163,14 @@ class MoodSearchRepository @Inject constructor(
                 movies = mappedMovies
             )
         } catch (_: Exception) {
-            // 3. SMART HYBRID FALLBACK: se l'AI Cloud fallisce (429 rate limit, timeout, offline, 500),
+            // 3. SMART HYBRID FALLBACK: se l'AI Cloud fallisce (429 rate limit, timeout, offline, 500, 502),
             // degrada trasparentemente sull'algoritmo (Cloudflare Vectorize -> Local Engine)
             performAlgoSearch(
                 trimmedQuery = trimmedQuery,
                 language = language,
                 page = page,
-                isQuotaFallback = true
+                isQuotaFallback = false,
+                isNetworkFallback = true
             )
         }
     }
@@ -182,14 +184,15 @@ class MoodSearchRepository @Inject constructor(
         trimmedQuery: String,
         language: String,
         page: Int,
-        isQuotaFallback: Boolean
+        isQuotaFallback: Boolean,
+        isNetworkFallback: Boolean = false
     ): MoodSearchResultData {
         // A. Tentativo 1: Algoritmo Vettoriale Cloudflare Vectorize (Zero Quota, Online)
         if (page == 1) {
             try {
                 val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
                 if (semanticMovies.isNotEmpty()) {
-                    val vibeTitle = if (isQuotaFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale"
+                    val vibeTitle = if (isQuotaFallback || isNetworkFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale"
                     val vibeDesc = "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
                     moodHistoryRepository.saveEntry(
                         MoodHistoryEntry(
@@ -200,13 +203,45 @@ class MoodSearchRepository @Inject constructor(
                             movies = semanticMovies
                         )
                     )
+
+                    // Fire-and-forget: registra la ricerca IRIS (Cloudflare Vectorize) su Supabase in background
+                    CoroutineScope(Dispatchers.IO).launch {
+                        try {
+                            val anonKey = com.cinetrack.util.Keys.getSupabaseAnonKey()
+                            if (anonKey.isNotBlank()) {
+                                val sample = semanticMovies.take(5).map { m ->
+                                    com.cinetrack.data.model.SearchLogMovieSampleDto(
+                                        title = m.title.orEmpty(),
+                                        year = m.releaseDate?.take(4)
+                                    )
+                                }
+                                api.recordSearchLog(
+                                    apiKey = anonKey,
+                                    authorization = "Bearer $anonKey",
+                                    payload = com.cinetrack.data.model.SearchLogDto(
+                                        query = trimmedQuery,
+                                        engine = "IRIS",
+                                        tier = "PRO",
+                                        language = language,
+                                        resultsCount = semanticMovies.size,
+                                        resultsSample = sample,
+                                        vibeTitle = vibeTitle
+                                    )
+                                )
+                            }
+                        } catch (_: Exception) {
+                            // Silente: il fallimento del logging analitico non deve mai impattare l'utente
+                        }
+                    }
+
                     return MoodSearchResultData(
                         vibeTitle = vibeTitle,
                         vibeDescription = vibeDesc,
                         totalCount = semanticMovies.size,
                         totalPages = 1,
                         movies = semanticMovies,
-                        isQuotaFallback = isQuotaFallback
+                        isQuotaFallback = isQuotaFallback,
+                        isNetworkFallback = isNetworkFallback
                     )
                 }
             } catch (_: Exception) {
@@ -262,6 +297,9 @@ class MoodSearchRepository @Inject constructor(
                 }
             }
         }
-        return localResult.copy(isQuotaFallback = isQuotaFallback)
+        return localResult.copy(
+            isQuotaFallback = isQuotaFallback,
+            isNetworkFallback = isNetworkFallback
+        )
     }
 }

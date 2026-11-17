@@ -2197,6 +2197,7 @@
     <string name="search_mood_exhausted_title">Búsquedas IA diarias agotadas</string>
     <string name="search_mood_switch_to_algo">Cambiar a IRIS (ilimitado)</string>
     <string name="search_mood_quota_fallback_notice">Búsquedas IA diarias agotadas: búsqueda realizada con IRIS (∞).</string>
+    <string name="search_mood_network_fallback_notice">IA no disponible temporalmente: búsqueda realizada con IRIS (∞).</string>
     <string name="search_mood_inspirations_header">Inspiraciones rápidas:</string>
     <string name="search_mood_analyzing">La IA está explorando el catálogo cinematográfico...</string>
     <string name="mood_insp_1_title">Thriller policíaco bajo la lluvia</string>

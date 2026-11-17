@@ -2158,6 +2158,7 @@
     <string name="search_mood_exhausted_title">Pesquisas diárias de IA esgotadas</string>
     <string name="search_mood_switch_to_algo">Mudar para IRIS (ilimitado)</string>
     <string name="search_mood_quota_fallback_notice">Pesquisas de IA diárias esgotadas: pesquisa realizada com IRIS (∞).</string>
+    <string name="search_mood_network_fallback_notice">IA temporariamente indisponível: pesquisa realizada com IRIS (∞).</string>
     <string name="search_mood_inspirations_header">Inspirações rápidas:</string>
     <string name="search_mood_analyzing">A IA está a explorar o catálogo de cinema...</string>
     <string name="mood_insp_1_title">Suspense policial sob a chuva</string>
