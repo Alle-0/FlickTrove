@@ -167,6 +167,8 @@
     <string name="settings_group_cards_details">Cartes &amp; Détails</string>
     <string name="settings_hide_saved">Masquer les titres enregistrés</string>
     <string name="settings_hide_saved_desc">Masque les films et séries regardés ou à voir dans les sections Découvrir et détails.</string>
+    <string name="settings_mood_hide_saved">Masquer les titres enregistrés dans Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtre les films et séries déjà vus ou dans la liste de suivi dans Cinema Mood et Surprise Me.</string>
     <string name="settings_folder_bookmarks">Marque-pages de dossiers</string>
     <string name="settings_folder_bookmarks_desc">Affiche un ruban coloré sur les cartes pour indiquer l\'appartenance à un dossier.</string>
     <string name="settings_badges">Badges d\'information</string>
@@ -2217,4 +2219,12 @@
     <string name="mood_insp_7_prompt">Aventure et survie en haute mer</string>
     <string name="mood_insp_8_title">Polar d\'auteur rugueux des années 70</string>
     <string name="mood_insp_8_prompt">Polar d\'auteur rugueux des années 70</string>
+    <string name="mood_guest_dialog_title">Recherche d\'Humeur</string>
+    <string name="mood_guest_dialog_message">Créez un compte gratuit ou connectez-vous pour utiliser la recherche d\'humeur et trouver des films selon vos émotions.</string>
+    <string name="search_mood_iris_badge">IRIS • DÉCOUVERTE OPTIQUE</string>
+    <string name="search_mood_iris_analyzing">IRIS fait la mise au point sur votre ambiance...</string>
+    <string name="search_mood_iris_status_focus">Calibrage de l\'ouverture et de la profondeur de champ...</string>
+    <string name="search_mood_iris_status_scanning">Balayage des coordonnées des archives cinéma...</string>
+    <string name="search_mood_iris_no_results">Aucun film au point pour ce cadrage</string>
+    <string name="search_mood_iris_no_results_desc">Essayez d\'élargir le cadre ou de décrire l\'ambiance avec d\'autres nuances.</string>
 </resources>

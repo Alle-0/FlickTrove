@@ -20,7 +20,16 @@ data class MoodSearchResponse(
     @SerialName("total_pages") val totalPages: Int = 1,
     val results: List<MoodMovieItemDto> = emptyList(),
     val code: String? = null,
-    val message: String? = null
+    val message: String? = null,
+    @SerialName("remaining_quota") val remainingQuota: Int? = null
+)
+
+@Serializable
+data class MoodQuotaResponse(
+    val success: Boolean = false,
+    val remaining: Int = 3,
+    @SerialName("current_count") val currentCount: Int = 0,
+    @SerialName("max_quota") val maxQuota: Int = 3
 )
 
 @Serializable

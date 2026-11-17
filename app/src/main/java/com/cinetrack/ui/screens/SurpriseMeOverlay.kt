@@ -81,9 +81,11 @@ fun SurpriseMeOverlay(
     viewModel: SurpriseMeViewModel,
     globalHazeState: HazeState,
     onMovieFound: (Movie?) -> Unit,
-    onClose: () -> Unit
+    onClose: () -> Unit,
+    onGuestAuthTrigger: () -> Unit = {}
 ) {
     var step by remember { mutableIntStateOf(0) }
+    val isGuest = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false }
     
     // Selections
     var selectedTime by remember { mutableStateOf<SurpriseTime?>(null) }
@@ -155,13 +157,23 @@ fun SurpriseMeOverlay(
                         onMovieFound(movie)
                     }
                 },
-                onPromptClick = { step = 4 },
+                onPromptClick = {
+                    if (isGuest) {
+                        onGuestAuthTrigger()
+                    } else {
+                        step = 4
+                    }
+                },
                 onPromptSubmit = { text, aiMode ->
-                    scope.launch {
-                        step = 5
-                        delay(800)
-                        val movie = viewModel.getPromptMovie(text, forceLocal = !aiMode)
-                        onMovieFound(movie)
+                    if (isGuest) {
+                        onGuestAuthTrigger()
+                    } else {
+                        scope.launch {
+                            step = 5
+                            delay(800)
+                            val movie = viewModel.getPromptMovie(text, forceLocal = !aiMode)
+                            onMovieFound(movie)
+                        }
                     }
                 },
                 onEmotionalClick = { step = 1 },

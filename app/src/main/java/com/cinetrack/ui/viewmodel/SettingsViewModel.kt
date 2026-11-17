@@ -101,7 +101,12 @@ class SettingsViewModel @Inject constructor(
     private val _showEditProfileMenu = MutableSharedFlow<Rect?>()
     val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()
     
-    private val _showGuestAuthDialog = MutableSharedFlow<Unit>()
+    data class GuestAuthDialogConfig(
+        val titleRes: Int? = null,
+        val messageRes: Int? = null
+    )
+
+    private val _showGuestAuthDialog = MutableSharedFlow<GuestAuthDialogConfig>()
     val showGuestAuthDialog = _showGuestAuthDialog.asSharedFlow()
 
     private val _showDashboardSettingsMenu = MutableSharedFlow<Unit>()
@@ -113,9 +118,12 @@ class SettingsViewModel @Inject constructor(
         }
     }
     
-    fun triggerGuestAuthDialog() {
+    fun triggerGuestAuthDialog(
+        @androidx.annotation.StringRes titleRes: Int? = null,
+        @androidx.annotation.StringRes messageRes: Int? = null
+    ) {
         viewModelScope.launch {
-            _showGuestAuthDialog.emit(Unit)
+            _showGuestAuthDialog.emit(GuestAuthDialogConfig(titleRes, messageRes))
         }
     }
     
@@ -225,6 +233,18 @@ class SettingsViewModel @Inject constructor(
     fun toggleHideSavedFromDiscovery(enabled: Boolean) {
         viewModelScope.launch {
             settingsRepository.toggleHideSavedFromDiscovery(enabled)
+        }
+    }
+
+    val moodHideSaved = settingsRepository.moodHideSaved.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
+    fun toggleMoodHideSaved(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsRepository.toggleMoodHideSaved(enabled)
         }
     }
 

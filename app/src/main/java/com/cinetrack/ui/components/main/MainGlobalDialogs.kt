@@ -363,6 +363,7 @@ fun MainGlobalDialogs(
 
 
     val surpriseMeViewModel: SurpriseMeViewModel = with(screen) { getViewModel<SurpriseMeViewModel>() }
+    val settingsViewModel: com.cinetrack.ui.viewmodel.SettingsViewModel = with(screen) { getViewModel() }
     Box(modifier = Modifier.zIndex(90000f)) {
         SurpriseMeOverlay(
             isVisible = showSurpriseMeOverlay,
@@ -378,7 +379,13 @@ fun MainGlobalDialogs(
                     surpriseMeViewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(R.string.main_surprise_me_not_found))
                 }
             },
-            onClose = onSurpriseMeClose
+            onClose = onSurpriseMeClose,
+            onGuestAuthTrigger = {
+                settingsViewModel.triggerGuestAuthDialog(
+                    R.string.mood_guest_dialog_title,
+                    R.string.mood_guest_dialog_message
+                )
+            }
         )
     }
 

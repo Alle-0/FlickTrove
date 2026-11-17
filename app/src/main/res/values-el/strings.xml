@@ -188,6 +188,8 @@
     <string name="settings_group_cards_details">Κάρτες &amp; Λεπτομέρειες</string>
     <string name="settings_hide_saved">Απόκρυψη αποθηκευμένων</string>
     <string name="settings_hide_saved_desc">Φιλτράρει τις ταινίες που έχουν προβληθεί και τα στοιχεία της λίστας παρακολούθησης από την Ανακάλυψη και τις λεπτομέρειες.</string>
+    <string name="settings_mood_hide_saved">Απόκρυψη αποθηκευμένων σε Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Φιλτράρει ταινίες και σειρές που έχετε δει ή βρίσκονται στη λίστα παρακολούθησης από τα Cinema Mood και Surprise Me.</string>
     <string name="settings_folder_bookmarks">Σελιδοδείκτες φακέλων</string>
     <string name="settings_folder_bookmarks_desc">Εμφανίζει μια έγχρωμη κορδέλα στις κάρτες για ένδειξη συμμετοχής σε φάκελο.</string>
     <string name="settings_badges">Εμβλήματα πληροφοριών</string>
@@ -2200,4 +2202,12 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="mood_insp_7_prompt">Περιπέτεια και επιβίωση στην ανοιχτή θάλασσα</string>
     <string name="mood_insp_8_title">Ρεαλιστικό αστυνομικό έργο της δεκαετίας του 70</string>
     <string name="mood_insp_8_prompt">Ρεαλιστικό αστυνομικό έργο της δεκαετίας του 70</string>
+    <string name="mood_guest_dialog_title">Αναζήτηση Διάθεσης</string>
+    <string name="mood_guest_dialog_message">Δημιουργήστε δωρεάν λογαριασμό ή συνδεθείτε για να χρησιμοποιήσετε την αναζήτηση διάθεσης και να βρείτε ταινίες προσαρμοσμένες στα συναισθήματά σας.</string>
+    <string name="search_mood_iris_badge">IRIS • ΟΠΤΙΚΗ ΑΝΑΚΑΛΥΨΗ</string>
+    <string name="search_mood_iris_analyzing">Το IRIS εστιάζει τον φακό στη διάθεσή σας...</string>
+    <string name="search_mood_iris_status_focus">Βαθμονόμηση διαφράγματος και βάθους πεδίου...</string>
+    <string name="search_mood_iris_status_scanning">Σάρωση συντεταγμένων κινηματογραφικού αρχείου...</string>
+    <string name="search_mood_iris_no_results">Καμία ταινία εστιασμένη για αυτό το κάδρο</string>
+    <string name="search_mood_iris_no_results_desc">Δοκιμάστε να ανοίξετε το κάδρο ή να περιγράψετε την ατμόσφαιρα με άλλες λεπτομέρειες.</string>
 </resources>

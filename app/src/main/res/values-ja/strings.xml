@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">カードと詳細</string>
     <string name="settings_hide_saved">保存済みアイテムを非表示</string>
     <string name="settings_hide_saved_desc">「見つける」や詳細画面から視聴済みおよび見たいリストの作品を除外します。</string>
+    <string name="settings_mood_hide_saved">MoodとSurprise Meの保存済みを非表示</string>
+    <string name="settings_mood_hide_saved_desc">視聴済みの映画・ドラマおよびウォッチリストの作品をCinema MoodとSurprise Meから除外します。</string>
     <string name="settings_folder_bookmarks">フォルダブックマーク</string>
     <string name="settings_folder_bookmarks_desc">所属フォルダを示すカラーリボンをカードに表示します。</string>
     <string name="settings_badges">情報バッジ</string>
@@ -2218,4 +2220,12 @@
     <string name="mood_insp_7_prompt">大洋の嵐と未知なる海洋アドベンチャー</string>
     <string name="mood_insp_8_title">70年代の骨太で緊迫した作家主義サスペンス</string>
     <string name="mood_insp_8_prompt">70年代の骨太で緊迫した作家主義サスペンス</string>
+    <string name="mood_guest_dialog_title">ムード検索</string>
+    <string name="mood_guest_dialog_message">ムード検索を使って気分に合わせた映画を見つけるには、無料アカウントを作成するかログインしてください。</string>
+    <string name="search_mood_iris_badge">IRIS • オプティカル・ディスカバリー</string>
+    <string name="search_mood_iris_analyzing">IRISがあなたの気分に焦点を合わせています...</string>
+    <string name="search_mood_iris_status_focus">絞りと被写界深度を調整中...</string>
+    <string name="search_mood_iris_status_scanning">映画アーカイブ座標をスキャン中...</string>
+    <string name="search_mood_iris_no_results">このフレームにピントが合う映画はありません</string>
+    <string name="search_mood_iris_no_results_desc">構図を広げるか、別の映画的なニュアンスで雰囲気を伝えてみてください。</string>
 </resources>

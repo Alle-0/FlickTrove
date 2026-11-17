@@ -178,6 +178,8 @@
     <string name="settings_group_cards_details">Karty a podrobnosti</string>
     <string name="settings_hide_saved">Skrýt uložené položky</string>
     <string name="settings_hide_saved_desc">Filtruje zhlédnuté filmy a položky ze seznamu ke zhlédnutí ze sekce Objevovat a detailů.</string>
+    <string name="settings_mood_hide_saved">Skrýt uložené v Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtruje zhlédnuté filmy a seriály a seznam ke zhlédnutí v Cinema Mood a Surprise Me.</string>
     <string name="settings_folder_bookmarks">Záložky složek</string>
     <string name="settings_folder_bookmarks_desc">Zobrazuje barevnou stuhu na kartách označující zařazení do složky.</string>
     <string name="settings_badges">Informační odznaky</string>
@@ -2178,4 +2180,12 @@
     <string name="mood_insp_7_prompt">Dobrodružství a přežití na širém moři</string>
     <string name="mood_insp_8_title">Drsný autorský krimi film 70. let</string>
     <string name="mood_insp_8_prompt">Drsný autorský krimi film 70. let</string>
+    <string name="mood_guest_dialog_title">Hledání podle nálady</string>
+    <string name="mood_guest_dialog_message">Vytvořte si bezplatný účet nebo se přihlaste, abyste mohli vyhledávat podle nálady a objevovat filmy podle svých pocitů.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTICKÉ OBJEVOVÁNÍ</string>
+    <string name="search_mood_iris_analyzing">IRIS zaostřuje objektiv na vaši náladu...</string>
+    <string name="search_mood_iris_status_focus">Kalibrace clony a hloubky ostrosti...</string>
+    <string name="search_mood_iris_status_scanning">Skenování souřadnic filmového archivu...</string>
+    <string name="search_mood_iris_no_results">Pro tento záběr není zaostřen žádný film</string>
+    <string name="search_mood_iris_no_results_desc">Zkuste rozšířit záběr nebo popsat atmosféru jinými slovy.</string>
 </resources>

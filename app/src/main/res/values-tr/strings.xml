@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">Kartlar ve Ayrıntılar</string>
     <string name="settings_hide_saved">Kaydedilenleri Gizle</string>
     <string name="settings_hide_saved_desc">İzlenen filmleri ve izleme listesindeki yapımları Keşfet ve ayrıntılardan filtreler.</string>
+    <string name="settings_mood_hide_saved">Kaydedilenleri Mood ve Surprise Me\'den Gizle</string>
+    <string name="settings_mood_hide_saved_desc">İzlenen film ve dizileri ve izleme listesini Cinema Mood ve Surprise Me\'den filtreler.</string>
     <string name="settings_folder_bookmarks">Klasör Yer İmleri</string>
     <string name="settings_folder_bookmarks_desc">Kartlarda klasör aidiyetini göstermek için renkli şeritler görüntüler.</string>
     <string name="settings_badges">Bilgi Rozetleri</string>
@@ -2218,4 +2220,12 @@
     <string name="mood_insp_7_prompt">Açık denizde macera ve hayatta kalma</string>
     <string name="mood_insp_8_title">70\'ler tarzı gerçekçi yazar polisiye filmi</string>
     <string name="mood_insp_8_prompt">70\'ler tarzı gerçekçi yazar polisiye filmi</string>
+    <string name="mood_guest_dialog_title">Mod Arama</string>
+    <string name="mood_guest_dialog_message">Mod aramasını kullanarak duygularınıza uygun filmler keşfetmek için ücretsiz bir hesap oluşturun veya giriş yapın.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTİK KEŞİF</string>
+    <string name="search_mood_iris_analyzing">IRIS lensi modunuza odaklıyor...</string>
+    <string name="search_mood_iris_status_focus">Diyafram ve alan derinliği kalibre ediliyor...</string>
+    <string name="search_mood_iris_status_scanning">Sinema arşivi koordinatları taranıyor...</string>
+    <string name="search_mood_iris_no_results">Bu kare için odakta film yok</string>
+    <string name="search_mood_iris_no_results_desc">Kareyi genişletmeyi veya atmosferi farklı detaylarla açıklamayı deneyin.</string>
 </resources>

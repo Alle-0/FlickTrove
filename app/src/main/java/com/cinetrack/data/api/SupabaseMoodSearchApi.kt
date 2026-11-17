@@ -1,14 +1,19 @@
 package com.cinetrack.data.api
 
+import com.cinetrack.data.model.MoodQuotaResponse
 import com.cinetrack.data.model.MoodSearchRequest
 import com.cinetrack.data.model.MoodSearchResponse
 import com.cinetrack.data.model.SearchLogDto
 import retrofit2.Response
 import retrofit2.http.Body
+import retrofit2.http.GET
 import retrofit2.http.Header
 import retrofit2.http.POST
 
 interface SupabaseMoodSearchApi {
+
+    @GET("mood-search")
+    suspend fun getMoodQuota(): Response<MoodQuotaResponse>
 
     @POST("mood-search")
     suspend fun searchMoviesByMood(

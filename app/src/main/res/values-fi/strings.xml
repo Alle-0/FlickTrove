@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">Kortit &amp; Tiedot</string>
     <string name="settings_hide_saved">Piilota tallennetut</string>
     <string name="settings_hide_saved_desc">Suodattaa katsotut elokuvat ja katselulistan kohteet pois Löydä-näkymästä ja tiedoista.</string>
+    <string name="settings_mood_hide_saved">Piilota tallennetut Moodista ja Surprise Mestä</string>
+    <string name="settings_mood_hide_saved_desc">Suodattaa katsotut elokuvat ja sarjat sekä katselulistan nimikkeet pois Cinema Moodista ja Surprise Mestä.</string>
     <string name="settings_folder_bookmarks">Kansiokirjanmerkit</string>
     <string name="settings_folder_bookmarks_desc">Näyttää korteissa värillisen nauhan osoittamaan kansiokuuluvuutta.</string>
     <string name="settings_badges">Infomerkit</string>
@@ -2224,4 +2226,12 @@
     <string name="mood_insp_7_prompt">Selviytymistä ja seikkailua aavalla ulkomerellä</string>
     <string name="mood_insp_8_title">Särmikäs 70-luvun tekijärikoselokuva</string>
     <string name="mood_insp_8_prompt">Särmikäs 70-luvun tekijärikoselokuva</string>
+    <string name="mood_guest_dialog_title">Tunnelmahaku</string>
+    <string name="mood_guest_dialog_message">Luo ilmainen tili tai kirjaudu sisään käyttääksesi tunnelmahukua ja löytääksesi tunteisiisi sopivia elokuvia.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTINEN LÖYTÖRETKI</string>
+    <string name="search_mood_iris_analyzing">IRIS tarkentaa linssin tunnelmaasi...</string>
+    <string name="search_mood_iris_status_focus">Kalibroidaan aukkoa ja syväterävyyttä...</string>
+    <string name="search_mood_iris_status_scanning">Skannataan elokuva-arkiston koordinaatteja...</string>
+    <string name="search_mood_iris_no_results">Ei elokuvia tarkennettuna tähän rajaukseen</string>
+    <string name="search_mood_iris_no_results_desc">Kokeile laajentaa rajausta tai kuvailla tunnelmaa toisin sanoin.</string>
 </resources>

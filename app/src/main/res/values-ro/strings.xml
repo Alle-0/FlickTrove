@@ -188,6 +188,8 @@ Urmărește-ți călătoria cinematografică pe FlickTrove! 🍿</string>
     <string name="settings_group_cards_details">Carduri și Detalii</string>
     <string name="settings_hide_saved">Ascunde elementele salvate</string>
     <string name="settings_hide_saved_desc">Filtrează filmele vizionate și titlurile din lista de văzut din Descoperă și detalii.</string>
+    <string name="settings_mood_hide_saved">Ascunde titlurile salvate din Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtrează filmele și serialele vizionate și din lista de urmărire din Cinema Mood și Surprise Me.</string>
     <string name="settings_folder_bookmarks">Marcaje foldere</string>
     <string name="settings_folder_bookmarks_desc">Afișează o panglică colorată pe carduri pentru a indica apartenența la un folder.</string>
     <string name="settings_badges">Insigne informative</string>
@@ -2200,4 +2202,12 @@ Cod de invitație: %3$s</string>
     <string name="mood_insp_7_prompt">Aventură și supraviețuire în largul mării</string>
     <string name="mood_insp_8_title">Polițist de autor realist din anii 70</string>
     <string name="mood_insp_8_prompt">Polițist de autor realist din anii 70</string>
+    <string name="mood_guest_dialog_title">Căutare după atmosferă</string>
+    <string name="mood_guest_dialog_message">Creează un cont gratuit sau conectează-te pentru a folosi căutarea după atmosferă și a descoperi filme pe gustul stării tale.</string>
+    <string name="search_mood_iris_badge">IRIS • DESCOPERIRE OPTICĂ</string>
+    <string name="search_mood_iris_analyzing">IRIS focalizează obiectivul pe atmosfera ta...</string>
+    <string name="search_mood_iris_status_focus">Calibrarea diafragmei și a profunzimii de câmp...</string>
+    <string name="search_mood_iris_status_scanning">Scanarea coordonatelor arhivei cinematografice...</string>
+    <string name="search_mood_iris_no_results">Niciun film focalizat pentru acest cadru</string>
+    <string name="search_mood_iris_no_results_desc">Încearcă să lărgești cadrul sau să descrii atmosfera cu alte detalii.</string>
 </resources>

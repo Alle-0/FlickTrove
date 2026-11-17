@@ -188,6 +188,8 @@ Följ din filmresa på FlickTrove! 🍿</string>
     <string name="settings_group_cards_details">Kort &amp; Detaljer</string>
     <string name="settings_hide_saved">Dölj sparade objekt</string>
     <string name="settings_hide_saved_desc">Filtrerar bort sedda filmer och objekt i att se-listan från Upptäck och detaljer.</string>
+    <string name="settings_mood_hide_saved">Dölj sparade i Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtrerar bort sedda filmer och serier samt bevakningslistan från Cinema Mood och Surprise Me.</string>
     <string name="settings_folder_bookmarks">Mappbokmärken</string>
     <string name="settings_folder_bookmarks_desc">Visar ett färgat band på kort för att indikera mapptillhörighet.</string>
     <string name="settings_badges">Informationsbrickor</string>
@@ -2197,4 +2199,12 @@ Prova att förenkla sökningen</string>
     <string name="mood_insp_7_prompt">Äventyr och överlevnad på öppet hav</string>
     <string name="mood_insp_8_title">Rå och realistisk författarkriminalfilm från 70-talet</string>
     <string name="mood_insp_8_prompt">Rå och realistisk författarkriminalfilm från 70-talet</string>
+    <string name="mood_guest_dialog_title">Stämningssökning</string>
+    <string name="mood_guest_dialog_message">Skapa ett gratis konto eller logga in för att använda stämningssökning och hitta filmer anpassade efter dina känslor.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTISK UPPTÄCKT</string>
+    <string name="search_mood_iris_analyzing">IRIS fokuserar linsen på din stämning...</string>
+    <string name="search_mood_iris_status_focus">Kalibrerar bländare och skärpedjup...</string>
+    <string name="search_mood_iris_status_scanning">Skannar biografarkivets koordinater...</string>
+    <string name="search_mood_iris_no_results">Ingen film i fokus för denna bildruta</string>
+    <string name="search_mood_iris_no_results_desc">Prova att vidga bildutsnittet eller beskriva stämningen med andra detaljer.</string>
 </resources>

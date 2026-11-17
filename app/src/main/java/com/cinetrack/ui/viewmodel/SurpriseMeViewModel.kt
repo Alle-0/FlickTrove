@@ -77,7 +77,7 @@ class SurpriseMeViewModel @Inject constructor(
 
     suspend fun getRandomMovie(): Movie? {
         val localMovies = _uiState.value.localMovies
-        val watchedIds = localMovies.filter { it.watched || it.dropped }.map { it.id }.toSet()
+        val excludedIds = getExcludedMovieIds()
 
         return try {
             val randomPage = (1..20).random()
@@ -89,19 +89,19 @@ class SurpriseMeViewModel @Inject constructor(
             )
             
             val response = tmdbService.discoverMovies(page = randomPage, options = options)
-            val candidates = response.results.filter { it.id !in watchedIds }
+            val candidates = response.results.filter { it.id !in excludedIds }
             
             candidates.randomOrNull()?.apply { mediaType = "movie" } 
-                ?: tmdbService.discoverMovies(page = 1, options = options).results.filter { it.id !in watchedIds }.randomOrNull()?.apply { mediaType = "movie" }
+                ?: tmdbService.discoverMovies(page = 1, options = options).results.filter { it.id !in excludedIds }.randomOrNull()?.apply { mediaType = "movie" }
         } catch (e: Exception) {
-            val unwatched = localMovies.filter { !it.watched && !it.dropped }
-            unwatched.filter { it.mediaType == "movie" }.randomOrNull() ?: unwatched.randomOrNull()
+            val candidates = if (excludedIds.isEmpty()) localMovies else localMovies.filter { it.id !in excludedIds }
+            candidates.filter { it.mediaType == "movie" }.randomOrNull() ?: candidates.randomOrNull()
         }
     }
 
     suspend fun getEmotionalMovie(time: SurpriseTime, mood: SurpriseMood, company: SurpriseCompany): Movie? {
         val localMovies = _uiState.value.localMovies
-        val watchedIds = localMovies.filter { it.watched || it.dropped }.map { it.id }.toSet()
+        val excludedIds = getExcludedMovieIds()
 
         return try {
             // 1. Map Time to TMDB Runtime limits
@@ -176,23 +176,25 @@ class SurpriseMeViewModel @Inject constructor(
                 }
             }
 
-            val candidates = response.results.filter { it.id !in watchedIds }
+            val candidates = response.results.filter { it.id !in excludedIds }
             
             candidates.randomOrNull()?.apply { mediaType = "movie" } 
-                ?: response.results.filter { it.id !in watchedIds }.randomOrNull()?.apply { mediaType = "movie" }
+                ?: response.results.filter { it.id !in excludedIds }.randomOrNull()?.apply { mediaType = "movie" }
         } catch (e: Exception) {
             // Offline fallback
-            val unwatched = localMovies.filter { !it.watched && !it.dropped }
-            unwatched.filter { it.mediaType == "movie" }.randomOrNull() ?: unwatched.randomOrNull()
+            val candidates = if (excludedIds.isEmpty()) localMovies else localMovies.filter { it.id !in excludedIds }
+            candidates.filter { it.mediaType == "movie" }.randomOrNull() ?: candidates.randomOrNull()
         }
     }
 
     suspend fun getPromptMovie(prompt: String, forceLocal: Boolean = false): Movie? {
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (user == null || user.isAnonymous) return null
         val trimmed = prompt.trim()
         if (trimmed.isEmpty()) return getRandomMovie()
 
         val localMovies = _uiState.value.localMovies
-        val watchedIds = localMovies.filter { it.watched || it.dropped }.map { it.id }.toSet()
+        val excludedIds = getExcludedMovieIds()
 
         val contentLang = preferenceRepository.getContentLanguage()
         val targetLanguage = if (contentLang == "system") {
@@ -210,7 +212,7 @@ class SurpriseMeViewModel @Inject constructor(
             val data = result.getOrNull()
             val movieResults = data?.movies.orEmpty()
 
-            val candidates = movieResults.filter { it.id !in watchedIds }
+            val candidates = movieResults.filter { it.id !in excludedIds }
             val chosen = if (candidates.isNotEmpty()) {
                 candidates.take(3).random()
             } else {
@@ -232,5 +234,15 @@ class SurpriseMeViewModel @Inject constructor(
         } catch (e: Exception) {
             getRandomMovie()
         }
+    }
+
+    private fun getExcludedMovieIds(): Set<Long> {
+        val prefs = preferenceRepository.getCachedPreferences()
+        val localMovies = _uiState.value.localMovies
+        if (!prefs.moodHideSaved) return emptySet()
+        return localMovies
+            .filter { it.watched || it.dropped || it.favorite }
+            .map { it.id }
+            .toSet()
     }
 }

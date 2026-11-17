@@ -188,6 +188,8 @@
     <string name="settings_group_cards_details">Картки та деталі</string>
     <string name="settings_hide_saved">Приховати збережене</string>
     <string name="settings_hide_saved_desc">Приховує переглянуті фільми та список перегляду з Огляду та деталей.</string>
+    <string name="settings_mood_hide_saved">Приховати збережене в Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Виключає переглянуті фільми та серіали, а також список перегляду з Cinema Mood і Surprise Me.</string>
     <string name="settings_folder_bookmarks">Закладки папок</string>
     <string name="settings_folder_bookmarks_desc">Показує кольорову стрічку на картках, вказуючи на належність до папки.</string>
     <string name="settings_badges">Інформаційні бейджі</string>
@@ -2198,4 +2200,12 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="mood_insp_7_prompt">Пригоди та виживання у відкритому океані</string>
     <string name="mood_insp_8_title">Авторський кримінальний фільм 70-х років</string>
     <string name="mood_insp_8_prompt">Авторський кримінальний фільм 70-х років</string>
+    <string name="mood_guest_dialog_title">Пошук за настроєм</string>
+    <string name="mood_guest_dialog_message">Створіть безкоштовний акаунт або увійдіть, щоб скористатися пошуком за настроєм і знаходити фільми під свої емоції.</string>
+    <string name="search_mood_iris_badge">IRIS • ОПТИЧНИЙ ПОШУК</string>
+    <string name="search_mood_iris_analyzing">IRIS налаштовує оптику під ваш настрій...</string>
+    <string name="search_mood_iris_status_focus">Калібрування діафрагми та глибини різкості...</string>
+    <string name="search_mood_iris_status_scanning">Сканування координат кіноархіву...</string>
+    <string name="search_mood_iris_no_results">Немає фільмів у фокусі для цього кадру</string>
+    <string name="search_mood_iris_no_results_desc">Спробуйте розширити кадр або описати атмосферу іншими словами.</string>
 </resources>

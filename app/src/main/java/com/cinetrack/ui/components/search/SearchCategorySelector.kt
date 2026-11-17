@@ -43,7 +43,9 @@ fun SearchCategorySelector(
     isMoodAiMode: Boolean = true,
     moodRemainingQuota: Int = 3,
     onMoodModeChanged: (Boolean) -> Unit = {},
-    hazeState: HazeState? = null
+    hazeState: HazeState? = null,
+    isGuest: Boolean = false,
+    onGuestAuthTrigger: () -> Unit = {}
 ) {
     val isMood = category == "mood"
     val selectedIndex = when (category) {
@@ -216,13 +218,12 @@ fun SearchCategorySelector(
                     label = "category_morphing_capsule"
                 ) { moodActive ->
                     if (moodActive) {
-                        val effectiveAiMode = isMoodAiMode && moodRemainingQuota > 0
                         CategoryTabSelector(
                             options = listOf(
                                 stringResource(R.string.search_mood_mode_ai_tab, moodRemainingQuota),
                                 stringResource(R.string.search_mood_mode_local_tab)
                             ),
-                            selectedIndex = if (effectiveAiMode) 0 else 1,
+                            selectedIndex = if (isMoodAiMode) 0 else 1,
                             onOptionClick = { index ->
                                 onMoodModeChanged(index == 0)
                             },
@@ -280,8 +281,12 @@ fun SearchCategorySelector(
                         if (isMood) {
                             onCategoryChanged(previousCategory)
                         } else {
-                            previousCategory = category
-                            onCategoryChanged("mood")
+                            if (isGuest) {
+                                onGuestAuthTrigger()
+                            } else {
+                                previousCategory = category
+                                onCategoryChanged("mood")
+                            }
                         }
                     }
                     .size(34.dp)

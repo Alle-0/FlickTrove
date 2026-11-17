@@ -147,6 +147,7 @@ fun SettingsUILayoutSection(
 ) {
     val context = LocalContext.current
     val hideSavedFromDiscovery by settingsViewModel.hideSavedFromDiscovery.collectAsStateWithLifecycle()
+    val moodHideSaved by settingsViewModel.moodHideSaved.collectAsStateWithLifecycle()
     val showLayoutToggle by settingsViewModel.showLayoutToggle.collectAsStateWithLifecycle()
     val showSplitReleasesHome by settingsViewModel.showSplitReleasesHome.collectAsStateWithLifecycle()
     val showSplitDroppedHome by settingsViewModel.showSplitDroppedHome.collectAsStateWithLifecycle()
@@ -266,6 +267,26 @@ fun SettingsUILayoutSection(
             onClick = {
                 if (vibrationEnabled) VibrationHelper.vibrateTick(context)
                 settingsViewModel.toggleHideSavedFromDiscovery(!hideSavedFromDiscovery)
+            }
+        )
+
+        SettingsItem(
+            icon = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+            title = stringResource(R.string.settings_mood_hide_saved),
+            description = stringResource(R.string.settings_mood_hide_saved_desc),
+            trailing = {
+                FlickTroveSwitch(
+                    checked = moodHideSaved,
+                    onCheckedChange = { 
+                        if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                        settingsViewModel.toggleMoodHideSaved(it) 
+                    },
+                    accentColor = currentAccentColor
+                )
+            },
+            onClick = {
+                if (vibrationEnabled) VibrationHelper.vibrateTick(context)
+                settingsViewModel.toggleMoodHideSaved(!moodHideSaved)
             }
         )
 

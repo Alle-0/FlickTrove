@@ -37,6 +37,7 @@ class SettingsRepositoryImpl @Inject constructor(
         val IGNORED_UPDATE_VERSION = stringPreferencesKey("ignored_update_version")
         val HAS_SEEN_ONBOARDING = booleanPreferencesKey("has_seen_onboarding")
         val HIDE_SAVED_FROM_DISCOVERY = booleanPreferencesKey("hide_saved_from_discovery")
+        val MOOD_HIDE_SAVED = booleanPreferencesKey("mood_hide_saved")
         val PROMPT_WATCH_DATE_ON_DETAIL = booleanPreferencesKey("prompt_watch_date_on_detail")
         val AUTO_OPEN_VIBE_ON_WATCH = booleanPreferencesKey("auto_open_vibe_on_watch")
         val EPISODES_LAYOUT = stringPreferencesKey("episodes_layout")
@@ -65,6 +66,10 @@ class SettingsRepositoryImpl @Inject constructor(
 
     override val hideSavedFromDiscovery: Flow<Boolean> = dataStore.data.map { preferences ->
         preferences[PreferencesKeys.HIDE_SAVED_FROM_DISCOVERY] ?: false // Default is false
+    }
+
+    override val moodHideSaved: Flow<Boolean> = dataStore.data.map { preferences ->
+        preferences[PreferencesKeys.MOOD_HIDE_SAVED] ?: false
     }
 
     override val lastSeenAppVersion: Flow<String> = dataStore.data.map { preferences ->
@@ -226,6 +231,12 @@ class SettingsRepositoryImpl @Inject constructor(
     override suspend fun toggleHideSavedFromDiscovery(enabled: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.HIDE_SAVED_FROM_DISCOVERY] = enabled
+        }
+    }
+
+    override suspend fun toggleMoodHideSaved(enabled: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MOOD_HIDE_SAVED] = enabled
         }
     }
 

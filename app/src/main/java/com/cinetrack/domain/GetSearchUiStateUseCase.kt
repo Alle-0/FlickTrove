@@ -35,16 +35,24 @@ class GetSearchUiStateUseCase @Inject constructor() {
         val query = currentState.query
 
         val filteredResults = results.applyFilter(sortConfig).let { list ->
-            // In Cinema Mood Discovery, exclude films and series that the user has already watched
+            // In Cinema Mood Discovery, conditionally exclude saved items based on UserPreferences
             val unWatchedList = if (category == "mood") {
-                val watchedKeys = localMovies
-                    .filter { it.watched || (it.mediaType == "tv" && it.isTvUpToDateOrCompleted()) || it.watchedAt != null }
-                    .flatMap { listOf("${it.id}_${it.mediaType}", "${it.mediaType}_${it.id}", "${it.id}") }
-                    .toSet()
-                list.filter { item ->
-                    "${item.id}_${item.mediaType}" !in watchedKeys &&
-                    "${item.mediaType}_${item.id}" !in watchedKeys &&
-                    "${item.id}" !in watchedKeys
+                if (!currentState.preferences.moodHideSaved) {
+                    list
+                } else {
+                    val excludedKeys = mutableSetOf<String>()
+                    localMovies
+                        .filter { it.watched || (it.mediaType == "tv" && it.isTvUpToDateOrCompleted()) || it.watchedAt != null || it.favorite }
+                        .forEach { movie ->
+                            excludedKeys.add("${movie.id}_${movie.mediaType}")
+                            excludedKeys.add("${movie.mediaType}_${movie.id}")
+                            excludedKeys.add("${movie.id}")
+                        }
+                    list.filter { item ->
+                        "${item.id}_${item.mediaType}" !in excludedKeys &&
+                        "${item.mediaType}_${item.id}" !in excludedKeys &&
+                        "${item.id}" !in excludedKeys
+                    }
                 }
             } else {
                 list

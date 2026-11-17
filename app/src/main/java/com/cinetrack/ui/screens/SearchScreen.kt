@@ -114,11 +114,21 @@ data class SearchScreen(
     @Composable
     override fun Content() {
         val viewModel = getViewModel<SearchViewModel>()
+        val settingsViewModel = getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
         val navigator = LocalNavigator.currentOrThrow
 
         LaunchedEffect(initialGenreId, initialGenreName, initialKeywordName, initialCategory) {
+            val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
             if (initialCategory != null) {
-                viewModel.onCategoryChanged(initialCategory)
+                if (initialCategory == "mood" && isGuest) {
+                    settingsViewModel.triggerGuestAuthDialog(
+                        R.string.mood_guest_dialog_title,
+                        R.string.mood_guest_dialog_message
+                    )
+                    viewModel.onCategoryChanged("all")
+                } else {
+                    viewModel.onCategoryChanged(initialCategory)
+                }
             }
             if (initialGenreId != null) {
                 viewModel.updateSortConfig(
@@ -164,6 +174,12 @@ data class SearchScreen(
                     onDiscoverTrendingClick = { requestedType ->
                         DiscoverTab.requestedType = requestedType
                         navigator.popUntilRoot()
+                    },
+                    onGuestAuthTrigger = {
+                        settingsViewModel.triggerGuestAuthDialog(
+                            R.string.mood_guest_dialog_title,
+                            R.string.mood_guest_dialog_message
+                        )
                     }
                 )
             }
@@ -187,9 +203,11 @@ fun SearchScreenContent(
     onMovieClick: (Movie) -> Unit,
     onPersonClick: (Long) -> Unit = {},
     onCollectionClick: (String, String?) -> Unit = { _, _ -> },
-    onDiscoverTrendingClick: ((String) -> Unit)? = null
+    onDiscoverTrendingClick: ((String) -> Unit)? = null,
+    onGuestAuthTrigger: () -> Unit = {}
 ) {
     val scope = rememberCoroutineScope()
+    val isGuest = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false }
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val focusManager = LocalFocusManager.current
     var isFilterVisible by remember { mutableStateOf(false) }
@@ -508,7 +526,9 @@ fun SearchScreenContent(
                                 viewModel.selectMoodHistory(entry)
                             },
                             onDeleteMoodHistory = { viewModel.deleteMoodHistory(it) },
-                            onClearMoodHistory = { viewModel.clearMoodHistory() }
+                            onClearMoodHistory = { viewModel.clearMoodHistory() },
+                            isGuest = isGuest,
+                            onGuestAuthTrigger = onGuestAuthTrigger
                         )
 
                     // 3. Local-Only Banner (bottom, shown when offline/poor connection)

@@ -24,7 +24,9 @@ fun GuestAuthDialog(
     showDialog: Boolean,
     onDismiss: () -> Unit,
     navigator: Navigator?,
-    globalHazeState: HazeState
+    globalHazeState: HazeState,
+    titleRes: Int? = null,
+    messageRes: Int? = null
 ) {
     if (showDialog) {
         FlickTroveModal(
@@ -34,7 +36,7 @@ fun GuestAuthDialog(
             contentPadding = PaddingValues(24.dp)
         ) {
             Text(
-                text = stringResource(R.string.account_guest_sync_title),
+                text = stringResource(titleRes ?: R.string.account_guest_sync_title),
                 style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                 color = Color.White,
                 textAlign = TextAlign.Center,
@@ -42,7 +44,7 @@ fun GuestAuthDialog(
             )
             Spacer(modifier = Modifier.height(16.dp))
             Text(
-                text = stringResource(R.string.account_guest_sync_message),
+                text = stringResource(messageRes ?: R.string.account_guest_sync_message),
                 style = MaterialTheme.typography.bodyMedium,
                 color = Color.White.copy(alpha = 0.75f),
                 textAlign = TextAlign.Center,

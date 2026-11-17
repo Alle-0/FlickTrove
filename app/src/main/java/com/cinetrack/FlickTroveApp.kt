@@ -216,10 +216,10 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                 }
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
-                                    var showGuestAuthDialog by remember { mutableStateOf(false) }
+                                    var guestAuthDialogConfig by remember { mutableStateOf<com.cinetrack.ui.viewmodel.SettingsViewModel.GuestAuthDialogConfig?>(null) }
                                     LaunchedEffect(Unit) {
-                                        settingsViewModel.showGuestAuthDialog.collect {
-                                            showGuestAuthDialog = true
+                                        settingsViewModel.showGuestAuthDialog.collect { config ->
+                                            guestAuthDialogConfig = config
                                         }
                                     }
                                     
@@ -366,6 +366,12 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                             deepLinkIntent.value = android.content.Intent("com.cinetrack.OPEN_DISCOVER_TAB").apply {
                                                                 putExtra("requestedType", reqType)
                                                             }
+                                                        },
+                                                        onGuestAuthTrigger = {
+                                                            settingsViewModel.triggerGuestAuthDialog(
+                                                                com.cinetrack.R.string.mood_guest_dialog_title,
+                                                                com.cinetrack.R.string.mood_guest_dialog_message
+                                                            )
                                                         }
                                                     )
                                                 }
@@ -375,15 +381,17 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                     } // end haze Box
                                     
                                     com.cinetrack.ui.components.dialog.GuestAuthDialog(
-                                        showDialog = showGuestAuthDialog,
-                                        onDismiss = { showGuestAuthDialog = false },
+                                        showDialog = guestAuthDialogConfig != null,
+                                        onDismiss = { guestAuthDialogConfig = null },
                                         navigator = navigator,
-                                        globalHazeState = globalHazeState
+                                        globalHazeState = globalHazeState,
+                                        titleRes = guestAuthDialogConfig?.titleRes,
+                                        messageRes = guestAuthDialogConfig?.messageRes
                                     )
 
                                     val isAuthScreen = navigator.lastItem is com.cinetrack.ui.screens.LoginScreen ||
                                         navigator.lastItem is com.cinetrack.ui.screens.SplashScreen ||
-                                        showGuestAuthDialog
+                                        guestAuthDialogConfig != null
 
                                     com.cinetrack.ui.components.badge.TrophyUnlockBanner(
                                         enabled = !isAuthScreen,

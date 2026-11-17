@@ -167,6 +167,8 @@
     <string name="settings_group_cards_details">Karten &amp; Details</string>
     <string name="settings_hide_saved">Gespeicherte Titel ausblenden</string>
     <string name="settings_hide_saved_desc">Blendet angesehene Filme und Watchlist-Titel in Entdecken und Details aus.</string>
+    <string name="settings_mood_hide_saved">Gespeicherte Titel in Mood &amp; Surprise Me ausblenden</string>
+    <string name="settings_mood_hide_saved_desc">Filtert bereits gesehene Filme und Serien sowie Watchlist-Titel in Cinema Mood und Surprise Me heraus.</string>
     <string name="settings_folder_bookmarks">Ordner-Lesezeichen</string>
     <string name="settings_folder_bookmarks_desc">Zeigt ein farbiges Band auf Karten an, um die Ordnerzugehörigkeit zu signalisieren.</string>
     <string name="settings_badges">Info-Badges</string>
@@ -2220,4 +2222,12 @@
     <string name="mood_insp_7_prompt">Überleben und Abenteuer auf hoher See</string>
     <string name="mood_insp_8_title">Rauher Autoren-Krimi der 70er Jahre</string>
     <string name="mood_insp_8_prompt">Rauher Autoren-Krimi der 70er Jahre</string>
+    <string name="mood_guest_dialog_title">Stimmungssuche</string>
+    <string name="mood_guest_dialog_message">Erstelle ein kostenloses Konto oder melde dich an, um die Stimmungssuche zu nutzen und Filme passend zu deinen Gefühlen zu entdecken.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTISCHE ENTDECKUNG</string>
+    <string name="search_mood_iris_analyzing">IRIS fokussiert die Linse auf deine Stimmung...</string>
+    <string name="search_mood_iris_status_focus">Kalibriere Blende und Schärfentiefe...</string>
+    <string name="search_mood_iris_status_scanning">Scanne Koordinaten des Filmarchivs...</string>
+    <string name="search_mood_iris_no_results">Kein Film für diesen Bildausschnitt im Fokus</string>
+    <string name="search_mood_iris_no_results_desc">Versuche, den Bildausschnitt zu erweitern oder die Stimmung anders zu beschreiben.</string>
 </resources>

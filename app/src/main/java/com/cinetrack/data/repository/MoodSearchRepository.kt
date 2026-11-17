@@ -49,6 +49,26 @@ class MoodSearchRepository @Inject constructor(
 
     suspend fun getRemainingQuota(): Int = preferenceRepository.getMoodSearchesRemaining()
 
+    suspend fun refreshRemoteQuota(): Int {
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (user == null || user.isAnonymous) return 0
+        return try {
+            val response = api.getMoodQuota()
+            if (response.isSuccessful) {
+                val rem = response.body()?.remaining ?: 3
+                preferenceRepository.setMoodSearchesRemaining(rem)
+                rem
+            } else if (response.code() == 429) {
+                preferenceRepository.setMoodSearchesRemaining(0)
+                0
+            } else {
+                preferenceRepository.getMoodSearchesRemaining()
+            }
+        } catch (_: Exception) {
+            preferenceRepository.getMoodSearchesRemaining()
+        }
+    }
+
     fun isLocalEligible(language: String): Boolean = true
 
     suspend fun searchMoviesByMood(
@@ -58,6 +78,10 @@ class MoodSearchRepository @Inject constructor(
         forceLocal: Boolean = false,
         bypassCache: Boolean = false
     ): Result<MoodSearchResultData> = runCatching {
+        val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
+        if (user == null || user.isAnonymous) {
+            throw Exception(context.getString(R.string.mood_guest_dialog_message))
+        }
         val trimmedQuery = query.trim().take(1000)
         val remaining = preferenceRepository.getMoodSearchesRemaining()
         val wantAi = !forceLocal && remaining > 0
@@ -112,6 +136,7 @@ class MoodSearchRepository @Inject constructor(
             }
 
             if (response.code() == 429) {
+                preferenceRepository.setMoodSearchesRemaining(0)
                 throw MoodRateLimitException()
             }
 
@@ -143,7 +168,11 @@ class MoodSearchRepository @Inject constructor(
 
             // Quota consumption & Caching: ONLY consume quota and cache if the search succeeded and produced results
             if (mappedMovies.isNotEmpty()) {
-                preferenceRepository.consumeMoodSearchQuota()
+                body.remainingQuota?.let { rem ->
+                    preferenceRepository.setMoodSearchesRemaining(rem)
+                } ?: run {
+                    preferenceRepository.consumeMoodSearchQuota()
+                }
                 moodHistoryRepository.saveEntry(
                     MoodHistoryEntry(
                         query = trimmedQuery,

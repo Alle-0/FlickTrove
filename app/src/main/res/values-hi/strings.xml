@@ -169,6 +169,8 @@
     <string name="settings_group_cards_details">कार्ड और विवरण</string>
     <string name="settings_hide_saved">सहेजे गए शीर्षक छिपाएं</string>
     <string name="settings_hide_saved_desc">डिस्कवर और विवरणों से देखी गई फिल्मों और वॉचलिस्ट आइटम को फ़िल्टर करता है।</string>
+    <string name="settings_mood_hide_saved">Mood और Surprise Me में सहेजे गए शीर्षक छिपाएं</string>
+    <string name="settings_mood_hide_saved_desc">देखी गई फिल्मों, सीरीज़ और वॉचलिस्ट को Cinema Mood और Surprise Me से फ़िल्टर करता है।</string>
     <string name="settings_folder_bookmarks">फ़ोल्डर बुकमार्क</string>
     <string name="settings_folder_bookmarks_desc">फ़ोल्डर सदस्यता को दर्शाने के लिए कार्ड पर एक रंगीन रिबन दिखाता है।</string>
     <string name="settings_badges">जानकारी बैज</string>
@@ -2215,4 +2217,12 @@
     <string name="mood_insp_7_prompt">खुले समंदर में साहसिक रोमांच और अस्तित्व</string>
     <string name="mood_insp_8_title">70 के दशक का यथार्थवादी क्राइम सिनेमा</string>
     <string name="mood_insp_8_prompt">70 के दशक का यथार्थवादी क्राइम सिनेमा</string>
+    <string name="mood_guest_dialog_title">मूड खोज</string>
+    <string name="mood_guest_dialog_message">मूड खोज का उपयोग करने और अपनी भावनाओं के अनुसार फ़िल्में खोजने के लिए मुफ़्त खाता बनाएं या लॉग इन करें।</string>
+    <string name="search_mood_iris_badge">IRIS • ऑप्टिकल खोज</string>
+    <string name="search_mood_iris_analyzing">IRIS आपके मूड पर लेंस फोकस कर रहा है...</string>
+    <string name="search_mood_iris_status_focus">एपर्चर और डेप्थ ऑफ़ फ़ील्ड कैलिब्रेट हो रहा है...</string>
+    <string name="search_mood_iris_status_scanning">सिनेमा पुरालेख निर्देशांक स्कैन हो रहे हैं...</string>
+    <string name="search_mood_iris_no_results">इस फ्रेम के लिए कोई फिल्म फोकस में नहीं है</string>
+    <string name="search_mood_iris_no_results_desc">फ्रेम को चौड़ा करने का प्रयास करें या अन्य विवरणों के साथ वाइब का वर्णन करें।</string>
 </resources>

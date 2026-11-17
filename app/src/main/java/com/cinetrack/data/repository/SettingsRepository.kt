@@ -20,6 +20,7 @@ interface SettingsRepository {
     val ignoredUpdateVersion: Flow<String>
     val hasSeenOnboarding: Flow<Boolean>
     val hideSavedFromDiscovery: Flow<Boolean>
+    val moodHideSaved: Flow<Boolean>
     val promptWatchDateOnDetail: Flow<Boolean>
     val autoOpenVibeOnWatch: Flow<Boolean>
     val episodesLayout: Flow<String>
@@ -46,6 +47,7 @@ interface SettingsRepository {
     suspend fun updateIgnoredUpdateVersion(version: String)
     suspend fun setOnboardingSeen(seen: Boolean)
     suspend fun toggleHideSavedFromDiscovery(enabled: Boolean)
+    suspend fun toggleMoodHideSaved(enabled: Boolean)
     suspend fun togglePromptWatchDateOnDetail(enabled: Boolean)
     suspend fun toggleAutoOpenVibeOnWatch(enabled: Boolean)
     suspend fun updateEpisodesLayout(layout: String)

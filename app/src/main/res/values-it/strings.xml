@@ -160,8 +160,10 @@
     <string name="settings_ui_layout_desc">Riordina le schede e personalizza la visibilità</string>
     <string name="settings_group_home_feed">Home e Feed</string>
     <string name="settings_group_cards_details">Card e Dettagli</string>
-    <string name="settings_hide_saved">Nascondi Titoli Salvati</string>
+    <string name="settings_hide_saved">Nascondi Titoli Salvati in Esplora</string>
     <string name="settings_hide_saved_desc">Nasconde i film e le serie TV già visti o salvati nella watchlist dalle sezioni Esplora e Consigliati.</string>
+    <string name="settings_mood_hide_saved">Nascondi Titoli Salvati in Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Nasconde i film e le serie TV già visti o salvati nella watchlist dai consigli di Cinema Mood e Surprise Me.</string>
     <string name="settings_folder_bookmarks">Segnalibri cartelle</string>
     <string name="settings_folder_bookmarks_desc">Mostra un nastro colorato sulle card per indicare l\'appartenenza alle cartelle.</string>
     <string name="settings_badges">Badge informativi</string>
@@ -2222,4 +2224,12 @@
 
     <string name="editorial_season_episode_scope">ST. %1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <string name="mood_guest_dialog_title">Ricerca Mood</string>
+    <string name="mood_guest_dialog_message">Crea un account gratuito o accedi per utilizzare la ricerca Mood e scoprire film su misura per le tue emozioni.</string>
+    <string name="search_mood_iris_badge">IRIS • SCOPERTA OTTICA</string>
+    <string name="search_mood_iris_analyzing">IRIS sta mettendo a fuoco l\'atmosfera...</string>
+    <string name="search_mood_iris_status_focus">Calibrazione diaframma e profondità di campo...</string>
+    <string name="search_mood_iris_status_scanning">Scansione coordinate dell\'archivio cinema...</string>
+    <string name="search_mood_iris_no_results">Nessuna pellicola a fuoco per questa inquadratura</string>
+    <string name="search_mood_iris_no_results_desc">Prova ad allargare l\'inquadratura o a descrivere l\'atmosfera con altre sfumature.</string>
 </resources>

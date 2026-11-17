@@ -188,6 +188,8 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="settings_group_cards_details">Karty i szczegóły</string>
     <string name="settings_hide_saved">Ukryj zapisane pozycje</string>
     <string name="settings_hide_saved_desc">Ukrywa obejrzane filmy i pozycje do obejrzenia w sekcji Odkrywaj i szczegółach.</string>
+    <string name="settings_mood_hide_saved">Ukryj zapisane w Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtruje obejrzane filmy i seriale oraz listę do obejrzenia w Cinema Mood i Surprise Me.</string>
     <string name="settings_folder_bookmarks">Wstążki folderów</string>
     <string name="settings_folder_bookmarks_desc">Pokazuje kolorową wstążkę na kartach informującą o przynależności do folderu.</string>
     <string name="settings_badges">Odznaki informacyjne</string>
@@ -2188,4 +2190,12 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="mood_insp_7_prompt">Morska przygoda i walka o przetrwanie</string>
     <string name="mood_insp_8_title">Mocny kryminał autorski z lat 70.</string>
     <string name="mood_insp_8_prompt">Mocny kryminał autorski z lat 70.</string>
+    <string name="mood_guest_dialog_title">Wyszukiwanie nastroju</string>
+    <string name="mood_guest_dialog_message">Utwórz bezpłatne konto lub zaloguj się, aby korzystać z wyszukiwania nastroju i odkrywać filmy dopasowane do Twoich emocji.</string>
+    <string name="search_mood_iris_badge">IRIS • ODKRYWANIE OPTYCZNE</string>
+    <string name="search_mood_iris_analyzing">IRIS ustawia ostrość na Twój nastrój...</string>
+    <string name="search_mood_iris_status_focus">Kalibracja przysłony i głębi ostrości...</string>
+    <string name="search_mood_iris_status_scanning">Skanowanie współrzędnych archiwum kina...</string>
+    <string name="search_mood_iris_no_results">Brak filmów w kadrze dla tego ujęcia</string>
+    <string name="search_mood_iris_no_results_desc">Spróbuj poszerzyć kadr lub opisać nastrój za pomocą innych szczegółów.</string>
 </resources>

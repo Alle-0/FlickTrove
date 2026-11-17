@@ -216,8 +216,8 @@ fun SearchMoodEditorialCard(
                         }
                     }
 
-                    // Badge di Stato (Top-Right: Visto)
-                    if (isWatched) {
+                    // Badge di Stato (Top-Right: Check se Visto, Occhio se in Watchlist/Da Vedere)
+                    if (isWatched || isFavorite) {
                         Box(
                             modifier = Modifier
                                 .align(Alignment.TopEnd)
@@ -228,7 +228,9 @@ fun SearchMoodEditorialCard(
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
-                                imageVector = ImageVector.vectorResource(id = R.drawable.ic_eye),
+                                imageVector = ImageVector.vectorResource(
+                                    id = if (isWatched) R.drawable.ic_tick_card else R.drawable.ic_eye
+                                ),
                                 contentDescription = null,
                                 tint = primaryColor,
                                 modifier = Modifier.size(12.dp)

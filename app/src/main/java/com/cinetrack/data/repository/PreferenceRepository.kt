@@ -110,10 +110,11 @@ class PreferenceRepository @Inject constructor(
         val HOME_SECTION_ORDER = stringPreferencesKey("home_section_order")
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
         val ENABLE_BOTTOM_BAR_SWIPE = booleanPreferencesKey("enable_bottom_bar_swipe")
+        val MOOD_HIDE_SAVED = booleanPreferencesKey("mood_hide_saved")
         val LAST_TASTE_VECTOR_SYNC_TIMESTAMP = longPreferencesKey("last_taste_vector_sync_timestamp")
         val MOOD_SEARCH_LAST_EPOCH_DAY = longPreferencesKey("mood_search_last_epoch_day")
         val MOOD_SEARCH_COUNT = intPreferencesKey("mood_search_count")
-        const val DAILY_MOOD_SEARCH_QUOTA = 3
+        val DAILY_MOOD_SEARCH_QUOTA = if (com.cinetrack.BuildConfig.DEBUG) 50 else 3
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -197,7 +198,8 @@ class PreferenceRepository @Inject constructor(
                     com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(raw.split(","))
                 } ?: com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER,
                 allowMobileDataUpdates = preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] ?: true,
-                enableBottomBarSwipe = preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] ?: true
+                enableBottomBarSwipe = preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] ?: true,
+                moodHideSaved = preferences[PreferencesKeys.MOOD_HIDE_SAVED] ?: false
             )
         }
 
@@ -579,10 +581,16 @@ class PreferenceRepository @Inject constructor(
         .map { prefs ->
             val todayEpochDay = java.time.LocalDate.now().toEpochDay()
             val savedEpochDay = prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] ?: 0L
+            val quotaMax = PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
             if (savedEpochDay < todayEpochDay) {
-                PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
+                quotaMax
             } else {
-                prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
+                val saved = prefs[PreferencesKeys.MOOD_SEARCH_COUNT]
+                if (com.cinetrack.BuildConfig.DEBUG && (saved == null || saved <= 0)) {
+                    quotaMax
+                } else {
+                    saved ?: quotaMax
+                }
             }
         }
 
@@ -590,7 +598,18 @@ class PreferenceRepository @Inject constructor(
         val prefs = dataStore.data.first()
         val todayEpochDay = java.time.LocalDate.now().toEpochDay()
         val savedEpochDay = prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] ?: 0L
-        return if (savedEpochDay < todayEpochDay) PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA else (prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA)
+        val quotaMax = PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
+        if (savedEpochDay < todayEpochDay) return quotaMax
+        val saved = prefs[PreferencesKeys.MOOD_SEARCH_COUNT]
+        return if (com.cinetrack.BuildConfig.DEBUG && (saved == null || saved <= 0)) quotaMax else (saved ?: quotaMax)
+    }
+
+    suspend fun setMoodSearchesRemaining(remaining: Int) = moodQuotaMutex.withLock {
+        val todayEpochDay = java.time.LocalDate.now().toEpochDay()
+        dataStore.edit { prefs ->
+            prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] = todayEpochDay
+            prefs[PreferencesKeys.MOOD_SEARCH_COUNT] = remaining.coerceIn(0, PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA)
+        }
     }
 
     suspend fun consumeMoodSearchQuota(): Boolean = moodQuotaMutex.withLock {
@@ -608,6 +627,12 @@ class PreferenceRepository @Inject constructor(
             }
         }
         success
+    }
+
+    suspend fun setMoodHideSaved(hide: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.MOOD_HIDE_SAVED] = hide
+        }
     }
 
     suspend fun clearAll() {

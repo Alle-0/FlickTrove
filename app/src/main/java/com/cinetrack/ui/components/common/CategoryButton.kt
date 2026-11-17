@@ -33,6 +33,12 @@ import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.RoundRect
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.text.AnnotatedString
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.buildAnnotatedString
+import androidx.compose.ui.text.style.BaselineShift
+import androidx.compose.ui.text.withStyle
+import androidx.compose.ui.unit.em
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.compose.ui.unit.IntOffset
@@ -595,8 +601,11 @@ private fun CategoryTabItems(
                             scaleY = tabBounceScale
                         }
                 ) {
+                    val formattedTitle = remember(title, uppercase) {
+                        formatTabTitle(title, uppercase)
+                    }
                     Text(
-                        text = if (uppercase) title.uppercase() else title,
+                        text = formattedTitle,
                         style = MaterialTheme.typography.labelSmall,
                         fontSize = fontSize,
                         fontWeight = FontWeight.Bold,
@@ -630,6 +639,34 @@ private fun CategoryTabItems(
                     }
                 }
             }
+        }
+    }
+}
+
+private fun formatTabTitle(title: String, uppercase: Boolean): AnnotatedString {
+    val processed = if (uppercase) title.uppercase() else title
+    if (!processed.contains("∞")) {
+        return AnnotatedString(processed)
+    }
+    return buildAnnotatedString {
+        var lastIndex = 0
+        val target = "∞"
+        var index = processed.indexOf(target)
+        while (index >= 0) {
+            append(processed.substring(lastIndex, index))
+            withStyle(
+                SpanStyle(
+                    baselineShift = BaselineShift(0.08f),
+                    fontSize = 1.08.em
+                )
+            ) {
+                append(target)
+            }
+            lastIndex = index + target.length
+            index = processed.indexOf(target, lastIndex)
+        }
+        if (lastIndex < processed.length) {
+            append(processed.substring(lastIndex))
         }
     }
 }

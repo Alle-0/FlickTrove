@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">卡片与详情</string>
     <string name="settings_hide_saved">隐藏已保存项目</string>
     <string name="settings_hide_saved_desc">从“发现”和详情中过滤掉已看过和想看列表中的项目。</string>
+    <string name="settings_mood_hide_saved">在 Mood 和 Surprise Me 中隐藏已保存内容</string>
+    <string name="settings_mood_hide_saved_desc">从 Cinema Mood 和 Surprise Me 中筛选排除已观看的电影与剧集以及稍后观看列表。</string>
     <string name="settings_folder_bookmarks">文件夹角标</string>
     <string name="settings_folder_bookmarks_desc">在卡片上显示彩色丝带，指示其所属的文件夹。</string>
     <string name="settings_badges">信息徽章</string>
@@ -2218,4 +2220,12 @@
     <string name="mood_insp_7_prompt">波涛汹涌的远洋冒险与生存</string>
     <string name="mood_insp_8_title">70年代冷峻写实的作者犯罪片</string>
     <string name="mood_insp_8_prompt">70年代冷峻写实的作者犯罪片</string>
+    <string name="mood_guest_dialog_title">氛围搜索</string>
+    <string name="mood_guest_dialog_message">创建免费账号或登录即可使用氛围搜索，发现契合当前心境的电影。</string>
+    <string name="search_mood_iris_badge">IRIS • 光学探索</string>
+    <string name="search_mood_iris_analyzing">IRIS 正在将镜头对焦至您的氛围...</string>
+    <string name="search_mood_iris_status_focus">正在校准光圈与景深...</string>
+    <string name="search_mood_iris_status_scanning">正在扫描电影档案坐标...</string>
+    <string name="search_mood_iris_no_results">目前没有与此构图对焦的电影</string>
+    <string name="search_mood_iris_no_results_desc">尝试扩大取景范围，或用其他电影细节描述这种氛围。</string>
 </resources>

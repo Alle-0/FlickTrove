@@ -188,6 +188,8 @@
     <string name="settings_group_cards_details">การ์ดและรายละเอียด</string>
     <string name="settings_hide_saved">ซ่อนรายการที่บันทึกไว้</string>
     <string name="settings_hide_saved_desc">กรองภาพยนตร์ที่ดูแล้วและรายการที่ต้องดูออกจากหน้าสำรวจและหน้ารายละเอียด</string>
+    <string name="settings_mood_hide_saved">ซ่อนรายการที่บันทึกไว้ใน Mood และ Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">กรองภาพยนตร์และซีรีส์ที่ดูแล้วและรายการที่ต้องดูออกจาก Cinema Mood และ Surprise Me</string>
     <string name="settings_folder_bookmarks">บุ๊กมาร์กโฟลเดอร์</string>
     <string name="settings_folder_bookmarks_desc">แสดงริบบิ้นสีบนการ์ดเพื่อระบุการเป็นสมาชิกโฟลเดอร์</string>
     <string name="settings_badges">ป้ายข้อมูล</string>
@@ -2191,4 +2193,12 @@
     <string name="mood_insp_7_prompt">การผจญภัยและเอาชีวิตรอดในมหาสมุทรคลั่ง</string>
     <string name="mood_insp_8_title">ภาพยนตร์อาชญากรรมเข้มข้นยุค 70</string>
     <string name="mood_insp_8_prompt">ภาพยนตร์อาชญากรรมเข้มข้นยุค 70</string>
+    <string name="mood_guest_dialog_title">ค้นหาตามอารมณ์</string>
+    <string name="mood_guest_dialog_message">สร้างบัญชีฟรีหรือเข้าสู่ระบบเพื่อใช้การค้นหาตามอารมณ์และค้นหาภาพยนตร์ที่ตรงกับความรู้สึกของคุณ</string>
+    <string name="search_mood_iris_badge">IRIS • การค้นพบด้วยเลนส์</string>
+    <string name="search_mood_iris_analyzing">IRIS กำลังปรับโฟกัสเลนส์ตามอารมณ์ของคุณ...</string>
+    <string name="search_mood_iris_status_focus">กำลังปรับรูรับแสงและความชัดลึก...</string>
+    <string name="search_mood_iris_status_scanning">กำลังสแกนพิกัดคลังภาพยนตร์...</string>
+    <string name="search_mood_iris_no_results">ไม่มีภาพยนตร์ที่อยู่ในโฟกัสสำหรับเฟรมนี้</string>
+    <string name="search_mood_iris_no_results_desc">ลองขยายมุมมองหรืออธิบายบรรยากาศด้วยรายละเอียดภาพยนตร์อื่นๆ</string>
 </resources>

@@ -35,6 +35,8 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.MoodHistoryEntry
+import com.cinetrack.ui.components.mascot.IrisMascot
+import com.cinetrack.ui.components.mascot.IrisMood
 import dev.chrisbanes.haze.HazeState
 
 @Composable
@@ -42,6 +44,7 @@ fun MoodDiscoverySection(
     isLoading: Boolean,
     onMoodSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
+    query: String = "",
     remainingQuota: Int = 0,
     vibeTitle: String? = null,
     vibeDescription: String? = null,
@@ -89,31 +92,51 @@ fun MoodDiscoverySection(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        // Icona centrale a sfera in vetro con sparkle Teal ed entrata elastica
+        val effectiveMood = when {
+            isLoading -> IrisMood.SEARCHING
+            query.isNotBlank() -> IrisMood.TYPING
+            else -> IrisMood.IDLE
+        }
+
+        // Mascotte Ottica IRIS con respiro vivace, battito periodico ed entrata elastica
+        IrisMascot(
+            mood = effectiveMood,
+            size = 84.dp,
+            modifier = Modifier.graphicsLayer {
+                val p = enterAnim.value
+                scaleX = (0.78f + 0.22f * p) * pulseScale
+                scaleY = (0.78f + 0.22f * p) * pulseScale
+                alpha = p
+                translationY = (1f - p) * 24f
+            }
+        )
+
+        Spacer(modifier = Modifier.height(18.dp))
+
+        // Badge ottico IRIS
         Box(
             modifier = Modifier
                 .graphicsLayer {
                     val p = enterAnim.value
-                    scaleX = (0.78f + 0.22f * p) * pulseScale
-                    scaleY = (0.78f + 0.22f * p) * pulseScale
                     alpha = p
-                    translationY = (1f - p) * 24f
+                    translationY = (1f - p) * 18f
                 }
-                .size(52.dp)
-                .clip(CircleShape)
-                .background(Color.White.copy(alpha = 0.04f))
-                .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
-            contentAlignment = Alignment.Center
+                .clip(RoundedCornerShape(6.dp))
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                .padding(horizontal = 8.dp, vertical = 3.dp)
         ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(22.dp)
+            Text(
+                text = stringResource(R.string.search_mood_iris_badge),
+                color = MaterialTheme.colorScheme.primary,
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 9.5.sp,
+                    letterSpacing = 0.8.sp
+                )
             )
         }
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
         Text(
             text = stringResource(R.string.search_mood_badge_label),

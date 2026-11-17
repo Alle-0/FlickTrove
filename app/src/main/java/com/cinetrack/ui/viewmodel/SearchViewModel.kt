@@ -62,7 +62,8 @@ data class SearchUiState(
     val moodRemainingQuota: Int = 3,
     val moodErrorMessage: String? = null,
     val isMoodAiMode: Boolean = true,
-    val moodHistory: ImmutableList<MoodHistoryEntry> = persistentListOf()
+    val moodHistory: ImmutableList<MoodHistoryEntry> = persistentListOf(),
+    val isMoodSearchSubmitted: Boolean = false
 )
 
 @OptIn(kotlinx.coroutines.FlowPreview::class)
@@ -192,6 +193,7 @@ class SearchViewModel @Inject constructor(
         viewModelScope.launch {
             preferenceRepository.userPreferencesFlow.collect { prefs ->
                 _uiState.update { it.copy(preferences = prefs) }
+                applyStateFilters()
             }
         }
 
@@ -223,15 +225,28 @@ class SearchViewModel @Inject constructor(
                 }
         }
 
+        var isInitialQuotaEmission = true
         viewModelScope.launch {
             moodSearchRepository.remainingQuotaFlow.collect { quota ->
                 _uiState.update { 
                     it.copy(
                         moodRemainingQuota = quota,
-                        isMoodAiMode = if (quota <= 0) false else it.isMoodAiMode
+                        isMoodAiMode = if (isInitialQuotaEmission && quota <= 0) false else it.isMoodAiMode
                     ) 
                 }
+                isInitialQuotaEmission = false
             }
+        }
+
+        viewModelScope.launch {
+            moodSearchRepository.refreshRemoteQuota()
+        }
+    }
+
+    fun resetQuotaForDev() {
+        viewModelScope.launch {
+            preferenceRepository.setMoodSearchesRemaining(50)
+            _uiState.update { it.copy(moodRemainingQuota = 50, isMoodAiMode = true) }
         }
     }
 
@@ -243,16 +258,12 @@ class SearchViewModel @Inject constructor(
     }
 
     fun setMoodAiMode(useAi: Boolean) {
+        val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
+        if (isGuest) return
         val remaining = _uiState.value.moodRemainingQuota
-        if (useAi && remaining <= 0) {
-            _uiState.update { it.copy(isMoodAiMode = false) }
-            emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
-            return
-        }
-        _uiState.update { it.copy(isMoodAiMode = useAi) }
-
-        // Se la query corrente ha già risultati salvati in cache per la nuova modalità, caricali a costo zero
         val currentQuery = _uiState.value.query.trim()
+
+        // 1. Se la query corrente ha già risultati salvati in cache per la modalità richiesta, caricali a costo zero
         if (_uiState.value.category == "mood" && currentQuery.isNotEmpty()) {
             val cached = moodHistoryRepository.getCachedEntry(currentQuery, isAi = useAi)
             if (cached != null) {
@@ -263,10 +274,11 @@ class SearchViewModel @Inject constructor(
                     applyStateFilters()
                     _uiState.update {
                         it.copy(
+                            isMoodAiMode = useAi,
                             isLoading = false,
                             isEndReached = true,
-                            moodVibeTitle = if (useAi) cached.resolveAiVibeTitle() else null,
-                            moodVibeDescription = if (useAi) cached.resolveAiVibeDescription() else null,
+                            moodVibeTitle = if (useAi) cached.resolveAiVibeTitle() else cached.resolveAlgoVibeTitle(),
+                            moodVibeDescription = if (useAi) cached.resolveAiVibeDescription() else cached.resolveAlgoVibeDescription(),
                             moodErrorMessage = null
                         )
                     }
@@ -275,12 +287,18 @@ class SearchViewModel @Inject constructor(
             }
         }
 
+        // 2. Se non ci sono risultati salvati in cache e si tenta di passare all'IA senza quota
         if (useAi && remaining <= 0) {
             emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
+            return
         }
+
+        _uiState.update { it.copy(isMoodAiMode = useAi) }
     }
 
     fun executeMoodSearch(query: String, bypassCache: Boolean = false) {
+        val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
+        if (isGuest) return
         val sanitized = query.trim().take(1000)
         if (sanitized.isBlank()) return
         searchJob?.cancel()
@@ -292,7 +310,8 @@ class SearchViewModel @Inject constructor(
                 category = "mood",
                 isLoading = true, 
                 errorMessage = null,
-                moodErrorMessage = null
+                moodErrorMessage = null,
+                isMoodSearchSubmitted = true
             ) 
         }
         searchJob = viewModelScope.launch {
@@ -316,7 +335,7 @@ class SearchViewModel @Inject constructor(
                     it.copy(
                         isLoading = false,
                         isEndReached = true,
-                        isMoodAiMode = if (data.isQuotaFallback || it.moodRemainingQuota <= 0) false else it.isMoodAiMode,
+                        isMoodAiMode = if (data.isQuotaFallback) false else it.isMoodAiMode,
                         moodVibeTitle = data.vibeTitle,
                         moodVibeDescription = data.vibeDescription,
                         moodErrorMessage = null
@@ -345,7 +364,12 @@ class SearchViewModel @Inject constructor(
     fun onQueryChanged(newQuery: String) {
         val sanitizedQuery = newQuery.take(1000)
         if (_uiState.value.query == sanitizedQuery) return
-        _uiState.update { it.copy(query = sanitizedQuery) }
+        _uiState.update { 
+            it.copy(
+                query = sanitizedQuery,
+                isMoodSearchSubmitted = if (it.category == "mood") false else it.isMoodSearchSubmitted
+            ) 
+        }
         
         if (sanitizedQuery.isNotEmpty() && _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) {
             _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedKeywords = emptyList())) }
@@ -377,6 +401,8 @@ class SearchViewModel @Inject constructor(
 
     fun onCategoryChanged(newCategory: String) {
         if (_uiState.value.category == newCategory) return
+        val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
+        if (newCategory == "mood" && isGuest) return
         _uiState.update { it.copy(category = newCategory) }
         // Reset selected genres on category change to avoid cross-contamination of movie/tv genre IDs
         _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedGenres = emptyList())) }
@@ -388,7 +414,8 @@ class SearchViewModel @Inject constructor(
                     isMoodAiMode = if (it.moodRemainingQuota <= 0) false else it.isMoodAiMode,
                     moodVibeTitle = null,
                     moodVibeDescription = null,
-                    moodErrorMessage = null
+                    moodErrorMessage = null,
+                    isMoodSearchSubmitted = false
                 ) 
             }
         }
@@ -1052,17 +1079,12 @@ class SearchViewModel @Inject constructor(
 
     fun selectMoodHistory(entry: MoodHistoryEntry) {
         searchJob?.cancel()
-        val remaining = _uiState.value.moodRemainingQuota
         val currentMode = _uiState.value.isMoodAiMode
-        val resolvedMode = if (remaining <= 0) {
-            false
-        } else {
-            when {
-                currentMode && entry.hasAi() -> true
-                !currentMode && entry.hasAlgo() -> false
-                entry.hasAi() -> true
-                else -> false
-            }
+        val resolvedMode = when {
+            currentMode && entry.hasAi() -> true
+            !currentMode && entry.hasAlgo() -> false
+            entry.hasAi() -> true
+            else -> false
         }
         if (!resolvedMode && !entry.hasAlgo()) {
             _uiState.update {
@@ -1085,8 +1107,8 @@ class SearchViewModel @Inject constructor(
                 isMoodAiMode = resolvedMode,
                 isLoading = false,
                 isEndReached = true,
-                moodVibeTitle = if (resolvedMode) entry.resolveAiVibeTitle() else null,
-                moodVibeDescription = if (resolvedMode) entry.resolveAiVibeDescription() else null,
+                moodVibeTitle = if (resolvedMode) entry.resolveAiVibeTitle() else entry.resolveAlgoVibeTitle(),
+                moodVibeDescription = if (resolvedMode) entry.resolveAiVibeDescription() else entry.resolveAlgoVibeDescription(),
                 moodErrorMessage = null
             )
         }

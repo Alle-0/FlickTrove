@@ -178,6 +178,8 @@
     <string name="settings_group_cards_details">Thẻ &amp; Chi tiết</string>
     <string name="settings_hide_saved">Ẩn các mục đã lưu</string>
     <string name="settings_hide_saved_desc">Lọc bỏ phim đã xem và các mục trong danh sách xem khỏi Khám phá và chi tiết.</string>
+    <string name="settings_mood_hide_saved">Ẩn nội dung đã lưu trong Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Lọc bỏ các phim và phim bộ đã xem cùng danh sách theo dõi khỏi Cinema Mood và Surprise Me.</string>
     <string name="settings_folder_bookmarks">Dấu trang thư mục</string>
     <string name="settings_folder_bookmarks_desc">Hiển thị dải ruy băng màu trên thẻ để biểu thị sự thuộc về thư mục.</string>
     <string name="settings_badges">Huy hiệu thông tin</string>
@@ -2178,4 +2180,12 @@
     <string name="mood_insp_7_prompt">Phiêu lưu sinh tồn giữa đại dương bao la</string>
     <string name="mood_insp_8_title">Phim tội phạm tác giả chân thực thập niên 70</string>
     <string name="mood_insp_8_prompt">Phim tội phạm tác giả chân thực thập niên 70</string>
+    <string name="mood_guest_dialog_title">Tìm kiếm theo tâm trạng</string>
+    <string name="mood_guest_dialog_message">Tạo tài khoản miễn phí hoặc đăng nhập để sử dụng tính năng tìm kiếm theo tâm trạng và khám phá những bộ phim phù hợp với cảm xúc của bạn.</string>
+    <string name="search_mood_iris_badge">IRIS • KHÁM PHÁ QUANG HỌC</string>
+    <string name="search_mood_iris_analyzing">IRIS đang lấy nét ống kính theo cảm xúc của bạn...</string>
+    <string name="search_mood_iris_status_focus">Đang hiệu chỉnh khẩu độ và độ sâu trường ảnh...</string>
+    <string name="search_mood_iris_status_scanning">Đang quét tọa độ lưu trữ phim ảnh...</string>
+    <string name="search_mood_iris_no_results">Không có bộ phim nào trong tiêu điểm khung hình này</string>
+    <string name="search_mood_iris_no_results_desc">Hãy thử mở rộng góc quay hoặc mô tả cảm xúc bằng những chi tiết điện ảnh khác.</string>
 </resources>

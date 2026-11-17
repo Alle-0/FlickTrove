@@ -170,6 +170,8 @@
     <string name="settings_group_cards_details">Карточки и сведения</string>
     <string name="settings_hide_saved">Скрыть сохраненные элементы</string>
     <string name="settings_hide_saved_desc">Скрывает просмотренные фильмы и элементы из списка наблюдения в Обзоре и деталях.</string>
+    <string name="settings_mood_hide_saved">Скрыть сохраненное в Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Исключает просмотренные фильмы и сериалы, а также список отслеживания из Cinema Mood и Surprise Me.</string>
     <string name="settings_folder_bookmarks">Закладки папок</string>
     <string name="settings_folder_bookmarks_desc">Показывает цветную ленту на карточках, указывающую на принадлежность к папке.</string>
     <string name="settings_badges">Информационные значки</string>
@@ -2217,4 +2219,12 @@
     <string name="mood_insp_7_prompt">Приключения и выживание в открытом океане</string>
     <string name="mood_insp_8_title">Авторский криминальный фильм 70-х</string>
     <string name="mood_insp_8_prompt">Авторский криминальный фильм 70-х</string>
+    <string name="mood_guest_dialog_title">Поиск по настроению</string>
+    <string name="mood_guest_dialog_message">Создайте бесплатный аккаунт или войдите, чтобы использовать поиск по настроению и находить фильмы под свои эмоции.</string>
+    <string name="search_mood_iris_badge">IRIS • ОПТИЧЕСКИЙ ПОИСК</string>
+    <string name="search_mood_iris_analyzing">IRIS настраивает оптику под ваше настроение...</string>
+    <string name="search_mood_iris_status_focus">Калибровка диафрагмы и глубины резкости...</string>
+    <string name="search_mood_iris_status_scanning">Сканирование координат киноархива...</string>
+    <string name="search_mood_iris_no_results">Нет фильмов в фокусе для этого кадра</string>
+    <string name="search_mood_iris_no_results_desc">Попробуйте расширить кадр или описать атмосферу другими словами.</string>
 </resources>

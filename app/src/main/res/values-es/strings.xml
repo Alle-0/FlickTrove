@@ -167,6 +167,8 @@
     <string name="settings_group_cards_details">Tarjetas y Detalles</string>
     <string name="settings_hide_saved">Ocultar títulos guardados</string>
     <string name="settings_hide_saved_desc">Oculta películas y series vistas o en la lista de seguimiento de Descubrir y detalles.</string>
+    <string name="settings_mood_hide_saved">Ocultar títulos guardados en Mood y Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtra películas y series ya vistas o en tu lista de seguimiento en Cinema Mood y Surprise Me.</string>
     <string name="settings_folder_bookmarks">Marcadores de carpetas</string>
     <string name="settings_folder_bookmarks_desc">Muestra una cinta de color en las tarjetas para indicar la pertenencia a una carpeta.</string>
     <string name="settings_badges">Insignias de información</string>
@@ -2216,4 +2218,12 @@
     <string name="mood_insp_7_prompt">Aventura y supervivencia en alta mar</string>
     <string name="mood_insp_8_title">Cine policíaco de autor de los años 70</string>
     <string name="mood_insp_8_prompt">Cine policíaco de autor de los años 70</string>
+    <string name="mood_guest_dialog_title">Búsqueda por Estado de Ánimo</string>
+    <string name="mood_guest_dialog_message">Crea una cuenta gratuita o inicia sesión para usar la búsqueda por estado de ánimo y descubrir películas según tus emociones.</string>
+    <string name="search_mood_iris_badge">IRIS • DESCUBRIMIENTO ÓPTICO</string>
+    <string name="search_mood_iris_analyzing">IRIS está enfocando el lente en tu vibra...</string>
+    <string name="search_mood_iris_status_focus">Calibrando apertura y profundidad de campo...</string>
+    <string name="search_mood_iris_status_scanning">Escaneando coordenadas del archivo de cine...</string>
+    <string name="search_mood_iris_no_results">Ninguna película enfocada para este encuadre</string>
+    <string name="search_mood_iris_no_results_desc">Prueba ampliando el encuadre o describiendo la atmósfera con otros matices.</string>
 </resources>

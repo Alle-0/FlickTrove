@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">卡片与详情</string>
     <string name="settings_hide_saved">隐藏已保存项目</string>
     <string name="settings_hide_saved_desc">从“发现”和详情中过滤掉已看过和想看列表中的项目。</string>
+    <string name="settings_mood_hide_saved">在 Mood 與 Surprise Me 中隱藏已儲存項目</string>
+    <string name="settings_mood_hide_saved_desc">從 Cinema Mood 和 Surprise Me 中篩選排除已觀看的電影與影集以及待看清單。</string>
     <string name="settings_folder_bookmarks">文件夹角标</string>
     <string name="settings_folder_bookmarks_desc">在卡片上显示彩色丝带，指示其所属的文件夹。</string>
     <string name="settings_badges">信息徽章</string>
@@ -2218,4 +2220,12 @@
     <string name="mood_insp_7_prompt">波涛汹涌的远洋冒险与生存</string>
     <string name="mood_insp_8_title">70年代冷峻写实的作者犯罪片</string>
     <string name="mood_insp_8_prompt">70年代冷峻写实的作者犯罪片</string>
+    <string name="mood_guest_dialog_title">氛圍搜尋</string>
+    <string name="mood_guest_dialog_message">建立免費帳號或登入即可使用氛圍搜尋，探索符合當前心情的電影。</string>
+    <string name="search_mood_iris_badge">IRIS • 光學探索</string>
+    <string name="search_mood_iris_analyzing">IRIS 正在將鏡頭對焦至您的氛圍...</string>
+    <string name="search_mood_iris_status_focus">正在校準光圈與景深...</string>
+    <string name="search_mood_iris_status_scanning">正在掃描電影檔案座標...</string>
+    <string name="search_mood_iris_no_results">目前沒有與此構圖對焦的電影</string>
+    <string name="search_mood_iris_no_results_desc">嘗試擴大取景範圍，或用其他電影細節描述這種氛圍。</string>
 </resources>

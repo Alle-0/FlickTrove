@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">البطاقات والتفاصيل</string>
     <string name="settings_hide_saved">إخفاء العناصر المحفوظة</string>
     <string name="settings_hide_saved_desc">يستبعد الأفلام المشاهدة وعناصر قائمة المشاهدة من الاستكشاف والتفاصيل.</string>
+    <string name="settings_mood_hide_saved">إخفاء العناصر المحفوظة في Mood و Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">يقوم بتصفية الأفلام والمسلسلات التي تمت مشاهدتها وقائمة المشاهدة من Cinema Mood و Surprise Me.</string>
     <string name="settings_folder_bookmarks">شارات المجلدات</string>
     <string name="settings_folder_bookmarks_desc">يعرض شريطًا ملونًا على البطاقات للإشارة إلى الانتماء لمجلد.</string>
     <string name="settings_badges">شارات المعلومات</string>
@@ -2175,4 +2177,12 @@
     <string name="mood_insp_7_prompt">مغامرة وبقاء ملحمي في عرض المحيط</string>
     <string name="mood_insp_8_title">فيلم جريمة بوليسي كلاسيكي من السبعينيات</string>
     <string name="mood_insp_8_prompt">فيلم جريمة بوليسي كلاسيكي من السبعينيات</string>
+    <string name="mood_guest_dialog_title">البحث حسب المزاج</string>
+    <string name="mood_guest_dialog_message">أنشئ حساباً مجانياً أو سجّل الدخول لاستخدام البحث حسب المزاج واكتشاف أفلام تناسب مشاعرك.</string>
+    <string name="search_mood_iris_badge">IRIS • استكشاف بصري</string>
+    <string name="search_mood_iris_analyzing">يقوم IRIS بضبط تركيز العدسة على أجواءك...</string>
+    <string name="search_mood_iris_status_focus">معايرة فتحة العدسة وعمق المجال...</string>
+    <string name="search_mood_iris_status_scanning">مسح إحداثيات أرشيف السينما...</string>
+    <string name="search_mood_iris_no_results">لا توجد أفلام في بؤرة التركيز لهذا الإطار</string>
+    <string name="search_mood_iris_no_results_desc">جرب توسيع الإطار أو وصف الأجواء بتفاصيل سينمائية أخرى.</string>
 </resources>

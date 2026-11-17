@@ -120,7 +120,9 @@ fun SearchHeader(
     onMoodModeChanged: (Boolean) -> Unit = {},
     onSelectMoodHistory: (MoodHistoryEntry) -> Unit = {},
     onDeleteMoodHistory: (String) -> Unit = {},
-    onClearMoodHistory: () -> Unit = {}
+    onClearMoodHistory: () -> Unit = {},
+    isGuest: Boolean = false,
+    onGuestAuthTrigger: () -> Unit = {}
 ) {
     val density = LocalDensity.current
 
@@ -278,7 +280,9 @@ fun SearchHeader(
                 isMoodAiMode = isMoodAiMode,
                 moodRemainingQuota = moodRemainingQuota,
                 onMoodModeChanged = onMoodModeChanged,
-                hazeState = hazeState
+                hazeState = hazeState,
+                isGuest = isGuest,
+                onGuestAuthTrigger = onGuestAuthTrigger
             )
         }
     }

@@ -40,6 +40,8 @@ import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.util.toComposeColor
+import com.cinetrack.ui.components.mascot.IrisEmptyState
+import com.cinetrack.ui.components.mascot.IrisSearchingHero
 import com.cinetrack.ui.components.shared.MovieActionsState
 import com.cinetrack.ui.components.shared.CollectionCardSkeleton
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
@@ -171,12 +173,16 @@ fun SearchContentGrid(
                     uiState.sortConfig.sortType != "popularity"
             val showEmptySearch = uiState.query.isEmpty() && (!hasDiscoveryFilters || uiState.category == "person" || uiState.category == "collection") && uiState.category != "mood"
 
-            if (uiState.category == "mood" && uiState.query.isEmpty() && uiState.results.isEmpty()) {
+            val isMoodInitialOrTyping = uiState.category == "mood" && !uiState.isLoading && uiState.results.isEmpty() && !uiState.isMoodSearchSubmitted
+
+            if (isMoodInitialOrTyping) {
                 item(span = { GridItemSpan(12) }) {
                     MoodDiscoverySection(
                         isLoading = uiState.isLoading,
+                        query = uiState.query,
                         onMoodSelected = onMoodSelected,
-                        errorMessage = uiState.moodErrorMessage
+                        errorMessage = uiState.moodErrorMessage,
+                        isMoodAiMode = uiState.isMoodAiMode
                     )
                 }
             }
@@ -260,8 +266,18 @@ fun SearchContentGrid(
                 }
             } else {
                 if (uiState.results.isEmpty() && uiState.isLoading) {
+                    if (uiState.category == "mood") {
+                        item(span = { GridItemSpan(12) }) {
+                            IrisSearchingHero(
+                                query = uiState.query,
+                                isMoodAiMode = uiState.isMoodAiMode,
+                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
+                            )
+                        }
+                    }
+
                     items(
-                        if (uiState.category == "person") 16 else if (uiState.category == "collection") 6 else if (uiState.category == "mood") 6 else 12,
+                        if (uiState.category == "person") 16 else if (uiState.category == "collection") 6 else if (uiState.category == "mood") 4 else 12,
                         contentType = { "skeleton" },
                         span = {
                             when (uiState.category) {
@@ -281,9 +297,20 @@ fun SearchContentGrid(
                     }
                 }
 
-                if (uiState.query.isNotEmpty() && !uiState.isLoading && uiState.results.isEmpty() && uiState.category != "mood") {
-                    item(span = { GridItemSpan(12) }) {
-                        SearchNoResults(queryLength = uiState.query.length)
+                if (uiState.query.isNotEmpty() && !uiState.isLoading && uiState.results.isEmpty()) {
+                    if (uiState.category == "mood") {
+                        if (uiState.isMoodSearchSubmitted) {
+                            item(span = { GridItemSpan(12) }) {
+                                IrisEmptyState(
+                                    query = uiState.query,
+                                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
+                                )
+                            }
+                        }
+                    } else {
+                        item(span = { GridItemSpan(12) }) {
+                            SearchNoResults(queryLength = uiState.query.length)
+                        }
                     }
                 }
 

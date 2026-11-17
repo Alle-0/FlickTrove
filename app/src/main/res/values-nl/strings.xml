@@ -178,6 +178,8 @@
     <string name="settings_group_cards_details">Kaarten &amp; Details</string>
     <string name="settings_hide_saved">Opgeslagen items verbergen</string>
     <string name="settings_hide_saved_desc">Filtert bekeken films en items op je kijklijst uit Ontdekken en details.</string>
+    <string name="settings_mood_hide_saved">Opgeslagen titels verbergen in Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtert bekeken films en series en watchlist-titels uit Cinema Mood en Surprise Me.</string>
     <string name="settings_folder_bookmarks">Mapmarkeringen</string>
     <string name="settings_folder_bookmarks_desc">Toont een gekleurd lint op kaarten om maplidmaatschap aan te geven.</string>
     <string name="settings_badges">Infobadges</string>
@@ -2178,4 +2180,12 @@
     <string name="mood_insp_7_prompt">Avontuur en overleving op volle zee</string>
     <string name="mood_insp_8_title">Rauwe auteursmisdaadfilm uit de jaren 70</string>
     <string name="mood_insp_8_prompt">Rauwe auteursmisdaadfilm uit de jaren 70</string>
+    <string name="mood_guest_dialog_title">Stemmingszoekopdracht</string>
+    <string name="mood_guest_dialog_message">Maak een gratis account aan of log in om de stemmingszoekopdracht te gebruiken en films te vinden die bij je gevoel passen.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTISCHE ONTDEKKING</string>
+    <string name="search_mood_iris_analyzing">IRIS stelt scherp op je stemming...</string>
+    <string name="search_mood_iris_status_focus">Diafragma en scherptediepte kalibreren...</string>
+    <string name="search_mood_iris_status_scanning">Bioscooparchiefcoördinaten scannen...</string>
+    <string name="search_mood_iris_no_results">Geen film scherpgesteld voor dit beeld</string>
+    <string name="search_mood_iris_no_results_desc">Probeer het beeld te verbreden of beschrijf de sfeer met andere details.</string>
 </resources>

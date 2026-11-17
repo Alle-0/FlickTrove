@@ -175,8 +175,10 @@
     <string name="settings_ui_layout_desc">Reorder cards and customize visibility</string>
     <string name="settings_group_home_feed">Home &amp; Feed</string>
     <string name="settings_group_cards_details">Cards &amp; Details</string>
-    <string name="settings_hide_saved">Hide Saved Items</string>
+    <string name="settings_hide_saved">Hide Saved in Discover &amp; Details</string>
     <string name="settings_hide_saved_desc">Filters out watched movies and watchlist items from Discover and details.</string>
+    <string name="settings_mood_hide_saved">Hide Saved in Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filters out watched movies and watchlist items from Cinema Mood and Surprise Me.</string>
     <string name="settings_folder_bookmarks">Folder Bookmarks</string>
     <string name="settings_folder_bookmarks_desc">Shows a colored ribbon on cards to indicate folder membership.</string>
     <string name="settings_badges">Info Badges</string>
@@ -2223,4 +2225,12 @@
 
     <string name="editorial_season_episode_scope">S%1$s • EP. %2$s</string>
     <string name="editorial_episode_scope">EP. %1$s</string>
+    <string name="mood_guest_dialog_title">Mood Search</string>
+    <string name="mood_guest_dialog_message">Create a free account or log in to use Mood search and find movies tailored to your feelings.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTICAL DISCOVERY</string>
+    <string name="search_mood_iris_analyzing">IRIS is focusing the lens on your vibe...</string>
+    <string name="search_mood_iris_status_focus">Calibrating aperture &amp; depth of field...</string>
+    <string name="search_mood_iris_status_scanning">Scanning cinema archive coordinates...</string>
+    <string name="search_mood_iris_no_results">No films in focus for this frame</string>
+    <string name="search_mood_iris_no_results_desc">Try widening the lens or describing the vibe with different cinematic details.</string>
 </resources>

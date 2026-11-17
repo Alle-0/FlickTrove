@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">카드 및 세부정보</string>
     <string name="settings_hide_saved">저장된 항목 숨기기</string>
     <string name="settings_hide_saved_desc">탐색 및 상세 페이지에서 이미 시청했거나 볼 작품 목록의 콘텐츠를 숨깁니다.</string>
+    <string name="settings_mood_hide_saved">Mood 및 Surprise Me에서 저장된 항목 숨기기</string>
+    <string name="settings_mood_hide_saved_desc">시청한 영화·시리즈 및 보고싶은 항목을 Cinema Mood 및 Surprise Me에서 제외합니다。</string>
     <string name="settings_folder_bookmarks">폴더 북마크 표시</string>
     <string name="settings_folder_bookmarks_desc">카드가 특정 폴더에 속해 있음을 나타내는 컬러 리본을 표시합니다.</string>
     <string name="settings_badges">정보 배지</string>
@@ -2218,4 +2220,12 @@
     <string name="mood_insp_7_prompt">거친 대양에서의 생존과 모험</string>
     <string name="mood_insp_8_title">70년대 감성의 묵직한 작가주의 범죄물</string>
     <string name="mood_insp_8_prompt">70년대 감성의 묵직한 작가주의 범죄물</string>
+    <string name="mood_guest_dialog_title">무드 검색</string>
+    <string name="mood_guest_dialog_message">무드 검색을 이용해 감정에 맞는 영화를 찾으려면 무료 계정을 만들거나 로그인하세요.</string>
+    <string name="search_mood_iris_badge">IRIS • 옵티컬 디스커버리</string>
+    <string name="search_mood_iris_analyzing">IRIS가 원하는 분위기에 초점을 맞추고 있습니다...</string>
+    <string name="search_mood_iris_status_focus">조리개 및 심도 보정 중...</string>
+    <string name="search_mood_iris_status_scanning">영화 아카이브 좌표 스캔 중...</string>
+    <string name="search_mood_iris_no_results">이 프레임에 초점이 맞는 영화가 없습니다</string>
+    <string name="search_mood_iris_no_results_desc">프레임을 넓히거나 다른 분위기의 키워드로 설명해 보세요.</string>
 </resources>

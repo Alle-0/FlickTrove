@@ -169,6 +169,8 @@
     <string name="settings_group_cards_details">Cards e Detalhes</string>
     <string name="settings_hide_saved">Ocultar títulos salvos</string>
     <string name="settings_hide_saved_desc">Oculta filmes e séries assistidos ou na lista de interesses das seções Descobrir e detalhes.</string>
+    <string name="settings_mood_hide_saved">Ocultar títulos salvos em Mood e Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtra filmes e séries já assistidos ou na lista de interesse em Cinema Mood e Surprise Me.</string>
     <string name="settings_folder_bookmarks">Marcadores de Pastas</string>
     <string name="settings_folder_bookmarks_desc">Mostra uma fita colorida nos cartões para indicar a associação à pasta.</string>
     <string name="settings_badges">Emblemas de Informação</string>
@@ -2215,4 +2217,12 @@
     <string name="mood_insp_7_prompt">Aventura e sobrevivência em alto-mar</string>
     <string name="mood_insp_8_title">Policial de autor cru dos anos 70</string>
     <string name="mood_insp_8_prompt">Policial de autor cru dos anos 70</string>
+    <string name="mood_guest_dialog_title">Busca por Clima</string>
+    <string name="mood_guest_dialog_message">Crie uma conta gratuita ou faça login para usar a busca por clima e descobrir filmes sob medida para suas emoções.</string>
+    <string name="search_mood_iris_badge">IRIS • DESCOBERTA ÓPTICA</string>
+    <string name="search_mood_iris_analyzing">IRIS está focando a lente na sua atmosfera...</string>
+    <string name="search_mood_iris_status_focus">Calibrando abertura e profundidade de campo...</string>
+    <string name="search_mood_iris_status_scanning">Escaneando coordenadas do arquivo de cinema...</string>
+    <string name="search_mood_iris_no_results">Nenhum filme em foco para este enquadramento</string>
+    <string name="search_mood_iris_no_results_desc">Tente abrir o enquadramento ou descrever o clima com outros detalhes.</string>
 </resources>

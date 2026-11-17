@@ -177,6 +177,8 @@
     <string name="settings_group_cards_details">Kort &amp; Detaljer</string>
     <string name="settings_hide_saved">Skjul gemte elementer</string>
     <string name="settings_hide_saved_desc">Filtrerer sete film og overvågningsliste fra Opdag og detaljer.</string>
+    <string name="settings_mood_hide_saved">Skjul gemte i Mood &amp; Surprise Me</string>
+    <string name="settings_mood_hide_saved_desc">Filtrerer sete film og serier samt overvågningslisten fra Cinema Mood og Surprise Me.</string>
     <string name="settings_folder_bookmarks">Mappebogmærker</string>
     <string name="settings_folder_bookmarks_desc">Viser et farvet bånd på kort for at indikere mappetilhørsforhold.</string>
     <string name="settings_badges">Info-badges</string>
@@ -2224,4 +2226,12 @@
     <string name="mood_insp_7_prompt">Eventyr og overlevelse på åbent hav</string>
     <string name="mood_insp_8_title">Rå forfatter-krimi fra 70\'erne</string>
     <string name="mood_insp_8_prompt">Rå forfatter-krimi fra 70\'erne</string>
+    <string name="mood_guest_dialog_title">Stemningssøgning</string>
+    <string name="mood_guest_dialog_message">Opret en gratis konto eller log ind for at bruge stemningssøgning og finde film tilpasset dine følelser.</string>
+    <string name="search_mood_iris_badge">IRIS • OPTISK OPDAGELSE</string>
+    <string name="search_mood_iris_analyzing">IRIS fokuserer linsen på din stemning...</string>
+    <string name="search_mood_iris_status_focus">Kalibrerer blænde og dybdeskarphed...</string>
+    <string name="search_mood_iris_status_scanning">Scanner biografarkivets koordinater...</string>
+    <string name="search_mood_iris_no_results">Ingen film i fokus for dette billedudsnit</string>
+    <string name="search_mood_iris_no_results_desc">Prøv at udvide billedudsnittet eller beskrive stemningen med andre detaljer.</string>
 </resources>
