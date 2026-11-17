@@ -58,6 +58,7 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.mascot.AiSparkleOrb
 import com.cinetrack.ui.components.mascot.IrisMascot
 import com.cinetrack.ui.components.mascot.IrisMood
 import com.cinetrack.ui.theme.DarkSurface
@@ -761,26 +762,12 @@ private fun LoadingStep(isGhost: Boolean = false, isSearchingWithAi: Boolean = f
         verticalArrangement = Arrangement.Center
     ) {
         if (isSearchingWithAi) {
-            // Se cercato tramite IA: Sfera di cristallo con scintille Sparkle AI
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .graphicsLayer {
-                        scaleX = scale
-                        scaleY = scale
-                        this.alpha = alpha
-                    }
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
-                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = ImageVector.vectorResource(R.drawable.ic_sparkle),
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(40.dp)
-                )
-            }
+            // Se cercato tramite IA: Sfera neurale generativa Cinema Mood AI con particelle orbitanti
+            AiSparkleOrb(
+                size = 84.dp,
+                isSearching = true,
+                accentColor = MaterialTheme.colorScheme.primary
+            )
         } else {
             // Se cercato localmente (o Random / Wizard / IRIS): Mascotte ottica IRIS in focus hunting
             IrisMascot(

@@ -39,6 +39,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
 import com.cinetrack.data.model.MoodHistoryEntry
+import com.cinetrack.ui.components.mascot.AiSparkleOrb
 import com.cinetrack.ui.components.mascot.IrisMascot
 import com.cinetrack.ui.components.mascot.IrisMood
 import dev.chrisbanes.haze.HazeState
@@ -134,28 +135,19 @@ fun MoodDiscoverySection(
             ) {
                 if (isAi) {
                     // TAB AI (Cloud Gemini): Sfera di cristallo con scintille Sparkle ed entrata elastica
-                    Box(
+                    AiSparkleOrb(
                         modifier = Modifier
                             .graphicsLayer {
                                 val p = enterAnim.value
-                                scaleX = (0.78f + 0.22f * p) * pulseScale
-                                scaleY = (0.78f + 0.22f * p) * pulseScale
+                                scaleX = 0.78f + 0.22f * p
+                                scaleY = 0.78f + 0.22f * p
                                 alpha = p
                                 translationY = (1f - p) * 24f
-                            }
-                            .size(56.dp)
-                            .clip(CircleShape)
-                            .background(Color.White.copy(alpha = 0.04f))
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(24.dp)
-                        )
-                    }
+                            },
+                        size = 64.dp,
+                        isSearching = false,
+                        accentColor = MaterialTheme.colorScheme.primary
+                    )
 
                     Spacer(modifier = Modifier.height(18.dp))
 
