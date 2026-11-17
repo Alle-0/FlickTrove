@@ -418,6 +418,7 @@ fun SearchScreenContent(
                                 keyboardController = keyboardController,
                                 actionsState = actionsState,
                                 animatedMovieIds = viewModel.animatedMovieIds,
+                                cursorPosition = textFieldValue.selection.end,
                                 onMovieClick = onMovieClick,
                                 onPersonClick = onPersonClick,
                                 onCollectionClick = onCollectionClick,

@@ -49,6 +49,7 @@ fun MoodDiscoverySection(
     onMoodSelected: (String) -> Unit,
     modifier: Modifier = Modifier,
     query: String = "",
+    cursorPosition: Int = -1,
     remainingQuota: Int = 0,
     vibeTitle: String? = null,
     vibeDescription: String? = null,
@@ -102,14 +103,16 @@ fun MoodDiscoverySection(
             else -> IrisMood.IDLE
         }
 
-        // Calcolo dello sguardo orizzontale in base alla posizione di scrittura nella search bar:
-        // A inizio digitazione (1 carattere, a sinistra della barra), guarda in alto a sinistra (~ -0.70f).
-        // Man mano che il testo cresce verso destra, lo sguardo scorre fluidamente fino a +0.70f.
-        val gazeBiasX = remember(query) {
+        // Calcolo dello sguardo orizzontale in base all'effettiva posizione del cursore nella search bar:
+        // - Se il cursore è all'inizio / a sinistra, guarda in alto a sinistra (~ -0.70f).
+        // - Man mano che il cursore si sposta verso destra, lo sguardo scorre fluidamente fino a +0.70f.
+        // - Se ci si riposiziona a sinistra anche in un testo lungo, lo sguardo torna subito a sinistra sul cursore.
+        val gazeBiasX = remember(query, cursorPosition) {
             if (query.isEmpty()) {
                 0f
             } else {
-                val progress = ((query.length - 1) / 30f).coerceIn(0f, 1f)
+                val effectiveCursor = if (cursorPosition in 0..query.length) cursorPosition else query.length
+                val progress = (effectiveCursor / 28f).coerceIn(0f, 1f)
                 -0.70f + (progress * 1.40f)
             }
         }

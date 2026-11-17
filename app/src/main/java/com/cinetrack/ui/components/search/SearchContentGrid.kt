@@ -78,6 +78,7 @@ fun SearchContentGrid(
     onClearMoodHistory: () -> Unit = {},
     onToggleMoodRecentExpanded: () -> Unit = {},
     onToggleMoodInspirationsExpanded: () -> Unit = {},
+    cursorPosition: Int = -1,
     modifier: Modifier = Modifier
 ) {
     val shouldLoadMore = remember(gridState) {
@@ -180,6 +181,7 @@ fun SearchContentGrid(
                     MoodDiscoverySection(
                         isLoading = uiState.isLoading,
                         query = uiState.query,
+                        cursorPosition = cursorPosition,
                         onMoodSelected = onMoodSelected,
                         errorMessage = uiState.moodErrorMessage,
                         isMoodAiMode = uiState.isMoodAiMode
