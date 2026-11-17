@@ -58,6 +58,8 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.ui.components.common.CategoryTabSelector
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.mascot.IrisMascot
+import com.cinetrack.ui.components.mascot.IrisMood
 import com.cinetrack.ui.theme.DarkSurface
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.components.shared.SymbiontPagerIndicator
@@ -725,81 +727,28 @@ private fun CompanyStep(onSelect: (SurpriseCompany) -> Unit) {
 
 @Composable
 private fun LoadingStep(isGhost: Boolean = false) {
-    if (isGhost) {
-        Column(
-            modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .size(80.dp)
-                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
-                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape)
-            )
-            Spacer(modifier = Modifier.height(32.dp))
-            Text(
-                stringResource(R.string.surprise_loading_1), 
-                style = MaterialTheme.typography.bodyLarge
-            )
-        }
-        return
-    }
-
-    val infiniteTransition = rememberInfiniteTransition(label = "loading_infinite")
-    val scale by infiniteTransition.animateFloat(
-        initialValue = 0.85f,
-        targetValue = 1.15f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "scale"
-    )
-    val alpha by infiniteTransition.animateFloat(
-        initialValue = 0.4f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1000, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "alpha"
-    )
-
     Column(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 48.dp),
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 48.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        Box(
-            modifier = Modifier
-                .size(80.dp)
-                .graphicsLayer {
-                    scaleX = scale
-                    scaleY = scale
-                    this.alpha = alpha
-                }
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
-                .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(
-                imageVector = ImageVector.vectorResource(R.drawable.ic_sparkle),
-                contentDescription = null,
-                tint = MaterialTheme.colorScheme.primary,
-                modifier = Modifier.size(40.dp)
-            )
-        }
-        
-        Spacer(modifier = Modifier.height(32.dp))
-        
+        IrisMascot(
+            mood = IrisMood.SEARCHING,
+            size = 84.dp
+        )
+
+        Spacer(modifier = Modifier.height(28.dp))
+
         Text(
-            stringResource(R.string.surprise_loading_1), 
-            color = Color.White.copy(alpha = 0.9f), 
+            text = stringResource(R.string.surprise_loading_1),
+            color = Color.White.copy(alpha = 0.9f),
             style = MaterialTheme.typography.bodyLarge.copy(
                 fontWeight = FontWeight.Bold,
                 letterSpacing = 0.5.sp
-            )
+            ),
+            textAlign = TextAlign.Center
         )
     }
 }
