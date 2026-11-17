@@ -381,28 +381,40 @@ fun IrisMascot(
                     style = Stroke(width = with(density) { 1.3.dp.toPx() })
                 )
 
-                // 4. CATCHLIGHTS OTTICI (I riflessi di luce perfettamente sigillati all'interno della pupilla mobile)
+                // 4. CATCHLIGHTS OTTICI (I riflessi di luce sfumati e traslucidi sul vetro ottico)
                 if (effectiveAperture > 0.12f) {
                     val driftPx = with(density) { (gazeDrift * 1.0f).dp.toPx() }
 
-                    // Riflesso primario superiore (Softbox Glint) - raggio contenuto, ancorato saldamente all'interno
+                    // Riflesso primario superiore (Softbox Glint) con gradiente morbido e trasparenza da vetro ottico
                     val glint1X = pupilCenterX + (innerR * 0.22f) + driftPx
                     val glint1Y = pupilCenterY - (innerR * 0.24f)
                     val glint1R = (innerR * 0.16f).coerceAtLeast(1f)
 
                     drawCircle(
-                        color = Color.White.copy(alpha = 0.92f),
+                        brush = Brush.radialGradient(
+                            0.0f to Color.White.copy(alpha = 0.60f),
+                            0.65f to Color.White.copy(alpha = 0.35f),
+                            1.0f to Color.White.copy(alpha = 0.06f),
+                            center = Offset(glint1X, glint1Y),
+                            radius = glint1R
+                        ),
                         radius = glint1R,
                         center = Offset(glint1X, glint1Y)
                     )
 
-                    // Riflesso secondario inferiore (Fill Glint)
+                    // Riflesso secondario inferiore (Fill Glint) traslucido e soffuso
                     val glint2X = pupilCenterX - (innerR * 0.18f) + driftPx * 0.5f
                     val glint2Y = pupilCenterY + (innerR * 0.20f)
                     val glint2R = (innerR * 0.09f).coerceAtLeast(0.8f)
 
                     drawCircle(
-                        color = accentColor.copy(alpha = 0.70f),
+                        brush = Brush.radialGradient(
+                            0.0f to accentColor.copy(alpha = 0.42f),
+                            0.75f to accentColor.copy(alpha = 0.18f),
+                            1.0f to Color.Transparent,
+                            center = Offset(glint2X, glint2Y),
+                            radius = glint2R
+                        ),
                         radius = glint2R,
                         center = Offset(glint2X, glint2Y)
                     )
