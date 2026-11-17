@@ -7,7 +7,10 @@ import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.model.MoodHistoryEntry
 import com.cinetrack.data.model.MoodSearchRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.launch
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -228,6 +231,36 @@ class MoodSearchRepository @Inject constructor(
                     movies = localResult.movies
                 )
             )
+
+            // Fire-and-forget: registra la ricerca IRIS MID (motore locale) su Supabase in background
+            CoroutineScope(Dispatchers.IO).launch {
+                try {
+                    val anonKey = com.cinetrack.util.Keys.getSupabaseAnonKey()
+                    if (anonKey.isNotBlank()) {
+                        val sample = localResult.movies.take(5).map { m ->
+                            com.cinetrack.data.model.SearchLogMovieSampleDto(
+                                title = m.title.orEmpty(),
+                                year = m.releaseDate?.take(4)
+                            )
+                        }
+                        api.recordSearchLog(
+                            apiKey = anonKey,
+                            authorization = "Bearer $anonKey",
+                            payload = com.cinetrack.data.model.SearchLogDto(
+                                query = trimmedQuery,
+                                engine = "IRIS",
+                                tier = "MID",
+                                language = language,
+                                resultsCount = localResult.movies.size,
+                                resultsSample = sample,
+                                vibeTitle = localResult.vibeTitle.ifBlank { "Algoritmo Locale" }
+                            )
+                        )
+                    }
+                } catch (_: Exception) {
+                    // Silente: il fallimento del logging analitico non deve mai impattare l'utente
+                }
+            }
         }
         return localResult.copy(isQuotaFallback = isQuotaFallback)
     }
