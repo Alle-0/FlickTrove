@@ -89,6 +89,16 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
 <table>
   <tr>
     <td width="50%" valign="top">
+      <h3>👁️ IRIS Mascot & Cinema Mood Discovery</h3>
+      Discover movies across <strong>29 languages</strong> by vibes, emotional atmospheres, or plot memories (<em>"existential space solitude"</em>). Powered by a triple engine: <strong>Cloudflare Vectorize</strong> (<code>bge-m3</code>), <strong>Gemini 3.5 Flash Lite</strong> with cinephile rationales, and the 100% offline Local IR Engine v3. Guided by <strong>IRIS</strong>, FlickTrove's living 6-blade optical lens mascot with tactile touch-to-close, 2D cursor gaze tracking, and gyro micro-parallax!
+    </td>
+    <td width="50%" valign="top">
+      <h3>🎭 Diegetic Chronological Sagas</h3>
+      Experience 6 flagship sagas (<strong>MCU</strong> with 85 items, <strong>Star Wars Canon</strong> with 27 items, <strong>Middle-earth</strong>, <strong>MonsterVerse</strong>, <strong>Alien</strong>, <strong>The Conjuring</strong>) in true in-universe story order. TV series split diegetically across their canonical chronology with scoped season badges (<code>[📺 STAGIONE 1]</code>) and 800+ global aliases.
+    </td>
+  </tr>
+  <tr>
+    <td width="50%" valign="top">
       <h3>🔮 The Trove's Pick & Taste Matrix</h3>
       An authentic daily ritual on your Home feed: hold the frosted energy lens to unseal your pick with gravitational bubbles, ring haptics, and a particle burst. Powered by <code>CalculateMatchScoreUseCase</code> with genre vectors, 64-bit micro-clustering, recency decay, and Bayesian quality smoothing.
     </td>
@@ -130,12 +140,12 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
 
   **Discovery & Curation**
   - 🎠 **Cinematic Discovery & Home Feed**: Auto-scrolling **Hero Spotlight Carousel** showcasing trending titles with official logo overlays.
-  - 🎲 **Surprise Me**: Instant random pick or guided assistant by available time, mood, and viewing company (*Solo*, *Date Night*, *Friends*, *Family*).
+  - 🎲 **Surprise Me ("Scrivi" & Voice)**: Free-form prompt composer with hands-free voice dictation, the dual-engine pill switcher (`[AI • 3 | ALGO • ∞]`), and single-pick reveal guided by the IRIS living mascot.
   - 🥇 **Top 10 FlickTrove & 📈 Box Office Insights**: Daily community Top 10 alongside domestic/international box office weekends and all-time records.
-  - 🎭 **Cinematic Sagas & Franchises**: Dedicated timelines for major franchises (MCU, Star Wars, Harry Potter, Middle-earth, etc.) with completion percentage and total saga runtime.
+  - 🎭 **Cinematic Sagas & Franchises**: Dedicated chronological timelines for major universes (MCU, Star Wars, Middle-earth, Alien, MonsterVerse, etc.) with scoped episodic season badges (`[📺 STAGIONE 1]`) and completion tracking.
   - 📁 **Custom Folders**: Bespoke folders with a custom Color Wheel, rich descriptions, and flexible sorting.
   - 📰 **Film Magazine & Streaming Providers**: Curated editorial news, JustWatch streaming/rent/buy availability via TMDB, and HD in-app YouTube trailers.
-  - 🔍 **Natural Language Search**: Instant TMDB search powered by a bilingual keyword dictionary for semantic mood and theme lookups.
+  - 🔍 **Cinema Mood Discovery**: Triple-engine semantic search (Cloudflare Vectorize `bge-m3`, Gemini 3.5 Flash Lite, Local IR Engine v3) with editorial magazine cards, intrinsic quote bars, and gold rating badges across all 29 languages.
 
   **Tracking, Diary & Sharing**
   - 🎬 **Episodic TV Tracking**: Check off episodes and seasons, track next air dates, monitor up-to-date status, and preserve watched episode history even when dropping or pausing shows.
@@ -210,7 +220,7 @@ Behind a gorgeous interface lies a solid and scalable engine built with modern A
 | **Dependency Injection** | <img src="https://img.shields.io/badge/Dagger_Hilt-000000?style=for-the-badge&logo=google&logoColor=white" alt="Hilt"> |
 | **Images & Colors** | <img src="https://img.shields.io/badge/Coil_3.6.3-2A2A2A?style=for-the-badge&logo=android&logoColor=white" alt="Coil"> <img src="https://img.shields.io/badge/AndroidX_Palette-FF7043?style=for-the-badge&logo=android&logoColor=white" alt="Palette"> |
 | **Background Sync** | <img src="https://img.shields.io/badge/WorkManager-34A853?style=for-the-badge&logo=android&logoColor=white" alt="WorkManager"> |
-| **Backend & Auth** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"> <img src="https://img.shields.io/badge/OAuth_2.0-Trakt_%26_SIMKL-232F3E?style=for-the-badge&logo=openid&logoColor=white" alt="OAuth2"> |
+| **Backend & Cloud** | <img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=firebase&logoColor=black" alt="Firebase"> <img src="https://img.shields.io/badge/Supabase-3ECF8E?style=for-the-badge&logo=supabase&logoColor=white" alt="Supabase"> <img src="https://img.shields.io/badge/Cloudflare_Workers_%26_Vectorize-F38020?style=for-the-badge&logo=cloudflare&logoColor=white" alt="Cloudflare"> <img src="https://img.shields.io/badge/Google_Gemini-8E75B2?style=for-the-badge&logo=google&logoColor=white" alt="Gemini"> <img src="https://img.shields.io/badge/OAuth_2.0-Trakt_%26_SIMKL-232F3E?style=for-the-badge&logo=openid&logoColor=white" alt="OAuth2"> |
 
 <details>
 <summary><b><img src="docs/assets/readme_icons/2_server.svg" width="18" height="18" alt="" align="absmiddle" /> Technical Deep Dive & Architecture Flow</b></summary>
@@ -284,7 +294,6 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces a new project.
 - [ ] **Calendar Integration:** Sync upcoming premiere dates and TV air dates directly to your Google Calendar.
-- [ ] **AI-Powered Cinephile Concierge:** Conversational discovery assistant for contextual mood queries and deep film analysis.
 
 ---
 

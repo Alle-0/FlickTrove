@@ -58,7 +58,7 @@
       <div class="legal-glass-panel">
         <div class="legal-header">
           <h1><span class="text-gradient">Privacy Policy</span></h1>
-        <p class="updated-date">Last Updated: November 12, 2026</p>
+        <p class="updated-date">Last Updated: November 17, 2026</p>
       </div>
 
       <div class="legal-content">
@@ -83,6 +83,7 @@
             app stability without personally identifying you.</li>
           <li><strong>Content Moderation, Security, & Reporting:</strong> Users can flag inappropriate comments or avatars via the in-app reporting feature. We collect the reported content ID, the reporter's user ID, and the reason for the report to review and moderate the community, ensuring a safe environment. We also use your account data (such as user ID) to enforce security measures and platform rules, which may include restricting or suspending (temporarily or permanently) your ability to post comments in case of violations of our Terms of Service.</li>
           <li><strong>Voluntary Donations & Patron Verification ("Executive Producer"):</strong> If you choose to support FlickTrove voluntarily via Ko-fi or PayPal, transactional metadata (donor email address, public display name, transaction amount, payment provider, and timestamp) is securely stored in Firebase Firestore to verify your supporter status, unlock and maintain the "Executive Producer" achievement badge on your account, prevent fraudulent voucher reuse across multiple profiles (One-Time Claim Binding), and fulfill minimal accounting obligations. FlickTrove never collects, processes, or has access to your sensitive financial data (credit card numbers, CVV, or bank accounts), which are handled exclusively and securely by PayPal and Ko-fi.</li>
+          <li><strong>Anonymous Search Telemetry & Quality Logs:</strong> When using Cinema Mood Discovery or natural language search, the App records anonymous performance and quality metrics in our cloud database (Supabase), including the search query text, response latency, engine delegation (Vectorize vs AI vs Local), and result count. These telemetry logs are completely anonymous, contain zero Personally Identifiable Information (PII) or user IDs, and are used exclusively to evaluate and improve cross-lingual semantic search accuracy across all 28+ supported languages.</li>
         </ul>
 
         <h2>2. Third-Party Services & APIs</h2>
@@ -103,6 +104,8 @@
           <li><strong>News RSS Providers (Everyeye.it, BadTaste.it, Collider.com & ScreenRant.com):</strong> When you open the News tab, the App
             connects directly to Everyeye.it and BadTaste.it (Italian) or Collider.com and ScreenRant.com (English) to retrieve public RSS feeds. Your
             device's IP address is exposed to these publishers during this request.</li>
+          <li><strong>Cloudflare Workers & Vectorize:</strong> Semantic mood searches query high-dimensional vector embeddings (<code>bge-m3</code>) hosted on Cloudflare Workers and Vectorize with sub-second latency. No user accounts, personal identities, or IP-linked profiles are stored on Cloudflare. Cloudflare Workers also act as an edge-caching reverse proxy for OMDB ratings requests to reduce upstream server load.</li>
+          <li><strong>Google Gemini AI (via Cloudflare AI Gateway & Supabase):</strong> When opting into AI Mode for Cinema Mood Discovery, user prompt queries and candidate movie overviews are processed using Gemini (Gemini 3.5 Flash Lite) via Supabase Edge Functions and Cloudflare AI Gateway to generate tailored cinephile rationales. Personal profile information, private watch histories, or account identifiers are never transmitted to Google AI.</li>
           <li><strong>Google ML Kit (On-Device AI Translation):</strong> Movie synopses can be translated locally using
             Google ML Kit. Translation is performed entirely on your physical device without sending text or reading
             preferences to cloud translation servers.</li>
