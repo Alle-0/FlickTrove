@@ -9,6 +9,8 @@ import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.awaitEachGesture
+import androidx.compose.foundation.gestures.awaitFirstDown
 import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
@@ -27,6 +29,7 @@ import androidx.compose.ui.graphics.drawscope.Stroke
 import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -76,34 +79,64 @@ fun IrisMascot(
 ) {
     val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
-    val coroutineScope = rememberCoroutineScope()
 
-    // 1. Battito ottico / ammiccamento spontaneo (Blink)
-    var isWinking by remember { mutableStateOf(false) }
+    // 1. Chiusura protettiva al tocco (Blink & Touch defense)
+    // IRIS chiude il diaframma istantaneamente appena viene toccata (press down)
+    // e rimane protetta e chiusa per tutto il tempo in cui il dito tocca la lente,
+    // per poi riaprirsi con un rimbalzo ottico elastico non appena il dito viene sollevato.
+    var isTouched by remember { mutableStateOf(false) }
+    var hasBeenTouched by remember { mutableStateOf(false) }
     val winkAnim = remember { Animatable(0f) }
 
+    LaunchedEffect(isTouched) {
+        if (isTouched) {
+            hasBeenTouched = true
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            winkAnim.animateTo(
+                targetValue = 1f,
+                animationSpec = tween(durationMillis = 75, easing = FastOutLinearInEasing)
+            )
+        } else if (hasBeenTouched) {
+            // Se rilasciato prima di aver raggiunto la chiusura completa (es. tap super rapido),
+            // completa rapidamente la chiusura prima del rimbalzo di riapertura
+            if (winkAnim.value < 0.75f) {
+                winkAnim.animateTo(
+                    targetValue = 1f,
+                    animationSpec = tween(durationMillis = 35, easing = LinearEasing)
+                )
+            }
+            winkAnim.animateTo(
+                targetValue = 0f,
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessMediumLow
+                )
+            )
+        }
+    }
+
+    // Battito spontaneo periodico quando non è toccata dall'utente
     LaunchedEffect(mood) {
         if (mood == IrisMood.IDLE || mood == IrisMood.TYPING) {
             while (true) {
                 delay(if (mood == IrisMood.TYPING) 6500L else 4500L + (0..2000).random())
-                isWinking = true
-                // Chiusura rapida (shutter snap) e riapertura elastica
-                winkAnim.animateTo(
-                    targetValue = 1f,
-                    animationSpec = tween(durationMillis = 140, easing = FastOutSlowInEasing)
-                )
-                winkAnim.animateTo(
-                    targetValue = 0f,
-                    animationSpec = spring(
-                        dampingRatio = Spring.DampingRatioMediumBouncy,
-                        stiffness = Spring.StiffnessMedium
+                if (!isTouched) {
+                    // Chiusura rapida (shutter snap) e riapertura elastica
+                    winkAnim.animateTo(
+                        targetValue = 1f,
+                        animationSpec = tween(durationMillis = 140, easing = FastOutSlowInEasing)
                     )
-                )
-                isWinking = false
+                    winkAnim.animateTo(
+                        targetValue = 0f,
+                        animationSpec = spring(
+                            dampingRatio = Spring.DampingRatioMediumBouncy,
+                            stiffness = Spring.StiffnessMedium
+                        )
+                    )
+                }
             }
         } else {
             winkAnim.snapTo(0f)
-            isWinking = false
         }
     }
 
@@ -206,25 +239,26 @@ fun IrisMascot(
         IrisMood.OFFLINE -> 0f
     }
 
-    val triggerInteractiveWink = {
-        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
-        coroutineScope.launch {
-            winkAnim.animateTo(1f, tween(110, easing = FastOutSlowInEasing))
-            winkAnim.animateTo(
-                0f,
-                spring(
-                    dampingRatio = Spring.DampingRatioMediumBouncy,
-                    stiffness = Spring.StiffnessMediumLow
-                )
-            )
-        }
-        onClick?.invoke()
-    }
-
     Box(
         modifier = modifier
             .size(size)
-            .bounceClick(scaleDown = 0.92f, onClick = { triggerInteractiveWink() }),
+            .pointerInput(Unit) {
+                awaitEachGesture {
+                    try {
+                        awaitFirstDown(requireUnconsumed = false)
+                        isTouched = true
+                        do {
+                            val event = awaitPointerEvent()
+                        } while (event.changes.any { it.pressed })
+                    } finally {
+                        isTouched = false
+                    }
+                }
+            }
+            .bounceClick(
+                scaleDown = 0.92f,
+                onClick = { onClick?.invoke() }
+            ),
         contentAlignment = Alignment.Center
     ) {
         Canvas(modifier = Modifier.fillMaxSize()) {
