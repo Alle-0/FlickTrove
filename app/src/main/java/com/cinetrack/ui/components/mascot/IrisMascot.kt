@@ -89,28 +89,71 @@ fun IrisMascot(
     val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
 
-    // Micro-parallasse giroscopica da inclinazione fisica dello smartphone
+    // Chiusura protettiva e ammiccamento (Wink & Touch Defense)
+    var isTouched by remember { mutableStateOf(false) }
+    var hasBeenTouched by remember { mutableStateOf(false) }
+    val winkAnim = remember { Animatable(0f) }
+
+    // Micro-parallasse giroscopica e rilevamento scuotimento dello smartphone (Shake to Dizzy)
     var rawTiltX by remember { mutableFloatStateOf(0f) }
     var rawTiltY by remember { mutableFloatStateOf(0f) }
+    var isDizzy by remember { mutableStateOf(false) }
+    val dizzyAnim = remember { Animatable(0f) }
+
+    LaunchedEffect(isDizzy) {
+        if (isDizzy) {
+            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+            dizzyAnim.snapTo(1f)
+            dizzyAnim.animateTo(
+                targetValue = 0f,
+                animationSpec = tween(durationMillis = 2800, easing = FastOutSlowInEasing)
+            )
+            // Chiusura rapida di ricalibrazione e riapertura elastica (shutter calibration blink)
+            winkAnim.animateTo(1f, tween(85, easing = FastOutLinearInEasing))
+            winkAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            isDizzy = false
+        }
+    }
 
     if (enableTiltParallax) {
         DisposableEffect(Unit) {
             val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-            val sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
-                ?: sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+            val sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
 
             if (sensorManager == null || sensor == null) {
                 onDispose { }
             } else {
+                var lastShakeTime = 0L
+                var shakeCount = 0
+
                 val listener = object : SensorEventListener {
                     override fun onSensorChanged(event: SensorEvent?) {
                         if (event == null) return
-                        // Asse X: inclinazione laterale sinistra (<0) o destra (>0)
-                        val x = (-event.values[0] / 5.5f).coerceIn(-1f, 1f)
-                        // Asse Y: calibrato sulla tipica postura di tenuta dello smartphone (45°-60°, gravità Y ~ 6.0 m/s^2)
-                        val y = ((event.values[1] - 6.0f) / 5.5f).coerceIn(-1f, 1f)
+                        val gX = event.values[0]
+                        val gY = event.values[1]
+                        val gZ = event.values[2]
+
+                        // 1. Inclinazione 2D (con filtro a m/s^2)
+                        val x = (-gX / 5.5f).coerceIn(-1f, 1f)
+                        val y = ((gY - 6.0f) / 5.5f).coerceIn(-1f, 1f)
                         rawTiltX = x
                         rawTiltY = y
+
+                        // 2. Rilevamento scuotimento vigoroso (Shake)
+                        val gMagnitude = sqrt(gX * gX + gY * gY + gZ * gZ) / SensorManager.GRAVITY_EARTH
+                        if (gMagnitude > 2.2f) {
+                            val now = System.currentTimeMillis()
+                            if (now - lastShakeTime < 650L) {
+                                shakeCount++
+                                if (shakeCount >= 2 && !isDizzy) {
+                                    isDizzy = true
+                                    shakeCount = 0
+                                }
+                            } else {
+                                shakeCount = 1
+                            }
+                            lastShakeTime = now
+                        }
                     }
 
                     override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
@@ -146,10 +189,6 @@ fun IrisMascot(
     // IRIS chiude il diaframma istantaneamente appena viene toccata (press down)
     // e rimane protetta e chiusa per tutto il tempo in cui il dito tocca la lente,
     // per poi riaprirsi con un rimbalzo ottico elastico non appena il dito viene sollevato.
-    var isTouched by remember { mutableStateOf(false) }
-    var hasBeenTouched by remember { mutableStateOf(false) }
-    val winkAnim = remember { Animatable(0f) }
-
     LaunchedEffect(isTouched) {
         if (isTouched) {
             hasBeenTouched = true
@@ -177,12 +216,12 @@ fun IrisMascot(
         }
     }
 
-    // Battito spontaneo periodico quando non è toccata dall'utente
+    // Battito spontaneo periodico quando non è toccata dall'utente e non è stordita
     LaunchedEffect(mood) {
         if (mood == IrisMood.IDLE || mood == IrisMood.TYPING) {
             while (true) {
                 delay(if (mood == IrisMood.TYPING) 6500L else 4500L + (0..2000).random())
-                if (!isTouched) {
+                if (!isTouched && !isDizzy) {
                     // Chiusura rapida (shutter snap) e riapertura elastica
                     winkAnim.animateTo(
                         targetValue = 1f,
@@ -304,18 +343,28 @@ fun IrisMascot(
         IrisMood.EMPTY -> 0.22f
         IrisMood.OFFLINE -> 0.06f
     }
-    // L'ammiccamento (wink) forza la chiusura dell'iride verso f/22 (0.05f)
-    val effectiveAperture = (baseAperture * (1f - winkAnim.value) + 0.05f * winkAnim.value).coerceIn(0.05f, 0.70f)
+    // Effetto scuotimento/stordimento (Dizzy): flutter rapido del diaframma che cerca la calibrazione
+    val dizzyProgress = dizzyAnim.value
+    val dizzyWobble = if (dizzyProgress > 0f) {
+        sin((1f - dizzyProgress) * 36f) * 0.16f * dizzyProgress
+    } else 0f
 
-    // Angolo di otturazione corrente con micro-inclinazione direzionale
-    val effectiveAngle = when (mood) {
+    // L'ammiccamento (wink) forza la chiusura dell'iride verso f/22 (0.05f)
+    val effectiveAperture = (baseAperture * (1f - winkAnim.value) + 0.05f * winkAnim.value + dizzyWobble).coerceIn(0.05f, 0.70f)
+
+    val dizzyRotation = if (dizzyProgress > 0f) {
+        sin((1f - dizzyProgress) * 20f) * 25f * dizzyProgress
+    } else 0f
+
+    // Angolo di otturazione corrente con micro-inclinazione direzionale e oscillazione stordita
+    val effectiveAngle = (when (mood) {
         IrisMood.SEARCHING -> searchingRotation
         IrisMood.TYPING -> (pupilShiftXRatio * 6f) + (gazeDrift * 2f)
         IrisMood.IDLE -> gazeDrift * 8f
         IrisMood.EMPTY -> 15f
         IrisMood.DELIGHTED -> 0f
         IrisMood.OFFLINE -> 0f
-    }
+    }) + dizzyRotation
 
     Box(
         modifier = modifier
@@ -401,14 +450,20 @@ fun IrisMascot(
                 style = Stroke(width = with(density) { 0.8.dp.toPx() })
             )
 
-            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si orientano in 2D seguendo la scrittura e il giroscopio)
+            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si orientano in 2D seguendo la scrittura, il giroscopio e la spirale da scuotimento)
             val pupilMaxShiftY = barrelInnerR * 0.22f
             val pupilMaxShiftX = barrelInnerR * 0.20f
             val tiltShiftX = barrelInnerR * 0.08f * smoothTiltX
             val tiltShiftY = barrelInnerR * 0.08f * smoothTiltY
 
-            val pupilCenterY = centerY + (pupilMaxShiftY * pupilShiftYRatio) + tiltShiftY
-            val pupilCenterX = centerX + (pupilMaxShiftX * pupilShiftXRatio) + tiltShiftX
+            // Orbita a spirale decrescente quando stordita
+            val dizzySpiralAngle = (1f - dizzyProgress) * 1440f * (Math.PI.toFloat() / 180f)
+            val dizzyOrbitR = barrelInnerR * 0.22f * dizzyProgress
+            val dizzyShiftX = dizzyOrbitR * cos(dizzySpiralAngle)
+            val dizzyShiftY = dizzyOrbitR * sin(dizzySpiralAngle)
+
+            val pupilCenterY = centerY + (pupilMaxShiftY * pupilShiftYRatio) + tiltShiftY + dizzyShiftY
+            val pupilCenterX = centerX + (pupilMaxShiftX * pupilShiftXRatio) + tiltShiftX + dizzyShiftX
 
             val outerR = barrelInnerR * 1.35f
             val innerR = (barrelInnerR * effectiveAperture).coerceAtLeast(1.5f)
