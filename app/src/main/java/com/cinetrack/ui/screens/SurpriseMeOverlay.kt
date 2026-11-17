@@ -412,7 +412,7 @@ private fun PromptOptionCard(
                         .padding(horizontal = 5.dp, vertical = 1.5.dp)
                 ) {
                     Text(
-                        text = "AI",
+                        text = "IRIS",
                         color = MaterialTheme.colorScheme.primary,
                         style = MaterialTheme.typography.labelSmall.copy(
                             fontWeight = FontWeight.Bold,
