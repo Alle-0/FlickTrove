@@ -96,6 +96,7 @@ fun SurpriseMeOverlay(
 
     val remainingQuota by viewModel.remainingQuota.collectAsState()
     var isAiMode by remember(remainingQuota) { mutableStateOf(remainingQuota > 0) }
+    var isSearchingWithAi by remember { mutableStateOf(false) }
 
     val scope = rememberCoroutineScope()
 
@@ -146,12 +147,14 @@ fun SurpriseMeOverlay(
                 selectedCompany = selectedCompany,
                 remainingQuota = remainingQuota,
                 isAiMode = isAiMode,
+                isSearchingWithAi = isSearchingWithAi,
                 onAiModeChanged = { isAiMode = it },
                 onEmitMessage = { viewModel.emitMessage(it) },
                 isGhost = contentAlpha == 0f,
                 onBack = handleBack,
                 onClose = onClose,
                 onRandomClick = {
+                    isSearchingWithAi = false
                     scope.launch {
                         step = 5
                         delay(800)
@@ -170,6 +173,7 @@ fun SurpriseMeOverlay(
                     if (isGuest) {
                         onGuestAuthTrigger()
                     } else {
+                        isSearchingWithAi = aiMode
                         scope.launch {
                             step = 5
                             delay(800)
@@ -189,6 +193,7 @@ fun SurpriseMeOverlay(
                 },
                 onCompanySelect = {
                     selectedCompany = it
+                    isSearchingWithAi = false
                     scope.launch {
                         step = 5
                         delay(800)
@@ -210,6 +215,7 @@ private fun SurpriseMeContent(
     selectedCompany: SurpriseCompany?,
     remainingQuota: Int,
     isAiMode: Boolean,
+    isSearchingWithAi: Boolean = false,
     onAiModeChanged: (Boolean) -> Unit,
     onEmitMessage: (UiText) -> Unit = {},
     isGhost: Boolean,
@@ -276,7 +282,7 @@ private fun SurpriseMeContent(
                     onAiModeChanged = {},
                     onSubmit = { _, _ -> }
                 )
-                5 -> LoadingStep(isGhost = true)
+                5 -> LoadingStep(isGhost = true, isSearchingWithAi = isSearchingWithAi)
             }
         } else {
             val slideDir = rtlSlideDirection()
@@ -318,7 +324,7 @@ private fun SurpriseMeContent(
                         onEmitMessage = onEmitMessage,
                         onSubmit = onPromptSubmit
                     )
-                    5 -> LoadingStep(isGhost = false)
+                    5 -> LoadingStep(isGhost = false, isSearchingWithAi = isSearchingWithAi)
                 }
             }
         }
@@ -726,7 +732,27 @@ private fun CompanyStep(onSelect: (SurpriseCompany) -> Unit) {
 }
 
 @Composable
-private fun LoadingStep(isGhost: Boolean = false) {
+private fun LoadingStep(isGhost: Boolean = false, isSearchingWithAi: Boolean = false) {
+    val infiniteTransition = rememberInfiniteTransition(label = "loading_infinite")
+    val scale by infiniteTransition.animateFloat(
+        initialValue = 0.85f,
+        targetValue = 1.15f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "scale"
+    )
+    val alpha by infiniteTransition.animateFloat(
+        initialValue = 0.4f,
+        targetValue = 1f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(1000, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "alpha"
+    )
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
@@ -734,10 +760,34 @@ private fun LoadingStep(isGhost: Boolean = false) {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        IrisMascot(
-            mood = IrisMood.SEARCHING,
-            size = 84.dp
-        )
+        if (isSearchingWithAi) {
+            // Se cercato tramite IA: Sfera di cristallo con scintille Sparkle AI
+            Box(
+                modifier = Modifier
+                    .size(80.dp)
+                    .graphicsLayer {
+                        scaleX = scale
+                        scaleY = scale
+                        this.alpha = alpha
+                    }
+                    .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape)
+                    .border(2.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.4f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(R.drawable.ic_sparkle),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(40.dp)
+                )
+            }
+        } else {
+            // Se cercato localmente (o Random / Wizard / IRIS): Mascotte ottica IRIS in focus hunting
+            IrisMascot(
+                mood = IrisMood.SEARCHING,
+                size = 84.dp
+            )
+        }
 
         Spacer(modifier = Modifier.height(28.dp))
 
