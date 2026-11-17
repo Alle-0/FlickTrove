@@ -114,7 +114,7 @@ class PreferenceRepository @Inject constructor(
         val LAST_TASTE_VECTOR_SYNC_TIMESTAMP = longPreferencesKey("last_taste_vector_sync_timestamp")
         val MOOD_SEARCH_LAST_EPOCH_DAY = longPreferencesKey("mood_search_last_epoch_day")
         val MOOD_SEARCH_COUNT = intPreferencesKey("mood_search_count")
-        val DAILY_MOOD_SEARCH_QUOTA = if (com.cinetrack.BuildConfig.DEBUG) 50 else 3
+        const val DAILY_MOOD_SEARCH_QUOTA = 3
     }
 
     val userPreferencesFlow: Flow<UserPreferences> = dataStore.data
@@ -585,12 +585,7 @@ class PreferenceRepository @Inject constructor(
             if (savedEpochDay < todayEpochDay) {
                 quotaMax
             } else {
-                val saved = prefs[PreferencesKeys.MOOD_SEARCH_COUNT]
-                if (com.cinetrack.BuildConfig.DEBUG && (saved == null || saved <= 0)) {
-                    quotaMax
-                } else {
-                    saved ?: quotaMax
-                }
+                prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: quotaMax
             }
         }
 
@@ -600,8 +595,7 @@ class PreferenceRepository @Inject constructor(
         val savedEpochDay = prefs[PreferencesKeys.MOOD_SEARCH_LAST_EPOCH_DAY] ?: 0L
         val quotaMax = PreferencesKeys.DAILY_MOOD_SEARCH_QUOTA
         if (savedEpochDay < todayEpochDay) return quotaMax
-        val saved = prefs[PreferencesKeys.MOOD_SEARCH_COUNT]
-        return if (com.cinetrack.BuildConfig.DEBUG && (saved == null || saved <= 0)) quotaMax else (saved ?: quotaMax)
+        return prefs[PreferencesKeys.MOOD_SEARCH_COUNT] ?: quotaMax
     }
 
     suspend fun setMoodSearchesRemaining(remaining: Int) = moodQuotaMutex.withLock {

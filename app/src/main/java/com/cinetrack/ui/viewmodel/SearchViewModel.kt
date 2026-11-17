@@ -245,8 +245,8 @@ class SearchViewModel @Inject constructor(
 
     fun resetQuotaForDev() {
         viewModelScope.launch {
-            preferenceRepository.setMoodSearchesRemaining(50)
-            _uiState.update { it.copy(moodRemainingQuota = 50, isMoodAiMode = true) }
+            preferenceRepository.setMoodSearchesRemaining(3)
+            _uiState.update { it.copy(moodRemainingQuota = 3, isMoodAiMode = true) }
         }
     }
 

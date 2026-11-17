@@ -44,6 +44,7 @@ interface SemanticSearchApi {
     suspend fun searchSemantics(
         @Query("q") query: String,
         @Query("lang") lang: String = "en",
+        @Query("q_en") queryEn: String? = null,
         @Query("limit") limit: Int = 20
     ): Response<SemanticSearchResponse>
 }

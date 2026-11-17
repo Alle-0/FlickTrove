@@ -607,9 +607,8 @@ private fun PromptStep(
                             Box(
                                 modifier = Modifier
                                     .size(28.dp)
-                                    .clip(CircleShape)
                                     .bounceClick { text = "" }
-                                    .background(Color.White.copy(alpha = 0.08f)),
+                                    .background(Color.White.copy(alpha = 0.08f), CircleShape),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Icon(
@@ -624,7 +623,6 @@ private fun PromptStep(
                         Box(
                             modifier = Modifier
                                 .size(28.dp)
-                                .clip(CircleShape)
                                 .bounceClick {
                                     try {
                                         val intent = Intent(RecognizerIntent.ACTION_RECOGNIZE_SPEECH).apply {
@@ -636,7 +634,7 @@ private fun PromptStep(
                                         speechLauncher.launch(intent)
                                     } catch (_: Exception) {}
                                 }
-                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)),
+                                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f), CircleShape),
                             contentAlignment = Alignment.Center
                         ) {
                             Icon(
