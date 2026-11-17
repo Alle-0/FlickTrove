@@ -1,5 +1,10 @@
 package com.cinetrack.ui.components.mascot
 
+import android.content.Context
+import android.hardware.Sensor
+import android.hardware.SensorEvent
+import android.hardware.SensorEventListener
+import android.hardware.SensorManager
 import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
@@ -30,6 +35,7 @@ import androidx.compose.ui.graphics.drawscope.clipPath
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.hapticfeedback.HapticFeedbackType
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
 import androidx.compose.ui.res.stringResource
@@ -76,10 +82,65 @@ fun IrisMascot(
     size: Dp = 80.dp,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     gazeBiasX: Float = 0f,
+    enableTiltParallax: Boolean = true,
     onClick: (() -> Unit)? = null
 ) {
+    val context = LocalContext.current
     val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
+
+    // Micro-parallasse giroscopica da inclinazione fisica dello smartphone
+    var rawTiltX by remember { mutableFloatStateOf(0f) }
+    var rawTiltY by remember { mutableFloatStateOf(0f) }
+
+    if (enableTiltParallax) {
+        DisposableEffect(Unit) {
+            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
+            val sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_GRAVITY)
+                ?: sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+
+            if (sensorManager == null || sensor == null) {
+                onDispose { }
+            } else {
+                val listener = object : SensorEventListener {
+                    override fun onSensorChanged(event: SensorEvent?) {
+                        if (event == null) return
+                        // Asse X: inclinazione laterale sinistra (<0) o destra (>0)
+                        val x = (-event.values[0] / 5.5f).coerceIn(-1f, 1f)
+                        // Asse Y: calibrato sulla tipica postura di tenuta dello smartphone (45°-60°, gravità Y ~ 6.0 m/s^2)
+                        val y = ((event.values[1] - 6.0f) / 5.5f).coerceIn(-1f, 1f)
+                        rawTiltX = x
+                        rawTiltY = y
+                    }
+
+                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
+                }
+
+                sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
+                onDispose {
+                    sensorManager.unregisterListener(listener)
+                }
+            }
+        }
+    }
+
+    val smoothTiltX by animateFloatAsState(
+        targetValue = if (enableTiltParallax) rawTiltX else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "iris_tilt_x"
+    )
+
+    val smoothTiltY by animateFloatAsState(
+        targetValue = if (enableTiltParallax) rawTiltY else 0f,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "iris_tilt_y"
+    )
 
     // 1. Chiusura protettiva al tocco (Blink & Touch defense)
     // IRIS chiude il diaframma istantaneamente appena viene toccata (press down)
@@ -340,11 +401,14 @@ fun IrisMascot(
                 style = Stroke(width = with(density) { 0.8.dp.toPx() })
             )
 
-            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si orientano in 2D seguendo la scrittura)
+            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si orientano in 2D seguendo la scrittura e il giroscopio)
             val pupilMaxShiftY = barrelInnerR * 0.22f
             val pupilMaxShiftX = barrelInnerR * 0.20f
-            val pupilCenterY = centerY + pupilMaxShiftY * pupilShiftYRatio
-            val pupilCenterX = centerX + pupilMaxShiftX * pupilShiftXRatio
+            val tiltShiftX = barrelInnerR * 0.08f * smoothTiltX
+            val tiltShiftY = barrelInnerR * 0.08f * smoothTiltY
+
+            val pupilCenterY = centerY + (pupilMaxShiftY * pupilShiftYRatio) + tiltShiftY
+            val pupilCenterX = centerX + (pupilMaxShiftX * pupilShiftXRatio) + tiltShiftX
 
             val outerR = barrelInnerR * 1.35f
             val innerR = (barrelInnerR * effectiveAperture).coerceAtLeast(1.5f)
@@ -433,13 +497,15 @@ fun IrisMascot(
                     style = Stroke(width = with(density) { 1.3.dp.toPx() })
                 )
 
-                // 4. CATCHLIGHTS OTTICI (I riflessi di luce sfumati e traslucidi sul vetro ottico)
+                // 4. CATCHLIGHTS OTTICI (I riflessi di luce sfumati sul vetro ottico con parallasse da inclinazione fisica)
                 if (effectiveAperture > 0.12f) {
                     val driftPx = with(density) { (gazeDrift * 1.0f).dp.toPx() }
+                    val catchlightParallaxX = barrelInnerR * 0.05f * smoothTiltX
+                    val catchlightParallaxY = barrelInnerR * 0.05f * smoothTiltY
 
-                    // Riflesso primario superiore (Softbox Glint) con gradiente morbido e trasparenza da vetro ottico
-                    val glint1X = pupilCenterX + (innerR * 0.22f) + driftPx
-                    val glint1Y = pupilCenterY - (innerR * 0.24f)
+                    // Riflesso primario superiore (Softbox Glint) con gradiente morbido, trasparenza da vetro ottico e parallasse
+                    val glint1X = pupilCenterX + (innerR * 0.22f) + driftPx + catchlightParallaxX
+                    val glint1Y = pupilCenterY - (innerR * 0.24f) + catchlightParallaxY
                     val glint1R = (innerR * 0.16f).coerceAtLeast(1f)
 
                     drawCircle(
@@ -454,9 +520,9 @@ fun IrisMascot(
                         center = Offset(glint1X, glint1Y)
                     )
 
-                    // Riflesso secondario inferiore (Fill Glint) traslucido e soffuso
-                    val glint2X = pupilCenterX - (innerR * 0.18f) + driftPx * 0.5f
-                    val glint2Y = pupilCenterY + (innerR * 0.20f)
+                    // Riflesso secondario inferiore (Fill Glint) traslucido, soffuso e contro-parallasse
+                    val glint2X = pupilCenterX - (innerR * 0.18f) + driftPx * 0.5f - catchlightParallaxX * 0.5f
+                    val glint2Y = pupilCenterY + (innerR * 0.20f) - catchlightParallaxY * 0.5f
                     val glint2R = (innerR * 0.09f).coerceAtLeast(0.8f)
 
                     drawCircle(
