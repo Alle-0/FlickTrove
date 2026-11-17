@@ -113,7 +113,7 @@ fun SearchCategorySelector(
                             tabWidth = 80.dp,
                             fontSize = 10.5.sp,
                             uppercase = true,
-                            enableDrag = moodRemainingQuota > 0
+                            enableDrag = true
                         )
                     } else {
                         CategoryTabSelector(

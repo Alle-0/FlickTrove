@@ -515,7 +515,7 @@ private fun PromptStep(
                 tabWidth = 72.dp,
                 fontSize = 10.sp,
                 uppercase = true,
-                enableDrag = false
+                enableDrag = true
             )
         }
 
