@@ -578,7 +578,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">IA • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Scrivi a parole tue cosa vorresti vedere o che atmosfera cerchi. IRIS troverà i film ideali su tutto il catalogo TMDB.</string>
+    <string name="search_mood_intro_text">Scrivi a parole tue cosa vorresti vedere o che atmosfera cerchi. L\'IA troverà i film ideali su tutto il catalogo TMDB.</string>
+    <string name="search_mood_iris_intro_text">Scrivi a parole tue cosa vorresti vedere o che atmosfera cerchi. IRIS troverà i film ideali su tutto il catalogo TMDB.</string>
     <string name="search_mood_exhausted_notice">Hai utilizzato tutte le 3 ricerche Mood per oggi. Si ricaricheranno stanotte a mezzanotte!</string>
     <string name="search_mood_exhausted_title">Ricerche IA giornaliere esaurite</string>
     <string name="search_mood_switch_to_algo">Passa a IRIS (Illimitato)</string>
@@ -2226,7 +2227,7 @@
     <string name="editorial_episode_scope">EP. %1$s</string>
     <string name="mood_guest_dialog_title">Ricerca Mood</string>
     <string name="mood_guest_dialog_message">Crea un account gratuito o accedi per utilizzare la ricerca Mood e scoprire film su misura per le tue emozioni.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • SCOPERTA IA</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD IA</string>
     <string name="search_mood_iris_badge">IRIS • SCOPERTA OTTICA</string>
     <string name="search_mood_iris_analyzing">IRIS sta mettendo a fuoco l\'atmosfera...</string>
     <string name="search_mood_iris_status_focus">Calibrazione diaframma e profondità di campo...</string>

@@ -2196,7 +2196,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">観たい作品の雰囲気を自由に入力してください。IRISがTMDBカタログ全体から最適な映画を見つけ出します。</string>
+    <string name="search_mood_intro_text">観たい作品の雰囲気を自由に入力してください。AIがTMDBカタログ全体から最適な映画を見つけ出します。</string>
+    <string name="search_mood_iris_intro_text">観たい作品の雰囲気を自由に入力してください。IRISがTMDBカタログ全体から最適な映画を見つけ出します。</string>
     <string name="search_mood_exhausted_notice">本日のムード検索上限（5回）に達しました。深夜0時にリセットされます。</string>
     <string name="search_mood_exhausted_title">本日のAI検索上限に達しました</string>
     <string name="search_mood_switch_to_algo">IRISに切り替え（無制限）</string>
@@ -2222,7 +2223,7 @@
     <string name="mood_insp_8_prompt">70年代の骨太で緊迫した作家主義サスペンス</string>
     <string name="mood_guest_dialog_title">ムード検索</string>
     <string name="mood_guest_dialog_message">ムード検索を使って気分に合わせた映画を見つけるには、無料アカウントを作成するかログインしてください。</string>
-    <string name="search_mood_iris_badge_ai">IRIS • AIディスカバリー</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • オプティカル・ディスカバリー</string>
     <string name="search_mood_iris_analyzing">IRISがあなたの気分に焦点を合わせています...</string>
     <string name="search_mood_iris_status_focus">絞りと被写界深度を調整中...</string>

@@ -2196,7 +2196,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. IRIS가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
+    <string name="search_mood_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. AI가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
+    <string name="search_mood_iris_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. IRIS가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
     <string name="search_mood_exhausted_notice">오늘 제공된 5회의 무드 검색을 모두 사용했습니다. 자정에 충전됩니다!</string>
     <string name="search_mood_exhausted_title">오늘의 AI 검색 한도 소진</string>
     <string name="search_mood_switch_to_algo">IRIS으로 전환 (무제한)</string>
@@ -2222,7 +2223,7 @@
     <string name="mood_insp_8_prompt">70년대 감성의 묵직한 작가주의 범죄물</string>
     <string name="mood_guest_dialog_title">무드 검색</string>
     <string name="mood_guest_dialog_message">무드 검색을 이용해 감정에 맞는 영화를 찾으려면 무료 계정을 만들거나 로그인하세요.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • AI 탐색</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • 옵티컬 디스커버리</string>
     <string name="search_mood_iris_analyzing">IRIS가 원하는 분위기에 초점을 맞추고 있습니다...</string>
     <string name="search_mood_iris_status_focus">조리개 및 심도 보정 중...</string>

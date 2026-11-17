@@ -1,5 +1,6 @@
 package com.cinetrack.ui.components.search
 
+import androidx.compose.animation.AnimatedContent
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.RepeatMode
@@ -9,6 +10,9 @@ import androidx.compose.animation.core.infiniteRepeatable
 import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
@@ -110,77 +114,178 @@ fun MoodDiscoverySection(
             }
         }
 
-        // Mascotte Ottica IRIS con respiro vivace, battito periodico, entrata elastica e sguardo tracciante
-        IrisMascot(
-            mood = effectiveMood,
-            size = 84.dp,
-            gazeBiasX = gazeBiasX,
-            modifier = Modifier.graphicsLayer {
-                val p = enterAnim.value
-                scaleX = (0.78f + 0.22f * p) * pulseScale
-                scaleY = (0.78f + 0.22f * p) * pulseScale
-                alpha = p
-                translationY = (1f - p) * 24f
-            }
-        )
+        // Separazione netta dei due mondi:
+        // - Tab AI: visuale elegante a sfera di cristallo con scintille Sparkle AI, badge CINEMA MOOD AI e intro AI
+        // - Tab IRIS: mascotte ottica viva IRIS a 6 lamelle con sguardo tracciante, badge OPTICAL DISCOVERY e intro IRIS
+        AnimatedContent(
+            targetState = isMoodAiMode,
+            transitionSpec = {
+                (fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180)))
+            },
+            label = "mood_mode_content",
+            contentAlignment = Alignment.Center
+        ) { isAi ->
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center
+            ) {
+                if (isAi) {
+                    // TAB AI (Cloud Gemini): Sfera di cristallo con scintille Sparkle ed entrata elastica
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                val p = enterAnim.value
+                                scaleX = (0.78f + 0.22f * p) * pulseScale
+                                scaleY = (0.78f + 0.22f * p) * pulseScale
+                                alpha = p
+                                translationY = (1f - p) * 24f
+                            }
+                            .size(56.dp)
+                            .clip(CircleShape)
+                            .background(Color.White.copy(alpha = 0.04f))
+                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Icon(
+                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                            contentDescription = null,
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
+                    }
 
-        Spacer(modifier = Modifier.height(18.dp))
+                    Spacer(modifier = Modifier.height(18.dp))
 
-        // Badge IRIS: distingue la modalità AI da quella Ottica locale
-        Box(
-            modifier = Modifier
-                .graphicsLayer {
-                    val p = enterAnim.value
-                    alpha = p
-                    translationY = (1f - p) * 18f
+                    // Badge AI
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                val p = enterAnim.value
+                                alpha = p
+                                translationY = (1f - p) * 18f
+                            }
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.search_mood_badge_ai),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.5.sp,
+                                letterSpacing = 0.8.sp
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.search_mood_badge_label),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.graphicsLayer {
+                            val p = enterAnim.value
+                            alpha = p
+                            translationY = (1f - p) * 16f
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = stringResource(R.string.search_mood_intro_text),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 16.5.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .widthIn(max = 280.dp)
+                            .graphicsLayer {
+                                val p = enterAnim.value
+                                alpha = p
+                                translationY = (1f - p) * 12f
+                            }
+                    )
+                } else {
+                    // TAB IRIS (Locale): Mascotte Ottica IRIS con sguardo che traccia la scrittura
+                    IrisMascot(
+                        mood = effectiveMood,
+                        size = 84.dp,
+                        gazeBiasX = gazeBiasX,
+                        modifier = Modifier.graphicsLayer {
+                            val p = enterAnim.value
+                            scaleX = (0.78f + 0.22f * p) * pulseScale
+                            scaleY = (0.78f + 0.22f * p) * pulseScale
+                            alpha = p
+                            translationY = (1f - p) * 24f
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(18.dp))
+
+                    // Badge IRIS
+                    Box(
+                        modifier = Modifier
+                            .graphicsLayer {
+                                val p = enterAnim.value
+                                alpha = p
+                                translationY = (1f - p) * 18f
+                            }
+                            .clip(RoundedCornerShape(6.dp))
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
+                            .padding(horizontal = 8.dp, vertical = 3.dp)
+                    ) {
+                        Text(
+                            text = stringResource(R.string.search_mood_iris_badge),
+                            color = MaterialTheme.colorScheme.primary,
+                            style = MaterialTheme.typography.labelSmall.copy(
+                                fontWeight = FontWeight.Bold,
+                                fontSize = 9.5.sp,
+                                letterSpacing = 0.8.sp
+                            )
+                        )
+                    }
+
+                    Spacer(modifier = Modifier.height(8.dp))
+
+                    Text(
+                        text = stringResource(R.string.search_mood_badge_label),
+                        fontSize = 14.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.graphicsLayer {
+                            val p = enterAnim.value
+                            alpha = p
+                            translationY = (1f - p) * 16f
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    Text(
+                        text = stringResource(R.string.search_mood_iris_intro_text),
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.Normal,
+                        lineHeight = 16.5.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier
+                            .widthIn(max = 280.dp)
+                            .graphicsLayer {
+                                val p = enterAnim.value
+                                alpha = p
+                                translationY = (1f - p) * 12f
+                            }
+                    )
                 }
-                .clip(RoundedCornerShape(6.dp))
-                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                .padding(horizontal = 8.dp, vertical = 3.dp)
-        ) {
-            Text(
-                text = stringResource(if (isMoodAiMode) R.string.search_mood_iris_badge_ai else R.string.search_mood_iris_badge),
-                color = MaterialTheme.colorScheme.primary,
-                style = MaterialTheme.typography.labelSmall.copy(
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 9.5.sp,
-                    letterSpacing = 0.8.sp
-                )
-            )
+            }
         }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Text(
-            text = stringResource(R.string.search_mood_badge_label),
-            fontSize = 14.sp,
-            fontWeight = FontWeight.SemiBold,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.85f),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.graphicsLayer {
-                val p = enterAnim.value
-                alpha = p
-                translationY = (1f - p) * 16f
-            }
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = stringResource(R.string.search_mood_intro_text),
-            fontSize = 12.sp,
-            fontWeight = FontWeight.Normal,
-            lineHeight = 16.5.sp,
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.45f),
-            textAlign = TextAlign.Center,
-            modifier = Modifier
-                .widthIn(max = 280.dp)
-                .graphicsLayer {
-                    val p = enterAnim.value
-                    alpha = p
-                    translationY = (1f - p) * 12f
-                }
-        )
 
         if (!errorMessage.isNullOrBlank()) {
             Spacer(modifier = Modifier.height(20.dp))

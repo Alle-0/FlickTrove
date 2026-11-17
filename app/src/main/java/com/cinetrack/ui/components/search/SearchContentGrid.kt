@@ -303,6 +303,7 @@ fun SearchContentGrid(
                             item(span = { GridItemSpan(12) }) {
                                 IrisEmptyState(
                                     query = uiState.query,
+                                    isMoodAiMode = uiState.isMoodAiMode,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)
                                 )
                             }

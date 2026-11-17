@@ -2156,7 +2156,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Popište vlastními slovy, na co máte chuť se podívat. IRIS vyhledá ideální filmy v celém katalogu TMDB.</string>
+    <string name="search_mood_intro_text">Popište vlastními slovy, na co máte chuť se podívat. Umělá inteligence vyhledá ideální filmy v celém katalogu TMDB.</string>
+    <string name="search_mood_iris_intro_text">Popište vlastními slovy, na co máte chuť se podívat. IRIS vyhledá ideální filmy v celém katalogu TMDB.</string>
     <string name="search_mood_exhausted_notice">Vyčerpali jste všech 3 vyhledávání podle nálady na dnešní den. Obnoví se o půlnoci!</string>
     <string name="search_mood_exhausted_title">Denní vyhledávání AI vyčerpána</string>
     <string name="search_mood_switch_to_algo">Přepnout na IRIS (neomezeně)</string>
@@ -2182,7 +2183,7 @@
     <string name="mood_insp_8_prompt">Drsný autorský krimi film 70. let</string>
     <string name="mood_guest_dialog_title">Hledání podle nálady</string>
     <string name="mood_guest_dialog_message">Vytvořte si bezplatný účet nebo se přihlaste, abyste mohli vyhledávat podle nálady a objevovat filmy podle svých pocitů.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • AI OBJEVOVÁNÍ</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • OPTICKÉ OBJEVOVÁNÍ</string>
     <string name="search_mood_iris_analyzing">IRIS zaostřuje objektiv na vaši náladu...</string>
     <string name="search_mood_iris_status_focus">Kalibrace clony a hloubky ostrosti...</string>

@@ -2196,7 +2196,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">用你自己的话描述想观看的内容。IRIS 将在完整的 TMDB 片库中为你挑选最理想的电影。</string>
+    <string name="search_mood_intro_text">用你自己的话描述想观看的内容。AI 将在完整的 TMDB 片库中为你挑选最理想的电影。</string>
+    <string name="search_mood_iris_intro_text">用你自己的话描述想观看的内容。IRIS 将在完整的 TMDB 片库中为你挑选最理想的电影。</string>
     <string name="search_mood_exhausted_notice">你今天已用完所有 3 次氛围搜索。将于今晚午夜重置！</string>
     <string name="search_mood_exhausted_title">今日 AI 搜索次数已用尽</string>
     <string name="search_mood_switch_to_algo">切换为IRIS（无限制）</string>
@@ -2222,7 +2223,7 @@
     <string name="mood_insp_8_prompt">70年代冷峻写实的作者犯罪片</string>
     <string name="mood_guest_dialog_title">氛围搜索</string>
     <string name="mood_guest_dialog_message">创建免费账号或登录即可使用氛围搜索，发现契合当前心境的电影。</string>
-    <string name="search_mood_iris_badge_ai">IRIS • AI 探索</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • 光学探索</string>
     <string name="search_mood_iris_analyzing">IRIS 正在将镜头对焦至您的氛围...</string>
     <string name="search_mood_iris_status_focus">正在校准光圈与景深...</string>

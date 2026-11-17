@@ -2175,7 +2175,8 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Írja le saját szavaival, mit szeretne nézni. IRIS megtalálja a tökéletes filmeket a teljes TMDB katalógusban.</string>
+    <string name="search_mood_intro_text">Írja le saját szavaival, mit szeretne nézni. A mesterséges intelligencia megtalálja a tökéletes filmeket a teljes TMDB katalógusban.</string>
+    <string name="search_mood_iris_intro_text">Írja le saját szavaival, mit szeretne nézni. IRIS megtalálja a tökéletes filmeket a teljes TMDB katalógusban.</string>
     <string name="search_mood_exhausted_notice">Mára felhasználtad mind az 3 hangulatkeresést. Éjfélkor újra elérhetővé válnak!</string>
     <string name="search_mood_exhausted_title">Napi AI keresések elfogytak</string>
     <string name="search_mood_switch_to_algo">Váltás IRISra (korlátlan)</string>
@@ -2201,7 +2202,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="mood_insp_8_prompt">Karakán, szerzői bűnügyi film a 70-es évekből</string>
     <string name="mood_guest_dialog_title">Hangulatkeresés</string>
     <string name="mood_guest_dialog_message">Hozz létre ingyenes fiókot vagy jelentkezz be a hangulatkeresés használatához és az érzéseidhez illő filmek felfedezéséhez.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • AI FELFEDEZÉS</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • OPTIKAI FELFEDEZÉS</string>
     <string name="search_mood_iris_analyzing">Az IRIS fókuszálja az objektívet a hangulatodra...</string>
     <string name="search_mood_iris_status_focus">Rekesz és mélységélesség kalibrálása...</string>

@@ -2156,7 +2156,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Beschrijf in je eigen woorden wat je wilt kijken. IRIS vindt de perfecte films in de hele TMDB-catalogus.</string>
+    <string name="search_mood_intro_text">Beschrijf in je eigen woorden wat je wilt kijken. AI vindt de perfecte films in de hele TMDB-catalogus.</string>
+    <string name="search_mood_iris_intro_text">Beschrijf in je eigen woorden wat je wilt kijken. IRIS vindt de perfecte films in de hele TMDB-catalogus.</string>
     <string name="search_mood_exhausted_notice">Je hebt al je 3 stemmingszoekopdrachten voor vandaag gebruikt. Ze worden om middernacht vernieuwd!</string>
     <string name="search_mood_exhausted_title">Dagelijkse AI-zoekopdrachten opgebruikt</string>
     <string name="search_mood_switch_to_algo">Overschakelen naar IRIS (onbeperkt)</string>
@@ -2182,7 +2183,7 @@
     <string name="mood_insp_8_prompt">Rauwe auteursmisdaadfilm uit de jaren 70</string>
     <string name="mood_guest_dialog_title">Stemmingszoekopdracht</string>
     <string name="mood_guest_dialog_message">Maak een gratis account aan of log in om de stemmingszoekopdracht te gebruiken en films te vinden die bij je gevoel passen.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • AI-ONTDEKKING</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • OPTISCHE ONTDEKKING</string>
     <string name="search_mood_iris_analyzing">IRIS stelt scherp op je stemming...</string>
     <string name="search_mood_iris_status_focus">Diafragma en scherptediepte kalibreren...</string>

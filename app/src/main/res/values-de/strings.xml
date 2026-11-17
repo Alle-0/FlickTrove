@@ -2198,7 +2198,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">KI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Beschreibe in deinen eigenen Worten, was du sehen möchtest. IRIS findet die idealen Filme im gesamten TMDB-Katalog.</string>
+    <string name="search_mood_intro_text">Beschreibe in deinen eigenen Worten, was du sehen möchtest. Die KI findet die idealen Filme im gesamten TMDB-Katalog.</string>
+    <string name="search_mood_iris_intro_text">Beschreibe in deinen eigenen Worten, was du sehen möchtest. IRIS findet die idealen Filme im gesamten TMDB-Katalog.</string>
     <string name="search_mood_exhausted_notice">Du hast alle 3 Stimmungssuchen für heute aufgebraucht. Sie werden um Mitternacht zurückgesetzt!</string>
     <string name="search_mood_exhausted_title">Tägliche KI-Suchen aufgebraucht</string>
     <string name="search_mood_switch_to_algo">Zu IRISus wechseln (unbegrenzt)</string>
@@ -2224,7 +2225,7 @@
     <string name="mood_insp_8_prompt">Rauher Autoren-Krimi der 70er Jahre</string>
     <string name="mood_guest_dialog_title">Stimmungssuche</string>
     <string name="mood_guest_dialog_message">Erstelle ein kostenloses Konto oder melde dich an, um die Stimmungssuche zu nutzen und Filme passend zu deinen Gefühlen zu entdecken.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • KI-ENTDECKUNG</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD KI</string>
     <string name="search_mood_iris_badge">IRIS • OPTISCHE ENTDECKUNG</string>
     <string name="search_mood_iris_analyzing">IRIS fokussiert die Linse auf deine Stimmung...</string>
     <string name="search_mood_iris_status_focus">Kalibriere Blende und Schärfentiefe...</string>

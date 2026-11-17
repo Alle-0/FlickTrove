@@ -2195,7 +2195,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Jelaskan dengan kata-kata Anda sendiri apa yang ingin Anda tonton. IRIS akan menemukan film ideal di seluruh katalog TMDB.</string>
+    <string name="search_mood_intro_text">Jelaskan dengan kata-kata Anda sendiri apa yang ingin Anda tonton. AI akan menemukan film ideal di seluruh katalog TMDB.</string>
+    <string name="search_mood_iris_intro_text">Jelaskan dengan kata-kata Anda sendiri apa yang ingin Anda tonton. IRIS akan menemukan film ideal di seluruh katalog TMDB.</string>
     <string name="search_mood_exhausted_notice">Anda telah menggunakan 3 pencarian suasana hari ini. Kuota akan diperbarui pada tengah malam!</string>
     <string name="search_mood_exhausted_title">Pencarian AI harian habis</string>
     <string name="search_mood_switch_to_algo">Beralih ke IRISa (tak terbatas)</string>
@@ -2221,7 +2222,7 @@
     <string name="mood_insp_8_prompt">Film kriminal auteur realistis era 70-an</string>
     <string name="mood_guest_dialog_title">Pencarian Suasana</string>
     <string name="mood_guest_dialog_message">Buat akun gratis atau masuk untuk menggunakan pencarian suasana dan menemukan film yang sesuai dengan perasaan Anda.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • PENEMUAN AI</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD AI</string>
     <string name="search_mood_iris_badge">IRIS • EKSPLORASI OPTIK</string>
     <string name="search_mood_iris_analyzing">IRIS sedang memfokuskan lensa pada suasana Anda...</string>
     <string name="search_mood_iris_status_focus">Mengkalibrasi bukaan dan kedalaman bidang...</string>

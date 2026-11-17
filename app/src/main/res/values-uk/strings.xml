@@ -2176,7 +2176,8 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">ШІ • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Опишіть власними словами, що ви хотите подивитися. IRIS підбере ідеальні фільми з усього каталогу TMDB.</string>
+    <string name="search_mood_intro_text">Опишіть власними словами, що ви хотите подивитися. ШІ підбере ідеальні фільми з усього каталогу TMDB.</string>
+    <string name="search_mood_iris_intro_text">Опишіть власними словами, що ви хотите подивитися. IRIS підбере ідеальні фільми з усього каталогу TMDB.</string>
     <string name="search_mood_exhausted_notice">Ви використали всі 3 пошуків за настроєм на сьогодні. Вони відновляться опівночі!</string>
     <string name="search_mood_exhausted_title">Денний ліміт пошуку з ШІ вичерпано</string>
     <string name="search_mood_switch_to_algo">Перейти на IRIS (необмежено)</string>
@@ -2202,7 +2203,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="mood_insp_8_prompt">Авторський кримінальний фільм 70-х років</string>
     <string name="mood_guest_dialog_title">Пошук за настроєм</string>
     <string name="mood_guest_dialog_message">Створіть безкоштовний акаунт або увійдіть, щоб скористатися пошуком за настроєм і знаходити фільми під свої емоції.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • ШІ-ВІДКРИТТЯ</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD ШІ</string>
     <string name="search_mood_iris_badge">IRIS • ОПТИЧНИЙ ПОШУК</string>
     <string name="search_mood_iris_analyzing">IRIS налаштовує оптику під ваш настрій...</string>
     <string name="search_mood_iris_status_focus">Калібрування діафрагми та глибини різкості...</string>

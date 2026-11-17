@@ -517,15 +517,34 @@ fun IrisSearchingHero(
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // IRIS in stato di ricerca attiva (focus hunting)
-            IrisMascot(
-                mood = IrisMood.SEARCHING,
-                size = 64.dp,
-                accentColor = MaterialTheme.colorScheme.primary
-            )
+            if (isMoodAiMode) {
+                // Indicatore AI: sfera con icona Sparkle
+                Box(
+                    modifier = Modifier
+                        .size(52.dp)
+                        .clip(CircleShape)
+                        .background(Color.White.copy(alpha = 0.04f))
+                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                    contentAlignment = Alignment.Center
+                ) {
+                    Icon(
+                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(24.dp)
+                    )
+                }
+            } else {
+                // IRIS in stato di ricerca attiva (focus hunting)
+                IrisMascot(
+                    mood = IrisMood.SEARCHING,
+                    size = 64.dp,
+                    accentColor = MaterialTheme.colorScheme.primary
+                )
+            }
 
             Column(modifier = Modifier.weight(1f)) {
-                // Micro-badge cinematografico IRIS
+                // Micro-badge contestuale
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(6.dp)
@@ -537,7 +556,7 @@ fun IrisSearchingHero(
                             .padding(horizontal = 6.dp, vertical = 2.dp)
                     ) {
                         Text(
-                            text = stringResource(R.string.search_mood_iris_badge),
+                            text = stringResource(if (isMoodAiMode) R.string.search_mood_badge_ai else R.string.search_mood_iris_badge),
                             color = MaterialTheme.colorScheme.primary,
                             style = MaterialTheme.typography.labelSmall.copy(
                                 fontWeight = FontWeight.Bold,
@@ -561,16 +580,10 @@ fun IrisSearchingHero(
 
                 Spacer(modifier = Modifier.height(6.dp))
 
-                // Messaggio ottico rotante
-                AnimatedContent(
-                    targetState = messageIndex,
-                    transitionSpec = {
-                        (fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180)))
-                    },
-                    label = "iris_searching_msg"
-                ) { idx ->
+                // Messaggio in caricamento
+                if (isMoodAiMode) {
                     Text(
-                        text = stringResource(messages[idx]),
+                        text = stringResource(R.string.search_mood_analyzing),
                         color = Color.White,
                         style = MaterialTheme.typography.bodyMedium.copy(
                             fontWeight = FontWeight.SemiBold,
@@ -578,6 +591,24 @@ fun IrisSearchingHero(
                             lineHeight = 18.sp
                         )
                     )
+                } else {
+                    AnimatedContent(
+                        targetState = messageIndex,
+                        transitionSpec = {
+                            (fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180)))
+                        },
+                        label = "iris_searching_msg"
+                    ) { idx ->
+                        Text(
+                            text = stringResource(messages[idx]),
+                            color = Color.White,
+                            style = MaterialTheme.typography.bodyMedium.copy(
+                                fontWeight = FontWeight.SemiBold,
+                                fontSize = 13.5.sp,
+                                lineHeight = 18.sp
+                            )
+                        )
+                    }
                 }
             }
         }
@@ -590,7 +621,8 @@ fun IrisSearchingHero(
 @Composable
 fun IrisEmptyState(
     query: String,
-    modifier: Modifier = Modifier
+    modifier: Modifier = Modifier,
+    isMoodAiMode: Boolean = false
 ) {
     Column(
         modifier = modifier
@@ -599,11 +631,29 @@ fun IrisEmptyState(
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Center
     ) {
-        IrisMascot(
-            mood = IrisMood.EMPTY,
-            size = 80.dp,
-            accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
-        )
+        if (isMoodAiMode) {
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.04f))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.60f),
+                    modifier = Modifier.size(24.dp)
+                )
+            }
+        } else {
+            IrisMascot(
+                mood = IrisMood.EMPTY,
+                size = 80.dp,
+                accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
+            )
+        }
 
         Spacer(modifier = Modifier.height(18.dp))
 

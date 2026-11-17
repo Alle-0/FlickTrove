@@ -2195,7 +2195,8 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">IA • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Décrivez avec vos propres mots ce que vous souhaitez regarder. IRIS trouvera les films idéaux dans tout le catalogue TMDB.</string>
+    <string name="search_mood_intro_text">Décrivez avec vos propres mots ce que vous souhaitez regarder. L\'IA trouvera les films idéaux dans tout le catalogue TMDB.</string>
+    <string name="search_mood_iris_intro_text">Décrivez avec vos propres mots ce que vous souhaitez regarder. IRIS trouvera les films idéaux dans tout le catalogue TMDB.</string>
     <string name="search_mood_exhausted_notice">Vous avez utilisé vos 3 recherches d\'humeur pour aujourd\'hui. Elles se rechargeront à minuit !</string>
     <string name="search_mood_exhausted_title">Recherches IA quotidiennes épuisées</string>
     <string name="search_mood_switch_to_algo">Passer à l\'IRISe (illimité)</string>
@@ -2221,7 +2222,7 @@
     <string name="mood_insp_8_prompt">Polar d\'auteur rugueux des années 70</string>
     <string name="mood_guest_dialog_title">Recherche d\'Humeur</string>
     <string name="mood_guest_dialog_message">Créez un compte gratuit ou connectez-vous pour utiliser la recherche d\'humeur et trouver des films selon vos émotions.</string>
-    <string name="search_mood_iris_badge_ai">IRIS • DÉCOUVERTE IA</string>
+    <string name="search_mood_badge_ai">CINEMA MOOD IA</string>
     <string name="search_mood_iris_badge">IRIS • DÉCOUVERTE OPTIQUE</string>
     <string name="search_mood_iris_analyzing">IRIS fait la mise au point sur votre ambiance...</string>
     <string name="search_mood_iris_status_focus">Calibrage de l\'ouverture et de la profondeur de champ...</string>
