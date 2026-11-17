@@ -75,6 +75,7 @@ fun IrisMascot(
     mood: IrisMood = IrisMood.IDLE,
     size: Dp = 80.dp,
     accentColor: Color = MaterialTheme.colorScheme.primary,
+    gazeBiasX: Float = 0f,
     onClick: (() -> Unit)? = null
 ) {
     val density = LocalDensity.current
@@ -207,14 +208,30 @@ fun IrisMascot(
         label = "iris_gaze_drift"
     )
 
-    // Spostamento fisico verso l'alto dell'intera pupilla/diaframma interno quando l'utente digita
-    val pupilShiftRatio by animateFloatAsState(
+    // Spostamento orizzontale fluido dello sguardo / pupilla
+    val targetPupilShiftX = when (mood) {
+        IrisMood.TYPING -> gazeBiasX.coerceIn(-1f, 1f)
+        IrisMood.IDLE -> gazeDrift * 0.15f
+        else -> 0f
+    }
+
+    val pupilShiftXRatio by animateFloatAsState(
+        targetValue = targetPupilShiftX,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioLowBouncy,
+            stiffness = Spring.StiffnessMediumLow
+        ),
+        label = "iris_pupil_shift_x"
+    )
+
+    // Spostamento verticale fluido verso l'alto quando l'utente digita
+    val pupilShiftYRatio by animateFloatAsState(
         targetValue = if (mood == IrisMood.TYPING) -1f else 0f,
         animationSpec = spring(
             dampingRatio = 0.76f,
             stiffness = Spring.StiffnessMediumLow
         ),
-        label = "iris_pupil_shift"
+        label = "iris_pupil_shift_y"
     )
 
     // Calcolo frazione di apertura effettiva
@@ -229,10 +246,10 @@ fun IrisMascot(
     // L'ammiccamento (wink) forza la chiusura dell'iride verso f/22 (0.05f)
     val effectiveAperture = (baseAperture * (1f - winkAnim.value) + 0.05f * winkAnim.value).coerceIn(0.05f, 0.70f)
 
-    // Angolo di otturazione corrente
+    // Angolo di otturazione corrente con micro-inclinazione direzionale
     val effectiveAngle = when (mood) {
         IrisMood.SEARCHING -> searchingRotation
-        IrisMood.TYPING -> gazeDrift * 3f
+        IrisMood.TYPING -> (pupilShiftXRatio * 6f) + (gazeDrift * 2f)
         IrisMood.IDLE -> gazeDrift * 8f
         IrisMood.EMPTY -> 15f
         IrisMood.DELIGHTED -> 0f
@@ -323,10 +340,11 @@ fun IrisMascot(
                 style = Stroke(width = with(density) { 0.8.dp.toPx() })
             )
 
-            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si spostano fisicamente in alto)
+            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si orientano in 2D seguendo la scrittura)
             val pupilMaxShiftY = barrelInnerR * 0.22f
-            val pupilCenterY = centerY + pupilMaxShiftY * pupilShiftRatio
-            val pupilCenterX = centerX
+            val pupilMaxShiftX = barrelInnerR * 0.20f
+            val pupilCenterY = centerY + pupilMaxShiftY * pupilShiftYRatio
+            val pupilCenterX = centerX + pupilMaxShiftX * pupilShiftXRatio
 
             val outerR = barrelInnerR * 1.35f
             val innerR = (barrelInnerR * effectiveAperture).coerceAtLeast(1.5f)

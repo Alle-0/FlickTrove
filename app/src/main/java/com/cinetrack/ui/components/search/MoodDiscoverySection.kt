@@ -98,10 +98,23 @@ fun MoodDiscoverySection(
             else -> IrisMood.IDLE
         }
 
-        // Mascotte Ottica IRIS con respiro vivace, battito periodico ed entrata elastica
+        // Calcolo dello sguardo orizzontale in base alla posizione di scrittura nella search bar:
+        // A inizio digitazione (1 carattere, a sinistra della barra), guarda in alto a sinistra (~ -0.70f).
+        // Man mano che il testo cresce verso destra, lo sguardo scorre fluidamente fino a +0.70f.
+        val gazeBiasX = remember(query) {
+            if (query.isEmpty()) {
+                0f
+            } else {
+                val progress = ((query.length - 1) / 30f).coerceIn(0f, 1f)
+                -0.70f + (progress * 1.40f)
+            }
+        }
+
+        // Mascotte Ottica IRIS con respiro vivace, battito periodico, entrata elastica e sguardo tracciante
         IrisMascot(
             mood = effectiveMood,
             size = 84.dp,
+            gazeBiasX = gazeBiasX,
             modifier = Modifier.graphicsLayer {
                 val p = enterAnim.value
                 scaleX = (0.78f + 0.22f * p) * pulseScale
@@ -113,7 +126,7 @@ fun MoodDiscoverySection(
 
         Spacer(modifier = Modifier.height(18.dp))
 
-        // Badge ottico IRIS
+        // Badge IRIS: distingue la modalità AI da quella Ottica locale
         Box(
             modifier = Modifier
                 .graphicsLayer {
@@ -126,7 +139,7 @@ fun MoodDiscoverySection(
                 .padding(horizontal = 8.dp, vertical = 3.dp)
         ) {
             Text(
-                text = stringResource(R.string.search_mood_iris_badge),
+                text = stringResource(if (isMoodAiMode) R.string.search_mood_iris_badge_ai else R.string.search_mood_iris_badge),
                 color = MaterialTheme.colorScheme.primary,
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontWeight = FontWeight.Bold,

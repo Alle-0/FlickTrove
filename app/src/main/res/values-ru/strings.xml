@@ -2195,7 +2195,7 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">ИИ • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Опишите своими словами, что вы хотите посмотреть. ИИ найдет идеальные фильмы по всему каталогу TMDB.</string>
+    <string name="search_mood_intro_text">Опишите своими словами, что вы хотите посмотреть. IRIS найдет идеальные фильмы по всему каталогу TMDB.</string>
     <string name="search_mood_exhausted_notice">Вы использовали все 3 поисков по настроению на сегодня. Они обновятся в полночь!</string>
     <string name="search_mood_exhausted_title">Дневной лимит поиска с ИИ исчерпан</string>
     <string name="search_mood_switch_to_algo">Переключить на IRIS (без ограничений)</string>
@@ -2221,6 +2221,7 @@
     <string name="mood_insp_8_prompt">Авторский криминальный фильм 70-х</string>
     <string name="mood_guest_dialog_title">Поиск по настроению</string>
     <string name="mood_guest_dialog_message">Создайте бесплатный аккаунт или войдите, чтобы использовать поиск по настроению и находить фильмы под свои эмоции.</string>
+    <string name="search_mood_iris_badge_ai">IRIS • ИИ-ОТКРЫТИЕ</string>
     <string name="search_mood_iris_badge">IRIS • ОПТИЧЕСКИЙ ПОИСК</string>
     <string name="search_mood_iris_analyzing">IRIS настраивает оптику под ваше настроение...</string>
     <string name="search_mood_iris_status_focus">Калибровка диафрагмы и глубины резкости...</string>

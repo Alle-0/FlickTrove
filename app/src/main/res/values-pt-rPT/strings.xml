@@ -2155,7 +2155,7 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">IA • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Descreva pelas suas próprias palavras o que pretende ver. A IA encontrará os filmes ideais em todo o catálogo TMDB.</string>
+    <string name="search_mood_intro_text">Descreva pelas suas próprias palavras o que pretende ver. O IRIS encontrará os filmes ideais em todo o catálogo TMDB.</string>
     <string name="search_mood_exhausted_notice">Utilizou todas as 3 pesquisas por ambiente de hoje. Serão repostas à meia-noite!</string>
     <string name="search_mood_exhausted_title">Pesquisas diárias de IA esgotadas</string>
     <string name="search_mood_switch_to_algo">Mudar para IRIS (ilimitado)</string>
@@ -2181,6 +2181,7 @@
     <string name="mood_insp_8_prompt">Policial de autor cru dos anos 70</string>
     <string name="mood_guest_dialog_title">Pesquisa por Ambiente</string>
     <string name="mood_guest_dialog_message">Crie uma conta gratuita ou inicie sessão para usar a pesquisa por ambiente e descobrir filmes à medida das suas emoções.</string>
+    <string name="search_mood_iris_badge_ai">IRIS • DESCOBERTA IA</string>
     <string name="search_mood_iris_badge">IRIS • DESCOBERTA ÓPTICA</string>
     <string name="search_mood_iris_analyzing">IRIS está a focar a lente na sua atmosfera...</string>
     <string name="search_mood_iris_status_focus">A calibrar abertura e profundidade de campo...</string>

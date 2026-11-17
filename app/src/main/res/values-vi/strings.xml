@@ -2156,7 +2156,7 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Mô tả bằng từ ngữ của bạn những gì bạn muốn xem. AI sẽ tìm những bộ phim lý tưởng trên toàn bộ danh mục TMDB.</string>
+    <string name="search_mood_intro_text">Mô tả bằng từ ngữ của bạn những gì bạn muốn xem. IRIS sẽ tìm những bộ phim lý tưởng trên toàn bộ danh mục TMDB.</string>
     <string name="search_mood_exhausted_notice">Bạn đã dùng hết 3 lượt tìm kiếm theo tâm trạng hôm nay. Lượt tìm kiếm sẽ được làm mới vào nửa đêm!</string>
     <string name="search_mood_exhausted_title">Đã dùng hết lượt tìm kiếm AI hôm nay</string>
     <string name="search_mood_switch_to_algo">Chuyển sang IRIS (không giới hạn)</string>
@@ -2182,6 +2182,7 @@
     <string name="mood_insp_8_prompt">Phim tội phạm tác giả chân thực thập niên 70</string>
     <string name="mood_guest_dialog_title">Tìm kiếm theo tâm trạng</string>
     <string name="mood_guest_dialog_message">Tạo tài khoản miễn phí hoặc đăng nhập để sử dụng tính năng tìm kiếm theo tâm trạng và khám phá những bộ phim phù hợp với cảm xúc của bạn.</string>
+    <string name="search_mood_iris_badge_ai">IRIS • KHÁM PHÁ AI</string>
     <string name="search_mood_iris_badge">IRIS • KHÁM PHÁ QUANG HỌC</string>
     <string name="search_mood_iris_analyzing">IRIS đang lấy nét ống kính theo cảm xúc của bạn...</string>
     <string name="search_mood_iris_status_focus">Đang hiệu chỉnh khẩu độ và độ sâu trường ảnh...</string>

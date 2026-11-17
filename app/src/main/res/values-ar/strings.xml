@@ -2153,7 +2153,7 @@
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">صِف بكلماتك الخاصة ما ترغب في مشاهدته. سيعثر الذكاء الاصطناعي على الأفلام المثالية عبر كتالوج TMDB بالكامل.</string>
+    <string name="search_mood_intro_text">صِف بكلماتك الخاصة ما ترغب في مشاهدته. سيعثر IRIS على الأفلام المثالية عبر كتالوج TMDB بالكامل.</string>
     <string name="search_mood_exhausted_notice">لقد استنفدت عمليات البحث الثلاث لهذا اليوم. ستتجدد عند منتصف الليل!</string>
     <string name="search_mood_exhausted_title">استنفدت عمليات بحث الذكاء الاصطناعي اليومية</string>
     <string name="search_mood_switch_to_algo">التبديل إلى IRIS (غير محدود)</string>
@@ -2179,6 +2179,7 @@
     <string name="mood_insp_8_prompt">فيلم جريمة بوليسي كلاسيكي من السبعينيات</string>
     <string name="mood_guest_dialog_title">البحث حسب المزاج</string>
     <string name="mood_guest_dialog_message">أنشئ حساباً مجانياً أو سجّل الدخول لاستخدام البحث حسب المزاج واكتشاف أفلام تناسب مشاعرك.</string>
+    <string name="search_mood_iris_badge_ai">IRIS • اكتشاف الذكاء الاصطناعي</string>
     <string name="search_mood_iris_badge">IRIS • استكشاف بصري</string>
     <string name="search_mood_iris_analyzing">يقوم IRIS بضبط تركيز العدسة على أجواءك...</string>
     <string name="search_mood_iris_status_focus">معايرة فتحة العدسة وعمق المجال...</string>

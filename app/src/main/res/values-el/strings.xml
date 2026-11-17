@@ -2178,7 +2178,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="search_mood_mode_local">IRIS</string>
     <string name="search_mood_mode_ai_tab">AI • %1$d</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
-    <string name="search_mood_intro_text">Περιγράψτε με δικά σας λόγια τι θέλετε να παρακολουθήσετε. Το AI θα βρει τις ιδανικές ταινίες σε ολόκληρο τον κατάλογο του TMDB.</string>
+    <string name="search_mood_intro_text">Περιγράψτε με δικά σας λόγια τι θέλετε να παρακολουθήσετε. Το IRIS θα βρει τις ιδανικές ταινίες σε ολόκληρο τον κατάλογο του TMDB.</string>
     <string name="search_mood_exhausted_notice">Χρησιμοποιήσατε και τις 3 αναζητήσεις διάθεσης για σήμερα. Θα ανανεωθούν τα μεσάνυχτα!</string>
     <string name="search_mood_exhausted_title">Εξαντλήθηκαν οι ημερήσιες αναζητήσεις AI</string>
     <string name="search_mood_switch_to_algo">Μετάβαση σε IRIS (απεριόριστο)</string>
@@ -2204,6 +2204,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="mood_insp_8_prompt">Ρεαλιστικό αστυνομικό έργο της δεκαετίας του 70</string>
     <string name="mood_guest_dialog_title">Αναζήτηση Διάθεσης</string>
     <string name="mood_guest_dialog_message">Δημιουργήστε δωρεάν λογαριασμό ή συνδεθείτε για να χρησιμοποιήσετε την αναζήτηση διάθεσης και να βρείτε ταινίες προσαρμοσμένες στα συναισθήματά σας.</string>
+    <string name="search_mood_iris_badge_ai">IRIS • ΑΝΑΚΑΛΥΨΗ AI</string>
     <string name="search_mood_iris_badge">IRIS • ΟΠΤΙΚΗ ΑΝΑΚΑΛΥΨΗ</string>
     <string name="search_mood_iris_analyzing">Το IRIS εστιάζει τον φακό στη διάθεσή σας...</string>
     <string name="search_mood_iris_status_focus">Βαθμονόμηση διαφράγματος και βάθους πεδίου...</string>
