@@ -477,9 +477,9 @@ fun IrisMascot(
 }
 
 /**
- * Hero Card elegante mostrata durante la ricerca Mood in corso.
- * Presenta IRIS al lavoro (fase di messa a fuoco ottica del catalogo)
- * con messaggi cinematici rotanti e la query dell'utente.
+ * Indicatore essenziale mostrato durante la ricerca Mood in corso:
+ * invece di una card pesante ("malloppone"), IRIS (o lo Sparkle AI) si posiziona
+ * semplicemente in alto al centro mentre ruota / esegue il focus hunting.
  */
 @Composable
 fun IrisSearchingHero(
@@ -487,130 +487,36 @@ fun IrisSearchingHero(
     modifier: Modifier = Modifier,
     isMoodAiMode: Boolean = true
 ) {
-    val messages = remember {
-        listOf(
-            R.string.search_mood_iris_analyzing,
-            R.string.search_mood_iris_status_focus,
-            R.string.search_mood_iris_status_scanning
-        )
-    }
-
-    var messageIndex by remember { mutableIntStateOf(0) }
-
-    LaunchedEffect(Unit) {
-        while (true) {
-            delay(2400)
-            messageIndex = (messageIndex + 1) % messages.size
-        }
-    }
-
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .clip(RoundedCornerShape(24.dp))
-            .background(Color.White.copy(alpha = 0.04f))
-            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.25f), RoundedCornerShape(24.dp))
-            .padding(16.dp)
+            .padding(top = 20.dp, bottom = 16.dp),
+        contentAlignment = Alignment.Center
     ) {
-        Row(
-            modifier = Modifier.fillMaxWidth(),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(16.dp)
-        ) {
-            if (isMoodAiMode) {
-                // Indicatore AI: sfera con icona Sparkle
-                Box(
-                    modifier = Modifier
-                        .size(52.dp)
-                        .clip(CircleShape)
-                        .background(Color.White.copy(alpha = 0.04f))
-                        .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-                        contentDescription = null,
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(24.dp)
-                    )
-                }
-            } else {
-                // IRIS in stato di ricerca attiva (focus hunting)
-                IrisMascot(
-                    mood = IrisMood.SEARCHING,
-                    size = 64.dp,
-                    accentColor = MaterialTheme.colorScheme.primary
+        if (isMoodAiMode) {
+            // Indicatore AI: sfera con icona Sparkle
+            Box(
+                modifier = Modifier
+                    .size(56.dp)
+                    .clip(CircleShape)
+                    .background(Color.White.copy(alpha = 0.04f))
+                    .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.35f), CircleShape),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
                 )
             }
-
-            Column(modifier = Modifier.weight(1f)) {
-                // Micro-badge contestuale
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(6.dp)
-                ) {
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.15f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = stringResource(if (isMoodAiMode) R.string.search_mood_badge_ai else R.string.search_mood_iris_badge),
-                            color = MaterialTheme.colorScheme.primary,
-                            style = MaterialTheme.typography.labelSmall.copy(
-                                fontWeight = FontWeight.Bold,
-                                fontSize = 9.sp,
-                                letterSpacing = 0.6.sp
-                            )
-                        )
-                    }
-
-                    if (query.isNotBlank()) {
-                        Text(
-                            text = "“$query”",
-                            color = Color.White.copy(alpha = 0.50f),
-                            style = MaterialTheme.typography.labelSmall,
-                            fontSize = 11.sp,
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
-                }
-
-                Spacer(modifier = Modifier.height(6.dp))
-
-                // Messaggio in caricamento
-                if (isMoodAiMode) {
-                    Text(
-                        text = stringResource(R.string.search_mood_analyzing),
-                        color = Color.White,
-                        style = MaterialTheme.typography.bodyMedium.copy(
-                            fontWeight = FontWeight.SemiBold,
-                            fontSize = 13.5.sp,
-                            lineHeight = 18.sp
-                        )
-                    )
-                } else {
-                    AnimatedContent(
-                        targetState = messageIndex,
-                        transitionSpec = {
-                            (fadeIn(animationSpec = tween(220)) togetherWith fadeOut(animationSpec = tween(180)))
-                        },
-                        label = "iris_searching_msg"
-                    ) { idx ->
-                        Text(
-                            text = stringResource(messages[idx]),
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium.copy(
-                                fontWeight = FontWeight.SemiBold,
-                                fontSize = 13.5.sp,
-                                lineHeight = 18.sp
-                            )
-                        )
-                    }
-                }
-            }
+        } else {
+            // IRIS pura in alto al centro mentre ruota le lamelle ed esegue il focus hunting
+            IrisMascot(
+                mood = IrisMood.SEARCHING,
+                size = 72.dp,
+                accentColor = MaterialTheme.colorScheme.primary
+            )
         }
     }
 }
