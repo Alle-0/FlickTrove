@@ -2236,4 +2236,8 @@
     <string name="search_mood_iris_status_scanning">Skannataan elokuva-arkiston koordinaatteja...</string>
     <string name="search_mood_iris_no_results">Ei elokuvia tarkennettuna tähän rajaukseen</string>
     <string name="search_mood_iris_no_results_desc">Kokeile laajentaa rajausta tai kuvailla tunnelmaa toisin sanoin.</string>
+    <string name="badge_iris_search_title">Mekaaninen silmä</string>
+    <string name="badge_iris_search_cat">TUNNELMAN LÖYTÖRETKI</string>
+    <string name="badge_iris_search_desc">Otit näkemyksen vastaan: lisäsit katselulistallesi elokuvan, joka löydettiin IRISillä tai tekoälyllä.</string>
+    <string name="trophy_unit_searches">hakua</string>
 </resources>

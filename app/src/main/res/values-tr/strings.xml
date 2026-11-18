@@ -2230,4 +2230,8 @@
     <string name="search_mood_iris_status_scanning">Sinema arşivi koordinatları taranıyor...</string>
     <string name="search_mood_iris_no_results">Bu kare için odakta film yok</string>
     <string name="search_mood_iris_no_results_desc">Kareyi genişletmeyi veya atmosferi farklı detaylarla açıklamayı deneyin.</string>
+    <string name="badge_iris_search_title">Mekanik Göz</string>
+    <string name="badge_iris_search_cat">RUH HALİ KEŞFİ</string>
+    <string name="badge_iris_search_desc">Vizyonu kucakladınız: IRIS veya Yapay Zeka ile keşfedilen bir filmi izleme listenize eklediniz.</string>
+    <string name="trophy_unit_searches">arama</string>
 </resources>

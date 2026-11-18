@@ -1,0 +1,20 @@
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="24dp"
+    android:height="24dp"
+    android:viewportWidth="512"
+    android:viewportHeight="512">
+    <!-- Outer lens barrel rim -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="24"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 256,43 A 213,213 0 1,0 256,469 A 213,213 0 1,0 256,43 Z" />
+    <!-- 6 mechanical aperture blades (Iris) -->
+    <path
+        android:strokeColor="#FFFFFFFF"
+        android:strokeWidth="22"
+        android:strokeLineCap="round"
+        android:strokeLineJoin="round"
+        android:pathData="M 305.28,170.67 L 427.73,382.72 M 206.72,170.67 L 451.63,170.67 M 157.44,256.00 L 279.89,43.95 M 206.72,341.33 L 84.27,129.28 M 305.28,341.33 L 60.37,341.33 M 354.56,256.00 L 232.11,468.05" />
+</vector>

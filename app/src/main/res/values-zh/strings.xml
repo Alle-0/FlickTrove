@@ -2230,4 +2230,8 @@
     <string name="search_mood_iris_status_scanning">正在掃描電影檔案座標...</string>
     <string name="search_mood_iris_no_results">目前沒有與此構圖對焦的電影</string>
     <string name="search_mood_iris_no_results_desc">嘗試擴大取景範圍，或用其他電影細節描述這種氛圍。</string>
+    <string name="badge_iris_search_title">机械之眼</string>
+    <string name="badge_iris_search_cat">情绪探索</string>
+    <string name="badge_iris_search_desc">捕捉电影灵感：将通过 IRIS 或 AI 发现的电影添加到了待看列表中。</string>
+    <string name="trophy_unit_searches">次搜索</string>
 </resources>

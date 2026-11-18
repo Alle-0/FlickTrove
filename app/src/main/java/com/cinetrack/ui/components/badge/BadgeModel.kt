@@ -140,6 +140,7 @@ enum class CustomBadgeIconKind(@DrawableRes val iconRes: Int) {
     SHORT_FILMS(R.drawable.ic_badge_short_films),
     TROPHY_HUNTER(R.drawable.ic_badge_trophy_hunter),
     CO_DIRECTOR(R.drawable.ic_badge_co_director),
+    MECHANICAL_EYE(R.drawable.ic_badge_mechanical_eye),
 
     // Alias per retrocompatibilità
     DOUBLE_TICKET(R.drawable.ic_badge_ticket),
@@ -270,6 +271,7 @@ fun getBadgeTitleRes(badgeId: String): Int = when (badgeId) {
     "badge_short_films" -> R.string.badge_short_films_title
     "badge_trophy_hunter" -> R.string.badge_trophy_hunter_title
     "badge_co_director" -> R.string.badge_co_director_title
+    "badge_iris_search" -> R.string.badge_iris_search_title
     else -> 0
 }
 
@@ -352,6 +354,7 @@ fun getBadgeCategoryRes(badgeId: String): Int = when (badgeId) {
     "badge_short_films" -> R.string.badge_short_films_cat
     "badge_trophy_hunter" -> R.string.badge_trophy_hunter_cat
     "badge_co_director" -> R.string.badge_co_director_cat
+    "badge_iris_search" -> R.string.badge_iris_search_cat
     else -> 0
 }
 
@@ -434,6 +437,7 @@ fun getBadgeDescriptionRes(badgeId: String): Int = when (badgeId) {
     "badge_short_films" -> R.string.badge_short_films_desc
     "badge_trophy_hunter" -> R.string.badge_trophy_hunter_desc
     "badge_co_director" -> R.string.badge_co_director_desc
+    "badge_iris_search" -> R.string.badge_iris_search_desc
     else -> 0
 }
 
@@ -477,6 +481,7 @@ fun getProgressUnitRes(unit: String): Int? = when (unit.lowercase().trim()) {
     "elementi", "elements", "items" -> R.string.trophy_unit_items
     "check-in", "checkins", "check-ins" -> R.string.trophy_unit_checkins
     "doc", "documentari", "documentaries" -> R.string.trophy_unit_movies
+    "ricerche", "searches" -> R.string.trophy_unit_searches
     "trofei", "trofeo", "trophies", "trophy" -> R.string.trophy_unit_trophies
     else -> null
 }

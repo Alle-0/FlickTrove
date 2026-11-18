@@ -2210,4 +2210,8 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="search_mood_iris_status_scanning">Сканування координат кіноархіву...</string>
     <string name="search_mood_iris_no_results">Немає фільмів у фокусі для цього кадру</string>
     <string name="search_mood_iris_no_results_desc">Спробуйте розширити кадр або описати атмосферу іншими словами.</string>
+    <string name="badge_iris_search_title">Механічне око</string>
+    <string name="badge_iris_search_cat">ПОШУК ЗА НАСТРОЄМ</string>
+    <string name="badge_iris_search_desc">Ви довірилися баченню: додали до списку до перегляду фільм, знайдений за допомогою IRIS або ШІ.</string>
+    <string name="trophy_unit_searches">пошуків</string>
 </resources>

@@ -2190,4 +2190,8 @@
     <string name="search_mood_iris_status_scanning">Bioscooparchiefcoördinaten scannen...</string>
     <string name="search_mood_iris_no_results">Geen film scherpgesteld voor dit beeld</string>
     <string name="search_mood_iris_no_results_desc">Probeer het beeld te verbreden of beschrijf de sfeer met andere details.</string>
+    <string name="badge_iris_search_title">Het mechanische oog</string>
+    <string name="badge_iris_search_cat">STEMMINGSONTDEKKING</string>
+    <string name="badge_iris_search_desc">Je omarmde de visie: voegde een film die ontdekt werd met IRIS of AI toe aan je kijklijst.</string>
+    <string name="trophy_unit_searches">zoekopdrachten</string>
 </resources>

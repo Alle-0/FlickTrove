@@ -2227,4 +2227,8 @@
     <string name="search_mood_iris_status_scanning">सिनेमा पुरालेख निर्देशांक स्कैन हो रहे हैं...</string>
     <string name="search_mood_iris_no_results">इस फ्रेम के लिए कोई फिल्म फोकस में नहीं है</string>
     <string name="search_mood_iris_no_results_desc">फ्रेम को चौड़ा करने का प्रयास करें या अन्य विवरणों के साथ वाइब का वर्णन करें।</string>
+    <string name="badge_iris_search_title">मैकेनिकल आई</string>
+    <string name="badge_iris_search_cat">मूड खोज</string>
+    <string name="badge_iris_search_desc">आपने दृष्टि को अपनाया: IRIS या AI द्वारा खोजी गई फिल्म को अपनी वॉचलिस्ट में जोड़ा।</string>
+    <string name="trophy_unit_searches">खोजें</string>
 </resources>

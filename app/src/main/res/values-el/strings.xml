@@ -2212,4 +2212,8 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="search_mood_iris_status_scanning">Σάρωση συντεταγμένων κινηματογραφικού αρχείου...</string>
     <string name="search_mood_iris_no_results">Καμία ταινία εστιασμένη για αυτό το κάδρο</string>
     <string name="search_mood_iris_no_results_desc">Δοκιμάστε να ανοίξετε το κάδρο ή να περιγράψετε την ατμόσφαιρα με άλλες λεπτομέρειες.</string>
+    <string name="badge_iris_search_title">Το Μηχανικό Μάτι</string>
+    <string name="badge_iris_search_cat">ΑΝΑΚΑΛΥΨΗ ΔΙΑΘΕΣΗΣ</string>
+    <string name="badge_iris_search_desc">Αγκαλιάσατε το όραμα: προσθέσατε στη λίστα παρακολούθησης μια ταινία που ανακαλύφθηκε με το IRIS ή την AI.</string>
+    <string name="trophy_unit_searches">αναζητήσεις</string>
 </resources>

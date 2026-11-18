@@ -1,7 +1,7 @@
 package com.cinetrack.ui.components.badge
 
 /**
- * Catalogo ufficiale e veritiero dei 52 trofei di FlickTrove.
+ * Catalogo ufficiale e veritiero dei 53 trofei di FlickTrove.
  * Ogni elemento parte nello stato originario da conquistare (progressCurrent = 0, isUnlocked = false).
  * Lo stato effettivo dell'utente viene sincronizzato in tempo reale da Room (BadgeRepository).
  */
@@ -1198,7 +1198,27 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
         unlockedDate = null
     ),
 
-    // 52. Meta Trofeo - Il Cacciatore di Trofei
+    // 52. L'Occhio Meccanico (Film da IRIS o IA in Watchlist)
+    TrophyRoomItemUi(
+        badge = PreviewBadgeItem(
+            id = "badge_iris_search",
+            title = "L'Occhio Meccanico",
+            category = BadgeTypeCategory.SPECIAL_ACHIEVEMENT,
+            fixedTier = PreviewBadgeTier.MM_35,
+            iconKind = CustomBadgeIconKind.MECHANICAL_EYE,
+            categoryLabel = "SCOPERTA MOOD",
+            defaultDescription = "Hai accolto la visione: hai aggiunto alla tua watchlist un film scoperto con IRIS o IA.",
+            progressCurrent = 0,
+            progressTarget = 1,
+            progressUnit = "film",
+            rarityPercent = "5.4%"
+        ),
+        currentTier = PreviewBadgeTier.MM_35,
+        isUnlocked = false,
+        unlockedDate = null
+    ),
+
+    // 53. Meta Trofeo - Il Cacciatore di Trofei
     TrophyRoomItemUi(
         badge = PreviewBadgeItem(
             id = "badge_trophy_hunter",
@@ -1213,7 +1233,7 @@ val OFFICIAL_TROPHY_ROOM_CATALOG = listOf(
                 PreviewBadgeTier.SUPER_8 to ProgressiveTierDetail(PreviewBadgeTier.SUPER_8, 10, "Hai sbloccato i tuoi primi 10 trofei.", "10 trofei"),
                 PreviewBadgeTier.MM_16 to ProgressiveTierDetail(PreviewBadgeTier.MM_16, 20, "20 trofei conquistati. La tua bacheca risplende.", "20 trofei"),
                 PreviewBadgeTier.MM_35 to ProgressiveTierDetail(PreviewBadgeTier.MM_35, 35, "35 trofei nella sala d'onore. Un vero maestro del cinema.", "35 trofei"),
-                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 51, "51 trofei completati. La Sala dei Trofei è al suo apice leggendario.", "51 trofei")
+                PreviewBadgeTier.MM_70 to ProgressiveTierDetail(PreviewBadgeTier.MM_70, 52, "52 trofei completati. La Sala dei Trofei è al suo apice leggendario.", "52 trofei")
             ),
             progressCurrent = 0,
             progressTarget = 10,

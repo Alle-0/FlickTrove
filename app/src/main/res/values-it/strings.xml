@@ -2234,4 +2234,8 @@
     <string name="search_mood_iris_status_scanning">Scansione coordinate dell\'archivio cinema...</string>
     <string name="search_mood_iris_no_results">Nessuna pellicola a fuoco per questa inquadratura</string>
     <string name="search_mood_iris_no_results_desc">Prova ad allargare l\'inquadratura o a descrivere l\'atmosfera con altre sfumature.</string>
+    <string name="badge_iris_search_title">L\'Occhio Meccanico</string>
+    <string name="badge_iris_search_cat">SCOPERTA MOOD</string>
+    <string name="badge_iris_search_desc">Hai accolto la visione: hai aggiunto alla tua watchlist un film scoperto con IRIS o IA.</string>
+    <string name="trophy_unit_searches">ricerche</string>
 </resources>

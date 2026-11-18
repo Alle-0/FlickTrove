@@ -104,7 +104,7 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
     </td>
     <td width="50%" valign="top">
       <h3>🏛️ Trophy Room Gamification</h3>
-      <strong>52 unique achievements</strong> across historical film stock formats (<em>Super 8</em>, <em>16mm</em>, <em>35mm</em>, <em>70mm</em>, <em>The Final Cut</em>) plus 12 secret <em>Lost Reels</em>. 100% offline-first async evaluation, real-time floating unlock banners, and global community rarity stats.
+      <strong>53 unique achievements</strong> across historical film stock formats (<em>Super 8</em>, <em>16mm</em>, <em>35mm</em>, <em>70mm</em>, <em>The Final Cut</em>) plus 12 secret <em>Lost Reels</em>. 100% offline-first async evaluation, real-time floating unlock banners, and global community rarity stats.
     </td>
   </tr>
   <tr>
@@ -240,7 +240,7 @@ flowchart LR
 - **Compose-Native Routing**: Navigation is orchestrated by **Voyager** (tab + stack navigator) with transition animations and state preservation.
 - **Parallel Aggregation**: The Home Feed relies on `GetHomeFeedUseCase` firing TMDB and user database calls in parallel via coroutines, ensuring sub-second rendering.
 - **Taste Matrix Engine**: Multi-vector recommendation engine (`CalculateMatchScoreUseCase`) balancing genre affinity vectors, zero-allocation 64-bit micro-clustering, recency half-life decay, Bayesian TMDB quality smoothing, and bilingual keyword semantics.
-- **Offline-First Room SSOT**: Local Room DB acts as the immutable Single Source of Truth for watch states, custom folders, and 52 achievements.
+- **Offline-First Room SSOT**: Local Room DB acts as the immutable Single Source of Truth for watch states, custom folders, and 53 achievements.
 - **Resilient Cloud Sync**: Background synchronization with cloud backends (Firebase Firestore, Trakt.tv, and SIMKL) is powered by Android **WorkManager** with exponential backoff, rate-limit safety, and automatic OAuth2 token refreshing.
 - **Glassmorphic Render Hierarchy**: Custom `Haze` state architecture ensuring zero recursive self-blur feedback loops and 60/120 FPS buttery rendering.
 

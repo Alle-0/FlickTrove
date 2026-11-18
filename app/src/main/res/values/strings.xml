@@ -2235,4 +2235,8 @@
     <string name="search_mood_iris_status_scanning">Scanning cinema archive coordinates...</string>
     <string name="search_mood_iris_no_results">No films in focus for this frame</string>
     <string name="search_mood_iris_no_results_desc">Try widening the lens or describing the vibe with different cinematic details.</string>
+    <string name="badge_iris_search_title">The Mechanical Eye</string>
+    <string name="badge_iris_search_cat">MOOD DISCOVERY</string>
+    <string name="badge_iris_search_desc">You embraced the vision: added a movie discovered with IRIS or AI to your watchlist.</string>
+    <string name="trophy_unit_searches">searches</string>
 </resources>

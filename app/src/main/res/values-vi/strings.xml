@@ -2190,4 +2190,8 @@
     <string name="search_mood_iris_status_scanning">Đang quét tọa độ lưu trữ phim ảnh...</string>
     <string name="search_mood_iris_no_results">Không có bộ phim nào trong tiêu điểm khung hình này</string>
     <string name="search_mood_iris_no_results_desc">Hãy thử mở rộng góc quay hoặc mô tả cảm xúc bằng những chi tiết điện ảnh khác.</string>
+    <string name="badge_iris_search_title">Mắt cơ học</string>
+    <string name="badge_iris_search_cat">KHÁM PHÁ THEO TÂM TRẠNG</string>
+    <string name="badge_iris_search_desc">Bạn đã đón nhận tầm nhìn: thêm một bộ phim được khám phá bằng IRIS hoặc AI vào danh sách theo dõi.</string>
+    <string name="trophy_unit_searches">tìm kiếm</string>
 </resources>

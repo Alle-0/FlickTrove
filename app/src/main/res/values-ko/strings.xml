@@ -2230,4 +2230,8 @@
     <string name="search_mood_iris_status_scanning">영화 아카이브 좌표 스캔 중...</string>
     <string name="search_mood_iris_no_results">이 프레임에 초점이 맞는 영화가 없습니다</string>
     <string name="search_mood_iris_no_results_desc">프레임을 넓히거나 다른 분위기의 키워드로 설명해 보세요.</string>
+    <string name="badge_iris_search_title">기계의 눈</string>
+    <string name="badge_iris_search_cat">무드 탐색</string>
+    <string name="badge_iris_search_desc">시각을 넓혔습니다: IRIS나 AI로 발견한 영화를 보고 싶은 목록에 추가했습니다。</string>
+    <string name="trophy_unit_searches">회 검색</string>
 </resources>

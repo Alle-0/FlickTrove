@@ -345,9 +345,11 @@ object NetworkModule {
                 }
             } else null
             val authHeader = if (!token.isNullOrEmpty()) "Bearer $token" else "Bearer $anonKey"
+            val userTimezone = try { java.time.ZoneId.systemDefault().id } catch (_: Exception) { "UTC" }
             val request = original.newBuilder()
                 .header("apikey", anonKey)
                 .header("Authorization", authHeader)
+                .header("x-user-timezone", userTimezone)
                 .build()
             val response = chain.proceed(request)
             if (response.code == 401 && !token.isNullOrEmpty()) {
@@ -355,6 +357,7 @@ object NetworkModule {
                 val fallbackRequest = original.newBuilder()
                     .header("apikey", anonKey)
                     .header("Authorization", "Bearer $anonKey")
+                    .header("x-user-timezone", userTimezone)
                     .build()
                 chain.proceed(fallbackRequest)
             } else {

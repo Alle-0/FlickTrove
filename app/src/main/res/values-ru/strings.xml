@@ -2229,4 +2229,8 @@
     <string name="search_mood_iris_status_scanning">Сканирование координат киноархива...</string>
     <string name="search_mood_iris_no_results">Нет фильмов в фокусе для этого кадра</string>
     <string name="search_mood_iris_no_results_desc">Попробуйте расширить кадр или описать атмосферу другими словами.</string>
+    <string name="badge_iris_search_title">Механический глаз</string>
+    <string name="badge_iris_search_cat">ПОИСК ПО НАСТРОЕНИЮ</string>
+    <string name="badge_iris_search_desc">Вы доверились чутью: добавили в список к просмотру фильм, найденный с помощью IRIS или ИИ.</string>
+    <string name="trophy_unit_searches">поисков</string>
 </resources>

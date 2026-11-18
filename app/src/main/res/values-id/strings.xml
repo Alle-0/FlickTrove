@@ -2229,4 +2229,8 @@
     <string name="search_mood_iris_status_scanning">Memindai koordinat arsip sinema...</string>
     <string name="search_mood_iris_no_results">Tidak ada film yang fokus untuk bingkai ini</string>
     <string name="search_mood_iris_no_results_desc">Coba perluas bingkai atau deskripsikan suasana dengan detail sinematik lain.</string>
+    <string name="badge_iris_search_title">Mata Mekanis</string>
+    <string name="badge_iris_search_cat">PENEMUAN MOOD</string>
+    <string name="badge_iris_search_desc">Anda menyambut visi: menambahkan film yang ditemukan dengan IRIS atau AI ke daftar pantauan Anda.</string>
+    <string name="trophy_unit_searches">pencarian</string>
 </resources>

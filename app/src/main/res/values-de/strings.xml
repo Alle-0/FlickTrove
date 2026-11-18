@@ -2232,4 +2232,8 @@
     <string name="search_mood_iris_status_scanning">Scanne Koordinaten des Filmarchivs...</string>
     <string name="search_mood_iris_no_results">Kein Film für diesen Bildausschnitt im Fokus</string>
     <string name="search_mood_iris_no_results_desc">Versuche, den Bildausschnitt zu erweitern oder die Stimmung anders zu beschreiben.</string>
+    <string name="badge_iris_search_title">Das mechanische Auge</string>
+    <string name="badge_iris_search_cat">STIMMUNGS-ENTDECKUNG</string>
+    <string name="badge_iris_search_desc">Du hast die Vision angenommen: Einen mit IRIS oder KI entdeckten Film zu deiner Merkliste hinzugefügt.</string>
+    <string name="trophy_unit_searches">Suchen</string>
 </resources>

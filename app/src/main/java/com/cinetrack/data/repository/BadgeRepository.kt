@@ -173,6 +173,7 @@ class BadgeRepository @Inject constructor(
             .remove("supporter_verified_uid")
             .remove("supporter_verified_email")
             .remove("supporter_credit_name")
+            .remove("mood_discovered_movie_ids")
             .apply()
         _trophyNotificationsTrigger.value++
     }
@@ -251,6 +252,16 @@ class BadgeRepository @Inject constructor(
         val currentSet = badgePrefs.getStringSet("surprise_me_discovered_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
         if (currentSet.add(movieId.toString())) {
             badgePrefs.edit().putStringSet("surprise_me_discovered_ids", currentSet).apply()
+            evaluateBadgesAsync()
+        }
+    }
+
+    fun recordMoodMoviesDiscovered(movieIds: List<Long>) {
+        if (movieIds.isEmpty()) return
+        val currentSet = badgePrefs.getStringSet("mood_discovered_movie_ids", emptySet())?.toMutableSet() ?: mutableSetOf()
+        val stringIds = movieIds.map { it.toString() }
+        if (currentSet.addAll(stringIds)) {
+            badgePrefs.edit().putStringSet("mood_discovered_movie_ids", currentSet).apply()
             evaluateBadgesAsync()
         }
     }

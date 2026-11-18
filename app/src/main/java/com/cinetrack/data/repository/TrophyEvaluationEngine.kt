@@ -262,6 +262,15 @@ class TrophyEvaluationEngine @Inject constructor(
                 if (m != null) listOf(m) else emptyList()
             }
 
+            // 52. L'Occhio Meccanico: Film scoperto con IRIS o IA aggiunto alla watchlist
+            "badge_iris_search" -> {
+                val moodDiscoveredIds = getMoodDiscoveredIds()
+                val m = allMovies.firstOrNull { movie ->
+                    (movie.favorite || movie.reminder) && moodDiscoveredIds.contains(movie.id.toString())
+                }
+                if (m != null) listOf(m) else emptyList()
+            }
+
             else -> emptyList()
         }
     }
@@ -940,7 +949,22 @@ class TrophyEvaluationEngine @Inject constructor(
                 )
             }
 
-            // 52. Meta Trofeo: Il Cacciatore di Trofei (avanza con lo sblocco degli altri trofei)
+            // 52. L'Occhio Meccanico: Aggiungi alla watchlist un film scoperto con IRIS o IA
+            "badge_iris_search" -> {
+                val moodDiscoveredIds = getMoodDiscoveredIds()
+                val isAddedToWatchlist = allMovies.any { movie ->
+                    (movie.favorite || movie.reminder) && moodDiscoveredIds.contains(movie.id.toString())
+                } || (prevEntity?.isUnlocked == true)
+
+                TrophyEvaluationResult(
+                    currentProgress = if (isAddedToWatchlist) 1 else 0,
+                    targetThreshold = 1,
+                    activeTier = PreviewBadgeTier.MM_35,
+                    isUnlocked = isAddedToWatchlist
+                )
+            }
+
+            // 53. Meta Trofeo: Il Cacciatore di Trofei (avanza con lo sblocco degli altri trofei)
             "badge_trophy_hunter" -> {
                 val curr = prevEntity?.progressCurrent ?: 0
                 calculateProgressiveTiers(curr, badge.progressiveSteps)
@@ -1049,4 +1073,23 @@ class TrophyEvaluationEngine @Inject constructor(
         return com.cinetrack.util.DateTimeUtils.parseIsoDateToMillis(dateStr)
     }
 
+    private fun getMoodDiscoveredIds(): Set<String> {
+        val direct = badgePrefs.getStringSet("mood_discovered_movie_ids", emptySet()) ?: emptySet()
+        if (direct.isNotEmpty()) return direct
+
+        // Retroactive fallback: se non ancora popolato, prova a leggere dalla cronologia di ricerca mood
+        try {
+            val moodPrefs = context.getSharedPreferences("mood_history_prefs", Context.MODE_PRIVATE)
+            val raw = moodPrefs.getString("mood_history_json", null)
+            if (!raw.isNullOrBlank()) {
+                val idRegex = Regex("\"id\":\\s*(\\d+)")
+                val found = idRegex.findAll(raw).map { it.groupValues[1] }.toSet()
+                if (found.isNotEmpty()) {
+                    badgePrefs.edit().putStringSet("mood_discovered_movie_ids", found).apply()
+                    return found
+                }
+            }
+        } catch (_: Exception) {}
+        return direct
+    }
 }

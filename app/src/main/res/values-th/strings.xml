@@ -2203,4 +2203,8 @@
     <string name="search_mood_iris_status_scanning">กำลังสแกนพิกัดคลังภาพยนตร์...</string>
     <string name="search_mood_iris_no_results">ไม่มีภาพยนตร์ที่อยู่ในโฟกัสสำหรับเฟรมนี้</string>
     <string name="search_mood_iris_no_results_desc">ลองขยายมุมมองหรืออธิบายบรรยากาศด้วยรายละเอียดภาพยนตร์อื่นๆ</string>
+    <string name="badge_iris_search_title">ดวงตาจักรกล</string>
+    <string name="badge_iris_search_cat">การค้นพบตามอารมณ์</string>
+    <string name="badge_iris_search_desc">คุณเปิดรับวิสัยทัศน์: เพิ่มภาพยนตร์ที่ค้นพบด้วย IRIS หรือ AI ลงในรายการที่ต้องดู</string>
+    <string name="trophy_unit_searches">การค้นหา</string>
 </resources>

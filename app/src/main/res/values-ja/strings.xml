@@ -2230,4 +2230,8 @@
     <string name="search_mood_iris_status_scanning">映画アーカイブ座標をスキャン中...</string>
     <string name="search_mood_iris_no_results">このフレームにピントが合う映画はありません</string>
     <string name="search_mood_iris_no_results_desc">構図を広げるか、別の映画的なニュアンスで雰囲気を伝えてみてください。</string>
+    <string name="badge_iris_search_title">メカニカル・アイ</string>
+    <string name="badge_iris_search_cat">ムード探索</string>
+    <string name="badge_iris_search_desc">その視線を受け止めました: IRISやAIで見つけた映画をウォッチリストに追加しました。</string>
+    <string name="trophy_unit_searches">回</string>
 </resources>

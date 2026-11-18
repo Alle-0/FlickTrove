@@ -2209,4 +2209,8 @@ Prova att förenkla sökningen</string>
     <string name="search_mood_iris_status_scanning">Skannar biografarkivets koordinater...</string>
     <string name="search_mood_iris_no_results">Ingen film i fokus för denna bildruta</string>
     <string name="search_mood_iris_no_results_desc">Prova att vidga bildutsnittet eller beskriva stämningen med andra detaljer.</string>
+    <string name="badge_iris_search_title">Det mekaniska ögat</string>
+    <string name="badge_iris_search_cat">STÄMNINGSUPPTÄCKT</string>
+    <string name="badge_iris_search_desc">Du anammade visionen: lade till en film upptäckt med IRIS eller AI till din bevakningslista.</string>
+    <string name="trophy_unit_searches">sökningar</string>
 </resources>

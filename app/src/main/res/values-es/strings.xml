@@ -2228,4 +2228,8 @@
     <string name="search_mood_iris_status_scanning">Escaneando coordenadas del archivo de cine...</string>
     <string name="search_mood_iris_no_results">Ninguna película enfocada para este encuadre</string>
     <string name="search_mood_iris_no_results_desc">Prueba ampliando el encuadre o describiendo la atmósfera con otros matices.</string>
+    <string name="badge_iris_search_title">El Ojo Mecánico</string>
+    <string name="badge_iris_search_cat">DESCUBRIMIENTO MOOD</string>
+    <string name="badge_iris_search_desc">Aceptaste la visión: añadiste a tu lista de seguimiento una película descubierta con IRIS o IA.</string>
+    <string name="trophy_unit_searches">búsquedas</string>
 </resources>

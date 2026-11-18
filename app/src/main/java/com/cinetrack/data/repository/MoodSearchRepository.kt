@@ -42,7 +42,8 @@ class MoodSearchRepository @Inject constructor(
     private val localEngine: LocalMoodSearchEngine,
     private val semanticSearchRepository: SemanticSearchRepository,
     private val preferenceRepository: PreferenceRepository,
-    private val moodHistoryRepository: MoodHistoryRepository
+    private val moodHistoryRepository: MoodHistoryRepository,
+    private val badgeRepository: dagger.Lazy<BadgeRepository>
 ) {
 
     val remainingQuotaFlow: Flow<Int> = preferenceRepository.moodSearchesRemainingFlow
@@ -97,6 +98,7 @@ class MoodSearchRepository @Inject constructor(
                     val isUnder24Hours = ageMillis < 24 * 60 * 60 * 1000L
                     val shouldReturnCache = !bypassCache && isUnder24Hours
                     if (shouldReturnCache) {
+                        badgeRepository.get().recordMoodMoviesDiscovered(cachedMovies.map { it.id })
                         return@runCatching MoodSearchResultData(
                             vibeTitle = if (wantAi) cached.resolveAiVibeTitle() else cached.resolveAlgoVibeTitle(),
                             vibeDescription = if (wantAi) cached.resolveAiVibeDescription() else cached.resolveAlgoVibeDescription(),
@@ -168,6 +170,7 @@ class MoodSearchRepository @Inject constructor(
 
             // Quota consumption & Caching: ONLY consume quota and cache if the search succeeded and produced results
             if (mappedMovies.isNotEmpty()) {
+                badgeRepository.get().recordMoodMoviesDiscovered(mappedMovies.map { it.id })
                 body.remainingQuota?.let { rem ->
                     preferenceRepository.setMoodSearchesRemaining(rem)
                 } ?: run {
@@ -221,6 +224,7 @@ class MoodSearchRepository @Inject constructor(
             try {
                 val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
                 if (semanticMovies.isNotEmpty()) {
+                    badgeRepository.get().recordMoodMoviesDiscovered(semanticMovies.map { it.id })
                     val vibeTitle = if (isQuotaFallback || isNetworkFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale"
                     val vibeDesc = "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
                     moodHistoryRepository.saveEntry(
@@ -286,6 +290,7 @@ class MoodSearchRepository @Inject constructor(
             isQuotaExhaustedFallback = isQuotaFallback
         )
         if (localResult.movies.isNotEmpty()) {
+            badgeRepository.get().recordMoodMoviesDiscovered(localResult.movies.map { it.id })
             moodHistoryRepository.saveEntry(
                 MoodHistoryEntry(
                     query = trimmedQuery,

@@ -2209,4 +2209,8 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="search_mood_iris_status_scanning">Filmarchívum koordinátáinak pásztázása...</string>
     <string name="search_mood_iris_no_results">Nincs film fókuszban ehhez a beállításhoz</string>
     <string name="search_mood_iris_no_results_desc">Próbáld meg tágítani a képet, vagy írd le a hangulatot más részletekkel.</string>
+    <string name="badge_iris_search_title">A mechanikus szem</string>
+    <string name="badge_iris_search_cat">HANGULAT-FELFEDEZÉS</string>
+    <string name="badge_iris_search_desc">Megragadtad a látomást: hozzáadtál a megnézendőkhöz egy filmcímet, amelyet az IRIS vagy az AI fedezett fel.</string>
+    <string name="trophy_unit_searches">keresés</string>
 </resources>

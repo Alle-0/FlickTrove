@@ -2190,4 +2190,8 @@
     <string name="search_mood_iris_status_scanning">Skenování souřadnic filmového archivu...</string>
     <string name="search_mood_iris_no_results">Pro tento záběr není zaostřen žádný film</string>
     <string name="search_mood_iris_no_results_desc">Zkuste rozšířit záběr nebo popsat atmosféru jinými slovy.</string>
+    <string name="badge_iris_search_title">Mechanické oko</string>
+    <string name="badge_iris_search_cat">OBJEVOVÁNÍ NÁLADY</string>
+    <string name="badge_iris_search_desc">Přijali jste vizi: přidali jste si do seznamu ke zhlédnutí film objevený pomocí IRIS nebo AI.</string>
+    <string name="trophy_unit_searches">hledání</string>
 </resources>

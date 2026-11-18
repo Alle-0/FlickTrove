@@ -8,7 +8,8 @@ import kotlinx.serialization.Serializable
 data class MoodSearchRequest(
     val query: String,
     val language: String = "it-IT",
-    val page: Int = 1
+    val page: Int = 1,
+    val timezone: String = java.time.ZoneId.systemDefault().id
 )
 
 @Serializable

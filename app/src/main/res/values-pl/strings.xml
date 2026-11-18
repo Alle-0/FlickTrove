@@ -2200,4 +2200,8 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="search_mood_iris_status_scanning">Skanowanie współrzędnych archiwum kina...</string>
     <string name="search_mood_iris_no_results">Brak filmów w kadrze dla tego ujęcia</string>
     <string name="search_mood_iris_no_results_desc">Spróbuj poszerzyć kadr lub opisać nastrój za pomocą innych szczegółów.</string>
+    <string name="badge_iris_search_title">Mechaniczne Oko</string>
+    <string name="badge_iris_search_cat">ODKRYWANIE NASTROJU</string>
+    <string name="badge_iris_search_desc">Podążyłeś za wizją: dodałeś do listy do obejrzenia film odkryty dzięki IRIS lub AI.</string>
+    <string name="trophy_unit_searches">wyszukiwań</string>
 </resources>

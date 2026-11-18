@@ -2187,4 +2187,8 @@
     <string name="search_mood_iris_status_scanning">مسح إحداثيات أرشيف السينما...</string>
     <string name="search_mood_iris_no_results">لا توجد أفلام في بؤرة التركيز لهذا الإطار</string>
     <string name="search_mood_iris_no_results_desc">جرب توسيع الإطار أو وصف الأجواء بتفاصيل سينمائية أخرى.</string>
+    <string name="badge_iris_search_title">العين الميكانيكية</string>
+    <string name="badge_iris_search_cat">اكتشاف المزاج</string>
+    <string name="badge_iris_search_desc">لقد استجبت للرؤية: أضفت فيلمًا تم اكتشافه بواسطة IRIS أو الذكاء الاصطناعي إلى قائمة المشاهدة.</string>
+    <string name="trophy_unit_searches">عمليات بحث</string>
 </resources>

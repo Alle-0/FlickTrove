@@ -2212,4 +2212,8 @@ Cod de invitație: %3$s</string>
     <string name="search_mood_iris_status_scanning">Scanarea coordonatelor arhivei cinematografice...</string>
     <string name="search_mood_iris_no_results">Niciun film focalizat pentru acest cadru</string>
     <string name="search_mood_iris_no_results_desc">Încearcă să lărgești cadrul sau să descrii atmosfera cu alte detalii.</string>
+    <string name="badge_iris_search_title">Ochiul mecanic</string>
+    <string name="badge_iris_search_cat">DESCOPERIRE MOOD</string>
+    <string name="badge_iris_search_desc">Ai îmbrățișat viziunea: ai adăugat în lista de vizionare un film descoperit cu IRIS sau AI.</string>
+    <string name="trophy_unit_searches">căutări</string>
 </resources>
