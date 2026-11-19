@@ -132,67 +132,23 @@ private fun IrisWeeklyReadySection(
             .fillMaxWidth()
             .padding(vertical = 12.dp)
     ) {
-        // --- HEADER CINEMATOGRAFICO PULITO ---
+        // --- HEADER IDENTICO ALLE ALTRE SEZIONI HOME ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp),
+                .padding(start = 16.dp, end = 16.dp, bottom = 12.dp),
             verticalAlignment = Alignment.CenterVertically,
             horizontalArrangement = Arrangement.SpaceBetween
         ) {
-            Column(modifier = Modifier.weight(1f)) {
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
-                ) {
-                    // Badge diaframma ottico a lamelle
-                    Box(
-                        modifier = Modifier
-                            .size(24.dp)
-                            .clip(CircleShape)
-                            .background(
-                                Brush.radialGradient(
-                                    colors = listOf(
-                                        MaterialTheme.colorScheme.primary.copy(alpha = 0.4f),
-                                        Color.Transparent
-                                    )
-                                )
-                            )
-                            .border(1.dp, MaterialTheme.colorScheme.primary.copy(alpha = 0.6f), CircleShape),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_aperture),
-                            contentDescription = null,
-                            tint = MaterialTheme.colorScheme.primary,
-                            modifier = Modifier.size(13.dp)
-                        )
-                    }
-
-                    Text(
-                        text = stringResource(R.string.iris_weekly_section_title).uppercase(),
-                        style = MaterialTheme.typography.labelMedium,
-                        fontWeight = FontWeight.ExtraBold,
-                        letterSpacing = 1.2.sp,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-
-                if (picks.focusClusterTitle.isNotBlank()) {
-                    Spacer(modifier = Modifier.height(2.dp))
-                    Text(
-                        text = picks.focusClusterTitle,
-                        style = MaterialTheme.typography.bodySmall,
-                        color = Color.White.copy(alpha = 0.65f),
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis
-                    )
-                }
-            }
+            Text(
+                text = stringResource(R.string.iris_weekly_section_title),
+                style = MaterialTheme.typography.titleLarge,
+                fontWeight = FontWeight.Bold,
+                color = Color.White
+            )
 
             // Tasto "Cambia Fuoco" - visibile SOLO se l'utente ha più di 1 cluster amato
             if (picks.hasMultipleClusters) {
-                Spacer(modifier = Modifier.width(10.dp))
                 Row(
                     modifier = Modifier
                         .bounceClick(onClick = onRotateFocus)
