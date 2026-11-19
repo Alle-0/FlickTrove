@@ -227,13 +227,32 @@ class LocalMoodSearchEngine @Inject constructor(
         return genres.distinct()
     }
 
+    /**
+     * Verifica se la lingua è supportata dall'algoritmo euristico locale offline (esclusivamente Italiano e Inglese).
+     * Per tutte le altre lingue l'algoritmo offline non opera per prevenire match inaffidabili.
+     */
+    fun isLanguageSupported(language: String): Boolean {
+        val normalized = language.lowercase(Locale.ROOT)
+        return normalized.startsWith("it") || normalized.startsWith("en")
+    }
+
     suspend fun searchLocalMood(
         query: String,
         language: String,
         page: Int = 1,
         isQuotaExhaustedFallback: Boolean = false
     ): MoodSearchResultData {
+        if (!isLanguageSupported(language)) {
+            return MoodSearchResultData(
+                vibeTitle = "",
+                vibeDescription = "",
+                totalCount = 0,
+                totalPages = 0,
+                movies = emptyList()
+            )
+        }
         val cleanQuery = query.trim().take(1000).lowercase(Locale.ROOT)
+        val isItalianUi = language.lowercase().startsWith("it")
         // Detect whether the query is Italian, regardless of system locale settings
         val isItalian = detectItalian(cleanQuery, language)
         val tmdbLang = if (isItalian) "it-IT" else "en-US"
@@ -773,7 +792,7 @@ class LocalMoodSearchEngine @Inject constructor(
             val reason = generateBespokeReason(
                 movie = m,
                 archetype = primaryArchetype,
-                isItalian = isItalian,
+                isItalian = isItalianUi,
                 query = query
             )
 
@@ -834,8 +853,8 @@ class LocalMoodSearchEngine @Inject constructor(
         }
 
         // 8. Final Results (Popola vibeTitle e vibeDescription se è stato agganciato un archetipo cinematografico)
-        val vibeTitle = primaryArchetype?.let { if (isItalian) it.nameIt else it.nameEn }.orEmpty()
-        val vibeDesc = primaryArchetype?.let { if (isItalian) it.rationaleTemplateIt else it.rationaleTemplateEn }.orEmpty()
+        val vibeTitle = primaryArchetype?.let { if (isItalianUi) it.nameIt else it.nameEn }.orEmpty()
+        val vibeDesc = primaryArchetype?.let { if (isItalianUi) it.rationaleTemplateIt else it.rationaleTemplateEn }.orEmpty()
 
         return MoodSearchResultData(
             vibeTitle = vibeTitle,
@@ -856,11 +875,11 @@ class LocalMoodSearchEngine @Inject constructor(
             "prestigiatore", "prestigiatori", "vuole", "essere", "non", "più", "piu", "tutto", "tutti",
             "storia", "racconto", "bello", "belli", "quello", "quella", "questo", "questa",
             "dopo", "prima", "durante", "contro", "insieme", "sempre", "mai",
-            "e", "ed", "o", "od", "di", "a", "da", "in", "su", "isola", "isole", "naufragio", "naufrago", "naufraghi"
+            "ed", "od", "di", "da", "su", "isola", "isole", "naufragio", "naufrago", "naufraghi"
         )
         val tokens = Regex("""\b\w+\b""").findAll(lower).map { it.value }
         val matchCount = tokens.count { italianMarkers.contains(it) }
-        return matchCount >= 1
+        return matchCount >= 2 || (matchCount == 1 && query.length > 20)
     }
 
     fun detectFranchiseKey(title: String, genreIds: List<Long> = emptyList()): String? {

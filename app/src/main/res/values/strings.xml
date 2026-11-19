@@ -2256,4 +2256,34 @@
     <string name="semantic_reason_plot_match">Semantic plot match</string>
     <string name="semantic_reason_atmosphere">Mood: %1$s</string>
     <string name="semantic_reason_written_by">Written by %1$s</string>
+
+    <!-- IRIS Mood Inspirations Candidates -->
+    <string name="iris_prompt_noir">1940s urban noir with pouring rain and late night jazz</string>
+    <string name="iris_prompt_scifi">Contemplative sci-fi in the silence of deep space</string>
+    <string name="iris_prompt_italian_comedy">Bittersweet Italian-style comedy with laughter and melancholy</string>
+    <string name="iris_prompt_cabin_thriller">Slow-burn psychological thriller in an isolated cabin</string>
+    <string name="iris_prompt_cyberpunk">Dystopian cyberpunk with acid rain and neon lights</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western with sunset duels</string>
+    <string name="iris_prompt_whodunit_mansion">Whodunit murder mystery with puzzles in a vintage mansion</string>
+    <string name="iris_prompt_archaeological_adventure">Epic archaeological adventure through forgotten temples and mysteries</string>
+
+    <string name="search_mood_language_offline_title">Internet connection required</string>
+    <string name="search_mood_language_offline_desc">For this language, Mood Discovery requires an active internet connection to explore the TMDB catalog.</string>
+
+    <!-- IRIS Weekly Top 10 -->
+    <string name="iris_weekly_section_title">IRIS Weekly</string>
+    <string name="iris_weekly_change_focus">Refocus</string>
+    <string name="iris_weekly_subtitle_resonance">Resonating with %1$s</string>
+    <string name="iris_weekly_subtitle_default">Tuned to your beloved masterpieces</string>
+    <string name="iris_weekly_cold_start_title">Calibrate the Eye of IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Rate or save at least 3 films to unlock your weekly mood-based Top 10.</string>
+    <string name="iris_weekly_cold_start_action">Explore films</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Resonance</string>
+    <string name="iris_cluster_scifi">Sci-Fi &amp; Dystopian Realities</string>
+    <string name="iris_cluster_crime_noir">Crime, Noir &amp; Psychological Thrillers</string>
+    <string name="iris_cluster_drama_auteur">Auteur Cinema &amp; Human Dramas</string>
+    <string name="iris_cluster_horror">Horror &amp; Dark Tension</string>
+    <string name="iris_cluster_adventure">Adventure, Fantasy &amp; Action</string>
+    <string name="iris_cluster_comedy">Sophisticated Comedy &amp; Witty Spirit</string>
+    <string name="iris_cluster_cult_favorites">Personal Cult Masterpieces</string>
 </resources>

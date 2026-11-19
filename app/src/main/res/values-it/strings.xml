@@ -2255,4 +2255,34 @@
     <string name="semantic_reason_plot_match">Affinità tematica con la trama</string>
     <string name="semantic_reason_atmosphere">Atmosfera: %1$s</string>
     <string name="semantic_reason_written_by">Sceneggiatura di %1$s</string>
+
+    <!-- Candidati Ispirazioni Mood IRIS -->
+    <string name="iris_prompt_noir">Noir metropolitano anni \'40 con pioggia battente e jazz notturno</string>
+    <string name="iris_prompt_scifi">Fantascienza contemplativa nel silenzio dello spazio profondo</string>
+    <string name="iris_prompt_italian_comedy">Commedia agrodolce all\'italiana con risate e malinconia</string>
+    <string name="iris_prompt_cabin_thriller">Thriller psicologico a fuoco lento in una baita isolata</string>
+    <string name="iris_prompt_cyberpunk">Cyberpunk distopico tra pioggia acida e luci al neon</string>
+    <string name="iris_prompt_spaghetti_western">Spaghetti western crepuscolare con duelli al tramonto</string>
+    <string name="iris_prompt_whodunit_mansion">Giallo investigativo con enigmi in una villa d\'epoca</string>
+    <string name="iris_prompt_archaeological_adventure">Avventura epica archeologica tra templi dimenticati e misteri</string>
+
+    <string name="search_mood_language_offline_title">Connessione Internet richiesta</string>
+    <string name="search_mood_language_offline_desc">Per questa lingua la ricerca Mood richiede una connessione a Internet attiva per esplorare il catalogo TMDB.</string>
+
+    <!-- IRIS Weekly Top 10 -->
+    <string name="iris_weekly_section_title">IRIS Weekly</string>
+    <string name="iris_weekly_change_focus">Cambia Fuoco</string>
+    <string name="iris_weekly_subtitle_resonance">In risonanza con %1$s</string>
+    <string name="iris_weekly_subtitle_default">Sintonizzato sui tuoi capolavori amati</string>
+    <string name="iris_weekly_cold_start_title">Calibra l\'occhio di IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Vota o salva almeno 3 film per sbloccare la tua Top 10 settimanale d\'atmosfera.</string>
+    <string name="iris_weekly_cold_start_action">Esplora catalogo</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Sintonia</string>
+    <string name="iris_cluster_scifi">Fantascienza &amp; Mondi Distopici</string>
+    <string name="iris_cluster_crime_noir">Crime, Noir &amp; Thriller Psicologici</string>
+    <string name="iris_cluster_drama_auteur">Cinema d\'Autore &amp; Drammi Umani</string>
+    <string name="iris_cluster_horror">Horror &amp; Tensione Oscura</string>
+    <string name="iris_cluster_adventure">Avventura, Fantasia &amp; Azione</string>
+    <string name="iris_cluster_comedy">Commedia &amp; Spirito Brillante</string>
+    <string name="iris_cluster_cult_favorites">Capolavori Cult Personali</string>
 </resources>

@@ -422,8 +422,8 @@ object NetworkModule {
         json: Json
     ): com.cinetrack.data.api.SemanticSearchApi {
         val fastOkHttpClient = okHttpClient.newBuilder()
-            .connectTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
-            .readTimeout(3, java.util.concurrent.TimeUnit.SECONDS)
+            .connectTimeout(10, java.util.concurrent.TimeUnit.SECONDS)
+            .readTimeout(15, java.util.concurrent.TimeUnit.SECONDS)
             .build()
         val contentType = "application/json".toMediaType()
         return Retrofit.Builder()

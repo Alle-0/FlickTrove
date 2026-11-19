@@ -134,7 +134,8 @@ fun SearchHeader(
     isFocusHunting: Boolean = false,
     inspectedCardXRatio: Float? = null,
     inspectedCardYRatio: Float? = null,
-    onOpenBubble: ((ActiveSearchBubble) -> Unit)? = null
+    onOpenBubble: ((ActiveSearchBubble) -> Unit)? = null,
+    onIrisLongClick: (() -> Unit)? = null
 ) {
     val density = LocalDensity.current
     val focusManager = LocalFocusManager.current
@@ -328,7 +329,8 @@ fun SearchHeader(
                 scrollInertia = scrollInertia,
                 isFocusHunting = isFocusHunting,
                 inspectedCardXRatio = inspectedCardXRatio,
-                inspectedCardYRatio = inspectedCardYRatio
+                inspectedCardYRatio = inspectedCardYRatio,
+                onIrisLongClick = onIrisLongClick
             )
         }
     }

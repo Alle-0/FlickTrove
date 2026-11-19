@@ -2251,4 +2251,30 @@
     <string name="semantic_reason_plot_match">情节契合</string>
     <string name="semantic_reason_atmosphere">氛围: %1$s</string>
     <string name="semantic_reason_written_by">编剧: %1$s</string>
+    <string name="search_mood_language_offline_title">需要互联网连接</string>
+    <string name="search_mood_language_offline_desc">在此语言下，情绪探索需要有效的互联网连接才能探索 TMDB 目录。</string>
+
+    <string name="iris_weekly_section_title">虹膜周刊</string>
+    <string name="iris_weekly_change_focus">重新聚焦</string>
+    <string name="iris_weekly_subtitle_resonance">与 %1$s 共振</string>
+    <string name="iris_weekly_subtitle_default">调整到您喜爱的杰作</string>
+    <string name="iris_weekly_cold_start_title">校准 IRIS 之眼</string>
+    <string name="iris_weekly_cold_start_desc">评价或保存至少 3 部电影，即可解锁每周基于心情的前 10 部影片。</string>
+    <string name="iris_weekly_cold_start_action">探索电影</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% 共振</string>
+    <string name="iris_cluster_scifi">科幻与反乌托邦现实</string>
+    <string name="iris_cluster_crime_noir">犯罪、黑色和心理惊悚片</string>
+    <string name="iris_cluster_drama_auteur">作者电影与人类戏剧</string>
+    <string name="iris_cluster_horror">恐怖与黑暗张力</string>
+    <string name="iris_cluster_adventure">冒险、奇幻和动作</string>
+    <string name="iris_cluster_comedy">复杂的喜剧和诙谐的精神</string>
+    <string name="iris_cluster_cult_favorites">个人崇拜杰作</string>
+    <string name="iris_prompt_noir">20 世纪 40 年代的都市黑色，倾盆大雨和深夜爵士乐</string>
+    <string name="iris_prompt_scifi">深空寂静中的沉思科幻</string>
+    <string name="iris_prompt_italian_comedy">苦乐参半的意大利式喜剧，欢笑与忧郁</string>
+    <string name="iris_prompt_cabin_thriller">在与世隔绝的小屋里缓慢燃烧的心理惊悚片</string>
+    <string name="iris_prompt_cyberpunk">酸雨和霓虹灯的反乌托邦赛博朋克</string>
+    <string name="iris_prompt_spaghetti_western">暮光意大利西​​部片与日落决斗</string>
+    <string name="iris_prompt_whodunit_mansion">老式宅邸中的侦探谋杀案与谜题</string>
+    <string name="iris_prompt_archaeological_adventure">穿越被遗忘的寺庙和奥秘的史诗般的考古冒险</string>
 </resources>

@@ -2250,4 +2250,30 @@
     <string name="semantic_reason_plot_match">Affinité thématique avec l\'intrigue</string>
     <string name="semantic_reason_atmosphere">Atmosphère : %1$s</string>
     <string name="semantic_reason_written_by">Scénario de %1$s</string>
+    <string name="search_mood_language_offline_title">Connexion Internet requise</string>
+    <string name="search_mood_language_offline_desc">Pour cette langue, Mood Discovery nécessite une connexion Internet active pour explorer le catalogue TMDB.</string>
+
+    <string name="iris_weekly_section_title">IRIS Hebdomadaire</string>
+    <string name="iris_weekly_change_focus">Recentrer</string>
+    <string name="iris_weekly_subtitle_resonance">En résonance avec %1$s</string>
+    <string name="iris_weekly_subtitle_default">À l\'écoute de vos chefs-d\'œuvre bien-aimés</string>
+    <string name="iris_weekly_cold_start_title">Calibrer l\'œil d\'IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Notez ou enregistrez au moins 3 films pour débloquer votre Top 10 hebdomadaire basé sur l\'humeur.</string>
+    <string name="iris_weekly_cold_start_action">Explorer les films</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Résonance</string>
+    <string name="iris_cluster_scifi">Science-fiction et réalités dystopiques</string>
+    <string name="iris_cluster_crime_noir">Policier, Noir et Thrillers psychologiques</string>
+    <string name="iris_cluster_drama_auteur">Cinéma d\'auteur et drames humains</string>
+    <string name="iris_cluster_horror">Horreur et tension sombre</string>
+    <string name="iris_cluster_adventure">Aventure, fantastique et action</string>
+    <string name="iris_cluster_comedy">Comédie sophistiquée et esprit plein d\'esprit</string>
+    <string name="iris_cluster_cult_favorites">Chefs-d’œuvre du culte personnel</string>
+    <string name="iris_prompt_noir">Film noir urbain des années 40 avec pluie battante et jazz de fin de soirée</string>
+    <string name="iris_prompt_scifi">Science-fiction contemplative dans le silence de l\'espace profond</string>
+    <string name="iris_prompt_italian_comedy">Comédie douce-amère à l\'italienne avec rire et mélancolie</string>
+    <string name="iris_prompt_cabin_thriller">Thriller psychologique à combustion lente dans une cabane isolée</string>
+    <string name="iris_prompt_cyberpunk">Cyberpunk dystopique avec pluies acides et néons</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western avec duels au coucher du soleil</string>
+    <string name="iris_prompt_whodunit_mansion">Mystère de meurtre policier avec énigmes dans un manoir vintage</string>
+    <string name="iris_prompt_archaeological_adventure">Aventure archéologique épique à travers des temples oubliés et des mystères</string>
 </resources>

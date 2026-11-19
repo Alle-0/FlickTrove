@@ -2250,4 +2250,30 @@
     <string name="semantic_reason_plot_match">Kesesuaian tema alur cerita</string>
     <string name="semantic_reason_atmosphere">Suasana: %1$s</string>
     <string name="semantic_reason_written_by">Ditulis oleh %1$s</string>
+    <string name="search_mood_language_offline_title">Koneksi internet diperlukan</string>
+    <string name="search_mood_language_offline_desc">Untuk bahasa ini, Mood Discovery memerlukan koneksi internet aktif untuk menjelajahi katalog TMDB.</string>
+
+    <string name="iris_weekly_section_title">Mingguan IRIS</string>
+    <string name="iris_weekly_change_focus">Fokus kembali</string>
+    <string name="iris_weekly_subtitle_resonance">Beresonansi dengan %1$s</string>
+    <string name="iris_weekly_subtitle_default">Disetel ke mahakarya kesayangan Anda</string>
+    <string name="iris_weekly_cold_start_title">Kalibrasi Mata IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Nilai atau simpan setidaknya 3 film untuk membuka Top 10 berdasarkan suasana hati mingguan Anda.</string>
+    <string name="iris_weekly_cold_start_action">Jelajahi film</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Resonansi</string>
+    <string name="iris_cluster_scifi">Fiksi Ilmiah &amp; Realitas Distopia</string>
+    <string name="iris_cluster_crime_noir">Kejahatan, Noir &amp; Thriller Psikologis</string>
+    <string name="iris_cluster_drama_auteur">Sinema Auteur &amp; Drama Manusia</string>
+    <string name="iris_cluster_horror">Horor &amp; Ketegangan Gelap</string>
+    <string name="iris_cluster_adventure">Petualangan, Fantasi &amp; Aksi</string>
+    <string name="iris_cluster_comedy">Komedi Canggih &amp; Semangat Cerdas</string>
+    <string name="iris_cluster_cult_favorites">Karya Kultus Pribadi</string>
+    <string name="iris_prompt_noir">Noir perkotaan tahun 1940-an dengan hujan lebat dan musik jazz larut malam</string>
+    <string name="iris_prompt_scifi">Fiksi ilmiah kontemplatif dalam keheningan angkasa luar</string>
+    <string name="iris_prompt_italian_comedy">Komedi pahit ala Italia dengan tawa dan melankolis</string>
+    <string name="iris_prompt_cabin_thriller">Thriller psikologis yang berlangsung lambat di kabin yang terisolasi</string>
+    <string name="iris_prompt_cyberpunk">Cyberpunk distopia dengan hujan asam dan lampu neon</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western dengan duel matahari terbenam</string>
+    <string name="iris_prompt_whodunit_mansion">Misteri pembunuhan whodunit dengan teka-teki di rumah antik</string>
+    <string name="iris_prompt_archaeological_adventure">Petualangan arkeologi epik melalui kuil dan misteri yang terlupakan</string>
 </resources>

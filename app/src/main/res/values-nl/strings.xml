@@ -2211,4 +2211,30 @@
     <string name="semantic_reason_plot_match">Thematische plotmatch</string>
     <string name="semantic_reason_atmosphere">Sfeer: %1$s</string>
     <string name="semantic_reason_written_by">Geschreven door %1$s</string>
+    <string name="search_mood_language_offline_title">Internetverbinding vereist</string>
+    <string name="search_mood_language_offline_desc">Voor deze taal vereist Mood Discovery een actieve internetverbinding om de TMDB-catalogus te doorzoeken.</string>
+
+    <string name="iris_weekly_section_title">IRIS wekelijks</string>
+    <string name="iris_weekly_change_focus">Heroriënteren</string>
+    <string name="iris_weekly_subtitle_resonance">Resonerend met %1$s</string>
+    <string name="iris_weekly_subtitle_default">Afgestemd op uw geliefde meesterwerken</string>
+    <string name="iris_weekly_cold_start_title">Kalibreer het oog van IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Beoordeel of bewaar minimaal 3 films om uw wekelijkse, op stemmingen gebaseerde Top 10 te ontgrendelen.</string>
+    <string name="iris_weekly_cold_start_action">Ontdek films</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Resonantie</string>
+    <string name="iris_cluster_scifi">Sci-Fi en dystopische realiteiten</string>
+    <string name="iris_cluster_crime_noir">Misdaad-, noir- en psychologische thrillers</string>
+    <string name="iris_cluster_drama_auteur">Auteur Cinema en menselijke drama\'s</string>
+    <string name="iris_cluster_horror">Horror en duistere spanning</string>
+    <string name="iris_cluster_adventure">Avontuur, fantasie en actie</string>
+    <string name="iris_cluster_comedy">Verfijnde komedie en geestige geest</string>
+    <string name="iris_cluster_cult_favorites">Persoonlijke cult-meesterwerken</string>
+    <string name="iris_prompt_noir">Urban noir uit de jaren 40 met stromende regen en late night jazz</string>
+    <string name="iris_prompt_scifi">Contemplatieve sciencefiction in de stilte van de diepe ruimte</string>
+    <string name="iris_prompt_italian_comedy">Bitterzoete komedie in Italiaanse stijl met humor en melancholie</string>
+    <string name="iris_prompt_cabin_thriller">Langzaam brandende psychologische thriller in een geïsoleerde hut</string>
+    <string name="iris_prompt_cyberpunk">Dystopische cyberpunk met zure regen en neonlichten</string>
+    <string name="iris_prompt_spaghetti_western">Schemeringspaghettiwestern met zonsondergangduels</string>
+    <string name="iris_prompt_whodunit_mansion">Whodunit-moordmysterie met puzzels in een vintage herenhuis</string>
+    <string name="iris_prompt_archaeological_adventure">Episch archeologisch avontuur door vergeten tempels en mysteries</string>
 </resources>

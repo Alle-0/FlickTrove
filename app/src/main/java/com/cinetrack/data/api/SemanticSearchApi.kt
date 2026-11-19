@@ -13,6 +13,13 @@ data class SemanticSearchResponse(
 )
 
 @Serializable
+data class IrisWeeklyResponse(
+    val results: List<SemanticMovieDto> = emptyList(),
+    @SerialName("used_seeds") val usedSeeds: List<Long> = emptyList(),
+    val error: String? = null
+)
+
+@Serializable
 data class SemanticMovieDto(
     val id: Long,
     val title: String,
@@ -85,4 +92,10 @@ interface SemanticSearchApi {
         @Query("q_en") queryEn: String? = null,
         @Query("limit") limit: Int = 100
     ): Response<SemanticSearchResponse>
+
+    @GET("iris-weekly")
+    suspend fun getIrisWeeklyPicks(
+        @Query("seeds") seeds: String,
+        @Query("lang") lang: String = "it"
+    ): Response<IrisWeeklyResponse>
 }

@@ -2248,4 +2248,30 @@
     <string name="semantic_reason_plot_match">कथानक विषय मेल</string>
     <string name="semantic_reason_atmosphere">माहौल: %1$s</string>
     <string name="semantic_reason_written_by">लेखन: %1$s</string>
+    <string name="search_mood_language_offline_title">इंटरनेट कनेक्शन आवश्यक है</string>
+    <string name="search_mood_language_offline_desc">इस भाषा के लिए, TMDB कैटलॉग का पता लगाने हेतु सक्रिय इंटरनेट कनेक्शन की आवश्यकता है।</string>
+
+    <string name="iris_weekly_section_title">आईआरआईएस साप्ताहिक</string>
+    <string name="iris_weekly_change_focus">फिर से फ़ोकस</string>
+    <string name="iris_weekly_subtitle_resonance">%1$s के साथ प्रतिध्वनित</string>
+    <string name="iris_weekly_subtitle_default">आपकी प्रिय उत्कृष्ट कृतियों से जुड़ा हुआ</string>
+    <string name="iris_weekly_cold_start_title">आईआरआईएस की आंख को कैलिब्रेट करें</string>
+    <string name="iris_weekly_cold_start_desc">अपने साप्ताहिक मूड-आधारित शीर्ष 10 को अनलॉक करने के लिए कम से कम 3 फिल्मों को रेट करें या सहेजें।</string>
+    <string name="iris_weekly_cold_start_action">फ़िल्मों का अन्वेषण करें</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% अनुनाद</string>
+    <string name="iris_cluster_scifi">विज्ञान कथा और डायस्टोपियन वास्तविकताएँ</string>
+    <string name="iris_cluster_crime_noir">अपराध, नॉयर और मनोवैज्ञानिक थ्रिलर</string>
+    <string name="iris_cluster_drama_auteur">ऑटोर सिनेमा और मानव नाटक</string>
+    <string name="iris_cluster_horror">डरावना और गहरा तनाव</string>
+    <string name="iris_cluster_adventure">साहसिक, काल्पनिक और एक्शन</string>
+    <string name="iris_cluster_comedy">परिष्कृत कॉमेडी और मजाकिया भावना</string>
+    <string name="iris_cluster_cult_favorites">व्यक्तिगत पंथ उत्कृष्ट कृतियाँ</string>
+    <string name="iris_prompt_noir">मूसलाधार बारिश और देर रात जैज़ के साथ 1940 के दशक का शहरी नॉयर</string>
+    <string name="iris_prompt_scifi">गहरे अंतरिक्ष की खामोशी में चिंतनशील विज्ञान कथा</string>
+    <string name="iris_prompt_italian_comedy">हंसी और उदासी के साथ खट्टी-मीठी इतालवी शैली की कॉमेडी</string>
+    <string name="iris_prompt_cabin_thriller">एक अलग केबिन में धीमी गति से चलने वाली मनोवैज्ञानिक थ्रिलर</string>
+    <string name="iris_prompt_cyberpunk">एसिड रेन और नियॉन रोशनी के साथ डिस्टोपियन साइबरपंक</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western with sunset duels</string>
+    <string name="iris_prompt_whodunit_mansion">एक पुरानी हवेली में पहेलियों के साथ व्होडुनिट मर्डर मिस्ट्री</string>
+    <string name="iris_prompt_archaeological_adventure">भूले हुए मंदिरों और रहस्यों के माध्यम से महाकाव्य पुरातात्विक साहसिक कार्य</string>
 </resources>

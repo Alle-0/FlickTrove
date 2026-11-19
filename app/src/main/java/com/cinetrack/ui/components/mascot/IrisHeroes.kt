@@ -84,7 +84,8 @@ fun IrisResultsHero(
     isFocusHunting: Boolean = false,
     inspectedCardXRatio: Float? = null,
     inspectedCardYRatio: Float? = null,
-    size: Dp = 68.dp
+    size: Dp = 68.dp,
+    onIrisLongClick: (() -> Unit)? = null
 ) {
     val targetSize = when {
         hasResults -> 64.dp
@@ -276,7 +277,8 @@ fun IrisResultsHero(
                     scrollInertia = scrollInertia,
                     isFocusHunting = isFocusHunting,
                     accentColor = MaterialTheme.colorScheme.primary,
-                    glowPadding = animatedSize * 0.38f
+                    glowPadding = animatedSize * 0.38f,
+                    onLongClick = onIrisLongClick
                 )
             }
         }

@@ -2233,4 +2233,30 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="semantic_reason_plot_match">Θεματική σύνδεση πλοκής</string>
     <string name="semantic_reason_atmosphere">Ατμόσφαιρα: %1$s</string>
     <string name="semantic_reason_written_by">Σενάριο: %1$s</string>
+    <string name="search_mood_language_offline_title">Απαιτείται σύνδεση στο Διαδίκτυο</string>
+    <string name="search_mood_language_offline_desc">Για αυτήν τη γλώσσα, η αναζήτηση διάθεσης απαιτεί ενεργή σύνδεση στο Διαδίκτυο για την εξερεύνηση του καταλόγου TMDB.</string>
+
+    <string name="iris_weekly_section_title">IRIS Weekly</string>
+    <string name="iris_weekly_change_focus">Επανεστίαση</string>
+    <string name="iris_weekly_subtitle_resonance">Αντηχεί με %1$s</string>
+    <string name="iris_weekly_subtitle_default">Συντονισμένοι στα αγαπημένα σας αριστουργήματα</string>
+    <string name="iris_weekly_cold_start_title">Βαθμονόμηση του ματιού της IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Βαθμολογήστε ή αποθηκεύστε τουλάχιστον 3 ταινίες για να ξεκλειδώσετε το εβδομαδιαίο Top 10 που βασίζεται στη διάθεση.</string>
+    <string name="iris_weekly_cold_start_action">Εξερευνήστε ταινίες</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Συντονισμός</string>
+    <string name="iris_cluster_scifi">Sci-Fi &amp; Dystopian Realities</string>
+    <string name="iris_cluster_crime_noir">Crime, Noir &amp; Ψυχολογικά Θρίλερ</string>
+    <string name="iris_cluster_drama_auteur">Auteur Cinema &amp; Human Dramas</string>
+    <string name="iris_cluster_horror">Horror &amp; Dark Tension</string>
+    <string name="iris_cluster_adventure">Περιπέτεια, Φαντασία &amp; Δράση</string>
+    <string name="iris_cluster_comedy">Εκλεπτυσμένη Κωμωδία &amp; Πνευματικό πνεύμα</string>
+    <string name="iris_cluster_cult_favorites">Προσωπικά Cult Αριστουργήματα</string>
+    <string name="iris_prompt_noir">Urban noir της δεκαετίας του 1940 με καταρρακτώδη βροχή και αργά τη νύχτα τζαζ</string>
+    <string name="iris_prompt_scifi">Στοχαστική επιστημονική φαντασία στη σιωπή του βαθύ διαστήματος</string>
+    <string name="iris_prompt_italian_comedy">Γλυκόπικρη κωμωδία ιταλικού τύπου με γέλιο και μελαγχολία</string>
+    <string name="iris_prompt_cabin_thriller">Ψυχολογικό θρίλερ βραδείας καύσης σε μια απομονωμένη καμπίνα</string>
+    <string name="iris_prompt_cyberpunk">Δυστοπικό cyberpunk με όξινη βροχή και φώτα νέον</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western με μονομαχίες ηλιοβασιλέματος</string>
+    <string name="iris_prompt_whodunit_mansion">Μυστήριο δολοφονίας Whodunit με παζλ σε μια vintage έπαυλη</string>
+    <string name="iris_prompt_archaeological_adventure">Επική αρχαιολογική περιπέτεια μέσα από ξεχασμένους ναούς και μυστήρια</string>
 </resources>

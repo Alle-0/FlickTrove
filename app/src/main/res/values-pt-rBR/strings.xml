@@ -2248,4 +2248,30 @@
     <string name="semantic_reason_plot_match">Afinidade temática com o enredo</string>
     <string name="semantic_reason_atmosphere">Clima: %1$s</string>
     <string name="semantic_reason_written_by">Roteiro de %1$s</string>
+    <string name="search_mood_language_offline_title">Conexão com a Internet necessária</string>
+    <string name="search_mood_language_offline_desc">Para este idioma, a Descoberta de Humor requer uma conexão ativa com a Internet para explorar o catálogo do TMDB.</string>
+
+    <string name="iris_weekly_section_title">IRIS Semanal</string>
+    <string name="iris_weekly_change_focus">Refocar</string>
+    <string name="iris_weekly_subtitle_resonance">Ressoando com %1$s</string>
+    <string name="iris_weekly_subtitle_default">Sintonizado com suas amadas obras-primas</string>
+    <string name="iris_weekly_cold_start_title">Calibre o Olho do IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Avalie ou salve pelo menos 3 filmes para desbloquear seu Top 10 semanal baseado em humor.</string>
+    <string name="iris_weekly_cold_start_action">Explorar filmes</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Ressonância</string>
+    <string name="iris_cluster_scifi">Ficção científica e realidades distópicas</string>
+    <string name="iris_cluster_crime_noir">Crime, Noir e thrillers psicológicos</string>
+    <string name="iris_cluster_drama_auteur">Cinema de autor e dramas humanos</string>
+    <string name="iris_cluster_horror">Terror e tensão sombria</string>
+    <string name="iris_cluster_adventure">Aventura, fantasia e ação</string>
+    <string name="iris_cluster_comedy">Comédia sofisticada e espírito espirituoso</string>
+    <string name="iris_cluster_cult_favorites">Obras-primas de culto pessoal</string>
+    <string name="iris_prompt_noir">Noir urbano dos anos 1940 com chuva torrencial e jazz noturno</string>
+    <string name="iris_prompt_scifi">Ficção científica contemplativa no silêncio do espaço profundo</string>
+    <string name="iris_prompt_italian_comedy">Comédia agridoce ao estilo italiano com risos e melancolia</string>
+    <string name="iris_prompt_cabin_thriller">Thriller psicológico de queima lenta em uma cabana isolada</string>
+    <string name="iris_prompt_cyberpunk">Cyberpunk distópico com chuva ácida e luzes de néon</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western com duelos ao pôr do sol</string>
+    <string name="iris_prompt_whodunit_mansion">Mistério de assassinato policial com quebra-cabeças em uma mansão vintage</string>
+    <string name="iris_prompt_archaeological_adventure">Aventura arqueológica épica através de templos e mistérios esquecidos</string>
 </resources>

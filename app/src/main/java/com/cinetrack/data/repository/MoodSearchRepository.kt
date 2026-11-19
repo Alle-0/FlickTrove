@@ -35,6 +35,10 @@ class MoodRateLimitException(
     message: String = "Servers are temporarily busy. Please try again shortly."
 ) : Exception(message)
 
+class MoodLanguageOfflineException(
+    message: String = "An active internet connection is required for this language."
+) : Exception(message)
+
 @Singleton
 class MoodSearchRepository @Inject constructor(
     @ApplicationContext private val context: Context,
@@ -70,7 +74,7 @@ class MoodSearchRepository @Inject constructor(
         }
     }
 
-    fun isLocalEligible(language: String): Boolean = true
+    fun isLocalEligible(language: String): Boolean = localEngine.isLanguageSupported(language)
 
     suspend fun searchMoviesByMood(
         query: String,
@@ -287,6 +291,10 @@ class MoodSearchRepository @Inject constructor(
         }
 
         // B. Tentativo 2: Algoritmo Locale Offline (LocalMoodSearchEngine, BM25 + TMDB sul device)
+        if (!localEngine.isLanguageSupported(language)) {
+            throw MoodLanguageOfflineException(context.getString(R.string.search_mood_language_offline_desc))
+        }
+
         val localResult = localEngine.searchLocalMood(
             query = trimmedQuery,
             language = language,

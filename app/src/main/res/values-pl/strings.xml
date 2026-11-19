@@ -2221,4 +2221,30 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="semantic_reason_plot_match">Tematyczne dopasowanie fabuły</string>
     <string name="semantic_reason_atmosphere">Klimat: %1$s</string>
     <string name="semantic_reason_written_by">Scenariusz: %1$s</string>
+    <string name="search_mood_language_offline_title">Wymagane połączenie z Internetem</string>
+    <string name="search_mood_language_offline_desc">W tym języku odkrywanie nastroju wymaga aktywnego połączenia z Internetem, aby przeszukiwać katalog TMDB.</string>
+
+    <string name="iris_weekly_section_title">Tygodnik IRIS</string>
+    <string name="iris_weekly_change_focus">Zmień ostrość</string>
+    <string name="iris_weekly_subtitle_resonance">Rezonuje z %1$s</string>
+    <string name="iris_weekly_subtitle_default">Dostrojony do Twoich ukochanych arcydzieł</string>
+    <string name="iris_weekly_cold_start_title">Skalibruj oko IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Oceń lub zapisz co najmniej 3 filmy, aby odblokować cotygodniowe Top 10 oparte na nastrojach.</string>
+    <string name="iris_weekly_cold_start_action">Przeglądaj filmy</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Rezonans</string>
+    <string name="iris_cluster_scifi">Rzeczywistość science fiction i dystopijna</string>
+    <string name="iris_cluster_crime_noir">Kryminały, thrillery noir i psychologiczne</string>
+    <string name="iris_cluster_drama_auteur">Kino autorskie i dramaty ludzkie</string>
+    <string name="iris_cluster_horror">Horror i mroczne napięcie</string>
+    <string name="iris_cluster_adventure">Przygoda, fantasy i akcja</string>
+    <string name="iris_cluster_comedy">Wyrafinowana komedia i dowcipny duch</string>
+    <string name="iris_cluster_cult_favorites">Arcydzieła kultu osobistego</string>
+    <string name="iris_prompt_noir">Miejski noir z lat 40. z ulewnym deszczem i nocnym jazzem</string>
+    <string name="iris_prompt_scifi">Kontemplacyjne sci-fi w ciszy głębokiego kosmosu</string>
+    <string name="iris_prompt_italian_comedy">Słodko-gorzka komedia w stylu włoskim, pełna śmiechu i melancholii</string>
+    <string name="iris_prompt_cabin_thriller">Trzymający w napięciu thriller psychologiczny w odizolowanej kabinie</string>
+    <string name="iris_prompt_cyberpunk">Dystopijny cyberpunk z kwaśnymi deszczami i neonami</string>
+    <string name="iris_prompt_spaghetti_western">Zmierzch Spaghetti Western z pojedynkami o zachodzie słońca</string>
+    <string name="iris_prompt_whodunit_mansion">Zagadka morderstwa Whodunit z zagadkami w zabytkowej rezydencji</string>
+    <string name="iris_prompt_archaeological_adventure">Epicka przygoda archeologiczna poprzez zapomniane świątynie i tajemnice</string>
 </resources>

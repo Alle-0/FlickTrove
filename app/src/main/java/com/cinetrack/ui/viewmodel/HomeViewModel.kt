@@ -86,7 +86,8 @@ class HomeViewModel @Inject constructor(
     private val selectContinueWatchingTvUseCase: com.cinetrack.domain.SelectContinueWatchingTvUseCase,
     private val traktAuthRepository: com.cinetrack.data.repository.TraktAuthRepository,
     private val simklAuthRepository: com.cinetrack.data.repository.SimklAuthRepository,
-    private val mediaActionDelegate: MediaActionDelegate
+    private val mediaActionDelegate: MediaActionDelegate,
+    private val getIrisWeeklyPicksUseCase: com.cinetrack.domain.usecase.GetIrisWeeklyPicksUseCase
 ) : ViewModel() {
 
     private val initialMedia = preferenceRepository.initialDefaultMedia
@@ -114,6 +115,37 @@ class HomeViewModel @Inject constructor(
     val troveRevealedToday: StateFlow<Boolean> = _troveRevealedToday.asStateFlow()
     private val _isRefreshing = MutableStateFlow(false)
     val isRefreshing: StateFlow<Boolean> = _isRefreshing.asStateFlow()
+
+    // -------------------------------------------------------------------------
+    // IRIS Weekly Top 10 Discovery
+    // -------------------------------------------------------------------------
+    private var irisClusterOffset = 0
+    private val _irisWeeklyUiState = MutableStateFlow<com.cinetrack.data.model.IrisWeeklyUiState>(
+        com.cinetrack.data.model.IrisWeeklyUiState.Loading
+    )
+    val irisWeeklyUiState: StateFlow<com.cinetrack.data.model.IrisWeeklyUiState> = _irisWeeklyUiState.asStateFlow()
+
+    fun loadIrisWeekly(forceRefresh: Boolean = false, cycleCluster: Boolean = false) {
+        viewModelScope.launch {
+            if (!cycleCluster && _irisWeeklyUiState.value !is com.cinetrack.data.model.IrisWeeklyUiState.Ready) {
+                _irisWeeklyUiState.value = com.cinetrack.data.model.IrisWeeklyUiState.Loading
+            }
+            val state = getIrisWeeklyPicksUseCase(
+                forceRefresh = forceRefresh,
+                clusterOffset = irisClusterOffset
+            )
+            _irisWeeklyUiState.value = state
+        }
+    }
+
+    fun onRotateIrisFocus() {
+        val current = _irisWeeklyUiState.value
+        if (current is com.cinetrack.data.model.IrisWeeklyUiState.Ready && current.picks.hasMultipleClusters) {
+            _irisWeeklyUiState.value = current.copy(isRotating = true)
+            irisClusterOffset++
+            loadIrisWeekly(forceRefresh = true, cycleCluster = true)
+        }
+    }
 
     private var lastRefreshTimestamp: Long = 0L
 
@@ -166,6 +198,7 @@ class HomeViewModel @Inject constructor(
 
                     // 4. Refresh Home Feed (TMDb) in background (non blocca la chiusura dello spinner)
                     fetchFeed(forceRefresh = true)
+                    loadIrisWeekly(forceRefresh = true)
 
                     // 5. Sincronizzazione Firebase cloud in background IO
                     launch(Dispatchers.IO) {
@@ -335,6 +368,7 @@ class HomeViewModel @Inject constructor(
         fetchFeed()
         loadBoxOfficeWinner()
         loadTroveRevealState()
+        loadIrisWeekly()
         // Ricarica lo stato Scrigno quando si cambia tab (Movie <-> TV)
         viewModelScope.launch {
             _activeTab.collect { loadTroveRevealState() }

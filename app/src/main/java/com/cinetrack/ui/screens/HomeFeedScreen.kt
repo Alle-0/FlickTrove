@@ -183,6 +183,7 @@ fun HomeFeedScreenContent(
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
     val isRefreshing by viewModel.isRefreshing.collectAsStateWithLifecycle()
     val troveRevealedToday by viewModel.troveRevealedToday.collectAsStateWithLifecycle()
+    val irisWeeklyState by viewModel.irisWeeklyUiState.collectAsStateWithLifecycle()
     val pullToRefreshState = rememberPullToRefreshState()
     val configuration = LocalConfiguration.current
     
@@ -488,6 +489,35 @@ fun HomeFeedScreenContent(
                                         onMessage = stableOnMessage,
                                         keyPrefix = "wl_${if (isTv) "tv" else "movie"}"
                                     )
+                                }
+                            }
+                        }
+
+                        com.cinetrack.data.model.HomeFeedSectionConstants.IRIS_WEEKLY -> {
+                            // 3.5 IRIS WEEKLY TOP 10 (Esclusiva Cinema, riordinabile e disattivabile)
+                            if (!isTv && uiState.preferences.showHomeIrisWeekly) {
+                                item(key = "section_iris_weekly") {
+                                    AnimatedHomeSection {
+                                        com.cinetrack.ui.components.home.IrisWeeklyCarousel(
+                                            state = irisWeeklyState,
+                                            hazeState = activeHazeState,
+                                            resolveLocalMovie = resolveLocalMovie,
+                                            isMovieFavorite = isMovieFavorite,
+                                            isMovieWatched = isMovieWatched,
+                                            isMovieReminder = isMovieReminder,
+                                            getMovieProgress = getMovieProgress,
+                                            getMovieFolderColors = getMovieFolderColors,
+                                            onMovieClick = onMovieClick,
+                                            onMovieLongPress = stableOnLongPress,
+                                            onAction = stableOnAction,
+                                            onMessage = stableOnMessage,
+                                            onRotateFocus = { viewModel.onRotateIrisFocus() },
+                                            onExploreCatalog = {
+                                                RecommendationsTab.requestedMediaType = "movie"
+                                                tabNavigator.current = RecommendationsTab
+                                            }
+                                        )
+                                    }
                                 }
                             }
                         }

@@ -90,6 +90,7 @@ fun HomeSectionsOrderDialog(
     val showHomeBoxOffice by settingsViewModel.showHomeBoxOffice.collectAsStateWithLifecycle()
     val showHomeWatchlist by settingsViewModel.showHomeWatchlist.collectAsStateWithLifecycle()
     val showHomeBecauseYouWatched by settingsViewModel.showHomeBecauseYouWatched.collectAsStateWithLifecycle()
+    val showHomeIrisWeekly by settingsViewModel.showHomeIrisWeekly.collectAsStateWithLifecycle()
     val homeSectionOrder by settingsViewModel.homeSectionOrder.collectAsStateWithLifecycle()
     val context = LocalContext.current
     val vibrationEnabled by settingsViewModel.vibrationEnabled.collectAsStateWithLifecycle()
@@ -289,6 +290,14 @@ fun HomeSectionsOrderDialog(
                             iconRes = R.drawable.ic_sparkle,
                             titleRes = R.string.home_section_trove_pick,
                             canToggle = false
+                        )
+                        com.cinetrack.data.model.HomeFeedSectionConstants.IRIS_WEEKLY -> HomeSectionSettingRow(
+                            key = itemKey,
+                            iconRes = R.drawable.ic_aperture,
+                            titleRes = R.string.iris_weekly_section_title,
+                            canToggle = true,
+                            checked = showHomeIrisWeekly,
+                            onCheckedChange = { settingsViewModel.toggleShowHomeIrisWeekly(it) }
                         )
                         com.cinetrack.data.model.HomeFeedSectionConstants.BECAUSE_YOU_WATCHED -> HomeSectionSettingRow(
                             key = itemKey,

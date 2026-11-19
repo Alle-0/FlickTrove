@@ -150,6 +150,7 @@ data class UserPreferences(
     val showHomeBoxOffice: Boolean = true,
     val showHomeWatchlist: Boolean = true,
     val showHomeBecauseYouWatched: Boolean = true,
+    val showHomeIrisWeekly: Boolean = true,
     val homeSectionOrder: List<String> = HomeFeedSectionConstants.DEFAULT_ORDER,
     val allowMobileDataUpdates: Boolean = true,
     val enableBottomBarSwipe: Boolean = true,
@@ -161,6 +162,7 @@ object HomeFeedSectionConstants {
     const val BOX_OFFICE = "box_office"
     const val WATCHLIST = "watchlist"
     const val TROVE_PICK = "trove_pick"
+    const val IRIS_WEEKLY = "iris_weekly"
     const val BECAUSE_YOU_WATCHED = "because_you_watched"
     const val TOP_10 = "top_10"
     const val POPULAR = "popular"
@@ -172,6 +174,7 @@ object HomeFeedSectionConstants {
         CONTINUE_WATCHING,
         WATCHLIST,
         TROVE_PICK,
+        IRIS_WEEKLY,
         BECAUSE_YOU_WATCHED,
         TOP_10,
         POPULAR,
@@ -194,13 +197,65 @@ object HomeFeedSectionConstants {
         NEWS
     )
 
+    private val OLD_DEFAULT_WITHOUT_IRIS = listOf(
+        CONTINUE_WATCHING,
+        WATCHLIST,
+        TROVE_PICK,
+        BECAUSE_YOU_WATCHED,
+        TOP_10,
+        POPULAR,
+        NOW_PLAYING,
+        UPCOMING,
+        NEWS,
+        BOX_OFFICE
+    )
+
     fun sanitizeOrder(savedOrder: List<String>): List<String> {
         val validSaved = savedOrder.filter { it in DEFAULT_ORDER }.distinct()
-        if (validSaved == OLD_DEFAULT_WITH_BOX_OFFICE_SECOND) {
+        if (validSaved == OLD_DEFAULT_WITH_BOX_OFFICE_SECOND || validSaved == OLD_DEFAULT_WITHOUT_IRIS) {
             return DEFAULT_ORDER
         }
-        val missing = DEFAULT_ORDER.filter { it !in validSaved }
-        return validSaved + missing
+
+        val result = validSaved.toMutableList()
+
+        if (IRIS_WEEKLY !in result) {
+            val trovePickIndex = result.indexOf(TROVE_PICK)
+            if (trovePickIndex != -1) {
+                result.add(trovePickIndex + 1, IRIS_WEEKLY)
+            } else {
+                val becauseIndex = result.indexOf(BECAUSE_YOU_WATCHED)
+                if (becauseIndex != -1) {
+                    result.add(becauseIndex, IRIS_WEEKLY)
+                } else {
+                    result.add(0, IRIS_WEEKLY)
+                }
+            }
+        } else {
+            // Se IRIS_WEEKLY è finito accidentalmente in fondo (dopo BOX_OFFICE o all'ultimo posto dopo NEWS)
+            val irisIndex = result.indexOf(IRIS_WEEKLY)
+            val boxOfficeIndex = result.indexOf(BOX_OFFICE)
+            val newsIndex = result.indexOf(NEWS)
+            val isAtTheVeryEnd = (boxOfficeIndex != -1 && irisIndex > boxOfficeIndex) ||
+                    (newsIndex != -1 && irisIndex > newsIndex && irisIndex == result.lastIndex)
+            if (isAtTheVeryEnd) {
+                result.removeAt(irisIndex)
+                val trovePickIndex = result.indexOf(TROVE_PICK)
+                if (trovePickIndex != -1) {
+                    result.add(trovePickIndex + 1, IRIS_WEEKLY)
+                } else {
+                    val becauseIndex = result.indexOf(BECAUSE_YOU_WATCHED)
+                    if (becauseIndex != -1) {
+                        result.add(becauseIndex, IRIS_WEEKLY)
+                    } else {
+                        result.add(0, IRIS_WEEKLY)
+                    }
+                }
+            }
+        }
+
+        val missing = DEFAULT_ORDER.filter { it !in result }
+        result.addAll(missing)
+        return result
     }
 }
 

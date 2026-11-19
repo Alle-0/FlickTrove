@@ -293,7 +293,20 @@ fun SearchContentGrid(
                     if (uiState.category == "mood") {
                         if (uiState.isMoodSearchSubmitted) {
                             item(span = { GridItemSpan(12) }) {
+                                val hasError = !uiState.moodErrorMessage.isNullOrBlank()
+                                val emptyTitle = if (hasError) {
+                                    stringResource(R.string.search_mood_language_offline_title)
+                                } else {
+                                    stringResource(R.string.search_mood_iris_no_results)
+                                }
+                                val emptyDesc = if (hasError) {
+                                    uiState.moodErrorMessage
+                                } else {
+                                    stringResource(R.string.search_mood_iris_no_results_desc)
+                                }
                                 IrisEmptyState(
+                                    title = emptyTitle,
+                                    description = emptyDesc,
                                     query = uiState.query,
                                     isMoodAiMode = uiState.isMoodAiMode,
                                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 24.dp)

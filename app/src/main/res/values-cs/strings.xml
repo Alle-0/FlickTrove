@@ -2211,4 +2211,30 @@
     <string name="semantic_reason_plot_match">Tematická shoda s dějem</string>
     <string name="semantic_reason_atmosphere">Atmosféra: %1$s</string>
     <string name="semantic_reason_written_by">Scénář: %1$s</string>
+    <string name="search_mood_language_offline_title">Vyžadováno připojení k internetu</string>
+    <string name="search_mood_language_offline_desc">Pro tento jazyk vyžaduje objevování nálad aktivní připojení k internetu pro prozkoumání katalogu TMDB.</string>
+
+    <string name="iris_weekly_section_title">Týdeník IRIS</string>
+    <string name="iris_weekly_change_focus">Přeostřit</string>
+    <string name="iris_weekly_subtitle_resonance">Rezonuje s %1$s</string>
+    <string name="iris_weekly_subtitle_default">Naladěni na vaše milovaná mistrovská díla</string>
+    <string name="iris_weekly_cold_start_title">Kalibrujte Eye of IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Ohodnoťte nebo uložte alespoň 3 filmy, abyste odemkli svých týdenních Top 10 podle nálady.</string>
+    <string name="iris_weekly_cold_start_action">Prozkoumejte filmy</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Rezonance</string>
+    <string name="iris_cluster_scifi">Sci-fi a dystopická realita</string>
+    <string name="iris_cluster_crime_noir">Krimi, noir a psychologické thrillery</string>
+    <string name="iris_cluster_drama_auteur">Auteur Cinema &amp; Lidská dramata</string>
+    <string name="iris_cluster_horror">Horor a temné napětí</string>
+    <string name="iris_cluster_adventure">Dobrodružství, fantasy a akce</string>
+    <string name="iris_cluster_comedy">Sofistikovaná komedie a vtipný duch</string>
+    <string name="iris_cluster_cult_favorites">Osobní kultovní mistrovská díla</string>
+    <string name="iris_prompt_noir">Městský noir 40. let s deštěm a pozdním nočním jazzem</string>
+    <string name="iris_prompt_scifi">Kontemplativní sci-fi v tichu hlubokého vesmíru</string>
+    <string name="iris_prompt_italian_comedy">Hořkosladká komedie v italském stylu se smíchem a melancholií</string>
+    <string name="iris_prompt_cabin_thriller">Pomalý psychologický thriller v izolované kabině</string>
+    <string name="iris_prompt_cyberpunk">Dystopický kyberpunk s kyselým deštěm a neony</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western s duely při západu slunce</string>
+    <string name="iris_prompt_whodunit_mansion">Záhada vraždy Whodunit s hádankami ve starém sídle</string>
+    <string name="iris_prompt_archaeological_adventure">Epické archeologické dobrodružství skrz zapomenuté chrámy a záhady</string>
 </resources>

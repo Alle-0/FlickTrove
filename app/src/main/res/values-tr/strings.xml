@@ -2251,4 +2251,30 @@
     <string name="semantic_reason_plot_match">Konu ve tema uyumu</string>
     <string name="semantic_reason_atmosphere">Atmosfer: %1$s</string>
     <string name="semantic_reason_written_by">Senaryo: %1$s</string>
+    <string name="search_mood_language_offline_title">İnternet bağlantısı gerekli</string>
+    <string name="search_mood_language_offline_desc">Bu dil için Ruh Hali Keşfi, TMDB kataloğunu keşfetmek üzere etkin bir internet bağlantısı gerektirir.</string>
+
+    <string name="iris_weekly_section_title">IRIS Haftalık</string>
+    <string name="iris_weekly_change_focus">Yeniden odaklan</string>
+    <string name="iris_weekly_subtitle_resonance">%1$s ile rezonans</string>
+    <string name="iris_weekly_subtitle_default">Sevdiğiniz başyapıtlara göre ayarlandı</string>
+    <string name="iris_weekly_cold_start_title">IRIS\'in Gözünü Kalibre Edin</string>
+    <string name="iris_weekly_cold_start_desc">Haftalık ruh halinize göre En İyi 10 listenizin kilidini açmak için en az 3 filmi derecelendirin veya kaydedin.</string>
+    <string name="iris_weekly_cold_start_action">Filmleri keşfedin</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Rezonans</string>
+    <string name="iris_cluster_scifi">Bilim Kurgu ve Distopik Gerçekler</string>
+    <string name="iris_cluster_crime_noir">Suç, Noir ve Psikolojik Gerilimler</string>
+    <string name="iris_cluster_drama_auteur">Auteur Sineması ve İnsan Dramaları</string>
+    <string name="iris_cluster_horror">Korku ve Karanlık Gerilim</string>
+    <string name="iris_cluster_adventure">Macera, Fantazi ve Aksiyon</string>
+    <string name="iris_cluster_comedy">Sofistike Komedi ve Esprili Ruh</string>
+    <string name="iris_cluster_cult_favorites">Kişisel Kült Başyapıtlar</string>
+    <string name="iris_prompt_noir">Sağanak yağmur ve gece caz müziğiyle 1940\'ların kentsel noir\'ı</string>
+    <string name="iris_prompt_scifi">Derin uzayın sessizliğinde düşünceli bilim kurgu</string>
+    <string name="iris_prompt_italian_comedy">Kahkaha ve melankoli içeren acı tatlı İtalyan tarzı komedi</string>
+    <string name="iris_prompt_cabin_thriller">İzole bir kabinde yavaş yavaş ilerleyen psikolojik gerilim filmi</string>
+    <string name="iris_prompt_cyberpunk">Asit yağmuru ve neon ışıklarıyla distopik siberpunk</string>
+    <string name="iris_prompt_spaghetti_western">Gün batımı düellolarıyla Alacakaranlık Spagetti Western</string>
+    <string name="iris_prompt_whodunit_mansion">Vintage bir malikanede bulmacalarla dolu polisiye cinayet gizemi</string>
+    <string name="iris_prompt_archaeological_adventure">Unutulmuş tapınaklar ve gizemlerle destansı arkeolojik macera</string>
 </resources>

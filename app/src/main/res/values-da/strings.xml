@@ -2257,4 +2257,30 @@
     <string name="semantic_reason_plot_match">Tematisk plot-match</string>
     <string name="semantic_reason_atmosphere">Stemning: %1$s</string>
     <string name="semantic_reason_written_by">Manuskript af %1$s</string>
+    <string name="search_mood_language_offline_title">Internetforbindelse påkrævet</string>
+    <string name="search_mood_language_offline_desc">For dette sprog kræver stemningssøgning en aktiv internetforbindelse for at udforske TMDB-kataloget.</string>
+
+    <string name="iris_weekly_section_title">IRIS Ugentligt</string>
+    <string name="iris_weekly_change_focus">Genfokus</string>
+    <string name="iris_weekly_subtitle_resonance">Resonanser med %1$s</string>
+    <string name="iris_weekly_subtitle_default">Tunet til dine elskede mesterværker</string>
+    <string name="iris_weekly_cold_start_title">Kalibrer øjet af IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Bedøm eller gem mindst 3 film for at låse op for din ugentlige humørbaserede Top 10.</string>
+    <string name="iris_weekly_cold_start_action">Udforsk film</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Resonans</string>
+    <string name="iris_cluster_scifi">Sci-fi og dystopiske virkeligheder</string>
+    <string name="iris_cluster_crime_noir">Krimi, Noir og psykologiske thrillere</string>
+    <string name="iris_cluster_drama_auteur">Forfatter Cinema &amp; Human Dramas</string>
+    <string name="iris_cluster_horror">Horror &amp; Dark Tension</string>
+    <string name="iris_cluster_adventure">Eventyr, Fantasy &amp; Action</string>
+    <string name="iris_cluster_comedy">Sofistikeret komedie og vittig ånd</string>
+    <string name="iris_cluster_cult_favorites">Personlige kultmesterværker</string>
+    <string name="iris_prompt_noir">1940\'er urban noir med silende regn og sen aftenjazz</string>
+    <string name="iris_prompt_scifi">Kontemplativ sci-fi i stilheden i det dybe rum</string>
+    <string name="iris_prompt_italian_comedy">Bittersød komedie i italiensk stil med latter og melankoli</string>
+    <string name="iris_prompt_cabin_thriller">Langsomt brændende psykologisk thriller i en isoleret hytte</string>
+    <string name="iris_prompt_cyberpunk">Dystopisk cyberpunk med sur regn og neonlys</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western med solnedgangsdueller</string>
+    <string name="iris_prompt_whodunit_mansion">Whodunit mordmysterium med gåder i et vintage palæ</string>
+    <string name="iris_prompt_archaeological_adventure">Episk arkæologisk eventyr gennem glemte templer og mysterier</string>
 </resources>

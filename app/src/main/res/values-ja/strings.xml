@@ -2251,4 +2251,30 @@
     <string name="semantic_reason_plot_match">プロットとの親和性</string>
     <string name="semantic_reason_atmosphere">雰囲気: %1$s</string>
     <string name="semantic_reason_written_by">脚本: %1$s</string>
+    <string name="search_mood_language_offline_title">インターネット接続が必要です</string>
+    <string name="search_mood_language_offline_desc">この言語では、TMDBカタログを探索するためにアクティブなインターネット接続が必要です。</string>
+
+    <string name="iris_weekly_section_title">アイリスウィークリー</string>
+    <string name="iris_weekly_change_focus">焦点を合わせ直す</string>
+    <string name="iris_weekly_subtitle_resonance">%1$s に共鳴する</string>
+    <string name="iris_weekly_subtitle_default">あなたの愛する傑作に合わせてチューニング</string>
+    <string name="iris_weekly_cold_start_title">IRISの目を調整する</string>
+    <string name="iris_weekly_cold_start_desc">少なくとも 3 本の映画を評価または保存すると、毎週の気分に基づくトップ 10 がロック解除されます。</string>
+    <string name="iris_weekly_cold_start_action">映画を探索する</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% 共鳴</string>
+    <string name="iris_cluster_scifi">SF とディストピアの現実</string>
+    <string name="iris_cluster_crime_noir">犯罪、ノワール、心理スリラー</string>
+    <string name="iris_cluster_drama_auteur">作家映画とヒューマン ドラマ</string>
+    <string name="iris_cluster_horror">ホラー＆ダークテンション</string>
+    <string name="iris_cluster_adventure">アドベンチャー、ファンタジー、アクション</string>
+    <string name="iris_cluster_comedy">洗練されたコメディーとウィットに富んだスピリット</string>
+    <string name="iris_cluster_cult_favorites">個人的なカルトの傑作</string>
+    <string name="iris_prompt_noir">土砂降りの雨と深夜のジャズが流れる 1940 年代のアーバン ノワール</string>
+    <string name="iris_prompt_scifi">深宇宙の静寂の中での思索的な SF</string>
+    <string name="iris_prompt_italian_comedy">笑いと哀愁を併せ持つほろ苦いイタリア風コメディー</string>
+    <string name="iris_prompt_cabin_thriller">隔離された小屋でゆっくりと燃え上がる心理スリラー</string>
+    <string name="iris_prompt_cyberpunk">酸性雨とネオンが光るディストピア的なサイバーパンク</string>
+    <string name="iris_prompt_spaghetti_western">日没の決闘を含むトワイライト スパゲッティ ウエスタン</string>
+    <string name="iris_prompt_whodunit_mansion">ビンテージの邸宅を舞台にしたパズルを備えたフーダニット殺人ミステリー</string>
+    <string name="iris_prompt_archaeological_adventure">忘れられた寺院と謎を巡る壮大な考古学アドベンチャー</string>
 </resources>

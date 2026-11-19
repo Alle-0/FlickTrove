@@ -2233,4 +2233,30 @@ Cod de invitație: %3$s</string>
     <string name="semantic_reason_plot_match">Potrivire tematică a intrigii</string>
     <string name="semantic_reason_atmosphere">Atmosferă: %1$s</string>
     <string name="semantic_reason_written_by">Scenariu de %1$s</string>
+    <string name="search_mood_language_offline_title">Conexiune la Internet necesară</string>
+    <string name="search_mood_language_offline_desc">Pentru această limbă, descoperirea după stare necesită o conexiune activă la Internet pentru a explora catalogul TMDB.</string>
+
+    <string name="iris_weekly_section_title">IRIS Săptămânal</string>
+    <string name="iris_weekly_change_focus">Reconcentrați-vă</string>
+    <string name="iris_weekly_subtitle_resonance">Rezonând cu %1$s</string>
+    <string name="iris_weekly_subtitle_default">Acordat la capodoperele tale iubite</string>
+    <string name="iris_weekly_cold_start_title">Calibrați ochiul lui IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Evaluează sau salvează cel puțin 3 filme pentru a-ți debloca Top 10 săptămânal bazat pe starea de spirit.</string>
+    <string name="iris_weekly_cold_start_action">Explorați filme</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Rezonanță</string>
+    <string name="iris_cluster_scifi">Sci-Fi și realități distopice</string>
+    <string name="iris_cluster_crime_noir">Crimă, Noir și Thrillere psihologice</string>
+    <string name="iris_cluster_drama_auteur">Cinema de autor și drame umane</string>
+    <string name="iris_cluster_horror">Horror și tensiune întunecată</string>
+    <string name="iris_cluster_adventure">Aventură, Fantezie și Acțiune</string>
+    <string name="iris_cluster_comedy">Comedie sofisticată și spirit spiritual</string>
+    <string name="iris_cluster_cult_favorites">Capodoperele Cultului Personal</string>
+    <string name="iris_prompt_noir">Urban noir al anilor 1940 cu ploaie torențială și jazz târziu</string>
+    <string name="iris_prompt_scifi">Sci-fi contemplativ în tăcerea spațiului adânc</string>
+    <string name="iris_prompt_italian_comedy">Comedie dulce-amăruie în stil italian, cu râs și melancolie</string>
+    <string name="iris_prompt_cabin_thriller">Thriller psihologic cu ardere lentă într-o cabină izolată</string>
+    <string name="iris_prompt_cyberpunk">Cyberpunk distopic cu ploaie acidă și lumini de neon</string>
+    <string name="iris_prompt_spaghetti_western">Western Spaghetti Twilight cu dueluri la apus</string>
+    <string name="iris_prompt_whodunit_mansion">Misterul crimei Whodunit cu puzzle-uri într-un conac de epocă</string>
+    <string name="iris_prompt_archaeological_adventure">Aventura arheologică epică prin temple și mistere uitate</string>
 </resources>

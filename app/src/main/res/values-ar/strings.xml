@@ -2208,4 +2208,30 @@
     <string name="semantic_reason_plot_match">تطابق موضوع القصة</string>
     <string name="semantic_reason_atmosphere">الأجواء: %1$s</string>
     <string name="semantic_reason_written_by">سيناريو: %1$s</string>
+    <string name="search_mood_language_offline_title">الاتصال بالإنترنت مطلوب</string>
+    <string name="search_mood_language_offline_desc">بالنسبة لهذه اللغة، يتطلب استكشاف المزاج اتصالاً نشطاً بالإنترنت لاستكشاف كتالوج TMDB.</string>
+
+    <string name="iris_weekly_section_title">ايريس ويكلي</string>
+    <string name="iris_weekly_change_focus">إعادة التركيز</string>
+    <string name="iris_weekly_subtitle_resonance">صدى مع %1$s</string>
+    <string name="iris_weekly_subtitle_default">تم ضبطها على روائعك المفضلة</string>
+    <string name="iris_weekly_cold_start_title">معايرة عين IRIS</string>
+    <string name="iris_weekly_cold_start_desc">قم بتقييم أو حفظ ما لا يقل عن 3 أفلام لفتح أفضل 10 أفلام أسبوعيًا بناءً على الحالة المزاجية.</string>
+    <string name="iris_weekly_cold_start_action">استكشاف الأفلام</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% الرنين</string>
+    <string name="iris_cluster_scifi">الخيال العلمي والواقع البائس</string>
+    <string name="iris_cluster_crime_noir">الجريمة والنوير والإثارة النفسية</string>
+    <string name="iris_cluster_drama_auteur">سينما المؤلف والدراما الإنسانية</string>
+    <string name="iris_cluster_horror">الرعب والتوتر المظلم</string>
+    <string name="iris_cluster_adventure">المغامرة والخيال والحركة</string>
+    <string name="iris_cluster_comedy">كوميديا ​​متطورة وروح بارعة</string>
+    <string name="iris_cluster_cult_favorites">روائع العبادة الشخصية</string>
+    <string name="iris_prompt_noir">نوير حضري من أربعينيات القرن العشرين مع أمطار غزيرة وموسيقى الجاز في وقت متأخر من الليل</string>
+    <string name="iris_prompt_scifi">خيال علمي تأملي في صمت الفضاء السحيق</string>
+    <string name="iris_prompt_italian_comedy">كوميديا ​​حلوة ومرّة على الطريقة الإيطالية مع الضحك والحزن</string>
+    <string name="iris_prompt_cabin_thriller">فيلم إثارة نفسي بطيء الاحتراق في مقصورة معزولة</string>
+    <string name="iris_prompt_cyberpunk">السايبربانك البائس مع المطر الحمضي وأضواء النيون</string>
+    <string name="iris_prompt_spaghetti_western">توايلايت سباغيتي ويسترن مع مبارزات عند غروب الشمس</string>
+    <string name="iris_prompt_whodunit_mansion">جريمة قتل غامضة مع الألغاز في قصر عتيق</string>
+    <string name="iris_prompt_archaeological_adventure">مغامرة أثرية ملحمية عبر المعابد والأسرار المنسية</string>
 </resources>

@@ -107,6 +107,7 @@ class PreferenceRepository @Inject constructor(
         val SHOW_HOME_BOX_OFFICE = booleanPreferencesKey("show_home_box_office")
         val SHOW_HOME_WATCHLIST = booleanPreferencesKey("show_home_watchlist")
         val SHOW_HOME_BECAUSE_YOU_WATCHED = booleanPreferencesKey("show_home_because_you_watched")
+        val SHOW_HOME_IRIS_WEEKLY = booleanPreferencesKey("show_home_iris_weekly")
         val HOME_SECTION_ORDER = stringPreferencesKey("home_section_order")
         val ALLOW_MOBILE_DATA_UPDATES = booleanPreferencesKey("allow_mobile_data_updates")
         val ENABLE_BOTTOM_BAR_SWIPE = booleanPreferencesKey("enable_bottom_bar_swipe")
@@ -194,6 +195,7 @@ class PreferenceRepository @Inject constructor(
                 showHomeBoxOffice = preferences[PreferencesKeys.SHOW_HOME_BOX_OFFICE] ?: true,
                 showHomeWatchlist = preferences[PreferencesKeys.SHOW_HOME_WATCHLIST] ?: true,
                 showHomeBecauseYouWatched = preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] ?: true,
+                showHomeIrisWeekly = preferences[PreferencesKeys.SHOW_HOME_IRIS_WEEKLY] ?: true,
                 homeSectionOrder = preferences[PreferencesKeys.HOME_SECTION_ORDER]?.let { raw ->
                     com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(raw.split(","))
                 } ?: com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER,
@@ -405,6 +407,7 @@ class PreferenceRepository @Inject constructor(
             preferences[PreferencesKeys.SHOW_HOME_BOX_OFFICE] = prefs.showHomeBoxOffice
             preferences[PreferencesKeys.SHOW_HOME_WATCHLIST] = prefs.showHomeWatchlist
             preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] = prefs.showHomeBecauseYouWatched
+            preferences[PreferencesKeys.SHOW_HOME_IRIS_WEEKLY] = prefs.showHomeIrisWeekly
             preferences[PreferencesKeys.HOME_SECTION_ORDER] = com.cinetrack.data.model.HomeFeedSectionConstants.sanitizeOrder(prefs.homeSectionOrder).joinToString(",")
             preferences[PreferencesKeys.ALLOW_MOBILE_DATA_UPDATES] = prefs.allowMobileDataUpdates
             preferences[PreferencesKeys.ENABLE_BOTTOM_BAR_SWIPE] = prefs.enableBottomBarSwipe
@@ -480,6 +483,12 @@ class PreferenceRepository @Inject constructor(
     suspend fun updateShowHomeBecauseYouWatched(show: Boolean) {
         dataStore.edit { preferences ->
             preferences[PreferencesKeys.SHOW_HOME_BECAUSE_YOU_WATCHED] = show
+        }
+    }
+
+    suspend fun updateShowHomeIrisWeekly(show: Boolean) {
+        dataStore.edit { preferences ->
+            preferences[PreferencesKeys.SHOW_HOME_IRIS_WEEKLY] = show
         }
     }
 

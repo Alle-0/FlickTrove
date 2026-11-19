@@ -2231,4 +2231,30 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="semantic_reason_plot_match">Тематична відповідність сюжету</string>
     <string name="semantic_reason_atmosphere">Атмосфера: %1$s</string>
     <string name="semantic_reason_written_by">Сценарій: %1$s</string>
+    <string name="search_mood_language_offline_title">Потрібне підключення до Інтернету</string>
+    <string name="search_mood_language_offline_desc">Для цієї мови пошук за настроєм потребує активного підключення до Інтернету для дослідження каталогу TMDB.</string>
+
+    <string name="iris_weekly_section_title">Щотижневик IRIS</string>
+    <string name="iris_weekly_change_focus">Перефокусувати</string>
+    <string name="iris_weekly_subtitle_resonance">Резонує з %1$s</string>
+    <string name="iris_weekly_subtitle_default">Налаштований на ваші улюблені шедеври</string>
+    <string name="iris_weekly_cold_start_title">Відкалібруйте око IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Оцініть або збережіть принаймні 3 фільми, щоб розблокувати щотижневий Топ-10 за настроєм.</string>
+    <string name="iris_weekly_cold_start_action">Досліджуйте фільми</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Резонанс</string>
+    <string name="iris_cluster_scifi">Наукова фантастика та антиутопічні реалії</string>
+    <string name="iris_cluster_crime_noir">Кримінал, нуар і психологічні трилери</string>
+    <string name="iris_cluster_drama_auteur">Авторське кіно та людські драми</string>
+    <string name="iris_cluster_horror">Жахи та темна напруга</string>
+    <string name="iris_cluster_adventure">Пригоди, фентезі та екшн</string>
+    <string name="iris_cluster_comedy">Витончена комедія та дотепний дух</string>
+    <string name="iris_cluster_cult_favorites">Персональні культові шедеври</string>
+    <string name="iris_prompt_noir">Міський нуар 1940-х із проливним дощем і нічним джазом</string>
+    <string name="iris_prompt_scifi">Споглядальна наукова фантастика в тиші глибокого космосу</string>
+    <string name="iris_prompt_italian_comedy">Гірко-солодка комедія в італійському стилі зі сміхом і меланхолією</string>
+    <string name="iris_prompt_cabin_thriller">Повільний психологічний трилер в ізольованій кабіні</string>
+    <string name="iris_prompt_cyberpunk">Антиутопічний кіберпанк з кислотним дощем і неоновим світлом</string>
+    <string name="iris_prompt_spaghetti_western">Сутінковий спагетті-вестерн із дуелями на заході сонця</string>
+    <string name="iris_prompt_whodunit_mansion">Whodunit таємниця вбивства з головоломками у старовинному особняку</string>
+    <string name="iris_prompt_archaeological_adventure">Епічна археологічна пригода через забуті храми та таємниці</string>
 </resources>

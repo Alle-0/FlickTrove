@@ -2211,4 +2211,30 @@
     <string name="semantic_reason_plot_match">Phù hợp chủ đề cốt truyện</string>
     <string name="semantic_reason_atmosphere">Không khí: %1$s</string>
     <string name="semantic_reason_written_by">Kịch bản: %1$s</string>
+    <string name="search_mood_language_offline_title">Yêu cầu kết nối Internet</string>
+    <string name="search_mood_language_offline_desc">Đối với ngôn ngữ này, Khám phá Tâm trạng yêu cầu kết nối Internet để khám phá danh mục TMDB.</string>
+
+    <string name="iris_weekly_section_title">IRIS hàng tuần</string>
+    <string name="iris_weekly_change_focus">Lấy nét lại</string>
+    <string name="iris_weekly_subtitle_resonance">Cộng hưởng với %1$s</string>
+    <string name="iris_weekly_subtitle_default">Điều chỉnh theo kiệt tác yêu thích của bạn</string>
+    <string name="iris_weekly_cold_start_title">Hiệu chỉnh mắt IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Xếp hạng hoặc lưu ít nhất 3 phim để lọt vào Top 10 phim dựa trên tâm trạng hàng tuần của bạn.</string>
+    <string name="iris_weekly_cold_start_action">Khám phá phim</string>
+    <string name="iris_weekly_affinity_badge">Cộng hưởng %1$d%%</string>
+    <string name="iris_cluster_scifi">Khoa học viễn tưởng &amp; Thực tế đen tối</string>
+    <string name="iris_cluster_crime_noir">Phim kinh dị tội phạm, đen tối và tâm lý</string>
+    <string name="iris_cluster_drama_auteur">Tác giả điện ảnh &amp; phim truyền hình nhân văn</string>
+    <string name="iris_cluster_horror">Căng thẳng kinh dị và đen tối</string>
+    <string name="iris_cluster_adventure">Phiêu lưu, Giả tưởng &amp; Hành động</string>
+    <string name="iris_cluster_comedy">Hài kịch tinh tế &amp; tinh thần dí dỏm</string>
+    <string name="iris_cluster_cult_favorites">Kiệt tác sùng bái cá nhân</string>
+    <string name="iris_prompt_noir">Phim noir đô thị những năm 1940 với mưa tầm tã và nhạc jazz đêm khuya</string>
+    <string name="iris_prompt_scifi">Khoa học viễn tưởng chiêm nghiệm trong sự im lặng của không gian sâu thẳm</string>
+    <string name="iris_prompt_italian_comedy">Hài kịch kiểu Ý buồn vui lẫn lộn với tiếng cười và nỗi buồn</string>
+    <string name="iris_prompt_cabin_thriller">Phim kinh dị tâm lý cháy chậm trong cabin biệt lập</string>
+    <string name="iris_prompt_cyberpunk">Cyberpunk đen tối với mưa axit và ánh đèn neon</string>
+    <string name="iris_prompt_spaghetti_western">Chạng vạng Spaghetti miền Tây với những cuộc đọ sức lúc hoàng hôn</string>
+    <string name="iris_prompt_whodunit_mansion">Bí ẩn vụ giết người Whodunit với những câu đố trong một biệt thự cổ điển</string>
+    <string name="iris_prompt_archaeological_adventure">Cuộc phiêu lưu khảo cổ hoành tráng qua những ngôi đền bị lãng quên và những bí ẩn</string>
 </resources>

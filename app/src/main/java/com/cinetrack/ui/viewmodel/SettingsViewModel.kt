@@ -485,6 +485,10 @@ class SettingsViewModel @Inject constructor(
         .map { it.showHomeBecauseYouWatched }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
 
+    val showHomeIrisWeekly: StateFlow<Boolean> = preferenceRepository.userPreferencesFlow
+        .map { it.showHomeIrisWeekly }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), true)
+
     val homeSectionOrder: StateFlow<List<String>> = preferenceRepository.userPreferencesFlow
         .map { it.homeSectionOrder }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER)
@@ -681,6 +685,13 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
+    fun toggleShowHomeIrisWeekly(enabled: Boolean) {
+        viewModelScope.launch {
+            preferenceRepository.updateShowHomeIrisWeekly(enabled)
+            movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
+        }
+    }
+
     fun resetHomeFeedSectionsToDefault() {
         viewModelScope.launch {
             preferenceRepository.updateHomeSectionOrder(com.cinetrack.data.model.HomeFeedSectionConstants.DEFAULT_ORDER)
@@ -688,6 +699,7 @@ class SettingsViewModel @Inject constructor(
             preferenceRepository.updateShowHomeBoxOffice(true)
             preferenceRepository.updateShowHomeWatchlist(true)
             preferenceRepository.updateShowHomeBecauseYouWatched(true)
+            preferenceRepository.updateShowHomeIrisWeekly(true)
             actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_home_feed_reset))
             movieRepository.savePreferencesRemote(preferenceRepository.userPreferencesFlow.first())
         }

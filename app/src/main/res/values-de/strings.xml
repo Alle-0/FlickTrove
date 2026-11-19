@@ -2253,4 +2253,33 @@
     <string name="semantic_reason_plot_match">Thematische Handlungsübereinstimmung</string>
     <string name="semantic_reason_atmosphere">Stimmung: %1$s</string>
     <string name="semantic_reason_written_by">Drehbuch von %1$s</string>
+
+    <!-- IRIS Mood Inspirations Candidates -->
+    <string name="iris_prompt_noir">Urbaner Film Noir der 40er Jahre mit strömendem Regen und nächtlichem Jazz</string>
+    <string name="iris_prompt_scifi">Kontemplative Science-Fiction in der Stille des tiefen Weltraums</string>
+    <string name="iris_prompt_italian_comedy">Bittersüße Komödie im italienischen Stil mit Lachen und Melancholie</string>
+    <string name="iris_prompt_cabin_thriller">Psychothriller mit langsamem Spannungsaufbau in einer einsamen Hütte</string>
+    <string name="iris_prompt_cyberpunk">Dystopischer Cyberpunk mit saurem Regen und Neonlichtern</string>
+    <string name="iris_prompt_spaghetti_western">Spaghetti-Western zur Dämmerung mit Duellen bei Sonnenuntergang</string>
+    <string name="iris_prompt_whodunit_mansion">Whodunit-Krimi mit Rätseln in einem historischen Herrenhaus</string>
+    <string name="iris_prompt_archaeological_adventure">Episches archäologisches Abenteuer durch vergessene Tempel und Geheimnisse</string>
+
+    <string name="search_mood_language_offline_title">Internetverbindung erforderlich</string>
+    <string name="search_mood_language_offline_desc">Für diese Sprache erfordert die Stimmungs-Entdeckung eine aktive Internetverbindung, um den TMDB-Katalog mit IRIS zu durchsuchen.</string>
+
+    <string name="iris_weekly_section_title">IRIS Weekly</string>
+    <string name="iris_weekly_change_focus">Konzentrieren Sie sich neu</string>
+    <string name="iris_weekly_subtitle_resonance">Resonanz bei %1$s</string>
+    <string name="iris_weekly_subtitle_default">Abgestimmt auf Ihre geliebten Meisterwerke</string>
+    <string name="iris_weekly_cold_start_title">Kalibrieren Sie das Auge von IRIS</string>
+    <string name="iris_weekly_cold_start_desc">Bewerten oder speichern Sie mindestens 3 Filme, um Ihre wöchentlichen stimmungsbasierten Top 10 freizuschalten.</string>
+    <string name="iris_weekly_cold_start_action">Entdecken Sie Filme</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Resonanz</string>
+    <string name="iris_cluster_scifi">Science-Fiction und dystopische Realitäten</string>
+    <string name="iris_cluster_crime_noir">Krimi, Noir und Psychothriller</string>
+    <string name="iris_cluster_drama_auteur">Autorenkino und menschliche Dramen</string>
+    <string name="iris_cluster_horror">Horror und dunkle Spannung</string>
+    <string name="iris_cluster_adventure">Abenteuer, Fantasy und Action</string>
+    <string name="iris_cluster_comedy">Anspruchsvolle Komödie und witziger Geist</string>
+    <string name="iris_cluster_cult_favorites">Meisterwerke des Personenkults</string>
 </resources>

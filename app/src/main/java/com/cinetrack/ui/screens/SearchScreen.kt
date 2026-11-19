@@ -51,6 +51,7 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalConfiguration
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
@@ -347,6 +348,7 @@ fun SearchScreenContent(
             (0.60f + (normY * 0.40f)).coerceIn(0.60f, 1.0f)
         } else null
     }
+    val context = LocalContext.current
     val padding = 16.dp
     val gap = 12.dp
     val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
@@ -648,7 +650,18 @@ fun SearchScreenContent(
                             isFocusHunting = isCardInspected,
                             inspectedCardXRatio = inspectedCardXRatio,
                             inspectedCardYRatio = inspectedCardYRatio,
-                            onOpenBubble = { activeSearchBubble = it }
+                            onOpenBubble = { activeSearchBubble = it },
+                            onIrisLongClick = {
+                                val prompt = com.cinetrack.ui.components.mascot.IrisInspirations.getRandomPrompt(context)
+                                if (prompt.isNotBlank()) {
+                                    val sanitized = prompt.take(1000)
+                                    textFieldValue = TextFieldValue(
+                                        text = sanitized,
+                                        selection = androidx.compose.ui.text.TextRange(sanitized.length)
+                                    )
+                                    viewModel.onQueryChanged(sanitized)
+                                }
+                            }
                         )
 
                     // 3. Local-Only Banner (bottom, shown when offline/poor connection)

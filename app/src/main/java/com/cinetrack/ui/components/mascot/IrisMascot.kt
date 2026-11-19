@@ -101,9 +101,11 @@ fun IrisMascot(
     scrollInertia: Float = 0f,
     isFocusHunting: Boolean = false,
     glowPadding: Dp = 0.dp,
-    onClick: (() -> Unit)? = null
+    onClick: (() -> Unit)? = null,
+    onLongClick: (() -> Unit)? = null
 ) {
     val haptic = LocalHapticFeedback.current
+    val coroutineScope = rememberCoroutineScope()
 
     // Chiusura protettiva e ammiccamento (Wink & Touch Defense)
     var isTouched by remember { mutableStateOf(false) }
@@ -304,19 +306,19 @@ fun IrisMascot(
                     idleGazeX = nextX
                     idleGazeY = nextY
 
-                    // Tempo di fissazione calmo e prolungato: circa 3.2 a 5.0 secondi
-                    val fixationDuration = (3200L..5000L).random()
+                    // Tempo di fissazione calmo e naturale: circa 2.8 a 4.2 secondi
+                    val fixationDuration = (2800L..4200L).random()
 
-                    // Ammiccamenti rari e naturali (solo il 25% delle volte, un battito ogni ~15-20 secondi circa)
+                    // Ammiccamenti naturali e vivi (~60% delle volte, un battito ogni ~5-7 secondi)
                     val rollBlink = (1..100).random()
-                    if (rollBlink <= 25) {
-                        val preWait = (1200L..2200L).random().coerceAtMost(fixationDuration - 700L)
+                    if (rollBlink <= 60) {
+                        val preWait = (1000L..1800L).random().coerceAtMost(fixationDuration - 700L)
                         delay(preWait)
 
                         if (!isTouched && !isDizzy && !isAnnoyed) {
                             when {
-                                // 1% Rarissimo triplo ammiccamento vivace
-                                rollBlink <= 1 -> {
+                                // 2% Rarissimo triplo ammiccamento vivace
+                                rollBlink <= 2 -> {
                                     repeat(3) { i ->
                                         winkAnim.animateTo(1f, tween(75, easing = FastOutSlowInEasing))
                                         winkAnim.animateTo(
@@ -326,8 +328,8 @@ fun IrisMascot(
                                         )
                                     }
                                 }
-                                // 3% Doppio ammiccamento morbido
-                                rollBlink <= 4 -> {
+                                // 6% Doppio ammiccamento morbido
+                                rollBlink <= 8 -> {
                                     repeat(2) { i ->
                                         winkAnim.animateTo(1f, tween(85, easing = FastOutSlowInEasing))
                                         winkAnim.animateTo(
@@ -361,19 +363,19 @@ fun IrisMascot(
             }
         } else if (mood == IrisMood.TYPING) {
             while (true) {
-                delay((6500L..9500L).random())
+                delay((3800L..5800L).random())
                 if (!isTouched && !isDizzy && !isAnnoyed) {
                     winkAnim.animateTo(1f, tween(110, easing = FastOutSlowInEasing))
                     winkAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow))
                 }
             }
         } else if (mood == IrisMood.DELIGHTED) {
-            // Ammiccamenti rari e piacevoli mentre contempla i risultati (ogni 8-14 secondi con occasionali doppi)
+            // Ammiccamenti piacevoli mentre contempla i risultati (ogni 5-8.5 secondi con occasionali doppi)
             while (true) {
-                delay((8000L..14000L).random())
+                delay((5000L..8500L).random())
                 if (!isTouched && !isDizzy && !isAnnoyed) {
                     val roll = (1..100).random()
-                    if (roll <= 20) {
+                    if (roll <= 25) {
                         // Raro doppio battito leggero
                         repeat(2) { i ->
                             winkAnim.animateTo(1f, tween(80, easing = FastOutSlowInEasing))
@@ -395,9 +397,9 @@ fun IrisMascot(
             }
         } else if (mood == IrisMood.EMPTY) {
             // Malinconia riflessiva (Nessun risultato trovato / EMPTY):
-            // Sguardo basso, micro-sospiro e battiti lenti e pesanti ogni 6-10 secondi (come WALL-E sconsolato)
+            // Sguardo basso, micro-sospiro e battiti lenti e pesanti ogni 5-7.5 secondi (come WALL-E sconsolato)
             while (true) {
-                delay((6500L..10500L).random())
+                delay((5000L..7500L).random())
                 if (!isTouched && !isDizzy && !isAnnoyed) {
                     winkAnim.animateTo(1f, tween(160, easing = FastOutSlowInEasing))
                     winkAnim.animateTo(
@@ -754,7 +756,19 @@ fun IrisMascot(
                     }
                     .bounceClick(
                         scaleDown = 0.92f,
-                        onClick = { onClick?.invoke() }
+                        onClick = { onClick?.invoke() },
+                        onLongClick = onLongClick?.let { action ->
+                            {
+                                if (!isDizzy) {
+                                    coroutineScope.launch {
+                                        focusHuntingAngle.animateTo(28f, tween(110, easing = FastOutSlowInEasing))
+                                        focusHuntingAngle.animateTo(-22f, tween(130, easing = FastOutSlowInEasing))
+                                        focusHuntingAngle.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow))
+                                    }
+                                    action()
+                                }
+                            }
+                        }
                     )
             )
         }

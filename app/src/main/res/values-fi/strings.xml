@@ -2257,4 +2257,30 @@
     <string name="semantic_reason_plot_match">Juoneen sopiva teema</string>
     <string name="semantic_reason_atmosphere">Tunnelma: %1$s</string>
     <string name="semantic_reason_written_by">Käsikirjoitus: %1$s</string>
+    <string name="search_mood_language_offline_title">Internet-yhteys vaaditaan</string>
+    <string name="search_mood_language_offline_desc">Tälle kielelle tunnelmahaku vaatii aktiivisen internet-yhteyden TMDB-luettelon tutkimiseen.</string>
+
+    <string name="iris_weekly_section_title">IRIS Viikkolehti</string>
+    <string name="iris_weekly_change_focus">Keskity uudelleen</string>
+    <string name="iris_weekly_subtitle_resonance">Resonoi kanssa %1$s</string>
+    <string name="iris_weekly_subtitle_default">Viritä rakkaille mestariteoksillesi</string>
+    <string name="iris_weekly_cold_start_title">Kalibroi IRIS-silmä</string>
+    <string name="iris_weekly_cold_start_desc">Arvioi tai tallenna vähintään 3 elokuvaa avataksesi viikoittaisen mielialaan perustuvan Top 10 -elokuvasi.</string>
+    <string name="iris_weekly_cold_start_action">Tutustu elokuviin</string>
+    <string name="iris_weekly_affinity_badge">___P1D__PCT___ Resonanssi</string>
+    <string name="iris_cluster_scifi">Scifi ja dystooppiset todellisuudet</string>
+    <string name="iris_cluster_crime_noir">Rikollisuus, noir ja psykologiset trillerit</string>
+    <string name="iris_cluster_drama_auteur">Tekijäelokuva ja ihmisdraamat</string>
+    <string name="iris_cluster_horror">Horror &amp; Dark Tension</string>
+    <string name="iris_cluster_adventure">Seikkailu, fantasia ja toiminta</string>
+    <string name="iris_cluster_comedy">Hienostunut komedia ja nokkela henki</string>
+    <string name="iris_cluster_cult_favorites">Henkilökohtaisia ​​kulttimestariteoksia</string>
+    <string name="iris_prompt_noir">1940-luvun urbaani noir kaatosadetta ja myöhäisillan jazzia</string>
+    <string name="iris_prompt_scifi">Mietiskelevää scifiä syvän avaruuden hiljaisuudessa</string>
+    <string name="iris_prompt_italian_comedy">Karvassuloinen italialaistyylinen komedia, jossa on naurua ja melankoliaa</string>
+    <string name="iris_prompt_cabin_thriller">Hitaasti palava psykologinen trilleri erillisessä mökissä</string>
+    <string name="iris_prompt_cyberpunk">Dystooppinen kyberpunk happosateella ja neonvaloilla</string>
+    <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western auringonlaskun kaksintaisteluilla</string>
+    <string name="iris_prompt_whodunit_mansion">Whodunit-murhamysteeri ja arvoituksia vintage-kartanossa</string>
+    <string name="iris_prompt_archaeological_adventure">Eeppinen arkeologinen seikkailu unohdettujen temppelien ja mysteerien läpi</string>
 </resources>
