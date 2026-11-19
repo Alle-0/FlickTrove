@@ -48,6 +48,7 @@ data class SemanticMovieDto(
     @SerialName("collection_id") val collectionId: Long? = null,
     val franchise: String? = null,
     val runtime: Int? = null,
+    val budget: Long? = null,
     val revenue: Long? = null,
     @SerialName("original_language") val originalLanguage: String? = null,
     val country: String? = null,
