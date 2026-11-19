@@ -84,12 +84,12 @@ class GetIrisWeeklyPicksUseCase @Inject constructor(
 
         val candidateSeedIds = (clusterCandidates.map { it.id } + otherCandidates.map { it.id } + cultFallbackIds).distinct().take(18)
 
-        // 4. Controllo Cache Locale (TTL 7gg e stesso cluster offset)
+        // 4. Controllo Cache Locale (TTL 7gg indicizzata per activeClusterIndex)
         if (!forceRefresh) {
-            val cached = repository.getCachedPicks()
+            val cached = repository.getCachedPicks(activeClusterIndex)
             if (cached != null &&
                 repository.isCacheValid(cached) &&
-                cached.clusterOffset == clusterOffset
+                cached.clusterOffset == activeClusterIndex
             ) {
                 // Riserva: applichiamo .filter { it.id !in watchedIds }.take(10) per fare subentrare i film successivi
                 val unconsumed = cached.candidateMovies.filter { it.id !in watchedIds }.take(10)
@@ -157,7 +157,7 @@ class GetIrisWeeklyPicksUseCase @Inject constructor(
                     focusSubtitle = subtitle,
                     usedSeedTitles = usedTitles,
                     timestamp = System.currentTimeMillis(),
-                    clusterOffset = clusterOffset,
+                    clusterOffset = activeClusterIndex,
                     hasMultipleClusters = hasMultipleClusters,
                     candidateMovies = reserve20
                 )

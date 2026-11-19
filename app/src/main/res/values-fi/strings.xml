@@ -2267,7 +2267,7 @@
     <string name="iris_weekly_cold_start_title">Kalibroi IRIS-silmä</string>
     <string name="iris_weekly_cold_start_desc">Arvioi tai tallenna vähintään 3 elokuvaa avataksesi viikoittaisen mielialaan perustuvan Top 10 -elokuvasi.</string>
     <string name="iris_weekly_cold_start_action">Tutustu elokuviin</string>
-    <string name="iris_weekly_affinity_badge">___P1D__PCT___ Resonanssi</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Resonanssi</string>
     <string name="iris_cluster_scifi">Scifi ja dystooppiset todellisuudet</string>
     <string name="iris_cluster_crime_noir">Rikollisuus, noir ja psykologiset trillerit</string>
     <string name="iris_cluster_drama_auteur">Tekijäelokuva ja ihmisdraamat</string>

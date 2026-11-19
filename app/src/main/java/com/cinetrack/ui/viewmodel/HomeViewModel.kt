@@ -138,12 +138,18 @@ class HomeViewModel @Inject constructor(
         }
     }
 
+    private var lastIrisRotateTimestamp: Long = 0L
+
     fun onRotateIrisFocus() {
+        val now = System.currentTimeMillis()
+        if (now - lastIrisRotateTimestamp < 600L) return // Cooldown: protegge la rotazione della ghiera a 600ms
+
         val current = _irisWeeklyUiState.value
-        if (current is com.cinetrack.data.model.IrisWeeklyUiState.Ready && current.picks.hasMultipleClusters) {
+        if (current is com.cinetrack.data.model.IrisWeeklyUiState.Ready && current.picks.hasMultipleClusters && !current.isRotating) {
+            lastIrisRotateTimestamp = now
             _irisWeeklyUiState.value = current.copy(isRotating = true)
             irisClusterOffset++
-            loadIrisWeekly(forceRefresh = true, cycleCluster = true)
+            loadIrisWeekly(forceRefresh = false, cycleCluster = true)
         }
     }
 

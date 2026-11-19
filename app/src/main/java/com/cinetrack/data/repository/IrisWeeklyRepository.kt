@@ -36,12 +36,16 @@ class IrisWeeklyRepository @Inject constructor(
         File(context.filesDir, CACHE_FILE_NAME)
     }
 
-    // In-memory cache per evitare accessi disco multipli nella stessa sessione
-    @Volatile
-    private var memoryCache: IrisWeeklyPicksData? = null
+    // In-memory cache multi-cluster per rotazioni a zero millisecondi e zero chiamate di rete
+    private val memoryCacheByOffset = java.util.concurrent.ConcurrentHashMap<Int, IrisWeeklyPicksData>()
 
-    suspend fun getCachedPicks(): IrisWeeklyPicksData? = withContext(Dispatchers.IO) {
-        memoryCache?.let { return@withContext it }
+    suspend fun getCachedPicks(clusterOffset: Int? = null): IrisWeeklyPicksData? = withContext(Dispatchers.IO) {
+        if (clusterOffset != null) {
+            val inMemory = memoryCacheByOffset[clusterOffset]
+            if (inMemory != null && isCacheValid(inMemory)) {
+                return@withContext inMemory
+            }
+        }
 
         if (!cacheFile.exists()) return@withContext null
 
@@ -59,7 +63,7 @@ class IrisWeeklyRepository @Inject constructor(
                 hasMultipleClusters = dto.hasMultipleClusters,
                 candidateMovies = dto.movies.map { it.toMovieResult() }
             )
-            memoryCache = parsed
+            memoryCacheByOffset[parsed.clusterOffset] = parsed
             parsed
         }.getOrNull()
     }
@@ -68,6 +72,7 @@ class IrisWeeklyRepository @Inject constructor(
         data: IrisWeeklyPicksData,
         collectionIdMap: Map<Long, Long?>
     ): Unit = withContext(Dispatchers.IO) {
+        memoryCacheByOffset[data.clusterOffset] = data
         runCatching {
             val movieDtos = data.candidateMovies.map { movie ->
                 IrisWeeklyMovieDto.fromMovieResult(movie, collectionIdMap[movie.id])
@@ -85,7 +90,6 @@ class IrisWeeklyRepository @Inject constructor(
             )
             val text = json.encodeToString(IrisWeeklyCacheDto.serializer(), dto)
             cacheFile.writeText(text)
-            memoryCache = data
         }.onFailure { e ->
             android.util.Log.w("IrisWeeklyRepository", "Non-fatal: failed to write iris weekly cache", e)
         }
@@ -115,6 +119,6 @@ class IrisWeeklyRepository @Inject constructor(
     }
 
     fun clearMemoryCache() {
-        memoryCache = null
+        memoryCacheByOffset.clear()
     }
 }

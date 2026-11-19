@@ -2240,7 +2240,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="iris_weekly_cold_start_title">Kalibrálja az Eye of IRIS-t</string>
     <string name="iris_weekly_cold_start_desc">Értékeljen vagy mentsen el legalább 3 filmet, hogy feloldja a heti hangulatalapú Top 10-et.</string>
     <string name="iris_weekly_cold_start_action">Fedezze fel a filmeket</string>
-    <string name="iris_weekly_affinity_badge">___P1D__PCT___ Rezonancia</string>
+    <string name="iris_weekly_affinity_badge">%1$d%% Rezonancia</string>
     <string name="iris_cluster_scifi">Sci-fi és disztópikus valóságok</string>
     <string name="iris_cluster_crime_noir">Krimi, noir és pszichológiai thrillerek</string>
     <string name="iris_cluster_drama_auteur">Szerzői mozi és emberi drámák</string>

@@ -55,7 +55,7 @@ data class SemanticMovieDto(
     val keywords: String? = null,
     val overview: String? = null
 ) {
-    fun toMovieResult(customReason: String? = null): TMDBSearchResult.MovieResult {
+    fun toMovieResult(customReason: String? = null, isItalian: Boolean = false): TMDBSearchResult.MovieResult {
         val normalizedPoster = posterPath?.trim()?.takeIf { it.isNotBlank() }?.let { path ->
             if (path.startsWith("http") || path.startsWith("/")) path else "/$path"
         }
@@ -63,8 +63,15 @@ data class SemanticMovieDto(
             if (path.startsWith("http") || path.startsWith("/")) path else "/$path"
         }
 
-        // Se disponibile un titolo italiano tradotto e non vuoto, privilegialo per gli utenti italiani
-        val finalTitle = titleIt?.trim()?.takeIf { it.isNotBlank() } ?: title
+        // Risoluzione Titolo localizzato con fallback sicuro:
+        // - Se l'utente usa l'app in italiano, mostra il titolo italiano (se presente), altrimenti fallback sul titolo internazionale.
+        // - Se l'utente usa l'app in inglese o altra lingua, mostra sempre il titolo internazionale in inglese.
+        // - Garanzia anti-vuoto: fallback progressivo su title -> originalTitle -> "Unknown".
+        val finalTitle = if (isItalian) {
+            titleIt?.trim()?.takeIf { it.isNotBlank() } ?: title.trim().ifBlank { originalTitle?.trim().orEmpty() }
+        } else {
+            title.trim().ifBlank { originalTitle?.trim().orEmpty() }
+        }.ifBlank { "Unknown" }
 
         // Data di rilascio precisa o fallback sull'anno
         val finalReleaseDate = releaseDate?.trim()?.takeIf { it.isNotBlank() }
