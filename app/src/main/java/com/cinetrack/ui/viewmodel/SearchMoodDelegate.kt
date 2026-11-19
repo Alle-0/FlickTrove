@@ -10,10 +10,12 @@ import com.cinetrack.data.repository.PreferenceRepository
 import com.cinetrack.ui.utils.UiText
 import com.google.firebase.auth.FirebaseAuth
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.util.Locale
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -53,10 +55,12 @@ class SearchMoodDelegate @Inject constructor(
         useAi: Boolean,
         uiState: MutableStateFlow<SearchUiState>,
         onApplyCachedMovies: (List<TMDBSearchResult.MovieResult>, isMoodAiMode: Boolean, vibeTitle: String?, vibeDesc: String?) -> Unit,
+        onClearResults: (isMoodAiMode: Boolean) -> Unit,
         onEmitMessage: (UiText) -> Unit
     ) {
         val isGuest = FirebaseAuth.getInstance().currentUser?.isAnonymous != false
         if (isGuest) return
+        if (uiState.value.isMoodAiMode == useAi) return
         val remaining = uiState.value.moodRemainingQuota
         val currentQuery = uiState.value.query.trim()
 
@@ -83,7 +87,13 @@ class SearchMoodDelegate @Inject constructor(
             return
         }
 
-        uiState.update { it.copy(isMoodAiMode = useAi) }
+        // 3. Se non ci sono risultati salvati in cache per la nuova modalità, azzera i risultati della modalità precedente
+        // per evitare che rimangano visibili i risultati di IRIS sotto AI o viceversa
+        if (uiState.value.category == "mood") {
+            onClearResults(useAi)
+        } else {
+            uiState.update { it.copy(isMoodAiMode = useAi) }
+        }
     }
 
     fun executeMoodSearch(
@@ -112,7 +122,7 @@ class SearchMoodDelegate @Inject constructor(
             ) 
         }
 
-        return scope.launch {
+        return scope.launch(Dispatchers.Default) {
             val contentLang = uiState.value.preferences.contentLanguage
             val targetLanguage = if (contentLang == "system") {
                 Locale.getDefault().toLanguageTag()
@@ -126,16 +136,18 @@ class SearchMoodDelegate @Inject constructor(
                 forceLocal = !useAi,
                 bypassCache = bypassCache
             )
-            result.onSuccess { data ->
-                onSuccess(
-                    data.movies,
-                    data.isQuotaFallback,
-                    data.isNetworkFallback,
-                    data.vibeTitle,
-                    data.vibeDescription
-                )
-            }.onFailure { ex ->
-                onFailure(ex.message ?: "Errore durante la ricerca Mood")
+            withContext(Dispatchers.Main) {
+                result.onSuccess { data ->
+                    onSuccess(
+                        data.movies,
+                        data.isQuotaFallback,
+                        data.isNetworkFallback,
+                        data.vibeTitle,
+                        data.vibeDescription
+                    )
+                }.onFailure { ex ->
+                    onFailure(ex.message ?: "Errore durante la ricerca Mood")
+                }
             }
         }
     }

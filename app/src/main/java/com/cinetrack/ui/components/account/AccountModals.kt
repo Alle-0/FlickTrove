@@ -297,11 +297,11 @@ fun AccountModals(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
                                 .bounceClick {
                                     nameInput = currentDisplayName
                                     editProfileSubScreen = EditProfileSubScreen.CHANGE_NAME
                                 }
+                                .clip(RoundedCornerShape(16.dp))
                                 .padding(12.dp)
                         ) {
                             Icon(
@@ -331,7 +331,6 @@ fun AccountModals(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
                                 .bounceClick {
                                     if (avatarBanned) {
                                         scope.launch {
@@ -341,6 +340,7 @@ fun AccountModals(
                                         editProfileSubScreen = EditProfileSubScreen.CHANGE_AVATAR
                                     }
                                 }
+                                .clip(RoundedCornerShape(16.dp))
                                 .padding(12.dp)
                         ) {
                             Icon(
@@ -370,10 +370,10 @@ fun AccountModals(
                             verticalAlignment = Alignment.CenterVertically,
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .clip(RoundedCornerShape(16.dp))
                                 .bounceClick {
                                     editProfileSubScreen = EditProfileSubScreen.CHANGE_COVER
                                 }
+                                .clip(RoundedCornerShape(16.dp))
                                 .padding(12.dp)
                         ) {
                             Icon(
@@ -503,11 +503,11 @@ fun AccountModals(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(Color.White.copy(alpha = 0.1f))
                                     .bounceClick { 
                                         editProfileSubScreen = EditProfileSubScreen.MENU
-                                    },
+                                    }
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(Color.White.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -521,8 +521,6 @@ fun AccountModals(
                                 modifier = Modifier
                                     .weight(1f)
                                     .height(56.dp)
-                                    .clip(RoundedCornerShape(16.dp))
-                                    .background(if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f))
                                     .bounceClick(enabled = isSaveEnabled) {
                                         if (nameChangesCount >= 2) {
                                             scope.launch {
@@ -612,7 +610,9 @@ fun AccountModals(
                                                 isCheckingName = false
                                             }
                                         }
-                                    },
+                                    }
+                                    .clip(RoundedCornerShape(16.dp))
+                                    .background(if (isSaveEnabled) MaterialTheme.colorScheme.primary else Color.White.copy(alpha = 0.1f)),
                                 contentAlignment = Alignment.Center
                             ) {
                                 if (isCheckingName) {

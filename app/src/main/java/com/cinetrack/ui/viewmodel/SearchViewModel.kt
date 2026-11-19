@@ -277,6 +277,9 @@ class SearchViewModel @Inject constructor(
                     )
                 }
             },
+            onClearResults = { isMoodAi ->
+                clearMoodResults(newMoodAiMode = isMoodAi)
+            },
             onEmitMessage = { emitMessage(it) }
         )
     }
@@ -339,12 +342,13 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    private fun clearMoodResults() {
+    private fun clearMoodResults(newMoodAiMode: Boolean? = null) {
         searchJob?.cancel()
         rawResults = emptyList()
         applyStateFilters()
         _uiState.update {
             it.copy(
+                isMoodAiMode = newMoodAiMode ?: it.isMoodAiMode,
                 isLoading = false,
                 isEndReached = true,
                 moodVibeTitle = null,

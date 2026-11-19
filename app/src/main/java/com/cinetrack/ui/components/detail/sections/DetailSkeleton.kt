@@ -344,41 +344,82 @@ fun DetailSkeleton(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(8.dp))
 
-                    // Genres Pills
-                    Row(
+                    // Genres Flow (mirrors FlowRow with centered genres + subgenre expand pill)
+                    Column(
                         modifier = Modifier.fillMaxWidth(),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                        verticalAlignment = Alignment.CenterVertically
+                        horizontalAlignment = Alignment.CenterHorizontally,
+                        verticalArrangement = Arrangement.spacedBy(8.dp)
                     ) {
-                        listOf(82.dp, 104.dp, 76.dp, 92.dp).forEach { pillWidth ->
-                            Box(
-                                modifier = Modifier
-                                    .width(pillWidth)
-                                    .height(32.dp)
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.04f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.07f), CircleShape)
-                                    .shimmerEffect()
-                            )
+                        // Row 1: 3 genre pills
+                        Row(
+                            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            listOf(92.dp, 68.dp, 84.dp).forEach { pillWidth ->
+                                Box(
+                                    modifier = Modifier
+                                        .width(pillWidth)
+                                        .height(28.dp)
+                                        .clip(RoundedCornerShape(20.dp))
+                                        .background(Color.White.copy(alpha = 0.04f))
+                                        .border(0.75.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                                        .shimmerEffect()
+                                )
+                            }
                         }
+
+                        // Row 2: Subgenres expand pill
+                        Box(
+                            modifier = Modifier
+                                .width(96.dp)
+                                .height(28.dp)
+                                .clip(RoundedCornerShape(20.dp))
+                                .background(Color.White.copy(alpha = 0.04f))
+                                .border(0.75.dp, Color.White.copy(alpha = 0.08f), RoundedCornerShape(20.dp))
+                                .shimmerEffect()
+                        )
                     }
 
-                    Spacer(modifier = Modifier.height(20.dp))
+                    Spacer(modifier = Modifier.height(28.dp))
 
-                    // Streaming / Watch Providers icons row
+                    // Section Title: "WHERE TO WATCH"
+                    Box(
+                        modifier = Modifier
+                            .width(108.dp)
+                            .height(11.dp)
+                            .clip(RoundedCornerShape(3.dp))
+                            .background(Color.White.copy(alpha = 0.08f))
+                            .shimmerEffect()
+                    )
+
+                    Spacer(modifier = Modifier.height(10.dp))
+
+                    // Category Subtitle: "IN THEATERS" / "STREAMING"
+                    Box(
+                        modifier = Modifier
+                            .width(56.dp)
+                            .height(8.dp)
+                            .clip(RoundedCornerShape(2.dp))
+                            .background(Color.White.copy(alpha = 0.06f))
+                            .shimmerEffect()
+                    )
+
+                    Spacer(modifier = Modifier.height(6.dp))
+
+                    // Streaming / Watch Providers icons row (32.dp rounded squares)
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         repeat(4) {
                             Box(
                                 modifier = Modifier
-                                    .size(40.dp)
-                                    .clip(RoundedCornerShape(12.dp))
+                                    .size(32.dp)
+                                    .clip(RoundedCornerShape(8.dp))
                                     .background(Color.White.copy(alpha = 0.04f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.06f), RoundedCornerShape(12.dp))
+                                    .border(0.5.dp, Color.White.copy(alpha = 0.07f), RoundedCornerShape(8.dp))
                                     .shimmerEffect()
                             )
                         }
@@ -391,7 +432,7 @@ fun DetailSkeleton(
                         .fillMaxWidth()
                         .padding(horizontal = 24.dp)
                 ) {
-                    Spacer(modifier = Modifier.height(28.dp))
+                    Spacer(modifier = Modifier.height(56.dp))
 
                     // Section Title: "TRAMA"
                     Box(

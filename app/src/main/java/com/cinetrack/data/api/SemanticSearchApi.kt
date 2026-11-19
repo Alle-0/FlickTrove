@@ -86,7 +86,10 @@ data class SemanticMovieDto(
             voteAverage = voteAverage,
             genreIds = genreIds ?: emptyList(),
             overview = overview,
-            aiReason = customReason ?: aiReason ?: score?.let { "Rilevanza semantica: ${(it * 100).toInt()}%" }
+            aiReason = customReason ?: aiReason ?: score?.let {
+                if (isItalian) "Rilevanza semantica: ${(it * 100).toInt()}%"
+                else "Semantic affinity: ${(it * 100).toInt()}%"
+            }
         )
     }
 }

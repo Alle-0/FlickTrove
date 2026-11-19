@@ -10,8 +10,10 @@ import com.cinetrack.data.repository.mood.CinematicArchetype
 import com.cinetrack.data.repository.mood.MoodArchetypes
 import com.cinetrack.data.repository.mood.MoodVocabularies
 import com.cinetrack.data.repository.mood.ParsedQueryIntent
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.async
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import java.time.LocalDate
 import java.util.Locale
 import java.util.concurrent.ConcurrentHashMap
@@ -43,11 +45,6 @@ class LocalMoodSearchEngine @Inject constructor(
 
     private val franchiseSignatures: Map<String, List<String>> get() = MoodVocabularies.franchiseSignatures
     private val franchiseGenreGuards: Map<String, Set<Long>> get() = MoodVocabularies.franchiseGenreGuards
-
-    fun isSupportedLanguage(language: String): Boolean {
-        val lang = language.lowercase().take(2)
-        return lang == "it" || lang == "en"
-    }
 
     fun parseIntent(query: String, language: String): ParsedQueryIntent {
         val cleanQuery = query.trim().take(1000).lowercase(Locale.ROOT)
@@ -92,13 +89,15 @@ class LocalMoodSearchEngine @Inject constructor(
     fun normalizeIdiomaticExpressions(query: String, language: String): String {
         var text = query
         // Regole idiomatiche italiane: neutralizzano falsi amici ed espandono il contesto semantico
-        text = text.replace(Regex("""\bisol[ae]\s+desert[ae]\b""", RegexOption.IGNORE_CASE), "isola disabitata naufrago castaway uninhabited island")
+        text = text.replace(Regex("""\bisol[ae]\s+desert[ae]\b""", RegexOption.IGNORE_CASE), "isola disabitata naufrago castaway shipwreck stranded on a desert island")
         text = text.replace(Regex("""\bnaufrag[ioe]\b""", RegexOption.IGNORE_CASE), "naufragio shipwreck castaway survival")
         text = text.replace(Regex("""\bfilm\s+in\s+costume\b""", RegexOption.IGNORE_CASE), "film storico dramma d'epoca period drama")
         text = text.replace(Regex("""\bcolpo\s+grosso\b""", RegexOption.IGNORE_CASE), "rapina colpo perfetto heist")
+        text = text.replace(Regex("""\bpian[io]\s+sequenz[ae]\b""", RegexOption.IGNORE_CASE), "long take sequence shot cinematography")
+        text = text.replace(Regex("""\bsequence\s+shot[s]?\b""", RegexOption.IGNORE_CASE), "long take sequence shot cinematography")
 
         // Regole idiomatiche inglesi
-        text = text.replace(Regex("""\bdesert\s+island\b""", RegexOption.IGNORE_CASE), "uninhabited deserted island castaway shipwreck")
+        text = text.replace(Regex("""\bdesert\s+island\b""", RegexOption.IGNORE_CASE), "desert island castaway shipwreck stranded on a desert island")
         text = text.replace(Regex("""\bcostume\s+drama\b""", RegexOption.IGNORE_CASE), "period drama historical film")
         return text
     }
@@ -112,7 +111,7 @@ class LocalMoodSearchEngine @Inject constructor(
         val lower = "$text $existingQueryEn".lowercase(Locale.ROOT)
         val enrichments = mutableListOf<String>()
 
-        if (Regex("""\b(microspi[ae]|intercettazion[ie]|cimic[ie]|spiat[oaei]|ascolto|sorveglianza)\b""").containsMatchIn(lower) ||
+        if (Regex("""\b(microspi[ae]|intercettazion[ie]|cimic[ie]|spiat[oaei]|dispositivo di ascolto|sorveglianza)\b""").containsMatchIn(lower) ||
             lower.contains("wiretap") || lower.contains("eavesdrop") || lower.contains("listening device")) {
             enrichments += "wiretap wiretapping surveillance bugged audio eavesdropping"
         }
@@ -122,8 +121,8 @@ class LocalMoodSearchEngine @Inject constructor(
             enrichments += "siege standoff police precinct assault trapped surrounded under siege"
         }
 
-        if (Regex("""\b(crepuscolar[ei]|tramonto dei pistoleri|fine del west|pistoler[io])\b""").containsMatchIn(lower) ||
-            lower.contains("twilight") || lower.contains("revisionist")) {
+        if (Regex("""\b(crepuscolar[ei]|tramonto dei pistoleri|fine del west|pistoler[io]|twilight western)\b""").containsMatchIn(lower) ||
+            lower.contains("revisionist western")) {
             enrichments += "revisionist western twilight outlaws end of frontier era gunslingers"
         }
 
@@ -142,9 +141,22 @@ class LocalMoodSearchEngine @Inject constructor(
             enrichments += "time loop temporal paradox space anomaly sci-fi mystery"
         }
 
-        if (Regex("""\b(naufrag[ioe]|isol[ae] disabitat[ae]|isol[ae] desert[ae]|naufrag[hi]|castaway)\b""").containsMatchIn(lower) ||
+        if (Regex("""\b(spazio[- ]?temporale|wormhole|buch[oi]\s+ner[oi]|curvatura)\b|\brelativit(?:à|a\b)""").containsMatchIn(lower)) {
+            enrichments += "spacetime wormhole time dilation black hole relativity sci-fi"
+        }
+
+        if (Regex("""\b(naufrag[ioe]|isol[ae] desert[ae]|naufrag[hi]|castaway)\b""").containsMatchIn(lower) ||
             lower.contains("shipwreck") || lower.contains("castaway")) {
-            enrichments += "shipwreck castaway deserted uninhabited island stranded survival ocean"
+            enrichments += "shipwreck castaway desert island stranded survival ocean"
+        }
+
+        if (Regex("""\b(top[oi]|topolin[oi]|ratt[oi]|roditor[ei]|mouse|mice|rat|rats)\b""").containsMatchIn(lower)) {
+            enrichments += "mouse rat rodent animated animal protagonist"
+        }
+
+        if (Regex("""\b(spionaggi[oo]|spi[ae]|agenzia segreta|gadget[s]?|007|servizi segreti)\b""").containsMatchIn(lower) ||
+            lower.contains("espionage") || lower.contains("secret agency")) {
+            enrichments += "secret spy agency espionage high-tech gadgets undercover mission"
         }
 
         return enrichments.distinct().joinToString(" ")
@@ -241,9 +253,9 @@ class LocalMoodSearchEngine @Inject constructor(
         language: String,
         page: Int = 1,
         isQuotaExhaustedFallback: Boolean = false
-    ): MoodSearchResultData {
+    ): MoodSearchResultData = withContext(Dispatchers.Default) {
         if (!isLanguageSupported(language)) {
-            return MoodSearchResultData(
+            return@withContext MoodSearchResultData(
                 vibeTitle = "",
                 vibeDescription = "",
                 totalCount = 0,
@@ -318,6 +330,9 @@ class LocalMoodSearchEngine @Inject constructor(
 
         val isAnimationRequested = (positiveQuery.contains("animazione") || positiveQuery.contains("cartone") || positiveQuery.contains("anime") || positiveQuery.contains("animation") || positiveQuery.contains("animated")) && !parsedIntent.negatedGenres.contains(16L)
         val hasAnimalOrNonHumanSubject = detectAnimalOrNonHumanSubject(positiveQuery)
+        val isDocRequested = positiveQuery.contains(
+            Regex("""\b(documentar\w*|docs|docu\w*)\b|\bdoc\b(?!\s+(?:brown|holliday|hudson|ock|savage)\b)""", RegexOption.IGNORE_CASE)
+        ) && !parsedIntent.negatedGenres.contains(99L)
 
         // 2. Multi-Level Archetype & Atmosphere Detection (Check positive query)
         val isTransformationIntent = detectTransformationIntent(positiveQuery)
@@ -438,6 +453,11 @@ class LocalMoodSearchEngine @Inject constructor(
 
         val distinctGenres = targetGenres.distinct()
         val distinctKeywords = targetKeywords.distinct()
+        val effectiveNegatedGenres = if (!isDocRequested && !distinctGenres.contains(99L)) {
+            (parsedIntent.negatedGenres + 99L).distinct()
+        } else {
+            parsedIntent.negatedGenres
+        }
 
         // DESPERATION MODE: If the engine has zero genres AND zero keywords, it means the query was
         // not understood at all (e.g. "un uomo da un altro pianeta diventa un supereroe" before superhero archetype).
@@ -446,6 +466,7 @@ class LocalMoodSearchEngine @Inject constructor(
 
         // 4. Multi-Stream Concurrent Candidate Generation
         val candidateMap = mutableMapOf<Long, Movie>()
+        var personMovieIds: Set<Long> = emptySet()
 
         coroutineScope {
             // Stream A: Subgenre Discover (Quality focus, ONLY if genres, keywords, or person matched!)
@@ -468,8 +489,8 @@ class LocalMoodSearchEngine @Inject constructor(
                         if (detectedPerson != null) {
                             opts["with_people"] = detectedPerson.second.toString()
                         }
-                        if (parsedIntent.negatedGenres.isNotEmpty()) {
-                            opts["without_genres"] = parsedIntent.negatedGenres.joinToString(",")
+                        if (effectiveNegatedGenres.isNotEmpty()) {
+                            opts["without_genres"] = effectiveNegatedGenres.joinToString(",")
                         }
                         if (parsedIntent.negatedKeywords.isNotEmpty()) {
                             opts["without_keywords"] = parsedIntent.negatedKeywords.take(3).joinToString(",")
@@ -504,8 +525,8 @@ class LocalMoodSearchEngine @Inject constructor(
                         if (detectedPerson != null) {
                             opts["with_people"] = detectedPerson.second.toString()
                         }
-                        if (parsedIntent.negatedGenres.isNotEmpty()) {
-                            opts["without_genres"] = parsedIntent.negatedGenres.joinToString(",")
+                        if (effectiveNegatedGenres.isNotEmpty()) {
+                            opts["without_genres"] = effectiveNegatedGenres.joinToString(",")
                         }
                         if (parsedIntent.negatedKeywords.isNotEmpty()) {
                             opts["without_keywords"] = parsedIntent.negatedKeywords.take(3).joinToString(",")
@@ -592,6 +613,10 @@ class LocalMoodSearchEngine @Inject constructor(
             val resC = streamC.await()
             val resD = streamD.await()
 
+            if (detectedPerson != null) {
+                personMovieIds = (resA.map { it.id } + resB.map { it.id }).toSet()
+            }
+
             for (m in (resC + resA + resB + resD)) {
                 // Hard Gates: Valid ID, valid poster image, minimum 20 votes, and already released
                 val hasPoster = !m.posterPath.isNullOrBlank()
@@ -605,14 +630,18 @@ class LocalMoodSearchEngine @Inject constructor(
         // Emergency Graceful Relaxation if still completely empty
         if (candidateMap.isEmpty()) {
             try {
+                val fallbackOpts = mutableMapOf(
+                    "language" to tmdbLang,
+                    "sort_by" to "popularity.desc",
+                    "vote_count.gte" to "200",
+                    "primary_release_date.lte" to todayStr
+                )
+                if (!isDocRequested) {
+                    fallbackOpts["without_genres"] = "99"
+                }
                 val fallbackResults = tmdbService.discoverMovies(
                     page = page,
-                    options = mapOf(
-                        "language" to tmdbLang,
-                        "sort_by" to "popularity.desc",
-                        "vote_count.gte" to "200",
-                        "primary_release_date.lte" to todayStr
-                    )
+                    options = fallbackOpts
                 ).results
                 for (m in fallbackResults) {
                     val hasPoster = !m.posterPath.isNullOrBlank()
@@ -647,6 +676,12 @@ class LocalMoodSearchEngine @Inject constructor(
 
             // A. Archetype & Genre Relevancy Score
             val movieGenres = m.genreIds ?: emptyList()
+
+            // Esclusione rigida di default per Documentary (99L) se non esplicitamente richiesto dalla query
+            if (!isDocRequested && movieGenres.contains(99L)) {
+                return@mapNotNull null
+            }
+
             val isAnchor = matchedArchetypes.any { it.anchorMovieIds.contains(m.id) }
             if (isAnchor) {
                 val hasDivergingQueryGenres = distinctGenres.isNotEmpty() && distinctGenres.none { movieGenres.contains(it) }
@@ -661,8 +696,8 @@ class LocalMoodSearchEngine @Inject constructor(
                 thematicRelevanceScore += (secondaryOverlap * 6.0).coerceAtMost(12.0)
 
                 // Penalty for unrequested animation in serious/gritty archetypes.
-                // NEUTRALIZED when query mentions animals or non-human subjects!
-                if (!isAnimationRequested && !hasAnimalOrNonHumanSubject && movieGenres.contains(16L)) {
+                // NEUTRALIZED when query mentions animals or non-human subjects or when movie is an anchor!
+                if (!isAnchor && !isAnimationRequested && !hasAnimalOrNonHumanSubject && movieGenres.contains(16L)) {
                     thematicRelevanceScore -= 35.0
                 }
             } else if (distinctGenres.isNotEmpty()) {
@@ -732,8 +767,9 @@ class LocalMoodSearchEngine @Inject constructor(
             val bm25Multiplier = if (isAestheticIntent) 2.5 else 1.5
             thematicRelevanceScore += (bm25 * bm25Multiplier).coerceAtMost(60.0)
 
-            // Bonus for detected iconic directors/actors explicitly searched
-            if (detectedPerson != null) {
+            // Bonus for detected iconic directors/actors explicitly searched (strictly verified via personMovieIds from TMDB with_people)
+            val isPersonMatch = detectedPerson != null && personMovieIds.contains(m.id)
+            if (isPersonMatch) {
                 thematicRelevanceScore += 25.0
             }
 
@@ -745,7 +781,7 @@ class LocalMoodSearchEngine @Inject constructor(
             } else if (distinctGenres.isNotEmpty()) {
                 movieGenres.count { distinctGenres.contains(it) }
             } else 0
-            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || matchedTokenCount > 0 || bm25 >= 1.5 || detectedPerson != null
+            val hasSubstantiveThematicGrounding = isAnchor || primaryOverlap > 0 || matchedTokenCount > 0 || bm25 >= 1.5 || isPersonMatch
 
             // DESPERATION MODE: When the engine has zero genres/keywords (complete parse failure),
             // relax the Hard Gate. Any candidate with BM25 > 0 or any text match passes through.
@@ -856,7 +892,7 @@ class LocalMoodSearchEngine @Inject constructor(
         val vibeTitle = primaryArchetype?.let { if (isItalianUi) it.nameIt else it.nameEn }.orEmpty()
         val vibeDesc = primaryArchetype?.let { if (isItalianUi) it.rationaleTemplateIt else it.rationaleTemplateEn }.orEmpty()
 
-        return MoodSearchResultData(
+        MoodSearchResultData(
             vibeTitle = vibeTitle,
             vibeDescription = vibeDesc,
             totalCount = finalMovies.size,
@@ -866,20 +902,29 @@ class LocalMoodSearchEngine @Inject constructor(
     }
 
     private fun detectItalian(query: String, language: String): Boolean {
-        if (language.lowercase().startsWith("it")) return true
         val lower = query.lowercase(Locale.ROOT)
+        val tokens = Regex("""\b\p{L}+\b""").findAll(lower).map { it.value }.toSet()
         val italianMarkers = setOf(
-            "un", "una", "uno", "il", "lo", "la", "gli", "le", "dei", "degli", "delle",
+            "un", "una", "uno", "il", "lo", "la", "i", "gli", "le", "dei", "degli", "delle",
             "del", "della", "dello", "con", "senza", "per", "tra", "fra", "che", "chi",
-            "cosa", "dove", "come", "quando", "perché", "perche", "mago", "maghi",
-            "prestigiatore", "prestigiatori", "vuole", "essere", "non", "più", "piu", "tutto", "tutti",
+            "cosa", "dove", "come", "quando", "perché", "perche", "non", "più", "piu", "tutto", "tutti",
             "storia", "racconto", "bello", "belli", "quello", "quella", "questo", "questa",
             "dopo", "prima", "durante", "contro", "insieme", "sempre", "mai",
             "ed", "od", "di", "da", "su", "isola", "isole", "naufragio", "naufrago", "naufraghi"
         )
-        val tokens = Regex("""\b\w+\b""").findAll(lower).map { it.value }
-        val matchCount = tokens.count { italianMarkers.contains(it) }
-        return matchCount >= 2 || (matchCount == 1 && query.length > 20)
+        // Parole neutre o condivise ("film", "a", "in", "no") sono escluse per non falsare il conteggio
+        val englishMarkers = setOf(
+            "the", "an", "with", "without", "and", "or", "on", "at", "to", "for",
+            "of", "by", "from", "about", "movie", "movies", "story", "stories",
+            "not", "except", "excluding", "like", "featuring", "space", "time"
+        )
+        val itCount = tokens.count { italianMarkers.contains(it) }
+        val enCount = tokens.count { englishMarkers.contains(it) }
+        return when {
+            itCount > enCount -> true
+            enCount > itCount -> false
+            else -> language.lowercase(Locale.ROOT).startsWith("it")
+        }
     }
 
     fun detectFranchiseKey(title: String, genreIds: List<Long> = emptyList()): String? {
@@ -1085,24 +1130,34 @@ class LocalMoodSearchEngine @Inject constructor(
     private fun damerauLevenshtein(s1: String, s2: String): Int {
         val len1 = s1.length
         val len2 = s2.length
-        val d = Array(len1 + 1) { IntArray(len2 + 1) }
+        if (len1 == 0) return len2
+        if (len2 == 0) return len1
 
-        for (i in 0..len1) d[i][0] = i
-        for (j in 0..len2) d[0][j] = j
+        // Flat primitive IntArray avoids allocating multiple Array<IntArray> objects in tight loops
+        val cols = len2 + 1
+        val d = IntArray((len1 + 1) * cols)
+
+        for (i in 0..len1) d[i * cols] = i
+        for (j in 0..len2) d[j] = j
 
         for (i in 1..len1) {
+            val iCols = i * cols
+            val iMinus1Cols = (i - 1) * cols
+            val iMinus2Cols = (i - 2) * cols
+            val c1 = s1[i - 1]
             for (j in 1..len2) {
-                val cost = if (s1[i - 1] == s2[j - 1]) 0 else 1
-                d[i][j] = min(
-                    d[i - 1][j] + 1,
-                    min(d[i][j - 1] + 1, d[i - 1][j - 1] + cost)
+                val cost = if (c1 == s2[j - 1]) 0 else 1
+                var minVal = min(
+                    d[iMinus1Cols + j] + 1,
+                    min(d[iCols + j - 1] + 1, d[iMinus1Cols + j - 1] + cost)
                 )
-                if (i > 1 && j > 1 && s1[i - 1] == s2[j - 2] && s1[i - 2] == s2[j - 1]) {
-                    d[i][j] = min(d[i][j], d[i - 2][j - 2] + cost)
+                if (i > 1 && j > 1 && c1 == s2[j - 2] && s1[i - 2] == s2[j - 1]) {
+                    minVal = min(minVal, d[iMinus2Cols + j - 2] + cost)
                 }
+                d[iCols + j] = minVal
             }
         }
-        return d[len1][len2]
+        return d[len1 * cols + len2]
     }
 
     private fun containsWholeWordOrPhrase(text: String, phrase: String): Boolean {
@@ -1161,6 +1216,20 @@ class LocalMoodSearchEngine @Inject constructor(
         }
     }
 
+    private fun isTitleStartingWithNo(textAfterTrigger: String): Boolean {
+        return textAfterTrigger.startsWith("country") ||
+            textAfterTrigger.startsWith("way") ||
+            textAfterTrigger.startsWith("time") ||
+            textAfterTrigger.startsWith("strings") ||
+            textAfterTrigger.startsWith("sudden") ||
+            textAfterTrigger.startsWith("mercy") ||
+            textAfterTrigger.startsWith("escape") ||
+            textAfterTrigger.startsWith("one") ||
+            textAfterTrigger.startsWith("end") ||
+            textAfterTrigger.startsWith("man's") ||
+            textAfterTrigger.startsWith("mans")
+    }
+
     private fun parseQueryNegations(
         query: String,
         isItalian: Boolean,
@@ -1179,10 +1248,16 @@ class LocalMoodSearchEngine @Inject constructor(
         for (trigger in negationTriggers) {
             val idx = lower.indexOf(" $trigger ")
             if (idx != -1 && (splitIndex == -1 || idx < splitIndex)) {
-                splitIndex = idx
-                matchedTrigger = trigger
+                val textAfter = lower.substring(idx + 1 + trigger.length).trim()
+                val isTitleWithNo = trigger == "no" && isTitleStartingWithNo(textAfter)
+                if (!isTitleWithNo) {
+                    splitIndex = idx
+                    matchedTrigger = trigger
+                }
             } else if (lower.startsWith("$trigger ")) {
-                if (splitIndex == -1 || 0 < splitIndex) {
+                val textAfter = lower.substring(trigger.length).trim()
+                val isTitleWithNo = trigger == "no" && isTitleStartingWithNo(textAfter)
+                if (!isTitleWithNo && (splitIndex == -1 || 0 < splitIndex)) {
                     splitIndex = 0
                     matchedTrigger = trigger
                 }
@@ -1202,7 +1277,9 @@ class LocalMoodSearchEngine @Inject constructor(
         val positivePart = if (splitIndex == 0) "" else lower.substring(0, splitIndex).trim()
         val afterTrigger = lower.substring(splitIndex + matchedTrigger.length + (if (splitIndex == 0) 1 else 2)).trim()
 
-        val clauseEnd = listOf(",", ";", " e ", " and ").map { afterTrigger.indexOf(it) }.filter { it != -1 }.minOrNull()
+        // Le congiunzioni ' e ' / ' and ' uniscono elementi negati (es. 'senza alieni e mostri');
+        // i delimitatori di fine clausola sono la punteggiatura o congiunzioni avversative
+        val clauseEnd = listOf(",", ";", " ma ", " pero ", " però ", " but ").map { afterTrigger.indexOf(it) }.filter { it != -1 }.minOrNull()
         val negatedClause = if (clauseEnd != null) afterTrigger.substring(0, clauseEnd).trim() else afterTrigger
 
         val negatedTokens = extractSignificantContentTokens(negatedClause, isItalian)
@@ -1236,7 +1313,7 @@ class LocalMoodSearchEngine @Inject constructor(
             "animazione", "animation", "cartone", "cartoni", "anime" -> 16L
             "commedia", "comedy", "comico", "comici", "divertente" -> 35L
             "crime", "crimine", "poliziesco", "gangster" -> 80L
-            "documentario", "documentary" -> 99L
+            "documentario", "documentari", "documentary", "documentaries", "doc", "docs", "docufilm" -> 99L
             "dramma", "drammatico", "drama" -> 18L
             "famiglia", "family" -> 10751L
             "fantasy", "fantastico" -> 14L
@@ -1381,6 +1458,38 @@ class LocalMoodSearchEngine @Inject constructor(
         "sam raimi" to 7623L,
         "damien chazelle" to 1310663L,
         "chazelle" to 1310663L,
+
+        // Composers
+        "hans zimmer" to 947L,
+        "zimmer" to 947L,
+        "ennio morricone" to 153L,
+        "morricone" to 153L,
+        "john williams" to 491L,
+        "howard shore" to 142L,
+        "ludwig goransson" to 1279883L,
+        "goransson" to 1279883L,
+        "bernard herrmann" to 1711L,
+        "danny elfman" to 531L,
+        "elfman" to 531L,
+        "max richter" to 12835L,
+        "alexandre desplat" to 9658L,
+        "desplat" to 9658L,
+        "trent reznor" to 77983L,
+        "thomas newman" to 283L,
+
+        // Cinematographers (Directors of Photography)
+        "roger deakins" to 909L,
+        "deakins" to 909L,
+        "emmanuel lubezki" to 8259L,
+        "lubezki" to 8259L,
+        "hoyte van hoytema" to 63012L,
+        "van hoytema" to 63012L,
+        "robert burks" to 2640L,
+        "vittorio storaro" to 4768L,
+        "storaro" to 4768L,
+        "gordon willis" to 7423L,
+        "darius khondji" to 1280L,
+        "greig fraser" to 61413L,
 
         // Actors
         "leonardo dicaprio" to 6193L,

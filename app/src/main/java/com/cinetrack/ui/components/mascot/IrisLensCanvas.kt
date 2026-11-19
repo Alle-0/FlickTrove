@@ -151,7 +151,7 @@ fun IrisLensCanvas(
         )
 
         // 2. TACCHE DI CALIBRAZIONE FOCALE (Focus & F-Stop Ring - zero density churn)
-        val tickAngleOffset = if (mood == IrisMood.SEARCHING) barrelRotation else 0f
+        val tickAngleOffset = if (mood == IrisMood.SEARCHING) barrelRotation else (effectiveAngle * 0.4f)
         val tickCount = 16
         for (i in 0 until tickCount) {
             val rad = (tickAngleOffset + i * (360f / tickCount)) * (Math.PI.toFloat() / 180f)

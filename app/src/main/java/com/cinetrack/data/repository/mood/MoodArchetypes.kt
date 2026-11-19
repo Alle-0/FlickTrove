@@ -13,19 +13,19 @@ object MoodArchetypes {
             nameIt = "Viaggio dell'Eroe & Ritorno a Casa",
             nameEn = "The Hero's Quest & Epic Journey Home",
             triggersIt = listOf(
-                "viaggio epico", "epico", "epica", "odissea", "viaggio verso casa",
+                "viaggio epico", "odissea", "viaggio verso casa",
                 "ritorno a casa", "viaggio a casa", "porta a casa", "viaggio dell'eroe",
                 "missione epica", "avventura epica", "lungo viaggio per tornare", "strada di casa"
             ),
             triggersEn = listOf(
-                "epic journey", "epic quest", "odyssey", "journey home", "quest",
+                "epic journey", "epic quest", "odyssey", "journey home",
                 "hero's journey", "epic adventure", "way back home", "epic voyage", "voyage home"
             ),
             primaryGenres = listOf(12L), // Adventure
             secondaryGenres = listOf(14L, 878L, 18L), // Fantasy, Sci-Fi, Drama
             mandatoryKeywords = listOf(209374L, 372264L, 9935L), // hero's journey, epic adventure, travel
             secondaryKeywords = listOf(188270L, 4379L, 3801L), // epic battle, time travel, space travel
-            anchorMovieIds = listOf(120L, 122L, 157336L, 568L, 8358L, 424L), // LotR Fellowship, Return of the King, Interstellar, Apollo 13, Cast Away, O Brother
+            anchorMovieIds = listOf(120L, 122L, 157336L, 568L, 8358L), // LotR Fellowship, Return of the King, Interstellar, Apollo 13, Cast Away
             rationaleTemplateIt = "Una grandiosa odissea di avventura e coraggio in cui il viaggio stesso trasforma l'eroe verso la salvezza o il ritorno a casa.",
             rationaleTemplateEn = "A majestic odyssey of discovery and courage where the journey itself transforms the hero in an epic quest toward home."
         ),
@@ -72,18 +72,20 @@ object MoodArchetypes {
                 "viaggio nel tempo", "viaggi nel tempo", "paradosso temporale", "macchina del tempo",
                 "spazio-temporale", "spaziotemporale", "spazio temporale", "viaggio spazio-temporale",
                 "viaggio spaziotemporale", "viaggi spazio-temporali", "viaggio temporale", "viaggi temporali",
-                "viaggiatore nel tempo", "viaggiatori nel tempo", "linea temporale", "continuum temporale"
+                "viaggiatore nel tempo", "viaggiatori nel tempo", "linea temporale", "continuum temporale",
+                "wormhole", "relatività", "buco nero", "curvatura"
             ),
             triggersEn = listOf(
                 "time loop", "repeating day", "reliving the same day", "time travel", "temporal paradox",
                 "time machine", "groundhog day style", "space-time", "spacetime", "space-time travel",
-                "spacetime travel", "temporal travel", "time traveler", "time travelers", "timeline"
+                "spacetime travel", "temporal travel", "time traveler", "time travelers", "timeline",
+                "wormhole", "relativity", "black hole", "warp"
             ),
             primaryGenres = listOf(878L),
             secondaryGenres = listOf(53L, 35L, 9648L),
             mandatoryKeywords = listOf(10854L, 4379L),
             secondaryKeywords = listOf(191132L, 207317L, 5455L),
-            anchorMovieIds = listOf(105L, 137L, 137113L, 587792L, 45612L, 26466L, 122906L, 63L),
+            anchorMovieIds = listOf(157336L, 105L, 141L, 59967L, 329865L, 137L, 137113L, 587792L, 45612L, 26466L, 122906L, 63L),
             rationaleTemplateIt = "Brillante rompicapo temporale in cui i protagonisti devono decifrare le regole di un continuum impazzito.",
             rationaleTemplateEn = "Brilliant temporal puzzle where characters must unravel the rules of a looping reality."
         ),
@@ -249,13 +251,13 @@ object MoodArchetypes {
             id = "spaghetti_western",
             nameIt = "Spaghetti Western",
             nameEn = "Spaghetti Western",
-            triggersIt = listOf("spaghetti western", "western all'italiana", "sergio leone", "duello", "cacciatore di taglie", "pistolero solitario", "mezzogiorno di fuoco", "morricone"),
+            triggersIt = listOf("spaghetti western", "western all'italiana", "sergio leone", "duello western", "cacciatore di taglie", "pistolero solitario", "mezzogiorno di fuoco", "morricone"),
             triggersEn = listOf("spaghetti western", "sergio leone style", "bounty hunter western", "lone gunslinger", "mexican standoff"),
             primaryGenres = listOf(37L),
             secondaryGenres = listOf(28L, 18L),
             mandatoryKeywords = listOf(156212L, 801L, 14819L),
             secondaryKeywords = listOf(14643L),
-            anchorMovieIds = listOf(429L, 185L, 391L, 10772L, 23565L),
+            anchorMovieIds = listOf(429L, 391L, 10772L, 23565L),
             rationaleTemplateIt = "Sguardi di piombo, polvere, silenzi carichi di piombo e l'immortale epica western di Sergio Leone.",
             rationaleTemplateEn = "Gritty shootouts, iconic stare-downs, dust, and the timeless cinematic mythology of the frontier."
         ),
@@ -281,7 +283,7 @@ object MoodArchetypes {
             id = "space_opera",
             nameIt = "Space Opera & Odissea Spaziale",
             nameEn = "Space Opera & Cosmic Odyssey",
-            triggersIt = listOf("space opera", "odissea nello spazio", "astronave", "pianeta alieno", "galassie", "stelle", "viaggio interstellare", "esplorazione spaziale", "interstellar style"),
+            triggersIt = listOf("space opera", "odissea nello spazio", "astronave", "pianeta alieno", "galassie", "viaggio tra le stelle", "viaggio interstellare", "esplorazione spaziale", "interstellar style"),
             triggersEn = listOf("space opera", "cosmic odyssey", "spaceship", "alien planet", "interstellar travel", "space exploration", "deep cosmos", "interstellar style"),
             primaryGenres = listOf(878L, 12L),
             secondaryGenres = listOf(18L),
@@ -303,7 +305,7 @@ object MoodArchetypes {
             secondaryGenres = listOf(80L),
             mandatoryKeywords = listOf(9748L, 7002L),
             secondaryKeywords = listOf(10291L),
-            anchorMovieIds = listOf(245891L, 24L, 670L, 11324L, 273481L),
+            anchorMovieIds = listOf(245891L, 24L, 670L, 273481L),
             rationaleTemplateIt = "Corsa inarrestabile alimentata dal furore della vendetta, dove ogni colpo è una sentenza definitiva.",
             rationaleTemplateEn = "Relentless adrenaline-fueled quest for vengeance where nothing can stop the protagonist's retribution."
         ),
@@ -319,7 +321,7 @@ object MoodArchetypes {
             secondaryGenres = listOf(80L, 53L),
             mandatoryKeywords = listOf(6148L, 11038L),
             secondaryKeywords = listOf(9826L),
-            anchorMovieIds = listOf(389L, 865L, 1592L, 595L, 556574L, 9800L),
+            anchorMovieIds = listOf(389L, 1592L, 595L, 9800L),
             rationaleTemplateIt = "Scontro dialettico ad altissima caratura tra accusa e difesa, dove la verità si nasconde tra le pieghe della legge.",
             rationaleTemplateEn = "Riveting battle of wits and morals inside the courtroom, fighting for justice against the clock."
         ),
@@ -351,7 +353,7 @@ object MoodArchetypes {
             secondaryGenres = listOf(18L),
             mandatoryKeywords = listOf(9799L, 240L, 1605L),
             secondaryKeywords = listOf(10183L),
-            anchorMovieIds = listOf(194L, 59436L, 122906L, 1581L, 76L, 426L),
+            anchorMovieIds = listOf(194L, 59436L, 122906L, 1581L, 76L),
             rationaleTemplateIt = "Dialoghi scintillanti, calore umano e quella magia irresistibile che fa sorridere e credere all'amore.",
             rationaleTemplateEn = "Charming dialogue, heartfelt tenderness, and that irresistible warmth of genuine human connection."
         ),
@@ -377,7 +379,7 @@ object MoodArchetypes {
             id = "neo_noir",
             nameIt = "Neo-Noir & Notte Metropolitana",
             nameEn = "Neo-Noir & Urban Night",
-            triggersIt = listOf("neo-noir", "noir moderno", "metropoli notturna", "pioggia e asfalto", "detective disilluso", "corruzione metropolitana", "luci al neon", "drive style", "se7en style", "pioggia battente", "pioggia torrenziale", "detective pioggia", "detective nella pioggia", "thriller piovoso", "investigatore privato"),
+            triggersIt = listOf("neo-noir", "noir moderno", "metropoli notturna", "pioggia e asfalto", "detective disilluso", "corruzione metropolitana", "neon noir", "drive style", "se7en style", "pioggia battente", "pioggia torrenziale", "detective pioggia", "detective nella pioggia", "thriller piovoso", "investigatore privato"),
             triggersEn = listOf("neo-noir", "modern noir", "nocturnal city", "rainy streets", "cynical detective", "urban decay", "neon-drenched", "drive style", "se7en style", "rain-drenched", "rain-soaked", "rain-slicked", "rain drenched", "detective thriller", "rainy detective", "rain detective", "rainy thriller"),
             primaryGenres = listOf(53L, 80L),
             secondaryGenres = listOf(9648L, 18L),
@@ -393,7 +395,7 @@ object MoodArchetypes {
             id = "war_epic",
             nameIt = "Epica Bellica & Fango delle Trincee",
             nameEn = "Gritty War & Battle Epic",
-            triggersIt = listOf("guerra", "film di guerra", "trincee", "seconda guerra mondiale", "sbarco in normandia", "vietnam", "soldati al fronte", "fratellanza sotto il fuoco", "soldati", "soldato", "linee nemiche", "dietro le linee nemiche", "intrappolati", "linee del fronte"),
+            triggersIt = listOf("guerra", "film di guerra", "trincee", "seconda guerra mondiale", "sbarco in normandia", "vietnam", "soldati al fronte", "fratellanza sotto il fuoco", "soldati", "soldato", "linee nemiche", "dietro le linee nemiche", "soldati intrappolati", "linee del fronte"),
             triggersEn = listOf("war", "war movie", "trenches", "world war", "ww2", "vietnam war", "soldiers on the frontline", "brotherhood in arms", "behind enemy lines", "soldiers", "trapped soldiers", "enemy lines"),
             primaryGenres = listOf(10752L),
             secondaryGenres = listOf(18L, 28L, 36L),
@@ -425,13 +427,13 @@ object MoodArchetypes {
             id = "metamorphosis_mutation",
             nameIt = "Metamorfosi, Insetti & Mutazioni",
             nameEn = "Metamorphosis & Insect Mutation",
-            triggersIt = listOf("metamorfosi", "trasformazione", "uomo insetto", "ragazzo insetto", "diventa un insetto", "diventa una libellula", "diventa un ragno", "mutazione genetica", "morso da un ragno", "morso da un insetto", "morso da", "superhero movie", "la mosca", "uomo mosca"),
-            triggersEn = listOf("metamorphosis", "transformation", "turn into an insect", "turns into an insect", "become a dragonfly", "becomes a dragonfly", "become a spider", "becomes a spider", "become an insect", "bitten by a spider", "bitten by an insect", "bitten by", "genetic mutation", "insect human", "body mutation", "superhero movie", "the fly"),
+            triggersIt = listOf("metamorfosi", "trasformazione", "uomo insetto", "ragazzo insetto", "diventa un insetto", "diventa una libellula", "diventa un ragno", "mutazione genetica", "morso da un ragno", "morso da un insetto", "morso da", "la mosca", "uomo mosca"),
+            triggersEn = listOf("metamorphosis", "transformation", "turn into an insect", "turns into an insect", "become a dragonfly", "becomes a dragonfly", "become a spider", "becomes a spider", "become an insect", "bitten by a spider", "bitten by an insect", "bitten by", "genetic mutation", "insect human", "body mutation", "the fly"),
             primaryGenres = listOf(878L, 35L),
             secondaryGenres = listOf(28L, 27L),
             mandatoryKeywords = listOf(10283L, 9717L),
             secondaryKeywords = listOf(4379L, 18035L),
-            anchorMovieIds = listOf(11918L, 9426L, 557L, 17654L, 9799L),
+            anchorMovieIds = listOf(11918L, 9426L, 557L, 17654L),
             rationaleTemplateIt = "Mutazioni genetiche prodigiose o surreali in cui il confine tra essere umano e insetto svanisce.",
             rationaleTemplateEn = "Wild genetic mutations and transformations where the boundary between human and insect blurs."
         ),
@@ -441,8 +443,8 @@ object MoodArchetypes {
             id = "roaring_twenties_wealth",
             nameIt = "Ruggenti Anni '20 & Magnati",
             nameEn = "Roaring Twenties & Wealth",
-            triggersIt = listOf("anni 20", "anni '20", "anni venti", "anni ruggenti", "i 20", "i '20", "i venti", "uomo ricco", "grande gatsby", "gatsby", "magnate", "roaring twenties", "quarto potere"),
-            triggersEn = listOf("roaring twenties", "1920s", "the 20s", "the 20's", "twenties", "rich man 1920s", "wealthy tycoon", "great gatsby", "gatsby style", "citizen kane style"),
+            triggersIt = listOf("anni 20", "anni '20", "anni venti", "anni ruggenti", "i venti", "uomo ricco", "grande gatsby", "gatsby", "magnate", "roaring twenties", "quarto potere"),
+            triggersEn = listOf("roaring twenties", "1920s", "twenties", "rich man 1920s", "wealthy tycoon", "great gatsby", "gatsby style", "citizen kane style"),
             primaryGenres = listOf(18L, 36L, 10749L),
             secondaryGenres = listOf(80L),
             mandatoryKeywords = listOf(207876L, 10329L, 257265L),

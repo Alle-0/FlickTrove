@@ -5,8 +5,12 @@ import com.cinetrack.R
 import com.cinetrack.data.api.SemanticSearchApi
 import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.model.GenreConstants
+import com.cinetrack.data.repository.mood.MoodVocabularies
 import com.cinetrack.util.TranslationManager
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
 import java.io.IOException
 import java.util.Locale
@@ -28,21 +32,20 @@ class SemanticSearchRepository @Inject constructor(
         query: String,
         language: String = java.util.Locale.getDefault().toLanguageTag(),
         limit: Int = 100
-    ): List<TMDBSearchResult.MovieResult> {
+    ): List<TMDBSearchResult.MovieResult> = withContext(Dispatchers.Default) {
         val rawQuery = query.trim().take(500)
-        if (rawQuery.isBlank()) return emptyList()
+        if (rawQuery.isBlank()) return@withContext emptyList()
 
         val langCode = language.take(2).lowercase()
         // La lingua dei titoli e delle label rispetta la preferenza lingua utente/sistema
         val isItalian = langCode == "it"
 
-        // 1. Fuzzy Typo-Correction a monte (Punto 1: Filtro anti-analfabetismo Levenshtein)
-        // Corregge "viagio" -> "viaggio", "pscicologica" -> "psicologica", ecc.
-        val sanitizedQuery = localEngine.correctQueryTypos(rawQuery, language)
+        // 1. Sanitizzazione query a monte (Bypass typo-correction locale per BGE-M3)
+        val sanitizedQuery = rawQuery.trim()
 
         val cacheKey = "$sanitizedQuery|$langCode|$isItalian"
         sessionCache.get(cacheKey)?.let { cached ->
-            return cached
+            return@withContext cached
         }
 
         // 2. Risoluzione Intento & Negazioni (Punto 2)
@@ -56,14 +59,51 @@ class SemanticSearchRepository @Inject constructor(
         val normalizedPositiveText = localEngine.normalizeIdiomaticExpressions(positiveText, language)
 
         // Rilevamento concetti chiave e generi attesi per l'Hard Gate di Genere
-        val expectedGenres = localEngine.extractQueryGenreIds(normalizedPositiveText, language)
+        val baseExpectedGenres = localEngine.extractQueryGenreIds(normalizedPositiveText, language)
         val matchedArchetype = localEngine.detectArchetype(positiveText, language)
             ?: localEngine.detectArchetype(normalizedPositiveText, language)
+        val expectedGenres = if (matchedArchetype != null) {
+            (baseExpectedGenres + matchedArchetype.primaryGenres).distinct()
+        } else baseExpectedGenres
         val matchedAtmosphere = if (matchedArchetype == null) {
             localEngine.detectAtmosphere(positiveText, language)
                 ?: localEngine.detectAtmosphere(normalizedPositiveText, language)
         } else null
-        val detectedPerson = if (matchedArchetype == null && matchedAtmosphere == null) localEngine.detectIconicPerson(positiveText) else null
+        val detectedPerson = localEngine.detectIconicPerson(positiveText)
+
+        // Token candidati per il match dinamico di autori e crew tecnica (DoP, Compositore, Regista, Sceneggiatore)
+        // Token >= 4 caratteri estratti dalla SOLA parte positiva (la negazione non deve mai premiare un autore!)
+        val queryAuthorTokens = Regex("""\b\p{L}{4,}\b""")
+            .findAll(positiveText.lowercase(Locale.ROOT))
+            .map { it.value }
+            .filter { it !in ROLE_QUERY_STOPWORDS }
+            .toList()
+
+        val isMusicQuery = positiveText.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|music[ae]|musiche|compositore|compositori|composer[s]?)\b""", RegexOption.IGNORE_CASE))
+        val isCinematographyQuery = positiveText.contains(Regex("""\b(fotografi[ae]|cinematograph[y]?|dop|direttore della fotografia|piano[ ]sequenza|piani[ ]sequenza|long take|master shot)\b""", RegexOption.IGNORE_CASE))
+        val isDirectorQuery = positiveText.contains(Regex("""\b(regi[ae]|regista|registi|director[s]?|directed\s+by|diretto\s+da)\b""", RegexOption.IGNORE_CASE))
+
+        val capitalizedAuthor = if (isMusicQuery || isCinematographyQuery || isDirectorQuery) {
+            // Cerca un token esplicitamente capitalizzato dall'utente nella query positiva originale (evitando la prima parola se a inizio frase)
+            val rawWords = positiveText.trim().split(Regex("""\s+"""))
+            rawWords.drop(1).firstOrNull { word ->
+                word.length >= 4 &&
+                    word.first().isUpperCase() &&
+                    word.lowercase(Locale.ROOT) !in ROLE_QUERY_STOPWORDS &&
+                    queryAuthorTokens.contains(word.lowercase(Locale.ROOT))
+            }
+        } else null
+
+        val authorTarget = detectedPerson?.first?.split(Regex("""\s+"""))?.joinToString(" ") { it.replaceFirstChar { c -> c.uppercase(Locale.ROOT) } }
+            ?: capitalizedAuthor
+
+        val authorPrefix = when {
+            authorTarget == null -> ""
+            isMusicQuery -> "$authorTarget original music score soundtrack"
+            isCinematographyQuery -> "$authorTarget cinematography director of photography"
+            isDirectorQuery -> "$authorTarget directed by film direction"
+            else -> "$authorTarget movie film"
+        }
 
         // 3. Query Expansion Zero-Neurons: traduzione verso l'inglese della SOLA parte positiva
         val shouldTranslate = langCode != "en" || looksLikeNonEnglish(normalizedPositiveText)
@@ -77,18 +117,25 @@ class SemanticSearchRepository @Inject constructor(
                         translated
                     } else null
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 null
             }
         } else null
 
         // Iniezione di lessico cinematografico ad alta densità gergale (es. "microspie" -> wiretap, "assedio" -> precinct siege)
-        // direttamente in queryEn PRIMA del calcolo dell'embedding BGE-M3 su Cloudflare
+        // e ancoraggio esplicito dell'autore (es. Roger Deakins cinematography / Hans Zimmer score) PRIMA di BGE-M3 su Cloudflare
         val cinematicEnrichment = localEngine.extractCinematicEnrichment(normalizedPositiveText, queryEn.orEmpty())
-        val finalQueryEn = if (!queryEn.isNullOrBlank()) {
+        val baseEn = if (!queryEn.isNullOrBlank()) {
             if (cinematicEnrichment.isNotBlank()) "$queryEn $cinematicEnrichment" else queryEn
         } else if (cinematicEnrichment.isNotBlank()) {
             cinematicEnrichment
+        } else null
+
+        val finalQueryEn = if (!baseEn.isNullOrBlank()) {
+            if (authorPrefix.isNotBlank()) "$authorPrefix $baseEn" else baseEn
+        } else if (authorPrefix.isNotBlank()) {
+            authorPrefix
         } else null
 
         // 4. Oversampling su Vectorize: Pesca a strascico con limit = 100 candidati (Punto 2)
@@ -105,7 +152,7 @@ class SemanticSearchRepository @Inject constructor(
 
                     // 5. RERANKER ALGORITMICO LOCALE KOTLIN (Punto 3: Hybrid Search 100% locale)
                     // A. Preparazione Regex per Ghigliottina Negazioni con Word Boundary (\b), Stemming e Filtro Generi
-                    val negatedGenreIds = mutableSetOf<Long>()
+                    val negatedGenreIds = parsedIntent.negatedGenres.toMutableSet()
                     val negationRegex: Regex? = if (negatedTokens.isNotEmpty()) {
                         val patterns = mutableListOf<String>()
                         for (rawNeg in negatedTokens) {
@@ -114,22 +161,26 @@ class SemanticSearchRepository @Inject constructor(
 
                             // 1. Mappatura diretta dei generi negati (Hard Genre Exclusion su genreIds)
                             when (negToken) {
-                                "animazione", "cartoni", "cartone", "anime" -> negatedGenreIds.add(16L)
-                                "horror", "paura", "mostro", "mostri" -> negatedGenreIds.add(27L)
-                                "musical", "canzoni", "musica" -> negatedGenreIds.add(10402L)
-                                "documentario", "documentari" -> negatedGenreIds.add(99L)
+                                "animazione", "animation", "cartoni", "cartone", "anime" -> negatedGenreIds.add(16L)
+                                "horror", "paura" -> negatedGenreIds.add(27L)
+                                "musical", "canzoni", "musica", "music" -> negatedGenreIds.add(10402L)
+                                "documentario", "documentari", "documentary", "documentaries", "doc", "docs", "docufilm" -> negatedGenreIds.add(99L)
                                 "western" -> negatedGenreIds.add(37L)
+                                "commedia", "comedy", "comico", "comici" -> negatedGenreIds.add(35L)
                                 "romantico", "romance", "sentimentale", "amore" -> negatedGenreIds.add(10749L)
                                 "guerra", "war", "bellico" -> negatedGenreIds.add(10752L)
+                                "fantascienza", "sci-fi", "scifi" -> negatedGenreIds.add(878L)
                             }
 
-                            // 2. Stemming radice italiana sicura
+                            // 2. Stemming radice italiana sicura con boundary rigorosi
                             if (negToken == "mostro" || negToken == "mostri") {
-                                // mostr[eoiu] intercetta mostro, mostri, mostruoso, ma protegge verbi come mostra, mostrare, mostrando!
-                                patterns += """mostr[eoiu]"""
+                                patterns += """\bmostr[eoiu]\w*\b"""
+                            } else if (negToken.length <= 4) {
+                                // Per token corti (es. "tim", "saw"), word boundary rigoroso all'inizio E alla fine per evitare falsi match (es. "tim" -> "time")
+                                patterns += """\b${Regex.escape(negToken)}\b"""
                             } else {
-                                val stem = if (negToken.length >= 5 && negToken.last() in "aeiou") negToken.dropLast(1) else negToken
-                                patterns += Regex.escape(stem)
+                                val stem = if (negToken.last() in "aeiou") negToken.dropLast(1) else negToken
+                                patterns += """\b${Regex.escape(stem)}\w*\b"""
                             }
 
                             // 3. Espansione semantica verso l'inglese per le overview TMDB
@@ -146,25 +197,37 @@ class SemanticSearchRepository @Inject constructor(
                                 "animazione", "cartoni", "cartone" -> listOf("animation", "animated", "cartoon")
                                 else -> emptyList()
                             }
-                            englishEquivalents.forEach { patterns += Regex.escape(it) }
+                            englishEquivalents.forEach { patterns += """\b${Regex.escape(it)}\w*\b""" }
                         }
+                        // Un genere esplicitamente atteso dalla parte positiva non deve MAI essere negato!
+                        negatedGenreIds.removeAll(expectedGenres.toSet())
                         if (patterns.isNotEmpty()) {
-                            // \b a inizio parola evita falsi positivi (es. \bmostr[eoiu] non matcha "dimostrare", \bwar non matcha "award")
-                            Regex("""\b(${patterns.joinToString("|")})""", RegexOption.IGNORE_CASE)
+                            Regex(patterns.joinToString("|"), RegexOption.IGNORE_CASE)
                         } else null
                     } else null
 
-                    // Token candidati per il match dinamico di autori e crew tecnica (DoP, Compositore, Regista, Sceneggiatore)
-                    // Token >= 4 caratteri escludendo parole cinematografiche comuni o stop words
-                    val queryAuthorTokens = Regex("""\b\p{L}{4,}\b""")
-                        .findAll(sanitizedQuery.lowercase(Locale.ROOT))
-                        .map { it.value }
-                        .filter { it !in ROLE_QUERY_STOPWORDS }
-                        .toList()
+                    // Calcolo univoco delle condizioni di query (valutate su positiveText per non essere contaminate da negazioni)
+                    val wantsShorts = positiveText.contains(Regex("""\b(cort[oi]|cortometraggi[oi]|short[s]?|short film)\b""", RegexOption.IGNORE_CASE))
+                    val isSoundtrackQuery = positiveText.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|musiche)\b""", RegexOption.IGNORE_CASE))
+                    val wantsConcertOrDoc = positiveText.contains(Regex("""\b(live|concerto|concerti|concert[s]?|documentar[io]|doc)\b""", RegexOption.IGNORE_CASE))
+                    val wantsDoc = positiveText.contains(
+                        Regex("""\b(documentar\w*|docs|docu\w*)\b|\bdoc\b(?!\s+(?:brown|holliday|hudson|ock|savage)\b)""", RegexOption.IGNORE_CASE)
+                    ) && !negatedGenreIds.contains(99L)
+                    val targetDecade = detectTargetDecade(positiveText)
+                    val isMatureOrDarkQuery = (matchedArchetype != null && DARK_MATURE_ARCHETYPE_IDS.contains(matchedArchetype.id)) ||
+                        (matchedAtmosphere != null && matchedAtmosphere.id == "dark_disturbing") ||
+                        positiveText.contains(Regex("""\b(cyberpunk|noir|dystop|neon|thriller|horror|gore|splatter|killer|dark|oscur|violenz|cup[oa]|rapin|heist|criminal|delitt)\b""", RegexOption.IGNORE_CASE))
+                    val wantsFamily = positiveText.contains(Regex("""\b(famigli[ae]|family|bambin[oi]|ragazzin[oi]|kids?|disney|pixar)\b""", RegexOption.IGNORE_CASE))
+                    val isAnimalSubject = MoodVocabularies.detectAnimalOrNonHumanSubject(positiveText)
 
                     val cleanCandidates = rawResults.filter { dto ->
                         // Anti-Slop: poster obbligatorio, titolo valido
                         if (dto.posterPath.isNullOrBlank() || dto.title.isBlank()) return@filter false
+
+                        // Esclusione rigida di default per Documentary (99L) se non esplicitamente richiesto dalla query
+                        if (!wantsDoc && dto.genreIds?.contains(99L) == true) {
+                            return@filter false
+                        }
 
                         // Esclusione rigida sui generi negati (es. "senza animazione", "senza horror")
                         if (negatedGenreIds.isNotEmpty() && dto.genreIds?.any { negatedGenreIds.contains(it) } == true) {
@@ -172,17 +235,17 @@ class SemanticSearchRepository @Inject constructor(
                         }
 
                         // Filtro Cortometraggi: esclude featurette e corti (1..45 min), a meno che la query non chieda esplicitamente corti
-                        val wantsShorts = sanitizedQuery.contains(Regex("""\b(cort[oi]|cortometraggi[oi]|short[s]?|short film)\b""", RegexOption.IGNORE_CASE))
                         if (!wantsShorts && dto.runtime != null && dto.runtime in 1..45) {
                             return@filter false
                         }
 
-                        // Filtro Genere Family (10751): taglia film per bambini su query cyberpunk/mature/noir/thriller/horror,
-                        // preservando al 100% l'animazione d'autore (Akira, Ghost in the Shell, Paprika, Redline) che NON ha il genere Family!
-                        val isMatureOrDarkQuery = matchedArchetype != null ||
-                            sanitizedQuery.contains(Regex("""\b(cyberpunk|noir|dystop|neon|thriller|horror|gore|splatter|killer|dark|oscur|violenz|cup[oa]|rapin|heist|criminal|delitt)\b""", RegexOption.IGNORE_CASE))
-                        val wantsFamily = sanitizedQuery.contains(Regex("""\b(famigli[ae]|family|bambin[oi]|ragazzin[oi]|kids?|disney|pixar)\b""", RegexOption.IGNORE_CASE))
+                        // Esclusione video-concerti e documentari musicali su query di colonna sonora/soundtrack narrativa
+                        if (isSoundtrackQuery && !wantsConcertOrDoc && (dto.genreIds?.contains(10402L) == true || dto.genreIds?.contains(99L) == true)) {
+                            return@filter false
+                        }
 
+                        // Filtro Genere Family (10751): taglia film per bambini ESCLUSIVAMENTE su query mature/dark autentiche,
+                        // preservando Goonies, E.T., Ratatouille, e l'animazione d'autore che non ha il genere Family!
                         if (isMatureOrDarkQuery && !wantsFamily && dto.genreIds?.contains(10751L) == true) {
                             return@filter false
                         }
@@ -198,11 +261,15 @@ class SemanticSearchRepository @Inject constructor(
                         if (vCount == null && vAvg >= 9.5) return@filter false
                         if (vAvg < 4.0 && (vCount ?: 100) >= 20) return@filter false
 
-                        // Filtro Negazioni Corazzato con Word Boundary (\b)
+                        // Filtro Negazioni Corazzato con Word Boundary (\b), Keywords e Crew/Cast Completo
                         if (negationRegex != null) {
                             val titleMatches = negationRegex.containsMatchIn(dto.title)
+                            val titleItMatches = !dto.titleIt.isNullOrBlank() && negationRegex.containsMatchIn(dto.titleIt)
                             val overviewMatches = !dto.overview.isNullOrBlank() && negationRegex.containsMatchIn(dto.overview)
-                            if (titleMatches || overviewMatches) return@filter false
+                            val keywordsMatch = !dto.keywords.isNullOrBlank() && negationRegex.containsMatchIn(dto.keywords)
+                            val crewMatch = listOfNotNull(dto.director, dto.composer, dto.cinematographer, dto.writer, dto.cast, dto.producers)
+                                .any { negationRegex.containsMatchIn(it) }
+                            if (titleMatches || titleItMatches || overviewMatches || keywordsMatch || crewMatch) return@filter false
                         }
                         true
                     }
@@ -226,8 +293,26 @@ class SemanticSearchRepository @Inject constructor(
                             val rawAffinity = dto.rawSimilarity ?: dto.score ?: extractScoreFromReason(dto.aiReason) ?: 0.5
 
                             // Match dinamico con gli autori / crew tecnica (DoP, Compositore, Regista, Sceneggiatore)
-                            val matchedCrew = findMatchingCrewRole(dto, queryAuthorTokens)
+                            val matchedCrew = findMatchingCrewRole(dto, queryAuthorTokens, positiveText)
                             val crewMultiplier = if (matchedCrew != null) 1.55 else 1.0
+
+                            // B0. Boost Anchor per l'archetipo identificato (es. Goonies, E.T. per teen_adventure)
+                            val isAnchor = matchedArchetype?.anchorMovieIds?.contains(dto.id) == true
+                            val anchorMultiplier = if (isAnchor) 1.40 else 1.0
+
+                            // B0.1 Damping e Boost Decennio:
+                            // Se il film è uscito nel decennio indicato: +25% (1.25x).
+                            // Se è uscito molto lontano (es. > 15 anni di scarto, come Bicycle Thieves 1948 rispetto agli anni '80)
+                            // e non è un anchor: attenuazione moderata (0.80x) che preserva film ambientati nell'epoca (Super 8, IT, Summer of 84)
+                            val decadeMultiplier = if (targetDecade != null) {
+                                val y = dto.year?.toIntOrNull()
+                                when {
+                                    y == null -> 1.0
+                                    y in targetDecade -> 1.25
+                                    !isAnchor && (y < targetDecade.first - 15 || y > targetDecade.last + 15) -> 0.80
+                                    else -> 1.0
+                                }
+                            } else 1.0
 
                             // B1. Macro-Cluster di Genere:
                             // Se il film condivide un genere o un genere narrativamente affine del cluster, riceve +12%.
@@ -247,16 +332,16 @@ class SemanticSearchRepository @Inject constructor(
                             val popularityMultiplier = when {
                                 dto.voteCount == null && isRecentOrFuture -> 0.85
                                 dto.voteCount == null -> 1.0
-                                // Se l'utente ha cercato un autore specifico (es. Zimmer, Deakins), non penalizzare i suoi capolavori celebri!
-                                matchedCrew != null -> if (votes != null && votes >= 2000) 1.15 else 1.0
+                                // Se l'utente ha cercato un autore specifico o il film è un anchor ufficiale dell'archetipo, non penalizzare i suoi capolavori celebri!
+                                matchedCrew != null || isAnchor -> if (votes >= 2000) 1.15 else 1.0
                                 else -> {
                                     when {
-                                        votes != null && votes > 6000 -> {
+                                        votes > 6000 -> {
                                             val excessLog = kotlin.math.ln(votes.toDouble()) - kotlin.math.ln(6000.0)
                                             (1.0 - (0.06 * excessLog.coerceIn(0.0, 3.5))).coerceAtLeast(0.78)
                                         }
-                                        votes != null && votes in 350..5500 && !isRecentOrFuture -> 1.12
-                                        votes != null && votes < 50 -> 0.88
+                                        votes in 350..5500 && !isRecentOrFuture -> 1.12
+                                        votes < 50 -> 0.88
                                         else -> 1.0
                                     }
                                 }
@@ -266,8 +351,11 @@ class SemanticSearchRepository @Inject constructor(
                             val voteAvg = if (dto.voteCount == null) 6.5 else (dto.voteAverage ?: 6.0)
                             val qualityMultiplier = 0.85 + (voteAvg / 10.0) * 0.25
 
-                            // Score finale composito con boost autore prioritario
-                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier
+                            // B3.1 Boost Animazione/Family per soggetti animali/non umani (es. topi/roditori: Ratatouille batte omonimi live action)
+                            val animalMultiplier = if (isAnimalSubject && (dto.genreIds?.contains(16L) == true || dto.genreIds?.contains(10751L) == true)) 1.25 else 1.0
+
+                            // Score finale composito con boost autore prioritario, anchor, decade e subject animali
+                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier * anchorMultiplier * decadeMultiplier * animalMultiplier
                             Pair(dto, compositeScore)
                         }
                         .sortedByDescending { it.second }
@@ -306,7 +394,8 @@ class SemanticSearchRepository @Inject constructor(
                                 detectedPerson = detectedPerson,
                                 expectedGenres = expectedGenres,
                                 language = language,
-                                queryAuthorTokens = queryAuthorTokens
+                                queryAuthorTokens = queryAuthorTokens,
+                                positiveQuery = positiveText
                             )
 
                             dto.toMovieResult(customReason = contextualReason, isItalian = isItalian)
@@ -316,13 +405,14 @@ class SemanticSearchRepository @Inject constructor(
             }
         } catch (_: IOException) {
             null
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
             null
         }
 
         if (!cloudResults.isNullOrEmpty()) {
             sessionCache.put(cacheKey, cloudResults)
-            return cloudResults
+            return@withContext cloudResults
         }
 
         // 2. Fallback Invisibile: LocalMoodSearchEngine in RAM (Zero-Crash & Offline-First)
@@ -335,7 +425,7 @@ class SemanticSearchRepository @Inject constructor(
         if (localResult.movies.isNotEmpty()) {
             sessionCache.put(cacheKey, localResult.movies)
         }
-        return localResult.movies
+        localResult.movies
     }
 
     private fun expandGenreClusters(genres: List<Long>): Set<Long> {
@@ -394,7 +484,8 @@ class SemanticSearchRepository @Inject constructor(
         detectedPerson: Pair<String, Long>?,
         expectedGenres: List<Long>,
         language: String,
-        queryAuthorTokens: List<String> = emptyList()
+        queryAuthorTokens: List<String> = emptyList(),
+        positiveQuery: String = ""
     ): String {
         val rawAffinity = dto.rawSimilarity ?: dto.score ?: extractScoreFromReason(dto.aiReason) ?: 0.5
         // Curva psicologica non-lineare per la UI:
@@ -409,7 +500,7 @@ class SemanticSearchRepository @Inject constructor(
             context.getString(R.string.semantic_affinity_format, label, affinityPercent, affinitySuffix)
 
         // 1. Corrispondenza Dinamica con Autori / Ruoli Tecnici cercati nella query (massima priorità)
-        val matchedCrew = findMatchingCrewRole(dto, queryAuthorTokens)
+        val matchedCrew = findMatchingCrewRole(dto, queryAuthorTokens, positiveQuery)
         if (matchedCrew != null) {
             val (roleType, personName) = matchedCrew
             val roleLabel = when (roleType) {
@@ -496,43 +587,121 @@ class SemanticSearchRepository @Inject constructor(
 
     private fun findMatchingCrewRole(
         dto: com.cinetrack.data.api.SemanticMovieDto,
-        authorTokens: List<String>
+        authorTokens: List<String>,
+        queryText: String = ""
     ): Pair<String, String>? {
         if (authorTokens.isEmpty()) return null
-        for (token in authorTokens) {
-            val regex = Regex("""\b${Regex.escape(token)}\b""", RegexOption.IGNORE_CASE)
 
-            val comp = dto.composer?.trim()
-            if (!comp.isNullOrBlank() && regex.containsMatchIn(comp)) {
-                return Pair("composer", comp)
+        val lowerQuery = queryText.lowercase(Locale.ROOT)
+        val isMusicQuery = lowerQuery.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|music[ae]|musiche|compositore|compositori|composer[s]?)\b""", RegexOption.IGNORE_CASE))
+        val isCinematographyQuery = lowerQuery.contains(Regex("""\b(fotografi[ae]|cinematograph[y]?|dop|direttore della fotografia)\b""", RegexOption.IGNORE_CASE))
+        val isDirectorQuery = lowerQuery.contains(Regex("""\b(regi[ae]|regista|registi|director[s]?|directed\s+by|diretto\s+da)\b""", RegexOption.IGNORE_CASE))
+
+        fun matchesPerson(fieldValue: String?): Boolean {
+            if (fieldValue.isNullOrBlank()) return false
+            val nameParts = fieldValue.trim().split(Regex("""\s+""")).filter { it.isNotBlank() }
+            if (nameParts.isEmpty()) return false
+            val lastName = nameParts.last().lowercase(Locale.ROOT)
+            val firstName = nameParts.first().lowercase(Locale.ROOT)
+
+            // 1. Il token autore nella query deve matchare il cognome della persona (es. "Zimmer", "Deakins", "Nolan")
+            if (authorTokens.any { it.equals(lastName, ignoreCase = true) }) {
+                return true
             }
 
-            val dop = dto.cinematographer?.trim()
-            if (!dop.isNullOrBlank() && regex.containsMatchIn(dop)) {
-                return Pair("cinematographer", dop)
+            // 2. Se ci sono più parti nel nome, verifica se la query contiene il nome completo (es. "Hans Zimmer")
+            if (nameParts.size >= 2) {
+                val fullNameRegex = Regex("""\b${Regex.escape(firstName)}\s+${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
+                if (fullNameRegex.containsMatchIn(lowerQuery)) return true
             }
 
-            val dir = dto.director?.trim()
-            if (!dir.isNullOrBlank() && regex.containsMatchIn(dir)) {
-                return Pair("director", dir)
-            }
-
-            val wrt = dto.writer?.trim()
-            if (!wrt.isNullOrBlank() && regex.containsMatchIn(wrt)) {
-                return Pair("writer", wrt)
-            }
+            // Un token che matcha solo il primo nome di battesimo (es. "Hans") non deve MAI dare boost a persone con cognome diverso!
+            return false
         }
+
+        // Se la query chiede esplicitamente la musica, valuta ESCLUSIVAMENTE il compositore!
+        if (isMusicQuery) {
+            val comp = dto.composer?.trim()
+            if (matchesPerson(comp)) return Pair("composer", comp!!)
+            return null
+        }
+
+        // Se la query chiede esplicitamente la fotografia, valuta ESCLUSIVAMENTE il DoP!
+        if (isCinematographyQuery) {
+            val dop = dto.cinematographer?.trim()
+            if (matchesPerson(dop)) return Pair("cinematographer", dop!!)
+            return null
+        }
+
+        // Se la query chiede esplicitamente la regia, valuta ESCLUSIVAMENTE il regista!
+        if (isDirectorQuery) {
+            val dir = dto.director?.trim()
+            if (matchesPerson(dir)) return Pair("director", dir!!)
+            return null
+        }
+
+        // Altrimenti valuta i ruoli in ordine gerarchico (composer, cinematographer, director, writer)
+        val comp = dto.composer?.trim()
+        if (matchesPerson(comp)) return Pair("composer", comp!!)
+
+        val dop = dto.cinematographer?.trim()
+        if (matchesPerson(dop)) return Pair("cinematographer", dop!!)
+
+        val dir = dto.director?.trim()
+        if (matchesPerson(dir)) return Pair("director", dir!!)
+
+        val wrt = dto.writer?.trim()
+        if (matchesPerson(wrt)) return Pair("writer", wrt!!)
+
         return null
     }
 
+    private fun detectTargetDecade(query: String): IntRange? {
+        val lower = query.lowercase(Locale.ROOT)
+        return when {
+            lower.contains(Regex("""\b(anni\s+'?80|80s|'80s|eighties|1980s|anni\s+ottanta)\b""")) -> 1980..1989
+            lower.contains(Regex("""\b(anni\s+'?70|70s|'70s|seventies|1970s|anni\s+settanta)\b""")) -> 1970..1979
+            lower.contains(Regex("""\b(anni\s+'?90|90s|'90s|nineties|1990s|anni\s+novanta)\b""")) -> 1990..1999
+            lower.contains(Regex("""\b(anni\s+'?60|60s|'60s|sixties|1960s|anni\s+sessanta)\b""")) -> 1960..1969
+            lower.contains(Regex("""\b(anni\s+'?50|50s|'50s|fifties|1950s|anni\s+cinquanta)\b""")) -> 1950..1959
+            lower.contains(Regex("""\b(anni\s+'?2000|2000s|duemila)\b""")) -> 2000..2009
+            lower.contains(Regex("""\b(anni\s+'?20|20s|'20s|roaring\s+twenties|anni\s+venti)\b""")) -> 1920..1929
+            lower.contains(Regex("""\b(anni\s+'?30|30s|'30s|thirties|anni\s+trenta)\b""")) -> 1930..1939
+            lower.contains(Regex("""\b(anni\s+'?40|40s|'40s|forties|anni\s+quaranta)\b""")) -> 1940..1949
+            else -> null
+        }
+    }
+
     companion object {
+        private val DARK_MATURE_ARCHETYPE_IDS = setOf(
+            "cyberpunk",
+            "neo_noir",
+            "psychological_thriller",
+            "post_apocalyptic",
+            "revenge_action",
+            "war_epic",
+            "heist_caper",
+            "courtroom_drama",
+            "claustrophobic_thriller",
+            "giallo_italiano",
+            "haunted_house",
+            "submarine_deep_sea",
+            "gladiator_arena",
+            "tragic_hero_demise",
+            "metamorphosis_mutation"
+        )
+
         private val ROLE_QUERY_STOPWORDS = setOf(
             "film", "movie", "cinema", "musica", "music", "musiche", "colonna", "sonora", "soundtrack",
             "fotografia", "cinematography", "regia", "regista", "director", "directed", "sceneggiatura",
             "sceneggiatore", "scritto", "scritta", "written", "writer", "autore", "autori", "produzione",
             "produttore", "producers", "piano", "piani", "sequenza", "sequenze", "ambientato", "ambientata",
             "storia", "trama", "attore", "attori", "protagonista", "protagonisti", "delle", "degli", "dello",
-            "della", "dallo", "dalla", "senza", "without", "with", "about", "scene", "scenes", "colpo", "luci", "neon"
+            "della", "dallo", "dalla", "senza", "without", "with", "about", "scene", "scenes", "colpo", "luci", "neon",
+            "west", "king", "stone", "snow", "nero", "bianco", "john", "day", "night", "dark", "moon", "star",
+            "wood", "hill", "bell", "ford", "brown", "miller", "scott", "smith", "jones", "young", "ross",
+            "gray", "grey", "green", "white", "black", "blue", "red", "gold", "silver", "iron", "steel", "rock",
+            "stile", "style", "tipo", "like"
         )
     }
 

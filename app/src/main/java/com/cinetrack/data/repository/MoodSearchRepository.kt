@@ -7,10 +7,12 @@ import com.cinetrack.data.api.TMDBSearchResult
 import com.cinetrack.data.model.MoodHistoryEntry
 import com.cinetrack.data.model.MoodSearchRequest
 import dagger.hilt.android.qualifiers.ApplicationContext
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import java.io.IOException
 import java.net.SocketTimeoutException
 import java.net.UnknownHostException
@@ -82,7 +84,8 @@ class MoodSearchRepository @Inject constructor(
         page: Int = 1,
         forceLocal: Boolean = false,
         bypassCache: Boolean = false
-    ): Result<MoodSearchResultData> = runCatching {
+    ): Result<MoodSearchResultData> = withContext(Dispatchers.Default) {
+        runCatching {
         val user = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser
         if (user == null || user.isAnonymous) {
             throw Exception(context.getString(R.string.mood_guest_dialog_message))
@@ -198,7 +201,8 @@ class MoodSearchRepository @Inject constructor(
                 totalPages = body.totalPages,
                 movies = mappedMovies
             )
-        } catch (_: Exception) {
+        } catch (e: Exception) {
+            if (e is CancellationException) throw e
             // 3. SMART HYBRID FALLBACK: se l'AI Cloud fallisce (429 rate limit, timeout, offline, 500, 502),
             // degrada trasparentemente sull'algoritmo (Cloudflare Vectorize -> Local Engine)
             performAlgoSearch(
@@ -210,6 +214,7 @@ class MoodSearchRepository @Inject constructor(
             )
         }
     }
+}
 
     /**
      * Pipeline di Fallback e Algoritmo (ALGO / Cloudflare Vectorize):
@@ -229,18 +234,25 @@ class MoodSearchRepository @Inject constructor(
                 val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
                 if (semanticMovies.isNotEmpty()) {
                     badgeRepository.get().recordMoodMoviesDiscovered(semanticMovies.map { it.id })
-                    val matchedArchetype = localEngine.detectArchetype(trimmedQuery, language)
+                    val positiveQuery = localEngine.parseIntent(trimmedQuery, language).positiveText.ifBlank { trimmedQuery }
+                    val matchedArchetype = localEngine.detectArchetype(positiveQuery, language)
+                        ?: localEngine.detectArchetype(localEngine.normalizeIdiomaticExpressions(positiveQuery, language), language)
                     val isItalian = language.lowercase().startsWith("it")
                     val vibeTitle = matchedArchetype?.let { if (isItalian) it.nameIt else it.nameEn }
-                        ?: (if (isQuotaFallback || isNetworkFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale")
+                        ?: (if (isQuotaFallback || isNetworkFallback) {
+                            if (isItalian) "Ricerca Semantica Vettoriale" else "Vector Semantic Search"
+                        } else {
+                            if (isItalian) "Algoritmo Vettoriale" else "Vector Algorithm"
+                        })
                     val vibeDesc = matchedArchetype?.let { if (isItalian) it.rationaleTemplateIt else it.rationaleTemplateEn }
-                        ?: "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
+                        ?: (if (isItalian) "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
+                            else "Results computed in bge-m3 geometric space on Cloudflare Vectorize.")
                     moodHistoryRepository.saveEntry(
                         MoodHistoryEntry(
                             query = trimmedQuery,
                             vibeTitle = vibeTitle,
                             vibeDescription = vibeDesc,
-                            isAi = isQuotaFallback,
+                            isAi = false,
                             movies = semanticMovies
                         )
                     )
@@ -285,7 +297,8 @@ class MoodSearchRepository @Inject constructor(
                         isNetworkFallback = isNetworkFallback
                     )
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
+                if (e is CancellationException) throw e
                 // Fallthrough silente verso l'algoritmo locale offline
             }
         }
@@ -308,7 +321,7 @@ class MoodSearchRepository @Inject constructor(
                     query = trimmedQuery,
                     vibeTitle = localResult.vibeTitle,
                     vibeDescription = localResult.vibeDescription,
-                    isAi = isQuotaFallback,
+                    isAi = false,
                     movies = localResult.movies
                 )
             )

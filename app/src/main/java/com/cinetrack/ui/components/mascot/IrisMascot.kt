@@ -370,24 +370,24 @@ fun IrisMascot(
                 }
             }
         } else if (mood == IrisMood.DELIGHTED) {
-            // Ammiccamenti piacevoli mentre contempla i risultati (ogni 5-8.5 secondi con occasionali doppi)
+            // Ammiccamenti piacevoli e vivi mentre contempla i risultati (ogni 3.0-5.2 secondi con frequenti doppi battiti)
             while (true) {
-                delay((5000L..8500L).random())
+                delay((3000L..5200L).random())
                 if (!isTouched && !isDizzy && !isAnnoyed) {
                     val roll = (1..100).random()
-                    if (roll <= 25) {
-                        // Raro doppio battito leggero
+                    if (roll <= 32) {
+                        // Doppio battito vivace
                         repeat(2) { i ->
-                            winkAnim.animateTo(1f, tween(80, easing = FastOutSlowInEasing))
+                            winkAnim.animateTo(1f, tween(75, easing = FastOutSlowInEasing))
                             winkAnim.animateTo(
                                 targetValue = if (i < 1) 0.15f else 0f,
-                                animationSpec = if (i < 1) tween(70, easing = LinearEasing)
+                                animationSpec = if (i < 1) tween(65, easing = LinearEasing)
                                 else spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
                             )
                         }
                     } else {
                         // Singolo battito morbido
-                        winkAnim.animateTo(1f, tween(110, easing = FastOutSlowInEasing))
+                        winkAnim.animateTo(1f, tween(95, easing = FastOutSlowInEasing))
                         winkAnim.animateTo(
                             targetValue = 0f,
                             animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
@@ -450,6 +450,17 @@ fun IrisMascot(
             repeatMode = RepeatMode.Reverse
         ),
         label = "iris_searching_breathing"
+    )
+
+    // Respirazione viva e radiosa del diaframma sui risultati (f/1.4 - f/1.2: le 6 lamelle pulsano con respiro ottico)
+    val delightedBreathing by infiniteTransition.animateFloat(
+        initialValue = 0.67f,
+        targetValue = 0.77f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(2200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iris_delighted_breathing"
     )
 
     // Respirazione malinconica diaframma in EMPTY (f/2.4 a f/2.0: apertura accogliente, espressiva e viva, non socchiusa)
@@ -543,6 +554,7 @@ fun IrisMascot(
         mood == IrisMood.IDLE && gazeBiasX == 0f -> idleGazeX.coerceIn(-1f, 1f)
         mood == IrisMood.TYPING -> if (gazeBiasX != 0f) gazeBiasX.coerceIn(-1f, 1f) else 0f
         mood == IrisMood.EMPTY -> if (gazeBiasX != 0f) gazeBiasX.coerceIn(-1f, 1f) else emptyGazeDriftX
+        mood == IrisMood.DELIGHTED -> (gazeBiasX + (gazeDrift * 0.05f)).coerceIn(-1f, 1f)
         else -> gazeBiasX.coerceIn(-1f, 1f)
     }
 
@@ -565,8 +577,9 @@ fun IrisMascot(
         mood == IrisMood.TYPING -> if (gazeBiasY != 0f) gazeBiasY.coerceIn(-1f, 1f) else -0.90f
         mood == IrisMood.EMPTY -> if (gazeBiasY != 0f) gazeBiasY.coerceIn(-1f, 1f) else (0.52f + ((emptyBreathing - 0.24f) * 0.4f))
         mood == IrisMood.DELIGHTED -> {
-            // Sui risultati lo sguardo perlustra in basso; durante un fling veloce compie solo una micro-reazione discreta
-            (0.80f + (smoothScrollInertia * 0.15f)).coerceIn(0.50f, 1f)
+            // Sui risultati lo sguardo perlustra in basso modulato da gazeBiasY e micro-drift vivente
+            val baseGazeY = if (gazeBiasY != 0f) gazeBiasY else 0.78f
+            (baseGazeY + (smoothScrollInertia * 0.15f) + (gazeDrift * 0.04f)).coerceIn(0.45f, 1f)
         }
         else -> (gazeBiasY + (smoothScrollInertia * 0.15f)).coerceIn(-1f, 1f)
     }
@@ -596,7 +609,7 @@ fun IrisMascot(
         isFocusHunting -> (gazeBiasX * 10f).coerceIn(-12f, 12f)
         mood == IrisMood.TYPING -> (gazeBiasX * 6f) + 3f
         mood == IrisMood.IDLE && gazeBiasX == 0f -> (idleGazeX * 5.5f) + (idleGazeY * 1.5f) + (headTiltAnim * 0.35f)
-        mood == IrisMood.DELIGHTED -> (gazeBiasX * 6f).coerceIn(-7f, 7f) + 2f
+        mood == IrisMood.DELIGHTED -> (gazeBiasX * 7f).coerceIn(-9f, 9f) + 2f + (headTiltAnim * 0.45f)
         mood == IrisMood.SEARCHING -> 0f
         mood == IrisMood.EMPTY -> emptyHeadTilt
         mood == IrisMood.OFFLINE -> 0f
@@ -618,7 +631,7 @@ fun IrisMascot(
         mood == IrisMood.IDLE -> idleBreathing
         mood == IrisMood.TYPING -> typingBreathing
         mood == IrisMood.SEARCHING -> searchingBreathing
-        mood == IrisMood.DELIGHTED -> 0.74f
+        mood == IrisMood.DELIGHTED -> delightedBreathing
         mood == IrisMood.EMPTY -> emptyBreathing // Respira e sospira a vuoto
         else -> 0.06f
     }
@@ -686,7 +699,7 @@ fun IrisMascot(
         IrisMood.TYPING -> (pupilShiftXRatio * 6f) + (gazeDrift * 2f)
         IrisMood.IDLE -> (idleGazeX * 8f) + (idleGazeY * 4f)
         IrisMood.EMPTY -> 12f + (emptyGazeDriftX * 6f)
-        IrisMood.DELIGHTED -> 0f
+        IrisMood.DELIGHTED -> (pupilShiftXRatio * 7f) + (pupilShiftYRatio * 3.5f) + (gazeDrift * 2.5f)
         IrisMood.OFFLINE -> 0f
     }) + dizzyRotation + focusHuntingAngle.value
 

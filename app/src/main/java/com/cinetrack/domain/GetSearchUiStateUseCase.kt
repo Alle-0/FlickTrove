@@ -115,7 +115,8 @@ class GetSearchUiStateUseCase @Inject constructor() {
             }
         }
 
-        if (query.length >= 2) {
+        // In category == "mood" i filtri tradizionali non vengono usati: bypass della scansione per zero CPU waste
+        if (category != "mood" && query.length >= 2) {
             availableGenres.filter { it.name.lowercase().contains(lowerQuery) || com.cinetrack.data.model.GenreConstants.getLocalizedName(it.id, "en", it.name).lowercase().contains(lowerQuery) }.forEach { genre ->
                 if (!suggestedFilters.any { it.id == genre.id }) {
                     val locName = com.cinetrack.data.model.GenreConstants.getLocalizedName(genre.id, currentState.preferences.contentLanguage, genre.name)

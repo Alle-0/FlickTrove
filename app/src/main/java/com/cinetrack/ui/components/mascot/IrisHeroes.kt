@@ -138,12 +138,13 @@ fun IrisResultsHero(
         }
     }
 
-    // Perlustrazione orizzontale dei risultati sottostanti:
-    // IRIS guarda SEMPRE in basso verso i risultati (Y = 1.0f fisso e costante),
-    // e perlustra in modo continuo e armonico (-0.30f ➔ -0.08f ➔ +0.18f ➔ +0.38f ➔ +0.10f ➔ -0.18f).
-    // Occasionalmente (ogni 4-6 passi), compie un "salto scattoso" (saccade) verso l'estremo opposto,
-    // catturata da una locandina o rating a sorpresa, per poi riprendere il ciclo armonico!
+    // Perlustrazione dinamica e viva dei risultati sottostanti:
+    // IRIS guarda in basso verso le card dei film (asse Y tra 0.60f e 0.95f),
+    // perlustrando locandina, rating, titolo e affinità in modo armonico e curioso.
+    // Periodicamente compie un salto visivo (saccade cinematografico) verso un'altra card,
+    // mantenendo viva e scattante la mascotte invece di lasciarla statica.
     var resultsGazeX by remember { mutableFloatStateOf(0f) }
+    var resultsGazeY by remember { mutableFloatStateOf(0.78f) }
     var isSaccade by remember { mutableStateOf(false) }
     var lastInspectedX by remember { mutableFloatStateOf(0f) }
 
@@ -161,49 +162,60 @@ fun IrisResultsHero(
             // prima di riprendere dolcemente la perlustrazione, eliminando ogni ritorno a scatto
             if (lastInspectedX != 0f) {
                 resultsGazeX = lastInspectedX
-                delay(900L)
+                delay(700L)
             }
+            // Waypoint 2D che simulano la lettura naturale di una card di film
             val scanWaypoints = listOf(
-                -0.30f, // Esamina la locandina a sinistra
-                -0.08f, // Passa al titolo
-                 0.18f, // Scivola verso il centro-destra
-                 0.38f, // Esamina l'affinità e il rating a destra
-                 0.10f, // Ritorno calmo al centro
-                -0.18f  // Torna dolcemente verso sinistra
+                // 1. Locandina del film (in basso a sinistra)
+                Triple(-0.35f, 0.74f, 1300L..1900L),
+                // 2. Rating a stella dorata sulla locandina
+                Triple(-0.28f, 0.92f, 1100L..1600L),
+                // 3. Titolo del film e anno (centro-alto)
+                Triple(0.04f, 0.62f, 1400L..2000L),
+                // 4. Tag affinità semantica e percentuale (centro-destra)
+                Triple(0.34f, 0.82f, 1300L..1900L),
+                // 5. Visione d'insieme al centro
+                Triple(0.08f, 0.72f, 1100L..1600L),
+                // 6. Locandina card adiacente / colonna successiva
+                Triple(-0.22f, 0.84f, 1200L..1800L)
             )
             var waypointIdx = if (lastInspectedX != 0f) {
-                scanWaypoints.indices.minByOrNull { kotlin.math.abs(scanWaypoints[it] - lastInspectedX) } ?: 0
+                scanWaypoints.indices.minByOrNull { kotlin.math.abs(scanWaypoints[it].first - lastInspectedX) } ?: 0
             } else 0
             var stepsSinceSnap = 0
             while (true) {
-                // Ogni 4-6 passi c'è l'occasione di un salto scattoso verso il polo opposto
-                val shouldSnap = stepsSinceSnap >= 4 && (stepsSinceSnap >= 6 || (1..100).random() <= 45)
+                // Ogni 3-5 passi compie un salto scattoso (saccade) catturata da un altro film
+                val shouldSnap = stepsSinceSnap >= 3 && (stepsSinceSnap >= 5 || (1..100).random() <= 50)
 
                 if (shouldSnap) {
                     stepsSinceSnap = 0
                     val currentX = resultsGazeX
-                    // Salto scattoso verso l'estremo opposto (saccade cinematografico)
-                    val snapTarget = if (currentX >= 0f) {
-                        ((-42..-32).random() / 100f)
+                    // Salto scattoso verso il polo opposto
+                    val snapTargetX = if (currentX >= 0f) {
+                        ((-42..-26).random() / 100f)
                     } else {
-                        ((32..42).random() / 100f)
+                        ((26..42).random() / 100f)
                     }
+                    val snapTargetY = ((65..92).random() / 100f)
                     isSaccade = true
-                    resultsGazeX = snapTarget
-                    // Riprende il ciclo armonico dal waypoint più vicino alla nuova posizione
-                    waypointIdx = if (snapTarget < 0f) 0 else 3
-                    // Sosta attenta e curiosa sul punto agganciato (1.8s - 2.5s)
-                    delay((1800L..2500L).random())
+                    resultsGazeX = snapTargetX
+                    resultsGazeY = snapTargetY
+                    // Riprende il ciclo dal waypoint più vicino alla nuova posizione
+                    waypointIdx = if (snapTargetX < 0f) 0 else 3
+                    // Sosta curiosa sul punto agganciato (1.2s - 1.8s)
+                    delay((1200L..1800L).random())
                     isSaccade = false
                 } else {
                     stepsSinceSnap++
                     isSaccade = false
-                    val base = scanWaypoints[waypointIdx % scanWaypoints.size]
+                    val (baseX, baseY, delayRange) = scanWaypoints[waypointIdx % scanWaypoints.size]
                     waypointIdx++
-                    val jitter = ((-3..3).random() / 100f)
-                    resultsGazeX = (base + jitter).coerceIn(-0.45f, 0.45f)
-                    // Si sofferma con calma per 3.0 - 4.5 secondi su ciascuna sezione
-                    delay((3000L..4500L).random())
+                    val jitterX = ((-3..3).random() / 100f)
+                    val jitterY = ((-2..2).random() / 100f)
+                    resultsGazeX = (baseX + jitterX).coerceIn(-0.48f, 0.48f)
+                    resultsGazeY = (baseY + jitterY).coerceIn(0.55f, 0.98f)
+                    // Si sofferma con ritmo vivo e naturale (1.1s - 2.0s)
+                    delay(delayRange.random())
                 }
             }
         }
@@ -212,7 +224,7 @@ fun IrisResultsHero(
     val effectiveGazeBiasY = when {
         isFocusHunting -> inspectedCardYRatio ?: 1.0f // Messa a fuoco selettiva diretta sulla card premuta (Feature 6)
         isLoading -> 0f
-        hasResults -> 1.0f // Quando ci sono risultati a schermo, IRIS guarda SEMPRE in basso verso i film
+        hasResults -> resultsGazeY // Perlustra le card a schermo esplorando sia X che Y
         isWriting && isSearchFocused -> -0.90f // Guarda in alto verso la barra di ricerca SOLO mentre si scrive senza risultati a schermo
         else -> 0f
     }
