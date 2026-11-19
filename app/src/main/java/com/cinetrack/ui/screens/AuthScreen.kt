@@ -75,7 +75,8 @@ import com.google.android.libraries.identity.googleid.GoogleIdTokenCredential
 import kotlinx.coroutines.launch
 import android.util.Log
 import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
+import com.cinetrack.ui.components.auth.AuthEmailForm
+import com.cinetrack.ui.components.auth.AuthLoadingOverlay
 
 // ─── Inline feedback message (replaces Toast) ───────────────────────────────
 private data class FeedbackMessage(
@@ -427,172 +428,26 @@ fun AuthScreen(
                         enter = expandVertically() + fadeIn(),
                         exit = shrinkVertically() + fadeOut()
                     ) {
-                        Column(
-                            modifier = Modifier.fillMaxWidth(),
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            val isEmailValid = remember(email) {
-                                email.isEmpty() || (email.contains("@") && email.contains(".") && email.length > 5)
-                            }
-                            val isPasswordValid = remember(password) {
-                                password.isEmpty() || password.length >= 6
-                            }
-
-                            PremiumTextField(
-                                value = email,
-                                onValueChange = { email = it },
-                                label = stringResource(R.string.auth_email),
-                                icon = androidx.compose.material.icons.Icons.Default.Email,
-                                isError = !isEmailValid && email.isNotEmpty(),
-                                errorText = if (!isEmailValid && email.isNotEmpty()) stringResource(R.string.auth_error_email_invalid) else null,
-                                enabled = authState !is AuthState.Loading
-                            )
-                            
-                            Spacer(modifier = Modifier.height(4.dp))
-
-                            PremiumTextField(
-                                value = password,
-                                onValueChange = { password = it },
-                                label = stringResource(R.string.auth_password),
-                                icon = androidx.compose.material.icons.Icons.Default.Lock,
-                                isError = !isPasswordValid && password.isNotEmpty(),
-                                errorText = if (!isPasswordValid && password.isNotEmpty()) stringResource(R.string.auth_error_password_length) else null,
-                                isPassword = true,
-                                enabled = authState !is AuthState.Loading
-                            )
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .padding(top = 6.dp),
-                                contentAlignment = Alignment.CenterEnd
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .bounceClick(scaleDown = 0.96f) {
-                                            viewModel.resetPassword(email.trim())
-                                        }
-                                        .padding(vertical = 4.dp, horizontal = 4.dp)
-                                ) {
-                                    Text(
-                                        stringResource(R.string.auth_forgot_password),
-                                        color = Color.White.copy(alpha = 0.45f),
-                                        fontSize = 13.sp,
-                                        fontWeight = FontWeight.Medium
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(16.dp))
-                            
-                            val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
-                            AnimatedVisibility(
-                                visible = isGuestUser,
-                                enter = expandVertically() + fadeIn(),
-                                exit = shrinkVertically() + fadeOut()
-                            ) {
-                                Box(
-                                    modifier = Modifier
-                                        .fillMaxWidth()
-                                        .padding(bottom = 16.dp)
-                                        .background(Color.White.copy(alpha = 0.05f), RoundedCornerShape(14.dp))
-                                        .border(1.dp, PrimaryTeal.copy(alpha = 0.3f), RoundedCornerShape(14.dp))
-                                        .padding(12.dp)
-                                ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
-                                        Icon(
-                                            imageVector = Icons.Rounded.Info,
-                                            contentDescription = null,
-                                            tint = PrimaryTeal,
-                                            modifier = Modifier.size(20.dp)
-                                        )
-                                        Spacer(modifier = Modifier.width(12.dp))
-                                        Text(
-                                            text = if (isLogin) 
-                                                stringResource(R.string.auth_guest_login_warning) 
-                                            else 
-                                                stringResource(R.string.auth_guest_signup_info),
-                                            color = Color.White.copy(alpha = 0.8f),
-                                            fontSize = 12.sp,
-                                            lineHeight = 16.sp
-                                        )
-                                    }
-                                }
-                            }
-
-                            val canProceed = authState !is AuthState.Loading && email.isNotEmpty() && password.isNotEmpty()
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(54.dp)
-                                    .bounceClick(enabled = canProceed) {
-                                        if (isLogin) viewModel.login(email, password)
-                                        else viewModel.signUp(email, password)
-                                    }
-                                    .clip(CircleShape)
-                                    .background(
-                                        color = if (canProceed) PrimaryTeal else PrimaryTeal.copy(alpha = 0.5f)
-                                    ),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                if (authState is AuthState.Loading) {
-                                    CircularProgressIndicator(
-                                        color = Color.Black,
-                                        modifier = Modifier.size(24.dp),
-                                        strokeWidth = 3.dp
-                                    )
-                                } else {
-                                    Text(
-                                        text = if (isLogin) stringResource(R.string.auth_login) else stringResource(R.string.auth_create_account),
-                                        color = if (canProceed) Color.Black else Color.Black.copy(alpha = 0.4f),
-                                        fontSize = 16.sp,
-                                        fontWeight = FontWeight.Bold
-                                    )
-                                }
-                            }
-
-                            Spacer(modifier = Modifier.height(10.dp))
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .bounceClick(scaleDown = 0.96f) {
-                                        isLogin = !isLogin
-                                        password = ""
-                                    }
-                                    .padding(vertical = 8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = if (isLogin) stringResource(R.string.auth_switch_to_register)
-                                           else stringResource(R.string.auth_switch_to_login),
-                                    color = Color.White,
-                                    fontSize = 14.5.sp,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                            
-                            // Back to main options (pill button with localized text)
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(44.dp)
-                                    .clip(CircleShape)
-                                    .bounceClick(scaleDown = 0.97f) {
-                                        showEmailAuth = false
-                                    }
-                                    .border(1.dp, Color.White.copy(alpha = 0.08f), CircleShape),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.detail_content_desc_back),
-                                    color = Color.White.copy(alpha = 0.65f),
-                                    fontSize = 14.sp,
-                                    fontWeight = FontWeight.SemiBold
-                                )
-                            }
-                        }
+                        val isGuestUser = remember { com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous == true }
+                        AuthEmailForm(
+                            email = email,
+                            onEmailChange = { email = it },
+                            password = password,
+                            onPasswordChange = { password = it },
+                            isLogin = isLogin,
+                            onToggleMode = {
+                                isLogin = !isLogin
+                                password = ""
+                            },
+                            isLoading = authState is AuthState.Loading,
+                            isGuestUser = isGuestUser,
+                            onForgotPassword = { viewModel.resetPassword(email.trim()) },
+                            onSubmit = {
+                                if (isLogin) viewModel.login(email, password)
+                                else viewModel.signUp(email, password)
+                            },
+                            onBack = { showEmailAuth = false }
+                        )
                     }
 
                     Spacer(modifier = Modifier.height(18.dp))
@@ -637,129 +492,10 @@ fun AuthScreen(
             hazeState = hazeState
         )
 
-        val loadingState = authState as? AuthState.Loading
-        val targetProgress = loadingState?.progress
-        val animatedProgress by animateFloatAsState(
-            targetValue = targetProgress ?: 0f,
-            animationSpec = tween(durationMillis = 420, easing = FastOutSlowInEasing),
-            label = "AuthSyncProgress"
+        AuthLoadingOverlay(
+            loadingState = authState as? AuthState.Loading,
+            onContinueAnyway = { viewModel.continueAnyway() }
         )
-
-        val isSyncingLibrary = when ((loadingState?.message as? com.cinetrack.ui.utils.UiText.StringResource)?.resId) {
-            R.string.sync_msg_fetching_favorites,
-            R.string.sync_msg_syncing_favorites,
-            R.string.sync_msg_saving_favorites,
-            R.string.sync_msg_fetching_folders,
-            R.string.sync_msg_syncing_folders,
-            R.string.sync_msg_saving_folders,
-            R.string.sync_msg_syncing_preferences,
-            R.string.sync_msg_completed -> true
-            else -> false
-        }
-
-        var showDismissButton by remember { mutableStateOf(false) }
-        LaunchedEffect(loadingState) {
-            if (loadingState != null) {
-                val delayMillis = if (isSyncingLibrary) 15_000L else 6_000L
-                delay(delayMillis)
-                showDismissButton = true
-            } else {
-                showDismissButton = false
-            }
-        }
-
-        AnimatedVisibility(
-            visible = loadingState != null,
-            enter = fadeIn(),
-            exit = fadeOut(),
-            modifier = Modifier.zIndex(30f)
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .background(Color.Black.copy(alpha = 0.45f))
-                    .clickable(enabled = false) {},
-                contentAlignment = Alignment.Center
-            ) {
-                Box(
-                    modifier = Modifier
-                        .widthIn(max = 420.dp)
-                        .fillMaxWidth(0.9f)
-                        .background(
-                            color = HazeStyles.GlassColor,
-                            shape = RoundedCornerShape(28.dp)
-                        )
-                        .border(
-                            width = 1.dp,
-                            color = HazeStyles.GlassBorderColor.copy(alpha = HazeStyles.GlassBorderAlphaTop),
-                            shape = RoundedCornerShape(28.dp)
-                        )
-                        .padding(horizontal = 22.dp, vertical = 18.dp)
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Text(
-                            text = loadingState?.message?.asString() ?: stringResource(R.string.auth_syncing),
-                            color = Color.White,
-                            style = MaterialTheme.typography.bodyMedium,
-                            fontWeight = FontWeight.SemiBold
-                        )
-                        Spacer(modifier = Modifier.height(16.dp))
-                        if (targetProgress == null) {
-                            LinearProgressIndicator(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(6.dp),
-                                color = PrimaryTeal,
-                                trackColor = Color.White.copy(alpha = 0.12f)
-                            )
-                        } else {
-                            val clamped = animatedProgress.coerceIn(0f, 1f)
-                            LinearProgressIndicator(
-                                progress = { clamped },
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .height(6.dp),
-                                color = PrimaryTeal,
-                                trackColor = Color.White.copy(alpha = 0.12f)
-                            )
-                            Spacer(modifier = Modifier.height(10.dp))
-                            Text(
-                                text = "${(clamped * 100).toInt()}%",
-                                color = Color.White.copy(alpha = 0.7f),
-                                style = MaterialTheme.typography.labelMedium,
-                                fontWeight = FontWeight.SemiBold
-                            )
-                        }
-
-                        AnimatedVisibility(
-                            visible = showDismissButton,
-                            enter = fadeIn() + expandVertically(),
-                            exit = fadeOut() + shrinkVertically()
-                        ) {
-                            Box(
-                                modifier = Modifier
-                                    .padding(top = 16.dp)
-                                    .bounceClick {
-                                        viewModel.continueAnyway()
-                                    }
-                                    .clip(androidx.compose.foundation.shape.CircleShape)
-                                    .background(Color.White.copy(alpha = 0.08f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.15f), androidx.compose.foundation.shape.CircleShape)
-                                    .padding(horizontal = 18.dp, vertical = 8.dp),
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Text(
-                                    text = stringResource(R.string.auth_sync_continue_anyway),
-                                    color = Color.White.copy(alpha = 0.85f),
-                                    style = MaterialTheme.typography.labelMedium,
-                                    fontWeight = FontWeight.Bold
-                                )
-                            }
-                        }
-                    }
-                }
-            }
-        }
 
         // ── Feedback Snackbar ─────────────────────────────────────────────
         AnimatedVisibility(
@@ -803,171 +539,4 @@ fun AuthScreen(
 }
 
 
-// ─── Premium Text Field ───────────────────────────────────────────────────────
-@Composable
-private fun PremiumTextField(
-    value: String,
-    onValueChange: (String) -> Unit,
-    label: String,
-    icon: ImageVector,
-    isError: Boolean = false,
-    errorText: String? = null,
-    isPassword: Boolean = false,
-    enabled: Boolean = true,
-    trailingIcon: (@Composable () -> Unit)? = null
-) {
-    var isFocused by remember { mutableStateOf(false) }
-    val isFloating = isFocused || value.isNotEmpty()
-    val density = LocalDensity.current
 
-    // ── Label animation math (all values in dp, within the outer Box coordinate system)
-    //
-    // Layout:
-    //   Outer Box: fillMaxWidth, wraps height.
-    //   padding(top = 20.dp) → field starts at y = 20dp.
-    //   Field height = 58dp → field center at y = 20 + 29 = 49dp.
-    //   Field padding(horizontal = 16.dp), icon 20dp, spacer 12dp → text at x = 48dp.
-    //
-    // NOT floating: label visually inside field, vertically centered, after the icon.
-    //   translationY = 49 - 10 = 39dp  (label top, assuming ~20dp label height)
-    //   translationX = 48dp
-    //
-    // Floating: label above the top border (border at y=20dp), left-aligned.
-    //   translationY = 2dp  (label sits just above the border at y=20dp)
-    //   translationX = 16dp  (same horizontal padding as the field content)
-    //
-    // Scale goes from 1f → 0.75f, origin = top-left.
-
-    val labelOffsetY by animateDpAsState(
-        targetValue = if (isFloating) 3.dp else 39.dp,
-        animationSpec = spring(
-            stiffness = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioLowBouncy
-        ),
-        label = "LabelY"
-    )
-    val labelOffsetX by animateDpAsState(
-        targetValue = if (isFloating) 20.dp else 52.dp,
-        animationSpec = spring(
-            stiffness = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioLowBouncy
-        ),
-        label = "LabelX"
-    )
-    val labelScale by animateFloatAsState(
-        targetValue = if (isFloating) 0.75f else 1f,
-        animationSpec = spring(
-            stiffness = Spring.StiffnessMediumLow,
-            dampingRatio = Spring.DampingRatioLowBouncy
-        ),
-        label = "LabelScale"
-    )
-        val labelColor by animateColorAsState(
-            targetValue = when {
-                isError -> Color(0xFFE57373)
-                isFocused -> PrimaryTeal
-                isFloating -> Color.White.copy(alpha = 0.9f)
-                else -> Color.White.copy(alpha = 0.7f)
-            },
-            label = "LabelColor"
-        )
-        val borderColor by animateColorAsState(
-            targetValue = when {
-                isError -> Color(0xFFE57373).copy(alpha = 0.7f)
-                isFocused || value.isNotEmpty() -> PrimaryTeal.copy(alpha = 0.8f)
-                else -> Color.White.copy(alpha = 0.25f)
-            },
-            label = "BorderColor"
-        )
-    val containerColor by animateColorAsState(
-        targetValue = if (isFocused) Color.White.copy(alpha = 0.08f) else Color.White.copy(alpha = 0.04f),
-        label = "ContainerColor"
-    )
-
-    // Outer Box: 20dp top padding gives space for the floating label above the field border
-    Box(modifier = Modifier.fillMaxWidth()) {
-
-        // ── Field container — border top at y = 20dp in outer Box
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(top = 20.dp)
-                .height(58.dp)
-                .background(color = containerColor, shape = CircleShape)
-                .border(1.5.dp, borderColor, CircleShape)
-                .padding(horizontal = 20.dp),
-            contentAlignment = Alignment.CenterStart
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier.fillMaxSize()
-            ) {
-                Icon(
-                    imageVector = icon,
-                    contentDescription = null,
-                    tint = when {
-                        isError -> Color(0xFFE57373)
-                        isFocused || value.isNotEmpty() -> PrimaryTeal
-                        else -> Color.White.copy(alpha = 0.6f)
-                    },
-                    modifier = Modifier.size(20.dp)
-                )
-                Spacer(modifier = Modifier.width(12.dp))
-                BasicTextField(
-                    value = value,
-                    onValueChange = onValueChange,
-                    modifier = Modifier
-                        .weight(1f)
-                        .onFocusChanged { isFocused = it.isFocused },
-                    textStyle = TextStyle(
-                        color = Color.White,
-                        fontSize = 16.sp,
-                        fontWeight = FontWeight.Medium
-                    ),
-                    cursorBrush = SolidColor(PrimaryTeal),
-                    visualTransformation = if (isPassword) PasswordVisualTransformation() else VisualTransformation.None,
-                    enabled = enabled,
-                    singleLine = true
-                )
-                if (trailingIcon != null) {
-                    Spacer(modifier = Modifier.width(8.dp))
-                    trailingIcon()
-                }
-            }
-        }
-
-        // ── Error text below the field
-        AnimatedVisibility(
-            visible = isError && !errorText.isNullOrEmpty(),
-            enter = scaleIn(initialScale = 0.95f) + fadeIn(),
-            exit = scaleOut(targetScale = 0.95f) + fadeOut(),
-            modifier = Modifier.padding(top = 82.dp, start = 16.dp)
-        ) {
-            Text(
-                text = errorText ?: "",
-                color = Color(0xFFE57373),
-                fontSize = 11.sp,
-                fontWeight = FontWeight.Medium
-            )
-        }
-
-        // ── Label: single Text that smoothly moves via graphicsLayer.
-        // When NOT floating → sits inside the field (vertically centered, after the icon).
-        // When floating    → rises above the top border, aligned left.
-        // No dark background. Scale 1f → 0.75f with top-left transform origin.
-        Text(
-            text = label,
-            color = labelColor,
-            fontSize = 16.sp,
-            fontWeight = FontWeight.Medium,
-            maxLines = 1,
-            modifier = Modifier.graphicsLayer {
-                scaleX = labelScale
-                scaleY = labelScale
-                translationX = with(density) { labelOffsetX.toPx() }
-                translationY = with(density) { labelOffsetY.toPx() }
-                transformOrigin = TransformOrigin(0f, 0f)
-            }
-        )
-    }
-}

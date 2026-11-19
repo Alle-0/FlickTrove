@@ -21,6 +21,8 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.mascot.IrisMascot
+import com.cinetrack.ui.components.mascot.IrisMood
 import com.cinetrack.ui.utils.LocalVibrationEnabled
 import com.cinetrack.util.VibrationHelper
 import dev.chrisbanes.haze.HazeState
@@ -169,28 +171,6 @@ private fun SymbiontFluidCanvas(
         label = "SymbiontPulseScale"
     )
 
-    // Rotazione continua del diaframma cinepresa dell'obiettivo
-    val shutterAngle by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 3200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "CameraShutterAngle"
-    )
-
-    // Dilatazione / respiro del diaframma dell'obiettivo cinepresa (apertura e chiusura lamelle)
-    val apertureFraction by infiniteTransition.animateFloat(
-        initialValue = 0.18f,
-        targetValue = 0.54f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 1100, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "CameraApertureFraction"
-    )
-
     // Progresso di distacco (transizione morbida ma elastica allo snap)
     val detachedProgress by animateFloatAsState(
         targetValue = if (isDetached) 1f else 0f,
@@ -331,6 +311,37 @@ private fun SymbiontFluidCanvas(
         }
     }
 
+    val currentCenterY = if (!isDetached || isRetracting) {
+        val pull = springPull
+        val stretch = pull.coerceIn(0f, 1.15f)
+        if (isRetracting) floatingRestYPx * pull else with(density) { (105.dp * stretch).toPx() }
+    } else {
+        androidx.compose.ui.util.lerp(
+            start = with(density) { 120.dp.toPx() },
+            stop = floatingRestYPx,
+            fraction = detachedProgress
+        )
+    }
+
+    val currentRadiusPx = if (!isDetached || isRetracting) {
+        val pull = springPull
+        val stretch = pull.coerceIn(0f, 1.15f)
+        if (isRetracting) {
+            with(density) { (22.dp * pull).toPx() }
+        } else {
+            with(density) { (2.dp + 20.dp * stretch.coerceIn(0f, 1f)).toPx() }
+        }
+    } else {
+        with(density) { 22.dp.toPx() } * (if (isRefreshing) pulseScale else 1f)
+    }
+
+    val irisAlpha = when {
+        isRetracting -> (retractAnim.value / 0.15f).coerceIn(0f, 1f)
+        isRefreshing -> 1f
+        currentProgress > 0.12f -> ((currentProgress - 0.12f) / 0.35f).coerceIn(0f, 1f)
+        else -> 0f
+    }
+
     Box(
         modifier = modifier
             .fillMaxWidth()
@@ -458,98 +469,30 @@ private fun SymbiontFluidCanvas(
                     center = Offset(centerX, orbY),
                     style = Stroke(width = with(density) { 1.dp.toPx() })
                 )
-
-            // 3. DIAFRAMMA CINEMATOGRAFICO MINIMAL (CAMERA IRIS ESSENTIAL)
-            if (isRefreshing) {
-                val outerR = currentRadius * 0.88f
-                val innerR = outerR * apertureFraction
-                val bladeCount = 6
-
-                // 1. Bagliore morbido nel cuore dell'iride
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        0.0f to accentColor.copy(alpha = 0.45f),
-                        0.6f to accentColor.copy(alpha = 0.12f),
-                        1.0f to Color.Transparent,
-                        center = Offset(centerX, orbY),
-                        radius = (innerR * 1.5f).coerceAtLeast(1f)
-                    ),
-                    radius = innerR * 1.5f,
-                    center = Offset(centerX, orbY)
-                )
-
-                // 2. Anello esterno pulito e nitido dell'obiettivo
-                drawCircle(
-                    color = accentColor.copy(alpha = 0.85f),
-                    radius = outerR,
-                    center = Offset(centerX, orbY),
-                    style = Stroke(width = with(density) { 1.4.dp.toPx() })
-                )
-
-                // 3. 6 Lamelle del diaframma (linee pulite, zero elementi superflui)
-                val tanLen = kotlin.math.sqrt((outerR * outerR - innerR * innerR).coerceAtLeast(0f))
-
-                for (i in 0 until bladeCount) {
-                    val phi = (shutterAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-                    val nextPhi = (shutterAngle + (i + 1) * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-
-                    val cosP = kotlin.math.cos(phi)
-                    val sinP = kotlin.math.sin(phi)
-                    val cosNext = kotlin.math.cos(nextPhi)
-                    val sinNext = kotlin.math.sin(nextPhi)
-
-                    // Vertice tangenziale all'apertura interna
-                    val tx = centerX + innerR * cosP
-                    val ty = orbY + innerR * sinP
-
-                    // Vertice sul cerchio esterno
-                    val px = tx - tanLen * sinP
-                    val py = ty + tanLen * cosP
-
-                    val nextTx = centerX + innerR * cosNext
-                    val nextTy = orbY + innerR * sinNext
-                    val nextPx = nextTx - tanLen * sinNext
-                    val nextPy = nextTy + tanLen * cosNext
-
-                    // Campitura leggera di ciascuna lamella
-                    val bladePath = Path().apply {
-                        moveTo(tx, ty)
-                        lineTo(px, py)
-                        lineTo(nextPx, nextPy)
-                        lineTo(nextTx, nextTy)
-                        close()
-                    }
-                    drawPath(
-                        path = bladePath,
-                        color = accentColor.copy(alpha = 0.10f)
-                    )
-
-                    // Linea affilata principale della lamella dell'iride
-                    drawLine(
-                        color = accentColor.copy(alpha = 0.95f),
-                        start = Offset(px, py),
-                        end = Offset(tx, ty),
-                        strokeWidth = with(density) { 1.3.dp.toPx() }
-                    )
-                }
-
-                // 4. Bordo dell'apertura centrale esagonale
-                val aperturePath = Path()
-                for (i in 0 until bladeCount) {
-                    val phi = (shutterAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-                    val tx = centerX + innerR * kotlin.math.cos(phi)
-                    val ty = orbY + innerR * kotlin.math.sin(phi)
-                    if (i == 0) aperturePath.moveTo(tx, ty) else aperturePath.lineTo(tx, ty)
-                }
-                aperturePath.close()
-
-                drawPath(
-                    path = aperturePath,
-                    color = accentColor.copy(alpha = 0.70f),
-                    style = Stroke(width = with(density) { 1.2.dp.toPx() })
-                )
             }
         }
+
+        // VERA MASCOTTE IRIS OTTICA (Single Source of Truth Cinematografica)
+        if (irisAlpha > 0.01f) {
+            val irisBaseSize = 42.dp
+            val scale = (currentRadiusPx / with(density) { 21.dp.toPx() }).coerceIn(0.1f, 1.15f)
+            IrisMascot(
+                mood = if (isRefreshing) IrisMood.SEARCHING else IrisMood.IDLE,
+                size = irisBaseSize,
+                accentColor = accentColor,
+                enableBacklight = false,
+                enableTiltParallax = false,
+                enableTouchInteractions = false,
+                gazeBiasY = if (isRefreshing) 0f else (currentProgress * 0.7f).coerceIn(0f, 0.8f),
+                modifier = Modifier
+                    .align(Alignment.TopCenter)
+                    .graphicsLayer {
+                        translationY = currentCenterY - with(density) { (irisBaseSize / 2).toPx() }
+                        scaleX = scale
+                        scaleY = scale
+                        alpha = irisAlpha
+                    }
+            )
+        }
     }
-}
 }

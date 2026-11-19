@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">Ei videoita saatavilla</string>
     <string name="detail_add_subgenres">+ Alagenret</string>
     <string name="detail_hide_subgenres">- Piilota</string>
+    <string name="detail_show_all_subgenres">+ Kaikki (%d)</string>
     <string name="detail_streaming">SUORATOISTO</string>
     <string name="detail_rent_buy">VUOKRAA TAI OSTA</string>
     <string name="detail_season">Kausi</string>
@@ -2204,6 +2205,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Kuvaile omin sanoin, mitä haluat katsoa. Tekoäly etsii ihanteelliset elokuvat koko TMDB-katalogista.</string>
     <string name="search_mood_iris_intro_text">Kuvaile omin sanoin, mitä haluat katsoa. IRIS etsii ihanteelliset elokuvat koko TMDB-katalogista.</string>
+    <string name="search_mood_tip_detail">Vinkki: Mitä enemmän kerrot juonesta, tunnelmasta tai hahmoista, sitä tarkempia tulokset ovat.</string>
     <string name="search_mood_exhausted_notice">Olet käyttänyt kaikki 3 tunnelmahakuasi tälle päivälle. Kiintiö nollautuu keskiyöllä!</string>
     <string name="search_mood_exhausted_title">Päivittäiset tekoälyhaut käytetty</string>
     <string name="search_mood_switch_to_algo">Vaihda IRISiin (rajoittamaton)</string>
@@ -2240,4 +2242,19 @@
     <string name="badge_iris_search_cat">TUNNELMAN LÖYTÖRETKI</string>
     <string name="badge_iris_search_desc">Otit näkemyksen vastaan: lisäsit katselulistallesi elokuvan, joka löydettiin IRISillä tai tekoälyllä.</string>
     <string name="trophy_unit_searches">hakua</string>
+
+    <string name="semantic_affinity_suffix">vastaavuus</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Ohjaus: %1$s</string>
+    <string name="semantic_reason_score_by">Musiikki: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Kuvaus: %1$s</string>
+    <string name="semantic_reason_produced_by">Tuotanto: %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s-elokuva</string>
+    <string name="semantic_reason_critically_acclaimed">Kriitikoiden ylistämä (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Genreklassikko (%1$s)</string>
+    <string name="semantic_reason_plot_match">Juoneen sopiva teema</string>
+    <string name="semantic_reason_atmosphere">Tunnelma: %1$s</string>
+    <string name="semantic_reason_written_by">Käsikirjoitus: %1$s</string>
 </resources>

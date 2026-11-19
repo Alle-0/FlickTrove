@@ -337,53 +337,8 @@ private fun HistoryItemRow(
     }
 }
 
-internal fun parseWatchDateToLocalDate(raw: String?): LocalDate? {
-    if (raw.isNullOrBlank()) return null
-    val trimmed = raw.trim()
-    
-    // 1. Try ISO Instant (e.g. "2023-02-28T21:52:35.338Z" or "2023-02-27T23:00:00Z")
-    try {
-        return Instant.parse(trimmed).atZone(ZoneId.systemDefault()).toLocalDate()
-    } catch (_: Exception) {}
+internal fun parseWatchDateToLocalDate(raw: String?): LocalDate? =
+    com.cinetrack.util.DateTimeUtils.parseDateToLocalDate(raw)
 
-    // 2. Try ISO LocalDate YYYY-MM-DD (e.g. "2023-02-28")
-    try {
-        if (trimmed.length >= 10 && trimmed[4] == '-' && trimmed[7] == '-') {
-            return LocalDate.parse(trimmed.take(10))
-        }
-    } catch (_: Exception) {}
-
-    // 3. Try ISO LocalDateTime (e.g. "2023-02-28T21:52:35" or with space "2023-02-28 21:52:35")
-    try {
-        val normalized = trimmed.replace(' ', 'T')
-        return java.time.LocalDateTime.parse(normalized).toLocalDate()
-    } catch (_: Exception) {}
-
-    // 4. Try Epoch millis / seconds string
-    try {
-        val epoch = trimmed.toLongOrNull()
-        if (epoch != null && epoch > 100_000_000L) {
-            val instant = if (epoch > 100_000_000_000L) Instant.ofEpochMilli(epoch) else Instant.ofEpochSecond(epoch)
-            return instant.atZone(ZoneId.systemDefault()).toLocalDate()
-        }
-    } catch (_: Exception) {}
-
-    // 5. Try DD/MM/YYYY (e.g. "28/02/2023")
-    try {
-        val dtf = DateTimeFormatter.ofPattern("dd/MM/yyyy")
-        return LocalDate.parse(trimmed, dtf)
-    } catch (_: Exception) {}
-
-    return null
-}
-
-internal fun formatDateToLocalDisplay(isoDate: String): String {
-    if (isoDate.isBlank()) return ""
-    val parsedDate: LocalDate? = parseWatchDateToLocalDate(isoDate)
-    if (parsedDate != null) {
-        val formatter = java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
-            .withLocale(java.util.Locale.getDefault())
-        return formatter.format(parsedDate)
-    }
-    return isoDate
-}
+internal fun formatDateToLocalDisplay(isoDate: String): String =
+    com.cinetrack.util.DateTimeUtils.formatDateToLocalDisplay(isoDate)

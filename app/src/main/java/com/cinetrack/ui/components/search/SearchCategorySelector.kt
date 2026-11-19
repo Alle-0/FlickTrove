@@ -40,7 +40,7 @@ fun SearchCategorySelector(
     category: String,
     onCategoryChanged: (String) -> Unit,
     modifier: Modifier = Modifier,
-    isMoodAiMode: Boolean = true,
+    isMoodAiMode: Boolean = false,
     moodRemainingQuota: Int = 3,
     onMoodModeChanged: (Boolean) -> Unit = {},
     hazeState: HazeState? = null,
@@ -220,12 +220,12 @@ fun SearchCategorySelector(
                     if (moodActive) {
                         CategoryTabSelector(
                             options = listOf(
-                                stringResource(R.string.search_mood_mode_ai_tab, moodRemainingQuota),
-                                stringResource(R.string.search_mood_mode_local_tab)
+                                stringResource(R.string.search_mood_mode_local_tab),
+                                stringResource(R.string.search_mood_mode_ai_tab, moodRemainingQuota)
                             ),
-                            selectedIndex = if (isMoodAiMode) 0 else 1,
+                            selectedIndex = if (isMoodAiMode) 1 else 0,
                             onOptionClick = { index ->
-                                onMoodModeChanged(index == 0)
+                                onMoodModeChanged(index == 1)
                             },
                             modifier = Modifier.fillMaxWidth(),
                             fillWidth = true,

@@ -89,11 +89,9 @@ class MovieRepository @Inject constructor(
     private val memoryDetailsCache = ConcurrentHashMap<String, Any>()
     private val memoryColorCache = ConcurrentHashMap<String, String>() // id -> hexColor
 
-    // In-Memory cache & Mutex per Top 10 FlickTrove (evita ricalcoli e letture multiple su Firestore/TMDB)
-    private val top10Mutex = kotlinx.coroutines.sync.Mutex()
-    private var cachedTop10Both: Pair<List<Movie>, List<Movie>>? = null
-    private var lastTop10FetchTime: Long = 0L
-    private val TOP10_TTL_MS = 12 * 60 * 60 * 1000L // 12 ore
+    private val externalSyncDispatcher by lazy { ExternalSyncDispatcher(context) }
+    private val tvEpisodeWatchStateDelegate by lazy { TvEpisodeWatchStateDelegate(watchHistoryRepository) }
+    private val trendingStatsSyncDelegate by lazy { TrendingStatsSyncDelegate(firebaseRemoteDataSource) }
 
     // Cache LRU per Global Movie Stats (elimina addSnapshotListener continuo a favore di on-demand .get())
     private data class CachedGlobalStats(
@@ -229,199 +227,18 @@ class MovieRepository @Inject constructor(
             }
         }
 
-        // Enqueue Instant Write to Trakt via WorkManager
+        // Enqueue Instant Write to Trakt & SIMKL via WorkManager
         if (syncToTrakt) {
-            val workRequests = mutableListOf<androidx.work.OneTimeWorkRequest>()
-
-            fun enqueue(action: String, extras: androidx.work.Data.Builder.() -> Unit = {}) {
-                val builder = androidx.work.Data.Builder()
-                    .putString(TraktInstantWriteWorker.KEY_ACTION,     action)
-                    .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, movie.mediaType)
-                    .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    movie.id)
-                if (movie.imdbId != null) {
-                    builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
-                }
-                builder.apply(extras)
-                workRequests += OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(builder.build())
-                    .setBackoffCriteria(BackoffPolicy.EXPONENTIAL, 10, TimeUnit.SECONDS)
-                    .build()
-            }
-
-            // Estraiamo i vecchi valori in sicurezza (se oldMovie è null, usiamo i default)
-            val oldRating  = oldMovie?.personalRating
-            val oldFav     = oldMovie?.favorite ?: false
-
-            var watchlistRemoveEnqueued = false
-            // watched changed (o nuovo inserimento già visto)
-            if (oldWatched != movie.watched) {
-                if (movie.mediaType == "tv") {
-                    // FIX: Per le serie TV, non "nuclearizzare" lo show se scende al 99%.
-                    // Rimuovi l'intero show SOLO se tutti gli episodi sono stati tolti.
-                    if (movie.watched) {
-                        enqueue(TraktInstantWriteWorker.ACTION_MARK_WATCHED)
-                        enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
-                        watchlistRemoveEnqueued = true
-                    } else if (movie.watchedEpisodes.isNullOrEmpty()) {
-                        // Se è un rewatch, watchedAt NON è null (viene aggiornato con la data del rewatch).
-                        // Se l'utente ha fatto WatchState.NONE, watchedAt diventa null.
-                        // Non rimuoviamo dal server se è un rewatch, altrimenti cancelliamo anni di cronologia!
-                        if (movie.watchedAt == null) {
-                            enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
-                        }
-                    }
-                } else {
-                    // I film funzionano in modo standard (acceso/spento)
-                    val action = if (movie.watched) TraktInstantWriteWorker.ACTION_MARK_WATCHED
-                                 else {
-                                     // Per i film, stesso discorso: se watched = false ma watchedAt != null è un rewatch?
-                                     // In realtà sui film logRewatch non mette watched = false. Lo fa solo WatchState.NONE.
-                                     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED
-                                 }
-                    enqueue(action)
-                    if (movie.watched) {
-                        enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
-                        watchlistRemoveEnqueued = true
-                    }
-                }
-            }
-
-            // rewatch for movies
-            val oldWatchedAt = oldMovie?.watchedAt
-            if (oldWatched == movie.watched && movie.watched && oldWatchedAt != movie.watchedAt && movie.watchedAt != null) {
-                if (movie.mediaType == "movie") {
-                    // For movies, if watchedAt changed but watched state is still true, it's a rewatch.
-                    // Enqueuing ACTION_MARK_WATCHED will send a new play to Trakt/SIMKL.
-                    enqueue(TraktInstantWriteWorker.ACTION_MARK_WATCHED)
-                }
-            }
-
-            // dropped changed
-            val oldDropped = oldMovie?.dropped ?: false
-            if (oldDropped != movie.dropped) {
-                val action = if (movie.dropped) TraktInstantWriteWorker.ACTION_MARK_DROPPED
-                             else               TraktInstantWriteWorker.ACTION_REMOVE_DROPPED
-                enqueue(action)
-            }
-
-            // personalRating changed
-            if (oldRating != movie.personalRating) {
-                val rating = movie.personalRating
-                if (rating != null && rating > 0.0) {
-                    val traktRating = rating.toInt().coerceIn(1, 10)
-                    enqueue(TraktInstantWriteWorker.ACTION_ADD_RATING) {
-                        putInt(TraktInstantWriteWorker.KEY_RATING, traktRating)
-                    }
-                } else if (oldRating != null && (rating == null || rating == 0.0)) {
-                    enqueue(TraktInstantWriteWorker.ACTION_REMOVE_RATING)
-                }
-            }
-
-            // favorite changed -> sync watchlist/favorite
-            if (oldFav != movie.favorite) {
-                if (movie.favorite) {
-                    enqueue(TraktInstantWriteWorker.ACTION_ADD_WATCHLIST)
-                } else if (!watchlistRemoveEnqueued) {
-                    enqueue(TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
-                }
-            }
-
-            // watchedEpisodes changed (TV only)
-            if (movie.mediaType == "tv" && oldMovie?.watchedEpisodes != movie.watchedEpisodes) {
-                val oldEps    = oldMovie?.watchedEpisodes ?: emptyMap()
-                val newEps    = movie.watchedEpisodes    ?: emptyMap()
-
-                // Episodes added
-                val addedEps  = newEps.mapValues { (season, eps) ->
-                    eps - (oldEps[season]?.toSet() ?: emptySet())
-                }.filter { it.value.isNotEmpty() }
-
-                // Episodes removed
-                val removedEps = oldEps.mapValues { (season, eps) ->
-                    eps - (newEps[season]?.toSet() ?: emptySet())
-                }.filter { it.value.isNotEmpty() }
-
-                if (addedEps.isNotEmpty()) {
-                    val encoded = TraktInstantWriteWorker.encodeEpisodes(addedEps)
-                    enqueue(TraktInstantWriteWorker.ACTION_MARK_EPISODES_WATCHED) {
-                        putString(TraktInstantWriteWorker.KEY_SEASON_EPISODES, encoded)
-                        movie.watchedAt?.let { putString(TraktInstantWriteWorker.KEY_WATCHED_AT, it) }
-                    }
-                }
-                if (removedEps.isNotEmpty()) {
-                    val encoded = TraktInstantWriteWorker.encodeEpisodes(removedEps)
-                    enqueue(TraktInstantWriteWorker.ACTION_REMOVE_EPISODES_WATCHED) {
-                        putString(TraktInstantWriteWorker.KEY_SEASON_EPISODES, encoded)
-                    }
-                }
-            }
-
-            if (workRequests.isNotEmpty()) {
-                androidx.work.WorkManager.getInstance(context)
-                    .enqueueUniqueWork("TRAKT_INSTANT_PUSH", androidx.work.ExistingWorkPolicy.APPEND_OR_REPLACE, workRequests)
-            }
-            
-            // Enqueue SIMKL Instant Write
-            val simklRequests = workRequests.map { traktReq ->
-                androidx.work.OneTimeWorkRequestBuilder<SimklInstantWriteWorker>()
-                    .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                    .setInputData(traktReq.workSpec.input)
-                    .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.SECONDS)
-                    .build()
-            }
-            
-            if (simklRequests.isNotEmpty()) {
-                androidx.work.WorkManager.getInstance(context)
-                    .enqueueUniqueWork("SIMKL_INSTANT_PUSH", androidx.work.ExistingWorkPolicy.APPEND_OR_REPLACE, simklRequests)
-            }
+            externalSyncDispatcher.dispatchSaveSync(oldMovie, movie)
         }
         
         // 2. Fire-and-forget to Firebase (SDK handles persistence/retry)
         repositoryScope.launch {
             try {
                 firebaseRemoteDataSource.setMovie(movie)
-                
-                val oldVibes = parseVibeCodes(oldMovie?.emotionalVibes)
-                val newVibes = parseVibeCodes(movie.emotionalVibes)
-                
-                val addedVibes = newVibes - oldVibes
-                val removedVibes = oldVibes - newVibes
-                
-                val newMvp = movie.favoriteActorId
-                val oldMvp = oldMovie?.favoriteActorId
-
-                val oldRating = oldMovie?.personalRating
-                val newRating = movie.personalRating
-                
-                val newStatus = if (movie.watched) "watched" else "unwatched"
-                val oldStatus = if (oldMovie?.watched == true) "watched" else "unwatched"
-
-                var calculatedViewsDelta = 0L
-                if (movie.mediaType == "tv") {
-                    val oldEps = oldMovie?.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                    val newEps = movie.watchedEpisodes?.values?.sumOf { it.size } ?: 0
-                    calculatedViewsDelta = (newEps - oldEps).toLong()
-                } else {
-                    if (newStatus == "watched" && oldStatus != "watched") calculatedViewsDelta = 1L
-                    if (oldStatus == "watched" && newStatus != "watched") calculatedViewsDelta = -1L
-                }
-
-                if (addedVibes.isNotEmpty() || removedVibes.isNotEmpty() || newMvp != oldMvp || newRating != oldRating || calculatedViewsDelta != 0L) {
-                    firebaseRemoteDataSource.updateGlobalMovieStats(
-                        compositeId = movie.compositeId,
-                        addedVibes = addedVibes.toList(),
-                        removedVibes = removedVibes.toList(),
-                        newMvp = newMvp,
-                        oldMvp = oldMvp,
-                        newRating = newRating,
-                        oldRating = oldRating,
-                        newStatus = newStatus,
-                        oldStatus = oldStatus,
-                        viewsDelta = calculatedViewsDelta
-                    )
+                trendingStatsSyncDelegate.syncGlobalStatsDeltas(oldMovie, movie) { compositeId ->
                     synchronized(globalStatsLruCache) {
-                        globalStatsLruCache.remove(movie.compositeId)
+                        globalStatsLruCache.remove(compositeId)
                     }
                 }
             } catch (e: Exception) {
@@ -582,53 +399,9 @@ class MovieRepository @Inject constructor(
         watchHistoryRepository.purgeHistoryForMovie(targetMovie.id, targetMovie.mediaType)
         widgetNotifier.notifyWidgetUpdated()
 
-        // --- PUSH RIMOZIONE A TRAKT ---
-        val builder = androidx.work.Data.Builder()
-            .putString(TraktInstantWriteWorker.KEY_ACTION,     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
-            .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, targetMovie.mediaType)
-            .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    targetMovie.id)
-        if (targetMovie.imdbId != null) {
-            builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, targetMovie.imdbId)
-        }
-
-        val workRequests = mutableListOf(
-            OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .setInputData(builder.build())
-                .build()
-        )
-
-        // Fix smart-cast salvando in una variabile locale immutabile
-        val currentRating = targetMovie.personalRating
-        if (currentRating != null && currentRating > 0.0) {
-            // Fix: uso di .putAll() al posto di fromData()
-            val ratingBuilder = androidx.work.Data.Builder().putAll(builder.build())
-                .putString(TraktInstantWriteWorker.KEY_ACTION, TraktInstantWriteWorker.ACTION_REMOVE_RATING)
-            workRequests += OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                .setInputData(ratingBuilder.build())
-                .build()
-        }
-        
-        if (targetMovie.favorite) {
-            // Fix: uso di .putAll() al posto di fromData()
-            val watchlistBuilder = androidx.work.Data.Builder().putAll(builder.build())
-                .putString(TraktInstantWriteWorker.KEY_ACTION, TraktInstantWriteWorker.ACTION_REMOVE_WATCHLIST)
-            workRequests += OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-                .setInputData(watchlistBuilder.build())
-                .build()
-        }
-
-        // --- PUSH RIMOZIONE A SIMKL ---
-        val simklRequests = workRequests.map { traktReq ->
-            OneTimeWorkRequestBuilder<SimklInstantWriteWorker>()
-                .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-                .setInputData(traktReq.workSpec.input)
-                .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.SECONDS)
-                .build()
-        }
-
-        WorkManager.getInstance(context).enqueue(workRequests + simklRequests)
-        // ------------------------------
+        // --- PUSH RIMOZIONE A TRAKT & SIMKL ---
+        externalSyncDispatcher.dispatchDeleteSync(targetMovie)
+        // --------------------------------------
         
         repositoryScope.launch {
             try {
@@ -636,7 +409,7 @@ class MovieRepository @Inject constructor(
 
                 // Rimuove il voto, le emotional vibes, l'attore MVP e le views dai global stats di Firestore
                 val ratingToRemove = targetMovie.personalRating
-                val vibesToRemove = parseVibeCodes(targetMovie.emotionalVibes).toList()
+                val vibesToRemove: List<String> = trendingStatsSyncDelegate.parseVibeCodes(targetMovie.emotionalVibes).toList()
                 val mvpToRemove = targetMovie.favoriteActorId
                 val calculatedViewsDelta = if (targetMovie.mediaType == "tv") {
                     -(targetMovie.watchedEpisodes?.values?.sumOf { it.size } ?: 0).toLong()
@@ -651,7 +424,7 @@ class MovieRepository @Inject constructor(
                 ) {
                     firebaseRemoteDataSource.updateGlobalMovieStats(
                         compositeId = "${targetMovie.mediaType}_${targetMovie.id}",
-                        addedVibes = emptyList(),
+                        addedVibes = emptyList<String>(),
                         removedVibes = vibesToRemove,
                         newMvp = null,
                         oldMvp = mvpToRemove,
@@ -681,27 +454,8 @@ class MovieRepository @Inject constructor(
         favoriteDao.insert(updatedMovie)
         watchHistoryRepository.purgeHistoryForMovie(movie.id, movie.mediaType)
 
-        // --- PUSH RIMOZIONE A TRAKT ---
-        val builder = androidx.work.Data.Builder()
-            .putString(TraktInstantWriteWorker.KEY_ACTION,     TraktInstantWriteWorker.ACTION_REMOVE_WATCHED)
-            .putString(TraktInstantWriteWorker.KEY_MEDIA_TYPE, movie.mediaType)
-            .putLong(  TraktInstantWriteWorker.KEY_TMDB_ID,    movie.id)
-        if (movie.imdbId != null) {
-            builder.putString(TraktInstantWriteWorker.KEY_IMDB_ID, movie.imdbId)
-        }
-
-        val traktRequest = OneTimeWorkRequestBuilder<TraktInstantWriteWorker>()
-            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setInputData(builder.build())
-            .build()
-            
-        val simklRequest = OneTimeWorkRequestBuilder<SimklInstantWriteWorker>()
-            .setExpedited(androidx.work.OutOfQuotaPolicy.RUN_AS_NON_EXPEDITED_WORK_REQUEST)
-            .setInputData(builder.build())
-            .setBackoffCriteria(androidx.work.BackoffPolicy.EXPONENTIAL, 10, java.util.concurrent.TimeUnit.SECONDS)
-            .build()
-
-        WorkManager.getInstance(context).enqueue(listOf(traktRequest, simklRequest))
+        // --- PUSH RIMOZIONE A TRAKT & SIMKL ---
+        externalSyncDispatcher.dispatchMarkAsDeletedSync(movie)
 
         repositoryScope.launch {
             try {
@@ -1295,80 +1049,11 @@ class MovieRepository @Inject constructor(
     suspend fun getTrendingPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getTrendingPeople(page = page).results
     suspend fun getPopularPeople(page: Int = 1): List<PersonSearchResult> = tmdbService.getPopularPeople(page = page).results
 
-    suspend fun getTop10FlickTroveBoth(): Pair<List<Movie>, List<Movie>> {
-        val now = System.currentTimeMillis()
-        cachedTop10Both?.let {
-            if (now - lastTop10FetchTime < TOP10_TTL_MS) return it
-        }
+    suspend fun getTop10FlickTroveBoth(): Pair<List<Movie>, List<Movie>> =
+        trendingStatsSyncDelegate.getTop10FlickTroveBoth { id, isTv -> getMovieDetail(id, isTv) }
 
-        return top10Mutex.withLock {
-            val cached = cachedTop10Both
-            if (cached != null && (System.currentTimeMillis() - lastTop10FetchTime) < TOP10_TTL_MS) {
-                return@withLock cached
-            }
-
-            val (movieIds, tvIds) = firebaseRemoteDataSource.fetchTop10MonthlyBoth()
-            val result = kotlinx.coroutines.coroutineScope {
-                val moviesDeferred = async {
-                    movieIds.mapNotNull { compositeId ->
-                        val idStr = compositeId.removePrefix("movie_")
-                        val id = idStr.toLongOrNull() ?: return@mapNotNull null
-                        try {
-                            val detail = getMovieDetail(id, isTv = false)
-                            Movie(
-                                id = detail.id,
-                                title = detail.title ?: "",
-                                posterPath = detail.posterPath,
-                                backdropPath = detail.backdropPath,
-                                releaseDate = detail.releaseDate ?: "",
-                                overview = detail.overview ?: "",
-                                voteAverage = detail.voteAverage ?: 0.0,
-                                voteCount = detail.voteCount ?: 0,
-                                genreIds = detail.genres?.map { it.id } ?: emptyList(),
-                                mediaType = "movie",
-                                runtime = detail.runtime
-                            )
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
-                }
-                val tvDeferred = async {
-                    tvIds.mapNotNull { compositeId ->
-                        val idStr = compositeId.removePrefix("tv_")
-                        val id = idStr.toLongOrNull() ?: return@mapNotNull null
-                        try {
-                            val detail = getMovieDetail(id, isTv = true)
-                            Movie(
-                                id = detail.id,
-                                title = detail.name ?: detail.title ?: "",
-                                posterPath = detail.posterPath,
-                                backdropPath = detail.backdropPath,
-                                releaseDate = detail.firstAirDate ?: detail.releaseDate ?: "",
-                                overview = detail.overview ?: "",
-                                voteAverage = detail.voteAverage ?: 0.0,
-                                voteCount = detail.voteCount ?: 0,
-                                genreIds = detail.genres?.map { it.id } ?: emptyList(),
-                                mediaType = "tv",
-                                runtime = detail.runtime
-                            )
-                        } catch (e: Exception) {
-                            null
-                        }
-                    }
-                }
-                Pair(moviesDeferred.await(), tvDeferred.await())
-            }
-            cachedTop10Both = result
-            lastTop10FetchTime = System.currentTimeMillis()
-            result
-        }
-    }
-
-    suspend fun getTop10FlickTrove(isTv: Boolean): List<Movie> {
-        val (movies, tv) = getTop10FlickTroveBoth()
-        return if (isTv) tv else movies
-    }
+    suspend fun getTop10FlickTrove(isTv: Boolean): List<Movie> =
+        trendingStatsSyncDelegate.getTop10FlickTrove(isTv) { id, isTv -> getMovieDetail(id, isTv) }
 
     suspend fun discoverMoviesWithParams(page: Int = 1, options: Map<String, String>): List<Movie> {
         val rawLanguage = preferenceRepository.userPreferencesFlow.first().contentLanguage
@@ -1564,141 +1249,14 @@ class MovieRepository @Inject constructor(
         customDate: java.time.Instant? = null,
         isProgressAdvancing: Boolean = true
     ) {
-        if (movie.mediaType != "tv") return
-        val watchedCount = movie.watchedEpisodes?.filter { it.key != "0" }?.values?.sumOf { it.size } ?: 0
-        if (watchedCount > 0 || movie.watched) {
-            val currentHistory = watchHistoryRepository.getWatchHistoryForMovie(movie.id, movie.mediaType)
-            val activeSession = if (currentHistory.any { it.isRewatch }) {
-                currentHistory.filter { it.isRewatch }.maxByOrNull { DateTimeUtils.parseIsoDateToMillis(it.watchedAt) }
-            } else {
-                currentHistory.find { !it.isRewatch }
-            }
-            val nowStr = customDate?.toString() ?: java.time.Instant.now().toString()
-
-            val currentDatesMap = try {
-                activeSession?.episodeDates?.let { 
-                    Json.decodeFromString<Map<String, String>>(it).toMutableMap() 
-                } ?: mutableMapOf()
-            } catch (e: Exception) {
-                mutableMapOf()
-            }
-
-            val newlyAddedSet = if (isAdding && !changedEpisodes.isNullOrEmpty()) {
-                changedEpisodes.toSet()
-            } else emptySet()
-
-            val watchedEpsMap = movie.watchedEpisodes ?: emptyMap()
-
-            if (activeSession != null) {
-                // Preserva le date degli episodi già visti in precedenza in questa sessione.
-                // Se un episodio già visto non ha una data esplicita in currentDatesMap:
-                // - Se currentDatesMap è vuota (dati pregressi senza date individuali), tutti gli episodi
-                //   esistenti (tranne eventuali newlyAddedSet) assumono activeSession.watchedAt.
-                // - Se currentDatesMap conteneva già delle date, eventuali episodi mancanti e non inclusi
-                //   in changedEpisodes sono nuovi se isProgressAdvancing = true (assumono nowStr),
-                //   oppure preesistenti (assumono activeSession.watchedAt).
-                val isBackfillingLegacy = currentDatesMap.isEmpty()
-                for ((seasonStr, epList) in watchedEpsMap) {
-                    val sNum = seasonStr.toIntOrNull() ?: continue
-                    for (epNum in epList) {
-                        if ((sNum to epNum) !in newlyAddedSet && currentDatesMap.getEpisodeWatchDate(sNum, epNum) == null) {
-                            val fallbackDate = if (isBackfillingLegacy || !isProgressAdvancing) {
-                                activeSession.watchedAt
-                            } else {
-                                nowStr
-                            }
-                            currentDatesMap.setEpisodeWatchDate(sNum, epNum, fallbackDate)
-                        }
-                    }
-                }
-            } else {
-                // Nuova sessione (prima visione assoluta): popola tutti gli episodi attualmente presenti in watchedEpisodes
-                for ((seasonStr, epList) in watchedEpsMap) {
-                    val sNum = seasonStr.toIntOrNull() ?: continue
-                    for (epNum in epList) {
-                        if (currentDatesMap.getEpisodeWatchDate(sNum, epNum) == null) {
-                            currentDatesMap.setEpisodeWatchDate(sNum, epNum, nowStr)
-                        }
-                    }
-                }
-            }
-
-            if (!changedEpisodes.isNullOrEmpty()) {
-                for ((seasonNum, epNum) in changedEpisodes) {
-                    if (isAdding) {
-                        currentDatesMap.setEpisodeWatchDate(seasonNum, epNum, nowStr)
-                    } else {
-                        currentDatesMap.removeEpisodeWatchDate(seasonNum, epNum)
-                    }
-                }
-            }
-
-            // Rimuovi eventuali episodi in currentDatesMap che non sono più in watchedEpisodes
-            val currentEpisodeKeys = watchedEpsMap.flatMap { (sStr, epList) ->
-                val sNum = sStr.toIntOrNull() ?: return@flatMap emptyList<Pair<Int, Int>>()
-                epList.map { sNum to it }
-            }.toSet()
-
-            val keysToRemove = mutableListOf<Pair<Int, Int>>()
-            for (key in currentDatesMap.keys) {
-                val parts = if (key.contains("_")) {
-                    key.split("_")
-                } else if (key.startsWith("S") && key.contains("E")) {
-                    key.removePrefix("S").split("E")
-                } else null
-
-                if (parts != null && parts.size == 2) {
-                    val s = parts[0].toIntOrNull()
-                    val e = parts[1].toIntOrNull()
-                    if (s != null && e != null && (s to e) !in currentEpisodeKeys) {
-                        keysToRemove.add(s to e)
-                    }
-                }
-            }
-            for ((s, e) in keysToRemove) {
-                currentDatesMap.removeEpisodeWatchDate(s, e)
-            }
-
-            val newEpisodeDatesJson = if (currentDatesMap.isNotEmpty()) {
-                try { Json.encodeToString(currentDatesMap) } catch (e: Exception) { null }
-            } else null
-
-            if (activeSession == null) {
-                watchHistoryRepository.insertWatchHistory(
-                    com.cinetrack.data.local.entities.WatchHistoryEntity(
-                        movieId = movie.id,
-                        mediaType = movie.mediaType,
-                        watchedAt = nowStr,
-                        isRewatch = false,
-                        episodeDates = newEpisodeDatesJson
-                    )
-                )
-                if (movie.watchedAt != nowStr) {
-                    saveMovie(movie.copy(watchedAt = nowStr, clientUpdatedAt = System.currentTimeMillis()))
-                }
-            } else {
-                val allResolvedDates = currentDatesMap.values.toList()
-                val targetIso = if (allResolvedDates.isNotEmpty()) {
-                    allResolvedDates.maxByOrNull { DateTimeUtils.parseIsoDateToMillis(it) } ?: nowStr
-                } else if (isProgressAdvancing) {
-                    nowStr
-                } else {
-                    activeSession.watchedAt
-                }
-
-                watchHistoryRepository.updateWatchHistory(
-                    activeSession.copy(
-                        watchedAt = targetIso,
-                        episodeDates = newEpisodeDatesJson,
-                        syncStatus = "pending"
-                    )
-                )
-                val latestHistory = watchHistoryRepository.getWatchHistoryForMovie(movie.id, movie.mediaType)
-                    .maxByOrNull { DateTimeUtils.parseIsoDateToMillis(it.watchedAt) }
-                if (latestHistory != null && movie.watchedAt != latestHistory.watchedAt) {
-                    saveMovie(movie.copy(watchedAt = latestHistory.watchedAt, clientUpdatedAt = System.currentTimeMillis()))
-                }
-            }
+        tvEpisodeWatchStateDelegate.recordEpisodeWatchState(
+            movie = movie,
+            changedEpisodes = changedEpisodes,
+            isAdding = isAdding,
+            customDate = customDate,
+            isProgressAdvancing = isProgressAdvancing
+        ) { updatedMovie ->
+            saveMovie(updatedMovie)
         }
     }
 
@@ -1708,18 +1266,6 @@ class MovieRepository @Inject constructor(
 
     suspend fun getAllTimeBoxOffice(year: Int? = null, page: Int = 1, forceRefresh: Boolean = false): List<com.cinetrack.data.model.BoxOfficeMovie> =
         boxOfficeRepository.get().getAllTimeBoxOffice(year, page, forceRefresh)
-
-    /** Parses and normalizes comma-separated vibe codes so whitespace or legacy aliases don't trigger spurious global stat diffs. */
-    private fun parseVibeCodes(emotionalVibes: String?): Set<String> {
-        return emotionalVibes
-            ?.split(",")
-            ?.mapNotNull { raw ->
-                val normalized = com.cinetrack.ui.components.detail.normalizeVibeCode(raw)
-                normalized.takeIf { it.isNotBlank() }
-            }
-            ?.toSet()
-            ?: emptySet()
-    }
 }
 
 data class TraktRatingInfo(val rating: Double?, val votes: Int)

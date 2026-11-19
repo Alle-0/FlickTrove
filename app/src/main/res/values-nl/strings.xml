@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">Geen video\'s beschikbaar</string>
     <string name="detail_add_subgenres">+ Subgenres</string>
     <string name="detail_hide_subgenres">- Verbergen</string>
+    <string name="detail_show_all_subgenres">+ Alle (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">HUREN OF KOPEN</string>
     <string name="detail_season">Seizoen</string>
@@ -2158,6 +2159,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Beschrijf in je eigen woorden wat je wilt kijken. AI vindt de perfecte films in de hele TMDB-catalogus.</string>
     <string name="search_mood_iris_intro_text">Beschrijf in je eigen woorden wat je wilt kijken. IRIS vindt de perfecte films in de hele TMDB-catalogus.</string>
+    <string name="search_mood_tip_detail">Tip: hoe meer details je geeft over het plot, de sfeer of personages, hoe nauwkeuriger de resultaten.</string>
     <string name="search_mood_exhausted_notice">Je hebt al je 3 stemmingszoekopdrachten voor vandaag gebruikt. Ze worden om middernacht vernieuwd!</string>
     <string name="search_mood_exhausted_title">Dagelijkse AI-zoekopdrachten opgebruikt</string>
     <string name="search_mood_switch_to_algo">Overschakelen naar IRIS (onbeperkt)</string>
@@ -2194,4 +2196,19 @@
     <string name="badge_iris_search_cat">STEMMINGSONTDEKKING</string>
     <string name="badge_iris_search_desc">Je omarmde de visie: voegde een film die ontdekt werd met IRIS of AI toe aan je kijklijst.</string>
     <string name="trophy_unit_searches">zoekopdrachten</string>
+
+    <string name="semantic_affinity_suffix">affiniteit</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Geregisseerd door %1$s</string>
+    <string name="semantic_reason_score_by">Muziek door %1$s</string>
+    <string name="semantic_reason_cinematography_by">Cinematografie door %1$s</string>
+    <string name="semantic_reason_produced_by">Geproduceerd door %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s Cinema</string>
+    <string name="semantic_reason_critically_acclaimed">Geprezen door critici (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Genreklassieker (%1$s)</string>
+    <string name="semantic_reason_plot_match">Thematische plotmatch</string>
+    <string name="semantic_reason_atmosphere">Sfeer: %1$s</string>
+    <string name="semantic_reason_written_by">Geschreven door %1$s</string>
 </resources>

@@ -81,29 +81,11 @@ fun TrendingHeader(text: String) {
 
 @Composable
 fun SearchNoResults(queryLength: Int) {
-    androidx.compose.foundation.layout.Column(
-        modifier = Modifier.fillMaxWidth().padding(top = 80.dp),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        androidx.compose.material3.Icon(
-            imageVector = androidx.compose.ui.graphics.vector.ImageVector.vectorResource(id = com.cinetrack.R.drawable.ic_lente), 
-            contentDescription = null, 
-            modifier = Modifier.size(64.dp), 
-            tint = MaterialTheme.colorScheme.primary.copy(alpha = 0.15f)
-        )
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(16.dp))
-        Text(
-            text = androidx.compose.ui.res.stringResource(com.cinetrack.R.string.search_no_results), 
-            color = MaterialTheme.colorScheme.onSurface, 
-            fontSize = 20.sp, 
-            fontWeight = FontWeight.Bold
-        )
-        androidx.compose.foundation.layout.Spacer(modifier = Modifier.height(8.dp))
-        Text(
-            text = if (queryLength in 1..2) androidx.compose.ui.res.stringResource(com.cinetrack.R.string.search_no_results_short) else androidx.compose.ui.res.stringResource(com.cinetrack.R.string.search_no_results_simplify), 
-            color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f), 
-            fontSize = 14.sp, 
-            textAlign = androidx.compose.ui.text.style.TextAlign.Center
-        )
-    }
+    com.cinetrack.ui.components.mascot.IrisEmptyState(
+        title = androidx.compose.ui.res.stringResource(com.cinetrack.R.string.search_no_results),
+        description = if (queryLength in 1..2) androidx.compose.ui.res.stringResource(com.cinetrack.R.string.search_no_results_short) else androidx.compose.ui.res.stringResource(com.cinetrack.R.string.search_no_results_simplify),
+        gazeBiasY = 0.55f,
+        size = 84.dp,
+        modifier = Modifier.fillMaxWidth().padding(top = 28.dp)
+    )
 }

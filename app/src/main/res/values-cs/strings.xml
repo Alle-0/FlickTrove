@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">Nejsou k dispozici žádná videa</string>
     <string name="detail_add_subgenres">+ Podžánry</string>
     <string name="detail_hide_subgenres">- Skrýt</string>
+    <string name="detail_show_all_subgenres">+ Vše (%d)</string>
     <string name="detail_streaming">STREAMOVÁNÍ</string>
     <string name="detail_rent_buy">PŮJČIT NEBO KOUPIT</string>
     <string name="detail_season">Série</string>
@@ -2158,6 +2159,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Popište vlastními slovy, na co máte chuť se podívat. Umělá inteligence vyhledá ideální filmy v celém katalogu TMDB.</string>
     <string name="search_mood_iris_intro_text">Popište vlastními slovy, na co máte chuť se podívat. IRIS vyhledá ideální filmy v celém katalogu TMDB.</string>
+    <string name="search_mood_tip_detail">Tip: Čím více podrobností o ději, atmosféře nebo postavách uvedete, tím přesnější budou výsledky.</string>
     <string name="search_mood_exhausted_notice">Vyčerpali jste všech 3 vyhledávání podle nálady na dnešní den. Obnoví se o půlnoci!</string>
     <string name="search_mood_exhausted_title">Denní vyhledávání AI vyčerpána</string>
     <string name="search_mood_switch_to_algo">Přepnout na IRIS (neomezeně)</string>
@@ -2194,4 +2196,19 @@
     <string name="badge_iris_search_cat">OBJEVOVÁNÍ NÁLADY</string>
     <string name="badge_iris_search_desc">Přijali jste vizi: přidali jste si do seznamu ke zhlédnutí film objevený pomocí IRIS nebo AI.</string>
     <string name="trophy_unit_searches">hledání</string>
+
+    <string name="semantic_affinity_suffix">shoda</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Režie: %1$s</string>
+    <string name="semantic_reason_score_by">Hudba: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Kamera: %1$s</string>
+    <string name="semantic_reason_produced_by">Produkce: %1$s</string>
+    <string name="semantic_reason_cinema_of">Kinematografie %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Vysoce hodnoceno kritikou (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Žánrová klasika (%1$s)</string>
+    <string name="semantic_reason_plot_match">Tematická shoda s dějem</string>
+    <string name="semantic_reason_atmosphere">Atmosféra: %1$s</string>
+    <string name="semantic_reason_written_by">Scénář: %1$s</string>
 </resources>

@@ -48,11 +48,11 @@ fun DetailSkeleton(
                 .fillMaxSize()
                 .verticalScroll(rememberScrollState())
         ) {
-            // 1. Backdrop Skeleton matching DetailBackdrop height (480dp)
+            // 1. Backdrop Skeleton matching DetailBackdrop height (520dp)
             Box(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(480.dp)
+                    .height(520.dp)
                     .background(Color.Black)
             ) {
                 // Neutral deep slate atmospheric background
@@ -104,13 +104,14 @@ fun DetailSkeleton(
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(horizontal = 16.dp)
+                        .padding(horizontal = 16.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
                     // Title skeleton bar
                     Box(
                         modifier = Modifier
-                            .fillMaxWidth(0.72f)
-                            .height(38.dp)
+                            .fillMaxWidth(0.82f)
+                            .height(44.dp)
                             .clip(RoundedCornerShape(8.dp))
                             .background(Color.White.copy(alpha = 0.06f))
                             .shimmerEffect()
@@ -132,7 +133,8 @@ fun DetailSkeleton(
 
                     // Row with Match Percentage Pill, Trailer Action & Cover Action
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         // Match Percentage Pill (Neutral monochrome)
@@ -346,7 +348,8 @@ fun DetailSkeleton(
 
                     // Genres Pills
                     Row(
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier.fillMaxWidth(),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         listOf(82.dp, 104.dp, 76.dp, 92.dp).forEach { pillWidth ->

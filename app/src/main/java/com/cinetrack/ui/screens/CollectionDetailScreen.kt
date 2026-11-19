@@ -204,8 +204,12 @@ fun CollectionDetailScreenContent(
     val rawAccentColor = extractedColor ?: fallbackAccentColor
     val globalAccentColor = remember(rawAccentColor) { ColorUtils.ensureVividAccent(rawAccentColor) }
 
-    val baseDarkColor = remember { Color(0xFF0F0F16) }
-    val targetBackgroundColor = if (uiState.collection != null) lerp(globalAccentColor, baseDarkColor, 0.85f) else baseDarkColor
+    val baseDarkColor = remember { ColorUtils.BaseDarkSlate }
+    val targetBackgroundColor = if (uiState.collection != null) {
+        ColorUtils.calculateCarouselBackgroundColor(globalAccentColor)
+    } else {
+        baseDarkColor
+    }
     val animatedBgColor by animateColorAsState(
         targetValue = targetBackgroundColor,
         animationSpec = tween(durationMillis = 800),
@@ -275,7 +279,7 @@ fun CollectionDetailScreenContent(
                         Column(
                             modifier = Modifier
                                 .fillMaxWidth()
-                                .padding(top = 340.dp)
+                                .padding(top = 380.dp)
                                 .padding(horizontal = 16.dp),
                             horizontalAlignment = Alignment.Start
                         ) {

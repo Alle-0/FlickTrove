@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">Δεν υπάρχουν διαθέσιμα βίντεο</string>
     <string name="detail_add_subgenres">+ Υποείδη</string>
     <string name="detail_hide_subgenres">- Απόκρυψη</string>
+    <string name="detail_show_all_subgenres">+ Όλα (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">ΕΝΟΙΚΙΑΣΗ Ή ΑΓΟΡΑ</string>
     <string name="detail_season">Σεζόν</string>
@@ -2180,6 +2181,7 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Περιγράψτε με δικά σας λόγια τι θέλετε να παρακολουθήσετε. Το AI θα βρει τις ιδανικές ταινίες σε ολόκληρο τον κατάλογο του TMDB.</string>
     <string name="search_mood_iris_intro_text">Περιγράψτε με δικά σας λόγια τι θέλετε να παρακολουθήσετε. Το IRIS θα βρει τις ιδανικές ταινίες σε ολόκληρο τον κατάλογο του TMDB.</string>
+    <string name="search_mood_tip_detail">Συμβουλή: Όσο περισσότερες λεπτομέρειες δίνετε για την πλοκή, την ατμόσφαιρα ή τους χαρακτήρες, τόσο πιο ακριβή θα είναι τα αποτελέσματα.</string>
     <string name="search_mood_exhausted_notice">Χρησιμοποιήσατε και τις 3 αναζητήσεις διάθεσης για σήμερα. Θα ανανεωθούν τα μεσάνυχτα!</string>
     <string name="search_mood_exhausted_title">Εξαντλήθηκαν οι ημερήσιες αναζητήσεις AI</string>
     <string name="search_mood_switch_to_algo">Μετάβαση σε IRIS (απεριόριστο)</string>
@@ -2216,4 +2218,19 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="badge_iris_search_cat">ΑΝΑΚΑΛΥΨΗ ΔΙΑΘΕΣΗΣ</string>
     <string name="badge_iris_search_desc">Αγκαλιάσατε το όραμα: προσθέσατε στη λίστα παρακολούθησης μια ταινία που ανακαλύφθηκε με το IRIS ή την AI.</string>
     <string name="trophy_unit_searches">αναζητήσεις</string>
+
+    <string name="semantic_affinity_suffix">συνάφεια</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Σκηνοθεσία: %1$s</string>
+    <string name="semantic_reason_score_by">Μουσική: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Φωτογραφία: %1$s</string>
+    <string name="semantic_reason_produced_by">Παραγωγή: %1$s</string>
+    <string name="semantic_reason_cinema_of">Κινηματογράφος %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Εξαιρετικές κριτικές (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Κλασικό του είδους (%1$s)</string>
+    <string name="semantic_reason_plot_match">Θεματική σύνδεση πλοκής</string>
+    <string name="semantic_reason_atmosphere">Ατμόσφαιρα: %1$s</string>
+    <string name="semantic_reason_written_by">Σενάριο: %1$s</string>
 </resources>

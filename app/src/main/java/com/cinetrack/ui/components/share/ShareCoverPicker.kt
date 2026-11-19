@@ -69,74 +69,6 @@ import dev.chrisbanes.haze.HazeState
 import dev.chrisbanes.haze.haze
 import java.util.Locale
 
-internal fun getFlagEmoji(languageCode: String?): String {
-    if (languageCode.isNullOrBlank()) return "🌐"
-    return when (languageCode.lowercase().trim()) {
-        "it" -> "🇮🇹"
-        "en" -> "🇬🇧"
-        "us" -> "🇺🇸"
-        "fr" -> "🇫🇷"
-        "es" -> "🇪🇸"
-        "de" -> "🇩🇪"
-        "ja" -> "🇯🇵"
-        "ko" -> "🇰🇷"
-        "zh", "cn" -> "🇨🇳"
-        "pt" -> "🇵🇹"
-        "ru" -> "🇷🇺"
-        "ar" -> "🇸🇦"
-        "hi" -> "🇮🇳"
-        "el" -> "🇬🇷"
-        "tr" -> "🇹🇷"
-        "nl" -> "🇳🇱"
-        "pl" -> "🇵🇱"
-        "sv" -> "🇸🇪"
-        "da" -> "🇩🇰"
-        "no" -> "🇳🇴"
-        "fi" -> "🇫🇮"
-        "cs" -> "🇨🇿"
-        "hu" -> "🇭🇺"
-        "ro" -> "🇷🇴"
-        "th" -> "🇹🇭"
-        "id" -> "🇮🇩"
-        "vi" -> "🇻🇳"
-        "uk" -> "🇺🇦"
-        "he", "iw" -> "🇮🇱"
-        "fa" -> "🇮🇷"
-        "bn" -> "🇧🇩"
-        "ur" -> "🇵🇰"
-        "ta" -> "🇮🇳"
-        "te" -> "🇮🇳"
-        "ml" -> "🇮🇳"
-        "mr" -> "🇮🇳"
-        "gu" -> "🇮🇳"
-        "kn" -> "🇮🇳"
-        "tl" -> "🇵🇭"
-        "ms" -> "🇲🇾"
-        "sk" -> "🇸🇰"
-        "bg" -> "🇧🇬"
-        "hr" -> "🇭🇷"
-        "sr" -> "🇷🇸"
-        "sl" -> "🇸🇮"
-        "et" -> "🇪🇪"
-        "lv" -> "🇱🇻"
-        "lt" -> "🇱🇹"
-        "is" -> "🇮🇸"
-        "ga" -> "🇮🇪"
-        "eu" -> "🇪🇸"
-        "ca" -> "🇪🇸"
-        "gl" -> "🇪🇸"
-        else -> "🌐"
-    }
-}
-
-internal fun getLanguageDisplayName(code: String): String {
-    val flag = getFlagEmoji(code)
-    val loc = Locale.forLanguageTag(code)
-    val localizedName = loc.getDisplayLanguage(Locale.getDefault()).replaceFirstChar { it.uppercase() }
-    val display = if (localizedName.isNotBlank() && localizedName != code) localizedName else code.uppercase()
-    return "$flag $display"
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 internal fun CoverSelectionView(
@@ -541,234 +473,47 @@ internal fun CoverSelectionView(
                                 else -> (config.customBackdropPath ?: defaultBackdrop) == item.filePath
                             }
 
-                            val imageUrl = remember(item.filePath) {
-                                val imageType = when {
-                                    isPosterTab -> ImageType.POSTER
-                                    isLogoTab -> ImageType.LOGO
-                                    else -> ImageType.BACKDROP
-                                }
-                                buildTmdbImageUrl(item.filePath, imageType, ImageQuality.HIGH)
-                            }
-
-                            Box(
-                                modifier = Modifier
-                                    .fillMaxWidth()
-                                    .aspectRatio(itemAspectRatio)
-                                    .bounceClick(scaleDown = 0.95f) {
-                                        VibrationHelper.vibrateTick(context)
-                                        when {
-                                            isPosterTab -> {
-                                                val newPath = if (item.filePath == defaultPoster) null else item.filePath
-                                                val matchedLogo = if (!config.hasManualLogoOverride && item.iso6391 != null) {
-                                                    validLogos.firstOrNull { it.iso6391.equals(item.iso6391, ignoreCase = true) }?.filePath
-                                                } else null
-                                                onConfigChange(
-                                                    config.copy(
-                                                        customPosterPath = newPath,
-                                                        customLogoPath = when {
-                                                            config.hasManualLogoOverride -> config.customLogoPath
-                                                            newPath == null -> null
-                                                            matchedLogo != null -> matchedLogo
-                                                            else -> config.customLogoPath
-                                                        }
-                                                    )
-                                                )
-                                            }
-                                            isLogoTab -> {
-                                                val newPath = if (item.filePath == defaultLogoPath) null else item.filePath
-                                                onConfigChange(
-                                                    config.copy(
-                                                        customLogoPath = newPath,
-                                                        hasManualLogoOverride = true
-                                                    )
-                                                )
-                                            }
-                                            else -> {
-                                                val newPath = if (item.filePath == defaultBackdrop) null else item.filePath
-                                                onConfigChange(config.copy(customBackdropPath = newPath))
-                                            }
-                                        }
-                                        onBack() // Si applica subito alla card e torna indietro
-                                    }
-                                    .clip(RoundedCornerShape(12.dp))
-                                    .background(Color(0xFF1E1E24))
-                                    .border(
-                                        width = if (isSelected) 2.5.dp else 1.dp,
-                                        color = if (isSelected) accentColor else Color.White.copy(alpha = 0.10f),
-                                        shape = RoundedCornerShape(12.dp)
-                                    )
-                            ) {
-                                SubcomposeAsyncImage(
-                                    model = ImageRequest.Builder(context)
-                                        .data(imageUrl)
-                                        .crossfade(true)
-                                        .build(),
-                                    contentDescription = null,
-                                    contentScale = if (isLogoTab) ContentScale.Fit else ContentScale.Crop,
-                                    modifier = if (isLogoTab) {
-                                        Modifier
-                                            .fillMaxSize()
-                                            .padding(14.dp)
-                                    } else {
-                                        Modifier.fillMaxSize()
-                                    },
-                                    loading = {
-                                        Box(
-                                            modifier = Modifier
-                                                .fillMaxSize()
-                                                .background(Color(0xFF1E1E24))
-                                                .shimmerEffect()
-                                        )
-                                    }
-                                )
-
-                                // Top-right selection badge
-                                if (isSelected) {
-                                    Box(
-                                        modifier = Modifier
-                                            .padding(6.dp)
-                                            .align(Alignment.TopEnd)
-                                            .size(22.dp)
-                                            .clip(CircleShape)
-                                            .background(accentColor),
-                                        contentAlignment = Alignment.Center
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_tick),
-                                            contentDescription = stringResource(R.string.share_cover_picker_selected),
-                                            tint = ColorUtils.contentColorForAccent(accentColor),
-                                            modifier = Modifier.size(13.dp)
-                                        )
-                                    }
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Layer 2: Tap-outside dismiss overlay across the entire modal when dropdown is open
-        if (languageMenuExpanded) {
-            Box(
-                modifier = Modifier
-                    .matchParentSize()
-                    .zIndex(50f)
-                    .pointerInput(Unit) {
-                        detectTapGestures { languageMenuExpanded = false }
-                    }
-            )
-        }
-
-        // Layer 3: Floating In-tree Glass Dropdown with Haze & Top/Bottom scroll fade gradient
-        if (showLanguageFilter) {
-            val dropdownTopDp = if (languageButtonBottomPx > 0f) {
-                with(LocalDensity.current) { languageButtonBottomPx.toDp() + 6.dp }
-            } else {
-                156.dp
-            }
-
-            AnimatedVisibility(
-                visible = languageMenuExpanded,
-                enter = fadeIn(tween(180)) + scaleIn(
-                    initialScale = 0.95f,
-                    transformOrigin = TransformOrigin(0.5f, 0f),
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                ),
-                exit = fadeOut(tween(130)) + scaleOut(
-                    targetScale = 0.95f,
-                    transformOrigin = TransformOrigin(0.5f, 0f),
-                    animationSpec = spring(stiffness = Spring.StiffnessMediumLow)
-                ),
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(horizontal = 24.dp)
-                    .offset(y = dropdownTopDp)
-                    .zIndex(60f)
-            ) {
-                val scrollState = rememberScrollState()
-                val canScrollUp = scrollState.canScrollBackward
-                val canScrollDown = scrollState.canScrollForward
-
-                Box(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .requiredHeightIn(max = 280.dp)
-                        .shadow(20.dp, RoundedCornerShape(16.dp))
-                        .hazeGlass(
-                            state = coverHazeState,
-                            shape = RoundedCornerShape(16.dp),
-                            blurRadius = 24.dp,
-                            containerColor = Color(0xFF141418).copy(alpha = 0.60f),
-                            borderWidth = 1.dp,
-                            borderColor = Color.White.copy(alpha = 0.18f)
-                        )
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
-                            .drawWithContent {
-                                drawContent()
-                                if (canScrollUp || canScrollDown) {
-                                    val topStop = if (canScrollUp) 0.08f else 0f
-                                    val bottomStop = if (canScrollDown) 0.92f else 1f
-                                    drawRect(
-                                        brush = Brush.verticalGradient(
-                                            0f to (if (canScrollUp) Color.Transparent else Color.Black),
-                                            topStop to Color.Black,
-                                            bottomStop to Color.Black,
-                                            1f to (if (canScrollDown) Color.Transparent else Color.Black)
-                                        ),
-                                        blendMode = BlendMode.DstIn
-                                    )
-                                }
-                            }
-                            .verticalScroll(scrollState)
-                            .padding(vertical = 6.dp)
-                    ) {
-                        // Opzione "Tutte le lingue"
-                        val isAllSelected = currentSelectedLanguage == "all"
-                        LanguageMenuItem(
-                            text = stringResource(R.string.share_cover_picker_all_languages),
-                            count = currentTotalCount,
-                            isSelected = isAllSelected,
-                            accentColor = accentColor,
-                            onClick = {
-                                if (coverTab == 0) {
-                                    selectedLanguageCode = "all"
-                                } else {
-                                    selectedLogoLanguageCode = "all"
-                                }
-                                languageMenuExpanded = false
-                            }
-                        )
-
-                        HorizontalDivider(
-                            modifier = Modifier.padding(horizontal = 14.dp, vertical = 4.dp),
-                            color = Color.White.copy(alpha = 0.08f),
-                            thickness = 0.5.dp
-                        )
-
-                        for (code in currentLanguages) {
-                            val count = if (coverTab == 0) {
-                                validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
-                            } else {
-                                validLogos.count { it.iso6391.equals(code, ignoreCase = true) }
-                            }
-                            val isCurrent = currentSelectedLanguage.equals(code, ignoreCase = true)
-                            LanguageMenuItem(
-                                text = getLanguageDisplayName(code),
-                                count = count,
-                                isSelected = isCurrent,
+                            CoverGridItem(
+                                item = item,
+                                isSelected = isSelected,
+                                isPosterTab = isPosterTab,
+                                isLogoTab = isLogoTab,
+                                itemAspectRatio = itemAspectRatio,
                                 accentColor = accentColor,
                                 onClick = {
-                                    if (coverTab == 0) {
-                                        selectedLanguageCode = code
-                                    } else {
-                                        selectedLogoLanguageCode = code
+                                    when {
+                                        isPosterTab -> {
+                                            val newPath = if (item.filePath == defaultPoster) null else item.filePath
+                                            val matchedLogo = if (!config.hasManualLogoOverride && item.iso6391 != null) {
+                                                validLogos.firstOrNull { it.iso6391.equals(item.iso6391, ignoreCase = true) }?.filePath
+                                            } else null
+                                            onConfigChange(
+                                                config.copy(
+                                                    customPosterPath = newPath,
+                                                    customLogoPath = when {
+                                                        config.hasManualLogoOverride -> config.customLogoPath
+                                                        newPath == null -> null
+                                                        matchedLogo != null -> matchedLogo
+                                                        else -> config.customLogoPath
+                                                    }
+                                                )
+                                            )
+                                        }
+                                        isLogoTab -> {
+                                            val newPath = if (item.filePath == defaultLogoPath) null else item.filePath
+                                            onConfigChange(
+                                                config.copy(
+                                                    customLogoPath = newPath,
+                                                    hasManualLogoOverride = true
+                                                )
+                                            )
+                                        }
+                                        else -> {
+                                            val newPath = if (item.filePath == defaultBackdrop) null else item.filePath
+                                            onConfigChange(config.copy(customBackdropPath = newPath))
+                                        }
                                     }
-                                    languageMenuExpanded = false
+                                    onBack() // Si applica subito alla card e torna indietro
                                 }
                             )
                         }
@@ -776,76 +521,39 @@ internal fun CoverSelectionView(
                 }
             }
         }
-    }
-}
 
-@Composable
-internal fun LanguageMenuItem(
-    text: String,
-    count: Int,
-    isSelected: Boolean,
-    accentColor: Color,
-    onClick: () -> Unit
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .height(42.dp)
-            .bounceClick(scaleDown = 0.98f, onClick = onClick)
-            .clip(RoundedCornerShape(10.dp))
-            .background(if (isSelected) accentColor.copy(alpha = 0.12f) else Color.Transparent)
-            .padding(horizontal = 14.dp),
-        horizontalArrangement = Arrangement.SpaceBetween,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(
-            text = text,
-            fontSize = 13.5.sp,
-            fontWeight = if (isSelected) FontWeight.Bold else FontWeight.Medium,
-            color = if (isSelected) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.weight(1f, fill = false)
-        )
-        Spacer(modifier = Modifier.width(12.dp))
-        CountPill(
-            count = count,
-            isSelected = isSelected,
-            accentColor = accentColor
-        )
-    }
-}
+        if (showLanguageFilter) {
+            val dropdownTopDp = if (languageButtonBottomPx > 0f) {
+                with(LocalDensity.current) { languageButtonBottomPx.toDp() + 6.dp }
+            } else {
+                156.dp
+            }
 
-@Composable
-internal fun CountPill(
-    count: Int,
-    isSelected: Boolean,
-    accentColor: Color,
-    modifier: Modifier = Modifier
-) {
-    Box(
-        modifier = modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                if (isSelected) accentColor.copy(alpha = 0.24f)
-                else Color.White.copy(alpha = 0.09f)
+            CoverLanguageDropdown(
+                expanded = languageMenuExpanded,
+                onDismissRequest = { languageMenuExpanded = false },
+                dropdownTopDp = dropdownTopDp,
+                coverHazeState = coverHazeState,
+                currentSelectedLanguage = currentSelectedLanguage,
+                currentTotalCount = currentTotalCount,
+                languages = currentLanguages,
+                accentColor = accentColor,
+                getLanguageCount = { code ->
+                    if (coverTab == 0) {
+                        validPosters.count { it.iso6391.equals(code, ignoreCase = true) }
+                    } else {
+                        validLogos.count { it.iso6391.equals(code, ignoreCase = true) }
+                    }
+                },
+                onLanguageSelected = { code ->
+                    if (coverTab == 0) {
+                        selectedLanguageCode = code
+                    } else {
+                        selectedLogoLanguageCode = code
+                    }
+                }
             )
-            .border(
-                0.6.dp,
-                if (isSelected) accentColor.copy(alpha = 0.60f)
-                else Color.White.copy(alpha = 0.14f),
-                RoundedCornerShape(50)
-            )
-            .padding(horizontal = 7.dp, vertical = 2.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Text(
-            text = count.toString(),
-            fontSize = 11.sp,
-            fontWeight = if (isSelected) FontWeight.ExtraBold else FontWeight.SemiBold,
-            color = if (isSelected) ColorUtils.lightenForText(accentColor, 1.35f) else Color.White.copy(alpha = 0.75f),
-            lineHeight = 11.sp
-        )
+        }
     }
 }
 

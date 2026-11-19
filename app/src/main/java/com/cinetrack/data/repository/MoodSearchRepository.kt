@@ -225,8 +225,12 @@ class MoodSearchRepository @Inject constructor(
                 val semanticMovies = semanticSearchRepository.search(query = trimmedQuery, language = language)
                 if (semanticMovies.isNotEmpty()) {
                     badgeRepository.get().recordMoodMoviesDiscovered(semanticMovies.map { it.id })
-                    val vibeTitle = if (isQuotaFallback || isNetworkFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale"
-                    val vibeDesc = "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
+                    val matchedArchetype = localEngine.detectArchetype(trimmedQuery, language)
+                    val isItalian = language.lowercase().startsWith("it")
+                    val vibeTitle = matchedArchetype?.let { if (isItalian) it.nameIt else it.nameEn }
+                        ?: (if (isQuotaFallback || isNetworkFallback) "Ricerca Semantica Vettoriale" else "Algoritmo Vettoriale")
+                    val vibeDesc = matchedArchetype?.let { if (isItalian) it.rationaleTemplateIt else it.rationaleTemplateEn }
+                        ?: "Risultati calcolati nello spazio geometrico bge-m3 su Cloudflare Vectorize."
                     moodHistoryRepository.saveEntry(
                         MoodHistoryEntry(
                             query = trimmedQuery,

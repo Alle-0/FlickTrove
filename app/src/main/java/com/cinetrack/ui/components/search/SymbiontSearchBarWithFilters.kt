@@ -48,6 +48,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.focus.focusRequester
+import androidx.compose.ui.focus.onFocusChanged
 import androidx.compose.ui.geometry.CornerRadius
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.geometry.Rect
@@ -61,6 +62,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
@@ -115,7 +117,8 @@ fun SymbiontSearchBarWithFilters(
     keyboardController: SoftwareKeyboardController?,
     onFilterBoundsMeasured: (Rect) -> Unit,
     modifier: Modifier = Modifier,
-    onSubmitSearch: (() -> Unit)? = null
+    onSubmitSearch: (() -> Unit)? = null,
+    onFocusChanged: ((Boolean) -> Unit)? = null
 ) {
     val targetControl = when (category) {
         "mood" -> "mood"
@@ -123,6 +126,7 @@ fun SymbiontSearchBarWithFilters(
         else -> "none"
     }
     val density = LocalDensity.current
+    val focusManager = LocalFocusManager.current
     val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
 
     var displayedControl by remember { mutableStateOf(targetControl) }
@@ -445,13 +449,17 @@ fun SymbiontSearchBarWithFilters(
                         },
                         modifier = Modifier
                             .weight(1f)
-                            .focusRequester(focusRequester),
+                            .focusRequester(focusRequester)
+                            .onFocusChanged { focusState ->
+                                onFocusChanged?.invoke(focusState.isFocused)
+                            },
                         textStyle = TextStyle(color = MaterialTheme.colorScheme.onSurface, fontSize = 15.sp),
                         cursorBrush = SolidColor(MaterialTheme.colorScheme.primary),
                         singleLine = true,
                         keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
                         keyboardActions = KeyboardActions(onSearch = {
                             keyboardController?.hide()
+                            focusManager.clearFocus()
                             if (category == "mood") {
                                 onSubmitSearch?.invoke()
                             } else {
@@ -461,7 +469,11 @@ fun SymbiontSearchBarWithFilters(
                         decorationBox = { innerTextField ->
                             Box(contentAlignment = Alignment.CenterStart) {
                                 if (query.isEmpty()) {
+                                    val isFilterlessCategory = category == "mood" || category == "person" || category == "collection"
                                     val placeholderText = when {
+                                        category == "mood" -> stringResource(R.string.search_placeholder_mood)
+                                        category == "person" -> stringResource(R.string.search_placeholder_person)
+                                        category == "collection" -> stringResource(R.string.search_placeholder_collection)
                                         sortConfig.selectedGenres.isNotEmpty() -> {
                                             val gid = sortConfig.selectedGenres.first()
                                             val name = suggestedFilters.find { it.id == gid && !it.isKeyword }?.name
@@ -481,13 +493,10 @@ fun SymbiontSearchBarWithFilters(
                                         }
                                         else -> when (category) {
                                             "tv" -> stringResource(R.string.search_placeholder_tv)
-                                            "person" -> stringResource(R.string.search_placeholder_person)
-                                            "collection" -> stringResource(R.string.search_placeholder_collection)
-                                            "mood" -> stringResource(R.string.search_placeholder_mood)
                                             else -> stringResource(R.string.search_placeholder_movie)
                                         }
                                     }
-                                    val hasActiveFilter = sortConfig.selectedGenres.isNotEmpty() || sortConfig.selectedKeywords.isNotEmpty()
+                                    val hasActiveFilter = !isFilterlessCategory && (sortConfig.selectedGenres.isNotEmpty() || sortConfig.selectedKeywords.isNotEmpty())
                                     AnimatedContent(
                                         targetState = placeholderText,
                                         transitionSpec = {
@@ -584,6 +593,7 @@ fun SymbiontSearchBarWithFilters(
                             .size(44.dp)
                             .bounceClick {
                                 keyboardController?.hide()
+                                focusManager.clearFocus()
                                 onSubmitSearch?.invoke()
                             }
                             .background(primaryColor, CircleShape),

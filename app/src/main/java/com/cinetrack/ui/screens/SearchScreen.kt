@@ -29,11 +29,13 @@ import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -68,6 +70,8 @@ import cafe.adriel.voyager.navigator.currentOrThrow
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.SortConfig
 import com.cinetrack.ui.components.home.HomeFilterModal
+import com.cinetrack.ui.components.search.ActiveSearchBubble
+import com.cinetrack.ui.components.search.RecentSearchBubbleOverlay
 import com.cinetrack.ui.components.search.SearchContentGrid
 import com.cinetrack.ui.components.search.SearchHeader
 import com.cinetrack.ui.components.shared.LocalMovieActions
@@ -114,14 +118,14 @@ data class SearchScreen(
     @Composable
     override fun Content() {
         val viewModel = getViewModel<SearchViewModel>()
-        val settingsViewModel = getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
+        val guestAuthManager = com.cinetrack.ui.utils.rememberGuestAuthManager()
         val navigator = LocalNavigator.currentOrThrow
 
         LaunchedEffect(initialGenreId, initialGenreName, initialKeywordName, initialCategory) {
             val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
             if (initialCategory != null) {
                 if (initialCategory == "mood" && isGuest) {
-                    settingsViewModel.triggerGuestAuthDialog(
+                    guestAuthManager?.triggerGuestAuthDialog(
                         R.string.mood_guest_dialog_title,
                         R.string.mood_guest_dialog_message
                     )
@@ -130,22 +134,24 @@ data class SearchScreen(
                     viewModel.onCategoryChanged(initialCategory)
                 }
             }
-            if (initialGenreId != null) {
-                viewModel.updateSortConfig(
-                    viewModel.uiState.value.sortConfig.copy(
-                        selectedGenres = listOf(initialGenreId),
-                        selectedKeywords = emptyList()
+            if (initialCategory != "mood" && initialCategory != "person" && initialCategory != "collection") {
+                if (initialGenreId != null) {
+                    viewModel.updateSortConfig(
+                        viewModel.uiState.value.sortConfig.copy(
+                            selectedGenres = listOf(initialGenreId),
+                            selectedKeywords = emptyList()
+                        )
                     )
-                )
-                viewModel.onQueryChanged("")
-            } else if (initialKeywordId != null) {
-                viewModel.updateSortConfig(
-                    viewModel.uiState.value.sortConfig.copy(
-                        selectedKeywords = listOf(initialKeywordId),
-                        selectedGenres = emptyList()
+                    viewModel.onQueryChanged("")
+                } else if (initialKeywordId != null) {
+                    viewModel.updateSortConfig(
+                        viewModel.uiState.value.sortConfig.copy(
+                            selectedKeywords = listOf(initialKeywordId),
+                            selectedGenres = emptyList()
+                        )
                     )
-                )
-                viewModel.onQueryChanged("")
+                    viewModel.onQueryChanged("")
+                }
             }
         }
 
@@ -176,7 +182,7 @@ data class SearchScreen(
                         navigator.popUntilRoot()
                     },
                     onGuestAuthTrigger = {
-                        settingsViewModel.triggerGuestAuthDialog(
+                        guestAuthManager?.triggerGuestAuthDialog(
                             R.string.mood_guest_dialog_title,
                             R.string.mood_guest_dialog_message
                         )
@@ -224,13 +230,23 @@ fun SearchScreenContent(
         }
     }
 
+    LaunchedEffect(uiState.isMoodSearchSubmitted, uiState.isLoading) {
+        if (uiState.isMoodSearchSubmitted && !uiState.isLoading) {
+            focusManager.clearFocus()
+            keyboardController?.hide()
+        }
+    }
+
     val internalHazeState = hazeState ?: remember { HazeState() }
     val globalSearchHazeState = remember { HazeState() }
     val onExitRequest = remember { mutableStateOf<(() -> Unit)?>(null) }
     val movieActions = LocalMovieActions.current
+    var activeSearchBubble by remember { mutableStateOf<ActiveSearchBubble?>(null) }
 
     BackHandler {
-        if (movieActions.isAnyModalOpen) {
+        if (activeSearchBubble != null) {
+            activeSearchBubble = null
+        } else if (movieActions.isAnyModalOpen) {
             movieActions.closeAll()
         } else if (isFilterVisible) {
             isFilterVisible = false
@@ -241,6 +257,7 @@ fun SearchScreenContent(
 
     val focusRequester = remember { FocusRequester() }
     var hasRequestedFocus by rememberSaveable { mutableStateOf(false) }
+    var isSearchFocused by remember { mutableStateOf(false) }
     val filterBounds = remember { arrayOf<Rect?>(null) }
 
     val density = LocalDensity.current
@@ -248,6 +265,88 @@ fun SearchScreenContent(
 
     val configuration = LocalConfiguration.current
     val screenWidth = configuration.screenWidthDp.dp
+    val screenHeight = configuration.screenHeightDp.dp
+    val gridState = viewModel.lazyGridState
+
+    // Calcolo inerzia dello scroll per la mascotte IRIS (Vento di pellicola - Feature 3):
+    // Si attiva ESCLUSIVAMENTE con scorrimento veloce o fling energico; durante lo scroll lento/calmo rimane a zero.
+    var scrollInertia by remember { mutableFloatStateOf(0f) }
+
+    LaunchedEffect(gridState) {
+        var lastIndex = gridState.firstVisibleItemIndex
+        var lastOffset = gridState.firstVisibleItemScrollOffset
+        val fastScrollThreshold = 160f // Soglia alta: si attiva solo con fling veloci ed energici
+
+        snapshotFlow {
+            Triple(
+                gridState.isScrollInProgress,
+                gridState.firstVisibleItemIndex,
+                gridState.firstVisibleItemScrollOffset
+            )
+        }.collect { (isScrolling, currIndex, currOffset) ->
+            if (isScrolling) {
+                val delta = ((currIndex - lastIndex) * 180) + (currOffset - lastOffset)
+                lastIndex = currIndex
+                lastOffset = currOffset
+                val absDelta = kotlin.math.abs(delta)
+                if (absDelta > fastScrollThreshold) {
+                    // Solo durante veri lanci veloci della lista: reazione morbida e contenuta
+                    val excess = absDelta - fastScrollThreshold
+                    val normalizedSpeed = (excess / 120f).coerceIn(0f, 0.65f)
+                    scrollInertia = if (delta > 0) normalizedSpeed else -normalizedSpeed
+                } else {
+                    // Qualsiasi scroll normale, calmo o moderato: inerzia spenta (0f)
+                    scrollInertia = 0f
+                }
+            } else {
+                lastIndex = currIndex
+                lastOffset = currOffset
+                scrollInertia = 0f
+            }
+        }
+    }
+
+    // Rilevamento card ispezionata per il Focus Hunting incuriosito di IRIS (Feature 6)
+    val isCardInspected = movieActions.showActionsPopup
+    val inspectedCardXRatio = remember(
+        movieActions.showActionsPopup,
+        movieActions.popupCardPosition,
+        movieActions.popupPressOffset,
+        movieActions.popupCardSize,
+        screenWidth
+    ) {
+        if (movieActions.showActionsPopup) {
+            val screenWidthPx = with(density) { screenWidth.toPx() }
+            val touchX = if (movieActions.popupPressOffset.x > 0f) {
+                movieActions.popupCardPosition.x + movieActions.popupPressOffset.x
+            } else {
+                movieActions.popupCardPosition.x + (movieActions.popupCardSize.width / 2f)
+            }
+            if (screenWidthPx > 0f) {
+                val offsetFromCenter = touchX - (screenWidthPx / 2f)
+                ((offsetFromCenter / (screenWidthPx / 2f)) * 0.85f).coerceIn(-0.85f, 0.85f)
+            } else 0f
+        } else null
+    }
+
+    val inspectedCardYRatio = remember(
+        movieActions.showActionsPopup,
+        movieActions.popupCardPosition,
+        movieActions.popupPressOffset,
+        movieActions.popupCardSize,
+        screenHeight
+    ) {
+        if (movieActions.showActionsPopup) {
+            val screenHeightPx = with(density) { screenHeight.toPx() }
+            val touchY = if (movieActions.popupPressOffset.y > 0f) {
+                movieActions.popupCardPosition.y + movieActions.popupPressOffset.y
+            } else {
+                movieActions.popupCardPosition.y + (movieActions.popupCardSize.height / 2f)
+            }
+            val normY = if (screenHeightPx > 0f) (touchY / screenHeightPx).coerceIn(0f, 1f) else 0.5f
+            (0.60f + (normY * 0.40f)).coerceIn(0.60f, 1.0f)
+        } else null
+    }
     val padding = 16.dp
     val gap = 12.dp
     val columns = if (uiState.preferences.gridColumns in 1..4) uiState.preferences.gridColumns else 3
@@ -394,7 +493,6 @@ fun SearchScreenContent(
                                     detectTapGestures(onTap = { focusManager.clearFocus() })
                                 }
                         ) {
-                            val gridState = viewModel.lazyGridState
                             var previousSortConfig by remember { mutableStateOf<SortConfig?>(null) }
                             LaunchedEffect(uiState.sortConfig) {
                                 if (previousSortConfig != null && previousSortConfig != uiState.sortConfig) {
@@ -419,6 +517,7 @@ fun SearchScreenContent(
                                 actionsState = actionsState,
                                 animatedMovieIds = viewModel.animatedMovieIds,
                                 cursorPosition = textFieldValue.selection.end,
+                                isSearchFocused = isSearchFocused,
                                 onMovieClick = onMovieClick,
                                 onPersonClick = onPersonClick,
                                 onCollectionClick = onCollectionClick,
@@ -429,6 +528,8 @@ fun SearchScreenContent(
                                 onRetry = { viewModel.retry() },
                                 onLoadNextPage = { viewModel.loadNextPage() },
                                 onMoodSelected = { prompt ->
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
                                     val sanitized = prompt.take(1000)
                                     textFieldValue = TextFieldValue(
                                         text = sanitized,
@@ -439,6 +540,8 @@ fun SearchScreenContent(
                                 },
                                 onMoodModeChanged = { viewModel.setMoodAiMode(it) },
                                 onSelectMoodHistory = { entry ->
+                                    keyboardController?.hide()
+                                    focusManager.clearFocus()
                                     val sanitized = entry.query.take(1000)
                                     textFieldValue = TextFieldValue(
                                         text = sanitized,
@@ -478,7 +581,7 @@ fun SearchScreenContent(
                             },
                             onClearQuery = {
                                 textFieldValue = TextFieldValue("")
-                                viewModel.onQueryChanged("")
+                                viewModel.clearQuery()
                             },
                             onBackClick = { onExitRequest.value?.invoke() },
                             onLayoutToggleClick = { nextCols ->
@@ -513,12 +616,18 @@ fun SearchScreenContent(
                             onHeaderHeightMeasured = { measured -> headerHeight = measured },
                             onFilterBoundsMeasured = { bounds -> filterBounds[0] = bounds },
                             modifier = Modifier.align(Alignment.TopCenter),
-                            onSubmitSearch = { viewModel.submitMoodSearch(textFieldValue.text) },
+                            onSubmitSearch = {
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
+                                viewModel.submitMoodSearch(textFieldValue.text)
+                            },
                             moodHistory = uiState.moodHistory,
                             isMoodAiMode = uiState.isMoodAiMode,
                             moodRemainingQuota = uiState.moodRemainingQuota,
                             onMoodModeChanged = { viewModel.setMoodAiMode(it) },
                             onSelectMoodHistory = { entry ->
+                                keyboardController?.hide()
+                                focusManager.clearFocus()
                                 val sanitized = entry.query.take(1000)
                                 textFieldValue = TextFieldValue(
                                     text = sanitized,
@@ -529,7 +638,17 @@ fun SearchScreenContent(
                             onDeleteMoodHistory = { viewModel.deleteMoodHistory(it) },
                             onClearMoodHistory = { viewModel.clearMoodHistory() },
                             isGuest = isGuest,
-                            onGuestAuthTrigger = onGuestAuthTrigger
+                            onGuestAuthTrigger = onGuestAuthTrigger,
+                            onSearchFocusChanged = { isSearchFocused = it },
+                            hasMoodResults = uiState.category == "mood" && uiState.results.isNotEmpty(),
+                            cursorPosition = textFieldValue.selection.end,
+                            isSearchFocused = isSearchFocused,
+                            isLoading = uiState.isLoading,
+                            scrollInertia = scrollInertia,
+                            isFocusHunting = isCardInspected,
+                            inspectedCardXRatio = inspectedCardXRatio,
+                            inspectedCardYRatio = inspectedCardYRatio,
+                            onOpenBubble = { activeSearchBubble = it }
                         )
 
                     // 3. Local-Only Banner (bottom, shown when offline/poor connection)
@@ -603,6 +722,15 @@ fun SearchScreenContent(
                 initialKeywordName = initialKeywordName,
                 onSortConfigChanged = { viewModel.updateSortConfig(it) },
                 onDismissRequest = { isFilterVisible = false }
+            )
+        }
+
+        // 4. In-Window Recent Search / Mood Bubble Overlay (Root level, sampling globalSearchHazeState to blur header, pills & iris ring)
+        if (activeSearchBubble != null) {
+            RecentSearchBubbleOverlay(
+                bubble = activeSearchBubble!!,
+                hazeState = globalSearchHazeState,
+                onDismiss = { activeSearchBubble = null }
             )
         }
     }

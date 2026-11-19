@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">No videos available</string>
     <string name="detail_add_subgenres">+ Subgenres</string>
     <string name="detail_hide_subgenres">- Hide</string>
+    <string name="detail_show_all_subgenres">+ All (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">RENT OR BUY</string>
     <string name="detail_season">Season</string>
@@ -666,6 +667,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Describe in your own words what you want to watch. AI will find the ideal movies across the entire TMDB catalog.</string>
     <string name="search_mood_iris_intro_text">Describe in your own words what you want to watch. IRIS will find the ideal movies across the entire TMDB catalog.</string>
+    <string name="search_mood_tip_detail">Tip: The more details you share about the plot, vibe, or characters, the more accurate the results.</string>
     <string name="search_mood_exhausted_notice">You have used all 3 Mood searches for today. They will recharge tonight at midnight!</string>
     <string name="search_mood_exhausted_title">Daily AI searches exhausted</string>
     <string name="search_mood_switch_to_algo">Switch to IRIS (Unlimited)</string>
@@ -2239,4 +2241,19 @@
     <string name="badge_iris_search_cat">MOOD DISCOVERY</string>
     <string name="badge_iris_search_desc">You embraced the vision: added a movie discovered with IRIS or AI to your watchlist.</string>
     <string name="trophy_unit_searches">searches</string>
+
+    <string name="semantic_affinity_suffix">affinity</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Directed by %1$s</string>
+    <string name="semantic_reason_score_by">Score by %1$s</string>
+    <string name="semantic_reason_cinematography_by">Cinematography by %1$s</string>
+    <string name="semantic_reason_produced_by">Produced by %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s Cinema</string>
+    <string name="semantic_reason_critically_acclaimed">Critically acclaimed (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Genre classic (%1$s)</string>
+    <string name="semantic_reason_plot_match">Semantic plot match</string>
+    <string name="semantic_reason_atmosphere">Mood: %1$s</string>
+    <string name="semantic_reason_written_by">Written by %1$s</string>
 </resources>

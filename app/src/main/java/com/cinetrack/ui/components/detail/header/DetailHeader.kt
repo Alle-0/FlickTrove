@@ -186,7 +186,10 @@ fun DetailHeader(
         } else null
 
         // Title & Tagline
-        Column(modifier = Modifier.fillMaxWidth()) {
+        Column(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
             @Composable
             fun FallbackTitleText() {
                 Text(
@@ -198,7 +201,7 @@ fun DetailHeader(
                         letterSpacing = (-1.5).sp
                     ),
                     color = Color.White,
-                    textAlign = TextAlign.Start,
+                    textAlign = TextAlign.Center,
                     modifier = Modifier
                         .fillMaxWidth()
                         .padding(bottom = 6.dp)
@@ -220,10 +223,10 @@ fun DetailHeader(
                     contentDescription = movie.title ?: movie.name ?: "",
                     contentScale = ContentScale.Fit,
                     modifier = Modifier
-                        .fillMaxWidth(0.6f) // Takes up to 60% of width
-                        .heightIn(max = 100.dp) // Max height to avoid huge logos
+                        .fillMaxWidth(0.85f) // Takes up to 85% of width for a cinema poster feel
+                        .heightIn(max = 120.dp) // Max height to avoid huge logos
                         .padding(bottom = 8.dp),
-                    alignment = Alignment.CenterStart
+                    alignment = Alignment.Center
                 ) {
                     val state by painter.state.collectAsState()
                     if (state is coil3.compose.AsyncImagePainter.State.Error) {
@@ -245,7 +248,7 @@ fun DetailHeader(
                             letterSpacing = 1.2.sp
                         ),
                         color = Color.White.copy(alpha = 0.5f),
-                        textAlign = TextAlign.Start,
+                        textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
                     )
                 }
@@ -258,8 +261,10 @@ fun DetailHeader(
             if (matchPercentage != null || showTrailerBtn || showCoverBtn) {
                 val advancedEffectsEnabled = LocalAdvancedVisualEffects.current
                 Row(
-                    modifier = Modifier.padding(bottom = 16.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(bottom = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
                     if (matchPercentage != null) {

@@ -36,19 +36,19 @@ fun CollectionDetailSkeleton(
         ) {
             // 1. Backdrop + Header in a single Box (mirrors real screen's first LazyColumn item)
             Box(modifier = Modifier.fillMaxWidth()) {
-                // Backdrop shimmer (matches DetailBackdrop height = 480.dp)
+                // Backdrop shimmer (matches DetailBackdrop height = 520.dp)
                 Box(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(480.dp)
+                        .height(520.dp)
                         .shimmerEffect()
                 )
 
-                // Header content overlapping the backdrop (mirrors padding(top=340.dp) in real screen)
+                // Header content overlapping the backdrop (mirrors padding(top=380.dp) in real screen)
                 Column(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(top = 340.dp)
+                        .padding(top = 380.dp)
                         .padding(horizontal = 16.dp)
                         .padding(bottom = 24.dp),
                     horizontalAlignment = Alignment.Start

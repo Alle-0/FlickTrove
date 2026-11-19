@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">利用可能な動画はありません</string>
     <string name="detail_add_subgenres">+ サブジャンル</string>
     <string name="detail_hide_subgenres">- 非表示</string>
+    <string name="detail_show_all_subgenres">+ すべて (%d)</string>
     <string name="detail_streaming">配信中</string>
     <string name="detail_rent_buy">レンタル・購入</string>
     <string name="detail_season">シーズン</string>
@@ -2198,6 +2199,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">観たい作品の雰囲気を自由に入力してください。AIがTMDBカタログ全体から最適な映画を見つけ出します。</string>
     <string name="search_mood_iris_intro_text">観たい作品の雰囲気を自由に入力してください。IRISがTMDBカタログ全体から最適な映画を見つけ出します。</string>
+    <string name="search_mood_tip_detail">ヒント：プロットや雰囲気、登場人物の情報を詳しく書くほど、より正確な映画が見つかります。</string>
     <string name="search_mood_exhausted_notice">本日のムード検索上限（5回）に達しました。深夜0時にリセットされます。</string>
     <string name="search_mood_exhausted_title">本日のAI検索上限に達しました</string>
     <string name="search_mood_switch_to_algo">IRISに切り替え（無制限）</string>
@@ -2234,4 +2236,19 @@
     <string name="badge_iris_search_cat">ムード探索</string>
     <string name="badge_iris_search_desc">その視線を受け止めました: IRISやAIで見つけた映画をウォッチリストに追加しました。</string>
     <string name="trophy_unit_searches">回</string>
+
+    <string name="semantic_affinity_suffix">親和性</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">監督: %1$s</string>
+    <string name="semantic_reason_score_by">音楽: %1$s</string>
+    <string name="semantic_reason_cinematography_by">撮影: %1$s</string>
+    <string name="semantic_reason_produced_by">製作: %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$sの映画</string>
+    <string name="semantic_reason_critically_acclaimed">批評家絶賛の名作 (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">ジャンルの名作 (%1$s)</string>
+    <string name="semantic_reason_plot_match">プロットとの親和性</string>
+    <string name="semantic_reason_atmosphere">雰囲気: %1$s</string>
+    <string name="semantic_reason_written_by">脚本: %1$s</string>
 </resources>

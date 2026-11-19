@@ -292,10 +292,11 @@ fun HomeScreenContent(
                                 .verticalScroll(rememberScrollState()),
                             contentAlignment = androidx.compose.ui.Alignment.Center
                         ) {
-                            Text(
-                                text = if (uiState.searchQuery.isEmpty()) stringResource(id = R.string.home_empty_list) else stringResource(id = R.string.home_no_results),
-                                color = Color.White.copy(alpha = 0.5f),
-                                style = MaterialTheme.typography.bodyLarge
+                            com.cinetrack.ui.components.mascot.IrisEmptyState(
+                                title = if (uiState.searchQuery.isEmpty()) stringResource(id = R.string.home_empty_list) else stringResource(id = R.string.home_no_results),
+                                description = if (uiState.searchQuery.isEmpty()) null else stringResource(id = R.string.search_no_results_simplify),
+                                gazeBiasY = 0.55f,
+                                size = 84.dp
                             )
                         }
                     } else {

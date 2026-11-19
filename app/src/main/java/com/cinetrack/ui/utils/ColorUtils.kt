@@ -210,6 +210,16 @@ object ColorUtils {
         hsv[2] = hsv[2].coerceIn(0.85f, 1.0f)
         return Color(AndroidColor.HSVToColor(hsv))
     }
+
+    val BaseDarkSlate = Color(0xFF0F0F16)
+
+    /**
+     * Calcola il colore di sfondo identico a quello dei caroselli Hero Spotlight,
+     * garantendo una perfetta continuità cromatica a 1:1 tra la card del carosello e la schermata di dettaglio.
+     */
+    fun calculateCarouselBackgroundColor(accentColor: Color): Color {
+        return androidx.compose.ui.graphics.lerp(accentColor, BaseDarkSlate, 0.72f)
+    }
 }
 
 /** Converts a Compose [Color] to a CSS-style hex string (e.g. "#FF3A2C"). */

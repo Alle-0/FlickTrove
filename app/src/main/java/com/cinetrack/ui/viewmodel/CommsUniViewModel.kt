@@ -64,6 +64,19 @@ class CommsUniViewModel @Inject constructor(
     private val prefs by lazy { context.getSharedPreferences("commsuni_prefs", android.content.Context.MODE_PRIVATE) }
     private val _cachedAuthorId = MutableStateFlow<String?>(null)
 
+    private val moderationDelegate by lazy {
+        CommsUniModerationDelegate(commentRepository, commsUniRepository, blockedAuthorsManager, storageRepository, badgeRepository, actionFeedbackManager)
+    }
+    private val reactionsDelegate by lazy {
+        CommsUniReactionsDelegate(auth, firestore, commsUniRepository, commentRepository, actionFeedbackManager)
+    }
+    private val translationDelegate by lazy {
+        CommsUniTranslationDelegate(translationManager, preferenceRepository, actionFeedbackManager)
+    }
+    private val mediaTagDelegate by lazy {
+        CommsUniMediaTagDelegate(movieRepository)
+    }
+
     val currentAuthorId: String?
         get() = _cachedAuthorId.value ?: auth.currentUser?.uid?.let { prefs.getString("author_id_$it", null) }
 
@@ -252,38 +265,24 @@ class CommsUniViewModel @Inject constructor(
     // Uses CommentsViewModel.TranslationState for compatibility with UI components
 
 
-    private val _translationStates = MutableStateFlow<Map<String, CommentsViewModel.TranslationState>>(emptyMap())
-    val translationStates: StateFlow<Map<String, CommentsViewModel.TranslationState>> = _translationStates.asStateFlow()
-
-    private val _showTranslationPrompt = MutableStateFlow<Pair<String, String>?>(null)
-    val showTranslationPrompt: StateFlow<Pair<String, String>?> = _showTranslationPrompt.asStateFlow()
+    val translationStates: StateFlow<Map<String, CommentsViewModel.TranslationState>> get() = translationDelegate.translationStates
+    val showTranslationPrompt: StateFlow<Pair<String, String>?> get() = translationDelegate.showTranslationPrompt
 
     // #movie / #tv hashtag search & cross-language resolution
-    private val _mediaTagSuggestions = MutableStateFlow<List<TaggedMediaRef>>(emptyList())
-    val mediaTagSuggestions: StateFlow<List<TaggedMediaRef>> = _mediaTagSuggestions.asStateFlow()
-
-    private val _isSearchingMediaTags = MutableStateFlow(false)
-    val isSearchingMediaTags: StateFlow<Boolean> = _isSearchingMediaTags.asStateFlow()
-
-    private val _taggedMediaTitles = MutableStateFlow<Map<String, String>>(emptyMap())
-    val taggedMediaTitles: StateFlow<Map<String, String>> = _taggedMediaTitles.asStateFlow()
-
-    private val _taggedMediaPosters = MutableStateFlow<Map<String, String>>(emptyMap())
-    val taggedMediaPosters: StateFlow<Map<String, String>> = _taggedMediaPosters.asStateFlow()
-
-    private var mediaTagSearchJob: Job? = null
-    private val resolvedOrInFlightMediaTags = java.util.Collections.synchronizedSet(mutableSetOf<String>())
-    private val mediaTagSemaphore = Semaphore(4)
+    val mediaTagSuggestions: StateFlow<List<TaggedMediaRef>> get() = mediaTagDelegate.mediaTagSuggestions
+    val isSearchingMediaTags: StateFlow<Boolean> get() = mediaTagDelegate.isSearchingMediaTags
+    val taggedMediaTitles: StateFlow<Map<String, String>> get() = mediaTagDelegate.taggedMediaTitles
+    val taggedMediaPosters: StateFlow<Map<String, String>> get() = mediaTagDelegate.taggedMediaPosters
 
     fun dismissTranslationPrompt() {
-        _showTranslationPrompt.value = null
+        translationDelegate.dismissTranslationPrompt()
     }
 
     init {
         viewModelScope.launch {
             _comments.collect { list ->
                 if (list.isNotEmpty()) {
-                    resolveMediaTagsForComments(list)
+                    mediaTagDelegate.resolveMediaTagsForComments(list, viewModelScope)
                 }
             }
         }
@@ -1037,49 +1036,13 @@ class CommsUniViewModel @Inject constructor(
     }
     
     fun toggleSpoilerStatus(commentId: String, currentStatus: Boolean) {
-        val targetStatus = !currentStatus
-        // Optimistic update locally
-        val currentList = _comments.value.toMutableList()
-        val index = currentList.indexOfFirst { it.id == commentId }
-        val targetComment = currentList.getOrNull(index)
-        val isFlickTrove = targetComment?.originSlug?.equals("flicktrove", ignoreCase = true) == true || targetComment?.originSlug.isNullOrBlank()
-
-        if (index != -1) {
-            currentList[index] = currentList[index].copy(isSpoiler = targetStatus)
-            _comments.value = currentList
-        }
-
-        viewModelScope.launch {
-            var success = false
-            // Aggiorna su CommsUni
-            val commsUniRes = commsUniRepository.updateCommentSpoiler(commentId, targetStatus)
-            if (commsUniRes.isSuccess) {
-                success = true
-            }
-            // Aggiorna anche su Firestore se presente
-            if (currentRawMediaId.isNotBlank()) {
-                val firestoreRes = try {
-                    val targetFsId = targetComment?.firestoreId?.takeIf { it.isNotBlank() } ?: commentId
-                    commentRepository.toggleSpoiler(currentRawMediaId, targetFsId, targetStatus)
-                } catch (_: Exception) {
-                    false
-                }
-                if (firestoreRes) {
-                    success = true
-                }
-            }
-
-            if (!success) {
-                // Revert on failure
-                val revertList = _comments.value.toMutableList()
-                val revertIndex = revertList.indexOfFirst { it.id == commentId }
-                if (revertIndex != -1) {
-                    revertList[revertIndex] = revertList[revertIndex].copy(isSpoiler = currentStatus)
-                    _comments.value = revertList
-                }
-                actionFeedbackManager.emit(UiText.DynamicString("Impossibile aggiornare lo spoiler."))
-            }
-        }
+        moderationDelegate.toggleSpoilerStatus(
+            commentId = commentId,
+            currentStatus = currentStatus,
+            commentsState = _comments,
+            currentRawMediaId = currentRawMediaId,
+            scope = viewModelScope
+        )
     }
 
     fun reportComment(
@@ -1090,319 +1053,75 @@ class CommsUniViewModel @Inject constructor(
         userDisplayName: String? = null,
         detail: String? = null
     ) {
-        viewModelScope.launch {
-            val targetComment = _comments.value.find { it.id == commentId }
-            val isFlickTrove = targetComment?.originSlug?.equals("flicktrove", ignoreCase = true) == true || targetComment?.originSlug.isNullOrBlank()
-
-            if (isFlickTrove && currentRawMediaId.isNotBlank()) {
-                val fResult = try {
-                    commentRepository.reportComment(
-                        mediaId = currentRawMediaId,
-                        commentId = commentId,
-                        reason = category.uppercase(),
-                        commentText = text ?: targetComment?.text ?: "",
-                        commentAuthorId = userId ?: targetComment?.userId ?: "",
-                        commentAuthorName = userDisplayName ?: targetComment?.userDisplayName ?: ""
-                    )
-                } catch (e: Exception) {
-                    com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR
-                }
-
-                when (fResult) {
-                    com.cinetrack.data.repository.CommentRepository.ReportResult.SUCCESS -> {
-                        actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_success))
-                    }
-                    com.cinetrack.data.repository.CommentRepository.ReportResult.COOLDOWN -> {
-                        actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_duplicate))
-                    }
-                    com.cinetrack.data.repository.CommentRepository.ReportResult.ERROR -> {
-                        actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
-                    }
-                }
-            } else {
-                val result = commsUniRepository.reportComment(commentId, reason = category, detail = detail)
-                result.onSuccess { reportStatus ->
-                    when (reportStatus) {
-                        CommsUniRepository.ReportCommentResult.SUCCESS -> {
-                            actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_success))
-                        }
-                        CommsUniRepository.ReportCommentResult.DUPLICATE -> {
-                            actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_duplicate))
-                        }
-                        CommsUniRepository.ReportCommentResult.ERROR -> {
-                            actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
-                        }
-                    }
-                }.onFailure {
-                    actionFeedbackManager.emit(UiText.StringResource(R.string.comment_report_error))
-                }
-            }
-        }
+        moderationDelegate.reportComment(
+            commentId = commentId,
+            category = category,
+            text = text,
+            userId = userId,
+            userDisplayName = userDisplayName,
+            detail = detail,
+            commentsState = _comments,
+            currentRawMediaId = currentRawMediaId,
+            scope = viewModelScope
+        )
     }
 
     fun blockAuthor(userId: String, authorName: String) {
-        val cleanName = authorName.trim()
-        val cleanId = userId.trim()
-        val effectiveId = if (cleanId.isNotBlank()) cleanId else "name_${cleanName.lowercase()}"
-        if (effectiveId.isBlank()) return
-
-        viewModelScope.launch {
-            blockedAuthorsManager.blockAuthor(effectiveId, cleanName)
-            _comments.value = _comments.value.filterNot { 
-                it.userId == effectiveId || 
-                (cleanId.isNotBlank() && it.userId == cleanId) || 
-                (cleanName.isNotBlank() && it.userDisplayName.equals(cleanName, ignoreCase = true))
-            }
-            actionFeedbackManager.emit(
-                UiText.StringResource(R.string.comment_block_user_success, cleanName.ifBlank { "User" })
-            )
-        }
+        moderationDelegate.blockAuthor(
+            userId = userId,
+            authorName = authorName,
+            commentsState = _comments,
+            scope = viewModelScope
+        )
     }
 
     fun unblockAuthor(userId: String) {
-        if (userId.isBlank()) return
-        viewModelScope.launch {
-            blockedAuthorsManager.unblockAuthor(userId)
-            actionFeedbackManager.emit(
-                UiText.StringResource(R.string.comment_unblock_user_success)
-            )
-            refreshComments()
-        }
+        moderationDelegate.unblockAuthor(
+            userId = userId,
+            scope = viewModelScope
+        ) { refreshComments() }
     }
 
     fun emitBlockedLink(reasonResId: Int) {
-        viewModelScope.launch {
-            actionFeedbackManager.emit(UiText.StringResource(reasonResId))
-        }
+        moderationDelegate.emitBlockedLink(reasonResId, viewModelScope)
     }
 
     fun deleteComment(commentId: String, targetComment: AppComment? = null) {
-        viewModelScope.launch {
-            // Optimistic: remove immediately
-            val currentList = _comments.value.toMutableList()
-            val removed = currentList.find { it.id == commentId } ?: targetComment
-            currentList.removeAll { it.id == commentId }
-            _comments.value = currentList
-
-            val mediaRegex = Regex("""!\[.*?\]\((.*?)\)""")
-            val inlineUrls = removed?.let { mediaRegex.findAll(it.text).map { m -> m.groupValues[1] }.toList() } ?: emptyList()
-            val allMediaUrls = ((removed?.attachedMedia ?: emptyList()) + inlineUrls).distinct()
-
-            var anySuccess = false
-            var firestoreDeleted = false
-
-            // 1. Elimina su CommsUni (se connesso a un'entità di rete)
-            if (currentEntityId.isNotBlank()) {
-                val commsRes = commsUniRepository.deleteComment(commentId)
-                if (commsRes.isSuccess) {
-                    anySuccess = true
-                }
-            }
-
-            // 2. Elimina anche su Firestore locale se presente
-            if (currentRawMediaId.isNotBlank()) {
-                val firestoreRes = try {
-                    val targetFsId = (removed ?: targetComment)?.firestoreId?.takeIf { it.isNotBlank() } ?: commentId
-                    val res = commentRepository.deleteComment(currentRawMediaId, targetFsId)
-                    res != com.cinetrack.data.repository.CommentRepository.DeleteCommentResult.FAILED
-                } catch (_: Exception) {
-                    false
-                }
-                if (firestoreRes) {
-                    anySuccess = true
-                    firestoreDeleted = true
-                }
-            }
-
-            if (anySuccess) {
-                untrackMyCommentId(commentId)
-                badgeRepository.recordCommentDeleted()
-                // Se non è già stato eliminato tramite CommentRepository su Firestore, elimina le immagini da Supabase Storage
-                if (!firestoreDeleted) {
-                    allMediaUrls.forEach { imageUrl ->
-                        if (imageUrl.contains("supabase.co") || imageUrl.contains("supabase")) {
-                            val delRes = storageRepository.deleteCommentImage(imageUrl)
-                            if (delRes.isFailure) {
-                                android.util.Log.e("CommsUniViewModel", "Failed to delete Supabase comment image: $imageUrl", delRes.exceptionOrNull())
-                            } else {
-                                android.util.Log.d("CommsUniViewModel", "Successfully deleted Supabase comment image: $imageUrl")
-                            }
-                        }
-                    }
-                }
-            } else {
-                // Revert in caso di fallimento su entrambi
-                removed?.let {
-                    val revertList = _comments.value.toMutableList()
-                    revertList.add(it)
-                    _comments.value = revertList.sortedBy { c -> c.createdAt?.seconds ?: 0L }
-                }
-                actionFeedbackManager.emit(UiText.DynamicString("Impossibile eliminare il commento."))
-            }
-        }
+        moderationDelegate.deleteComment(
+            commentId = commentId,
+            targetComment = targetComment,
+            commentsState = _comments,
+            currentEntityId = currentEntityId,
+            currentRawMediaId = currentRawMediaId,
+            untrackMyCommentId = { untrackMyCommentId(it) },
+            scope = viewModelScope
+        )
     }
-
 
     fun toggleLikeComment(commentId: String, mediaTitle: String, mediaImage: String?) {
-        val currentAuthUid = auth.currentUser?.uid ?: return
-        val authorId = currentAuthorId
-        val actorId = currentActorId
-        viewModelScope.launch {
-            val currentList = _comments.value.toMutableList()
-            val commentIndex = currentList.indexOfFirst { it.id == commentId }
-            if (commentIndex == -1) return@launch
-            
-            val comment = currentList[commentIndex]
-            val isLiked = isCommentLikedByMe(comment)
-            val myIds = listOfNotNull(currentAuthUid, authorId, actorId)
-            
-            // Optimistic update
-            val newLikedBy = if (isLiked) {
-                comment.likedBy.filterNot { it in myIds }
-            } else {
-                (comment.likedBy + currentAuthUid).distinct()
-            }
-            
-            val updatedComment = comment.copy(
-                likedBy = newLikedBy,
-                likesCount = maxOf(0, comment.likesCount + if (isLiked) -1 else 1),
-                nativeLikes = maxOf(0, comment.nativeLikes + if (isLiked) -1 else 1)
-            )
-            
-            currentList[commentIndex] = updatedComment
-            _comments.value = currentList
-
-            commsUniRepository.recordLikeOverride(
-                commentId = comment.id,
-                isLiked = !isLiked,
-                likesCount = updatedComment.likesCount,
-                alternativeId = comment.firestoreId
-            )
-            
-            // Network call
-            val isFlickTrove = comment.originSlug.equals("flicktrove", ignoreCase = true) || comment.originSlug.isBlank()
-            if (isFlickTrove && currentRawMediaId.isNotBlank()) {
-                try {
-                    val targetFsId = comment.firestoreId?.takeIf { it.isNotBlank() } ?: commentId
-                    commentRepository.toggleLike(currentRawMediaId, targetFsId, currentEntityType, mediaTitle, mediaImage, commentSnippet = comment.text)
-                } catch (_: Exception) {}
-            }
-            val result = if (currentEntityId.isNotBlank()) {
-                if (isLiked) {
-                    commsUniRepository.unlikeComment(commentId)
-                } else {
-                    commsUniRepository.likeComment(commentId)
-                }
-            } else {
-                Result.success(Unit)
-            }
-            
-            if (result.isFailure && !isFlickTrove) {
-                // Revert
-                val revertList = _comments.value.toMutableList()
-                val revertIndex = revertList.indexOfFirst { it.id == commentId }
-                if (revertIndex != -1) {
-                    revertList[revertIndex] = comment
-                    _comments.value = revertList
-                    commsUniRepository.recordLikeOverride(
-                        commentId = comment.id,
-                        isLiked = isLiked,
-                        likesCount = comment.likesCount,
-                        alternativeId = comment.firestoreId
-                    )
-                }
-                actionFeedbackManager.emit(UiText.DynamicString("Errore di rete con CommsUni."))
-                return@launch
-            }
-
-            // Se il commento appartiene a un FlickTrover, invia/rimuovi notifica Social e Push
-            if (comment.originSlug.equals("flicktrove", ignoreCase = true) && !comment.userId.isBlank()) {
-                launch(kotlinx.coroutines.Dispatchers.IO) {
-                    try {
-                        val targetUid = resolveFirebaseUidForAuthor(comment.userId)
-                        if (targetUid != null && targetUid != currentAuthUid) {
-                            val notifId = "${commentId}_${currentAuthUid}_like"
-                            val notifRef = firestore.collection("user_social_notifications")
-                                .document(targetUid)
-                                .collection("items")
-                                .document(notifId)
-
-                            if (!isLiked) {
-                                val notif = hashMapOf(
-                                    "id" to notifRef.id,
-                                    "type" to "like",
-                                    "mediaId" to currentRawMediaId,
-                                    "mediaType" to currentEntityType,
-                                    "mediaTitle" to mediaTitle,
-                                    "mediaImage" to mediaImage,
-                                    "commentId" to commentId,
-                                    "senderName" to (auth.currentUser?.displayName ?: "Qualcuno"),
-                                    "senderUserId" to currentAuthUid,
-                                    "snippet" to comment.text.take(80),
-                                    "createdAt" to Timestamp.now(),
-                                    "isRead" to false
-                                )
-                                notifRef.set(notif, com.google.firebase.firestore.SetOptions.merge()).await()
-
-                                com.cinetrack.util.SupabaseNotificationService.notifyUser(
-                                    targetUserId = targetUid,
-                                    titleLocKey = "notification_like_title",
-                                    bodyLocKey = "notification_like_body",
-                                    bodyLocArgs = listOf(auth.currentUser?.displayName ?: "Qualcuno"),
-                                    mediaId = currentRawMediaId.toLongOrNull() ?: 0L,
-                                    mediaType = currentEntityType,
-                                    mediaImage = mediaImage,
-                                    commentId = commentId
-                                )
-                            } else {
-                                notifRef.delete().await()
-                            }
-                        }
-                    } catch (e: Exception) {
-                        android.util.Log.e("CommsUniViewModel", "Failed to update like social notification", e)
-                    }
-                }
-            }
-        }
+        reactionsDelegate.toggleLikeComment(
+            commentId = commentId,
+            mediaTitle = mediaTitle,
+            mediaImage = mediaImage,
+            commentsState = _comments,
+            currentAuthorId = currentAuthorId,
+            currentActorId = currentActorId,
+            currentRawMediaId = currentRawMediaId,
+            currentEntityType = currentEntityType,
+            currentEntityId = currentEntityId,
+            isCommentLikedByMe = { isCommentLikedByMe(it) },
+            resolveFirebaseUidForAuthor = { resolveFirebaseUidForAuthor(it) },
+            scope = viewModelScope
+        )
     }
-    
+
     fun translateComment(commentId: String, text: String, requireWifi: Boolean? = null) {
-        val current = _translationStates.value[commentId]
-        // Toggle: if already translated, reset to untranslated (original text)
-        if (current is CommentsViewModel.TranslationState.Translated) {
-            _translationStates.value = _translationStates.value - commentId
-            return
-        }
-        viewModelScope.launch {
-            val mediaRegex = Regex("!\\[(?:gif|foto)\\]\\((.*?)\\)")
-            val cleanText = text.replace(mediaRegex, "").trim()
-            if (cleanText.isBlank()) {
-                return@launch
-            }
-
-            // Sync user's target language from preferences
-            val prefs = preferenceRepository.userPreferencesFlow.first()
-            val systemLang = java.util.Locale.getDefault().language
-            translationManager.setTargetLanguage(prefs.contentLanguage, systemLang)
-
-            val targetMlKit = translationManager.getCurrentTargetLanguage()
-
-            _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translating)
-
-            when (val result = translationManager.translateCommentSmart(cleanText, targetMlKit)) {
-                is com.cinetrack.util.TranslationManager.TranslationResult.Success -> {
-                    _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Translated(result.text))
-                }
-                is com.cinetrack.util.TranslationManager.TranslationResult.AlreadyInLanguage -> {
-                    _translationStates.value = _translationStates.value - commentId
-                    actionFeedbackManager.emit(UiText.StringResource(R.string.comment_already_in_language))
-                }
-                is com.cinetrack.util.TranslationManager.TranslationResult.Error -> {
-                    _translationStates.value = _translationStates.value + (commentId to CommentsViewModel.TranslationState.Error)
-                    actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_translating))
-                }
-            }
-        }
+        translationDelegate.translateComment(
+            commentId = commentId,
+            text = text,
+            requireWifi = requireWifi,
+            scope = viewModelScope
+        )
     }
     
     fun loadRepliesForComment(commentId: String) {
@@ -1568,113 +1287,16 @@ class CommsUniViewModel @Inject constructor(
     }
 
     fun searchMediaTags(query: String) {
-        val cleanQuery = query.trim()
-        mediaTagSearchJob?.cancel()
-        if (cleanQuery.length < 2) {
-            _mediaTagSuggestions.value = emptyList()
-            _isSearchingMediaTags.value = false
-            return
-        }
-
-        mediaTagSearchJob = viewModelScope.launch {
-            _isSearchingMediaTags.value = true
-            delay(300)
-            val results = kotlinx.coroutines.withContext(kotlinx.coroutines.Dispatchers.IO) {
-                try {
-                    val tmdbResults = movieRepository.searchMulti(cleanQuery, page = 1)
-                        .mapNotNull { item ->
-                            when (item) {
-                                is TMDBSearchResult.MovieResult -> {
-                                    val title = item.title?.trim().orEmpty()
-                                    if (title.isEmpty()) null else TaggedMediaRef(
-                                        id = item.id,
-                                        mediaType = "movie",
-                                        title = title,
-                                        posterPath = item.posterPath,
-                                        releaseYear = item.releaseDate?.take(4)?.takeIf { it.isNotBlank() }
-                                    )
-                                }
-                                is TMDBSearchResult.TvResult -> {
-                                    val name = item.name?.trim().orEmpty()
-                                    if (name.isEmpty()) null else TaggedMediaRef(
-                                        id = item.id,
-                                        mediaType = "tv",
-                                        title = name,
-                                        posterPath = item.posterPath,
-                                        releaseYear = item.firstAirDate?.take(4)?.takeIf { it.isNotBlank() }
-                                    )
-                                }
-                                else -> null
-                            }
-                        }
-                        .take(8)
-                    if (tmdbResults.isNotEmpty()) {
-                        tmdbResults
-                    } else {
-                        searchLocalMediaTags(cleanQuery)
-                    }
-                } catch (_: Exception) {
-                    searchLocalMediaTags(cleanQuery)
-                }
-            }
-            _mediaTagSuggestions.value = results
-            _isSearchingMediaTags.value = false
-        }
-    }
-
-    private suspend fun searchLocalMediaTags(cleanQuery: String): List<TaggedMediaRef> {
-        return try {
-            movieRepository.searchLocalMovies(cleanQuery)
-                .mapNotNull { movie ->
-                    val title = (movie.title ?: movie.name)?.trim().orEmpty()
-                    if (title.isEmpty()) null else TaggedMediaRef(
-                        id = movie.id,
-                        mediaType = if (movie.mediaType == "tv") "tv" else "movie",
-                        title = title,
-                        posterPath = movie.posterPath,
-                        releaseYear = (movie.releaseYear ?: movie.releaseDate ?: movie.firstAirDate)?.take(4)?.takeIf { it.isNotBlank() }
-                    )
-                }
-                .take(8)
-        } catch (_: Exception) {
-            emptyList()
-        }
+        mediaTagDelegate.searchMediaTags(query, viewModelScope)
     }
 
     fun clearMediaTagSuggestions() {
-        mediaTagSearchJob?.cancel()
-        _mediaTagSuggestions.value = emptyList()
-        _isSearchingMediaTags.value = false
-    }
-
-    private fun resolveMediaTagsForComments(comments: List<com.cinetrack.data.model.AppComment>) {
-        val refs = comments
-            .flatMap { extractTmdbMediaRefsFromText(it.text) }
-            .distinct()
-            .filter { (type, id) ->
-                val key = "$type:$id"
-                !_taggedMediaTitles.value.containsKey(key) && resolvedOrInFlightMediaTags.add(key)
-            }
-        if (refs.isEmpty()) return
-
-        viewModelScope.launch(kotlinx.coroutines.Dispatchers.IO) {
-            val resolved = com.cinetrack.ui.utils.resolveTmdbMediaTagsMetadata(
-                refs = refs,
-                movieRepository = movieRepository,
-                semaphore = mediaTagSemaphore
-            )
-            if (resolved.titles.isNotEmpty()) {
-                _taggedMediaTitles.value = _taggedMediaTitles.value + resolved.titles
-            }
-            if (resolved.posters.isNotEmpty()) {
-                _taggedMediaPosters.value = _taggedMediaPosters.value + resolved.posters
-            }
-        }
+        mediaTagDelegate.clearMediaTagSuggestions()
     }
 
     override fun onCleared() {
         super.onCleared()
-        mediaTagSearchJob?.cancel()
-        translationManager.closeAll()
+        mediaTagDelegate.cancel()
+        translationDelegate.close()
     }
 }

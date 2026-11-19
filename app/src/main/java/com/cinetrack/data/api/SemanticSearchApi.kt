@@ -16,25 +16,63 @@ data class SemanticSearchResponse(
 data class SemanticMovieDto(
     val id: Long,
     val title: String,
+    @SerialName("title_it") val titleIt: String? = null,
+    @SerialName("original_title") val originalTitle: String? = null,
     val year: String? = null,
+    @SerialName("release_date") val releaseDate: String? = null,
+    @SerialName("imdb_id") val imdbId: String? = null,
     @SerialName("poster_path") val posterPath: String? = null,
+    @SerialName("backdrop_path") val backdropPath: String? = null,
     @SerialName("vote_average") val voteAverage: Double? = null,
+    @SerialName("vote_count") val voteCount: Int? = null,
+    val popularity: Double? = null,
+    @SerialName("genre_ids") val genreIds: List<Long>? = null,
+    val genres: String? = null,
     val score: Double? = null,
-    @SerialName("ai_reason") val aiReason: String? = null
+    @SerialName("raw_similarity") val rawSimilarity: Double? = null,
+    @SerialName("ai_reason") val aiReason: String? = null,
+    val director: String? = null,
+    val writer: String? = null,
+    val cast: String? = null,
+    val producers: String? = null,
+    val composer: String? = null,
+    val cinematographer: String? = null,
+    val studio: String? = null,
+    @SerialName("collection_id") val collectionId: Long? = null,
+    val franchise: String? = null,
+    val runtime: Int? = null,
+    val revenue: Long? = null,
+    @SerialName("original_language") val originalLanguage: String? = null,
+    val country: String? = null,
+    val tagline: String? = null,
+    val keywords: String? = null,
+    val overview: String? = null
 ) {
-    fun toMovieResult(): TMDBSearchResult.MovieResult {
+    fun toMovieResult(customReason: String? = null): TMDBSearchResult.MovieResult {
         val normalizedPoster = posterPath?.trim()?.takeIf { it.isNotBlank() }?.let { path ->
             if (path.startsWith("http") || path.startsWith("/")) path else "/$path"
         }
+        val normalizedBackdrop = backdropPath?.trim()?.takeIf { it.isNotBlank() }?.let { path ->
+            if (path.startsWith("http") || path.startsWith("/")) path else "/$path"
+        }
+
+        // Se disponibile un titolo italiano tradotto e non vuoto, privilegialo per gli utenti italiani
+        val finalTitle = titleIt?.trim()?.takeIf { it.isNotBlank() } ?: title
+
+        // Data di rilascio precisa o fallback sull'anno
+        val finalReleaseDate = releaseDate?.trim()?.takeIf { it.isNotBlank() }
+            ?: year?.let { if (it.length == 4) "$it-01-01" else it }
 
         return TMDBSearchResult.MovieResult(
             id = id,
-            title = title,
+            title = finalTitle,
             posterPath = normalizedPoster,
-            releaseDate = year?.let { if (it.length == 4) "$it-01-01" else it },
+            backdropPath = normalizedBackdrop,
+            releaseDate = finalReleaseDate,
             voteAverage = voteAverage,
-            overview = null,
-            aiReason = aiReason ?: score?.let { "Rilevanza semantica: ${(it * 100).toInt()}%" }
+            genreIds = genreIds ?: emptyList(),
+            overview = overview,
+            aiReason = customReason ?: aiReason ?: score?.let { "Rilevanza semantica: ${(it * 100).toInt()}%" }
         )
     }
 }
@@ -45,6 +83,6 @@ interface SemanticSearchApi {
         @Query("q") query: String,
         @Query("lang") lang: String = "en",
         @Query("q_en") queryEn: String? = null,
-        @Query("limit") limit: Int = 20
+        @Query("limit") limit: Int = 100
     ): Response<SemanticSearchResponse>
 }

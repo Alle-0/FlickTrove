@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">Nem állnak rendelkezésre videók</string>
     <string name="detail_add_subgenres">+ Alműfajok</string>
     <string name="detail_hide_subgenres">- Elrejtés</string>
+    <string name="detail_show_all_subgenres">+ Összes (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">KÖLCSÖNZÉS VAGY VÁSÁRLÁS</string>
     <string name="detail_season">Évad</string>
@@ -2177,6 +2178,7 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Írja le saját szavaival, mit szeretne nézni. A mesterséges intelligencia megtalálja a tökéletes filmeket a teljes TMDB katalógusban.</string>
     <string name="search_mood_iris_intro_text">Írja le saját szavaival, mit szeretne nézni. IRIS megtalálja a tökéletes filmeket a teljes TMDB katalógusban.</string>
+    <string name="search_mood_tip_detail">Tipp: Minél több részletet adsz meg a cselekményről, hangulatról vagy karakterekről, annál pontosabbak lesznek az eredmények.</string>
     <string name="search_mood_exhausted_notice">Mára felhasználtad mind az 3 hangulatkeresést. Éjfélkor újra elérhetővé válnak!</string>
     <string name="search_mood_exhausted_title">Napi AI keresések elfogytak</string>
     <string name="search_mood_switch_to_algo">Váltás IRISra (korlátlan)</string>
@@ -2213,4 +2215,19 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="badge_iris_search_cat">HANGULAT-FELFEDEZÉS</string>
     <string name="badge_iris_search_desc">Megragadtad a látomást: hozzáadtál a megnézendőkhöz egy filmcímet, amelyet az IRIS vagy az AI fedezett fel.</string>
     <string name="trophy_unit_searches">keresés</string>
+
+    <string name="semantic_affinity_suffix">egyezés</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Rendezte: %1$s</string>
+    <string name="semantic_reason_score_by">Zene: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Operatőr: %1$s</string>
+    <string name="semantic_reason_produced_by">Producer: %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s filmjei</string>
+    <string name="semantic_reason_critically_acclaimed">Kritikusok által dicsért (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Műfaji klasszikus (%1$s)</string>
+    <string name="semantic_reason_plot_match">Tematikus cselekmény-egyezés</string>
+    <string name="semantic_reason_atmosphere">Hangulat: %1$s</string>
+    <string name="semantic_reason_written_by">Forgatókönyv: %1$s</string>
 </resources>

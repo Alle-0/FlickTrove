@@ -239,10 +239,10 @@ object AccountTab : Tab {
         var actualHeaderLuminance by remember { mutableFloatStateOf(0f) }
         var actualBackdropLuminance by remember { mutableFloatStateOf(0f) }
         
-        val baseDarkColor = remember { Color(0xFF0F0F16) }
+        val baseDarkColor = remember { com.cinetrack.ui.utils.ColorUtils.BaseDarkSlate }
         val targetBackgroundColor = if (extractedColor != null) {
             val vividAccent = com.cinetrack.ui.utils.ColorUtils.ensureVividAccent(extractedColor!!)
-            androidx.compose.ui.graphics.lerp(vividAccent, baseDarkColor, 0.85f)
+            com.cinetrack.ui.utils.ColorUtils.calculateCarouselBackgroundColor(vividAccent)
         } else {
             baseDarkColor
         }

@@ -76,6 +76,7 @@
     <string name="detail_no_trailers">Видео недоступны</string>
     <string name="detail_add_subgenres">+ Поджанры</string>
     <string name="detail_hide_subgenres">- Скрыть</string>
+    <string name="detail_show_all_subgenres">+ Все (%d)</string>
     <string name="detail_streaming">СТРИМИНГ</string>
     <string name="detail_rent_buy">АРЕНДА ИЛИ ПОКУПКА</string>
     <string name="detail_season">Сезон</string>
@@ -2197,6 +2198,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Опишите своими словами, что вы хотите посмотреть. ИИ найдет идеальные фильмы по всему каталогу TMDB.</string>
     <string name="search_mood_iris_intro_text">Опишите своими словами, что вы хотите посмотреть. IRIS найдет идеальные фильмы по всему каталогу TMDB.</string>
+    <string name="search_mood_tip_detail">Совет: чем больше деталей о сюжете, атмосфере или героях вы укажете, тем точнее будут результаты.</string>
     <string name="search_mood_exhausted_notice">Вы использовали все 3 поисков по настроению на сегодня. Они обновятся в полночь!</string>
     <string name="search_mood_exhausted_title">Дневной лимит поиска с ИИ исчерпан</string>
     <string name="search_mood_switch_to_algo">Переключить на IRIS (без ограничений)</string>
@@ -2233,4 +2235,19 @@
     <string name="badge_iris_search_cat">ПОИСК ПО НАСТРОЕНИЮ</string>
     <string name="badge_iris_search_desc">Вы доверились чутью: добавили в список к просмотру фильм, найденный с помощью IRIS или ИИ.</string>
     <string name="trophy_unit_searches">поисков</string>
+
+    <string name="semantic_affinity_suffix">сходство</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Режиссёр: %1$s</string>
+    <string name="semantic_reason_score_by">Композитор: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Оператор: %1$s</string>
+    <string name="semantic_reason_produced_by">Продюсер: %1$s</string>
+    <string name="semantic_reason_cinema_of">Кинематограф %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Признанный критиками шедевр (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Классика жанра (%1$s)</string>
+    <string name="semantic_reason_plot_match">Тематическое соответствие сюжету</string>
+    <string name="semantic_reason_atmosphere">Атмосфера: %1$s</string>
+    <string name="semantic_reason_written_by">Сценарий: %1$s</string>
 </resources>

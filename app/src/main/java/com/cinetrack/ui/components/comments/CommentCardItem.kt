@@ -296,101 +296,14 @@ fun CommentCardItem(
                 val isEffectivelyDeleted = comment.isEffectivelyDeleted
 
                 // Author Header
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    Text(
-                        text = if (isEffectivelyDeleted) stringResource(R.string.comment_deleted) else comment.userDisplayName.ifBlank { stringResource(R.string.comment_anonymous_user) },
-                        style = MaterialTheme.typography.titleSmall.copy(fontWeight = FontWeight.Bold),
-                        color = Color.White
-                    )
-                    if (comment.originSlug.isNotBlank()) {
-                        Spacer(modifier = Modifier.width(8.dp))
-                        
-                        val parsedColor = comment.originColor?.let {
-                            try {
-                                Color(android.graphics.Color.parseColor(it))
-                            } catch (e: Exception) {
-                                null
-                            }
-                        }
-                        // If no API color, derive a deterministic vivid hue from the slug
-                        val originColor = parsedColor ?: run {
-                            val hue = (comment.originSlug.fold(0) { acc, c -> acc * 31 + c.code }
-                                .and(0x7FFFFFFF) % 360).toFloat()
-                            Color(android.graphics.Color.HSVToColor(floatArrayOf(hue, 0.65f, 0.9f)))
-                        }
-
-                        val originIconUrl = comment.originIcon?.takeIf { it.isNotBlank() }
-
-                        Row(
-                            verticalAlignment = Alignment.CenterVertically,
-                            modifier = Modifier
-                                .background(originColor.copy(alpha = 0.18f), CircleShape)
-                                .border(1.dp, originColor.copy(alpha = 0.4f), CircleShape)
-                                .padding(horizontal = 8.dp, vertical = 4.dp)
-                        ) {
-                            if (comment.originSlug.equals("flicktrove", ignoreCase = true)) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_flicktrove_logo),
-                                    contentDescription = "FlickTrove",
-                                    tint = Color.Unspecified,
-                                    modifier = Modifier.size(width = 16.dp, height = 12.dp)
-                                )
-                            } else if (!originIconUrl.isNullOrBlank()) {
-                                AsyncImage(
-                                    model = originIconUrl,
-                                    contentDescription = null,
-                                    modifier = Modifier
-                                        .size(14.dp)
-                                        .clip(RoundedCornerShape(3.5.dp))
-                                )
-                            } else {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_world),
-                                    contentDescription = null,
-                                    tint = originColor,
-                                    modifier = Modifier.size(12.dp)
-                                )
-                            }
-                            Spacer(modifier = Modifier.width(4.dp))
-                            Text(
-                                text = comment.originName.ifBlank {
-                                    comment.originSlug.replaceFirstChar { char ->
-                                        if (char.isLowerCase()) char.titlecase(Locale.ROOT) else char.toString()
-                                    }
-                                },
-                                color = originColor,
-                                style = MaterialTheme.typography.labelSmall.copy(fontWeight = FontWeight.Bold, fontSize = 9.sp),
-                                maxLines = 1
-                            )
-                        }
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    if (isOwner && !isEffectivelyDeleted && comment.createdAt != null) {
-                        val timeSinceCreated = System.currentTimeMillis() - comment.createdAt.toDate().time
-                        if (timeSinceCreated <= 12 * 60 * 60 * 1000) {
-                            Icon(
-                                painter = painterResource(id = if (comment.isSpoiler) R.drawable.ic_eye_off else R.drawable.ic_eye),
-                                contentDescription = "Toggle Spoiler",
-                                tint = if (comment.isSpoiler) accentColor else Color.White.copy(alpha = 0.5f),
-                                modifier = Modifier
-                                    .size(16.dp)
-                                    .bounceClick { onToggleSpoilerAuthor() }
-                            )
-                            Spacer(modifier = Modifier.width(12.dp))
-                        }
-                        Icon(
-                            painter = painterResource(id = R.drawable.ic_trash),
-                            contentDescription = "Elimina",
-                            tint = Color.White.copy(alpha = 0.5f),
-                            modifier = Modifier
-                                .size(14.dp)
-                                .bounceClick { onDeleteComment() }
-                        )
-                    }
-                }
+                CommentAuthorHeader(
+                    comment = comment,
+                    isOwner = isOwner,
+                    isEffectivelyDeleted = isEffectivelyDeleted,
+                    accentColor = accentColor,
+                    onToggleSpoilerAuthor = onToggleSpoilerAuthor,
+                    onDeleteComment = onDeleteComment
+                )
 
                 Spacer(modifier = Modifier.height(4.dp))
                 var isTextExpanded by remember { mutableStateOf(false) }
@@ -600,97 +513,20 @@ fun CommentCardItem(
                 Spacer(modifier = Modifier.height(8.dp))
 
                 // Actions Row
-                Row(
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier.fillMaxWidth()
-                ) {
-                    if (!isEffectivelyDeleted) {
-                        Text(
-                            text = stringResource(R.string.comment_reply_btn),
-                            color = accentColor,
-                            style = MaterialTheme.typography.labelMedium.copy(fontWeight = FontWeight.Bold),
-                            modifier = Modifier
-                                .bounceClick {
-                                    if (isUserAnonymous) onTriggerGuestAuth()
-                                    else onReply()
-                                }
-                                .padding(vertical = 6.dp, horizontal = 4.dp)
-                        )
-                        Spacer(modifier = Modifier.width(4.dp))
-                        Row(
-                            modifier = Modifier
-                                .bounceClick(scaleDown = 0.90f) {
-                                    if (isUserAnonymous) onTriggerGuestAuth()
-                                    else onToggleLike()
-                                }
-                                .padding(horizontal = 8.dp, vertical = 6.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            LiquidStarIcon(
-                                isLiked = isLiked,
-                                accentColor = accentColor,
-                                modifier = Modifier.size(17.dp)
-                            )
-                            Spacer(modifier = Modifier.width(5.dp))
-                            Text(
-                                text = "${comment.likesCount}",
-                                color = if (isLiked) accentColor else Color.White.copy(alpha = 0.5f),
-                                style = MaterialTheme.typography.labelMedium
-                            )
-                        }
-                        if (!isOwner) {
-                            Spacer(modifier = Modifier.width(8.dp))
-                            Box(
-                                modifier = Modifier
-                                    .size(32.dp)
-                                    .bounceClick {
-                                        if (isUserAnonymous) onTriggerGuestAuth()
-                                        else onReport()
-                                    },
-                                contentAlignment = Alignment.Center
-                            ) {
-                                Icon(
-                                    painter = painterResource(id = R.drawable.ic_flag),
-                                    contentDescription = stringResource(R.string.comment_report_title),
-                                    tint = Color.White.copy(alpha = 0.5f),
-                                    modifier = Modifier.size(14.dp)
-                                )
-                            }
-                        }
-
-                        Spacer(modifier = Modifier.weight(1f))
-
-                        // Translate button with progressive filling download bar
-                        TranslationProgressIndicator(
-                            translationState = translationState,
-                            accentColor = accentColor,
-                            onTranslate = { onTranslate(comment.text) }
-                        )
-                        Spacer(modifier = Modifier.width(16.dp))
-                    } else {
-                        Spacer(modifier = Modifier.weight(1f))
-                    }
-
-                    if (comment.createdAt != null) {
-                        val timeStr = remember(comment.createdAt, context) {
-                            val date = comment.createdAt.toDate()
-                            val diff = System.currentTimeMillis() - date.time
-                            val hours = diff / (1000 * 60 * 60)
-                            val minutes = diff / (1000 * 60)
-                            when {
-                                minutes < 1 -> context.getString(R.string.comment_time_now)
-                                minutes < 60 -> context.getString(R.string.comment_time_mins_ago, minutes.toInt())
-                                hours < 24 -> context.getString(R.string.comment_time_hours_ago, hours.toInt())
-                                else -> DateTimeUtils.formatShortDate(date)
-                            }
-                        }
-                        Text(
-                            text = timeStr,
-                            color = Color.White.copy(alpha = 0.3f),
-                            style = MaterialTheme.typography.labelSmall
-                        )
-                    }
-                }
+                CommentCardActionsRow(
+                    comment = comment,
+                    isLiked = isLiked,
+                    isOwner = isOwner,
+                    isEffectivelyDeleted = isEffectivelyDeleted,
+                    isUserAnonymous = isUserAnonymous,
+                    accentColor = accentColor,
+                    translationState = translationState,
+                    onTriggerGuestAuth = onTriggerGuestAuth,
+                    onReply = onReply,
+                    onToggleLike = onToggleLike,
+                    onReport = onReport,
+                    onTranslate = onTranslate
+                )
 
                 // Replies Toggle
                 val childrenCount = maxOf(comment.repliesCount, allComments.count { it.parentId == comment.id })
@@ -719,155 +555,4 @@ fun CommentCardItem(
         imageUrl = previewImageUrl,
         onDismiss = { previewImageUrl = null }
     )
-}
-
-@Composable
-fun TranslationProgressIndicator(
-    translationState: CommentsViewModel.TranslationState?,
-    accentColor: Color,
-    onTranslate: () -> Unit,
-    modifier: Modifier = Modifier
-) {
-    val isDownloading = translationState is CommentsViewModel.TranslationState.Downloading
-    val isTranslating = translationState is CommentsViewModel.TranslationState.Translating
-    val isTranslated = translationState is CommentsViewModel.TranslationState.Translated
-    val isProgressVisible = isDownloading || isTranslating
-
-    val progress = remember { Animatable(0.08f) }
-
-    val infiniteTransition = rememberInfiniteTransition(label = "downloadingShimmer")
-    val shimmerPhase by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(1200, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "shimmerPhase"
-    )
-    val iconAlpha by infiniteTransition.animateFloat(
-        initialValue = 0.50f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(800, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "iconPulse"
-    )
-
-    LaunchedEffect(isDownloading) {
-        if (isDownloading) {
-            progress.snapTo(0.08f)
-            // Multi-phase continuous filling curve scaled to realistic ML Kit model downloads:
-            // Phase 1: Fast start response
-            progress.animateTo(0.35f, tween(2000, easing = FastOutSlowInEasing))
-            // Phase 2: Steady mid download
-            progress.animateTo(0.65f, tween(4000, easing = LinearEasing))
-            // Phase 3: High progress
-            progress.animateTo(0.85f, tween(6000, easing = LinearOutSlowInEasing))
-            // Phase 4: Long buffer crawl so it never freezes
-            progress.animateTo(0.96f, tween(12000, easing = LinearOutSlowInEasing))
-        }
-    }
-
-    LaunchedEffect(isTranslating) {
-        if (isTranslating) {
-            progress.animateTo(
-                targetValue = 1f,
-                animationSpec = tween(durationMillis = 250, easing = FastOutSlowInEasing)
-            )
-        }
-    }
-
-    // Animate width & spacing to smoothly slide the icon to the left when opening,
-    // and slide it back to the right when closing (preserving rounded pill shape at every frame)
-    val animatedBarWidth by animateDpAsState(
-        targetValue = if (isProgressVisible) 36.dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = 0.82f,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "translationBarWidth"
-    )
-    val animatedSpacing by animateDpAsState(
-        targetValue = if (isProgressVisible) 6.dp else 0.dp,
-        animationSpec = spring(
-            dampingRatio = 0.82f,
-            stiffness = Spring.StiffnessMediumLow
-        ),
-        label = "translationSpacing"
-    )
-    val animatedBarAlpha by animateFloatAsState(
-        targetValue = if (isProgressVisible) 1f else 0f,
-        animationSpec = tween(
-            durationMillis = if (isProgressVisible) 220 else 180,
-            easing = FastOutSlowInEasing
-        ),
-        label = "translationBarAlpha"
-    )
-
-    val targetIconTint = when {
-        isDownloading -> accentColor.copy(alpha = iconAlpha)
-        isTranslating -> accentColor
-        isTranslated -> accentColor
-        else -> Color.White.copy(alpha = 0.55f)
-    }
-    val animatedIconTint by animateColorAsState(
-        targetValue = targetIconTint,
-        animationSpec = tween(220),
-        label = "translationIconTint"
-    )
-
-    val canClick = !isDownloading && !isTranslating
-
-    Row(
-        verticalAlignment = Alignment.CenterVertically,
-        modifier = modifier
-    ) {
-        Icon(
-            painter = painterResource(R.drawable.ic_traduzione),
-            contentDescription = stringResource(
-                if (isTranslated) R.string.comment_show_original else R.string.comment_translate
-            ),
-            tint = animatedIconTint,
-            modifier = Modifier
-                .size(14.dp)
-                .bounceClick(enabled = canClick) { onTranslate() }
-        )
-
-        if (animatedBarWidth > 0.5.dp && animatedBarAlpha > 0.01f) {
-            Spacer(modifier = Modifier.width(animatedSpacing))
-            Box(
-                modifier = Modifier
-                    .width(animatedBarWidth)
-                    .height(4.dp)
-                    .graphicsLayer { alpha = animatedBarAlpha }
-                    .clip(CircleShape)
-                    .background(Color.White.copy(alpha = 0.15f))
-            ) {
-                val currentProg = progress.value.coerceIn(0.06f, 1f)
-                Box(
-                    modifier = Modifier
-                        .fillMaxHeight()
-                        .fillMaxWidth(fraction = currentProg)
-                        .clip(CircleShape)
-                        .background(
-                            if (isTranslating) {
-                                Brush.linearGradient(listOf(accentColor, accentColor))
-                            } else {
-                                Brush.horizontalGradient(
-                                    colors = listOf(
-                                        accentColor.copy(alpha = 0.70f),
-                                        Color.White.copy(alpha = 0.90f),
-                                        accentColor
-                                    ),
-                                    startX = -40f + shimmerPhase * 100f,
-                                    endX = shimmerPhase * 100f
-                                )
-                            }
-                        )
-                )
-            }
-        }
-    }
 }

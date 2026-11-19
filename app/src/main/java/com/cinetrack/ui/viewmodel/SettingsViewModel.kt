@@ -55,6 +55,7 @@ class SettingsViewModel @Inject constructor(
     private val commsUniRepository: com.cinetrack.data.repository.CommsUniRepository,
     private val sharedFolderRepository: dagger.Lazy<com.cinetrack.data.repository.SharedFolderRepository>,
     private val badgeRepository: dagger.Lazy<com.cinetrack.data.repository.BadgeRepository>,
+    private val guestAuthManager: com.cinetrack.ui.utils.GuestAuthManager,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -100,14 +101,8 @@ class SettingsViewModel @Inject constructor(
 
     private val _showEditProfileMenu = MutableSharedFlow<Rect?>()
     val showEditProfileMenu = _showEditProfileMenu.asSharedFlow()
-    
-    data class GuestAuthDialogConfig(
-        val titleRes: Int? = null,
-        val messageRes: Int? = null
-    )
 
-    private val _showGuestAuthDialog = MutableSharedFlow<GuestAuthDialogConfig>()
-    val showGuestAuthDialog = _showGuestAuthDialog.asSharedFlow()
+    val showGuestAuthDialog = guestAuthManager.events
 
     private val _showDashboardSettingsMenu = MutableSharedFlow<Unit>()
     val showDashboardSettingsMenu = _showDashboardSettingsMenu.asSharedFlow()
@@ -122,9 +117,7 @@ class SettingsViewModel @Inject constructor(
         @androidx.annotation.StringRes titleRes: Int? = null,
         @androidx.annotation.StringRes messageRes: Int? = null
     ) {
-        viewModelScope.launch {
-            _showGuestAuthDialog.emit(GuestAuthDialogConfig(titleRes, messageRes))
-        }
+        guestAuthManager.triggerGuestAuthDialog(titleRes, messageRes)
     }
     
     fun triggerDashboardSettingsMenu() {
@@ -301,56 +294,49 @@ class SettingsViewModel @Inject constructor(
     private val _isFeedbackLoading = MutableStateFlow(false)
     val isFeedbackLoading = _isFeedbackLoading.asStateFlow()
 
-    val isTraktLoggedIn: StateFlow<Boolean> = traktAuthRepository.isLoggedIn
+    private val externalSyncDelegate by lazy {
+        SettingsExternalSyncDelegate(
+            traktAuthRepository = traktAuthRepository,
+            traktService = traktService,
+            simklAuthRepository = simklAuthRepository,
+            simklService = simklService,
+            badgeRepository = badgeRepository,
+            actionFeedbackManager = actionFeedbackManager,
+            context = context
+        )
+    }
+
+    private val backupDelegate by lazy {
+        SettingsBackupDelegate(
+            backupRepository = backupRepository,
+            movieRepository = movieRepository,
+            actionFeedbackManager = actionFeedbackManager,
+            context = context
+        )
+    }
+
+    val isTraktLoggedIn: StateFlow<Boolean> get() = externalSyncDelegate.isTraktLoggedIn
 
     /** Emits true when the session was forcibly cleared after a token-refresh failure. */
-    val traktNeedsReconnect: StateFlow<Boolean> = traktAuthRepository.needsReconnect
+    val traktNeedsReconnect: StateFlow<Boolean> get() = externalSyncDelegate.traktNeedsReconnect
 
-    val isSimklLoggedIn: StateFlow<Boolean> = simklAuthRepository.isLoggedInFlow.stateIn(viewModelScope, SharingStarted.Lazily, false)
+    val isSimklLoggedIn: StateFlow<Boolean> by lazy { externalSyncDelegate.createSimklLoggedInFlow(viewModelScope) }
 
-    fun disconnectTrakt() {
-        traktAuthRepository.clearAuth()
-        viewModelScope.launch {
-            actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_disconnected)))
-        }
-    }
+    fun disconnectTrakt() = externalSyncDelegate.disconnectTrakt(viewModelScope)
 
-    fun disconnectSimkl() {
-        viewModelScope.launch {
-            simklAuthRepository.clearAuth()
-            actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.simkl_disconnected)))
-        }
-    }
+    fun disconnectSimkl() = externalSyncDelegate.disconnectSimkl(viewModelScope)
 
     /** Generates and persists the OAuth CSRF state before opening the Trakt browser flow. */
-    fun savePendingOAuthState(state: String) {
-        traktAuthRepository.savePendingOAuthState(state)
-    }
+    fun savePendingOAuthState(state: String) = externalSyncDelegate.savePendingOAuthState(state)
 
-    val syncWorkInfo = androidx.work.WorkManager.getInstance(context)
-        .getWorkInfosForUniqueWorkFlow("TraktManualSync")
-        .map { it.firstOrNull() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
+    val syncWorkInfo by lazy { externalSyncDelegate.createSyncWorkInfoFlow(viewModelScope) }
 
     val externalImportWorkInfo = androidx.work.WorkManager.getInstance(context)
         .getWorkInfosForUniqueWorkFlow("ExternalImportWork")
         .map { it.firstOrNull() }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
-    fun syncTraktNow() {
-        viewModelScope.launch {
-            val inputData = androidx.work.workDataOf("force" to true)
-            val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.TraktSyncWorker>()
-                .setInputData(inputData)
-                .build() // No constraints for forced manual sync
-            androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
-                "TraktManualSync",
-                androidx.work.ExistingWorkPolicy.REPLACE,
-                workRequest
-            )
-            actionFeedbackManager.emit(UiText.DynamicString(context.getString(R.string.trakt_manual_sync_started)))
-        }
-    }
+    fun syncTraktNow() = externalSyncDelegate.syncTraktNow(viewModelScope)
 
 
     fun setAnyDialogOpen(isOpen: Boolean) {
@@ -783,140 +769,18 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    /**
-     * Completes the OAuth code exchange after the browser redirects back to flicktrove://auth.
-     *
-     * @param code   The authorization code from Trakt.
-     * @param returnedState  The `state` param from the callback URI — validated against the
-     *               value saved before the browser was launched to prevent CSRF attacks.
-     */
-    fun exchangeTraktCode(code: String, returnedState: String? = null) {
-        viewModelScope.launch {
-            // Validate CSRF state if the callback included one
-            if (returnedState != null) {
-                val expectedState = traktAuthRepository.getPendingOAuthState()
-                traktAuthRepository.clearPendingOAuthState()
-                if (expectedState == null || expectedState != returnedState) {
-                    android.util.Log.e("SettingsViewModel", "Trakt OAuth state mismatch — possible CSRF attack")
-                    actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connect_error))
-                    return@launch
-                }
-            } else {
-                // No state in callback — clear any pending state regardless
-                traktAuthRepository.clearPendingOAuthState()
-            }
+    fun exchangeTraktCode(code: String, returnedState: String? = null) =
+        externalSyncDelegate.exchangeTraktCode(code, returnedState, viewModelScope)
 
-            try {
-                val response = traktService.get().getAccessToken(
-                    com.cinetrack.data.api.TraktTokenRequest(
-                        code = code,
-                        client_id = com.cinetrack.util.Keys.getTraktKey(),
-                        client_secret = com.cinetrack.util.Keys.getTraktSecret(),
-                        redirect_uri = "flicktrove://auth"
-                    )
-                )
-                traktAuthRepository.saveTokens(
-                    accessToken = response.access_token,
-                    refreshToken = response.refresh_token,
-                    expiresInSeconds = response.expires_in
-                )
-                // Kick off an immediate full sync so the user's history is populated
-                // right away without having to wait for the next scheduled run.
-                syncTraktNow()
-                badgeRepository.get().evaluateBadgesAsync()
-                actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connected))
-            } catch (e: Exception) {
-                android.util.Log.e("SettingsViewModel", "Trakt token exchange failed", e)
-                actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_connect_error))
-            }
-        }
-    }
+    fun savePendingSimklOAuth(codeVerifier: String, state: String) =
+        externalSyncDelegate.savePendingSimklOAuth(codeVerifier, state, viewModelScope)
 
-    fun savePendingSimklOAuth(codeVerifier: String, state: String) {
-        viewModelScope.launch {
-            simklAuthRepository.savePendingOAuth(codeVerifier, state)
-        }
-    }
+    fun exchangeSimklCode(code: String, returnedState: String? = null) =
+        externalSyncDelegate.exchangeSimklCode(code, returnedState, viewModelScope)
 
-    fun exchangeSimklCode(code: String, returnedState: String? = null) {
-        viewModelScope.launch {
-            val expectedState = simklAuthRepository.getPendingOAuthState()
-            val codeVerifier = simklAuthRepository.getPendingCodeVerifier()
-            simklAuthRepository.clearPendingOAuth()
+    val simklSyncWorkInfo by lazy { externalSyncDelegate.createSimklSyncWorkInfoFlow(viewModelScope) }
 
-            if (expectedState != null && expectedState != returnedState) {
-                android.util.Log.e("SettingsViewModel", "Simkl OAuth state mismatch — possible CSRF attack")
-                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connect_error))
-                return@launch
-            }
-
-            if (codeVerifier.isNullOrEmpty()) {
-                android.util.Log.e("SettingsViewModel", "Simkl PKCE code_verifier missing")
-                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connect_error))
-                return@launch
-            }
-
-            try {
-                val response = simklService.get().getAccessTokenV2(
-                    com.cinetrack.data.api.SimklTokenRequestV2(
-                        grant_type = "authorization_code",
-                        client_id = com.cinetrack.util.Keys.getSimklKey(),
-                        code = code,
-                        redirect_uri = "flicktrove://simkl_login",
-                        code_verifier = codeVerifier
-                    )
-                )
-                simklAuthRepository.saveTokens(
-                    accessToken = response.access_token,
-                    refreshToken = response.refresh_token,
-                    expiresInSeconds = response.expires_in
-                )
-
-                // Fetch account profile & user ID immediately
-                try {
-                    val settings = simklService.get().getUserSettings()
-                    val uid = settings.account?.id
-                    if (uid != null) {
-                        simklAuthRepository.saveUserAccount(uid, settings.account.type)
-                    }
-                } catch (e: Exception) {
-                    android.util.Log.w("SettingsViewModel", "Failed to fetch user settings after Simkl login", e)
-                }
-
-                syncSimklNow()
-                badgeRepository.get().evaluateBadgesAsync()
-                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connected))
-            } catch (e: Exception) {
-                android.util.Log.e("SettingsViewModel", "Simkl token exchange failed", e)
-                actionFeedbackManager.emit(UiText.StringResource(R.string.simkl_connect_error))
-            }
-        }
-    }
-
-    val simklSyncWorkInfo = androidx.work.WorkManager.getInstance(context)
-        .getWorkInfosForUniqueWorkFlow("SimklManualSync")
-        .map { it.firstOrNull() }
-        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
-
-    fun syncSimklNow() {
-        viewModelScope.launch {
-            val constraints = androidx.work.Constraints.Builder()
-                .setRequiredNetworkType(androidx.work.NetworkType.CONNECTED)
-                .build()
-
-            val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.SimklSyncWorker>()
-                .setConstraints(constraints)
-                .setInputData(androidx.work.workDataOf("force" to true))
-                .build()
-
-            androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
-                "SimklManualSync",
-                androidx.work.ExistingWorkPolicy.REPLACE,
-                workRequest
-            )
-            actionFeedbackManager.emit(UiText.StringResource(R.string.trakt_manual_sync_started))
-        }
-    }
+    fun syncSimklNow() = externalSyncDelegate.syncSimklNow(viewModelScope)
 
 
     fun toggleAdvancedVisualEffects(enabled: Boolean) {
@@ -1091,50 +955,11 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    suspend fun getBackupData(): String? {
-        return try {
-            backupRepository.exportData()
-        } catch (e: Exception) {
-            actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_export_error))
-            null
-        }
-    }
+    suspend fun getBackupData(): String? = backupDelegate.getBackupData()
 
-    fun restoreData(json: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val tempFile = File(context.cacheDir, "restore_payload_${System.currentTimeMillis()}.tmp")
-                tempFile.writeText(json)
-                restoreFile(tempFile.absolutePath)
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_error))
-            }
-        }
-    }
+    fun restoreData(json: String) = backupDelegate.restoreData(json, viewModelScope)
 
-    fun restoreFile(filePath: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
-                    .setInputData(
-                        androidx.work.workDataOf(
-                            "filePath" to filePath,
-                            "isRestore" to true,
-                            "keepLatestWatchDate" to true
-                        )
-                    )
-                    .build()
-                androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
-                    "ExternalImportWork",
-                    androidx.work.ExistingWorkPolicy.REPLACE,
-                    workRequest
-                )
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_started))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_restore_error))
-            }
-        }
-    }
+    fun restoreFile(filePath: String) = backupDelegate.restoreFile(filePath, viewModelScope)
 
     fun deleteAccount() {
         viewModelScope.launch {
@@ -1147,103 +972,27 @@ class SettingsViewModel @Inject constructor(
         }
     }
 
-    fun wipeLocalData() {
-        viewModelScope.launch {
-            try {
-                movieRepository.wipeLocalData()
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_action_success))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to wipe local data"))
-            }
-        }
-    }
+    fun wipeLocalData() = backupDelegate.wipeLocalData(viewModelScope)
 
-    fun wipeTotalData() {
-        viewModelScope.launch {
-            try {
-                movieRepository.wipeTotalData()
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_action_success))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to wipe total data"))
-            }
-        }
-    }
+    fun wipeTotalData() = backupDelegate.wipeTotalData(viewModelScope)
 
-    fun countDuplicateRewatches(onResult: (Int) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val count = movieRepository.countDuplicateRewatches()
-                onResult(count)
-            } catch (e: Exception) {
-                onResult(0)
-            }
-        }
-    }
+    fun countDuplicateRewatches(onResult: (Int) -> Unit) =
+        backupDelegate.countDuplicateRewatches(viewModelScope, onResult)
 
-    fun cleanupRewatches(onComplete: (Int) -> Unit) {
-        viewModelScope.launch {
-            try {
-                val deletedCount = movieRepository.cleanupAllRewatches()
-                if (deletedCount > 0) {
-                    actionFeedbackManager.emit(UiText.StringResource(R.string.settings_cleanup_rewatches_success, deletedCount))
-                } else {
-                    actionFeedbackManager.emit(UiText.StringResource(R.string.settings_cleanup_rewatches_none))
-                }
-                onComplete(deletedCount)
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.DynamicString(e.message ?: "Failed to clean up rewatches"))
-                onComplete(0)
-            }
-        }
-    }
+    fun cleanupRewatches(onComplete: (Int) -> Unit) =
+        backupDelegate.cleanupRewatches(viewModelScope, onComplete)
 
-    fun migrateExternalData(fileContent: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val tempFile = File(context.cacheDir, "migrate_payload_${System.currentTimeMillis()}.tmp")
-                tempFile.writeText(fileContent)
-                migrateExternalFile(tempFile.absolutePath)
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
-            }
-        }
-    }
+    fun migrateExternalData(fileContent: String) =
+        backupDelegate.migrateExternalData(fileContent, viewModelScope)
 
-    fun migrateExternalFile(filePath: String) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                val workRequest = androidx.work.OneTimeWorkRequestBuilder<com.cinetrack.worker.ExternalImportWorker>()
-                    .setInputData(
-                        androidx.work.workDataOf(
-                            "filePath" to filePath,
-                            "isRestore" to false
-                        )
-                    )
-                    .build()
-                androidx.work.WorkManager.getInstance(context).enqueueUniqueWork(
-                    "ExternalImportWork",
-                    androidx.work.ExistingWorkPolicy.REPLACE,
-                    workRequest
-                )
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_started))
-            } catch (e: Exception) {
-                actionFeedbackManager.emit(UiText.StringResource(R.string.settings_msg_import_error))
-            }
-        }
-    }
+    fun migrateExternalFile(filePath: String) =
+        backupDelegate.migrateExternalFile(filePath, viewModelScope)
 
     fun emitToast(uiText: UiText) {
         actionFeedbackManager.emit(uiText)
     }
 
-    fun deleteUnmatchedItem(movie: Movie) {
-        viewModelScope.launch(Dispatchers.IO) {
-            try {
-                movieRepository.deleteMovie(movie)
-            } catch (e: Exception) {
-                // Ignore or show error
-            }
-        }
-    }
+    fun deleteUnmatchedItem(movie: Movie) =
+        backupDelegate.deleteUnmatchedItem(movie, viewModelScope)
 
 }

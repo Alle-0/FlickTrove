@@ -40,6 +40,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.cinetrack.R
+import com.cinetrack.ui.components.mascot.IrisMascot
+import com.cinetrack.ui.components.mascot.IrisMood
 import kotlin.math.PI
 import kotlin.math.cos
 import kotlin.math.pow
@@ -245,18 +247,28 @@ internal fun TroveHoldToUnsealOverlay(
                     }
                 }
 
-                // 4. Icona scintillio al centro dell'ottica: brilla ed entra in pieno fuoco (> 0.85f)
-                val iconScale = 1f + chargeProgress * 0.12f
-                Icon(
-                    painter = painterResource(id = R.drawable.ic_sparkle),
-                    contentDescription = null,
-                    tint = if (chargeProgress > 0.85f) Color.White else primaryColor,
-                    modifier = Modifier
-                        .size(24.dp)
-                        .graphicsLayer {
-                            scaleX = iconScale
-                            scaleY = iconScale
-                        }
+                // 4. Mascotte ottica IRIS viva al centro dell'ottica (Opzione A)
+                val effectiveIrisMood = when {
+                    chargeProgress > 0.85f -> IrisMood.DELIGHTED
+                    chargeProgress > 0.01f || isHolding -> IrisMood.SEARCHING
+                    else -> IrisMood.IDLE
+                }
+                val effectiveIrisGazeY = when {
+                    chargeProgress > 0.85f -> 0f
+                    chargeProgress > 0.01f || isHolding -> -0.1f
+                    else -> 0.60f // Sguardo incuriosito verso il basso verso il testo "Press and hold"
+                }
+                val irisSize = (34 + chargeProgress * 4).dp
+
+                IrisMascot(
+                    mood = effectiveIrisMood,
+                    size = irisSize,
+                    gazeBiasX = 0f,
+                    gazeBiasY = effectiveIrisGazeY,
+                    enableTiltParallax = true,
+                    enableBacklight = false,
+                    isFocusHunting = isHolding && chargeProgress < 0.85f,
+                    accentColor = primaryColor
                 )
             }
 

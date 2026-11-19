@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">ไม่มีวิดีโอ</string>
     <string name="detail_add_subgenres">+ ประเภทย่อย</string>
     <string name="detail_hide_subgenres">- ซ่อน</string>
+    <string name="detail_show_all_subgenres">+ ทั้งหมด (%d)</string>
     <string name="detail_streaming">สตรีมมิง</string>
     <string name="detail_rent_buy">เช่าหรือซื้อ</string>
     <string name="detail_season">ซีซัน</string>
@@ -2171,6 +2172,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">อธิบายสิ่งที่คุณต้องการรับชมด้วยคำพูดของคุณเอง AI จะค้นหาภาพยนตร์ที่เหมาะสมที่สุดจากแคตตาล็อก TMDB ทั้งหมด</string>
     <string name="search_mood_iris_intro_text">อธิบายสิ่งที่คุณต้องการรับชมด้วยคำพูดของคุณเอง IRIS จะค้นหาภาพยนตร์ที่เหมาะสมที่สุดจากแคตตาล็อก TMDB ทั้งหมด</string>
+    <string name="search_mood_tip_detail">เคล็ดลับ: ยิ่งคุณบอกรายละเอียดเกี่ยวกับพล็อต บรรยากาศ หรือตัวละครมากเท่าไหร่ ผลลัพธ์ก็จะยิ่งแม่นยำมากขึ้นเท่านั้น</string>
     <string name="search_mood_exhausted_notice">คุณใช้การค้นหาตามอารมณ์ครบทั้ง 3 ครั้งสำหรับวันนี้แล้ว ระบบจะรีเซ็ตตอนเที่ยงคืน!</string>
     <string name="search_mood_exhausted_title">การค้นหาด้วย AI ประจำวันครบกำหนดแล้ว</string>
     <string name="search_mood_switch_to_algo">สลับเป็นIRIS (ไม่จำกัด)</string>
@@ -2207,4 +2209,19 @@
     <string name="badge_iris_search_cat">การค้นพบตามอารมณ์</string>
     <string name="badge_iris_search_desc">คุณเปิดรับวิสัยทัศน์: เพิ่มภาพยนตร์ที่ค้นพบด้วย IRIS หรือ AI ลงในรายการที่ต้องดู</string>
     <string name="trophy_unit_searches">การค้นหา</string>
+
+    <string name="semantic_affinity_suffix">ความเข้ากันได้</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">กำกับโดย %1$s</string>
+    <string name="semantic_reason_score_by">ดนตรีประกอบโดย %1$s</string>
+    <string name="semantic_reason_cinematography_by">ถ่ายภาพโดย %1$s</string>
+    <string name="semantic_reason_produced_by">อำนวยการสร้างโดย %1$s</string>
+    <string name="semantic_reason_cinema_of">ภาพยนตร์ %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">ได้รับคำชมจากนักวิจารณ์ (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">ภาพยนตร์คลาสสิกแห่งยุค (%1$s)</string>
+    <string name="semantic_reason_plot_match">โครงเรื่องสอดคล้องกับธีม</string>
+    <string name="semantic_reason_atmosphere">บรรยากาศ: %1$s</string>
+    <string name="semantic_reason_written_by">บทภาพยนตร์โดย %1$s</string>
 </resources>

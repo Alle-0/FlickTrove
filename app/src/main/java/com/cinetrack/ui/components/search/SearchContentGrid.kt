@@ -41,7 +41,6 @@ import com.cinetrack.R
 import com.cinetrack.data.model.Movie
 import com.cinetrack.util.toComposeColor
 import com.cinetrack.ui.components.mascot.IrisEmptyState
-import com.cinetrack.ui.components.mascot.IrisSearchingHero
 import com.cinetrack.ui.components.shared.MovieActionsState
 import com.cinetrack.ui.components.shared.CollectionCardSkeleton
 import com.cinetrack.ui.components.shared.MovieCardSkeleton
@@ -79,6 +78,7 @@ fun SearchContentGrid(
     onToggleMoodRecentExpanded: () -> Unit = {},
     onToggleMoodInspirationsExpanded: () -> Unit = {},
     cursorPosition: Int = -1,
+    isSearchFocused: Boolean = false,
     modifier: Modifier = Modifier
 ) {
     val shouldLoadMore = remember(gridState) {
@@ -268,16 +268,6 @@ fun SearchContentGrid(
                 }
             } else {
                 if (uiState.results.isEmpty() && uiState.isLoading) {
-                    if (uiState.category == "mood") {
-                        item(span = { GridItemSpan(12) }) {
-                            IrisSearchingHero(
-                                query = uiState.query,
-                                isMoodAiMode = uiState.isMoodAiMode,
-                                modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp)
-                            )
-                        }
-                    }
-
                     items(
                         if (uiState.category == "person") 16 else if (uiState.category == "collection") 6 else if (uiState.category == "mood") 4 else 12,
                         contentType = { "skeleton" },

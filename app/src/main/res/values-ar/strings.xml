@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">لا توجد فيديوهات متاحة</string>
     <string name="detail_add_subgenres">+ تصنيفات فرعية</string>
     <string name="detail_hide_subgenres">- إخفاء</string>
+    <string name="detail_show_all_subgenres">+ الكل (%d)</string>
     <string name="detail_streaming">البث</string>
     <string name="detail_rent_buy">استئجار أو شراء</string>
     <string name="detail_season">موسم</string>
@@ -2155,6 +2156,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">صِف بكلماتك الخاصة ما ترغب في مشاهدته. سيعثر الذكاء الاصطناعي على الأفلام المثالية عبر كتالوج TMDB بالكامل.</string>
     <string name="search_mood_iris_intro_text">صِف بكلماتك الخاصة ما ترغب في مشاهدته. سيعثر IRIS على الأفلام المثالية عبر كتالوج TMDB بالكامل.</string>
+    <string name="search_mood_tip_detail">نصيحة: كلما زادت التفاصيل حول الحبكة أو الأجواء أو الشخصيات، زادت دقة النتائج.</string>
     <string name="search_mood_exhausted_notice">لقد استنفدت عمليات البحث الثلاث لهذا اليوم. ستتجدد عند منتصف الليل!</string>
     <string name="search_mood_exhausted_title">استنفدت عمليات بحث الذكاء الاصطناعي اليومية</string>
     <string name="search_mood_switch_to_algo">التبديل إلى IRIS (غير محدود)</string>
@@ -2191,4 +2193,19 @@
     <string name="badge_iris_search_cat">اكتشاف المزاج</string>
     <string name="badge_iris_search_desc">لقد استجبت للرؤية: أضفت فيلمًا تم اكتشافه بواسطة IRIS أو الذكاء الاصطناعي إلى قائمة المشاهدة.</string>
     <string name="trophy_unit_searches">عمليات بحث</string>
+
+    <string name="semantic_affinity_suffix">توافق</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">إخراج: %1$s</string>
+    <string name="semantic_reason_score_by">موسيقى: %1$s</string>
+    <string name="semantic_reason_cinematography_by">تصوير: %1$s</string>
+    <string name="semantic_reason_produced_by">إنتاج: %1$s</string>
+    <string name="semantic_reason_cinema_of">سينما %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">تحفة نالت إشادة النقاد (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">كلاسيكية سينمائية (%1$s)</string>
+    <string name="semantic_reason_plot_match">تطابق موضوع القصة</string>
+    <string name="semantic_reason_atmosphere">الأجواء: %1$s</string>
+    <string name="semantic_reason_written_by">سيناريو: %1$s</string>
 </resources>

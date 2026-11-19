@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">Không có video khả dụng</string>
     <string name="detail_add_subgenres">+ Thể loại phụ</string>
     <string name="detail_hide_subgenres">- Ẩn</string>
+    <string name="detail_show_all_subgenres">+ Tất cả (%d)</string>
     <string name="detail_streaming">TRỰC TUYẾN</string>
     <string name="detail_rent_buy">THUÊ HOẶC MUA</string>
     <string name="detail_season">Mùa</string>
@@ -2158,6 +2159,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Mô tả bằng từ ngữ của bạn những gì bạn muốn xem. AI sẽ tìm những bộ phim lý tưởng trên toàn bộ danh mục TMDB.</string>
     <string name="search_mood_iris_intro_text">Mô tả bằng từ ngữ của bạn những gì bạn muốn xem. IRIS sẽ tìm những bộ phim lý tưởng trên toàn bộ danh mục TMDB.</string>
+    <string name="search_mood_tip_detail">Mẹo: Càng mô tả chi tiết về cốt truyện, bầu không khí hoặc nhân vật, kết quả tìm kiếm càng chính xác.</string>
     <string name="search_mood_exhausted_notice">Bạn đã dùng hết 3 lượt tìm kiếm theo tâm trạng hôm nay. Lượt tìm kiếm sẽ được làm mới vào nửa đêm!</string>
     <string name="search_mood_exhausted_title">Đã dùng hết lượt tìm kiếm AI hôm nay</string>
     <string name="search_mood_switch_to_algo">Chuyển sang IRIS (không giới hạn)</string>
@@ -2194,4 +2196,19 @@
     <string name="badge_iris_search_cat">KHÁM PHÁ THEO TÂM TRẠNG</string>
     <string name="badge_iris_search_desc">Bạn đã đón nhận tầm nhìn: thêm một bộ phim được khám phá bằng IRIS hoặc AI vào danh sách theo dõi.</string>
     <string name="trophy_unit_searches">tìm kiếm</string>
+
+    <string name="semantic_affinity_suffix">độ tương thích</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Đạo diễn: %1$s</string>
+    <string name="semantic_reason_score_by">Âm nhạc: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Quay phim: %1$s</string>
+    <string name="semantic_reason_produced_by">Sản xuất: %1$s</string>
+    <string name="semantic_reason_cinema_of">Điện ảnh %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Được giới phê bình đánh giá cao (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Tác phẩm kinh điển (%1$s)</string>
+    <string name="semantic_reason_plot_match">Phù hợp chủ đề cốt truyện</string>
+    <string name="semantic_reason_atmosphere">Không khí: %1$s</string>
+    <string name="semantic_reason_written_by">Kịch bản: %1$s</string>
 </resources>

@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">Tidak ada video tersedia</string>
     <string name="detail_add_subgenres">+ Subgenre</string>
     <string name="detail_hide_subgenres">- Sembunyikan</string>
+    <string name="detail_show_all_subgenres">+ Semua (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">SEWA ATAU BELI</string>
     <string name="detail_season">Musim</string>
@@ -2197,6 +2198,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Jelaskan dengan kata-kata Anda sendiri apa yang ingin Anda tonton. AI akan menemukan film ideal di seluruh katalog TMDB.</string>
     <string name="search_mood_iris_intro_text">Jelaskan dengan kata-kata Anda sendiri apa yang ingin Anda tonton. IRIS akan menemukan film ideal di seluruh katalog TMDB.</string>
+    <string name="search_mood_tip_detail">Tips: semakin banyak detail alur, suasana, atau karakter yang kamu berikan, semakin akurat hasilnya.</string>
     <string name="search_mood_exhausted_notice">Anda telah menggunakan 3 pencarian suasana hari ini. Kuota akan diperbarui pada tengah malam!</string>
     <string name="search_mood_exhausted_title">Pencarian AI harian habis</string>
     <string name="search_mood_switch_to_algo">Beralih ke IRISa (tak terbatas)</string>
@@ -2233,4 +2235,19 @@
     <string name="badge_iris_search_cat">PENEMUAN MOOD</string>
     <string name="badge_iris_search_desc">Anda menyambut visi: menambahkan film yang ditemukan dengan IRIS atau AI ke daftar pantauan Anda.</string>
     <string name="trophy_unit_searches">pencarian</string>
+
+    <string name="semantic_affinity_suffix">afinitas</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Disutradarai oleh %1$s</string>
+    <string name="semantic_reason_score_by">Musik oleh %1$s</string>
+    <string name="semantic_reason_cinematography_by">Sinematografi oleh %1$s</string>
+    <string name="semantic_reason_produced_by">Diproduseri oleh %1$s</string>
+    <string name="semantic_reason_cinema_of">Sinema %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Pujian para kritikus (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Klasik genre (%1$s)</string>
+    <string name="semantic_reason_plot_match">Kesesuaian tema alur cerita</string>
+    <string name="semantic_reason_atmosphere">Suasana: %1$s</string>
+    <string name="semantic_reason_written_by">Ditulis oleh %1$s</string>
 </resources>

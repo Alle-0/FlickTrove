@@ -65,6 +65,7 @@ fun DetailMetaRows(
             .padding(horizontal = 24.dp)
     ) {
         var showKeywords by remember { mutableStateOf(false) }
+        var showAllKeywords by remember { mutableStateOf(false) }
 
         // Genres Flow
         FlowRow(
@@ -72,7 +73,7 @@ fun DetailMetaRows(
                 .fillMaxWidth()
                 .padding(bottom = 28.dp)
                 .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)),
-            horizontalArrangement = Arrangement.spacedBy(8.dp),
+            horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
             for (genre in genres) {
@@ -90,27 +91,31 @@ fun DetailMetaRows(
                 ) {
                     KeywordExpandPill(
                         accentColor = accentColor,
-                        onClick = { showKeywords = true }
+                        onClick = { 
+                            showKeywords = true
+                            showAllKeywords = false
+                        }
                     )
                 }
                 
                 val currentLanguage = androidx.compose.ui.platform.LocalConfiguration.current.locales[0]?.language ?: "en"
                 keywords.forEachIndexed { index, keyword ->
+                    val isVisible = showKeywords && (showAllKeywords || index < 10)
                     val reverseIndex = keywords.size - 1 - index
                     val localizedKeyword = com.cinetrack.data.model.KeywordDictionary.getLocalizedKeywordName(keyword.id, currentLanguage, keyword.name) ?: keyword.name
                     AnimatedVisibility(
-                        visible = showKeywords,
+                        visible = isVisible,
                         enter = scaleIn(
                             initialScale = 0.8f, 
-                            animationSpec = tween(durationMillis = 350, delayMillis = index * 25, easing = FastOutSlowInEasing)
+                            animationSpec = tween(durationMillis = 350, delayMillis = (index * 25).coerceAtMost(300), easing = FastOutSlowInEasing)
                         ) + fadeIn(
-                            animationSpec = tween(durationMillis = 300, delayMillis = index * 25, easing = LinearOutSlowInEasing)
+                            animationSpec = tween(durationMillis = 300, delayMillis = (index * 25).coerceAtMost(300), easing = LinearOutSlowInEasing)
                         ),
                         exit = scaleOut(
                             targetScale = 0.8f, 
-                            animationSpec = tween(durationMillis = 200, delayMillis = reverseIndex * 20, easing = FastOutSlowInEasing)
+                            animationSpec = tween(durationMillis = 200, delayMillis = (reverseIndex * 20).coerceAtMost(200), easing = FastOutSlowInEasing)
                         ) + fadeOut(
-                            animationSpec = tween(durationMillis = 200, delayMillis = reverseIndex * 20, easing = LinearOutSlowInEasing)
+                            animationSpec = tween(durationMillis = 200, delayMillis = (reverseIndex * 20).coerceAtMost(200), easing = LinearOutSlowInEasing)
                         )
                     ) {
                         KeywordPill(
@@ -120,14 +125,28 @@ fun DetailMetaRows(
                         )
                     }
                 }
+
+                if (keywords.size > 10) {
+                    AnimatedVisibility(
+                        visible = showKeywords && !showAllKeywords,
+                        enter = scaleIn(initialScale = 0.8f) + fadeIn(),
+                        exit = scaleOut(targetScale = 0.8f) + fadeOut()
+                    ) {
+                        KeywordShowAllPill(
+                            remainingCount = keywords.size - 10,
+                            accentColor = accentColor,
+                            onClick = { showAllKeywords = true }
+                        )
+                    }
+                }
                 
                 AnimatedVisibility(
                     visible = showKeywords,
                     enter = scaleIn(
                         initialScale = 0.8f, 
-                        animationSpec = tween(durationMillis = 350, delayMillis = keywords.size * 25, easing = FastOutSlowInEasing)
+                        animationSpec = tween(durationMillis = 350, delayMillis = (keywords.size * 25).coerceAtMost(350), easing = FastOutSlowInEasing)
                     ) + fadeIn(
-                        animationSpec = tween(durationMillis = 300, delayMillis = keywords.size * 25, easing = LinearOutSlowInEasing)
+                        animationSpec = tween(durationMillis = 300, delayMillis = (keywords.size * 25).coerceAtMost(350), easing = LinearOutSlowInEasing)
                     ),
                     exit = scaleOut(
                         targetScale = 0.8f, 
@@ -138,7 +157,10 @@ fun DetailMetaRows(
                 ) {
                     KeywordCollapsePill(
                         accentColor = accentColor,
-                        onClick = { showKeywords = false }
+                        onClick = { 
+                            showKeywords = false
+                            showAllKeywords = false
+                        }
                     )
                 }
             }
@@ -332,6 +354,37 @@ fun KeywordExpandPill(accentColor: Color, onClick: () -> Unit) {
         ) {
             Text(
                 text = stringResource(R.string.detail_add_subgenres),
+                style = MaterialTheme.typography.labelSmall.copy(
+                    fontSize = 11.sp,
+                    fontWeight = FontWeight.Bold,
+                    letterSpacing = 1.sp
+                ),
+                color = ColorUtils.lightenForText(accentColor, 1.35f),
+                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+        }
+    }
+}
+
+@Composable
+fun KeywordShowAllPill(remainingCount: Int, accentColor: Color, onClick: () -> Unit) {
+    val shape = RoundedCornerShape(20.dp)
+
+    Box(
+        modifier = Modifier
+            .bounceClick { onClick() },
+        contentAlignment = Alignment.Center
+    ) {
+        Box(
+            modifier = Modifier
+                .clip(shape)
+                .graphicsLayer { compositingStrategy = CompositingStrategy.Offscreen }
+                .background(accentColor.copy(alpha = 0.15f))
+                .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), shape),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(
+                text = stringResource(R.string.detail_show_all_subgenres, remainingCount),
                 style = MaterialTheme.typography.labelSmall.copy(
                     fontSize = 11.sp,
                     fontWeight = FontWeight.Bold,

@@ -72,6 +72,8 @@ import com.cinetrack.ui.components.folder.NewFolderCard
 import com.cinetrack.ui.components.folder.JoinFolderCard
 import com.cinetrack.ui.components.folder.FolderEditMode
 import com.cinetrack.ui.components.folder.FolderModalsHost
+import com.cinetrack.ui.components.folder.FoldersEmptyState
+import com.cinetrack.ui.components.folder.FolderOptionsMenuPopup
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.boundsInWindow
 import androidx.compose.animation.AnimatedVisibility
@@ -126,11 +128,7 @@ object FoldersTab : Tab {
         } else {
             getViewModel<FoldersViewModel>()
         }
-        val settingsViewModel = if (activity != null) {
-            androidx.hilt.navigation.compose.hiltViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>(activity)
-        } else {
-            getViewModel<com.cinetrack.ui.viewmodel.SettingsViewModel>()
-        }
+        val guestAuthManager = com.cinetrack.ui.utils.rememberGuestAuthManager()
         val paddingValues = LocalAppPadding.current
         val hazeState = LocalHazeState.current
         val tabNavigator = LocalTabNavigator.current
@@ -143,7 +141,7 @@ object FoldersTab : Tab {
                 tabNavigator.current = FolderDetailTab(folder.id, folder.name, folder.color)
             },
             onGuestAuthRequired = {
-                settingsViewModel.triggerGuestAuthDialog()
+                guestAuthManager?.triggerGuestAuthDialog()
             }
         )
     }
@@ -208,81 +206,18 @@ fun FoldersScreenContent(
                 .haze(state = activeHazeState)
         ) {
             if (folders.isNullOrEmpty() && searchQuery.isBlank() && typeFilter == FolderTypeFilter.ALL) {
-                Box(
-                    modifier = Modifier.fillMaxSize(),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                        Icon(
-                            imageVector = ImageVector.vectorResource(id = R.drawable.ic_cartella_piena),
-                            contentDescription = null,
-                            tint = Color.White.copy(alpha = 0.2f),
-                            modifier = Modifier.size(80.dp)
-                        )
-                        Spacer(Modifier.height(16.dp))
-                        Text(
-                            text = stringResource(R.string.folders_empty_message),
-                            color = Color.White.copy(alpha = 0.4f),
-                            style = MaterialTheme.typography.bodyLarge
-                        )
-                        Spacer(Modifier.height(24.dp))
-                        var emptyCreateBounds by remember { mutableStateOf<Rect?>(null) }
-                        var emptyJoinBounds by remember { mutableStateOf<Rect?>(null) }
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally,
-                            verticalArrangement = Arrangement.spacedBy(12.dp)
-                        ) {
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                                modifier = Modifier
-                                    .onGloballyPositioned { emptyCreateBounds = it.boundsInWindow() }
-                                    .bounceClick {
-                                        createTriggerBounds = emptyCreateBounds
-                                        isCreateDialogOpen = true
-                                    }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                                    .padding(horizontal = 24.dp, vertical = 12.dp)
-                            ) {
-                                Icon(ImageVector.vectorResource(id = R.drawable.ic_plus), null, tint = Color.White, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.folders_create_first), 
-                                    color = Color.White, 
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold, letterSpacing = 0.5.sp)
-                                )
-                            }
-                            Row(
-                                verticalAlignment = Alignment.CenterVertically,
-                                horizontalArrangement = Arrangement.Center,
-                                modifier = Modifier
-                                    .onGloballyPositioned { emptyJoinBounds = it.boundsInWindow() }
-                                    .bounceClick {
-                                        if (isGuest) {
-                                            onGuestAuthRequired()
-                                        } else {
-                                            joinTriggerBounds = emptyJoinBounds
-                                            isJoinDialogOpen = true
-                                        }
-                                    }
-                                    .clip(CircleShape)
-                                    .background(Color.White.copy(alpha = 0.05f))
-                                    .border(1.dp, Color.White.copy(alpha = 0.15f), CircleShape)
-                                    .padding(horizontal = 24.dp, vertical = 12.dp)
-                            ) {
-                                Icon(ImageVector.vectorResource(id = R.drawable.ic_people), null, tint = Color.White, modifier = Modifier.size(18.dp))
-                                Spacer(Modifier.width(8.dp))
-                                Text(
-                                    stringResource(R.string.folder_join_button), 
-                                    color = Color.White, 
-                                    style = MaterialTheme.typography.labelLarge.copy(fontWeight = FontWeight.Bold)
-                                )
-                            }
-                        }
-                    }
-                }
+                FoldersEmptyState(
+                    isGuest = isGuest,
+                    onCreateFolderClick = { bounds ->
+                        createTriggerBounds = bounds
+                        isCreateDialogOpen = true
+                    },
+                    onJoinFolderClick = { bounds ->
+                        joinTriggerBounds = bounds
+                        isJoinDialogOpen = true
+                    },
+                    onGuestAuthRequired = onGuestAuthRequired
+                )
             } else {
                 val listState = androidx.compose.foundation.lazy.rememberLazyListState()
                 val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
@@ -699,178 +634,20 @@ fun FoldersScreenContent(
         onOpenShareModal = { folderToShare = it }
     )
 
-    var stableMenuFolder by remember { mutableStateOf<FolderEntity?>(null) }
-    val showFolderMenu = activeMenuFolder != null
-    if (activeMenuFolder != null) {
-        stableMenuFolder = activeMenuFolder
-    }
-
-    val folderTransitionState = remember {
-        MutableTransitionState(false)
-    }
-    folderTransitionState.targetState = showFolderMenu
-
-    LaunchedEffect(folderTransitionState.currentState, folderTransitionState.targetState, folderTransitionState.isIdle) {
-        if (!folderTransitionState.targetState && folderTransitionState.isIdle) {
-            stableMenuFolder = null
-        }
-    }
-
-    if (folderTransitionState.targetState || !folderTransitionState.isIdle) {
-        stableMenuFolder?.let { folder ->
-            Box(
-                contentAlignment = AbsoluteAlignment.TopLeft,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .zIndex(2000f)
-                    .pointerInput(Unit) { detectTapGestures { activeMenuFolder = null } }
-            ) {
-                val density = androidx.compose.ui.platform.LocalDensity.current
-                val screenWidthDp = androidx.compose.ui.platform.LocalConfiguration.current.screenWidthDp.dp
-                val isRtl = androidx.compose.ui.platform.LocalLayoutDirection.current == androidx.compose.ui.unit.LayoutDirection.Rtl
-                val rawOffsetX = with(density) {
-                    if (isRtl) activeMenuBounds.right.toDp() - 200.dp else activeMenuBounds.left.toDp() + 32.dp
-                }
-                val offsetX = rawOffsetX.coerceIn(8.dp, (screenWidthDp - 208.dp).coerceAtLeast(8.dp))
-                val offsetY = with(density) { activeMenuBounds.top.toDp() + 48.dp }
-                
-                AnimatedVisibility(
-                    visibleState = folderTransitionState,
-                    enter = expandVertically(
-                        expandFrom = Alignment.Top,
-                        animationSpec = spring(
-                            dampingRatio = 0.76f,
-                            stiffness = Spring.StiffnessMediumLow
-                        )
-                    ) + fadeIn(
-                        animationSpec = tween(120, easing = LinearOutSlowInEasing)
-                    ),
-                    exit = shrinkVertically(
-                        shrinkTowards = Alignment.Top,
-                        animationSpec = tween(120, easing = FastOutLinearInEasing)
-                    ) + fadeOut(
-                        animationSpec = tween(110, easing = FastOutLinearInEasing)
-                    ),
-                    modifier = Modifier.absoluteOffset(x = offsetX, y = offsetY)
-                ) {
-                    Column(
-                        modifier = Modifier
-                            .width(200.dp)
-                            .clip(RoundedCornerShape(24.dp))
-                            .hazeGlass(state = activeHazeState, shape = RoundedCornerShape(24.dp))
-                    ) {
-                    val currentUserId = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.uid
-                    val isOwner = !folder.isShared || (folder.ownerUid == currentUserId)
-                    var itemDelay = 15
-                    val itemStep = 35
-
-                    if (folder.isShared || isOwner) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateEnterExit(
-                                    enter = fadeIn(tween(120, delayMillis = itemDelay)) +
-                                            scaleIn(
-                                                initialScale = 0.90f,
-                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
-                                            ),
-                                    exit = fadeOut(tween(100))
-                                )
-                                .bounceClick { 
-                                    val target = folder
-                                    activeMenuFolder = null
-                                    if (isGuest) {
-                                        onGuestAuthRequired()
-                                    } else if (target.isShared) {
-                                        folderForMembers = target
-                                    } else {
-                                        folderToShare = target
-                                    }
-                                }
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(
-                                ImageVector.vectorResource(id = R.drawable.ic_people), 
-                                contentDescription = null, 
-                                tint = Color.White, 
-                                modifier = Modifier.size(20.dp)
-                            )
-                            Spacer(Modifier.width(12.dp))
-                            Text(
-                                text = if (folder.isShared) {
-                                    if (isOwner) stringResource(R.string.folder_members_title) else stringResource(R.string.folder_members_only_title)
-                                } else {
-                                    stringResource(R.string.folder_share_action)
-                                }, 
-                                color = Color.White, 
-                                style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                            )
-                        }
-                        itemDelay += itemStep
-                    }
-
-                    if (isOwner) {
-                        Row(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .animateEnterExit(
-                                    enter = fadeIn(tween(120, delayMillis = itemDelay)) +
-                                            scaleIn(
-                                                initialScale = 0.90f,
-                                                animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
-                                            ),
-                                    exit = fadeOut(tween(100))
-                                )
-                                .bounceClick { 
-                                    activeMenuFolder = null
-                                    folderEditMode = FolderEditMode.ALL
-                                    folderToEdit = folder
-                                }
-                                .padding(horizontal = 16.dp, vertical = 14.dp),
-                            verticalAlignment = Alignment.CenterVertically
-                        ) {
-                            Icon(ImageVector.vectorResource(id = R.drawable.ic_pencil), contentDescription = null, tint = Color.White, modifier = Modifier.size(20.dp))
-                            Spacer(Modifier.width(12.dp))
-                            Text(stringResource(R.string.folder_edit_info), color = Color.White, style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium))
-                        }
-                        itemDelay += itemStep
-                    }
-
-                    Row(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .animateEnterExit(
-                                enter = fadeIn(tween(120, delayMillis = itemDelay)) +
-                                        scaleIn(
-                                            initialScale = 0.90f,
-                                            animationSpec = spring(dampingRatio = 0.70f, stiffness = 500f)
-                                        ),
-                                exit = fadeOut(tween(100))
-                            )
-                            .bounceClick { 
-                                activeMenuFolder = null
-                                folderToDelete = folder 
-                            }
-                            .padding(horizontal = 16.dp, vertical = 14.dp),
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Icon(ImageVector.vectorResource(id = R.drawable.ic_trash), contentDescription = null, tint = Color(0xFFFF3B30), modifier = Modifier.size(20.dp))
-                        Spacer(Modifier.width(12.dp))
-                        Text(
-                            text = if (folder.isShared && !isOwner) {
-                                stringResource(R.string.folder_leave)
-                            } else {
-                                stringResource(R.string.folders_delete)
-                            },
-                            color = Color(0xFFFF3B30),
-                            style = MaterialTheme.typography.bodyMedium.copy(fontWeight = FontWeight.Medium)
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
+    FolderOptionsMenuPopup(
+        activeMenuFolder = activeMenuFolder,
+        activeMenuBounds = activeMenuBounds,
+        activeHazeState = activeHazeState,
+        isGuest = isGuest,
+        onDismiss = { activeMenuFolder = null },
+        onShareFolder = { folderToShare = it },
+        onOpenMembers = { folderForMembers = it },
+        onEditFolder = { folder ->
+            folderEditMode = FolderEditMode.ALL
+            folderToEdit = folder
+        },
+        onDeleteFolder = { folderToDelete = it },
+        onGuestAuthRequired = onGuestAuthRequired
+    )
 }
 

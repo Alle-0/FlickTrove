@@ -543,24 +543,8 @@ class HistoryViewModel @Inject constructor(
             }
         }
 
-        fun parseToEpochMillis(raw: String?): Long {
-            if (raw.isNullOrBlank()) return 0L
-            return try {
-                if (raw.contains("T")) {
-                    try {
-                        Instant.parse(raw).toEpochMilli()
-                    } catch (e: Exception) {
-                        LocalDateTime.parse(raw.take(19)).atZone(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                    }
-                } else if (raw.length >= 10) {
-                    LocalDate.parse(raw.take(10)).atStartOfDay(ZoneId.systemDefault()).toInstant().toEpochMilli()
-                } else {
-                    0L
-                }
-            } catch (e: Exception) {
-                0L
-            }
-        }
+        fun parseToEpochMillis(raw: String?): Long =
+            com.cinetrack.util.DateTimeUtils.parseToEpochMillis(raw)
 
         private fun formatTvEpisodes(
             @Suppress("UNUSED_PARAMETER") historicalEpisodes: String?,

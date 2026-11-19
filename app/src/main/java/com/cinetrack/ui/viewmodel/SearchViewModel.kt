@@ -61,7 +61,7 @@ data class SearchUiState(
     val moodVibeDescription: String? = null,
     val moodRemainingQuota: Int = 3,
     val moodErrorMessage: String? = null,
-    val isMoodAiMode: Boolean = true,
+    val isMoodAiMode: Boolean = false,
     val moodHistory: ImmutableList<MoodHistoryEntry> = persistentListOf(),
     val isMoodSearchSubmitted: Boolean = false
 )
@@ -86,6 +86,10 @@ class SearchViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow(SearchUiState())
     val uiState: StateFlow<SearchUiState> = _uiState.asStateFlow()
+
+    private val searchMoodDelegate by lazy {
+        SearchMoodDelegate(moodSearchRepository, moodHistoryRepository, preferenceRepository)
+    }
     
     private var rawResults: List<TMDBSearchResult> = emptyList()
     private var rawTrendingMovies: List<TMDBSearchResult> = emptyList()
@@ -244,131 +248,144 @@ class SearchViewModel @Inject constructor(
     }
 
     fun resetQuotaForDev() {
-        viewModelScope.launch {
-            preferenceRepository.setMoodSearchesRemaining(3)
-            _uiState.update { it.copy(moodRemainingQuota = 3, isMoodAiMode = true) }
-        }
+        searchMoodDelegate.resetQuotaForDev(viewModelScope, _uiState)
     }
 
     fun submitMoodSearch(queryOverride: String? = null) {
-        val q = (queryOverride ?: _uiState.value.query).trim()
-        if (q.isNotEmpty()) {
+        searchMoodDelegate.submitMoodSearch(queryOverride, _uiState) { q ->
             executeMoodSearch(q, bypassCache = true)
         }
     }
 
     fun setMoodAiMode(useAi: Boolean) {
-        val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
-        if (isGuest) return
-        val remaining = _uiState.value.moodRemainingQuota
-        val currentQuery = _uiState.value.query.trim()
-
-        // 1. Se la query corrente ha già risultati salvati in cache per la modalità richiesta, caricali a costo zero
-        if (_uiState.value.category == "mood" && currentQuery.isNotEmpty()) {
-            val cached = moodHistoryRepository.getCachedEntry(currentQuery, isAi = useAi)
-            if (cached != null) {
-                val cachedMovies = if (useAi) cached.resolveAiResults() else cached.resolveAlgoResults()
-                if (cachedMovies.isNotEmpty()) {
-                    searchJob?.cancel()
-                    rawResults = cachedMovies
-                    applyStateFilters()
-                    _uiState.update {
-                        it.copy(
-                            isMoodAiMode = useAi,
-                            isLoading = false,
-                            isEndReached = true,
-                            moodVibeTitle = if (useAi) cached.resolveAiVibeTitle() else cached.resolveAlgoVibeTitle(),
-                            moodVibeDescription = if (useAi) cached.resolveAiVibeDescription() else cached.resolveAlgoVibeDescription(),
-                            moodErrorMessage = null
-                        )
-                    }
-                    return
+        searchMoodDelegate.setMoodAiMode(
+            useAi = useAi,
+            uiState = _uiState,
+            onApplyCachedMovies = { cachedMovies, isMoodAi, vibeTitle, vibeDesc ->
+                searchJob?.cancel()
+                rawResults = cachedMovies
+                applyStateFilters()
+                _uiState.update {
+                    it.copy(
+                        isMoodAiMode = isMoodAi,
+                        isLoading = false,
+                        isEndReached = true,
+                        moodVibeTitle = vibeTitle,
+                        moodVibeDescription = vibeDesc,
+                        moodErrorMessage = null,
+                        isMoodSearchSubmitted = true
+                    )
                 }
-            }
-        }
-
-        // 2. Se non ci sono risultati salvati in cache e si tenta di passare all'IA senza quota
-        if (useAi && remaining <= 0) {
-            emitMessage(UiText.StringResource(R.string.search_mood_exhausted_notice))
-            return
-        }
-
-        _uiState.update { it.copy(isMoodAiMode = useAi) }
+            },
+            onEmitMessage = { emitMessage(it) }
+        )
     }
 
     fun executeMoodSearch(query: String, bypassCache: Boolean = false) {
-        val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
-        if (isGuest) return
-        val sanitized = query.trim().take(1000)
-        if (sanitized.isBlank()) return
         searchJob?.cancel()
-        rawResults = emptyList()
-        applyStateFilters()
-        _uiState.update { 
-            it.copy(
-                query = sanitized,
-                category = "mood",
-                isLoading = true, 
-                errorMessage = null,
-                moodErrorMessage = null,
-                isMoodSearchSubmitted = true
-            ) 
-        }
-        searchJob = viewModelScope.launch {
-            val contentLang = _uiState.value.preferences.contentLanguage
-            val targetLanguage = if (contentLang == "system") {
-                java.util.Locale.getDefault().toLanguageTag()
-            } else {
-                contentLang
-            }
-            val useAi = _uiState.value.isMoodAiMode && _uiState.value.moodRemainingQuota > 0
-            val result = moodSearchRepository.searchMoviesByMood(
-                sanitized,
-                language = targetLanguage,
-                forceLocal = !useAi,
-                bypassCache = bypassCache
-            )
-            result.onSuccess { data ->
-                rawResults = data.movies
+        searchJob = searchMoodDelegate.executeMoodSearch(
+            query = query,
+            bypassCache = bypassCache,
+            scope = viewModelScope,
+            uiState = _uiState,
+            onPreSearch = {
+                rawResults = emptyList()
                 applyStateFilters()
-                _uiState.update { 
+            },
+            onSuccess = { movies, isQuotaFallback, isNetworkFallback, vibeTitle, vibeDesc ->
+                rawResults = movies
+                applyStateFilters()
+                _uiState.update {
                     it.copy(
                         isLoading = false,
                         isEndReached = true,
-                        isMoodAiMode = if (data.isQuotaFallback) false else it.isMoodAiMode,
-                        moodVibeTitle = data.vibeTitle,
-                        moodVibeDescription = data.vibeDescription,
+                        isMoodAiMode = if (isQuotaFallback) false else it.isMoodAiMode,
+                        moodVibeTitle = vibeTitle,
+                        moodVibeDescription = vibeDesc,
                         moodErrorMessage = null
                     )
                 }
-                if (data.isQuotaFallback) {
+                if (isQuotaFallback) {
                     emitMessage(UiText.StringResource(R.string.search_mood_quota_fallback_notice))
-                } else if (data.isNetworkFallback) {
+                } else if (isNetworkFallback) {
                     emitMessage(UiText.StringResource(R.string.search_mood_network_fallback_notice))
                 }
-            }.onFailure { ex ->
+            },
+            onFailure = { errorMsg ->
                 rawResults = emptyList()
                 applyStateFilters()
                 _uiState.update {
                     it.copy(
                         isLoading = false,
                         isEndReached = true,
-                        moodErrorMessage = ex.message ?: "Errore durante la ricerca Mood"
+                        moodErrorMessage = errorMsg
                     )
                 }
             }
-        }
+        )
     }
 
 
+    fun clearQuery() {
+        searchJob?.cancel()
+        keywordSearchJob?.cancel()
+        rawDynamicKeywords = emptyList()
+        if (_uiState.value.category == "mood") {
+            clearMoodResults()
+            _uiState.update { it.copy(query = "") }
+        } else {
+            _uiState.update { it.copy(query = "") }
+            performSearch()
+        }
+    }
+
+    private fun clearMoodResults() {
+        searchJob?.cancel()
+        rawResults = emptyList()
+        applyStateFilters()
+        _uiState.update {
+            it.copy(
+                isLoading = false,
+                isEndReached = true,
+                moodVibeTitle = null,
+                moodVibeDescription = null,
+                moodErrorMessage = null,
+                isMoodSearchSubmitted = false
+            )
+        }
+    }
+
     fun onQueryChanged(newQuery: String) {
         val sanitizedQuery = newQuery.take(1000)
-        if (_uiState.value.query == sanitizedQuery) return
-        _uiState.update { 
-            it.copy(
-                query = sanitizedQuery,
-                isMoodSearchSubmitted = if (it.category == "mood") false else it.isMoodSearchSubmitted
-            ) 
+        if (_uiState.value.query == sanitizedQuery) {
+            if (_uiState.value.category == "mood" && sanitizedQuery.isBlank() && rawResults.isNotEmpty()) {
+                clearMoodResults()
+            }
+            return
+        }
+
+        if (_uiState.value.category == "mood") {
+            if (sanitizedQuery.isBlank()) {
+                clearMoodResults()
+                _uiState.update { it.copy(query = sanitizedQuery) }
+            } else {
+                if (_uiState.value.isMoodSearchSubmitted || rawResults.isNotEmpty()) {
+                    clearMoodResults()
+                }
+                _uiState.update { 
+                    it.copy(
+                        query = sanitizedQuery,
+                        isMoodSearchSubmitted = false
+                    ) 
+                }
+            }
+        } else {
+            _uiState.update { 
+                it.copy(
+                    query = sanitizedQuery,
+                    isMoodSearchSubmitted = false
+                ) 
+            }
         }
         
         if (sanitizedQuery.isNotEmpty() && _uiState.value.sortConfig.selectedKeywords.isNotEmpty()) {
@@ -376,7 +393,7 @@ class SearchViewModel @Inject constructor(
         }
         
         keywordSearchJob?.cancel()
-        if (sanitizedQuery.length >= 3) {
+        if (sanitizedQuery.length >= 3 && _uiState.value.category != "mood") {
             keywordSearchJob = viewModelScope.launch {
                 kotlinx.coroutines.delay(400)
                 try {
@@ -404,18 +421,29 @@ class SearchViewModel @Inject constructor(
         val isGuest = com.google.firebase.auth.FirebaseAuth.getInstance().currentUser?.isAnonymous != false
         if (newCategory == "mood" && isGuest) return
         _uiState.update { it.copy(category = newCategory) }
-        // Reset selected genres on category change to avoid cross-contamination of movie/tv genre IDs
-        _uiState.update { it.copy(sortConfig = _uiState.value.sortConfig.copy(selectedGenres = emptyList())) }
-        if (newCategory == "mood") {
-            rawResults = emptyList()
-            applyStateFilters()
+
+        if (newCategory == "mood" || newCategory == "person" || newCategory == "collection") {
+            // Modalità senza filtri tradizionali: reset completo di generi, parole chiave, decadi e ordinamento
             _uiState.update { 
                 it.copy(
-                    isMoodAiMode = if (it.moodRemainingQuota <= 0) false else it.isMoodAiMode,
-                    moodVibeTitle = null,
-                    moodVibeDescription = null,
-                    moodErrorMessage = null,
-                    isMoodSearchSubmitted = false
+                    sortConfig = it.sortConfig.copy(
+                        selectedGenres = emptyList(),
+                        selectedKeywords = emptyList(),
+                        selectedDecades = emptyList(),
+                        sortType = "popularity"
+                    )
+                ) 
+            }
+        } else {
+            // Reset selected genres on category change to avoid cross-contamination of movie/tv genre IDs
+            _uiState.update { it.copy(sortConfig = it.sortConfig.copy(selectedGenres = emptyList())) }
+        }
+
+        if (newCategory == "mood") {
+            clearMoodResults()
+            _uiState.update { 
+                it.copy(
+                    isMoodAiMode = if (it.moodRemainingQuota <= 0) false else it.isMoodAiMode
                 ) 
             }
         }
@@ -439,17 +467,7 @@ class SearchViewModel @Inject constructor(
             if (query.isNotBlank() && query.length >= 3) {
                 executeMoodSearch(query)
             } else {
-                rawResults = emptyList()
-                applyStateFilters()
-                _uiState.update { 
-                    it.copy(
-                        isLoading = false, 
-                        isEndReached = true,
-                        moodVibeTitle = null, 
-                        moodVibeDescription = null,
-                        moodErrorMessage = null
-                    ) 
-                }
+                clearMoodResults()
             }
             return
         }
@@ -1079,48 +1097,35 @@ class SearchViewModel @Inject constructor(
 
     fun selectMoodHistory(entry: MoodHistoryEntry) {
         searchJob?.cancel()
-        val currentMode = _uiState.value.isMoodAiMode
-        val resolvedMode = when {
-            currentMode && entry.hasAi() -> true
-            !currentMode && entry.hasAlgo() -> false
-            entry.hasAi() -> true
-            else -> false
-        }
-        if (!resolvedMode && !entry.hasAlgo()) {
-            _uiState.update {
-                it.copy(
-                    query = entry.query.take(1000),
-                    category = "mood",
-                    isMoodAiMode = false
-                )
+        searchMoodDelegate.selectMoodHistory(
+            entry = entry,
+            uiState = _uiState,
+            onApplyResult = { movies, isAi, vibeTitle, vibeDesc ->
+                rawResults = movies
+                applyStateFilters()
+                _uiState.update {
+                    it.copy(
+                        query = entry.query.take(1000),
+                        category = "mood",
+                        isMoodAiMode = isAi,
+                        isLoading = false,
+                        isEndReached = true,
+                        moodVibeTitle = vibeTitle,
+                        moodVibeDescription = vibeDesc,
+                        moodErrorMessage = null,
+                        isMoodSearchSubmitted = true
+                    )
+                }
+            },
+            onFallbackSearch = { query ->
+                executeMoodSearch(query)
             }
-            executeMoodSearch(entry.query.take(1000))
-            return
-        }
-        val targetMovies = if (resolvedMode) entry.resolveAiResults() else entry.resolveAlgoResults()
-        rawResults = targetMovies
-        applyStateFilters()
-        _uiState.update {
-            it.copy(
-                query = entry.query.take(1000),
-                category = "mood",
-                isMoodAiMode = resolvedMode,
-                isLoading = false,
-                isEndReached = true,
-                moodVibeTitle = if (resolvedMode) entry.resolveAiVibeTitle() else entry.resolveAlgoVibeTitle(),
-                moodVibeDescription = if (resolvedMode) entry.resolveAiVibeDescription() else entry.resolveAlgoVibeDescription(),
-                moodErrorMessage = null
-            )
-        }
+        )
     }
 
-    fun deleteMoodHistory(query: String) {
-        moodHistoryRepository.deleteEntry(query)
-    }
+    fun deleteMoodHistory(query: String) = searchMoodDelegate.deleteMoodHistory(query)
 
-    fun clearMoodHistory() {
-        moodHistoryRepository.clearHistory()
-    }
+    fun clearMoodHistory() = searchMoodDelegate.clearMoodHistory()
 
     fun updateRating(movie: Movie, rating: Double) = mediaActionDelegate.updateRating(viewModelScope, movie, rating)
 
@@ -1171,27 +1176,9 @@ class SearchViewModel @Inject constructor(
         }
     }
 
-    fun toggleMoodRecentExpanded() {
-        val current = _uiState.value.preferences.isMoodRecentExpanded
-        viewModelScope.launch {
-            try {
-                preferenceRepository.updateMoodRecentExpanded(!current)
-            } catch (e: Exception) {
-                android.util.Log.e("SearchViewModel", "Error updating mood recent expanded preference", e)
-            }
-        }
-    }
+    fun toggleMoodRecentExpanded() = searchMoodDelegate.toggleMoodRecentExpanded(viewModelScope, _uiState)
 
-    fun toggleMoodInspirationsExpanded() {
-        val current = _uiState.value.preferences.isMoodInspirationsExpanded
-        viewModelScope.launch {
-            try {
-                preferenceRepository.updateMoodInspirationsExpanded(!current)
-            } catch (e: Exception) {
-                android.util.Log.e("SearchViewModel", "Error updating mood inspirations expanded preference", e)
-            }
-        }
-    }
+    fun toggleMoodInspirationsExpanded() = searchMoodDelegate.toggleMoodInspirationsExpanded(viewModelScope, _uiState)
 }
 
 

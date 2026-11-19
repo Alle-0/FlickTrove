@@ -84,6 +84,7 @@
     <string name="detail_no_trailers">Немає доступних відео</string>
     <string name="detail_add_subgenres">+ Піджанри</string>
     <string name="detail_hide_subgenres">- Сховати</string>
+    <string name="detail_show_all_subgenres">+ Всі (%d)</string>
     <string name="detail_streaming">СТРІМІНГ</string>
     <string name="detail_rent_buy">ОРЕНДА ТА ПОКУПКА</string>
     <string name="detail_season">Сезон</string>
@@ -2178,6 +2179,7 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Опишіть власними словами, що ви хотите подивитися. ШІ підбере ідеальні фільми з усього каталогу TMDB.</string>
     <string name="search_mood_iris_intro_text">Опишіть власними словами, що ви хотите подивитися. IRIS підбере ідеальні фільми з усього каталогу TMDB.</string>
+    <string name="search_mood_tip_detail">Порада: що більше деталей про сюжет, атмосферу чи персонажів ви опишете, то точнішими будуть результати.</string>
     <string name="search_mood_exhausted_notice">Ви використали всі 3 пошуків за настроєм на сьогодні. Вони відновляться опівночі!</string>
     <string name="search_mood_exhausted_title">Денний ліміт пошуку з ШІ вичерпано</string>
     <string name="search_mood_switch_to_algo">Перейти на IRIS (необмежено)</string>
@@ -2214,4 +2216,19 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="badge_iris_search_cat">ПОШУК ЗА НАСТРОЄМ</string>
     <string name="badge_iris_search_desc">Ви довірилися баченню: додали до списку до перегляду фільм, знайдений за допомогою IRIS або ШІ.</string>
     <string name="trophy_unit_searches">пошуків</string>
+
+    <string name="semantic_affinity_suffix">спорідненість</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Режисер: %1$s</string>
+    <string name="semantic_reason_score_by">Музика: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Оператор: %1$s</string>
+    <string name="semantic_reason_produced_by">Продюсер: %1$s</string>
+    <string name="semantic_reason_cinema_of">Кінематограф %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Високо оцінено критиками (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Класика жанру (%1$s)</string>
+    <string name="semantic_reason_plot_match">Тематична відповідність сюжету</string>
+    <string name="semantic_reason_atmosphere">Атмосфера: %1$s</string>
+    <string name="semantic_reason_written_by">Сценарій: %1$s</string>
 </resources>

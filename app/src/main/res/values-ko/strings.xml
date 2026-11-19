@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">재생 가능한 영상이 없습니다</string>
     <string name="detail_add_subgenres">+ 서브장르</string>
     <string name="detail_hide_subgenres">- 숨기기</string>
+    <string name="detail_show_all_subgenres">+ 모두 (%d)</string>
     <string name="detail_streaming">스트리밍</string>
     <string name="detail_rent_buy">대여 또는 구매</string>
     <string name="detail_season">시즌</string>
@@ -2198,6 +2199,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. AI가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
     <string name="search_mood_iris_intro_text">보고 싶은 영화의 느낌을 자유롭게 적어보세요. IRIS가 전체 TMDB 카탈로그에서 알맞은 영화를 찾아냅니다.</string>
+    <string name="search_mood_tip_detail">팁: 줄거리, 분위기, 등장인물에 대한 설명이 자세할수록 더 정확한 결과를 찾을 수 있습니다.</string>
     <string name="search_mood_exhausted_notice">오늘 제공된 5회의 무드 검색을 모두 사용했습니다. 자정에 충전됩니다!</string>
     <string name="search_mood_exhausted_title">오늘의 AI 검색 한도 소진</string>
     <string name="search_mood_switch_to_algo">IRIS으로 전환 (무제한)</string>
@@ -2234,4 +2236,19 @@
     <string name="badge_iris_search_cat">무드 탐색</string>
     <string name="badge_iris_search_desc">시각을 넓혔습니다: IRIS나 AI로 발견한 영화를 보고 싶은 목록에 추가했습니다。</string>
     <string name="trophy_unit_searches">회 검색</string>
+
+    <string name="semantic_affinity_suffix">연관성</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">감독: %1$s</string>
+    <string name="semantic_reason_score_by">음악: %1$s</string>
+    <string name="semantic_reason_cinematography_by">촬영: %1$s</string>
+    <string name="semantic_reason_produced_by">제작: %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s 시네마</string>
+    <string name="semantic_reason_critically_acclaimed">평단의 극찬을 받은 명작 (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">장르의 고전 (%1$s)</string>
+    <string name="semantic_reason_plot_match">줄거리 테마 일치</string>
+    <string name="semantic_reason_atmosphere">분위기: %1$s</string>
+    <string name="semantic_reason_written_by">각본: %1$s</string>
 </resources>

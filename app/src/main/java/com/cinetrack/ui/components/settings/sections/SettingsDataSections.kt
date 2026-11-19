@@ -38,6 +38,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import com.cinetrack.ui.components.mascot.IrisMascot
+import com.cinetrack.ui.components.mascot.IrisMood
 import com.cinetrack.ui.utils.mirrorInRtl
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -586,6 +588,28 @@ fun SettingsFooterSection(
             }
         }
 
+        Spacer(modifier = Modifier.height(10.dp))
+
+        var mascotTapCount by remember { mutableIntStateOf(0) }
+        var currentMood by remember { mutableStateOf(IrisMood.IDLE) }
+
+        IrisMascot(
+            mood = currentMood,
+            size = 84.dp,
+            accentColor = accentColor,
+            onClick = {
+                mascotTapCount++
+                currentMood = when (mascotTapCount % 4) {
+                    1 -> IrisMood.DELIGHTED
+                    2 -> IrisMood.TYPING
+                    3 -> IrisMood.EMPTY
+                    else -> IrisMood.IDLE
+                }
+            }
+        )
+
+        Spacer(modifier = Modifier.height(14.dp))
+
         Text(
             text = "FlickTrove v${com.cinetrack.BuildConfig.VERSION_NAME}",
             style = MaterialTheme.typography.bodyMedium.copy(
@@ -702,13 +726,13 @@ fun SettingsEndCreditsBox(
                     fontStyle = androidx.compose.ui.text.font.FontStyle.Italic
                 ),
                 color = OnSurfaceMuted,
-                modifier = Modifier.padding(horizontal = 4.dp, vertical = 6.dp)
+                modifier = Modifier.padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 0.dp)
             )
         } else {
             Column(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .padding(horizontal = 4.dp, vertical = 4.dp)
+                    .padding(start = 4.dp, end = 4.dp, top = 2.dp, bottom = 0.dp)
             ) {
                 Text(
                     text = stringResource(R.string.credits_producers_desc),
@@ -728,12 +752,12 @@ fun SettingsEndCreditsBox(
                     supporters.forEach { name ->
                         Box(
                             modifier = Modifier
-                                .clip(CircleShape)
+                                .clip(RoundedCornerShape(16.dp))
                                 .background(Color(0xFF1E202A))
                                 .border(
                                     width = 1.dp,
                                     color = Color(0xFFEAB308).copy(alpha = 0.38f),
-                                    shape = CircleShape
+                                    shape = RoundedCornerShape(16.dp)
                                 )
                                 .padding(horizontal = 14.dp, vertical = 7.dp)
                         ) {

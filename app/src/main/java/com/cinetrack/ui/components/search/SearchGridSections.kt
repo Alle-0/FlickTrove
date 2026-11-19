@@ -89,295 +89,122 @@ import com.cinetrack.ui.utils.horizontalFadingEdges
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.lazy.rememberLazyListState
 
+
+
 @OptIn(ExperimentalAnimationApi::class)
-@Composable
-fun SearchGridMovieItem(
-    movie: Movie,
-    movieStatus: Movie?,
-    folderColors: List<Color>,
+fun LazyGridScope.searchTrendingMediaSection(
+    trendingItems: List<TMDBSearchResult>,
+    isLoading: Boolean,
+    favorites: List<Movie>,
+    movieFolderColors: Map<String, List<String>>,
+    preferences: UserPreferences,
+    animatedMovieIds: MutableSet<String>?,
     columns: Int,
+    movieSpan: Int,
     cardWidth: Dp,
-    showFolderBookmarks: Boolean,
-    hasAnimatedSet: MutableSet<String>?,
     animatedVisibilityScope: AnimatedVisibilityScope?,
-    staggerIndex: Int,
     keyboardController: SoftwareKeyboardController?,
-    aiReason: String? = null,
+    favoritesMap: Map<String, Movie>? = null,
+    precomputedFolderColors: Map<String, List<Color>>? = null,
+    keyPrefix: String = "trending",
     onMovieClick: (Movie) -> Unit,
     onToggleFavorite: (Movie) -> Unit,
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit,
-    modifier: Modifier = Modifier
+    onDiscoverMore: (() -> Unit)? = null
 ) {
-    Box(
-        modifier = modifier.fillMaxWidth(),
-        contentAlignment = Alignment.Center
-    ) {
-        AnimatedContent(
-            targetState = columns == 1,
-            transitionSpec = {
-                (fadeIn(animationSpec = tween(200, delayMillis = 40)) + scaleIn(initialScale = 0.94f, animationSpec = tween(200, delayMillis = 40)))
-                    .togetherWith(fadeOut(animationSpec = tween(120)) + scaleOut(targetScale = 0.94f, animationSpec = tween(120)))
-            },
-            label = "SearchGridCardLayoutTransition"
-        ) { isList ->
-            if (isList) {
-                MovieListCard(
-                    movie = movie,
-                    modifier = Modifier.fillMaxWidth(),
-                    isFavorite = movieStatus?.favorite ?: false,
-                    isWatched = movieStatus?.watched ?: false,
-                    isReminder = movieStatus?.reminder ?: false,
-                    progress = movieStatus?.progress?.toFloat() ?: 0f,
-                    folderColors = folderColors,
-                    showFolderBookmarks = showFolderBookmarks,
-                    hasAnimatedSet = hasAnimatedSet,
-                    staggerIndex = staggerIndex,
-                    aiReason = aiReason,
-                    onPress = { 
-                        keyboardController?.hide()
-                        onMovieClick(movie) 
-                    },
-                    onAction = { onToggleFavorite(movie) },
-                    onLongPress = { m, pressOffset, cardPos ->
-                        onLongPress(m, pressOffset, cardPos)
-                    },
-                    onMessage = { onEmitMessage(it) }
+    val favMap = favoritesMap ?: favorites.associateBy { "${it.mediaType}_${it.id}" }
+    val colorsMap = precomputedFolderColors ?: movieFolderColors.mapValues { entry -> entry.value.map { it.toComposeColor() } }
+
+    if (trendingItems.isNotEmpty() || isLoading) {
+        item(span = { GridItemSpan(12) }) {
+            Column {
+                Text(
+                    text = stringResource(R.string.search_trending_now),
+                    color = MaterialTheme.colorScheme.onSurface,
+                    fontSize = 20.sp,
+                    fontWeight = FontWeight.Bold,
+                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
                 )
-            } else {
-                if (!aiReason.isNullOrBlank()) {
-                    Column(
-                        horizontalAlignment = Alignment.CenterHorizontally,
-                        modifier = Modifier.width(cardWidth)
-                    ) {
-                        MovieCard(
-                            movie = movie,
-                            cardWidth = cardWidth,
-                            isFavorite = movieStatus?.favorite ?: false,
-                            isWatched = movieStatus?.watched ?: false,
-                            isReminder = movieStatus?.reminder ?: false,
-                            progress = movieStatus?.progress?.toFloat() ?: 0f,
-                            personalRating = movieStatus?.personalRating,
-                            folderColors = folderColors,
-                            showFolderBookmarks = showFolderBookmarks,
-                            hasAnimatedSet = hasAnimatedSet,
-                            animatedVisibilityScope = animatedVisibilityScope,
-                            staggerIndex = staggerIndex,
-                            onPress = { 
-                                keyboardController?.hide()
-                                onMovieClick(movie) 
-                            },
-                            onAction = { onToggleFavorite(movie) },
-                            onLongPress = { m, pressOffset, cardPos ->
-                                onLongPress(m, pressOffset, cardPos)
-                            },
-                            onMessage = { onEmitMessage(it) }
-                        )
-                        Spacer(modifier = Modifier.height(4.dp))
-                        Box(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .background(Color.White.copy(alpha = 0.07f), RoundedCornerShape(8.dp))
-                                .padding(horizontal = 7.dp, vertical = 5.dp)
-                        ) {
-                            Text(
-                                text = aiReason,
-                                style = MaterialTheme.typography.bodySmall.copy(
-                                    fontSize = 10.sp,
-                                    fontStyle = FontStyle.Italic,
-                                    lineHeight = 13.5.sp
-                                ),
-                                color = Color.White.copy(alpha = 0.90f),
-                                maxLines = 4,
-                                overflow = TextOverflow.Ellipsis
-                            )
-                        }
-                    }
-                } else {
-                    MovieCard(
+            }
+        }
+        if (trendingItems.isNotEmpty()) {
+            itemsIndexed(
+                items = trendingItems.take(6),
+                key = { _, item -> "${keyPrefix}_${item.id}" },
+                span = { _, _ -> GridItemSpan(movieSpan) }
+            ) { index, item ->
+                val baseMovie = when (item) {
+                    is TMDBSearchResult.MovieResult -> Movie(
+                        id = item.id,
+                        mediaType = "movie",
+                        title = item.title,
+                        posterPath = item.posterPath,
+                        backdropPath = item.backdropPath,
+                        voteAverage = item.voteAverage,
+                        releaseDate = item.releaseDate,
+                        overview = item.overview,
+                        genreIds = item.genreIds
+                    )
+                    is TMDBSearchResult.TvResult -> Movie(
+                        id = item.id,
+                        mediaType = "tv",
+                        name = item.name,
+                        posterPath = item.posterPath,
+                        backdropPath = item.backdropPath,
+                        voteAverage = item.voteAverage,
+                        firstAirDate = item.firstAirDate,
+                        overview = item.overview,
+                        genreIds = item.genreIds
+                    )
+                    else -> null
+                }
+                if (baseMovie != null) {
+                    val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
+                    val movie = movieStatus ?: baseMovie
+                    val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
+                    SearchGridMovieItem(
+                        modifier = Modifier.animateItem(
+                            fadeInSpec = tween(280),
+                            placementSpec = spring(
+                                dampingRatio = Spring.DampingRatioLowBouncy,
+                                stiffness = Spring.StiffnessMediumLow
+                            ),
+                            fadeOutSpec = tween(200)
+                        ),
                         movie = movie,
-                        cardWidth = cardWidth,
-                        isFavorite = movieStatus?.favorite ?: false,
-                        isWatched = movieStatus?.watched ?: false,
-                        isReminder = movieStatus?.reminder ?: false,
-                        progress = movieStatus?.progress?.toFloat() ?: 0f,
-                        personalRating = movieStatus?.personalRating,
+                        movieStatus = movieStatus,
                         folderColors = folderColors,
-                        showFolderBookmarks = showFolderBookmarks,
-                        hasAnimatedSet = hasAnimatedSet,
+                        columns = columns,
+                        cardWidth = cardWidth,
+                        showFolderBookmarks = preferences.showFolderBookmarks,
+                        hasAnimatedSet = animatedMovieIds,
                         animatedVisibilityScope = animatedVisibilityScope,
-                        staggerIndex = staggerIndex,
-                        onPress = { 
-                            keyboardController?.hide()
-                            onMovieClick(movie) 
-                        },
-                        onAction = { onToggleFavorite(movie) },
-                        onLongPress = { m, pressOffset, cardPos ->
-                            onLongPress(m, pressOffset, cardPos)
-                        },
-                        onMessage = { onEmitMessage(it) }
+                        staggerIndex = index,
+                        keyboardController = keyboardController,
+                        onMovieClick = onMovieClick,
+                        onToggleFavorite = onToggleFavorite,
+                        onLongPress = onLongPress,
+                        onEmitMessage = onEmitMessage
                     )
                 }
             }
-        }
-    }
-}
-
-@Composable
-fun DiscoverMoreTrendingButton(
-    onClick: () -> Unit
-) {
-    val accentColor = MaterialTheme.colorScheme.primary
-    Box(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(top = 16.dp, bottom = 28.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        Row(
-            modifier = Modifier
-                .bounceClick(onClick = onClick)
-                .background(
-                    color = accentColor.copy(alpha = 0.12f),
-                    shape = androidx.compose.foundation.shape.CircleShape
-                )
-                .border(
-                    width = 1.dp,
-                    color = accentColor.copy(alpha = 0.35f),
-                    shape = androidx.compose.foundation.shape.CircleShape
-                )
-                .padding(vertical = 8.dp, horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Center
-        ) {
-            Text(
-                text = stringResource(R.string.search_discover_more),
-                color = accentColor,
-                fontSize = 13.sp,
-                fontWeight = FontWeight.SemiBold
-            )
-            Spacer(modifier = Modifier.width(6.dp))
-            Icon(
-                imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                contentDescription = null,
-                tint = accentColor,
-                modifier = Modifier.size(13.dp).mirrorInRtl()
-            )
-        }
-    }
-}
-
-@Composable
-fun DiscoverMoreTrendingCard(
-    cardWidth: Dp,
-    columns: Int,
-    onClick: () -> Unit
-) {
-    val accentColor = MaterialTheme.colorScheme.primary
-    if (columns == 1) {
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(108.dp)
-                .bounceClick(onClick = onClick)
-                .background(
-                    color = Color(0xFF191924),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .border(
-                    width = 1.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            accentColor.copy(alpha = 0.5f),
-                            accentColor.copy(alpha = 0.12f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Row(
-                verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.Center
+            if (onDiscoverMore != null) {
+                item(span = { GridItemSpan(12) }) {
+                    DiscoverMoreTrendingButton(onClick = onDiscoverMore)
+                }
+            }
+        } else if (isLoading) {
+            items(
+                count = 6,
+                contentType = { "skeleton" },
+                span = { GridItemSpan(movieSpan) }
             ) {
-                Box(
-                    modifier = Modifier
-                        .size(44.dp)
-                        .background(accentColor.copy(alpha = 0.16f), CircleShape)
-                        .border(1.dp, accentColor.copy(alpha = 0.45f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(18.dp).mirrorInRtl()
-                    )
-                }
-                Spacer(modifier = Modifier.width(14.dp))
-                Text(
-                    text = stringResource(R.string.search_discover_more),
-                    color = Color.White,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
-            }
-        }
-    } else {
-        val cardHeight = cardWidth * 1.5f
-        Box(
-            modifier = Modifier
-                .width(cardWidth)
-                .height(cardHeight)
-                .bounceClick(onClick = onClick)
-                .background(
-                    color = Color(0xFF191924),
-                    shape = RoundedCornerShape(12.dp)
-                )
-                .border(
-                    width = 1.2.dp,
-                    brush = Brush.linearGradient(
-                        colors = listOf(
-                            accentColor.copy(alpha = 0.55f),
-                            accentColor.copy(alpha = 0.1f)
-                        )
-                    ),
-                    shape = RoundedCornerShape(12.dp)
-                ),
-            contentAlignment = Alignment.Center
-        ) {
-            Column(
-                horizontalAlignment = Alignment.CenterHorizontally,
-                verticalArrangement = Arrangement.Center,
-                modifier = Modifier.padding(12.dp)
-            ) {
-                Box(
-                    modifier = Modifier
-                        .size(56.dp)
-                        .background(accentColor.copy(alpha = 0.18f), CircleShape)
-                        .border(1.5.dp, accentColor.copy(alpha = 0.5f), CircleShape),
-                    contentAlignment = Alignment.Center
-                ) {
-                    Icon(
-                        imageVector = ImageVector.vectorResource(id = R.drawable.ic_right),
-                        contentDescription = null,
-                        tint = accentColor,
-                        modifier = Modifier.size(24.dp).mirrorInRtl()
-                    )
-                }
-                Spacer(modifier = Modifier.height(16.dp))
-                Text(
-                    text = stringResource(R.string.search_discover_more),
-                    color = Color.White,
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.ExtraBold,
-                    textAlign = TextAlign.Center
-                )
+                MovieCardSkeleton(width = cardWidth)
             }
         }
     }
 }
-
 
 @OptIn(ExperimentalAnimationApi::class)
 fun LazyGridScope.searchTrendingMoviesSection(
@@ -399,85 +226,27 @@ fun LazyGridScope.searchTrendingMoviesSection(
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit,
     onDiscoverMore: (() -> Unit)? = null
-) {
-    val favMap = favoritesMap ?: favorites.associateBy { "${it.mediaType}_${it.id}" }
-    val colorsMap = precomputedFolderColors ?: movieFolderColors.mapValues { entry -> entry.value.map { it.toComposeColor() } }
-
-    if (trendingMovies.isNotEmpty() || isLoading) {
-        item(span = { GridItemSpan(12) }) {
-            Column {
-                Text(
-                    text = stringResource(R.string.search_trending_now),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                )
-            }
-        }
-        if (trendingMovies.isNotEmpty()) {
-            itemsIndexed(
-                items = trendingMovies.take(6),
-                key = { _, item -> "trending_movie_${item.id}" },
-                span = { _, _ -> GridItemSpan(movieSpan) }
-            ) { index, item ->
-                if (item is TMDBSearchResult.MovieResult) {
-                    val baseMovie = Movie(
-                        id = item.id,
-                        mediaType = "movie",
-                        title = item.title,
-                        posterPath = item.posterPath,
-                        backdropPath = item.backdropPath,
-                        voteAverage = item.voteAverage,
-                        releaseDate = item.releaseDate,
-                        overview = item.overview,
-                        genreIds = item.genreIds
-                    )
-                    val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
-                    val movie = movieStatus ?: baseMovie
-                    val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                    SearchGridMovieItem(
-                        modifier = Modifier.animateItem(
-                            fadeInSpec = tween(280),
-                            placementSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMediumLow
-                            ),
-                            fadeOutSpec = tween(200)
-                        ),
-                        movie = movie,
-                        movieStatus = movieStatus,
-                        folderColors = folderColors,
-                        columns = columns,
-                        cardWidth = cardWidth,
-                        showFolderBookmarks = preferences.showFolderBookmarks,
-                        hasAnimatedSet = animatedMovieIds,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        staggerIndex = index,
-                        keyboardController = keyboardController,
-                        onMovieClick = onMovieClick,
-                        onToggleFavorite = onToggleFavorite,
-                        onLongPress = onLongPress,
-                        onEmitMessage = onEmitMessage
-                    )
-                }
-            }
-            if (onDiscoverMore != null) {
-                item(span = { GridItemSpan(12) }) {
-                    DiscoverMoreTrendingButton(onClick = onDiscoverMore)
-                }
-            }
-        } else if (isLoading) {
-            items(
-                count = 6,
-                contentType = { "skeleton" },
-                span = { GridItemSpan(movieSpan) }
-            ) {
-                MovieCardSkeleton(width = cardWidth)
-            }
-        }
-    }
-}
+) = searchTrendingMediaSection(
+    trendingItems = trendingMovies,
+    isLoading = isLoading,
+    favorites = favorites,
+    movieFolderColors = movieFolderColors,
+    preferences = preferences,
+    animatedMovieIds = animatedMovieIds,
+    columns = columns,
+    movieSpan = movieSpan,
+    cardWidth = cardWidth,
+    animatedVisibilityScope = animatedVisibilityScope,
+    keyboardController = keyboardController,
+    favoritesMap = favoritesMap,
+    precomputedFolderColors = precomputedFolderColors,
+    keyPrefix = "trending_movie",
+    onMovieClick = onMovieClick,
+    onToggleFavorite = onToggleFavorite,
+    onLongPress = onLongPress,
+    onEmitMessage = onEmitMessage,
+    onDiscoverMore = onDiscoverMore
+)
 
 @OptIn(ExperimentalAnimationApi::class)
 fun LazyGridScope.searchTrendingTvSection(
@@ -499,85 +268,27 @@ fun LazyGridScope.searchTrendingTvSection(
     onLongPress: (Movie, Offset, Offset) -> Unit,
     onEmitMessage: (String) -> Unit,
     onDiscoverMore: (() -> Unit)? = null
-) {
-    val favMap = favoritesMap ?: favorites.associateBy { "${it.mediaType}_${it.id}" }
-    val colorsMap = precomputedFolderColors ?: movieFolderColors.mapValues { entry -> entry.value.map { it.toComposeColor() } }
-
-    if (trendingTv.isNotEmpty() || isLoading) {
-        item(span = { GridItemSpan(12) }) {
-            Column {
-                Text(
-                    text = stringResource(R.string.search_trending_now),
-                    color = MaterialTheme.colorScheme.onSurface,
-                    fontSize = 20.sp,
-                    fontWeight = FontWeight.Bold,
-                    modifier = Modifier.padding(top = 4.dp, bottom = 4.dp)
-                )
-            }
-        }
-        if (trendingTv.isNotEmpty()) {
-            itemsIndexed(
-                items = trendingTv.take(6),
-                key = { _, item -> "trending_tv_${item.id}" },
-                span = { _, _ -> GridItemSpan(movieSpan) }
-            ) { index, item ->
-                if (item is TMDBSearchResult.TvResult) {
-                    val baseMovie = Movie(
-                        id = item.id,
-                        mediaType = "tv",
-                        name = item.name,
-                        posterPath = item.posterPath,
-                        backdropPath = item.backdropPath,
-                        voteAverage = item.voteAverage,
-                        firstAirDate = item.firstAirDate,
-                        overview = item.overview,
-                        genreIds = item.genreIds
-                    )
-                    val movieStatus = favMap["${baseMovie.mediaType}_${baseMovie.id}"]
-                    val movie = movieStatus ?: baseMovie
-                    val folderColors = colorsMap["${movie.mediaType}_${movie.id}"] ?: emptyList()
-                    SearchGridMovieItem(
-                        modifier = Modifier.animateItem(
-                            fadeInSpec = tween(280),
-                            placementSpec = spring(
-                                dampingRatio = Spring.DampingRatioLowBouncy,
-                                stiffness = Spring.StiffnessMediumLow
-                            ),
-                            fadeOutSpec = tween(200)
-                        ),
-                        movie = movie,
-                        movieStatus = movieStatus,
-                        folderColors = folderColors,
-                        columns = columns,
-                        cardWidth = cardWidth,
-                        showFolderBookmarks = preferences.showFolderBookmarks,
-                        hasAnimatedSet = animatedMovieIds,
-                        animatedVisibilityScope = animatedVisibilityScope,
-                        staggerIndex = index,
-                        keyboardController = keyboardController,
-                        onMovieClick = onMovieClick,
-                        onToggleFavorite = onToggleFavorite,
-                        onLongPress = onLongPress,
-                        onEmitMessage = onEmitMessage
-                    )
-                }
-            }
-            if (onDiscoverMore != null) {
-                item(span = { GridItemSpan(12) }) {
-                    DiscoverMoreTrendingButton(onClick = onDiscoverMore)
-                }
-            }
-        } else if (isLoading) {
-            items(
-                count = 6,
-                contentType = { "skeleton" },
-                span = { GridItemSpan(movieSpan) }
-            ) {
-                MovieCardSkeleton(width = cardWidth)
-            }
-        }
-    }
-}
+) = searchTrendingMediaSection(
+    trendingItems = trendingTv,
+    isLoading = isLoading,
+    favorites = favorites,
+    movieFolderColors = movieFolderColors,
+    preferences = preferences,
+    animatedMovieIds = animatedMovieIds,
+    columns = columns,
+    movieSpan = movieSpan,
+    cardWidth = cardWidth,
+    animatedVisibilityScope = animatedVisibilityScope,
+    keyboardController = keyboardController,
+    favoritesMap = favoritesMap,
+    precomputedFolderColors = precomputedFolderColors,
+    keyPrefix = "trending_tv",
+    onMovieClick = onMovieClick,
+    onToggleFavorite = onToggleFavorite,
+    onLongPress = onLongPress,
+    onEmitMessage = onEmitMessage,
+    onDiscoverMore = onDiscoverMore
+)
 
 fun LazyGridScope.searchTrendingPeopleSection(
     trendingPeople: List<TMDBSearchResult>,

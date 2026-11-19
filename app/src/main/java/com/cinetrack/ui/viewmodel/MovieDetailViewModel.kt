@@ -71,6 +71,7 @@ class MovieDetailViewModel @Inject constructor(
     private val networkMonitor: com.cinetrack.util.NetworkMonitor,
     private val badgeRepository: com.cinetrack.data.repository.BadgeRepository,
     private val commentsDelegate: MovieDetailCommentsDelegate,
+    private val mediaActionDelegate: MediaActionDelegate,
     @ApplicationContext private val context: Context
 ) : ViewModel() {
 
@@ -612,43 +613,15 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     private fun updateMovieRating(movie: Movie, rating: Double?) {
-        viewModelScope.launch {
-            val effectiveRating = if (rating == 0.0) null else rating
-            val targetMediaType = movie.mediaType.ifBlank { "movie" }
-            val local = repository.getMovie(movie.id, targetMediaType)
-            val current = local ?: movie.copy(mediaType = targetMediaType)
-            val oldRating = current.personalRating
-            if (oldRating != null && effectiveRating != null && oldRating != effectiveRating) {
-                badgeRepository.recordRatingChanged(current.id)
-            }
-            current.personalRating = effectiveRating
-            current.votedAt = System.currentTimeMillis()
-            repository.saveMovie(current)
-            badgeRepository.evaluateBadgesAsync()
-        }
+        mediaActionDelegate.updateRating(viewModelScope, movie, rating)
     }
 
     private fun updateMovieNote(movie: Movie, note: String) {
-        viewModelScope.launch {
-            val targetMediaType = movie.mediaType.ifBlank { "movie" }
-            val local = repository.getMovie(movie.id, targetMediaType)
-            val current = local ?: movie.copy(mediaType = targetMediaType)
-            current.personalNote = note
-            repository.saveMovie(current)
-            badgeRepository.evaluateBadgesAsync()
-        }
+        mediaActionDelegate.updateNote(viewModelScope, movie, note)
     }
 
     private fun deleteMovieItem(movie: Movie) {
-        viewModelScope.launch {
-            movieUpdateMutex.withLock {
-                val targetMediaType = movie.mediaType.ifBlank { "movie" }
-                val target = repository.getMovie(movie.id, targetMediaType)
-                val movieToDelete = target ?: (if (movie.mediaType.isBlank()) movie.copy(mediaType = targetMediaType) else movie)
-                repository.deleteMovie(movieToDelete)
-                badgeRepository.evaluateBadgesAsync()
-            }
-        }
+        mediaActionDelegate.deleteMovie(viewModelScope, movie)
     }
 
     fun toggleRemindersMuted() {
@@ -670,21 +643,7 @@ class MovieDetailViewModel @Inject constructor(
     }
 
     private fun toggleMovieFolderMembership(movie: Movie, folder: FolderEntity) {
-        val targetMediaType = movie.mediaType.ifBlank { "movie" }
-        val itemId = "${targetMediaType}_${movie.id}"
-        val newItemIds = if (folder.itemIds.contains(itemId)) {
-            folder.itemIds - itemId
-        } else {
-            folder.itemIds + itemId
-        }
-        viewModelScope.launch {
-            repository.saveFolder(folder.copy(itemIds = newItemIds, updatedAt = Instant.now().toString()))
-            val local = repository.getMovie(movie.id, targetMediaType)
-            if (local == null) {
-                repository.saveMovie(movie.copy(mediaType = targetMediaType))
-            }
-            badgeRepository.evaluateBadgesAsync()
-        }
+        mediaActionDelegate.toggleItemInFolder(viewModelScope, folder, movie)
     }
 
     private fun toggleFolderMembership(folder: FolderEntity) {
@@ -802,26 +761,8 @@ class MovieDetailViewModel @Inject constructor(
         }
     }
 
-    private fun parseToEpochMillis(raw: String?): Long {
-        if (raw.isNullOrBlank()) return 0L
-        return try {
-            if (raw.contains("T")) {
-                try {
-                    Instant.parse(raw).toEpochMilli()
-                } catch (e: Exception) {
-                    java.time.LocalDateTime.parse(raw.take(19))
-                        .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-                }
-            } else if (raw.length >= 10) {
-                java.time.LocalDate.parse(raw.take(10))
-                    .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
-            } else {
-                0L
-            }
-        } catch (e: Exception) {
-            0L
-        }
-    }
+    private fun parseToEpochMillis(raw: String?): Long =
+        com.cinetrack.util.DateTimeUtils.parseToEpochMillis(raw)
 
     private suspend fun ensureFirstViewingCreated(
         movie: Movie, 

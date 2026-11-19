@@ -6,9 +6,12 @@ import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
 import android.hardware.SensorManager
 import androidx.compose.animation.AnimatedContent
+import androidx.compose.animation.SizeTransform
 import androidx.compose.animation.core.*
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
+import androidx.compose.animation.scaleIn
+import androidx.compose.animation.scaleOut
 import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
@@ -39,6 +42,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalHapticFeedback
+import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
@@ -47,10 +51,16 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
 import com.cinetrack.R
 import com.cinetrack.ui.utils.bounceClick
+import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
+import kotlin.math.atan2
 import kotlin.math.cos
 import kotlin.math.sin
 import kotlin.math.sqrt
@@ -71,7 +81,7 @@ enum class IrisMood {
  * IRIS: Mascotte Cinematografica Ufficiale di FlickTrove.
  *
  * Rappresenta un obiettivo cinematografico vivo (diaframma ad apertura ottica a 6 lamelle).
- * L'espressività scaturisce dalla fisica ottica:
+ * L'espressivitÃ  scaturisce dalla fisica ottica:
  * - Dilatazione e contrazione delle lamelle (f-stops da f/1.2 a f/22).
  * - "Sguardo" ottico vivente mediante catchlights (riflessi di luce interni).
  * - Calibrazione della ghiera dei diaframmi sul barilotto esterno.
@@ -83,12 +93,16 @@ fun IrisMascot(
     size: Dp = 80.dp,
     accentColor: Color = MaterialTheme.colorScheme.primary,
     gazeBiasX: Float = 0f,
+    gazeBiasY: Float = 0f,
     enableTiltParallax: Boolean = true,
     enableBacklight: Boolean = true,
+    enableTouchInteractions: Boolean = true,
+    isSaccade: Boolean = false,
+    scrollInertia: Float = 0f,
+    isFocusHunting: Boolean = false,
+    glowPadding: Dp = 0.dp,
     onClick: (() -> Unit)? = null
 ) {
-    val context = LocalContext.current
-    val density = LocalDensity.current
     val haptic = LocalHapticFeedback.current
 
     // Chiusura protettiva e ammiccamento (Wink & Touch Defense)
@@ -96,101 +110,111 @@ fun IrisMascot(
     var hasBeenTouched by remember { mutableStateOf(false) }
     val winkAnim = remember { Animatable(0f) }
 
-    // Micro-parallasse giroscopica e rilevamento scuotimento dello smartphone (Shake to Dizzy)
-    var rawTiltX by remember { mutableFloatStateOf(0f) }
-    var rawTiltY by remember { mutableFloatStateOf(0f) }
-    var isDizzy by remember { mutableStateOf(false) }
-    val dizzyAnim = remember { Animatable(0f) }
+    // Animazione dello Starnuto Ottico (Lens Dust Sneeze - Feature 4)
+    var isSneezing by remember { mutableStateOf(false) }
+    val sneezeAnim = remember { Animatable(0f) }
 
-    LaunchedEffect(isDizzy) {
-        if (isDizzy) {
-            haptic.performHapticFeedback(HapticFeedbackType.LongPress)
-            dizzyAnim.snapTo(1f)
-            dizzyAnim.animateTo(
+    // Oscillazione rapida della ghiera per il Focus Hunting incuriosito (Feature 6)
+    val focusHuntingAngle = remember { Animatable(0f) }
+    LaunchedEffect(isFocusHunting) {
+        if (isFocusHunting) {
+            haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+            focusHuntingAngle.animateTo(28f, tween(110, easing = FastOutSlowInEasing))
+            focusHuntingAngle.animateTo(-22f, tween(130, easing = FastOutSlowInEasing))
+            focusHuntingAngle.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMediumLow))
+        } else {
+            // Rilascio morbido e continuo della ghiera: zero scatti bruschi (no snapTo)
+            focusHuntingAngle.animateTo(
                 targetValue = 0f,
-                animationSpec = tween(durationMillis = 2800, easing = FastOutSlowInEasing)
+                animationSpec = spring(
+                    dampingRatio = Spring.DampingRatioMediumBouncy,
+                    stiffness = Spring.StiffnessLow
+                )
             )
-            // Chiusura rapida di ricalibrazione e riapertura elastica (shutter calibration blink)
-            winkAnim.animateTo(1f, tween(85, easing = FastOutLinearInEasing))
-            winkAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
-            isDizzy = false
         }
     }
 
-    if (enableTiltParallax) {
-        DisposableEffect(Unit) {
-            val sensorManager = context.getSystemService(Context.SENSOR_SERVICE) as? SensorManager
-            val sensor = sensorManager?.getDefaultSensor(Sensor.TYPE_ACCELEROMETER)
+    // Micro-parallasse giroscopica e rilevamento scuotimento dello smartphone (Shake to Dizzy)
+    var isDizzy by remember { mutableStateOf(false) }
+    val tiltMotion = rememberIrisTiltMotion(
+        enableTiltParallax = enableTiltParallax,
+        onShakeDetected = { if (!isDizzy) isDizzy = true }
+    )
+    val dizzyAnim = remember { Animatable(0f) }
 
-            if (sensorManager == null || sensor == null) {
-                onDispose { }
-            } else {
-                var lastShakeTime = 0L
-                var shakeCount = 0
+    // Sguardo saccadico naturale in IDLE (Saccadic Exploration & Fixation come un occhio vero)
+    var idleGazeX by remember { mutableFloatStateOf(0f) }
+    var idleGazeY by remember { mutableFloatStateOf(0f) }
+    var idleIsSaccade by remember { mutableStateOf(false) }
 
-                val listener = object : SensorEventListener {
-                    override fun onSensorChanged(event: SensorEvent?) {
-                        if (event == null) return
-                        val gX = event.values[0]
-                        val gY = event.values[1]
-                        val gZ = event.values[2]
+    // Reazione di agitazione e stizza al tocco ripetuto (Annoyed Reaction: 2 o 3 click seguiti da pausa di 500ms)
+    var tapEventCount by remember { mutableIntStateOf(0) }
+    var lastTapTimestamp by remember { mutableLongStateOf(0L) }
+    var isAnnoyed by remember { mutableStateOf(false) }
+    val annoyedAnim = remember { Animatable(0f) }
 
-                        // 1. Inclinazione 2D (con filtro a m/s^2)
-                        val x = (-gX / 5.5f).coerceIn(-1f, 1f)
-                        val y = ((gY - 6.0f) / 5.5f).coerceIn(-1f, 1f)
-                        rawTiltX = x
-                        rawTiltY = y
-
-                        // 2. Rilevamento scuotimento vigoroso (Shake)
-                        val gMagnitude = sqrt(gX * gX + gY * gY + gZ * gZ) / SensorManager.GRAVITY_EARTH
-                        if (gMagnitude > 2.2f) {
-                            val now = System.currentTimeMillis()
-                            if (now - lastShakeTime < 650L) {
-                                shakeCount++
-                                if (shakeCount >= 2 && !isDizzy) {
-                                    isDizzy = true
-                                    shakeCount = 0
-                                }
-                            } else {
-                                shakeCount = 1
-                            }
-                            lastShakeTime = now
+    LaunchedEffect(lastTapTimestamp) {
+        if (lastTapTimestamp > 0L) {
+            if (tapEventCount >= 2) {
+                // L'utente ha toccato ripetutamente (2 o 3+ volte).
+                // Se l'utente non tocca piÃ¹ per 500ms, IRIS si agita infastidita!
+                delay(500L)
+                tapEventCount = 0
+                if (!isAnnoyed && !isDizzy) {
+                    try {
+                        isAnnoyed = true
+                        haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                        // Arrossamento e contrazione infastidita che salgono fluidamente in 260ms (niente scatto secco a 0ms)
+                        annoyedAnim.animateTo(
+                            targetValue = 1f,
+                            animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
+                        )
+                        // Raffreddamento graduale e riapertura progressiva a respiro in 1400ms
+                        annoyedAnim.animateTo(
+                            targetValue = 0f,
+                            animationSpec = tween(durationMillis = 1400, easing = FastOutSlowInEasing)
+                        )
+                    } finally {
+                        withContext(NonCancellable) {
+                            annoyedAnim.animateTo(
+                                targetValue = 0f,
+                                animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing)
+                            )
+                            isAnnoyed = false
                         }
                     }
-
-                    override fun onAccuracyChanged(sensor: Sensor?, accuracy: Int) {}
                 }
+            } else {
+                delay(600L)
+                tapEventCount = 0
+            }
+        }
+    }
 
-                sensorManager.registerListener(listener, sensor, SensorManager.SENSOR_DELAY_UI)
-                onDispose {
-                    sensorManager.unregisterListener(listener)
+    LaunchedEffect(isDizzy) {
+        if (isDizzy) {
+            try {
+                haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                dizzyAnim.snapTo(1f)
+                dizzyAnim.animateTo(
+                    targetValue = 0f,
+                    animationSpec = tween(durationMillis = 2800, easing = FastOutSlowInEasing)
+                )
+                // Chiusura rapida di ricalibrazione e riapertura elastica (shutter calibration blink)
+                winkAnim.animateTo(1f, tween(85, easing = FastOutLinearInEasing))
+                winkAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioMediumBouncy, stiffness = Spring.StiffnessMedium))
+            } finally {
+                withContext(NonCancellable) {
+                    dizzyAnim.snapTo(0f)
+                    isDizzy = false
                 }
             }
         }
     }
 
-    val smoothTiltX by animateFloatAsState(
-        targetValue = if (enableTiltParallax) rawTiltX else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "iris_tilt_x"
-    )
-
-    val smoothTiltY by animateFloatAsState(
-        targetValue = if (enableTiltParallax) rawTiltY else 0f,
-        animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessLow
-        ),
-        label = "iris_tilt_y"
-    )
-
-    // 1. Chiusura protettiva al tocco (Blink & Touch defense)
-    // IRIS chiude il diaframma istantaneamente appena viene toccata (press down)
-    // e rimane protetta e chiusa per tutto il tempo in cui il dito tocca la lente,
-    // per poi riaprirsi con un rimbalzo ottico elastico non appena il dito viene sollevato.
+    // 1. Chiusura protettiva al tocco (Blink & Touch Defense)
+    // IRIS chiude il diaframma istantaneamente appena viene toccata (press down).
+    // Al rilascio si riapre a piena apertura con un rimbalzo morbido ed accogliente.
     LaunchedEffect(isTouched) {
         if (isTouched) {
             hasBeenTouched = true
@@ -200,8 +224,6 @@ fun IrisMascot(
                 animationSpec = tween(durationMillis = 75, easing = FastOutLinearInEasing)
             )
         } else if (hasBeenTouched) {
-            // Se rilasciato prima di aver raggiunto la chiusura completa (es. tap super rapido),
-            // completa rapidamente la chiusura prima del rimbalzo di riapertura
             if (winkAnim.value < 0.75f) {
                 winkAnim.animateTo(
                     targetValue = 1f,
@@ -218,22 +240,171 @@ fun IrisMascot(
         }
     }
 
-    // Battito spontaneo periodico quando non è toccata dall'utente e non è stordita
+    // 2. Sguardo organico e naturale come un occhio vero (Fluid Gaze, Calm Fixation & Rare Subtle Blinks)
+    // In IDLE perlustra lo spazio circostante in modo fluido e morbido, senza scatti bruschi.
+    // Si sofferma con curiositÃ  su ciascun punto per 3 - 5 secondi e batte le palpebre solo occasionalmente.
     LaunchedEffect(mood) {
-        if (mood == IrisMood.IDLE || mood == IrisMood.TYPING) {
+        if (mood == IrisMood.IDLE) {
+            var stepIndex = 0
+            var stepsSinceSnap = 0
             while (true) {
-                delay(if (mood == IrisMood.TYPING) 6500L else 4500L + (0..2000).random())
-                if (!isTouched && !isDizzy) {
-                    // Chiusura rapida (shutter snap) e riapertura elastica
-                    winkAnim.animateTo(
-                        targetValue = 1f,
-                        animationSpec = tween(durationMillis = 140, easing = FastOutSlowInEasing)
-                    )
+                // Easter egg raro: Starnuto Ottico da granello di polvere sulla lente (Feature 4, ~1.5% in IDLE)
+                val rollSneeze = (1..100).random()
+                if (!isSneezing && !isTouched && !isDizzy && !isAnnoyed && rollSneeze == 42) {
+                    isSneezing = true
+                    // 1. Solletico sulla lente: 3 contrazioni crescenti rapide
+                    repeat(3) { i ->
+                        winkAnim.animateTo(0.35f + (i * 0.22f), tween(85, easing = FastOutSlowInEasing))
+                        winkAnim.animateTo(0.08f, tween(70, easing = LinearEasing))
+                    }
+                    // 2. ETCIÃ™! Chiusura fulminea con vibrazione aptica e scatto in avanti della testa
+                    haptic.performHapticFeedback(HapticFeedbackType.LongPress)
+                    sneezeAnim.snapTo(1f)
+                    winkAnim.animateTo(1f, tween(35))
+                    // 3. Riapertura elastica e riallineamento timido
+                    sneezeAnim.animateTo(0f, spring(Spring.DampingRatioMediumBouncy, Spring.StiffnessLow))
+                    winkAnim.animateTo(0f, spring(Spring.DampingRatioLowBouncy, Spring.StiffnessLow))
+                    isSneezing = false
+                    delay(1200L)
+                }
+
+                // Ogni 4-6 passi organici c'Ã¨ l'occasione di un "salto scattoso" spontaneo (saccade)
+                val shouldSnap = stepsSinceSnap >= 4 && (stepsSinceSnap >= 6 || (1..100).random() <= 45)
+
+                if (shouldSnap) {
+                    stepsSinceSnap = 0
+                    idleIsSaccade = true
+                    // Salto scattoso verso l'estremo opposto o un raggio ampio (50% - 75%)
+                    val currentAngle = atan2(idleGazeY.toDouble(), idleGazeX.toDouble())
+                    val snapAngle = currentAngle + Math.PI + (((-35..35).random()) * (Math.PI / 180.0))
+                    val magnitude = (48..72).random() / 100f
+                    idleGazeX = (cos(snapAngle) * magnitude).toFloat().coerceIn(-0.85f, 0.85f)
+                    idleGazeY = (sin(snapAngle) * magnitude).toFloat().coerceIn(-0.85f, 0.85f)
+
+                    // Sosta attenta e curiosa sul nuovo punto agganciato (1.8s - 2.5s)
+                    delay((1800L..2500L).random())
+                    idleIsSaccade = false
+                } else {
+                    stepsSinceSnap++
+                    idleIsSaccade = false
+                    // Selezione del punto di fissazione:
+                    // Sguardi dolci e organici a raggio moderato (20% - 50% del raggio visivo)
+                    // alternati a soste rilassate verso il centro
+                    val (nextX, nextY) = if (stepIndex % 3 == 0) {
+                        // Sosta centrale rilassata
+                        Pair(((-8..8).random() / 100f), ((-8..8).random() / 100f))
+                    } else {
+                        val angle = (0..359).random() * (Math.PI / 180.0)
+                        val magnitude = (20..50).random() / 100f
+                        Pair((cos(angle) * magnitude).toFloat(), (sin(angle) * magnitude).toFloat())
+                    }
+                    stepIndex++
+
+                    // Sposta lo sguardo verso il nuovo punto
+                    idleGazeX = nextX
+                    idleGazeY = nextY
+
+                    // Tempo di fissazione calmo e prolungato: circa 3.2 a 5.0 secondi
+                    val fixationDuration = (3200L..5000L).random()
+
+                    // Ammiccamenti rari e naturali (solo il 25% delle volte, un battito ogni ~15-20 secondi circa)
+                    val rollBlink = (1..100).random()
+                    if (rollBlink <= 25) {
+                        val preWait = (1200L..2200L).random().coerceAtMost(fixationDuration - 700L)
+                        delay(preWait)
+
+                        if (!isTouched && !isDizzy && !isAnnoyed) {
+                            when {
+                                // 1% Rarissimo triplo ammiccamento vivace
+                                rollBlink <= 1 -> {
+                                    repeat(3) { i ->
+                                        winkAnim.animateTo(1f, tween(75, easing = FastOutSlowInEasing))
+                                        winkAnim.animateTo(
+                                            targetValue = if (i < 2) 0.15f else 0f,
+                                            animationSpec = if (i < 2) tween(65, easing = LinearEasing)
+                                            else spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                                        )
+                                    }
+                                }
+                                // 3% Doppio ammiccamento morbido
+                                rollBlink <= 4 -> {
+                                    repeat(2) { i ->
+                                        winkAnim.animateTo(1f, tween(85, easing = FastOutSlowInEasing))
+                                        winkAnim.animateTo(
+                                            targetValue = if (i < 1) 0.15f else 0f,
+                                            animationSpec = if (i < 1) tween(75, easing = LinearEasing)
+                                            else spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                                        )
+                                    }
+                                }
+                                // Singolo battito d'otturatore calmo e rilassato
+                                else -> {
+                                    winkAnim.animateTo(1f, tween(110, easing = FastOutSlowInEasing))
+                                    winkAnim.animateTo(
+                                        targetValue = 0f,
+                                        animationSpec = spring(
+                                            dampingRatio = Spring.DampingRatioLowBouncy,
+                                            stiffness = Spring.StiffnessLow
+                                        )
+                                    )
+                                }
+                            }
+                        }
+
+                        val postWait = (fixationDuration - preWait - 350L).coerceAtLeast(600L)
+                        delay(postWait)
+                    } else {
+                        // Mantiene la fissazione calma senza battere le ciglia
+                        delay(fixationDuration)
+                    }
+                }
+            }
+        } else if (mood == IrisMood.TYPING) {
+            while (true) {
+                delay((6500L..9500L).random())
+                if (!isTouched && !isDizzy && !isAnnoyed) {
+                    winkAnim.animateTo(1f, tween(110, easing = FastOutSlowInEasing))
+                    winkAnim.animateTo(0f, spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow))
+                }
+            }
+        } else if (mood == IrisMood.DELIGHTED) {
+            // Ammiccamenti rari e piacevoli mentre contempla i risultati (ogni 8-14 secondi con occasionali doppi)
+            while (true) {
+                delay((8000L..14000L).random())
+                if (!isTouched && !isDizzy && !isAnnoyed) {
+                    val roll = (1..100).random()
+                    if (roll <= 20) {
+                        // Raro doppio battito leggero
+                        repeat(2) { i ->
+                            winkAnim.animateTo(1f, tween(80, easing = FastOutSlowInEasing))
+                            winkAnim.animateTo(
+                                targetValue = if (i < 1) 0.15f else 0f,
+                                animationSpec = if (i < 1) tween(70, easing = LinearEasing)
+                                else spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                            )
+                        }
+                    } else {
+                        // Singolo battito morbido
+                        winkAnim.animateTo(1f, tween(110, easing = FastOutSlowInEasing))
+                        winkAnim.animateTo(
+                            targetValue = 0f,
+                            animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessLow)
+                        )
+                    }
+                }
+            }
+        } else if (mood == IrisMood.EMPTY) {
+            // Malinconia riflessiva (Nessun risultato trovato / EMPTY):
+            // Sguardo basso, micro-sospiro e battiti lenti e pesanti ogni 6-10 secondi (come WALL-E sconsolato)
+            while (true) {
+                delay((6500L..10500L).random())
+                if (!isTouched && !isDizzy && !isAnnoyed) {
+                    winkAnim.animateTo(1f, tween(160, easing = FastOutSlowInEasing))
                     winkAnim.animateTo(
                         targetValue = 0f,
                         animationSpec = spring(
-                            dampingRatio = Spring.DampingRatioMediumBouncy,
-                            stiffness = Spring.StiffnessMedium
+                            dampingRatio = Spring.DampingRatioNoBouncy,
+                            stiffness = Spring.StiffnessLow
                         )
                     )
                 }
@@ -279,6 +450,39 @@ fun IrisMascot(
         label = "iris_searching_breathing"
     )
 
+    // Respirazione malinconica diaframma in EMPTY (f/2.4 a f/2.0: apertura accogliente, espressiva e viva, non socchiusa)
+    val emptyBreathing by infiniteTransition.animateFloat(
+        initialValue = 0.35f,
+        targetValue = 0.44f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4200, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iris_empty_breathing"
+    )
+
+    // Lieve oscillazione sconsolata dello sguardo in EMPTY (perlustra timidamente a terra verso destra e sinistra)
+    val emptyGazeDriftX by infiniteTransition.animateFloat(
+        initialValue = -0.18f,
+        targetValue = 0.18f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4400, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iris_empty_gaze_drift_x"
+    )
+
+    // Micro-inclinazione sconsolata della testa in EMPTY (dondolio triste alla WALL-E)
+    val emptyHeadTilt by infiniteTransition.animateFloat(
+        initialValue = -6.5f,
+        targetValue = -2.5f,
+        animationSpec = infiniteRepeatable(
+            animation = tween(4800, easing = FastOutSlowInEasing),
+            repeatMode = RepeatMode.Reverse
+        ),
+        label = "iris_empty_head_tilt"
+    )
+
     // Micro-inclinazione curiosa della testa (Curious Head-Tilt alla WALL-E / Pixar)
     val headTiltAnim by infiniteTransition.animateFloat(
         initialValue = -5.0f,
@@ -290,7 +494,7 @@ fun IrisMascot(
         label = "iris_head_tilt"
     )
 
-    // Respiro elastico organico (Squash & Stretch che toglie rigidità al metallo)
+    // Respiro elastico organico (Squash & Stretch che toglie rigiditÃ  al metallo)
     val breathSquash by infiniteTransition.animateFloat(
         initialValue = 0.982f,
         targetValue = 1.018f,
@@ -333,674 +537,226 @@ fun IrisMascot(
     )
 
     // Spostamento orizzontale fluido dello sguardo / pupilla
-    val targetPupilShiftX = when (mood) {
-        IrisMood.TYPING -> gazeBiasX.coerceIn(-1f, 1f)
-        IrisMood.IDLE -> gazeDrift * 0.15f
-        else -> 0f
+    val targetPupilShiftX = when {
+        mood == IrisMood.IDLE && gazeBiasX == 0f -> idleGazeX.coerceIn(-1f, 1f)
+        mood == IrisMood.TYPING -> if (gazeBiasX != 0f) gazeBiasX.coerceIn(-1f, 1f) else 0f
+        mood == IrisMood.EMPTY -> if (gazeBiasX != 0f) gazeBiasX.coerceIn(-1f, 1f) else emptyGazeDriftX
+        else -> gazeBiasX.coerceIn(-1f, 1f)
     }
+
+    // Inerzia da scroll veloce (Vento di pellicola - Feature 3):
+    // La pupilla e la testa vengono trascinate con dolcezza dal flusso di scorrimento,
+    // e al rilascio compiono un elastico rimbalzo morbido!
+    val smoothScrollInertia by animateFloatAsState(
+        targetValue = scrollInertia,
+        animationSpec = spring(
+            dampingRatio = Spring.DampingRatioMediumBouncy,
+            stiffness = Spring.StiffnessLow
+        ),
+        label = "iris_smooth_scroll_inertia"
+    )
+
+    // Spostamento verticale fluido dello sguardo / pupilla (guarda in alto durante la digitazione, traccia i risultati, esplora in idle o abbassa sconsolata lo sguardo in empty)
+    val targetPupilShiftY = when {
+        isFocusHunting -> (gazeBiasY + (smoothScrollInertia * 0.15f)).coerceIn(0.40f, 1f)
+        mood == IrisMood.IDLE && gazeBiasY == 0f -> (idleGazeY + (smoothScrollInertia * 0.15f)).coerceIn(-1f, 1f)
+        mood == IrisMood.TYPING -> if (gazeBiasY != 0f) gazeBiasY.coerceIn(-1f, 1f) else -0.90f
+        mood == IrisMood.EMPTY -> if (gazeBiasY != 0f) gazeBiasY.coerceIn(-1f, 1f) else (0.52f + ((emptyBreathing - 0.24f) * 0.4f))
+        mood == IrisMood.DELIGHTED -> {
+            // Sui risultati lo sguardo perlustra in basso; durante un fling veloce compie solo una micro-reazione discreta
+            (0.80f + (smoothScrollInertia * 0.15f)).coerceIn(0.50f, 1f)
+        }
+        else -> (gazeBiasY + (smoothScrollInertia * 0.15f)).coerceIn(-1f, 1f)
+    }
+
+    val effectiveIsSaccade = isSaccade || idleIsSaccade || isFocusHunting
 
     val pupilShiftXRatio by animateFloatAsState(
         targetValue = targetPupilShiftX,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioLowBouncy,
-            stiffness = Spring.StiffnessMediumLow
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = if (isFocusHunting) Spring.StiffnessMedium else if (effectiveIsSaccade) Spring.StiffnessMediumLow else Spring.StiffnessLow
         ),
         label = "iris_pupil_shift_x"
     )
 
-    // Spostamento verticale fluido verso l'alto quando l'utente digita
     val pupilShiftYRatio by animateFloatAsState(
-        targetValue = if (mood == IrisMood.TYPING) -1f else 0f,
+        targetValue = targetPupilShiftY,
         animationSpec = spring(
-            dampingRatio = 0.76f,
-            stiffness = Spring.StiffnessMediumLow
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = if (isFocusHunting) Spring.StiffnessMedium else if (effectiveIsSaccade) Spring.StiffnessMediumLow else Spring.StiffnessLow
         ),
         label = "iris_pupil_shift_y"
     )
 
-    // Inclinazione curiosa del telaio dell'ottica (Head-Tilt orientato ed empatico)
-    val targetHeadTilt = when (mood) {
-        IrisMood.TYPING -> (gazeBiasX * 6f) + 3f
-        IrisMood.IDLE -> headTiltAnim
-        IrisMood.DELIGHTED -> 6f
-        IrisMood.SEARCHING -> 0f
-        IrisMood.EMPTY -> -3.5f
-        IrisMood.OFFLINE -> 0f
-    }
+    // Inclinazione curiosa del telaio dell'ottica (Head-Tilt orientato ed empatico alla Pixar)
+    val targetHeadTilt = (when {
+        isFocusHunting -> (gazeBiasX * 10f).coerceIn(-12f, 12f)
+        mood == IrisMood.TYPING -> (gazeBiasX * 6f) + 3f
+        mood == IrisMood.IDLE && gazeBiasX == 0f -> (idleGazeX * 5.5f) + (idleGazeY * 1.5f) + (headTiltAnim * 0.35f)
+        mood == IrisMood.DELIGHTED -> (gazeBiasX * 6f).coerceIn(-7f, 7f) + 2f
+        mood == IrisMood.SEARCHING -> 0f
+        mood == IrisMood.EMPTY -> emptyHeadTilt
+        mood == IrisMood.OFFLINE -> 0f
+        else -> (gazeBiasX * 6f).coerceIn(-7f, 7f)
+    } + (smoothScrollInertia * 2.2f)).coerceIn(-16f, 16f)
 
     val smoothHeadTilt by animateFloatAsState(
         targetValue = targetHeadTilt,
         animationSpec = spring(
-            dampingRatio = Spring.DampingRatioMediumBouncy,
-            stiffness = Spring.StiffnessLow
+            dampingRatio = Spring.DampingRatioNoBouncy,
+            stiffness = if (isFocusHunting) Spring.StiffnessMediumLow else Spring.StiffnessVeryLow
         ),
         label = "iris_smooth_head_tilt"
     )
 
     // Calcolo frazione di apertura effettiva
-    val baseAperture = when (mood) {
-        IrisMood.IDLE -> idleBreathing
-        IrisMood.TYPING -> typingBreathing
-        IrisMood.SEARCHING -> searchingBreathing
-        IrisMood.DELIGHTED -> 0.74f
-        IrisMood.EMPTY -> 0.25f
-        IrisMood.OFFLINE -> 0.06f
+    val baseAperture = when {
+        isFocusHunting -> 0.30f // f/5.6 - Chiusura di precisione per messa a fuoco dei dettagli (Feature 6)
+        mood == IrisMood.IDLE -> idleBreathing
+        mood == IrisMood.TYPING -> typingBreathing
+        mood == IrisMood.SEARCHING -> searchingBreathing
+        mood == IrisMood.DELIGHTED -> 0.74f
+        mood == IrisMood.EMPTY -> emptyBreathing // Respira e sospira a vuoto
+        else -> 0.06f
     }
+
+    // Transizione graduale e morbida dell'apertura del diaframma (nessuno scatto secco tra f/5.6 e f/1.4 al rilascio del popup)
+    val animatedBaseAperture by animateFloatAsState(
+        targetValue = baseAperture,
+        animationSpec = tween(durationMillis = 380, easing = FastOutSlowInEasing),
+        label = "iris_animated_base_aperture"
+    )
+
     // Effetto scuotimento/stordimento (Dizzy): flutter rapido del diaframma che cerca la calibrazione
     val dizzyProgress = dizzyAnim.value
     val dizzyWobble = if (dizzyProgress > 0f) {
         sin((1f - dizzyProgress) * 36f) * 0.16f * dizzyProgress
     } else 0f
 
-    // L'ammiccamento (wink) forza la chiusura dell'iride verso f/22 (0.05f)
-    val effectiveAperture = (baseAperture * (1f - winkAnim.value) + 0.05f * winkAnim.value + dizzyWobble).coerceIn(0.05f, 0.78f)
+    val annoyedProgress = annoyedAnim.value
 
-    // Rapporto di apertura normalizzato per modulare l'intensità del controluce ottico
+    // Effetto agitazione / stizza al tocco ripetuto:
+    // Scuote energicamente la testa a destra e sinistra in protesta rapida ("No! Smettila di toccarmi l'occhio!")
+    val annoyedShake = if (annoyedProgress > 0f) {
+        sin((1f - annoyedProgress) * 44f) * 14f * annoyedProgress
+    } else 0f
+
+    // Restringimento infastidito dell'iride a f/22 con micro-tremolio di stizza (squint indignato, l'occhio rimane vivo)
+    val annoyedSquint = if (annoyedProgress > 0f) {
+        (-0.36f * annoyedProgress) + (sin((1f - annoyedProgress) * 56f) * 0.03f * annoyedProgress)
+    } else 0f
+
+    val effectiveAperture = ((animatedBaseAperture + annoyedSquint) * (1f - winkAnim.value) + 0.05f * winkAnim.value + dizzyWobble).coerceIn(0.12f, 0.78f)
+
+    // Rapporto di apertura normalizzato per modulare l'intensitÃ  del controluce ottico
     val apertureRatio = ((effectiveAperture - 0.05f) / 0.73f).coerceIn(0f, 1f)
 
+    // Shift cromatico progressivo e morbido verso ambra/rosso vivo (sale in 260ms e sfuma in 1400ms, zero scatti a 0ms)
+    val activeAccentColor = if (annoyedProgress > 0f) {
+        val irritatedRed = Color(0xFFFF453A)
+        lerp(accentColor, irritatedRed, annoyedProgress)
+    } else {
+        accentColor
+    }
+
     val moodGlowAlphaMultiplier = when (mood) {
-        IrisMood.IDLE -> 0.48f
+        IrisMood.IDLE -> if (annoyedProgress > 0f) 0.85f else 0.48f
         IrisMood.TYPING -> 0.58f
         IrisMood.SEARCHING -> 0.85f
         IrisMood.DELIGHTED -> 0.92f
-        IrisMood.EMPTY -> 0.22f
+        IrisMood.EMPTY -> 0.30f
         IrisMood.OFFLINE -> 0.0f
     }
-    val effectiveGlowAlpha = (moodGlowAlphaMultiplier * (0.60f + 0.40f * apertureRatio) * (1f - winkAnim.value * 0.5f)).coerceIn(0f, 1f)
+    val sneezeFlash = if (sneezeAnim.value > 0f) sneezeAnim.value * 0.35f else 0f
+    val effectiveGlowAlpha = ((moodGlowAlphaMultiplier * (0.60f + 0.40f * apertureRatio) * (1f - winkAnim.value * 0.5f)) + sneezeFlash).coerceIn(0f, 1f)
 
     val dizzyRotation = if (dizzyProgress > 0f) {
         sin((1f - dizzyProgress) * 20f) * 25f * dizzyProgress
     } else 0f
 
-    val totalChassisRotation = smoothHeadTilt + (if (dizzyProgress > 0f) dizzyRotation * 0.5f else 0f)
+    val sneezeNod = if (sneezeAnim.value > 0f) sneezeAnim.value * 10f else 0f
+    val totalChassisRotation = smoothHeadTilt + (if (dizzyProgress > 0f) dizzyRotation * 0.5f else 0f) + annoyedShake + sneezeNod
 
-    // Angolo di otturazione corrente con micro-inclinazione direzionale e oscillazione stordita
+    // Angolo di otturazione corrente con micro-inclinazione direzionale, oscillazione stordita e focus hunting
     val effectiveAngle = (when (mood) {
         IrisMood.SEARCHING -> searchingRotation
         IrisMood.TYPING -> (pupilShiftXRatio * 6f) + (gazeDrift * 2f)
-        IrisMood.IDLE -> gazeDrift * 8f
-        IrisMood.EMPTY -> 15f
+        IrisMood.IDLE -> (idleGazeX * 8f) + (idleGazeY * 4f)
+        IrisMood.EMPTY -> 12f + (emptyGazeDriftX * 6f)
         IrisMood.DELIGHTED -> 0f
         IrisMood.OFFLINE -> 0f
-    }) + dizzyRotation
+    }) + dizzyRotation + focusHuntingAngle.value
+
+    val containerSize = size + (glowPadding * 2)
 
     Box(
         modifier = modifier
-            .size(size)
+            .size(containerSize)
             .graphicsLayer {
+                // Inerzia fisica dello scroll (Vento di pellicola - Feature 3):
+                // Micro-spostamento sobrio ed elegante solo durante lanci veloci (max 5dp)
+                translationY = smoothScrollInertia * 5.dp.toPx()
                 rotationZ = totalChassisRotation
-                scaleX = (2f - breathSquash)
-                scaleY = breathSquash
-            }
-            .pointerInput(Unit) {
-                awaitEachGesture {
-                    try {
-                        awaitFirstDown(requireUnconsumed = false)
-                        isTouched = true
-                        do {
-                            val event = awaitPointerEvent()
-                        } while (event.changes.any { it.pressed })
-                    } finally {
-                        isTouched = false
+                scaleX = ((2f - breathSquash) - (kotlin.math.abs(smoothScrollInertia) * 0.02f)).coerceAtLeast(0.85f)
+                scaleY = (breathSquash + (kotlin.math.abs(smoothScrollInertia) * 0.025f)).coerceAtLeast(0.85f)
+            },
+        contentAlignment = Alignment.Center
+    ) {
+        IrisLensCanvas(
+            size = size,
+            glowPadding = glowPadding,
+            enableBacklight = enableBacklight,
+            effectiveGlowAlpha = effectiveGlowAlpha,
+            apertureRatio = apertureRatio,
+            activeAccentColor = activeAccentColor,
+            mood = mood,
+            barrelRotation = barrelRotation,
+            effectiveAngle = effectiveAngle,
+            pupilShiftXRatio = pupilShiftXRatio,
+            pupilShiftYRatio = pupilShiftYRatio,
+            smoothTiltX = tiltMotion.smoothTiltX,
+            smoothTiltY = tiltMotion.smoothTiltY,
+            dizzyProgress = dizzyProgress,
+            annoyedProgress = annoyedProgress,
+            effectiveAperture = effectiveAperture,
+            gazeDrift = gazeDrift
+        )
+
+        // Area interattiva centrata sul barilotto della lente per rilevare i tocchi in modo preciso
+        if (enableTouchInteractions) {
+            Box(
+                modifier = Modifier
+                    .size(size)
+                    .pointerInput(Unit) {
+                        awaitEachGesture {
+                            try {
+                                awaitFirstDown(requireUnconsumed = false)
+                                isTouched = true
+                                val downTime = System.currentTimeMillis()
+                                do {
+                                    val event = awaitPointerEvent()
+                                } while (event.changes.any { it.pressed })
+                                val pressDuration = System.currentTimeMillis() - downTime
+                                if (pressDuration < 450L) {
+                                    if (!isAnnoyed && !isDizzy) {
+                                        tapEventCount++
+                                        lastTapTimestamp = System.currentTimeMillis()
+                                    } else {
+                                        // Se la tocchi mentre Ã¨ giÃ  stizzita o stordita, dÃ  un feedback di protesta senza interrompere la ripresa
+                                        haptic.performHapticFeedback(HapticFeedbackType.TextHandleMove)
+                                    }
+                                }
+                            } finally {
+                                isTouched = false
+                            }
+                        }
                     }
-                }
-            }
-            .bounceClick(
-                scaleDown = 0.92f,
-                onClick = { onClick?.invoke() }
-            ),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val width = this.size.width
-            val height = this.size.height
-            val centerX = width / 2f
-            val centerY = height / 2f
-            val maxR = width.coerceAtMost(height) / 2f
-
-            // 1. BARILOTTO ESTERNO DELLA LENTE (Metal & Glass Barrel)
-            val barrelOuterR = maxR * 0.88f
-            val barrelInnerR = maxR * 0.75f
-
-            // 0. CONTROLUCE CINEMATOGRAFICO POSTERIORE (Volumetric Cinematic Back-Glow)
-            // Simula il fascio del proiettore di sala e la luce d'ambiente di scena
-            // che stacca morbidamente e volumetricamente il barilotto ottico dallo sfondo nero.
-            if (enableBacklight && effectiveGlowAlpha > 0.01f) {
-                // A. Alone d'ambiente ampio e soffuso (Wide Volumetric Halo)
-                val ambientRadius = barrelOuterR * (1.80f + 0.35f * apertureRatio)
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        0.0f to accentColor.copy(alpha = effectiveGlowAlpha * 0.45f),
-                        (barrelOuterR / ambientRadius).coerceIn(0.35f, 0.70f) to accentColor.copy(alpha = effectiveGlowAlpha * 0.32f),
-                        0.72f to accentColor.copy(alpha = effectiveGlowAlpha * 0.10f),
-                        1.0f to Color.Transparent,
-                        center = Offset(centerX, centerY),
-                        radius = ambientRadius
-                    ),
-                    radius = ambientRadius,
-                    center = Offset(centerX, centerY)
-                )
-
-                // B. Bloom brillante intermedio a ridosso del bordo (Core Rim Bloom)
-                val rimBloomRadius = barrelOuterR * (1.35f + 0.15f * apertureRatio)
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        0.0f to accentColor.copy(alpha = effectiveGlowAlpha * 0.85f),
-                        (barrelOuterR / rimBloomRadius).coerceIn(0.55f, 0.85f) to accentColor.copy(alpha = effectiveGlowAlpha * 0.55f),
-                        0.90f to accentColor.copy(alpha = effectiveGlowAlpha * 0.12f),
-                        1.0f to Color.Transparent,
-                        center = Offset(centerX, centerY),
-                        radius = rimBloomRadius
-                    ),
-                    radius = rimBloomRadius,
-                    center = Offset(centerX, centerY)
-                )
-
-                // C. Flare supplementare del fascio di proiezione in ricerca attiva o gioia (Projector Beam Flare)
-                if (mood == IrisMood.SEARCHING || mood == IrisMood.DELIGHTED) {
-                    val flareRadius = ambientRadius * 1.25f
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to accentColor.copy(alpha = effectiveGlowAlpha * 0.30f),
-                            0.55f to accentColor.copy(alpha = effectiveGlowAlpha * 0.12f),
-                            1.0f to Color.Transparent,
-                            center = Offset(centerX, centerY),
-                            radius = flareRadius
-                        ),
-                        radius = flareRadius,
-                        center = Offset(centerX, centerY)
+                    .bounceClick(
+                        scaleDown = 0.92f,
+                        onClick = { onClick?.invoke() }
                     )
-                }
-            }
-
-            // Fondo scuro del corpo ottica
-            drawCircle(
-                brush = Brush.radialGradient(
-                    0.0f to Color(0xFF1B232A),
-                    0.7f to Color(0xFF0F1419),
-                    1.0f to Color(0xFF07090C),
-                    center = Offset(centerX, centerY),
-                    radius = barrelOuterR
-                ),
-                radius = barrelOuterR,
-                center = Offset(centerX, centerY)
-            )
-
-            // Anello metallico esterno con bordo rifinito
-            drawCircle(
-                color = accentColor.copy(alpha = 0.35f),
-                radius = barrelOuterR,
-                center = Offset(centerX, centerY),
-                style = Stroke(width = with(density) { 1.2.dp.toPx() })
-            )
-
-            // 2. TACCHE DI CALIBRAZIONE FOCALE (Focus & F-Stop Ring)
-            val tickAngleOffset = if (mood == IrisMood.SEARCHING) barrelRotation else 0f
-            val tickCount = 16
-            for (i in 0 until tickCount) {
-                val rad = (tickAngleOffset + i * (360f / tickCount)) * (Math.PI.toFloat() / 180f)
-                val isMajor = (i % 4 == 0)
-                val tickStartR = barrelOuterR - with(density) { (if (isMajor) 4.5.dp else 2.5.dp).toPx() }
-                val tickEndR = barrelOuterR - with(density) { 1.0.dp.toPx() }
-
-                val startX = centerX + tickStartR * cos(rad)
-                val startY = centerY + tickStartR * sin(rad)
-                val endX = centerX + tickEndR * cos(rad)
-                val endY = centerY + tickEndR * sin(rad)
-
-                drawLine(
-                    color = if (isMajor) accentColor.copy(alpha = 0.70f) else Color.White.copy(alpha = 0.20f),
-                    start = Offset(startX, startY),
-                    end = Offset(endX, endY),
-                    strokeWidth = with(density) { (if (isMajor) 1.2.dp else 0.8.dp).toPx() }
-                )
-            }
-
-            // Anello interno di raccordo alla camera del diaframma
-            drawCircle(
-                color = Color.White.copy(alpha = 0.12f),
-                radius = barrelInnerR,
-                center = Offset(centerX, centerY),
-                style = Stroke(width = with(density) { 0.8.dp.toPx() })
-            )
-
-            // 3. DIAFRAMMA CINEMATOGRAFICO (La pupilla e la ghiera si orientano in 2D seguendo la scrittura, il giroscopio e la spirale da scuotimento)
-            val pupilMaxShiftY = barrelInnerR * 0.22f
-            val pupilMaxShiftX = barrelInnerR * 0.20f
-            val tiltShiftX = barrelInnerR * 0.08f * smoothTiltX
-            val tiltShiftY = barrelInnerR * 0.08f * smoothTiltY
-
-            // Orbita a spirale decrescente quando stordita
-            val dizzySpiralAngle = (1f - dizzyProgress) * 1440f * (Math.PI.toFloat() / 180f)
-            val dizzyOrbitR = barrelInnerR * 0.22f * dizzyProgress
-            val dizzyShiftX = dizzyOrbitR * cos(dizzySpiralAngle)
-            val dizzyShiftY = dizzyOrbitR * sin(dizzySpiralAngle)
-
-            val pupilCenterY = centerY + (pupilMaxShiftY * pupilShiftYRatio) + tiltShiftY + dizzyShiftY
-            val pupilCenterX = centerX + (pupilMaxShiftX * pupilShiftXRatio) + tiltShiftX + dizzyShiftX
-
-            val outerR = barrelInnerR * 1.35f
-            val innerR = (barrelInnerR * effectiveAperture).coerceAtLeast(1.5f)
-            val bladeCount = 6
-            val tanLen = sqrt((outerR * outerR - innerR * innerR).coerceAtLeast(0f))
-
-            // La camera interna è ritagliata all'interno del barilotto metallico fisso
-            clipPath(
-                Path().apply {
-                    addOval(Rect(center = Offset(centerX, centerY), radius = barrelInnerR))
-                }
-            ) {
-                // A. Bagliore profondo centrale nella pupilla (ancorato al centro pupillare mobile)
-                val glowRadius = (innerR * 1.8f).coerceAtLeast(2f)
-                drawCircle(
-                    brush = Brush.radialGradient(
-                        0.0f to accentColor.copy(alpha = if (mood == IrisMood.SEARCHING) 0.60f else 0.35f),
-                        0.5f to accentColor.copy(alpha = 0.12f),
-                        1.0f to Color.Transparent,
-                        center = Offset(pupilCenterX, pupilCenterY),
-                        radius = glowRadius
-                    ),
-                    radius = glowRadius,
-                    center = Offset(pupilCenterX, pupilCenterY)
-                )
-
-                // B1. Superfici geometriche delle 6 lamelle (livello z-index inferiore)
-                for (i in 0 until bladeCount) {
-                    val phi = (effectiveAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-                    val nextPhi = (effectiveAngle + (i + 1) * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-
-                    val cosP = cos(phi)
-                    val sinP = sin(phi)
-                    val cosNext = cos(nextPhi)
-                    val sinNext = sin(nextPhi)
-
-                    // Vertice tangenziale sull'apertura interna
-                    val tx = pupilCenterX + innerR * cosP
-                    val ty = pupilCenterY + innerR * sinP
-
-                    // Vertice tangenziale sul cerchio esterno
-                    val px = tx - tanLen * sinP
-                    val py = ty + tanLen * cosP
-
-                    val nextTx = pupilCenterX + innerR * cosNext
-                    val nextTy = pupilCenterY + innerR * sinNext
-                    val nextPx = nextTx - tanLen * sinNext
-                    val nextPy = nextTy + tanLen * cosNext
-
-                    // Superficie della singola lamella
-                    val bladePath = Path().apply {
-                        moveTo(tx, ty)
-                        lineTo(px, py)
-                        lineTo(nextPx, nextPy)
-                        lineTo(nextTx, nextTy)
-                        close()
-                    }
-
-                    drawPath(
-                        path = bladePath,
-                        color = Color(0xFF13181D).copy(alpha = 0.95f)
-                    )
-                }
-
-                // B2. Bordi nitidi di scorrimento delle lamelle (livello z-index superiore, disegnati sopra per evitare che l'ultima lamella copra la prima)
-                for (i in 0 until bladeCount) {
-                    val phi = (effectiveAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-                    val cosP = cos(phi)
-                    val sinP = sin(phi)
-
-                    val tx = pupilCenterX + innerR * cosP
-                    val ty = pupilCenterY + innerR * sinP
-                    val px = tx - tanLen * sinP
-                    val py = ty + tanLen * cosP
-
-                    drawLine(
-                        color = accentColor.copy(alpha = 0.85f),
-                        start = Offset(px, py),
-                        end = Offset(tx, ty),
-                        strokeWidth = with(density) { 1.2.dp.toPx() }
-                    )
-                }
-
-                // C. Bordo dell'apertura centrale poligonale (la pupilla esagonale mobile)
-                val aperturePath = Path()
-                for (i in 0 until bladeCount) {
-                    val phi = (effectiveAngle + i * (360f / bladeCount)) * (Math.PI.toFloat() / 180f)
-                    val tx = pupilCenterX + innerR * cos(phi)
-                    val ty = pupilCenterY + innerR * sin(phi)
-                    if (i == 0) aperturePath.moveTo(tx, ty) else aperturePath.lineTo(tx, ty)
-                }
-                aperturePath.close()
-
-                drawPath(
-                    path = aperturePath,
-                    color = accentColor.copy(alpha = 0.90f),
-                    style = Stroke(width = with(density) { 1.3.dp.toPx() })
-                )
-
-                // 4. CATCHLIGHTS OTTICI (Riflessi di luce grandi, lucidi ed espressivi sul vetro ottico stile Pixar / Anime)
-                if (effectiveAperture > 0.10f) {
-                    val driftPx = with(density) { (gazeDrift * 1.0f).dp.toPx() }
-                    val catchlightParallaxX = barrelInnerR * 0.05f * smoothTiltX
-                    val catchlightParallaxY = barrelInnerR * 0.05f * smoothTiltY
-
-                    // A. Riflesso primario superiore (Big Anime/Pixar Sparkle Glint): bianco brillante, grande e accogliente
-                    val glint1X = pupilCenterX + (innerR * 0.24f) + driftPx + catchlightParallaxX
-                    val glint1Y = pupilCenterY - (innerR * 0.26f) + catchlightParallaxY
-                    val glint1R = (innerR * 0.28f).coerceAtLeast(2.4f)
-
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to Color.White.copy(alpha = 0.95f),
-                            0.50f to Color.White.copy(alpha = 0.75f),
-                            0.80f to Color.White.copy(alpha = 0.25f),
-                            1.0f to Color.Transparent,
-                            center = Offset(glint1X, glint1Y),
-                            radius = glint1R
-                        ),
-                        radius = glint1R,
-                        center = Offset(glint1X, glint1Y)
-                    )
-
-                    // B. Riflesso secondario inferiore (Fill Glint): riflesso soffuso di controcampo nel barilotto
-                    val glint2X = pupilCenterX - (innerR * 0.20f) + driftPx * 0.5f - catchlightParallaxX * 0.5f
-                    val glint2Y = pupilCenterY + (innerR * 0.22f) - catchlightParallaxY * 0.5f
-                    val glint2R = (innerR * 0.15f).coerceAtLeast(1.5f)
-
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to Color.White.copy(alpha = 0.75f),
-                            0.55f to accentColor.copy(alpha = 0.40f),
-                            1.0f to Color.Transparent,
-                            center = Offset(glint2X, glint2Y),
-                            radius = glint2R
-                        ),
-                        radius = glint2R,
-                        center = Offset(glint2X, glint2Y)
-                    )
-
-                    // C. Micro-scintilla lucida supplementare (Dewy Lens Specular Sparkle): conferisce profondità bagnata e tenera alla cornea ottica
-                    val glint3X = pupilCenterX + (innerR * 0.08f) + driftPx * 0.7f + catchlightParallaxX * 0.7f
-                    val glint3Y = pupilCenterY - (innerR * 0.04f) + catchlightParallaxY * 0.7f
-                    val glint3R = (innerR * 0.09f).coerceAtLeast(1.0f)
-
-                    drawCircle(
-                        brush = Brush.radialGradient(
-                            0.0f to Color.White.copy(alpha = 0.90f),
-                            0.60f to Color.White.copy(alpha = 0.45f),
-                            1.0f to Color.Transparent,
-                            center = Offset(glint3X, glint3Y),
-                            radius = glint3R
-                        ),
-                        radius = glint3R,
-                        center = Offset(glint3X, glint3Y)
-                    )
-                }
-            }
-        }
-    }
-}
-
-/**
- * Sfera neurale / generativa dell'IA Cinema Mood (Cloud Gemini).
- * - A riposo (isSearching = false): morbido respiro del bagliore interno, micro-fluttuazione e presenza sobria.
- * - In ricerca / elaborazione (isSearching = true): aura generativa pulsante, anello orbitale con sweep gradient rotante,
- *   particelle stardust in orbita e oscillazione scintillante dell'icona Sparkle.
- */
-@Composable
-fun AiSparkleOrb(
-    modifier: Modifier = Modifier,
-    size: Dp = 64.dp,
-    isSearching: Boolean = false,
-    accentColor: Color = MaterialTheme.colorScheme.primary
-) {
-    val density = LocalDensity.current
-    val infiniteTransition = rememberInfiniteTransition(label = "ai_sparkle_orb_loop")
-
-    // Rotazione orbitale continua a 360° (più veloce in ricerca, lenta e rilassante a riposo)
-    val rotation by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (isSearching) 2400 else 7000, easing = LinearEasing),
-            repeatMode = RepeatMode.Restart
-        ),
-        label = "ai_orb_rotation"
-    )
-
-    // Pulsazione respirante dell'aura e dell'icona Sparkle
-    val pulseScale by infiniteTransition.animateFloat(
-        initialValue = if (isSearching) 0.92f else 0.96f,
-        targetValue = if (isSearching) 1.08f else 1.03f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (isSearching) 1300 else 2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ai_orb_pulse"
-    )
-
-    // Bagliore dinamico centrale
-    val glowAlpha by infiniteTransition.animateFloat(
-        initialValue = if (isSearching) 0.30f else 0.15f,
-        targetValue = if (isSearching) 0.75f else 0.35f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (isSearching) 1300 else 2400, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ai_orb_glow"
-    )
-
-    // Oscillazione angolare dello Sparkle interno
-    val sparkleTilt by infiniteTransition.animateFloat(
-        initialValue = if (isSearching) -14f else -4f,
-        targetValue = if (isSearching) 14f else 4f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(if (isSearching) 1800 else 3200, easing = FastOutSlowInEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "ai_sparkle_tilt"
-    )
-
-    Box(
-        modifier = modifier.size(size),
-        contentAlignment = Alignment.Center
-    ) {
-        Canvas(modifier = Modifier.fillMaxSize()) {
-            val width = this.size.width
-            val height = this.size.height
-            val centerX = width / 2f
-            val centerY = height / 2f
-            val baseRadius = (width.coerceAtMost(height) / 2f) * 0.90f
-
-            // 1. Aura esterna pulsante (Generative Thinking Aura)
-            val auraRadius = baseRadius * pulseScale
-            drawCircle(
-                brush = Brush.radialGradient(
-                    0.0f to accentColor.copy(alpha = glowAlpha * (if (isSearching) 0.45f else 0.20f)),
-                    0.60f to accentColor.copy(alpha = glowAlpha * (if (isSearching) 0.15f else 0.05f)),
-                    1.0f to Color.Transparent,
-                    center = Offset(centerX, centerY),
-                    radius = auraRadius
-                ),
-                radius = auraRadius,
-                center = Offset(centerX, centerY)
-            )
-
-            // 2. Disco di fondo in vetro scuro cinematico
-            drawCircle(
-                brush = Brush.radialGradient(
-                    0.0f to Color(0xFF1B232A),
-                    0.7f to Color(0xFF0F1419),
-                    1.0f to Color(0xFF07090C),
-                    center = Offset(centerX, centerY),
-                    radius = baseRadius
-                ),
-                radius = baseRadius,
-                center = Offset(centerX, centerY)
-            )
-
-            // 3. Anello sweep orbitale luminoso rotante a 360°
-            val sweepBrush = Brush.sweepGradient(
-                listOf(
-                    accentColor.copy(alpha = 0.05f),
-                    accentColor.copy(alpha = 0.25f),
-                    accentColor.copy(alpha = if (isSearching) 0.95f else 0.50f),
-                    Color.White.copy(alpha = if (isSearching) 0.90f else 0.40f),
-                    accentColor.copy(alpha = 0.15f),
-                    accentColor.copy(alpha = 0.05f)
-                ),
-                center = Offset(centerX, centerY)
-            )
-
-            rotate(rotation, pivot = Offset(centerX, centerY)) {
-                drawCircle(
-                    brush = sweepBrush,
-                    radius = baseRadius,
-                    center = Offset(centerX, centerY),
-                    style = Stroke(width = with(density) { (if (isSearching) 1.8.dp else 1.2.dp).toPx() })
-                )
-
-                // Micro-particelle stardust in orbita sull'anello
-                if (isSearching) {
-                    val dotRad1 = 0f
-                    val dotRad2 = 180f * (Math.PI.toFloat() / 180f)
-                    drawCircle(
-                        color = Color.White,
-                        radius = with(density) { 2.2.dp.toPx() },
-                        center = Offset(centerX + baseRadius * cos(dotRad1), centerY + baseRadius * sin(dotRad1))
-                    )
-                    drawCircle(
-                        color = accentColor.copy(alpha = 0.75f),
-                        radius = with(density) { 1.6.dp.toPx() },
-                        center = Offset(centerX + baseRadius * cos(dotRad2), centerY + baseRadius * sin(dotRad2))
-                    )
-                }
-            }
-
-            // 4. Anello interno fisso sottile
-            drawCircle(
-                color = Color.White.copy(alpha = 0.10f),
-                radius = baseRadius * 0.78f,
-                center = Offset(centerX, centerY),
-                style = Stroke(width = with(density) { 0.8.dp.toPx() })
-            )
-
-            // 5. Nucleo luminoso centrale dietro l'icona
-            val coreGlowRadius = baseRadius * 0.65f
-            drawCircle(
-                brush = Brush.radialGradient(
-                    0.0f to accentColor.copy(alpha = glowAlpha * (if (isSearching) 0.55f else 0.25f)),
-                    1.0f to Color.Transparent,
-                    center = Offset(centerX, centerY),
-                    radius = coreGlowRadius
-                ),
-                radius = coreGlowRadius,
-                center = Offset(centerX, centerY)
             )
         }
-
-        // Icona Sparkle centrale che pulsa ed oscilla armonicamente
-        Icon(
-            imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
-            contentDescription = null,
-            tint = if (isSearching) Color.White else accentColor,
-            modifier = Modifier
-                .size(size * 0.42f)
-                .graphicsLayer {
-                    scaleX = pulseScale
-                    scaleY = pulseScale
-                    rotationZ = sparkleTilt
-                    alpha = if (isSearching) (0.75f + glowAlpha * 0.25f).coerceIn(0f, 1f) else 0.85f
-                }
-        )
-    }
-}
-
-/**
- * Indicatore essenziale mostrato durante la ricerca Mood in corso:
- * invece di una card pesante ("malloppone"), IRIS (o lo Sparkle AI) si posiziona
- * semplicemente in alto al centro mentre ruota / esegue il focus hunting.
- */
-@Composable
-fun IrisSearchingHero(
-    query: String,
-    modifier: Modifier = Modifier,
-    isMoodAiMode: Boolean = true
-) {
-    Box(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(top = 20.dp, bottom = 16.dp),
-        contentAlignment = Alignment.Center
-    ) {
-        if (isMoodAiMode) {
-            // Sfera generativa animata per Cinema Mood AI
-            AiSparkleOrb(
-                size = 72.dp,
-                isSearching = true,
-                accentColor = MaterialTheme.colorScheme.primary
-            )
-        } else {
-            // IRIS pura in alto al centro mentre ruota le lamelle ed esegue il focus hunting
-            IrisMascot(
-                mood = IrisMood.SEARCHING,
-                size = 72.dp,
-                accentColor = MaterialTheme.colorScheme.primary
-            )
-        }
-    }
-}
-
-/**
- * Stato vuoto cinematografico quando la ricerca Mood non produce risultati.
- */
-@Composable
-fun IrisEmptyState(
-    query: String,
-    modifier: Modifier = Modifier,
-    isMoodAiMode: Boolean = false
-) {
-    Column(
-        modifier = modifier
-            .fillMaxWidth()
-            .padding(horizontal = 24.dp, vertical = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Center
-    ) {
-        if (isMoodAiMode) {
-            AiSparkleOrb(
-                size = 64.dp,
-                isSearching = false,
-                accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.60f)
-            )
-        } else {
-            IrisMascot(
-                mood = IrisMood.EMPTY,
-                size = 80.dp,
-                accentColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.70f)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(18.dp))
-
-        Text(
-            text = stringResource(R.string.search_mood_iris_no_results),
-            style = MaterialTheme.typography.titleMedium.copy(
-                fontWeight = FontWeight.Bold,
-                color = Color.White
-            ),
-            textAlign = TextAlign.Center
-        )
-
-        Spacer(modifier = Modifier.height(6.dp))
-
-        Text(
-            text = stringResource(R.string.search_mood_iris_no_results_desc),
-            style = MaterialTheme.typography.bodySmall.copy(
-                color = Color.White.copy(alpha = 0.50f),
-                lineHeight = 16.sp
-            ),
-            textAlign = TextAlign.Center,
-            modifier = Modifier.widthIn(max = 290.dp)
-        )
     }
 }

@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">暂无可用视频</string>
     <string name="detail_add_subgenres">+ 子类型</string>
     <string name="detail_hide_subgenres">- 隐藏</string>
+    <string name="detail_show_all_subgenres">+ 全部 (%d)</string>
     <string name="detail_streaming">流媒体</string>
     <string name="detail_rent_buy">租赁或购买</string>
     <string name="detail_season">季</string>
@@ -2198,6 +2199,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">用您自己的話描述想觀看的內容。AI 將在完整的 TMDB 片庫中為您挑選最理想的電影。</string>
     <string name="search_mood_iris_intro_text">用您自己的話描述想觀看的內容。IRIS 將在完整的 TMDB 片庫中為您挑選最理想的電影。</string>
+    <string name="search_mood_tip_detail">提示：关于剧情、氛围或角色的细节越丰富，推荐结果越精准。</string>
     <string name="search_mood_exhausted_notice">您今天已用完所有 3 次氛圍搜尋。將於今晚午夜重置！</string>
     <string name="search_mood_exhausted_title">今日 AI 搜尋次數已用完</string>
     <string name="search_mood_switch_to_algo">切換為IRIS（無限制）</string>
@@ -2234,4 +2236,19 @@
     <string name="badge_iris_search_cat">情绪探索</string>
     <string name="badge_iris_search_desc">捕捉电影灵感：将通过 IRIS 或 AI 发现的电影添加到了待看列表中。</string>
     <string name="trophy_unit_searches">次搜索</string>
+
+    <string name="semantic_affinity_suffix">契合度</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">导演: %1$s</string>
+    <string name="semantic_reason_score_by">配乐: %1$s</string>
+    <string name="semantic_reason_cinematography_by">摄影: %1$s</string>
+    <string name="semantic_reason_produced_by">制片: %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s 电影</string>
+    <string name="semantic_reason_critically_acclaimed">影评人力荐杰作 (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">类型经典 (%1$s)</string>
+    <string name="semantic_reason_plot_match">情节契合</string>
+    <string name="semantic_reason_atmosphere">氛围: %1$s</string>
+    <string name="semantic_reason_written_by">编剧: %1$s</string>
 </resources>

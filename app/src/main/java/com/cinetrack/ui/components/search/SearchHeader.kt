@@ -61,6 +61,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.layout.onGloballyPositioned
 import androidx.compose.ui.layout.positionInWindow
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.SoftwareKeyboardController
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.res.vectorResource
@@ -78,6 +79,7 @@ import com.cinetrack.data.model.SortConfig
 import com.cinetrack.data.model.UserPreferences
 import com.cinetrack.data.model.MoodHistoryEntry
 import com.cinetrack.ui.components.glass.hazeGlass
+import com.cinetrack.ui.components.mascot.IrisResultsHero
 import com.cinetrack.ui.components.shared.layoutToggleIcon
 import com.cinetrack.ui.components.shared.nextGridColumns
 import com.cinetrack.ui.utils.bounceClick
@@ -115,16 +117,27 @@ fun SearchHeader(
     modifier: Modifier = Modifier,
     onSubmitSearch: (() -> Unit)? = null,
     moodHistory: List<MoodHistoryEntry> = emptyList(),
-    isMoodAiMode: Boolean = true,
+    isMoodAiMode: Boolean = false,
     moodRemainingQuota: Int = 3,
     onMoodModeChanged: (Boolean) -> Unit = {},
     onSelectMoodHistory: (MoodHistoryEntry) -> Unit = {},
     onDeleteMoodHistory: (String) -> Unit = {},
     onClearMoodHistory: () -> Unit = {},
     isGuest: Boolean = false,
-    onGuestAuthTrigger: () -> Unit = {}
+    onGuestAuthTrigger: () -> Unit = {},
+    onSearchFocusChanged: ((Boolean) -> Unit)? = null,
+    hasMoodResults: Boolean = false,
+    cursorPosition: Int = -1,
+    isSearchFocused: Boolean = false,
+    isLoading: Boolean = false,
+    scrollInertia: Float = 0f,
+    isFocusHunting: Boolean = false,
+    inspectedCardXRatio: Float? = null,
+    inspectedCardYRatio: Float? = null,
+    onOpenBubble: ((ActiveSearchBubble) -> Unit)? = null
 ) {
     val density = LocalDensity.current
+    val focusManager = LocalFocusManager.current
 
     Box(
         modifier = modifier
@@ -135,25 +148,26 @@ fun SearchHeader(
                 onHeaderHeightMeasured(with(density) { layoutCoordinates.size.height.toDp() })
             }
     ) {
-        val headerShape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(headerShape)
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null,
-                    onClick = { /* Intercept accidental taps on header background to prevent leaking to underlying cards */ }
-                )
-                .hazeGlass(
-                    state = hazeState,
-                    shape = headerShape,
-                    borderWidth = 0.dp
-                )
-                .windowInsetsPadding(WindowInsets.statusBars)
-                .windowInsetsPadding(WindowInsets.displayCutout)
-                .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
-        ) {
+        Column(modifier = Modifier.fillMaxWidth()) {
+            val headerShape = RoundedCornerShape(bottomStart = 32.dp, bottomEnd = 32.dp)
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .clip(headerShape)
+                    .clickable(
+                        interactionSource = remember { MutableInteractionSource() },
+                        indication = null,
+                        onClick = { /* Intercept accidental taps on header background to prevent leaking to underlying cards */ }
+                    )
+                    .hazeGlass(
+                        state = hazeState,
+                        shape = headerShape,
+                        borderWidth = 0.dp
+                    )
+                    .windowInsetsPadding(WindowInsets.statusBars)
+                    .windowInsetsPadding(WindowInsets.displayCutout)
+                    .graphicsLayer(compositingStrategy = CompositingStrategy.Offscreen)
+            ) {
             // Row 1: Back, Search, Layout Toggle, Filter
             Row(
                 modifier = Modifier
@@ -195,11 +209,12 @@ fun SearchHeader(
                     keyboardController = keyboardController,
                     onFilterBoundsMeasured = onFilterBoundsMeasured,
                     modifier = Modifier.weight(1f),
-                    onSubmitSearch = onSubmitSearch
+                    onSubmitSearch = onSubmitSearch,
+                    onFocusChanged = onSearchFocusChanged
                 )
             }
 
-            if (sortConfig.selectedKeywords.isNotEmpty()) {
+            if (category != "mood" && category != "person" && category != "collection" && sortConfig.selectedKeywords.isNotEmpty()) {
                 Spacer(modifier = Modifier.height(8.dp))
                 Text(
                     text = stringResource(R.string.search_keyword_filter_warning),
@@ -247,15 +262,23 @@ fun SearchHeader(
                         query = query,
                         onMoodClick = onSelectMoodHistory,
                         onClearAll = onClearMoodHistory,
-                        onDeleteMood = onDeleteMoodHistory
+                        onDeleteMood = onDeleteMoodHistory,
+                        hazeState = hazeState,
+                        onOpenBubble = onOpenBubble
                     )
                 } else {
                     SearchRecentSearchesRow(
                         recentSearches = recentSearches,
                         query = query,
-                        onSearchClick = { onQueryChanged(it) },
+                        onSearchClick = {
+                            keyboardController?.hide()
+                            focusManager.clearFocus()
+                            onQueryChanged(it)
+                        },
                         onClearAll = { onClearRecentSearches() },
-                        onDeleteSearch = { onDeleteRecentSearch(it) }
+                        onDeleteSearch = { onDeleteRecentSearch(it) },
+                        hazeState = hazeState,
+                        onOpenBubble = onOpenBubble
                     )
                 }
             }
@@ -285,5 +308,29 @@ fun SearchHeader(
                 onGuestAuthTrigger = onGuestAuthTrigger
             )
         }
+
+        // Mascotte IRIS unificata per la modalità Cinema Mood:
+        // Rimane SEMPRE montata e viva durante tutta l'esperienza Mood,
+        // animando fluidamente posizione verticale, dimensione e sguardo
+        // tra Idle, Searching e Results senza mai scomparire né ricomparire a scatti.
+        AnimatedVisibility(
+            visible = category == "mood",
+            enter = fadeIn(animationSpec = tween(200)) + expandVertically(animationSpec = spring(dampingRatio = Spring.DampingRatioLowBouncy, stiffness = Spring.StiffnessMediumLow)),
+            exit = fadeOut(animationSpec = tween(160)) + shrinkVertically(animationSpec = tween(180))
+        ) {
+            IrisResultsHero(
+                hasResults = hasMoodResults,
+                isLoading = isLoading,
+                isMoodAiMode = isMoodAiMode,
+                isSearchFocused = isSearchFocused,
+                cursorPosition = cursorPosition,
+                query = query,
+                scrollInertia = scrollInertia,
+                isFocusHunting = isFocusHunting,
+                inspectedCardXRatio = inspectedCardXRatio,
+                inspectedCardYRatio = inspectedCardYRatio
+            )
+        }
     }
+}
 }

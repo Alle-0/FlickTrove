@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">Kullanılabilir video yok</string>
     <string name="detail_add_subgenres">+ Alt Türler</string>
     <string name="detail_hide_subgenres">- Gizle</string>
+    <string name="detail_show_all_subgenres">+ Tümü (%d)</string>
     <string name="detail_streaming">DİJİTALDE</string>
     <string name="detail_rent_buy">KİRALA VEYA SATIN AL</string>
     <string name="detail_season">Sezon</string>
@@ -2198,6 +2199,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Ne izlemek istediğinizi kendi kelimelerinizle açıklayın. Yapay zeka tüm TMDB kataloğundaki ideal filmleri bulsun.</string>
     <string name="search_mood_iris_intro_text">Ne izlemek istediğinizi kendi kelimelerinizle açıklayın. IRIS tüm TMDB kataloğundaki ideal filmleri bulsun.</string>
+    <string name="search_mood_tip_detail">İpucu: Konu, atmosfer veya karakterler hakkında ne kadar çok ayrıntı verirseniz, sonuçlar o kadar doğru olur.</string>
     <string name="search_mood_exhausted_notice">Bugünkü 3 mod arama hakkınızın tamamını kullandınız. Gece yarısı yenilenecek!</string>
     <string name="search_mood_exhausted_title">Günlük Yapay Zeka aramaları tükendi</string>
     <string name="search_mood_switch_to_algo">IRISaya geç (Sınırsız)</string>
@@ -2234,4 +2236,19 @@
     <string name="badge_iris_search_cat">RUH HALİ KEŞFİ</string>
     <string name="badge_iris_search_desc">Vizyonu kucakladınız: IRIS veya Yapay Zeka ile keşfedilen bir filmi izleme listenize eklediniz.</string>
     <string name="trophy_unit_searches">arama</string>
+
+    <string name="semantic_affinity_suffix">uyum</string>
+    <string name="semantic_affinity_format">%1$s · %%%2$d %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %%%2$d</string>
+    <string name="semantic_quote_format">«%1$s» · %%%2$d</string>
+    <string name="semantic_reason_directed_by">Yönetmen: %1$s</string>
+    <string name="semantic_reason_score_by">Müzik: %1$s</string>
+    <string name="semantic_reason_cinematography_by">Görüntü Yönetmeni: %1$s</string>
+    <string name="semantic_reason_produced_by">Yapımcı: %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s Sineması</string>
+    <string name="semantic_reason_critically_acclaimed">Eleştirmenlerden tam not (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Tür klasiği (%1$s)</string>
+    <string name="semantic_reason_plot_match">Konu ve tema uyumu</string>
+    <string name="semantic_reason_atmosphere">Atmosfer: %1$s</string>
+    <string name="semantic_reason_written_by">Senaryo: %1$s</string>
 </resources>

@@ -19,17 +19,20 @@ import javax.inject.Singleton
 @Singleton
 class MediaActionDelegate @Inject constructor(
     private val repository: MovieRepository,
-    private val actionFeedbackManager: ActionFeedbackManager
+    private val actionFeedbackManager: ActionFeedbackManager,
+    private val badgeRepository: com.cinetrack.data.repository.BadgeRepository
 ) {
     fun deleteMovie(scope: CoroutineScope, movie: Movie) {
         scope.launch {
             try {
                 repository.deleteMovie(movie)
+                badgeRepository.evaluateBadgesAsync()
                 actionFeedbackManager.emit(
                     UiText.StringResource(R.string.msg_item_removed, movie.title ?: movie.name ?: "")
                 ) {
                     try {
                         repository.saveMovie(movie)
+                        badgeRepository.evaluateBadgesAsync()
                     } catch (_: Exception) {
                         // ignore nested error
                     }
@@ -43,9 +46,16 @@ class MediaActionDelegate @Inject constructor(
     fun updateRating(scope: CoroutineScope, movie: Movie, rating: Double?) {
         scope.launch {
             try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
-                repository.saveMovie(current.copy(personalRating = rating, votedAt = if (rating != null) System.currentTimeMillis() else null))
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val local = repository.getMovie(movie.id, targetMediaType)
+                val current = local ?: movie.copy(mediaType = targetMediaType)
+                val effectiveRating = if (rating == 0.0) null else rating
+                val oldRating = current.personalRating
+                if (oldRating != null && effectiveRating != null && oldRating != effectiveRating) {
+                    badgeRepository.recordRatingChanged(current.id)
+                }
+                repository.saveMovie(current.copy(personalRating = effectiveRating, votedAt = if (effectiveRating != null) System.currentTimeMillis() else null))
+                badgeRepository.evaluateBadgesAsync()
             } catch (_: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
@@ -55,9 +65,11 @@ class MediaActionDelegate @Inject constructor(
     fun updateNote(scope: CoroutineScope, movie: Movie, note: String?) {
         scope.launch {
             try {
-                val local = repository.getMovie(movie.id, movie.mediaType)
-                val current = local ?: movie
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val local = repository.getMovie(movie.id, targetMediaType)
+                val current = local ?: movie.copy(mediaType = targetMediaType)
                 repository.saveMovie(current.copy(personalNote = note))
+                badgeRepository.evaluateBadgesAsync()
             } catch (_: Exception) {
                 actionFeedbackManager.emit(UiText.StringResource(R.string.msg_error_updating))
             }
@@ -67,7 +79,8 @@ class MediaActionDelegate @Inject constructor(
     fun toggleItemInFolder(scope: CoroutineScope, folder: FolderEntity, movie: Movie) {
         scope.launch {
             try {
-                val compositeId = movie.compositeId
+                val targetMediaType = movie.mediaType.ifBlank { "movie" }
+                val compositeId = movie.compositeId.ifBlank { "${targetMediaType}_${movie.id}" }
                 val isPresent = folder.itemIds.contains(compositeId)
                 if (!isPresent && folder.isShared && folder.itemIds.size >= folder.maxItems) {
                     actionFeedbackManager.emit(UiText.StringResource(R.string.folder_max_items_reached))
@@ -84,10 +97,11 @@ class MediaActionDelegate @Inject constructor(
                         updatedAt = java.time.Instant.now().toString()
                     )
                 )
-                val local = repository.getMovie(movie.id, movie.mediaType)
+                val local = repository.getMovie(movie.id, targetMediaType)
                 if (local == null) {
-                    repository.saveMovie(movie)
+                    repository.saveMovie(movie.copy(mediaType = targetMediaType))
                 }
+                badgeRepository.evaluateBadgesAsync()
                 val title = movie.title ?: movie.name ?: ""
                 val folderName = folder.name
                 actionFeedbackManager.emit(
@@ -96,6 +110,7 @@ class MediaActionDelegate @Inject constructor(
                 ) {
                     try {
                         repository.saveFolder(folder)
+                        badgeRepository.evaluateBadgesAsync()
                     } catch (_: Exception) {
                         // ignore
                     }

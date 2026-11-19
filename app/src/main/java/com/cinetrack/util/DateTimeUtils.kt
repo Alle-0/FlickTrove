@@ -146,6 +146,86 @@ object DateTimeUtils {
     }
 
     /**
+     * Parses an ISO 8601 or date string (with or without 'T' / time portion) to epoch milliseconds.
+     * Returns 0L if null, blank, or invalid.
+     */
+    fun parseToEpochMillis(raw: String?): Long {
+        if (raw.isNullOrBlank()) return 0L
+        return try {
+            if (raw.contains("T")) {
+                try {
+                    Instant.parse(raw).toEpochMilli()
+                } catch (_: Exception) {
+                    java.time.LocalDateTime.parse(raw.take(19))
+                        .atZone(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+                }
+            } else if (raw.length >= 10) {
+                java.time.LocalDate.parse(raw.take(10))
+                    .atStartOfDay(java.time.ZoneId.systemDefault()).toInstant().toEpochMilli()
+            } else {
+                0L
+            }
+        } catch (_: Exception) {
+            0L
+        }
+    }
+
+    /**
+     * Parses a date string across various common formats (ISO Instant, LocalDate yyyy-MM-dd,
+     * LocalDateTime, epoch millis/seconds, dd/MM/yyyy) to a LocalDate.
+     */
+    fun parseDateToLocalDate(raw: String?): java.time.LocalDate? {
+        if (raw.isNullOrBlank()) return null
+        val trimmed = raw.trim()
+
+        // 1. Try ISO Instant
+        try {
+            return Instant.parse(trimmed).atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+        } catch (_: Exception) {}
+
+        // 2. Try ISO LocalDate YYYY-MM-DD
+        try {
+            if (trimmed.length >= 10 && trimmed[4] == '-' && trimmed[7] == '-') {
+                return java.time.LocalDate.parse(trimmed.take(10))
+            }
+        } catch (_: Exception) {}
+
+        // 3. Try ISO LocalDateTime
+        try {
+            val normalized = trimmed.replace(' ', 'T')
+            return java.time.LocalDateTime.parse(normalized).toLocalDate()
+        } catch (_: Exception) {}
+
+        // 4. Try Epoch millis / seconds string
+        try {
+            val epoch = trimmed.toLongOrNull()
+            if (epoch != null && epoch > 100_000_000L) {
+                val instant = if (epoch > 100_000_000_000L) Instant.ofEpochMilli(epoch) else Instant.ofEpochSecond(epoch)
+                return instant.atZone(java.time.ZoneId.systemDefault()).toLocalDate()
+            }
+        } catch (_: Exception) {}
+
+        // 5. Try DD/MM/YYYY
+        try {
+            val dtf = java.time.format.DateTimeFormatter.ofPattern("dd/MM/yyyy")
+            return java.time.LocalDate.parse(trimmed, dtf)
+        } catch (_: Exception) {}
+
+        return null
+    }
+
+    /**
+     * Formats an ISO / arbitrary date string to a localized medium display string.
+     */
+    fun formatDateToLocalDisplay(isoDate: String, locale: Locale = Locale.getDefault()): String {
+        if (isoDate.isBlank()) return ""
+        val parsedDate = parseDateToLocalDate(isoDate) ?: return isoDate
+        val formatter = java.time.format.DateTimeFormatter.ofLocalizedDate(java.time.format.FormatStyle.MEDIUM)
+            .withLocale(locale)
+        return formatter.format(parsedDate)
+    }
+
+    /**
      * Formats a date as a short date string (e.g. "15 nov 26").
      */
     fun formatShortDate(date: Date, locale: Locale = Locale.getDefault()): String {

@@ -216,7 +216,7 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                 }
                             ) {
                                 Box(modifier = Modifier.fillMaxSize()) {
-                                    var guestAuthDialogConfig by remember { mutableStateOf<com.cinetrack.ui.viewmodel.SettingsViewModel.GuestAuthDialogConfig?>(null) }
+                                    var guestAuthDialogConfig by remember { mutableStateOf<com.cinetrack.ui.utils.GuestAuthDialogConfig?>(null) }
                                     LaunchedEffect(Unit) {
                                         settingsViewModel.showGuestAuthDialog.collect { config ->
                                             guestAuthDialogConfig = config

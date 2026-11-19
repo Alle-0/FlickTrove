@@ -45,6 +45,7 @@ fun DetailBackdrop(
     accentColor: Color,
     backgroundColor: Color = Color.Black,
     isOffline: Boolean = false,
+    height: androidx.compose.ui.unit.Dp = 520.dp,
     modifier: Modifier = Modifier
 ) {
     val path = backdropPath ?: posterPath
@@ -52,7 +53,7 @@ fun DetailBackdrop(
     Box(
         modifier = modifier
             .fillMaxWidth()
-            .height(480.dp)
+            .height(height)
             .clipToBounds()
             .background(backgroundColor)
     ) {

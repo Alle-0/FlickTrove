@@ -74,6 +74,7 @@
     <string name="detail_no_trailers">No hay videos disponibles</string>
     <string name="detail_add_subgenres">+ Subgéneros</string>
     <string name="detail_hide_subgenres">- Ocultar</string>
+    <string name="detail_show_all_subgenres">+ Todos (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">ALQUILAR O COMPRAR</string>
     <string name="detail_season">Temporada</string>
@@ -2196,6 +2197,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Describe con tus propias palabras lo que deseas ver. La IA encontrará las películas ideales en todo el catálogo de TMDB.</string>
     <string name="search_mood_iris_intro_text">Describe con tus propias palabras lo que deseas ver. IRIS encontrará las películas ideales en todo el catálogo de TMDB.</string>
+    <string name="search_mood_tip_detail">Sugerencia: cuantos más detalles des sobre la trama, el ambiente o los personajes, más precisos serán los resultados.</string>
     <string name="search_mood_exhausted_notice">Has utilizado las 3 búsquedas por estado de ánimo de hoy. Se restablecerán esta noche a medianoche.</string>
     <string name="search_mood_exhausted_title">Búsquedas IA diarias agotadas</string>
     <string name="search_mood_switch_to_algo">Cambiar a IRIS (ilimitado)</string>
@@ -2232,4 +2234,19 @@
     <string name="badge_iris_search_cat">DESCUBRIMIENTO MOOD</string>
     <string name="badge_iris_search_desc">Aceptaste la visión: añadiste a tu lista de seguimiento una película descubierta con IRIS o IA.</string>
     <string name="trophy_unit_searches">búsquedas</string>
+
+    <string name="semantic_affinity_suffix">afinidad</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Dirigida por %1$s</string>
+    <string name="semantic_reason_score_by">Música de %1$s</string>
+    <string name="semantic_reason_cinematography_by">Fotografía de %1$s</string>
+    <string name="semantic_reason_produced_by">Producida por %1$s</string>
+    <string name="semantic_reason_cinema_of">Cine de %1$s</string>
+    <string name="semantic_reason_critically_acclaimed">Aclamada por la crítica (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Clásico del género (%1$s)</string>
+    <string name="semantic_reason_plot_match">Afinidad temática con la trama</string>
+    <string name="semantic_reason_atmosphere">Ambiente: %1$s</string>
+    <string name="semantic_reason_written_by">Guion de %1$s</string>
 </resources>

@@ -83,6 +83,7 @@
     <string name="detail_no_trailers">Ingen videoer tilgængelige</string>
     <string name="detail_add_subgenres">+ Undergenrer</string>
     <string name="detail_hide_subgenres">- Skjul</string>
+    <string name="detail_show_all_subgenres">+ Alle (%d)</string>
     <string name="detail_streaming">STREAMING</string>
     <string name="detail_rent_buy">LEJ ELLER KØB</string>
     <string name="detail_season">Sæson</string>
@@ -2204,6 +2205,7 @@
     <string name="search_mood_mode_local_tab">IRIS • ∞</string>
     <string name="search_mood_intro_text">Beskriv med dine egne ord, hvad du ønsker at se. AI finder de perfekte film i hele TMDB-kataloget.</string>
     <string name="search_mood_iris_intro_text">Beskriv med dine egne ord, hvad du ønsker at se. IRIS finder de perfekte film i hele TMDB-kataloget.</string>
+    <string name="search_mood_tip_detail">Tip: Jo flere detaljer du giver om handlingen, stemningen eller karaktererne, desto mere præcise bliver resultaterne.</string>
     <string name="search_mood_exhausted_notice">Du har brugt alle 3 stemningssøgninger i dag. De genoplades ved midnat!</string>
     <string name="search_mood_exhausted_title">Daglige AI-søgninger opbrugt</string>
     <string name="search_mood_switch_to_algo">Skift til IRIS (ubegrænset)</string>
@@ -2240,4 +2242,19 @@
     <string name="badge_iris_search_cat">STEMNINGSOPDAGELSE</string>
     <string name="badge_iris_search_desc">Du tog visionen til dig: tilføjede en film opdaget med IRIS eller AI til din overvågningsliste.</string>
     <string name="trophy_unit_searches">søgninger</string>
+
+    <string name="semantic_affinity_suffix">match</string>
+    <string name="semantic_affinity_format">%1$s · %2$d%% %3$s</string>
+    <string name="semantic_plot_match_format">%1$s · %2$d%%</string>
+    <string name="semantic_quote_format">«%1$s» · %2$d%%</string>
+    <string name="semantic_reason_directed_by">Instrueret af %1$s</string>
+    <string name="semantic_reason_score_by">Musik af %1$s</string>
+    <string name="semantic_reason_cinematography_by">Fotografering af %1$s</string>
+    <string name="semantic_reason_produced_by">Produceret af %1$s</string>
+    <string name="semantic_reason_cinema_of">%1$s Film</string>
+    <string name="semantic_reason_critically_acclaimed">Kritikerrost mesterværk (%1$s★)</string>
+    <string name="semantic_reason_genre_classic">Genre-klassiker (%1$s)</string>
+    <string name="semantic_reason_plot_match">Tematisk plot-match</string>
+    <string name="semantic_reason_atmosphere">Stemning: %1$s</string>
+    <string name="semantic_reason_written_by">Manuskript af %1$s</string>
 </resources>

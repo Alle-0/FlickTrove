@@ -245,10 +245,11 @@ fun VistiScreenContent(
                     modifier = Modifier.fillMaxSize(),
                     contentAlignment = androidx.compose.ui.Alignment.Center
                 ) {
-                    Text(
-                        text = if (uiState.searchQuery.isEmpty() && !hasActiveFilters) stringResource(R.string.library_empty_seen) else stringResource(R.string.search_no_results),
-                        color = Color.White.copy(alpha = 0.5f),
-                        style = MaterialTheme.typography.bodyLarge
+                    com.cinetrack.ui.components.mascot.IrisEmptyState(
+                        title = if (uiState.searchQuery.isEmpty() && !hasActiveFilters) stringResource(R.string.library_empty_seen) else stringResource(R.string.search_no_results),
+                        description = if (uiState.searchQuery.isEmpty() && !hasActiveFilters) null else stringResource(R.string.search_no_results_simplify),
+                        gazeBiasY = 0.55f,
+                        size = 84.dp
                     )
                 }
             } else {
