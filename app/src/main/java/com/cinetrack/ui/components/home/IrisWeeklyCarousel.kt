@@ -40,7 +40,7 @@ import com.cinetrack.data.model.IrisWeeklyPicksData
 import com.cinetrack.data.model.IrisWeeklyUiState
 import com.cinetrack.data.model.Movie
 import com.cinetrack.data.model.toMovie
-import com.cinetrack.ui.components.card.Top10MovieCard
+import com.cinetrack.ui.components.card.MovieCard
 import com.cinetrack.ui.components.glass.hazeGlass
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
@@ -132,7 +132,7 @@ private fun IrisWeeklyReadySection(
             .fillMaxWidth()
             .padding(vertical = 12.dp)
     ) {
-        // --- HEADER CINEMATOGRAFICO ---
+        // --- HEADER CINEMATOGRAFICO PULITO ---
         Row(
             modifier = Modifier
                 .fillMaxWidth()
@@ -176,34 +176,18 @@ private fun IrisWeeklyReadySection(
                         letterSpacing = 1.2.sp,
                         color = MaterialTheme.colorScheme.primary
                     )
-
-                    // Pill del Focus tematico
-                    Box(
-                        modifier = Modifier
-                            .clip(RoundedCornerShape(6.dp))
-                            .background(Color.White.copy(alpha = 0.08f))
-                            .padding(horizontal = 6.dp, vertical = 2.dp)
-                    ) {
-                        Text(
-                            text = picks.focusClusterTitle,
-                            style = MaterialTheme.typography.labelSmall,
-                            color = Color.White.copy(alpha = 0.85f),
-                            maxLines = 1,
-                            overflow = TextOverflow.Ellipsis
-                        )
-                    }
                 }
 
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Sottotitolo: "In risonanza con Blade Runner 2049 e Arrival"
-                Text(
-                    text = picks.focusSubtitle,
-                    style = MaterialTheme.typography.bodySmall,
-                    color = Color.White.copy(alpha = 0.6f),
-                    maxLines = 1,
-                    overflow = TextOverflow.Ellipsis
-                )
+                if (picks.focusClusterTitle.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(2.dp))
+                    Text(
+                        text = picks.focusClusterTitle,
+                        style = MaterialTheme.typography.bodySmall,
+                        color = Color.White.copy(alpha = 0.65f),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                }
             }
 
             // Tasto "Cambia Fuoco" - visibile SOLO se l'utente ha più di 1 cluster amato
@@ -222,7 +206,7 @@ private fun IrisWeeklyReadySection(
                         contentDescription = stringResource(R.string.iris_weekly_change_focus),
                         tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier
-                            .size(15.dp)
+                            .size(14.dp)
                             .rotate(rotationAngle)
                     )
                     Text(
@@ -237,36 +221,39 @@ private fun IrisWeeklyReadySection(
 
         Spacer(modifier = Modifier.height(10.dp))
 
-        // --- CAROSELLO TOP 10 ---
+        // --- CAROSELLO PULITO (ZERO NUMERI GIGANTI) ---
         LazyRow(
             state = listState,
             contentPadding = PaddingValues(horizontal = 16.dp),
             horizontalArrangement = Arrangement.spacedBy(12.dp),
             modifier = Modifier.fillMaxWidth()
         ) {
-            itemsIndexed(
-                items = picks.candidateMovies,
-                key = { _, item -> "iris_weekly_${item.id}" }
-            ) { index, searchResult ->
+            items(
+                count = picks.candidateMovies.size,
+                key = { index -> "iris_weekly_${picks.candidateMovies[index].id}" }
+            ) { index ->
+                val searchResult = picks.candidateMovies[index]
                 val baseMovie = remember(searchResult) { searchResult.toMovie() }
                 val movie = resolveLocalMovie(baseMovie)
 
-                Top10MovieCard(
-                    movie = movie,
-                    rank = index + 1,
-                    hazeState = hazeState,
-                    staggerIndex = index,
-                    isFavorite = isMovieFavorite(movie),
-                    isWatched = isMovieWatched(movie),
-                    isReminder = isMovieReminder(movie),
-                    progress = getMovieProgress(movie),
-                    personalRating = movie.personalRating,
-                    folderColors = getMovieFolderColors(movie),
-                    onPress = onMovieClick,
-                    onLongPress = onMovieLongPress,
-                    onAction = onAction,
-                    onMessage = onMessage
-                )
+                Box(modifier = Modifier.width(110.dp)) {
+                    MovieCard(
+                        movie = movie,
+                        cardWidth = 110.dp,
+                        isFavorite = isMovieFavorite(movie),
+                        isWatched = isMovieWatched(movie),
+                        isReminder = isMovieReminder(movie),
+                        progress = getMovieProgress(movie),
+                        personalRating = movie.personalRating,
+                        folderColors = getMovieFolderColors(movie),
+                        hazeState = hazeState,
+                        staggerIndex = index,
+                        onPress = onMovieClick,
+                        onLongPress = onMovieLongPress,
+                        onAction = onAction,
+                        onMessage = onMessage
+                    )
+                }
             }
         }
     }
