@@ -606,6 +606,17 @@ class SemanticSearchRepository @Inject constructor(
         return context.getString(R.string.semantic_plot_match_format, plotMatchLabel, affinityPercent)
     }
 
+    private fun getRoleMarkerRegex(resId: Int, fallbackEn: List<String>): Regex {
+        val localized = try {
+            context.getString(resId).split(',').map { it.trim() }.filter { it.isNotBlank() }
+        } catch (_: Exception) {
+            emptyList()
+        }
+        val allTriggers = (localized + fallbackEn).distinct()
+        val pattern = allTriggers.joinToString("|") { Regex.escape(it) }
+        return Regex("""\b(?:$pattern)\b""", RegexOption.IGNORE_CASE)
+    }
+
     private fun findMatchingCrewRole(
         dto: com.cinetrack.data.api.SemanticMovieDto,
         authorTokens: List<String>,
@@ -614,11 +625,30 @@ class SemanticSearchRepository @Inject constructor(
         if (authorTokens.isEmpty()) return null
 
         val lowerQuery = queryText.lowercase(Locale.ROOT)
-        val hasMusicTrigger = lowerQuery.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|music[ae]|musiche|compositore|compositori|composer[s]?|music\s+by|scored?\s+by)\b""", RegexOption.IGNORE_CASE))
-        val hasCinematographyTrigger = lowerQuery.contains(Regex("""\b(fotografi[ae]|cinematograph[y]?|dop|direttore della fotografia|cinematography\s+by)\b""", RegexOption.IGNORE_CASE))
-        val hasDirectorTrigger = lowerQuery.contains(Regex("""\b(regi[ae]|regista|registi|director[s]?|directed\s+by|diretto\s+da)\b""", RegexOption.IGNORE_CASE))
-        val hasWriterTrigger = lowerQuery.contains(Regex("""\b(sceneggiatur[ae]|sceneggiatore|sceneggiatori|scritto\s+da|written\s+by|screenplay\s+by)\b""", RegexOption.IGNORE_CASE))
-        val hasActorTrigger = lowerQuery.contains(Regex("""\b(interpretat[oi]\s+da|recitat[oi]\s+da|starring|protagonista)\b""", RegexOption.IGNORE_CASE))
+        val hasMusicTrigger = getRoleMarkerRegex(
+            R.string.iris_music_markers,
+            listOf("music by", "soundtrack by", "score by", "scored by", "composer")
+        ).containsMatchIn(lowerQuery)
+
+        val hasCinematographyTrigger = getRoleMarkerRegex(
+            R.string.iris_cinematography_markers,
+            listOf("cinematography by", "director of photography", "dop")
+        ).containsMatchIn(lowerQuery)
+
+        val hasDirectorTrigger = getRoleMarkerRegex(
+            R.string.iris_director_markers,
+            listOf("directed by", "director", "direction by")
+        ).containsMatchIn(lowerQuery)
+
+        val hasWriterTrigger = getRoleMarkerRegex(
+            R.string.iris_writer_markers,
+            listOf("written by", "screenplay by", "writer")
+        ).containsMatchIn(lowerQuery)
+
+        val hasActorTrigger = getRoleMarkerRegex(
+            R.string.iris_actor_markers,
+            listOf("starring", "star", "lead actor")
+        ).containsMatchIn(lowerQuery)
 
         fun matchesPerson(fieldValue: String?, hasExplicitRoleTrigger: Boolean): Boolean {
             if (fieldValue.isNullOrBlank()) return false
@@ -711,14 +741,18 @@ class SemanticSearchRepository @Inject constructor(
     }
 
     private fun looksLikeNonEnglish(query: String): Boolean {
+        // 1. Intercetta istantaneamente oltre 20 lingue non-ASCII (cirillico, arabo, CJK, hindi, greco, thai)
+        // e qualsiasi parola europea con accenti o dieresi (français, español, deutsch, italiano con à/è/ì/ò/ù)
+        if (query.any { it.code > 127 }) return true
+
+        // 2. Manciata di articoli e preposizioni ASCII essenziali per lingue latine pure
         val lower = query.lowercase(Locale.ROOT)
         val tokens = Regex("""\b\p{L}+\b""").findAll(lower).map { it.value }.toSet()
         val nonEnglishMarkers = setOf(
             "un", "una", "uno", "il", "lo", "la", "gli", "le", "dei", "degli", "delle",
             "del", "della", "dello", "con", "senza", "per", "tra", "fra", "che", "chi",
-            "cosa", "dove", "come", "quando", "perché", "perche", "più", "piu", "tutto", "tutti",
-            "storia", "racconto", "bello", "belli", "specchio", "fata", "ragazzo", "drago",
-            "film", "serie", "personaggio", "amore", "morte", "paura", "spazio", "futuro",
+            "cosa", "dove", "come", "quando", "perche", "piu", "tutto", "tutti",
+            "storia", "film", "serie", "personaggio", "amore", "morte", "paura", "spazio", "futuro",
             "el", "los", "las", "para", "por", "avec", "sans", "pour", "dans", "und", "der", "die", "das"
         )
         return tokens.any { it in nonEnglishMarkers }

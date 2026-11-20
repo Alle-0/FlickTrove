@@ -2257,6 +2257,14 @@
     <string name="semantic_reason_atmosphere">Mood: %1$s</string>
     <string name="semantic_reason_written_by">Written by %1$s</string>
 
+    <!-- IRIS Grammar & Semantic Role Triggers (Universal fallback) -->
+    <string name="iris_negation_triggers">without,except,but not,excluding,that is not,that are not,not by,not directed by,no</string>
+    <string name="iris_director_markers">directed by,director,direction by</string>
+    <string name="iris_music_markers">music by,soundtrack by,score by,scored by,composer</string>
+    <string name="iris_cinematography_markers">cinematography by,director of photography,dop</string>
+    <string name="iris_writer_markers">written by,screenplay by,writer</string>
+    <string name="iris_actor_markers">starring,star,lead actor</string>
+
     <!-- IRIS Mood Inspirations Candidates -->
     <string name="iris_prompt_noir">1940s urban noir with pouring rain and late night jazz</string>
     <string name="iris_prompt_scifi">Contemplative sci-fi in the silence of deep space</string>

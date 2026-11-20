@@ -2256,6 +2256,14 @@
     <string name="semantic_reason_atmosphere">Atmosfera: %1$s</string>
     <string name="semantic_reason_written_by">Sceneggiatura di %1$s</string>
 
+    <!-- Trigger grammaticali e di ruolo per IRIS -->
+    <string name="iris_negation_triggers">senza,tranne,ma non,eccetto,escludendo,che non sia,che non siano,non diretto da,non di,non da,no</string>
+    <string name="iris_director_markers">regia di,diretto da,film diretto da,regista,registi</string>
+    <string name="iris_music_markers">musica di,musiche di,colonna sonora di,colonne sonore di,compositore,compositori</string>
+    <string name="iris_cinematography_markers">fotografia di,direttore della fotografia,dop</string>
+    <string name="iris_writer_markers">sceneggiatura di,scritto da,sceneggiatore,sceneggiatori</string>
+    <string name="iris_actor_markers">interpretato da,recitato da,protagonista,protagonisti</string>
+
     <!-- Candidati Ispirazioni Mood IRIS -->
     <string name="iris_prompt_noir">Noir metropolitano anni \'40 con pioggia battente e jazz notturno</string>
     <string name="iris_prompt_scifi">Fantascienza contemplativa nel silenzio dello spazio profondo</string>
