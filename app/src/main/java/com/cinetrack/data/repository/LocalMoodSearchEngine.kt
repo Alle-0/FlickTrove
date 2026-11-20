@@ -1239,14 +1239,17 @@ class LocalMoodSearchEngine @Inject constructor(
         val lower = query.lowercase(Locale.ROOT)
         val negationTriggers = if (isItalian) {
             listOf(
-                "che non sia", "che non siano", "che non sia un", "che non sia una", "che non siano dei", "che non siano delle",
+                "che non sia un", "che non sia una", "che non siano dei", "che non siano delle",
+                "che non sia", "che non siano", "non sia un", "non sia una", "non sia", "non siano",
                 "non diretto da", "non di", "non da",
-                "senza", "tranne", "ma non", "eccetto", "escludendo", "no"
+                "senza un", "senza una", "senza", "tranne", "ma non", "eccetto", "escludendo", "no"
             )
         } else {
             listOf(
-                "that is not", "that are not", "not directed by", "not by",
-                "without", "except", "but not", "excluding", "no"
+                "that is not a", "that is not an", "that is not", "that are not",
+                "is not a", "is not an", "is not", "are not",
+                "not directed by", "not by",
+                "without a", "without an", "without", "except", "but not", "excluding", "no"
             )
         }
 
@@ -1289,19 +1292,39 @@ class LocalMoodSearchEngine @Inject constructor(
         val clauseEnd = listOf(",", ";", " ma ", " pero ", " però ", " but ").map { afterTrigger.indexOf(it) }.filter { it != -1 }.minOrNull()
         val negatedClause = if (clauseEnd != null) afterTrigger.substring(0, clauseEnd).trim() else afterTrigger
 
-        val negatedTokens = extractSignificantContentTokens(negatedClause, isItalian)
+        // Valutazione di finestre composte di 2-3 parole dopo la negazione (es. "commedia romantica" nega Romance 10749L, NON Comedy 35L)
+        val isRomanticComedyNegated = negatedClause.contains(
+            Regex("""\b(commedi[ae]\s+romantics?\w*|commedi[ae]\s+sentimentali?\w*|commedi[ae]\s+d[' ]amore|romantic\s+comed(?:y|ies)|rom-?coms?)\b""", RegexOption.IGNORE_CASE)
+        )
+
+        val rawNegatedTokens = extractSignificantContentTokens(negatedClause, isItalian)
         val negGenres = mutableListOf<Long>()
         val negKeywords = mutableListOf<Long>()
+        val finalNegatedTokens = mutableListOf<String>()
 
-        for (token in negatedTokens) {
+        if (isRomanticComedyNegated) {
+            negGenres.add(10749L) // Romance
+        }
+
+        for (token in rawNegatedTokens) {
+            // Se la negazione è una commedia romantica, impedisci a "commedia" di negare Comedy (35L) o scartare commedie nei token testuali
+            if (isRomanticComedyNegated && (token in listOf("commedia", "comedy", "comico", "comici", "divertente") || token.startsWith("commedi"))) {
+                continue
+            }
+
             val genreId = mapTokenToGenreId(token)
             if (genreId != null) {
-                negGenres.add(genreId)
+                if (genreId == 35L && isRomanticComedyNegated) {
+                    // Non aggiungere 35L se stiamo negando la componente romantica
+                } else {
+                    negGenres.add(genreId)
+                }
             }
             val kwId = querySynonyms[token] ?: dictionary[token]
             if (kwId != null) {
                 negKeywords.add(kwId)
             }
+            finalNegatedTokens.add(token)
         }
 
         return ParsedQueryIntent(
@@ -1309,7 +1332,7 @@ class LocalMoodSearchEngine @Inject constructor(
             negatedText = negatedClause,
             negatedGenres = negGenres.distinct(),
             negatedKeywords = negKeywords.distinct(),
-            negatedTokens = negatedTokens
+            negatedTokens = finalNegatedTokens.distinct()
         )
     }
 
@@ -1328,7 +1351,7 @@ class LocalMoodSearchEngine @Inject constructor(
             "horror", "orrore", "paura" -> 27L
             "musica", "musical", "music" -> 10402L
             "mistero", "mystery", "giallo" -> 9648L
-            "romantico", "romance", "amore", "sentimentale" -> 10749L
+            "romantico", "romance", "amore", "sentimentale", "commedia romantica", "romantic comedy", "commedia sentimentale", "commedia d'amore", "rom-com" -> 10749L
             "fantascienza", "sci-fi", "scifi", "science fiction",
             "spazio-temporale", "spaziotemporale", "spazio temporale",
             "viaggio spazio-temporale", "viaggio spaziotemporale",

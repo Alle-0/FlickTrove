@@ -34,7 +34,7 @@ class SemanticSearchRepository @Inject constructor(
         limit: Int = 100
     ): List<TMDBSearchResult.MovieResult> = withContext(Dispatchers.Default) {
         val rawQuery = query.trim().take(500)
-        if (rawQuery.isBlank()) return@withContext emptyList()
+        if (rawQuery.isBlank()) return@withContext emptyList<TMDBSearchResult.MovieResult>()
 
         val langCode = language.take(2).lowercase()
         // La lingua dei titoli e delle label rispetta la preferenza lingua utente/sistema
@@ -153,11 +153,26 @@ class SemanticSearchRepository @Inject constructor(
                     // 5. RERANKER ALGORITMICO LOCALE KOTLIN (Punto 3: Hybrid Search 100% locale)
                     // A. Preparazione Regex per Ghigliottina Negazioni con Word Boundary (\b), Stemming e Filtro Generi
                     val negatedGenreIds = parsedIntent.negatedGenres.toMutableSet()
+
+                    // Valutazione di finestre composte di 2-3 parole dopo la negazione (es. "commedia romantica" nega Romance 10749L, NON Comedy 35L)
+                    val isRomComNegated = parsedIntent.negatedText?.contains(
+                        Regex("""\b(commedi[ae]\s+romantics?\w*|commedi[ae]\s+sentimentali?\w*|commedi[ae]\s+d[' ]amore|romantic\s+comed(?:y|ies)|rom-?coms?)\b""", RegexOption.IGNORE_CASE)
+                    ) == true
+                    if (isRomComNegated) {
+                        negatedGenreIds.add(10749L)
+                        negatedGenreIds.remove(35L)
+                    }
+
                     val negationRegex: Regex? = if (negatedTokens.isNotEmpty()) {
                         val patterns = mutableListOf<String>()
                         for (rawNeg in negatedTokens) {
                             val negToken = rawNeg.lowercase(Locale.ROOT).trim()
                             if (negToken.length < 3) continue
+
+                            // Se la negazione è commedia romantica, non negare "commedia" come parola o genere
+                            if (isRomComNegated && (negToken in listOf("commedia", "comedy", "comico", "comici", "divertente") || negToken.startsWith("commedi"))) {
+                                continue
+                            }
 
                             // 1. Mappatura diretta dei generi negati (Hard Genre Exclusion su genreIds)
                             when (negToken) {
@@ -166,7 +181,7 @@ class SemanticSearchRepository @Inject constructor(
                                 "musical", "canzoni", "musica", "music" -> negatedGenreIds.add(10402L)
                                 "documentario", "documentari", "documentary", "documentaries", "doc", "docs", "docufilm" -> negatedGenreIds.add(99L)
                                 "western" -> negatedGenreIds.add(37L)
-                                "commedia", "comedy", "comico", "comici" -> negatedGenreIds.add(35L)
+                                "commedia", "comedy", "comico", "comici" -> if (!isRomComNegated) negatedGenreIds.add(35L)
                                 "romantico", "romance", "sentimentale", "amore" -> negatedGenreIds.add(10749L)
                                 "guerra", "war", "bellico" -> negatedGenreIds.add(10752L)
                                 "fantascienza", "sci-fi", "scifi" -> negatedGenreIds.add(878L)
@@ -228,6 +243,7 @@ class SemanticSearchRepository @Inject constructor(
                         Regex("""\b(piangere|commovente|strappalacrime|lacrime|devastante\s+emotiv\w*|far\s+piangere|triste\s+da\s+morire|emotivo)\b""", RegexOption.IGNORE_CASE)
                     )
                     val wantsHorror = positiveText.contains(Regex("""\b(horror|paura|terrore|spavent\w*|brivid\w*)\b""", RegexOption.IGNORE_CASE))
+                    val wantsTvMovie = positiveText.contains(Regex("""\b(tv\s+movie|film\s+tv|television\s+film|film\s+per\s+la\s+tv|film\s+televisiv\w*)\b""", RegexOption.IGNORE_CASE))
 
                     val cleanCandidates = rawResults.filter { dto ->
                         // Anti-Slop: poster obbligatorio, titolo valido
@@ -345,37 +361,43 @@ class SemanticSearchRepository @Inject constructor(
                                 }
                             }
 
-                            // B2. Damping di Popolarità & Anno:
-                            val releaseYear = dto.year?.toIntOrNull() ?: 2020
-                            val isRecentOrFuture = releaseYear >= 2025
-                            val votes = dto.voteCount
+                            // B2. Quality & Popularity Prior Morbido:
+                            // Sfrutta vote_count e vote_average con scala logaritmica (zero hardcoded IDs!):
+                            // - Sotto i 100 voti: scala dolce da 0.88x a 0.94x (smorza produzioni amatoriali e B-movie oscuri)
+                            // - Tra 100 e 5000 voti: neutrale / morbido (0.96x - 1.02x)
+                            // - Sopra i 5000 voti con vote_average >= 7.0: boost logaritmico fino a 1.08x per capolavori acclamati (Interstellar, Blade Runner, ecc.)
+                            val votes = dto.voteCount ?: 0
+                            val voteAvg = dto.voteAverage ?: 6.0
                             val popularityMultiplier = when {
-                                dto.voteCount == null && isRecentOrFuture -> 0.85
-                                dto.voteCount == null -> 1.0
-                                // Se l'utente ha cercato un autore specifico, non penalizzare i suoi capolavori celebri!
-                                matchedCrew != null -> if (votes >= 2000) 1.15 else 1.0
-                                else -> {
-                                    when {
-                                        votes > 6000 -> {
-                                            val excessLog = kotlin.math.ln(votes.toDouble()) - kotlin.math.ln(6000.0)
-                                            (1.0 - (0.06 * excessLog.coerceIn(0.0, 3.5))).coerceAtLeast(0.78)
-                                        }
-                                        votes in 350..5500 && !isRecentOrFuture -> 1.12
-                                        votes < 50 -> 0.88
-                                        else -> 1.0
-                                    }
+                                votes == 0 -> 0.88
+                                votes < 100 -> 0.88 + (votes / 100.0) * 0.06
+                                votes >= 5000 && voteAvg >= 7.0 -> {
+                                    val logBonus = (kotlin.math.log10(votes.toDouble()) - 3.69897).coerceIn(0.0, 1.0) * 0.05
+                                    (1.03 + logBonus).coerceAtMost(1.08)
                                 }
+                                votes >= 1000 && voteAvg >= 6.8 -> 1.03
+                                votes >= 300 -> 1.00
+                                else -> 0.95
                             }
 
                             // B3. Moltiplicatore Qualità Critica (Voto medio TMDB)
-                            val voteAvg = if (dto.voteCount == null) 6.5 else (dto.voteAverage ?: 6.0)
-                            val qualityMultiplier = 0.85 + (voteAvg / 10.0) * 0.25
+                            val qualityMultiplier = when {
+                                dto.voteCount == null || dto.voteCount < 30 -> 1.0
+                                voteAvg >= 8.0 -> 1.05
+                                voteAvg >= 7.2 -> 1.02
+                                voteAvg >= 6.0 -> 1.00
+                                voteAvg < 4.8 -> 0.82 // Penalizza film oggettivamente disastrosi (es. Stormageddon a 4.2)
+                                else -> 0.93
+                            }
 
-                            // B3.1 Boost Animazione/Family per soggetti animali/non umani (es. topi/roditori: Ratatouille batte omonimi live action)
+                            // B3.1 Penalità TV Movie (10770L): applica 0.80x quando non espressamente richiesto
+                            val tvMovieMultiplier = if (!wantsTvMovie && dto.genreIds?.contains(10770L) == true) 0.80 else 1.0
+
+                            // B3.2 Boost Animazione/Family per soggetti animali/non umani (es. topi/roditori: Ratatouille batte omonimi live action)
                             val animalMultiplier = if (isAnimalSubject && (dto.genreIds?.contains(16L) == true || dto.genreIds?.contains(10751L) == true)) 1.25 else 1.0
 
-                            // Score finale composito con boost autore prioritario, decade e subject animali (Zero hardcoded anchors!)
-                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier * decadeMultiplier * animalMultiplier
+                            // Score finale composito con algebra pura (zero hardcoded anchors!)
+                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier * decadeMultiplier * animalMultiplier * tvMovieMultiplier
                             Pair(dto, compositeScore)
                         }
                         .sortedByDescending { it.second }
@@ -405,8 +427,14 @@ class SemanticSearchRepository @Inject constructor(
                             finalRanked.add(Pair(dto, adjustedScore))
                         }
 
-                        finalRanked.sortedByDescending { it.second }
-                        .map { (dto, _) ->
+                        // Filtraggio di sicurezza contro rumore e B-movie affossati dal reranker:
+                        // I film che non hanno il macro-genere ad alta confidenza o TV movie scadenti crollano sotto soglia
+                        val validRanked = finalRanked.filter { (_, score) ->
+                            score >= (thresholdFloor * 0.70)
+                        }
+
+                        validRanked.sortedByDescending { it.second }
+                        .map { (dto, score) ->
                             val contextualReason = formatCinematicReason(
                                 dto = dto,
                                 matchedArchetype = matchedArchetype,
@@ -415,7 +443,8 @@ class SemanticSearchRepository @Inject constructor(
                                 expectedGenres = expectedGenres,
                                 language = language,
                                 queryAuthorTokens = queryAuthorTokens,
-                                positiveQuery = positiveText
+                                positiveQuery = positiveText,
+                                effectiveScore = score
                             )
 
                             dto.toMovieResult(customReason = contextualReason, isItalian = isItalian)
@@ -505,14 +534,25 @@ class SemanticSearchRepository @Inject constructor(
         expectedGenres: List<Long>,
         language: String,
         queryAuthorTokens: List<String> = emptyList(),
-        positiveQuery: String = ""
+        positiveQuery: String = "",
+        effectiveScore: Double? = null
     ): String {
-        val rawAffinity = dto.rawSimilarity ?: dto.score ?: extractScoreFromReason(dto.aiReason) ?: 0.5
+        val baseSim = dto.rawSimilarity ?: dto.score ?: extractScoreFromReason(dto.aiReason) ?: 0.5
         // Curva psicologica non-lineare per la UI:
-        // Tarata sul nuovo Floor di base (0.34f - 0.65f) per garantire differenziazione graduale (71% - 98%)
-        // anche per gemme ripescate nella fascia 0.36 - 0.39.
-        val normalizedCosine = ((rawAffinity.toFloat() - 0.34f) / (0.65f - 0.34f)).coerceIn(0f, 1f)
-        val affinityPercent = (normalizedCosine * 28f + 70f).toInt().coerceIn(68, 98)
+        // Se effectiveScore è fornito dal reranker, usiamo il punteggio armonizzato che include penalità di genere (0.60x),
+        // TV movie (0.80x) e quality prior logaritmico, evitando percentuali gonfiate per film penalizzati.
+        val scoreToDisplay = if (effectiveScore != null) {
+            val ratio = (effectiveScore / baseSim.coerceAtLeast(0.01)).coerceIn(0.15, 1.40)
+            baseSim * ratio
+        } else baseSim
+
+        val affinityPercent = if (scoreToDisplay < 0.32f) {
+            val lowNorm = (scoreToDisplay.toFloat() / 0.32f).coerceIn(0f, 1f)
+            (lowNorm * 28f + 38f).toInt().coerceIn(38, 66)
+        } else {
+            val normalizedCosine = ((scoreToDisplay.toFloat() - 0.32f) / (0.65f - 0.32f)).coerceIn(0f, 1f)
+            (normalizedCosine * 28f + 70f).toInt().coerceIn(68, 98)
+        }
         val affinitySuffix = context.getString(R.string.semantic_affinity_suffix)
         val isItalian = language.lowercase().startsWith("it")
 
@@ -582,20 +622,13 @@ class SemanticSearchRepository @Inject constructor(
             return formatAffinity(acclaimLabel)
         }
 
-        // 7. Regista di spicco se presente
-        val dir = dto.director?.trim()
-        if (!dir.isNullOrBlank()) {
-            val dirLabel = context.getString(R.string.semantic_reason_directed_by, dir)
-            return formatAffinity(dirLabel)
-        }
-
-        // 8. Classico di genere storico (pre-2010 con buon gradimento)
+        // 7. Classico di genere storico (pre-2010 con buon gradimento)
         if (year != null && year <= 2010 && vote >= 6.8) {
             val classicLabel = context.getString(R.string.semantic_reason_genre_classic, year.toString())
             return formatAffinity(classicLabel)
         }
 
-        // 9. Tagline cinematografica ufficiale o Fallback pulito e internazionalizzato
+        // 8. Tagline cinematografica ufficiale o Fallback pulito e internazionalizzato
         val tag = dto.tagline?.trim()
         if (!tag.isNullOrBlank()) {
             val shortTag = if (tag.length > 50) "${tag.take(47)}..." else tag
@@ -625,32 +658,28 @@ class SemanticSearchRepository @Inject constructor(
         if (authorTokens.isEmpty()) return null
 
         val lowerQuery = queryText.lowercase(Locale.ROOT)
-        val hasMusicTrigger = getRoleMarkerRegex(
+        val musicRegex = getRoleMarkerRegex(
             R.string.iris_music_markers,
             listOf("music by", "soundtrack by", "score by", "scored by", "composer")
-        ).containsMatchIn(lowerQuery)
-
-        val hasCinematographyTrigger = getRoleMarkerRegex(
+        )
+        val cinematographyRegex = getRoleMarkerRegex(
             R.string.iris_cinematography_markers,
             listOf("cinematography by", "director of photography", "dop")
-        ).containsMatchIn(lowerQuery)
-
-        val hasDirectorTrigger = getRoleMarkerRegex(
+        )
+        val directorRegex = getRoleMarkerRegex(
             R.string.iris_director_markers,
             listOf("directed by", "director", "direction by")
-        ).containsMatchIn(lowerQuery)
-
-        val hasWriterTrigger = getRoleMarkerRegex(
+        )
+        val writerRegex = getRoleMarkerRegex(
             R.string.iris_writer_markers,
             listOf("written by", "screenplay by", "writer")
-        ).containsMatchIn(lowerQuery)
-
-        val hasActorTrigger = getRoleMarkerRegex(
+        )
+        val actorRegex = getRoleMarkerRegex(
             R.string.iris_actor_markers,
             listOf("starring", "star", "lead actor")
-        ).containsMatchIn(lowerQuery)
+        )
 
-        fun matchesPerson(fieldValue: String?, hasExplicitRoleTrigger: Boolean): Boolean {
+        fun matchesPerson(fieldValue: String?, roleMarkerRegex: Regex?): Boolean {
             if (fieldValue.isNullOrBlank()) return false
             val nameParts = fieldValue.trim().split(Regex("""\s+""")).filter { it.isNotBlank() }
             if (nameParts.isEmpty()) return false
@@ -664,12 +693,15 @@ class SemanticSearchRepository @Inject constructor(
                 if (fullNameRegex.containsMatchIn(lowerQuery)) return true
             }
 
-            // 2. Cognome singolo (1 parola, >= 5 caratteri): scatta ESCLUSIVAMENTE se accompagnato da un marcatore di ruolo esplicito
+            // 2. Cognome singolo (1 parola, >= 5 caratteri): scatta ESCLUSIVAMENTE se preceduto da un marcatore di ruolo esplicito
             // (regia di, diretto da, musica di, colonna sonora di, fotografia di, sceneggiatura di, interpretato da).
-            // Eliminando le preposizioni generiche ("di", "con"), non serve alcuna blacklist infinita di sostantivi.
-            if (hasExplicitRoleTrigger && lastName.length >= 5 && lastName !in ROLE_QUERY_STOPWORDS) {
-                val singleLastNameRegex = Regex("""\b${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
-                if (singleLastNameRegex.containsMatchIn(lowerQuery)) return true
+            // La preposizione generica isolata "di" NON è un marcatore di ruolo, prevenendo falsi positivi (es. "film di natale").
+            if (roleMarkerRegex != null && lastName.length >= 5 && lastName !in ROLE_QUERY_STOPWORDS) {
+                val roleWithLastNameRegex = Regex(
+                    """(?:${roleMarkerRegex.pattern})\s+(?:d[ei]\s+|the\s+)?${Regex.escape(lastName)}\b""",
+                    RegexOption.IGNORE_CASE
+                )
+                if (roleWithLastNameRegex.containsMatchIn(lowerQuery)) return true
             }
 
             return false
@@ -677,20 +709,20 @@ class SemanticSearchRepository @Inject constructor(
 
         // Valutazione gerarchica sui campi dei metadati (composer, cinematography, director, writer, cast):
         val comp = dto.composer?.trim()
-        if (matchesPerson(comp, hasMusicTrigger)) return Pair("composer", comp!!)
+        if (matchesPerson(comp, musicRegex)) return Pair("composer", comp!!)
 
         val dop = dto.cinematographer?.trim()
-        if (matchesPerson(dop, hasCinematographyTrigger)) return Pair("cinematographer", dop!!)
+        if (matchesPerson(dop, cinematographyRegex)) return Pair("cinematographer", dop!!)
 
         val dir = dto.director?.trim()
-        if (matchesPerson(dir, hasDirectorTrigger)) return Pair("director", dir!!)
+        if (matchesPerson(dir, directorRegex)) return Pair("director", dir!!)
 
         val wrt = dto.writer?.trim()
-        if (matchesPerson(wrt, hasWriterTrigger)) return Pair("writer", wrt!!)
+        if (matchesPerson(wrt, writerRegex)) return Pair("writer", wrt!!)
 
         val castMembers = dto.cast?.split(Regex(""",\s*"""))?.filter { it.isNotBlank() }.orEmpty()
         for (actor in castMembers.take(4)) {
-            if (matchesPerson(actor, hasActorTrigger)) return Pair("cast", actor)
+            if (matchesPerson(actor, actorRegex)) return Pair("cast", actor)
         }
 
         return null
