@@ -1238,9 +1238,16 @@ class LocalMoodSearchEngine @Inject constructor(
     ): ParsedQueryIntent {
         val lower = query.lowercase(Locale.ROOT)
         val negationTriggers = if (isItalian) {
-            listOf("senza", "tranne", "ma non", "eccetto", "escludendo", "no")
+            listOf(
+                "che non sia", "che non siano", "che non sia un", "che non sia una", "che non siano dei", "che non siano delle",
+                "non diretto da", "non di", "non da",
+                "senza", "tranne", "ma non", "eccetto", "escludendo", "no"
+            )
         } else {
-            listOf("without", "except", "but not", "excluding", "no")
+            listOf(
+                "that is not", "that are not", "not directed by", "not by",
+                "without", "except", "but not", "excluding", "no"
+            )
         }
 
         var splitIndex = -1

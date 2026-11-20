@@ -740,13 +740,22 @@ class SemanticSearchRepository @Inject constructor(
             "wood", "hill", "bell", "ford", "brown", "miller", "scott", "smith", "jones", "young", "ross",
             "gray", "grey", "green", "white", "black", "blue", "red", "gold", "silver", "iron", "steel", "rock",
             "stile", "style", "tipo", "like",
-            // Sostantivi e aggettivi tematici comuni per prevenire match accidentali su cognomi omonimi
+            // Sostantivi e aggettivi tematici comuni per prevenire match accidentali su cognomi omonimi con la preposizione "di"
             "pioggia", "rain", "guerra", "war", "amore", "love", "fuoco", "fire", "vento", "wind", "tempo", "time",
             "sole", "sun", "mare", "sea", "terra", "earth", "sangue", "blood", "morte", "death", "vita", "life",
             "ombra", "shadow", "luce", "light", "paura", "fear", "sogno", "dream", "acqua", "water", "inverno", "winter",
             "estate", "summer", "tempesta", "storm", "strada", "road", "casa", "house", "citta", "città", "city",
             "occhio", "occhi", "eye", "eyes", "cuore", "heart", "alien", "alieno", "alieni", "spazio", "space",
-            "viaggio", "viaggi", "ragazzo", "ragazza", "uomo", "donna", "bambino", "bambina"
+            "viaggio", "viaggi", "ragazzo", "ragazza", "uomo", "donna", "bambino", "bambina",
+            // Termini specifici da >= 5 caratteri sensibili alla preposizione "di" (es. film di natale, di notte, di futuro)
+            "natale", "christmas", "holiday", "incubo", "incubi", "nightmare", "futuro", "future",
+            "azione", "action", "avventura", "adventure", "commedia", "comedy", "fantascienza", "scifi",
+            "animazione", "animation", "terrore", "terror", "fantasia", "fantasy", "mistero", "mystery",
+            "suspense", "tensione", "magia", "magic", "rapina", "heist", "mafia", "famiglia", "family",
+            "amici", "friends", "coppia", "crimine", "crime", "delitto", "vendetta", "revenge",
+            "fantasmi", "ghosts", "mostri", "monsters", "zombie", "zombies", "vampiri", "vampires",
+            "supereroi", "superheroes", "robot", "robots", "pirati", "pirates", "mondo", "world",
+            "pianeta", "planet", "notte", "notti", "giorno", "giorni", "festa", "feste"
         )
     }
 
