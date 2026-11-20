@@ -2257,4 +2257,12 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="iris_prompt_spaghetti_western">Сутінковий спагетті-вестерн із дуелями на заході сонця</string>
     <string name="iris_prompt_whodunit_mansion">Whodunit таємниця вбивства з головоломками у старовинному особняку</string>
     <string name="iris_prompt_archaeological_adventure">Епічна археологічна пригода через забуті храми та таємниці</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">без,крім,але не,за винятком,не знятий,не від,ні,не</string>
+    <string name="iris_director_markers">режисер,знято,знятий,постановник</string>
+    <string name="iris_music_markers">музика,саундтрек,композитор</string>
+    <string name="iris_cinematography_markers">оператор,операторська робота,доп</string>
+    <string name="iris_writer_markers">сценарій,сценарист,написав</string>
+    <string name="iris_actor_markers">у головних ролях,у головній ролі,за участю,актор</string>
 </resources>

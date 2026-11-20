@@ -2274,4 +2274,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western com duelos ao pôr do sol</string>
     <string name="iris_prompt_whodunit_mansion">Mistério de assassinato policial com quebra-cabeças em uma mansão vintage</string>
     <string name="iris_prompt_archaeological_adventure">Aventura arqueológica épica através de templos e mistérios esquecidos</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">sem,exceto,mas não,excluindo,que não seja,que não sejam,não dirigido por,não de,não</string>
+    <string name="iris_director_markers">dirigido por,direção de,diretor,diretora</string>
+    <string name="iris_music_markers">música de,trilha sonora de,soundtrack de,compositor</string>
+    <string name="iris_cinematography_markers">fotografia de,direção de fotografia,dop</string>
+    <string name="iris_writer_markers">roteiro de,escrito por,roteirista</string>
+    <string name="iris_actor_markers">estrelado por,com,atuação de,protagonista</string>
 </resources>

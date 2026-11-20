@@ -2247,4 +2247,12 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="iris_prompt_spaghetti_western">Zmierzch Spaghetti Western z pojedynkami o zachodzie słońca</string>
     <string name="iris_prompt_whodunit_mansion">Zagadka morderstwa Whodunit z zagadkami w zabytkowej rezydencji</string>
     <string name="iris_prompt_archaeological_adventure">Epicka przygoda archeologiczna poprzez zapomniane świątynie i tajemnice</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">bez,oprócz,ale nie,z wyjątkiem,nie w reżyserii,nie od,nie</string>
+    <string name="iris_director_markers">reżyseria,wyreżyserowany przez,reżyser</string>
+    <string name="iris_music_markers">muzyka,ścieżka dźwiękowa,soundtrack,kompozytor</string>
+    <string name="iris_cinematography_markers">zdjęcia,operator filmowy,dop</string>
+    <string name="iris_writer_markers">scenariusz,napisany przez,scenarzysta</string>
+    <string name="iris_actor_markers">w rolach głównych,z udziałem,aktor,gwiazda</string>
 </resources>

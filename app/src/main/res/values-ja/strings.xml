@@ -2277,4 +2277,12 @@
     <string name="iris_prompt_spaghetti_western">日没の決闘を含むトワイライト スパゲッティ ウエスタン</string>
     <string name="iris_prompt_whodunit_mansion">ビンテージの邸宅を舞台にしたパズルを備えたフーダニット殺人ミステリー</string>
     <string name="iris_prompt_archaeological_adventure">忘れられた寺院と謎を巡る壮大な考古学アドベンチャー</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">なし,含まない,除く,ではなく,以外の,ない,なしで</string>
+    <string name="iris_director_markers">監督,演出,監督作品</string>
+    <string name="iris_music_markers">音楽,サントラ,サウンドトラック,作曲</string>
+    <string name="iris_cinematography_markers">撮影,撮影監督,シネマトグラフィー</string>
+    <string name="iris_writer_markers">脚本,原案,脚本家</string>
+    <string name="iris_actor_markers">出演,主演,キャスト</string>
 </resources>

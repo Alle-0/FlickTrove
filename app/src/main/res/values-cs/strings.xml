@@ -2237,4 +2237,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western s duely při západu slunce</string>
     <string name="iris_prompt_whodunit_mansion">Záhada vraždy Whodunit s hádankami ve starém sídle</string>
     <string name="iris_prompt_archaeological_adventure">Epické archeologické dobrodružství skrz zapomenuté chrámy a záhady</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">bez,kromě,ale ne,s výjimkou,nerežírovaný,ne od,ne</string>
+    <string name="iris_director_markers">režie,režíroval,režisér</string>
+    <string name="iris_music_markers">hudba,soundtrack,filmová hudba,skladatel</string>
+    <string name="iris_cinematography_markers">kamera,hlavní kameraman,dop</string>
+    <string name="iris_writer_markers">scénář,napsal,scenárista</string>
+    <string name="iris_actor_markers">v hlavní roli,hrají,herec</string>
 </resources>

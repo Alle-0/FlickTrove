@@ -2277,4 +2277,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western with sunset duels</string>
     <string name="iris_prompt_whodunit_mansion">老式宅邸中的偵探謀殺案與謎題</string>
     <string name="iris_prompt_archaeological_adventure">穿越被遺忘的寺廟和奧秘的史詩般的考古冒險</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">沒有,不含,排除,不是,除了,無,不</string>
+    <string name="iris_director_markers">導演,執導,執導作品</string>
+    <string name="iris_music_markers">音樂,配樂,原聲帶,作曲</string>
+    <string name="iris_cinematography_markers">攝影,攝影指導,攝製</string>
+    <string name="iris_writer_markers">編劇,劇本,編撰</string>
+    <string name="iris_actor_markers">主演,領銜主演,演員</string>
 </resources>

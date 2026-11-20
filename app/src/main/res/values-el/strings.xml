@@ -2259,4 +2259,12 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western με μονομαχίες ηλιοβασιλέματος</string>
     <string name="iris_prompt_whodunit_mansion">Μυστήριο δολοφονίας Whodunit με παζλ σε μια vintage έπαυλη</string>
     <string name="iris_prompt_archaeological_adventure">Επική αρχαιολογική περιπέτεια μέσα από ξεχασμένους ναούς και μυστήρια</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">χωρίς,εκτός,αλλά όχι,εξαιρώντας,όχι από,δεν,όχι</string>
+    <string name="iris_director_markers">σκηνοθεσία,σκηνοθέτης,σκηνοθετημένο από</string>
+    <string name="iris_music_markers">μουσική,soundtrack,συνθέτης</string>
+    <string name="iris_cinematography_markers">διεύθυνση φωτογραφίας,φωτογραφία,dop</string>
+    <string name="iris_writer_markers">σενάριο,γραμμένο από,σεναριογράφος</string>
+    <string name="iris_actor_markers">πρωταγωνιστεί,με τους,πρωταγωνιστής</string>
 </resources>

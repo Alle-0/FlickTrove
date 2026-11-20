@@ -2256,4 +2256,12 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western naplemente párbajokkal</string>
     <string name="iris_prompt_whodunit_mansion">Whodunit gyilkossági rejtély rejtvényekkel egy vintage kastélyban</string>
     <string name="iris_prompt_archaeological_adventure">Epikus régészeti kaland elfeledett templomokon és rejtélyeken keresztül</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">nélkül,kivéve,de nem,kizárva,nem rendezte,nem,ne</string>
+    <string name="iris_director_markers">rendezte,rendező,rendezés</string>
+    <string name="iris_music_markers">zene,filmzene,soundtrack,zeneszerző</string>
+    <string name="iris_cinematography_markers">operatőr,fényképezte,dop</string>
+    <string name="iris_writer_markers">forgatókönyv,írta,forgatókönyvíró</string>
+    <string name="iris_actor_markers">főszerepben,főszereplő,szereplők</string>
 </resources>

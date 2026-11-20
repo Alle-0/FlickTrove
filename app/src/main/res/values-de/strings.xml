@@ -2282,4 +2282,12 @@
     <string name="iris_cluster_adventure">Abenteuer, Fantasy und Action</string>
     <string name="iris_cluster_comedy">Anspruchsvolle Komödie und witziger Geist</string>
     <string name="iris_cluster_cult_favorites">Meisterwerke des Personenkults</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">ohne,außer,ausser,aber nicht,nicht von,kein,keine,nicht</string>
+    <string name="iris_director_markers">regie von,unter der regie von,regisseur,regisseurin</string>
+    <string name="iris_music_markers">musik von,soundtrack von,filmmusik von,komponist</string>
+    <string name="iris_cinematography_markers">kamera von,bildgestaltung von,chef-kameramann,dop</string>
+    <string name="iris_writer_markers">drehbuch von,geschrieben von,drehbuchautor</string>
+    <string name="iris_actor_markers">mit,in den hauptrollen,hauptdarsteller,gespielt von</string>
 </resources>

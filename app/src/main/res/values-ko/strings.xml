@@ -2277,4 +2277,12 @@
     <string name="iris_prompt_spaghetti_western">황혼의 스파게티 웨스턴과 일몰 결투</string>
     <string name="iris_prompt_whodunit_mansion">빈티지 맨션에서 퍼즐을 풀어가는 Whodunit 살인 미스터리</string>
     <string name="iris_prompt_archaeological_adventure">잊혀진 사원과 미스터리를 통한 장대한 고고학 모험</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">없이,제외,빼고,아닌,말고,아님,없음</string>
+    <string name="iris_director_markers">감독,연출,감독작</string>
+    <string name="iris_music_markers">음악,사운드트랙,ost,작곡</string>
+    <string name="iris_cinematography_markers">촬영,촬영감독</string>
+    <string name="iris_writer_markers">각본,각색,시나리오,작가</string>
+    <string name="iris_actor_markers">주연,출연,배우</string>
 </resources>

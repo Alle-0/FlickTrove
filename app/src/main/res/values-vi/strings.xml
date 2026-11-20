@@ -2237,4 +2237,12 @@
     <string name="iris_prompt_spaghetti_western">Chạng vạng Spaghetti miền Tây với những cuộc đọ sức lúc hoàng hôn</string>
     <string name="iris_prompt_whodunit_mansion">Bí ẩn vụ giết người Whodunit với những câu đố trong một biệt thự cổ điển</string>
     <string name="iris_prompt_archaeological_adventure">Cuộc phiêu lưu khảo cổ hoành tráng qua những ngôi đền bị lãng quên và những bí ẩn</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">không có,ngoại trừ,loại trừ,không phải,miễn là không,không</string>
+    <string name="iris_director_markers">đạo diễn bởi,đạo diễn</string>
+    <string name="iris_music_markers">nhạc phim,nhạc nền,soundtrack,nhạc sĩ</string>
+    <string name="iris_cinematography_markers">quay phim,đạo diễn hình ảnh,dop</string>
+    <string name="iris_writer_markers">kịch bản,viết kịch bản,biên kịch</string>
+    <string name="iris_actor_markers">diễn viên chính,đóng bởi,ngôi sao</string>
 </resources>

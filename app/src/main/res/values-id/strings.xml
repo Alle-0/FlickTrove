@@ -2276,4 +2276,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western dengan duel matahari terbenam</string>
     <string name="iris_prompt_whodunit_mansion">Misteri pembunuhan whodunit dengan teka-teki di rumah antik</string>
     <string name="iris_prompt_archaeological_adventure">Petualangan arkeologi epik melalui kuil dan misteri yang terlupakan</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">tanpa,kecuali,bukan,tidak termasuk,tidak,bukan dari</string>
+    <string name="iris_director_markers">disutradarai oleh,sutradara</string>
+    <string name="iris_music_markers">musik oleh,lagu tema,soundtrack,komposer</string>
+    <string name="iris_cinematography_markers">sinematografi oleh,sinematografer,penata kamera,dop</string>
+    <string name="iris_writer_markers">skenario oleh,ditulis oleh,penulis naskah</string>
+    <string name="iris_actor_markers">dibintangi oleh,pemeran utama,aktor</string>
 </resources>

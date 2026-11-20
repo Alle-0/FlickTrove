@@ -2274,4 +2274,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western with sunset duels</string>
     <string name="iris_prompt_whodunit_mansion">एक पुरानी हवेली में पहेलियों के साथ व्होडुनिट मर्डर मिस्ट्री</string>
     <string name="iris_prompt_archaeological_adventure">भूले हुए मंदिरों और रहस्यों के माध्यम से महाकाव्य पुरातात्विक साहसिक कार्य</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">बिना,के बिना,अलावा,छोड़कर,नहीं,ना</string>
+    <string name="iris_director_markers">निर्देशन,निर्देशक,द्वारा निर्देशित</string>
+    <string name="iris_music_markers">संगीत,साउंडट्रैक,संगीतकार</string>
+    <string name="iris_cinematography_markers">छायांकन,सिनेमैटोग्राफी,डीओपी</string>
+    <string name="iris_writer_markers">लेखन,पटकथा,लेखक</string>
+    <string name="iris_actor_markers">अभिनीत,मुख्य भूमिका,कलाकार,अभिनेता</string>
 </resources>

@@ -2276,4 +2276,12 @@
     <string name="iris_prompt_spaghetti_western">Сумеречный спагетти-вестерн с дуэлями на закате</string>
     <string name="iris_prompt_whodunit_mansion">Детективное расследование убийства с головоломками в старинном особняке</string>
     <string name="iris_prompt_archaeological_adventure">Эпическое археологическое приключение через забытые храмы и загадки</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">без,кроме,но не,исключая,не снятый,не от,нет,не</string>
+    <string name="iris_director_markers">режиссер,режиссёр,снято,снятый,постановщик</string>
+    <string name="iris_music_markers">музыка,саундтрек,композитор</string>
+    <string name="iris_cinematography_markers">оператор,операторская работа,доп</string>
+    <string name="iris_writer_markers">сценарий,сценарист,написал</string>
+    <string name="iris_actor_markers">в главных ролях,в главной роли,с участием,актер</string>
 </resources>

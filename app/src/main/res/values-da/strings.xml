@@ -2283,4 +2283,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western med solnedgangsdueller</string>
     <string name="iris_prompt_whodunit_mansion">Whodunit mordmysterium med gåder i et vintage palæ</string>
     <string name="iris_prompt_archaeological_adventure">Episk arkæologisk eventyr gennem glemte templer og mysterier</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">uden,undtagen,men ikke,eksklusive,ikke instrueret af,ikke af,nej,ikke</string>
+    <string name="iris_director_markers">instrueret af,instruktion af,instruktør</string>
+    <string name="iris_music_markers">musik af,soundtrack af,filmmusik af,komponist</string>
+    <string name="iris_cinematography_markers">fotografering af,cheffotograf,dop</string>
+    <string name="iris_writer_markers">manuskript af,skrevet af,manusforfatter</string>
+    <string name="iris_actor_markers">medvirkende,i hovedrollen,hovedrolleindehaver</string>
 </resources>

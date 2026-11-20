@@ -2259,4 +2259,12 @@ Cod de invitație: %3$s</string>
     <string name="iris_prompt_spaghetti_western">Western Spaghetti Twilight cu dueluri la apus</string>
     <string name="iris_prompt_whodunit_mansion">Misterul crimei Whodunit cu puzzle-uri într-un conac de epocă</string>
     <string name="iris_prompt_archaeological_adventure">Aventura arheologică epică prin temple și mistere uitate</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">fără,cu excepția,dar nu,excluzând,care nu este,nu de,nu</string>
+    <string name="iris_director_markers">regizat de,regia,regizor</string>
+    <string name="iris_music_markers">muzica de,coloana sonoră de,compozitor</string>
+    <string name="iris_cinematography_markers">imaginea de,director de imagine,dop</string>
+    <string name="iris_writer_markers">scenariul de,scris de,scenarist</string>
+    <string name="iris_actor_markers">cu,în rolurile principale,actor principal</string>
 </resources>

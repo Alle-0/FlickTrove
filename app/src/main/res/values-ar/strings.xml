@@ -2234,4 +2234,12 @@
     <string name="iris_prompt_spaghetti_western">توايلايت سباغيتي ويسترن مع مبارزات عند غروب الشمس</string>
     <string name="iris_prompt_whodunit_mansion">جريمة قتل غامضة مع الألغاز في قصر عتيق</string>
     <string name="iris_prompt_archaeological_adventure">مغامرة أثرية ملحمية عبر المعابد والأسرار المنسية</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">بدون,من غير,ما عدا,باستثناء,ليس من,لا,غير</string>
+    <string name="iris_director_markers">إخراج,إخراج من,المخرج,مخرج</string>
+    <string name="iris_music_markers">موسيقى,الموسيقى التصويرية,ساوندتراك,ملحن</string>
+    <string name="iris_cinematography_markers">تصوير سينمائي,مدير التصوير,تصوير</string>
+    <string name="iris_writer_markers">سيناريو,تأليف,كاتب السيناريو,كتابة</string>
+    <string name="iris_actor_markers">بطولة,تمثيل,الممثل الرئيسي,نجم</string>
 </resources>

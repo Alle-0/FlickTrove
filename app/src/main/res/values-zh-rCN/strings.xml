@@ -2277,4 +2277,12 @@
     <string name="iris_prompt_spaghetti_western">暮光意大利西​​部片与日落决斗</string>
     <string name="iris_prompt_whodunit_mansion">老式宅邸中的侦探谋杀案与谜题</string>
     <string name="iris_prompt_archaeological_adventure">穿越被遗忘的寺庙和奥秘的史诗般的考古冒险</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">没有,不含,排除,不是,除了,无,不</string>
+    <string name="iris_director_markers">导演,执导,执导作品</string>
+    <string name="iris_music_markers">音乐,配乐,原声带,作曲</string>
+    <string name="iris_cinematography_markers">摄影,摄影指导,摄制</string>
+    <string name="iris_writer_markers">编剧,剧本,编撰</string>
+    <string name="iris_actor_markers">主演,领衔主演,演员</string>
 </resources>

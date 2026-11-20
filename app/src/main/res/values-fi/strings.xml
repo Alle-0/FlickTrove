@@ -2283,4 +2283,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western auringonlaskun kaksintaisteluilla</string>
     <string name="iris_prompt_whodunit_mansion">Whodunit-murhamysteeri ja arvoituksia vintage-kartanossa</string>
     <string name="iris_prompt_archaeological_adventure">Eeppinen arkeologinen seikkailu unohdettujen temppelien ja mysteerien läpi</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">ilman,paitsi,mutta ei,lukuun ottamatta,ei ohjannut,ei,älä</string>
+    <string name="iris_director_markers">ohjannut,ohjaus,ohjaaja</string>
+    <string name="iris_music_markers">musiikki,soundtrack,elokuvamusiikki,säveltäjä</string>
+    <string name="iris_cinematography_markers">kuvaus,pääkuvaaja,dop</string>
+    <string name="iris_writer_markers">käsikirjoitus,käsikirjoittanut,käsikirjoittaja</string>
+    <string name="iris_actor_markers">pääosassa,näyttelijät,tähtinäyttelijä</string>
 </resources>

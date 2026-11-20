@@ -2237,4 +2237,12 @@
     <string name="iris_prompt_spaghetti_western">Schemeringspaghettiwestern met zonsondergangduels</string>
     <string name="iris_prompt_whodunit_mansion">Whodunit-moordmysterie met puzzels in een vintage herenhuis</string>
     <string name="iris_prompt_archaeological_adventure">Episch archeologisch avontuur door vergeten tempels en mysteries</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">zonder,behalve,maar niet,uitgezonderd,niet geregisseerd door,niet van,geen,niet</string>
+    <string name="iris_director_markers">geregisseerd door,regie van,regisseur</string>
+    <string name="iris_music_markers">muziek van,soundtrack van,filmmuziek van,componist</string>
+    <string name="iris_cinematography_markers">camerawerk van,cinematografie door,dop</string>
+    <string name="iris_writer_markers">scenario door,geschreven door,scenarioschrijver</string>
+    <string name="iris_actor_markers">met in de hoofdrol,met,hoofdrolspeler</string>
 </resources>

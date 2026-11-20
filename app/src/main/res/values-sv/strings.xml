@@ -2256,4 +2256,12 @@ Prova att förenkla sökningen</string>
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western med solnedgångsdueller</string>
     <string name="iris_prompt_whodunit_mansion">Whodunit mordmysterium med pussel i en vintage herrgård</string>
     <string name="iris_prompt_archaeological_adventure">Episkt arkeologiskt äventyr genom bortglömda tempel och mysterier</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">utan,utom,men inte,exklusive,inte regisserad av,inte av,nej,inte</string>
+    <string name="iris_director_markers">regisserad av,regi av,regissör</string>
+    <string name="iris_music_markers">musik av,soundtrack av,filmmusik av,kompositör</string>
+    <string name="iris_cinematography_markers">foto av,filmfoto av,cheffotograf,dop</string>
+    <string name="iris_writer_markers">manus av,skriven av,manusförfattare</string>
+    <string name="iris_actor_markers">medverkande,i huvudrollen,huvudrollsinnehavare</string>
 </resources>

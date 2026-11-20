@@ -2250,4 +2250,12 @@
     <string name="iris_prompt_spaghetti_western">Twilight Spaghetti Western กับการดวลพระอาทิตย์ตก</string>
     <string name="iris_prompt_whodunit_mansion">ความลึกลับของการฆาตกรรม Whodunit พร้อมปริศนาในคฤหาสน์วินเทจ</string>
     <string name="iris_prompt_archaeological_adventure">การผจญภัยทางโบราณคดีครั้งยิ่งใหญ่ผ่านวัดวาอารามและความลึกลับที่ถูกลืม</string>
+
+    <!-- IRIS Grammar & Semantic Role Triggers -->
+    <string name="iris_negation_triggers">ไม่มี,ไม่รวม,ยกเว้น,ไม่ใช่,ปราศจาก,ไม่</string>
+    <string name="iris_director_markers">กำกับโดย,ผู้กำกับ,การกำกับ</string>
+    <string name="iris_music_markers">ดนตรีประกอบ,เพลงประกอบ,ซาวด์แทร็ก,ผู้ประพันธ์เพลง</string>
+    <string name="iris_cinematography_markers">ถ่ายภาพ,ผู้กำกับภาพ</string>
+    <string name="iris_writer_markers">บทภาพยนตร์,เขียนบท,ผู้เขียนบท</string>
+    <string name="iris_actor_markers">นำแสดงโดย,นักแสดงนำ,นักแสดง</string>
 </resources>
