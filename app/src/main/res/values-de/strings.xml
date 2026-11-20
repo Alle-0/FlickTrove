@@ -2290,4 +2290,11 @@
     <string name="iris_cinematography_markers">kamera von,bildgestaltung von,chef-kameramann,dop</string>
     <string name="iris_writer_markers">drehbuch von,geschrieben von,drehbuchautor</string>
     <string name="iris_actor_markers">mit,in den hauptrollen,hauptdarsteller,gespielt von</string>
+    <string name="iris_condition_shorts">kurzfilm,kurzfilme,short film</string>
+    <string name="iris_condition_family">familie,familienfilm,kinder,für die ganze familie,disney,pixar</string>
+    <string name="iris_condition_emotional">weinen,berührend,zu tränen gerührt,tränen,herzzerreißend,traurig,gefühlvoll</string>
+    <string name="iris_condition_horror">horror,angst,gruselig,schrecken,unheimlich,düster</string>
+    <string name="iris_condition_tv_movie">fernsehfilm,tv-film,tv movie</string>
+    <string name="iris_condition_scifi">science-fiction,sci-fi,cyberpunk,synthwave,weltraum,wurmloch,raumschiff,raumfahrt,außerirdische,alien,android,cyborg,roboter,künstliche intelligenz,zeitdilatation,schwarzes loch,dystopie,dystopisch</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopisch,neon,thriller,horror,gore,splatter,mörder,düster,gewalt,raubüberfall,verbrechen</string>
 </resources>

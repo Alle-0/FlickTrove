@@ -2265,4 +2265,11 @@ Trakt ➔ Додаток: 6 год</string>
     <string name="iris_cinematography_markers">оператор,операторська робота,доп</string>
     <string name="iris_writer_markers">сценарій,сценарист,написав</string>
     <string name="iris_actor_markers">у головних ролях,у головній ролі,за участю,актор</string>
+    <string name="iris_condition_shorts">короткометражка,короткометражний фільм,короткометражки,short film</string>
+    <string name="iris_condition_family">сімейний,сім\'я,дитячий,діти,для всієї родини,disney,pixar</string>
+    <string name="iris_condition_emotional">зворушливий,до сліз,сльози,серцероздираючий,сумний,емоційний,плакати</string>
+    <string name="iris_condition_horror">жахи,хорор,страх,лякаючий,моторошний,страшний</string>
+    <string name="iris_condition_tv_movie">телефільм,тб-фільм,фільм для телебачення,tv movie</string>
+    <string name="iris_condition_scifi">фантастика,наукова фантастика,sci-fi,кіберпанк,синтвейв,глибокий космос,кротовина,космічний корабель,прибулець,інопланетянин,андроїд,кіборг,робот,штучний інтелект,уповільнення часу,чорна діра,антиутопія</string>
+    <string name="iris_condition_mature">кіберпанк,нуар,антиутопія,неон,трилер,жахи,розчленування,сплаттер,вбивця,похмурий,насильство,пограбування,кримінал</string>
 </resources>

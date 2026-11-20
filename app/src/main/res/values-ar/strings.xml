@@ -2242,4 +2242,11 @@
     <string name="iris_cinematography_markers">تصوير سينمائي,مدير التصوير,تصوير</string>
     <string name="iris_writer_markers">سيناريو,تأليف,كاتب السيناريو,كتابة</string>
     <string name="iris_actor_markers">بطولة,تمثيل,الممثل الرئيسي,نجم</string>
+    <string name="iris_condition_shorts">فيلم قصير,أفلام قصيرة,short film</string>
+    <string name="iris_condition_family">عائلي,عائلة,أطفال,لكل العائلة,ديزني,بيكسار,disney,pixar</string>
+    <string name="iris_condition_emotional">يبكي,مؤثر,مبكي,دموع,مفجع,حزين</string>
+    <string name="iris_condition_horror">رعب,خوف,مخيف,مرعب</string>
+    <string name="iris_condition_tv_movie">فيلم تلفزيوني,فيلم للتلفزيون,tv movie</string>
+    <string name="iris_condition_scifi">خيال علمي,sci-fi,سايبربانك,سينثويف,الفضاء العميق,ثقب دودي,سفينة فضاء,فضائي,كائن فضائي,أندرويد,سايبورغ,روبوت,ذكاء اصطناعي,تمدد الزمن,ثقب أسود,ديستوبيا</string>
+    <string name="iris_condition_mature">سايبربانك,نوار,ديستوبي,نيون,إثارة,رعب,دموي,قاتل,مظلم,عنف,سطو,جريمة</string>
 </resources>

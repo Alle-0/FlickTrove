@@ -2258,4 +2258,11 @@
     <string name="iris_cinematography_markers">ถ่ายภาพ,ผู้กำกับภาพ</string>
     <string name="iris_writer_markers">บทภาพยนตร์,เขียนบท,ผู้เขียนบท</string>
     <string name="iris_actor_markers">นำแสดงโดย,นักแสดงนำ,นักแสดง</string>
+    <string name="iris_condition_shorts">หนังสั้น,ภาพยนตร์สั้น,short film</string>
+    <string name="iris_condition_family">ครอบครัว,หนังครอบครัว,เด็ก,สำหรับทุกคน,disney,pixar</string>
+    <string name="iris_condition_emotional">ร้องไห้,ซึ้ง,น้ำตา,สะเทือนใจ,เศร้า</string>
+    <string name="iris_condition_horror">สยองขวัญ,ผี,น่ากลัว,หลอน</string>
+    <string name="iris_condition_tv_movie">หนังทีวี,ภาพยนตร์ทางโทรทัศน์,tv movie</string>
+    <string name="iris_condition_scifi">ไซไฟ,วิทยาศาสตร์,ไซเบอร์พังก์,ซินธ์เวฟ,อวกาศ,รูหนอน,ยานอวกาศ,มนุษย์ต่างดาว,แอนดรอยด์,ไซบอร์ก,หุ่นยนต์,ปัญญาประดิษฐ์,การยืดของเวลา,หลุมดำ,ดิสโทเปีย</string>
+    <string name="iris_condition_mature">ไซเบอร์พังก์,นัวร์,ดิสโทเปีย,นีออน,ระทึกขวัญ,สyองขวัญ,เลือดสาด,ฆาตกร,มืดมน,ความรุนแรง,ปล้น,อาชญากรรม</string>
 </resources>

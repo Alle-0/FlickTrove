@@ -22,6 +22,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -58,8 +59,42 @@ fun PersonDetailSkeleton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(480.dp)
-                    .shimmerEffect()
-            )
+            ) {
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .shimmerEffect()
+                )
+
+                val baseColor = Color(0xFF0A0A0A)
+                Box(
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .background(
+                            Brush.verticalGradient(
+                                0.00f to baseColor.copy(alpha = 0.00f),
+                                0.25f to baseColor.copy(alpha = 0.00f),
+                                0.29f to baseColor.copy(alpha = 0.01f),
+                                0.33f to baseColor.copy(alpha = 0.04f),
+                                0.37f to baseColor.copy(alpha = 0.09f),
+                                0.41f to baseColor.copy(alpha = 0.16f),
+                                0.45f to baseColor.copy(alpha = 0.23f),
+                                0.49f to baseColor.copy(alpha = 0.32f),
+                                0.53f to baseColor.copy(alpha = 0.41f),
+                                0.57f to baseColor.copy(alpha = 0.50f),
+                                0.62f to baseColor.copy(alpha = 0.59f),
+                                0.66f to baseColor.copy(alpha = 0.68f),
+                                0.70f to baseColor.copy(alpha = 0.77f),
+                                0.74f to baseColor.copy(alpha = 0.84f),
+                                0.78f to baseColor.copy(alpha = 0.91f),
+                                0.82f to baseColor.copy(alpha = 0.96f),
+                                0.86f to baseColor.copy(alpha = 0.99f),
+                                0.90f to baseColor,
+                                1.00f to baseColor
+                            )
+                        )
+                )
+            }
 
             Column(
                 modifier = Modifier

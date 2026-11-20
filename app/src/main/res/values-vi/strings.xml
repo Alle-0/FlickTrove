@@ -2245,4 +2245,11 @@
     <string name="iris_cinematography_markers">quay phim,đạo diễn hình ảnh,dop</string>
     <string name="iris_writer_markers">kịch bản,viết kịch bản,biên kịch</string>
     <string name="iris_actor_markers">diễn viên chính,đóng bởi,ngôi sao</string>
+    <string name="iris_condition_shorts">phim ngắn,short film</string>
+    <string name="iris_condition_family">gia đình,phim gia đình,trẻ em,cho cả gia đình,disney,pixar</string>
+    <string name="iris_condition_emotional">khóc,cảm động,nước mắt,đau lòng,buồn</string>
+    <string name="iris_condition_horror">kinh dị,sợ hãi,rùng rợn,đáng sợ</string>
+    <string name="iris_condition_tv_movie">phim truyền hình,phim chiếu tv,tv movie</string>
+    <string name="iris_condition_scifi">khoa học viễn tưởng,sci-fi,cyberpunk,synthwave,không gian sâu,lỗ sâu,tàu vũ trụ,người ngoài hành tinh,android,cyborg,robot,trí tuệ nhân tạo,giãn nở thời gian,hố đen,dystopia</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopia,neon,giật gân,kinh dị,máu me,sát nhân,tăm tối,bạo lực,cướp,tội phạm</string>
 </resources>

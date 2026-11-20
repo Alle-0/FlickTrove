@@ -2263,6 +2263,13 @@
     <string name="iris_cinematography_markers">fotografia di,direttore della fotografia,dop</string>
     <string name="iris_writer_markers">sceneggiatura di,scritto da,sceneggiatore,sceneggiatori</string>
     <string name="iris_actor_markers">interpretato da,recitato da,protagonista,protagonisti</string>
+    <string name="iris_condition_shorts">cortometraggio,cortometraggi,corto,corti,short film</string>
+    <string name="iris_condition_family">famiglia,famiglie,bambini,bambino,ragazzini,per tutta la famiglia,disney,pixar</string>
+    <string name="iris_condition_emotional">piangere,commovente,strappalacrime,lacrime,devastante,far piangere,triste da morire,emotivo</string>
+    <string name="iris_condition_horror">horror,paura,terrore,spaventoso,brividi,angoscia</string>
+    <string name="iris_condition_tv_movie">tv movie,film tv,film per la tv,film televisivo,film per la televisione</string>
+    <string name="iris_condition_scifi">fantascienza,sci-fi,cyberpunk,synthwave,spazio profondo,cunicolo spazio temporale,wormhole,astronave,astronavi,viaggio spaziale,alieni,alieno,extraterrestre,androidi,androide,cyborg,robot,intelligenza artificiale,dilatazione temporale,buco nero,distopia,distopico</string>
+    <string name="iris_condition_mature">cyberpunk,noir,distopico,neon,thriller,horror,gore,splatter,killer,dark,oscuro,oscura,violenza,cupo,cupa,rapina,heist,crimine,delitto</string>
 
     <!-- Candidati Ispirazioni Mood IRIS -->
     <string name="iris_prompt_noir">Noir metropolitano anni \'40 con pioggia battente e jazz notturno</string>

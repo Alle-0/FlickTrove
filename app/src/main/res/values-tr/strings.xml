@@ -2285,4 +2285,11 @@
     <string name="iris_cinematography_markers">görüntü yönetmeni,sinematografi,dop</string>
     <string name="iris_writer_markers">senaryo,yazan,senarist</string>
     <string name="iris_actor_markers">başrolde,oyuncular,başrol oyuncusu</string>
+    <string name="iris_condition_shorts">kısa film,kısa filmler,short film</string>
+    <string name="iris_condition_family">aile,ailece,çocuklar,tüm aile için,disney,pixar</string>
+    <string name="iris_condition_emotional">ağlatan,duygusal,gözyaşı,dokunaklı,yürek burkan,üzücü</string>
+    <string name="iris_condition_horror">korku,gerilim,korkunç,ürpertici</string>
+    <string name="iris_condition_tv_movie">televizyon filmi,tv filmi,tv movie</string>
+    <string name="iris_condition_scifi">bilim kurgu,sci-fi,cyberpunk,synthwave,derin uzay,solucan deliği,uzay gemisi,uzay yolculuğu,uzaylı,alien,android,cyborg,robot,yapay zeka,zaman genişlemesi,kara delik,distopya</string>
+    <string name="iris_condition_mature">cyberpunk,noir,distopik,neon,gerilim,korku,gore,katil,karanlık,şiddet,soygun,suç</string>
 </resources>

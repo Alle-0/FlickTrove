@@ -2255,4 +2255,11 @@ Dołącz do mnie i śledź swoje seanse: https://alle-0.github.io/FlickTrove/</s
     <string name="iris_cinematography_markers">zdjęcia,operator filmowy,dop</string>
     <string name="iris_writer_markers">scenariusz,napisany przez,scenarzysta</string>
     <string name="iris_actor_markers">w rolach głównych,z udziałem,aktor,gwiazda</string>
+    <string name="iris_condition_shorts">film krótkometrażowy,krótkometrażówka,short film</string>
+    <string name="iris_condition_family">familijny,rodzina,dla dzieci,dla całej rodziny,disney,pixar</string>
+    <string name="iris_condition_emotional">płakać,wzruszający,do łez,łzy,poruszający,smutny,wyciskacz łez</string>
+    <string name="iris_condition_horror">horror,strach,groza,przerażający,straszny</string>
+    <string name="iris_condition_tv_movie">film telewizyjny,film tv,tv movie</string>
+    <string name="iris_condition_scifi">science fiction,sci-fi,fantastyka naukowa,cyberpunk,synthwave,kosmos,tunel czasoprzestrzenny,statek kosmiczny,obcy,kosmita,android,cyborg,robot,sztuczna inteligencja,dylatacja czasu,czarna dziura,dystopia</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopia,neon,thriller,horror,gore,splatter,morderca,mroczny,przemoc,napad,zbrodnia</string>
 </resources>

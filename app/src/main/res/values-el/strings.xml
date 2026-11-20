@@ -2267,4 +2267,11 @@ SIMKL ➔ Εφαρμογή: 6 ώρες</string>
     <string name="iris_cinematography_markers">διεύθυνση φωτογραφίας,φωτογραφία,dop</string>
     <string name="iris_writer_markers">σενάριο,γραμμένο από,σεναριογράφος</string>
     <string name="iris_actor_markers">πρωταγωνιστεί,με τους,πρωταγωνιστής</string>
+    <string name="iris_condition_shorts">ταινία μικρού μήκους,μικρού μήκους,short film</string>
+    <string name="iris_condition_family">οικογενειακό,οικογένεια,παιδιά,για όλη την οικογένεια,disney,pixar</string>
+    <string name="iris_condition_emotional">κλάμα,συγκινητικό,δακρύβρεχτο,δάκρυα,σπαρακτικό,θλιβερό</string>
+    <string name="iris_condition_horror">τρόμος,φόβος,τρομακτικό,ανατριχιαστικό</string>
+    <string name="iris_condition_tv_movie">τηλεταινία,ταινία για την τηλεόραση,tv movie</string>
+    <string name="iris_condition_scifi">επιστημονική φαντασία,sci-fi,cyberpunk,synthwave,διάστημα,σκουληκότρυπα,διαστημόπλοιο,εξωγήινος,alien,ανδροειδές,cyborg,ρομπότ,τεχνητή νοημοσύνη,διαστολή χρόνου,μαύρη τρύπα,δυστοπία</string>
+    <string name="iris_condition_mature">cyberpunk,noir,δυστοπικό,neon,θρίλερ,τρόμος,gore,δολοφόνος,σκοτεινό,βία,ληστεία,έγκλημα</string>
 </resources>

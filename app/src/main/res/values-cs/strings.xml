@@ -2245,4 +2245,11 @@
     <string name="iris_cinematography_markers">kamera,hlavní kameraman,dop</string>
     <string name="iris_writer_markers">scénář,napsal,scenárista</string>
     <string name="iris_actor_markers">v hlavní roli,hrají,herec</string>
+    <string name="iris_condition_shorts">krátký film,krátkometrážní,short film</string>
+    <string name="iris_condition_family">rodinný,rodina,pro děti,pro celou rodinu,disney,pixar</string>
+    <string name="iris_condition_emotional">plakat,dojemný,k pláči,slzy,srdceryvný,smutný</string>
+    <string name="iris_condition_horror">horor,strach,děsivý,strašidelný</string>
+    <string name="iris_condition_tv_movie">televizní film,tv film,tv movie</string>
+    <string name="iris_condition_scifi">sci-fi,vědeckofantastický,cyberpunk,synthwave,hluboký vesmír,červí díra,vesmírná loď,mimozemšťan,alien,android,kyborg,robot,umělá inteligence,dilatace času,černá díra,dystopie</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopický,neon,thriller,horor,gore,vrah,temný,násilí,loupež,zločin</string>
 </resources>

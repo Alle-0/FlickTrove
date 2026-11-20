@@ -2264,4 +2264,11 @@ Próbáld egyszerűsíteni a keresést</string>
     <string name="iris_cinematography_markers">operatőr,fényképezte,dop</string>
     <string name="iris_writer_markers">forgatókönyv,írta,forgatókönyvíró</string>
     <string name="iris_actor_markers">főszerepben,főszereplő,szereplők</string>
+    <string name="iris_condition_shorts">rövidfilm,rövidfilmek,short film</string>
+    <string name="iris_condition_family">családi,család,gyerekek,az egész családnak,disney,pixar</string>
+    <string name="iris_condition_emotional">sírni,megható,könnyfakasztó,könnyek,szívszorító,szomorú</string>
+    <string name="iris_condition_horror">horror,félelem,félelmetes,ijesztő,rémisztő</string>
+    <string name="iris_condition_tv_movie">tévéfilm,tv film,tv movie</string>
+    <string name="iris_condition_scifi">sci-fi,tudományos-fantasztikus,cyberpunk,synthwave,mélyűr,féreglyuk,űrhajó,űrutazás,földönkívüli,alien,android,kiborg,robot,mesterséges intelligencia,időtágulás,fekete lyuk,disztópia</string>
+    <string name="iris_condition_mature">cyberpunk,noir,disztópikus,neon,thriller,horror,gore,gyilkos,sötét,erőszak,rablás,bűnügy</string>
 </resources>

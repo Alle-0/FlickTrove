@@ -2284,4 +2284,11 @@
     <string name="iris_cinematography_markers">sinematografi oleh,sinematografer,penata kamera,dop</string>
     <string name="iris_writer_markers">skenario oleh,ditulis oleh,penulis naskah</string>
     <string name="iris_actor_markers">dibintangi oleh,pemeran utama,aktor</string>
+    <string name="iris_condition_shorts">film pendek,short film</string>
+    <string name="iris_condition_family">keluarga,ramah keluarga,anak-anak,untuk seluruh keluarga,disney,pixar</string>
+    <string name="iris_condition_emotional">menangis,mengharukan,air mata,menyayat hati,sedih</string>
+    <string name="iris_condition_horror">horor,takut,menakutkan,seram</string>
+    <string name="iris_condition_tv_movie">film televisi,film tv,tv movie</string>
+    <string name="iris_condition_scifi">fiksi ilmiah,sci-fi,cyberpunk,synthwave,luar angkasa,lubang cacing,pesawat luar angkasa,alien,makhluk luar angkasa,android,cyborg,robot,kecerdasan buatan,dilatasi waktu,lubang hitam,distopia</string>
+    <string name="iris_condition_mature">cyberpunk,noir,distopia,neon,thriller,horor,gore,pembunuh,gelap,kekerasan,perampokan,kejahatan</string>
 </resources>

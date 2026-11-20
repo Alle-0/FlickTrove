@@ -2285,4 +2285,11 @@
     <string name="iris_cinematography_markers">撮影,撮影監督,シネマトグラフィー</string>
     <string name="iris_writer_markers">脚本,原案,脚本家</string>
     <string name="iris_actor_markers">出演,主演,キャスト</string>
+    <string name="iris_condition_shorts">短編映画,ショートフィルム,short film</string>
+    <string name="iris_condition_family">ファミリー,家族向け,子供向け,家族,disney,pixar</string>
+    <string name="iris_condition_emotional">泣ける,感動,涙,号泣,切ない,悲しい,感動的</string>
+    <string name="iris_condition_horror">ホラー,恐怖,怖い,心霊,恐ろしい</string>
+    <string name="iris_condition_tv_movie">テレビ映画,TV映画,tv movie</string>
+    <string name="iris_condition_scifi">SF,サイエンスフィクション,サイバーパンク,シンセウェーブ,深宇宙,ワームホール,宇宙船,宇宙旅行,エイリアン,アンドロイド,サイボーグ,ロボット,人工知能,時間の遅れ,ブラックホール,ディストピア</string>
+    <string name="iris_condition_mature">サイバーパンク,ノワール,ディストピア,ネオン,スリラー,ホラー,スプラッター,殺人鬼,ダーク,暴力,強盗,犯罪</string>
 </resources>

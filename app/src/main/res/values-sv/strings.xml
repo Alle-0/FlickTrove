@@ -2264,4 +2264,11 @@ Prova att förenkla sökningen</string>
     <string name="iris_cinematography_markers">foto av,filmfoto av,cheffotograf,dop</string>
     <string name="iris_writer_markers">manus av,skriven av,manusförfattare</string>
     <string name="iris_actor_markers">medverkande,i huvudrollen,huvudrollsinnehavare</string>
+    <string name="iris_condition_shorts">kortfilm,kortfilmer,short film</string>
+    <string name="iris_condition_family">familj,familjefilm,barn,för hela familjen,disney,pixar</string>
+    <string name="iris_condition_emotional">gråta,rörande,tårdrypande,tårar,hjärtskärande,sorglig</string>
+    <string name="iris_condition_horror">skräck,rädsla,läskig,kuslig,skrämmande</string>
+    <string name="iris_condition_tv_movie">tv-film,televisionsfilm,tv movie</string>
+    <string name="iris_condition_scifi">science fiction,sci-fi,cyberpunk,synthwave,rymden,maskhål,rymdskepp,utomjording,alien,android,cyborg,robot,artificiell intelligens,tidsdilatation,svart hål,dystopi</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopisk,neon,thriller,skräck,gore,mördare,mörk,våld,rån,brott</string>
 </resources>

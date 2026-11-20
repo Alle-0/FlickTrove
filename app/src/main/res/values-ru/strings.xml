@@ -2284,4 +2284,11 @@
     <string name="iris_cinematography_markers">оператор,операторская работа,доп</string>
     <string name="iris_writer_markers">сценарий,сценарист,написал</string>
     <string name="iris_actor_markers">в главных ролях,в главной роли,с участием,актер</string>
+    <string name="iris_condition_shorts">короткометражка,короткометражный фильм,короткометражки,short film</string>
+    <string name="iris_condition_family">семейный,семья,детский,дети,для всей семьи,disney,pixar</string>
+    <string name="iris_condition_emotional">плакать,трогательный,до слез,слезы,душераздирающий,грустный,эмоциональный</string>
+    <string name="iris_condition_horror">ужасы,хоррор,страх,пугающий,жуткий,страшный</string>
+    <string name="iris_condition_tv_movie">телефильм,тв-фильм,фильм для тв,tv movie</string>
+    <string name="iris_condition_scifi">фантастика,научная фантастика,sci-fi,киберпанк,синтвейв,глубокий космос,кротовая нора,космический корабль,пришелец,инопланетянин,андроид,киборг,робот,искусственный интеллект,замедление времени,черная дыра,антиутопия</string>
+    <string name="iris_condition_mature">киберпанк,нуар,антиутопия,неон,триллер,ужасы,расчлененка,сплаттер,убийца,мрачный,насилие,ограбление,криминал</string>
 </resources>

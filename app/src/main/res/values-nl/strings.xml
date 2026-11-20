@@ -2245,4 +2245,11 @@
     <string name="iris_cinematography_markers">camerawerk van,cinematografie door,dop</string>
     <string name="iris_writer_markers">scenario door,geschreven door,scenarioschrijver</string>
     <string name="iris_actor_markers">met in de hoofdrol,met,hoofdrolspeler</string>
+    <string name="iris_condition_shorts">korte film,korte films,short film</string>
+    <string name="iris_condition_family">familie,familiefilm,kinderen,voor het hele gezin,disney,pixar</string>
+    <string name="iris_condition_emotional">huilen,ontroerend,tranentrekker,tranen,hartverscheurend,verdrietig</string>
+    <string name="iris_condition_horror">horror,angst,eng,griezelig,angstaanjagend</string>
+    <string name="iris_condition_tv_movie">televisiefilm,tv-film,tv movie</string>
+    <string name="iris_condition_scifi">sciencefiction,sci-fi,cyberpunk,synthwave,diepe ruimte,wormgat,ruimteschip,ruimtereis,buitenaards,alien,androïde,cyborg,robot,kunstmatige intelligentie,tijdsdilatatie,zwart gat,dystopie</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopisch,neon,thriller,horror,gore,splatter,moordenaar,duister,geweld,overval,misdaad</string>
 </resources>

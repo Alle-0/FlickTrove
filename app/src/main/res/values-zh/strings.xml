@@ -2285,4 +2285,11 @@
     <string name="iris_cinematography_markers">攝影,攝影指導,攝製</string>
     <string name="iris_writer_markers">編劇,劇本,編撰</string>
     <string name="iris_actor_markers">主演,領銜主演,演員</string>
+    <string name="iris_condition_shorts">短片,微電影,short film</string>
+    <string name="iris_condition_family">家庭,闔家觀賞,兒童,闔家,disney,pixar</string>
+    <string name="iris_condition_emotional">催淚,感人,流淚,痛哭,悲傷,感動</string>
+    <string name="iris_condition_horror">恐怖,驚悚,害怕,嚇人,恐懼</string>
+    <string name="iris_condition_tv_movie">電視電影,電視片,tv movie</string>
+    <string name="iris_condition_scifi">科幻,賽博朋克,合成波,深空,蟲洞,太空船,太空旅行,外星人,生化人,機器人,人工智慧,時間膨脹,黑洞,反烏托邦</string>
+    <string name="iris_condition_mature">賽博朋克,黑色電影,反烏托邦,霓虹,驚悚,恐怖,血腥,殺手,黑暗,暴力,搶劫,犯罪</string>
 </resources>

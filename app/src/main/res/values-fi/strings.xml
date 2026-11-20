@@ -2291,4 +2291,11 @@
     <string name="iris_cinematography_markers">kuvaus,pääkuvaaja,dop</string>
     <string name="iris_writer_markers">käsikirjoitus,käsikirjoittanut,käsikirjoittaja</string>
     <string name="iris_actor_markers">pääosassa,näyttelijät,tähtinäyttelijä</string>
+    <string name="iris_condition_shorts">lyhytelokuva,lyhytelokuvat,short film</string>
+    <string name="iris_condition_family">perhe,perhe-elokuva,lapset,koko perheelle,disney,pixar</string>
+    <string name="iris_condition_emotional">itkeä,koskettava,kyyneleet,sydäntäsärkevä,surullinen</string>
+    <string name="iris_condition_horror">kauhu,pelko,pelottava,kammottava</string>
+    <string name="iris_condition_tv_movie">televisioelokuva,tv-elokuva,tv movie</string>
+    <string name="iris_condition_scifi">tieteiselokuva,sci-fi,cyberpunk,synthwave,avaruus,madonreikä,avaruusalus,avaruusolento,alien,androidi,kyborgi,robotti,tekoäly,aikadilaatio,musta aukko,dystopia</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystooppinen,neon,trilleri,kauhu,gore,tappaja,synkkä,väkivalta,ryöstö,rikos</string>
 </resources>

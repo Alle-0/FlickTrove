@@ -79,9 +79,20 @@ class SemanticSearchRepository @Inject constructor(
             .filter { it !in ROLE_QUERY_STOPWORDS }
             .toList()
 
-        val isMusicQuery = positiveText.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|music[ae]|musiche|compositore|compositori|composer[s]?)\b""", RegexOption.IGNORE_CASE))
-        val isCinematographyQuery = positiveText.contains(Regex("""\b(fotografi[ae]|cinematograph[y]?|dop|direttore della fotografia|piano[ ]sequenza|piani[ ]sequenza|long take|master shot)\b""", RegexOption.IGNORE_CASE))
-        val isDirectorQuery = positiveText.contains(Regex("""\b(regi[ae]|regista|registi|director[s]?|directed\s+by|diretto\s+da)\b""", RegexOption.IGNORE_CASE))
+        val isMusicQuery = getRoleMarkerRegex(
+            R.string.iris_music_markers,
+            listOf("music by", "soundtrack by", "score by", "scored by", "composer")
+        ).containsMatchIn(positiveText)
+
+        val isCinematographyQuery = getRoleMarkerRegex(
+            R.string.iris_cinematography_markers,
+            listOf("cinematography by", "director of photography", "dop")
+        ).containsMatchIn(positiveText)
+
+        val isDirectorQuery = getRoleMarkerRegex(
+            R.string.iris_director_markers,
+            listOf("directed by", "director", "direction by")
+        ).containsMatchIn(positiveText)
 
         val capitalizedAuthor = if (isMusicQuery || isCinematographyQuery || isDirectorQuery) {
             // Cerca un token esplicitamente capitalizzato dall'utente nella query positiva originale (evitando la prima parola se a inizio frase)
@@ -222,30 +233,58 @@ class SemanticSearchRepository @Inject constructor(
                     } else null
 
                     // Calcolo univoco delle condizioni di query (valutate su positiveText per non essere contaminate da negazioni)
-                    val wantsShorts = positiveText.contains(Regex("""\b(cort[oi]|cortometraggi[oi]|short[s]?|short film)\b""", RegexOption.IGNORE_CASE))
-                    val isSoundtrackQuery = positiveText.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|musiche)\b""", RegexOption.IGNORE_CASE))
+                    val wantsShorts = getRoleMarkerRegex(
+                        R.string.iris_condition_shorts,
+                        listOf("short film", "short films", "shorts", "short movie")
+                    ).containsMatchIn(positiveText)
+
+                    val isSoundtrackQuery = getRoleMarkerRegex(
+                        R.string.iris_music_markers,
+                        listOf("soundtrack", "score", "music", "composer")
+                    ).containsMatchIn(positiveText)
+
                     val wantsDoc = positiveText.contains(
                         Regex("""\b(documentar\w*|docs|docu\w*)\b|\bdoc\b(?!\s+(?:brown|holliday|hudson|ock|savage)\b)""", RegexOption.IGNORE_CASE)
                     ) && !negatedGenreIds.contains(99L)
                     val wantsConcertOrDoc = wantsDoc || positiveText.contains(Regex("""\b(live|concerto|concerti|concert[s]?)\b""", RegexOption.IGNORE_CASE))
                     val targetDecade = detectTargetDecade(positiveText)
+
                     val isMatureOrDarkQuery = (matchedArchetype != null && DARK_MATURE_ARCHETYPE_IDS.contains(matchedArchetype.id)) ||
                         (matchedAtmosphere != null && matchedAtmosphere.id == "dark_disturbing") ||
-                        positiveText.contains(Regex("""\b(cyberpunk|noir|dystop|neon|thriller|horror|gore|splatter|killer|dark|oscur|violenz|cup[oa]|rapin|heist|criminal|delitt)\b""", RegexOption.IGNORE_CASE))
-                    val wantsFamily = positiveText.contains(Regex("""\b(famigli[ae]|family|bambin[oi]|ragazzin[oi]|kids?|disney|pixar)\b""", RegexOption.IGNORE_CASE))
+                        getRoleMarkerRegex(
+                            R.string.iris_condition_mature,
+                            listOf("cyberpunk", "noir", "dystopian", "neon", "thriller", "horror", "gore", "splatter", "killer", "dark", "violence", "heist", "crime")
+                        ).containsMatchIn(positiveText)
+
+                    val wantsFamily = getRoleMarkerRegex(
+                        R.string.iris_condition_family,
+                        listOf("family", "family friendly", "kids", "children", "disney", "pixar")
+                    ).containsMatchIn(positiveText)
+
                     val isAnimalSubject = MoodVocabularies.detectAnimalOrNonHumanSubject(positiveText)
 
-                    // Guardie ad alta confidenza per macro-generi inequivocabili:
+                    // Guardie ad alta confidenza per macro-generi inequivocabili (localizzate via strings.xml):
                     val isStrictSciFiIntent = expectedGenres.contains(878L) ||
                         (matchedArchetype != null && matchedArchetype.primaryGenres.contains(878L)) ||
-                        positiveText.contains(
-                            Regex("""\b(cyberpunk|sci-?fi|fantascienza|synthwave|spazio\s+profondo|cunicolo\s+spazio[- ]?temporale|wormhole|astronav[ei]|viagg[io]\s+spazial[ei]|alien[oi]|extraterrestr[ei]|android[ei]|cyborg|robot|intelligenza\s+artificiale|dilatazione\s+temporale|buco\s+nero|buchi\s+neri|black\s+hole|distopi[ae]|distopic[oi]|dystopi\w*)\b""", RegexOption.IGNORE_CASE)
-                        )
-                    val isStrictEmotionalIntent = positiveText.contains(
-                        Regex("""\b(piangere|commovente|strappalacrime|lacrime|devastante\s+emotiv\w*|far\s+piangere|triste\s+da\s+morire|emotivo)\b""", RegexOption.IGNORE_CASE)
-                    )
-                    val wantsHorror = positiveText.contains(Regex("""\b(horror|paura|terrore|spavent\w*|brivid\w*)\b""", RegexOption.IGNORE_CASE))
-                    val wantsTvMovie = positiveText.contains(Regex("""\b(tv\s+movie|film\s+tv|television\s+film|film\s+per\s+la\s+tv|film\s+televisiv\w*)\b""", RegexOption.IGNORE_CASE))
+                        getRoleMarkerRegex(
+                            R.string.iris_condition_scifi,
+                            listOf("cyberpunk", "sci-fi", "science fiction", "synthwave", "deep space", "wormhole", "spaceship", "alien", "android", "cyborg", "robot", "time dilation", "black hole", "dystopian")
+                        ).containsMatchIn(positiveText)
+
+                    val isStrictEmotionalIntent = getRoleMarkerRegex(
+                        R.string.iris_condition_emotional,
+                        listOf("cry", "crying", "tearjerker", "tears", "heartbreaking", "devastating", "sad", "touching", "moving")
+                    ).containsMatchIn(positiveText)
+
+                    val wantsHorror = getRoleMarkerRegex(
+                        R.string.iris_condition_horror,
+                        listOf("horror", "scary", "terror", "fear", "frightening", "spooky", "creepy")
+                    ).containsMatchIn(positiveText)
+
+                    val wantsTvMovie = getRoleMarkerRegex(
+                        R.string.iris_condition_tv_movie,
+                        listOf("tv movie", "television film", "made for tv", "tv film")
+                    ).containsMatchIn(positiveText)
 
                     val cleanCandidates = rawResults.filter { dto ->
                         // Anti-Slop: poster obbligatorio, titolo valido

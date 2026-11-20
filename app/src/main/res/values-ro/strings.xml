@@ -2267,4 +2267,11 @@ Cod de invitație: %3$s</string>
     <string name="iris_cinematography_markers">imaginea de,director de imagine,dop</string>
     <string name="iris_writer_markers">scenariul de,scris de,scenarist</string>
     <string name="iris_actor_markers">cu,în rolurile principale,actor principal</string>
+    <string name="iris_condition_shorts">scurtmetraj,scurtmetraje,short film</string>
+    <string name="iris_condition_family">familie,familial,copii,pentru toată familia,disney,pixar</string>
+    <string name="iris_condition_emotional">plâns,emoționant,sfâșietor,lacrimi,trist,de plâns</string>
+    <string name="iris_condition_horror">groază,horror,frică,înfricoșător,terifiant</string>
+    <string name="iris_condition_tv_movie">film de televiziune,film tv,tv movie</string>
+    <string name="iris_condition_scifi">științifico-fantastic,sci-fi,cyberpunk,synthwave,spațiu cosmic,gaură de vierme,navă spațială,extraterestru,alien,android,cyborg,robot,inteligență artificială,dilatare temporală,gaură neagră,distopie</string>
+    <string name="iris_condition_mature">cyberpunk,noir,distopic,neon,thriller,horror,gore,criminal,întunecat,violență,jaf,crimă</string>
 </resources>

@@ -2282,4 +2282,11 @@
     <string name="iris_cinematography_markers">छायांकन,सिनेमैटोग्राफी,डीओपी</string>
     <string name="iris_writer_markers">लेखन,पटकथा,लेखक</string>
     <string name="iris_actor_markers">अभिनीत,मुख्य भूमिका,कलाकार,अभिनेता</string>
+    <string name="iris_condition_shorts">शॉर्ट फिल्म,लघु फिल्म,short film</string>
+    <string name="iris_condition_family">पारिवारिक,परिवार,बच्चे,पूरे परिवार के लिए,disney,pixar</string>
+    <string name="iris_condition_emotional">रुला देने वाली,भावुक,आंसू,दिल दहला देने वाला,दुखद</string>
+    <string name="iris_condition_horror">हॉरर,डरावनी,भय,खौफनाक</string>
+    <string name="iris_condition_tv_movie">टीवी फिल्म,टेलीविजन फिल्म,tv movie</string>
+    <string name="iris_condition_scifi">साइंस फिक्शन,sci-fi,साइबरपंक,सिंथवेव,गहरा अंतरिक्ष,वर्महोल,अंतरिक्ष यान,एलियन,एंड्रॉइड,साइबोर्ग,रोबोट,आर्टिफिशियल इंटेलिजेंस,समय फैलाव,ब्लैक होल,डिस्टोपिया</string>
+    <string name="iris_condition_mature">साइबरपंक,नोयर,डिस्टोपियन,नियॉन,थ्रिलर,हॉरर,खूनी,कातिल,अंधेरा,हिंसा,डकैती,अपराध</string>
 </resources>

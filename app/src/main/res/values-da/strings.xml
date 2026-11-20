@@ -2291,4 +2291,11 @@
     <string name="iris_cinematography_markers">fotografering af,cheffotograf,dop</string>
     <string name="iris_writer_markers">manuskript af,skrevet af,manusforfatter</string>
     <string name="iris_actor_markers">medvirkende,i hovedrollen,hovedrolleindehaver</string>
+    <string name="iris_condition_shorts">kortfilm,kortfilmer,short film</string>
+    <string name="iris_condition_family">familie,familiefilm,børn,for hele familien,disney,pixar</string>
+    <string name="iris_condition_emotional">græde,rørende,tårevædet,tårer,hjerteskærende,sørgelig</string>
+    <string name="iris_condition_horror">gys,skræk,uhyggelig,frygt,skræmmende</string>
+    <string name="iris_condition_tv_movie">tv-film,fjernsynsfilm,tv movie</string>
+    <string name="iris_condition_scifi">science fiction,sci-fi,cyberpunk,synthwave,rummet,ormehul,rumskib,rumrejse,rumvæsen,alien,android,cyborg,robot,kunstig intelligens,tidsudvidelse,sort hul,dystopi</string>
+    <string name="iris_condition_mature">cyberpunk,noir,dystopisk,neon,thriller,gys,gore,morder,mørk,vold,røveri,forbrydelse</string>
 </resources>
