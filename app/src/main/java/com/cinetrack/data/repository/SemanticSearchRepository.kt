@@ -209,16 +209,25 @@ class SemanticSearchRepository @Inject constructor(
                     // Calcolo univoco delle condizioni di query (valutate su positiveText per non essere contaminate da negazioni)
                     val wantsShorts = positiveText.contains(Regex("""\b(cort[oi]|cortometraggi[oi]|short[s]?|short film)\b""", RegexOption.IGNORE_CASE))
                     val isSoundtrackQuery = positiveText.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|musiche)\b""", RegexOption.IGNORE_CASE))
-                    val wantsConcertOrDoc = positiveText.contains(Regex("""\b(live|concerto|concerti|concert[s]?|documentar[io]|doc)\b""", RegexOption.IGNORE_CASE))
                     val wantsDoc = positiveText.contains(
                         Regex("""\b(documentar\w*|docs|docu\w*)\b|\bdoc\b(?!\s+(?:brown|holliday|hudson|ock|savage)\b)""", RegexOption.IGNORE_CASE)
                     ) && !negatedGenreIds.contains(99L)
+                    val wantsConcertOrDoc = wantsDoc || positiveText.contains(Regex("""\b(live|concerto|concerti|concert[s]?)\b""", RegexOption.IGNORE_CASE))
                     val targetDecade = detectTargetDecade(positiveText)
                     val isMatureOrDarkQuery = (matchedArchetype != null && DARK_MATURE_ARCHETYPE_IDS.contains(matchedArchetype.id)) ||
                         (matchedAtmosphere != null && matchedAtmosphere.id == "dark_disturbing") ||
                         positiveText.contains(Regex("""\b(cyberpunk|noir|dystop|neon|thriller|horror|gore|splatter|killer|dark|oscur|violenz|cup[oa]|rapin|heist|criminal|delitt)\b""", RegexOption.IGNORE_CASE))
                     val wantsFamily = positiveText.contains(Regex("""\b(famigli[ae]|family|bambin[oi]|ragazzin[oi]|kids?|disney|pixar)\b""", RegexOption.IGNORE_CASE))
                     val isAnimalSubject = MoodVocabularies.detectAnimalOrNonHumanSubject(positiveText)
+
+                    // Guardie ad alta confidenza per macro-generi inequivocabili:
+                    val isStrictSciFiIntent = positiveText.contains(
+                        Regex("""\b(cyberpunk|sci-?fi|fantascienza|spazio\s+profondo|cunicolo\s+spazio[- ]?temporale|wormhole|astronav[ei]|viagg[io]\s+spazial[ei]|alien[oi]|extraterrestr[ei])\b""", RegexOption.IGNORE_CASE)
+                    )
+                    val isStrictEmotionalIntent = positiveText.contains(
+                        Regex("""\b(piangere|commovente|strappalacrime|lacrime|devastante\s+emotiv\w*|far\s+piangere|triste\s+da\s+morire|emotivo)\b""", RegexOption.IGNORE_CASE)
+                    )
+                    val wantsHorror = positiveText.contains(Regex("""\b(horror|paura|terrore|spavent\w*|brivid\w*)\b""", RegexOption.IGNORE_CASE))
 
                     val cleanCandidates = rawResults.filter { dto ->
                         // Anti-Slop: poster obbligatorio, titolo valido
@@ -292,37 +301,48 @@ class SemanticSearchRepository @Inject constructor(
                         val scoredCandidates = candidatesToScore.map { dto ->
                             val rawAffinity = dto.rawSimilarity ?: dto.score ?: extractScoreFromReason(dto.aiReason) ?: 0.5
 
-                            // Match dinamico con gli autori / crew tecnica (DoP, Compositore, Regista, Sceneggiatore)
+                            // Match dinamico con gli autori / crew tecnica (DoP, Compositore, Regista, Sceneggiatore, Cast)
                             val matchedCrew = findMatchingCrewRole(dto, queryAuthorTokens, positiveText)
                             val crewMultiplier = if (matchedCrew != null) 1.55 else 1.0
 
-                            // B0. Boost Anchor per l'archetipo identificato (es. Goonies, E.T. per teen_adventure)
-                            val isAnchor = matchedArchetype?.anchorMovieIds?.contains(dto.id) == true
-                            val anchorMultiplier = if (isAnchor) 1.40 else 1.0
-
                             // B0.1 Damping e Boost Decennio:
                             // Se il film è uscito nel decennio indicato: +25% (1.25x).
-                            // Se è uscito molto lontano (es. > 15 anni di scarto, come Bicycle Thieves 1948 rispetto agli anni '80)
-                            // e non è un anchor: attenuazione moderata (0.80x) che preserva film ambientati nell'epoca (Super 8, IT, Summer of 84)
+                            // Se è uscito molto lontano (es. > 15 anni di scarto, come Bicycle Thieves 1948 rispetto agli anni '80):
+                            // attenuazione moderata (0.80x) che preserva film ambientati nell'epoca (Super 8, IT, Summer of 84)
                             val decadeMultiplier = if (targetDecade != null) {
                                 val y = dto.year?.toIntOrNull()
                                 when {
                                     y == null -> 1.0
                                     y in targetDecade -> 1.25
-                                    !isAnchor && (y < targetDecade.first - 15 || y > targetDecade.last + 15) -> 0.80
+                                    y < targetDecade.first - 15 || y > targetDecade.last + 15 -> 0.80
                                     else -> 1.0
                                 }
                             } else 1.0
 
-                            // B1. Macro-Cluster di Genere:
+                            // B1. Macro-Cluster di Genere & Penalità ad Alta Confidenza:
                             // Se il film condivide un genere o un genere narrativamente affine del cluster, riceve +12%.
                             // Se c'è mismatch totale ma la sinossi è eccellente, subisce un'attenuazione moderata (0.78x anziché 0.50x).
                             val movieGenres = dto.genreIds.orEmpty()
-                            val genreMultiplier = if (expandedExpectedGenres.isNotEmpty() && movieGenres.isNotEmpty()) {
+                            var genreMultiplier = if (expandedExpectedGenres.isNotEmpty() && movieGenres.isNotEmpty()) {
                                 val hasOverlap = movieGenres.any { expandedExpectedGenres.contains(it) }
                                 if (hasOverlap) 1.12 else 0.78 // Penalità attenuata: 0.78x preserva grandi film di confine
                             } else {
                                 1.0
+                            }
+
+                            // Penalità severa (0.60x) su macro-generi mancanti ad alta confidenza:
+                            if (isStrictSciFiIntent && !movieGenres.contains(878L)) {
+                                genreMultiplier *= 0.60
+                            }
+                            if (isStrictEmotionalIntent) {
+                                val hasEmotionalGenre = movieGenres.contains(18L) || movieGenres.contains(10749L)
+                                if (!hasEmotionalGenre) {
+                                    genreMultiplier *= 0.60
+                                }
+                                // Taglia fuori B-movie horror fuori tema se non richiesto
+                                if (movieGenres.contains(27L) && !wantsHorror) {
+                                    genreMultiplier *= 0.50
+                                }
                             }
 
                             // B2. Damping di Popolarità & Anno:
@@ -332,8 +352,8 @@ class SemanticSearchRepository @Inject constructor(
                             val popularityMultiplier = when {
                                 dto.voteCount == null && isRecentOrFuture -> 0.85
                                 dto.voteCount == null -> 1.0
-                                // Se l'utente ha cercato un autore specifico o il film è un anchor ufficiale dell'archetipo, non penalizzare i suoi capolavori celebri!
-                                matchedCrew != null || isAnchor -> if (votes >= 2000) 1.15 else 1.0
+                                // Se l'utente ha cercato un autore specifico, non penalizzare i suoi capolavori celebri!
+                                matchedCrew != null -> if (votes >= 2000) 1.15 else 1.0
                                 else -> {
                                     when {
                                         votes > 6000 -> {
@@ -354,8 +374,8 @@ class SemanticSearchRepository @Inject constructor(
                             // B3.1 Boost Animazione/Family per soggetti animali/non umani (es. topi/roditori: Ratatouille batte omonimi live action)
                             val animalMultiplier = if (isAnimalSubject && (dto.genreIds?.contains(16L) == true || dto.genreIds?.contains(10751L) == true)) 1.25 else 1.0
 
-                            // Score finale composito con boost autore prioritario, anchor, decade e subject animali
-                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier * anchorMultiplier * decadeMultiplier * animalMultiplier
+                            // Score finale composito con boost autore prioritario, decade e subject animali (Zero hardcoded anchors!)
+                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier * decadeMultiplier * animalMultiplier
                             Pair(dto, compositeScore)
                         }
                         .sortedByDescending { it.second }
@@ -507,6 +527,7 @@ class SemanticSearchRepository @Inject constructor(
                 "composer" -> context.getString(R.string.semantic_reason_score_by, personName)
                 "cinematographer" -> context.getString(R.string.semantic_reason_cinematography_by, personName)
                 "writer" -> context.getString(R.string.semantic_reason_written_by, personName)
+                "cast" -> context.getString(R.string.semantic_reason_cinema_of, personName)
                 else -> context.getString(R.string.semantic_reason_directed_by, personName)
             }
             return formatAffinity(roleLabel)
@@ -604,18 +625,29 @@ class SemanticSearchRepository @Inject constructor(
             val lastName = nameParts.last().lowercase(Locale.ROOT)
             val firstName = nameParts.first().lowercase(Locale.ROOT)
 
-            // 1. Il token autore nella query deve matchare il cognome della persona (es. "Zimmer", "Deakins", "Nolan")
-            if (authorTokens.any { it.equals(lastName, ignoreCase = true) }) {
-                return true
-            }
-
-            // 2. Se ci sono più parti nel nome, verifica se la query contiene il nome completo (es. "Hans Zimmer")
+            // 1. Match Nome e Cognome completo nella query (es. "Hans Zimmer", "Christopher Nolan", "Roger Deakins") -> Massima confidenza
             if (nameParts.size >= 2) {
                 val fullNameRegex = Regex("""\b${Regex.escape(firstName)}\s+${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
                 if (fullNameRegex.containsMatchIn(lowerQuery)) return true
             }
 
-            // Un token che matcha solo il primo nome di battesimo (es. "Hans") non deve MAI dare boost a persone con cognome diverso!
+            // 2. Match su Cognome singolo (es. "Nolan", "Zimmer", "Tarantino"):
+            // Guardia anti-falsi positivi (es. attori con cognome "Rain" o "Guerra"):
+            // a) Il cognome deve avere >= 5 caratteri e NON essere una parola comune di cinema, trama o dizionario (ROLE_QUERY_STOPWORDS)
+            // b) Deve esserci un marcatore di ruolo contestuale:
+            //    - Se è una query esplicita di ruolo (isMusicQuery, isCinematographyQuery, isDirectorQuery)
+            //    - OPPURE se il cognome è introdotto da una preposizione attributiva (es. "di Nolan", "diretto da Tarantino", "by Zimmer", "con DiCaprio")
+            val isCommonWord = lastName in ROLE_QUERY_STOPWORDS
+            if (lastName.length >= 5 && !isCommonWord) {
+                if (isMusicQuery || isCinematographyQuery || isDirectorQuery) {
+                    val singleLastNameRegex = Regex("""\b${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
+                    if (singleLastNameRegex.containsMatchIn(lowerQuery)) return true
+                } else {
+                    val attributedRegex = Regex("""\b(?:di|da|by|con|with)\s+${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
+                    if (attributedRegex.containsMatchIn(lowerQuery)) return true
+                }
+            }
+
             return false
         }
 
@@ -640,7 +672,7 @@ class SemanticSearchRepository @Inject constructor(
             return null
         }
 
-        // Altrimenti valuta i ruoli in ordine gerarchico (composer, cinematographer, director, writer)
+        // Altrimenti valuta i ruoli in ordine gerarchico (composer, cinematographer, director, writer, cast)
         val comp = dto.composer?.trim()
         if (matchesPerson(comp)) return Pair("composer", comp!!)
 
@@ -652,6 +684,12 @@ class SemanticSearchRepository @Inject constructor(
 
         val wrt = dto.writer?.trim()
         if (matchesPerson(wrt)) return Pair("writer", wrt!!)
+
+        // Match su interpreti/cast: protetto dalle guardie di matchesPerson
+        val castMembers = dto.cast?.split(Regex(""",\s*"""))?.filter { it.isNotBlank() }.orEmpty()
+        for (actor in castMembers.take(4)) {
+            if (matchesPerson(actor)) return Pair("cast", actor)
+        }
 
         return null
     }
@@ -701,7 +739,14 @@ class SemanticSearchRepository @Inject constructor(
             "west", "king", "stone", "snow", "nero", "bianco", "john", "day", "night", "dark", "moon", "star",
             "wood", "hill", "bell", "ford", "brown", "miller", "scott", "smith", "jones", "young", "ross",
             "gray", "grey", "green", "white", "black", "blue", "red", "gold", "silver", "iron", "steel", "rock",
-            "stile", "style", "tipo", "like"
+            "stile", "style", "tipo", "like",
+            // Sostantivi e aggettivi tematici comuni per prevenire match accidentali su cognomi omonimi
+            "pioggia", "rain", "guerra", "war", "amore", "love", "fuoco", "fire", "vento", "wind", "tempo", "time",
+            "sole", "sun", "mare", "sea", "terra", "earth", "sangue", "blood", "morte", "death", "vita", "life",
+            "ombra", "shadow", "luce", "light", "paura", "fear", "sogno", "dream", "acqua", "water", "inverno", "winter",
+            "estate", "summer", "tempesta", "storm", "strada", "road", "casa", "house", "citta", "città", "city",
+            "occhio", "occhi", "eye", "eyes", "cuore", "heart", "alien", "alieno", "alieni", "spazio", "space",
+            "viaggio", "viaggi", "ragazzo", "ragazza", "uomo", "donna", "bambino", "bambina"
         )
     }
 
