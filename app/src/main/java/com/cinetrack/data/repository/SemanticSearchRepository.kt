@@ -614,81 +614,53 @@ class SemanticSearchRepository @Inject constructor(
         if (authorTokens.isEmpty()) return null
 
         val lowerQuery = queryText.lowercase(Locale.ROOT)
-        val isMusicQuery = lowerQuery.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|music[ae]|musiche|compositore|compositori|composer[s]?)\b""", RegexOption.IGNORE_CASE))
-        val isCinematographyQuery = lowerQuery.contains(Regex("""\b(fotografi[ae]|cinematograph[y]?|dop|direttore della fotografia)\b""", RegexOption.IGNORE_CASE))
-        val isDirectorQuery = lowerQuery.contains(Regex("""\b(regi[ae]|regista|registi|director[s]?|directed\s+by|diretto\s+da)\b""", RegexOption.IGNORE_CASE))
+        val hasMusicTrigger = lowerQuery.contains(Regex("""\b(colonn[ae]\s+sonor[ae]|soundtrack[s]?|score[s]?|music[ae]|musiche|compositore|compositori|composer[s]?|music\s+by|scored?\s+by)\b""", RegexOption.IGNORE_CASE))
+        val hasCinematographyTrigger = lowerQuery.contains(Regex("""\b(fotografi[ae]|cinematograph[y]?|dop|direttore della fotografia|cinematography\s+by)\b""", RegexOption.IGNORE_CASE))
+        val hasDirectorTrigger = lowerQuery.contains(Regex("""\b(regi[ae]|regista|registi|director[s]?|directed\s+by|diretto\s+da)\b""", RegexOption.IGNORE_CASE))
+        val hasWriterTrigger = lowerQuery.contains(Regex("""\b(sceneggiatur[ae]|sceneggiatore|sceneggiatori|scritto\s+da|written\s+by|screenplay\s+by)\b""", RegexOption.IGNORE_CASE))
+        val hasActorTrigger = lowerQuery.contains(Regex("""\b(interpretat[oi]\s+da|recitat[oi]\s+da|starring|protagonista)\b""", RegexOption.IGNORE_CASE))
 
-        fun matchesPerson(fieldValue: String?): Boolean {
+        fun matchesPerson(fieldValue: String?, hasExplicitRoleTrigger: Boolean): Boolean {
             if (fieldValue.isNullOrBlank()) return false
             val nameParts = fieldValue.trim().split(Regex("""\s+""")).filter { it.isNotBlank() }
             if (nameParts.isEmpty()) return false
             val lastName = nameParts.last().lowercase(Locale.ROOT)
             val firstName = nameParts.first().lowercase(Locale.ROOT)
 
-            // 1. Match Nome e Cognome completo nella query (es. "Hans Zimmer", "Christopher Nolan", "Roger Deakins") -> Massima confidenza
+            // 1. Nome e cognome completo (2+ parole): match libero e sempre attivo su regista, compositore, DoP e cast.
+            // Nessun tema cinematografico si chiama "Christopher Nolan" o "Hans Zimmer" -> zero falsi positivi strutturali!
             if (nameParts.size >= 2) {
                 val fullNameRegex = Regex("""\b${Regex.escape(firstName)}\s+${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
                 if (fullNameRegex.containsMatchIn(lowerQuery)) return true
             }
 
-            // 2. Match su Cognome singolo (es. "Nolan", "Zimmer", "Tarantino"):
-            // Guardia anti-falsi positivi (es. attori con cognome "Rain" o "Guerra"):
-            // a) Il cognome deve avere >= 5 caratteri e NON essere una parola comune di cinema, trama o dizionario (ROLE_QUERY_STOPWORDS)
-            // b) Deve esserci un marcatore di ruolo contestuale:
-            //    - Se è una query esplicita di ruolo (isMusicQuery, isCinematographyQuery, isDirectorQuery)
-            //    - OPPURE se il cognome è introdotto da una preposizione attributiva (es. "di Nolan", "diretto da Tarantino", "by Zimmer", "con DiCaprio")
-            val isCommonWord = lastName in ROLE_QUERY_STOPWORDS
-            if (lastName.length >= 5 && !isCommonWord) {
-                if (isMusicQuery || isCinematographyQuery || isDirectorQuery) {
-                    val singleLastNameRegex = Regex("""\b${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
-                    if (singleLastNameRegex.containsMatchIn(lowerQuery)) return true
-                } else {
-                    val attributedRegex = Regex("""\b(?:di|da|by|con|with)\s+${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
-                    if (attributedRegex.containsMatchIn(lowerQuery)) return true
-                }
+            // 2. Cognome singolo (1 parola, >= 5 caratteri): scatta ESCLUSIVAMENTE se accompagnato da un marcatore di ruolo esplicito
+            // (regia di, diretto da, musica di, colonna sonora di, fotografia di, sceneggiatura di, interpretato da).
+            // Eliminando le preposizioni generiche ("di", "con"), non serve alcuna blacklist infinita di sostantivi.
+            if (hasExplicitRoleTrigger && lastName.length >= 5 && lastName !in ROLE_QUERY_STOPWORDS) {
+                val singleLastNameRegex = Regex("""\b${Regex.escape(lastName)}\b""", RegexOption.IGNORE_CASE)
+                if (singleLastNameRegex.containsMatchIn(lowerQuery)) return true
             }
 
             return false
         }
 
-        // Se la query chiede esplicitamente la musica, valuta ESCLUSIVAMENTE il compositore!
-        if (isMusicQuery) {
-            val comp = dto.composer?.trim()
-            if (matchesPerson(comp)) return Pair("composer", comp!!)
-            return null
-        }
-
-        // Se la query chiede esplicitamente la fotografia, valuta ESCLUSIVAMENTE il DoP!
-        if (isCinematographyQuery) {
-            val dop = dto.cinematographer?.trim()
-            if (matchesPerson(dop)) return Pair("cinematographer", dop!!)
-            return null
-        }
-
-        // Se la query chiede esplicitamente la regia, valuta ESCLUSIVAMENTE il regista!
-        if (isDirectorQuery) {
-            val dir = dto.director?.trim()
-            if (matchesPerson(dir)) return Pair("director", dir!!)
-            return null
-        }
-
-        // Altrimenti valuta i ruoli in ordine gerarchico (composer, cinematographer, director, writer, cast)
+        // Valutazione gerarchica sui campi dei metadati (composer, cinematography, director, writer, cast):
         val comp = dto.composer?.trim()
-        if (matchesPerson(comp)) return Pair("composer", comp!!)
+        if (matchesPerson(comp, hasMusicTrigger)) return Pair("composer", comp!!)
 
         val dop = dto.cinematographer?.trim()
-        if (matchesPerson(dop)) return Pair("cinematographer", dop!!)
+        if (matchesPerson(dop, hasCinematographyTrigger)) return Pair("cinematographer", dop!!)
 
         val dir = dto.director?.trim()
-        if (matchesPerson(dir)) return Pair("director", dir!!)
+        if (matchesPerson(dir, hasDirectorTrigger)) return Pair("director", dir!!)
 
         val wrt = dto.writer?.trim()
-        if (matchesPerson(wrt)) return Pair("writer", wrt!!)
+        if (matchesPerson(wrt, hasWriterTrigger)) return Pair("writer", wrt!!)
 
-        // Match su interpreti/cast: protetto dalle guardie di matchesPerson
         val castMembers = dto.cast?.split(Regex(""",\s*"""))?.filter { it.isNotBlank() }.orEmpty()
         for (actor in castMembers.take(4)) {
-            if (matchesPerson(actor)) return Pair("cast", actor)
+            if (matchesPerson(actor, hasActorTrigger)) return Pair("cast", actor)
         }
 
         return null
@@ -733,29 +705,8 @@ class SemanticSearchRepository @Inject constructor(
             "film", "movie", "cinema", "musica", "music", "musiche", "colonna", "sonora", "soundtrack",
             "fotografia", "cinematography", "regia", "regista", "director", "directed", "sceneggiatura",
             "sceneggiatore", "scritto", "scritta", "written", "writer", "autore", "autori", "produzione",
-            "produttore", "producers", "piano", "piani", "sequenza", "sequenze", "ambientato", "ambientata",
-            "storia", "trama", "attore", "attori", "protagonista", "protagonisti", "delle", "degli", "dello",
-            "della", "dallo", "dalla", "senza", "without", "with", "about", "scene", "scenes", "colpo", "luci", "neon",
-            "west", "king", "stone", "snow", "nero", "bianco", "john", "day", "night", "dark", "moon", "star",
-            "wood", "hill", "bell", "ford", "brown", "miller", "scott", "smith", "jones", "young", "ross",
-            "gray", "grey", "green", "white", "black", "blue", "red", "gold", "silver", "iron", "steel", "rock",
-            "stile", "style", "tipo", "like",
-            // Sostantivi e aggettivi tematici comuni per prevenire match accidentali su cognomi omonimi con la preposizione "di"
-            "pioggia", "rain", "guerra", "war", "amore", "love", "fuoco", "fire", "vento", "wind", "tempo", "time",
-            "sole", "sun", "mare", "sea", "terra", "earth", "sangue", "blood", "morte", "death", "vita", "life",
-            "ombra", "shadow", "luce", "light", "paura", "fear", "sogno", "dream", "acqua", "water", "inverno", "winter",
-            "estate", "summer", "tempesta", "storm", "strada", "road", "casa", "house", "citta", "città", "city",
-            "occhio", "occhi", "eye", "eyes", "cuore", "heart", "alien", "alieno", "alieni", "spazio", "space",
-            "viaggio", "viaggi", "ragazzo", "ragazza", "uomo", "donna", "bambino", "bambina",
-            // Termini specifici da >= 5 caratteri sensibili alla preposizione "di" (es. film di natale, di notte, di futuro)
-            "natale", "christmas", "holiday", "incubo", "incubi", "nightmare", "futuro", "future",
-            "azione", "action", "avventura", "adventure", "commedia", "comedy", "fantascienza", "scifi",
-            "animazione", "animation", "terrore", "terror", "fantasia", "fantasy", "mistero", "mystery",
-            "suspense", "tensione", "magia", "magic", "rapina", "heist", "mafia", "famiglia", "family",
-            "amici", "friends", "coppia", "crimine", "crime", "delitto", "vendetta", "revenge",
-            "fantasmi", "ghosts", "mostri", "monsters", "zombie", "zombies", "vampiri", "vampires",
-            "supereroi", "superheroes", "robot", "robots", "pirati", "pirates", "mondo", "world",
-            "pianeta", "planet", "notte", "notti", "giorno", "giorni", "festa", "feste"
+            "produttore", "producers", "attore", "attori", "protagonista", "protagonisti", "starring",
+            "story", "storia", "trama", "sound", "score"
         )
     }
 
