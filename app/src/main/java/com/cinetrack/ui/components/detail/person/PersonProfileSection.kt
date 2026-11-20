@@ -163,17 +163,29 @@ fun PersonHeroHeader(
                 )
         )
 
+        val baseColor = Color(0xFF0A0A0A)
         Box(
             modifier = Modifier.fillMaxSize().background(
                 Brush.verticalGradient(
-                    0.00f to Color.Transparent,
-                    0.60f to Color.Transparent,
-                    0.72f to Color(0xFF0A0A0A).copy(alpha = 0.08f),
-                    0.80f to Color(0xFF0A0A0A).copy(alpha = 0.22f),
-                    0.87f to Color(0xFF0A0A0A).copy(alpha = 0.48f),
-                    0.93f to Color(0xFF0A0A0A).copy(alpha = 0.78f),
-                    0.97f to Color(0xFF0A0A0A).copy(alpha = 0.94f),
-                    1.00f to Color(0xFF0A0A0A)
+                    0.00f to baseColor.copy(alpha = 0.00f),
+                    0.25f to baseColor.copy(alpha = 0.00f),
+                    0.29f to baseColor.copy(alpha = 0.01f),
+                    0.33f to baseColor.copy(alpha = 0.04f),
+                    0.37f to baseColor.copy(alpha = 0.09f),
+                    0.41f to baseColor.copy(alpha = 0.16f),
+                    0.45f to baseColor.copy(alpha = 0.23f),
+                    0.49f to baseColor.copy(alpha = 0.32f),
+                    0.53f to baseColor.copy(alpha = 0.41f),
+                    0.57f to baseColor.copy(alpha = 0.50f),
+                    0.62f to baseColor.copy(alpha = 0.59f),
+                    0.66f to baseColor.copy(alpha = 0.68f),
+                    0.70f to baseColor.copy(alpha = 0.77f),
+                    0.74f to baseColor.copy(alpha = 0.84f),
+                    0.78f to baseColor.copy(alpha = 0.91f),
+                    0.82f to baseColor.copy(alpha = 0.96f),
+                    0.86f to baseColor.copy(alpha = 0.99f),
+                    0.90f to baseColor,
+                    1.00f to baseColor
                 )
             )
         )

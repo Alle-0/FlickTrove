@@ -236,9 +236,11 @@ class SemanticSearchRepository @Inject constructor(
                     val isAnimalSubject = MoodVocabularies.detectAnimalOrNonHumanSubject(positiveText)
 
                     // Guardie ad alta confidenza per macro-generi inequivocabili:
-                    val isStrictSciFiIntent = positiveText.contains(
-                        Regex("""\b(cyberpunk|sci-?fi|fantascienza|spazio\s+profondo|cunicolo\s+spazio[- ]?temporale|wormhole|astronav[ei]|viagg[io]\s+spazial[ei]|alien[oi]|extraterrestr[ei])\b""", RegexOption.IGNORE_CASE)
-                    )
+                    val isStrictSciFiIntent = expectedGenres.contains(878L) ||
+                        (matchedArchetype != null && matchedArchetype.primaryGenres.contains(878L)) ||
+                        positiveText.contains(
+                            Regex("""\b(cyberpunk|sci-?fi|fantascienza|synthwave|spazio\s+profondo|cunicolo\s+spazio[- ]?temporale|wormhole|astronav[ei]|viagg[io]\s+spazial[ei]|alien[oi]|extraterrestr[ei]|android[ei]|cyborg|robot|intelligenza\s+artificiale|dilatazione\s+temporale|buco\s+nero|buchi\s+neri|black\s+hole|distopi[ae]|distopic[oi]|dystopi\w*)\b""", RegexOption.IGNORE_CASE)
+                        )
                     val isStrictEmotionalIntent = positiveText.contains(
                         Regex("""\b(piangere|commovente|strappalacrime|lacrime|devastante\s+emotiv\w*|far\s+piangere|triste\s+da\s+morire|emotivo)\b""", RegexOption.IGNORE_CASE)
                     )
@@ -335,32 +337,6 @@ class SemanticSearchRepository @Inject constructor(
                                 }
                             } else 1.0
 
-                            // B1. Macro-Cluster di Genere & Penalità ad Alta Confidenza:
-                            // Se il film condivide un genere o un genere narrativamente affine del cluster, riceve +12%.
-                            // Se c'è mismatch totale ma la sinossi è eccellente, subisce un'attenuazione moderata (0.78x anziché 0.50x).
-                            val movieGenres = dto.genreIds.orEmpty()
-                            var genreMultiplier = if (expandedExpectedGenres.isNotEmpty() && movieGenres.isNotEmpty()) {
-                                val hasOverlap = movieGenres.any { expandedExpectedGenres.contains(it) }
-                                if (hasOverlap) 1.12 else 0.78 // Penalità attenuata: 0.78x preserva grandi film di confine
-                            } else {
-                                1.0
-                            }
-
-                            // Penalità severa (0.60x) su macro-generi mancanti ad alta confidenza:
-                            if (isStrictSciFiIntent && !movieGenres.contains(878L)) {
-                                genreMultiplier *= 0.60
-                            }
-                            if (isStrictEmotionalIntent) {
-                                val hasEmotionalGenre = movieGenres.contains(18L) || movieGenres.contains(10749L)
-                                if (!hasEmotionalGenre) {
-                                    genreMultiplier *= 0.60
-                                }
-                                // Taglia fuori B-movie horror fuori tema se non richiesto
-                                if (movieGenres.contains(27L) && !wantsHorror) {
-                                    genreMultiplier *= 0.50
-                                }
-                            }
-
                             // B2. Quality & Popularity Prior Morbido:
                             // Sfrutta vote_count e vote_average con scala logaritmica (zero hardcoded IDs!):
                             // - Sotto i 100 voti: scala dolce da 0.88x a 0.94x (smorza produzioni amatoriali e B-movie oscuri)
@@ -380,14 +356,18 @@ class SemanticSearchRepository @Inject constructor(
                                 else -> 0.95
                             }
 
-                            // B3. Moltiplicatore Qualità Critica (Voto medio TMDB)
+                            // B3. Moltiplicatore Qualità Critica (Voto medio TMDB con freno progressivo severo sotto voto 6.0)
                             val qualityMultiplier = when {
-                                dto.voteCount == null || dto.voteCount < 30 -> 1.0
-                                voteAvg >= 8.0 -> 1.05
-                                voteAvg >= 7.2 -> 1.02
-                                voteAvg >= 6.0 -> 1.00
-                                voteAvg < 4.8 -> 0.82 // Penalizza film oggettivamente disastrosi (es. Stormageddon a 4.2)
-                                else -> 0.93
+                                dto.voteCount == null || dto.voteCount < 20 -> 1.0
+                                voteAvg >= 8.0 -> 1.06
+                                voteAvg >= 7.2 -> 1.03
+                                voteAvg >= 6.5 -> 1.00
+                                voteAvg in 6.0..<6.5 -> 0.95
+                                // Freno progressivo severo sotto voto 6.0: affossa film mediocri (es. Extraterrestrial 5.6 e The Black Hole 5.8)
+                                votes >= 50 && voteAvg < 5.0 -> 0.72
+                                votes >= 50 && voteAvg < 6.0 -> 0.84
+                                voteAvg < 5.0 -> 0.80
+                                else -> 0.88
                             }
 
                             // B3.1 Penalità TV Movie (10770L): applica 0.80x quando non espressamente richiesto
@@ -396,9 +376,32 @@ class SemanticSearchRepository @Inject constructor(
                             // B3.2 Boost Animazione/Family per soggetti animali/non umani (es. topi/roditori: Ratatouille batte omonimi live action)
                             val animalMultiplier = if (isAnimalSubject && (dto.genreIds?.contains(16L) == true || dto.genreIds?.contains(10751L) == true)) 1.25 else 1.0
 
-                            // Score finale composito con algebra pura (zero hardcoded anchors!)
-                            val compositeScore = rawAffinity * genreMultiplier * popularityMultiplier * qualityMultiplier * crewMultiplier * decadeMultiplier * animalMultiplier * tvMovieMultiplier
-                            Pair(dto, compositeScore)
+                            // 1. Calcolo moltiplicatori strutturali di base
+                            var finalScore = rawAffinity * popularityMultiplier * qualityMultiplier * crewMultiplier * decadeMultiplier * animalMultiplier * tvMovieMultiplier
+
+                            // 2. Moltiplicatore Macro-Cluster di Genere (+12% se overlap, 0.78x se deviazione standard)
+                            val movieGenres = dto.genreIds.orEmpty()
+                            val clusterMultiplier = if (expandedExpectedGenres.isNotEmpty() && movieGenres.isNotEmpty()) {
+                                val hasOverlap = movieGenres.any { expandedExpectedGenres.contains(it) }
+                                if (hasOverlap) 1.12 else 0.78
+                            } else 1.0
+                            finalScore *= clusterMultiplier
+
+                            // 3. HARD PENALTIES di Genere ad Alta Confidenza (ULTIMO MOLTIPLICATORE prima del sort finale)
+                            if (isStrictSciFiIntent && !movieGenres.contains(878L)) {
+                                finalScore *= 0.60
+                            }
+                            if (isStrictEmotionalIntent) {
+                                val hasEmotionalGenre = movieGenres.contains(18L) || movieGenres.contains(10749L)
+                                if (!hasEmotionalGenre) {
+                                    finalScore *= 0.60
+                                }
+                                if (movieGenres.contains(27L) && !wantsHorror) {
+                                    finalScore *= 0.50
+                                }
+                            }
+
+                            Pair(dto, finalScore)
                         }
                         .sortedByDescending { it.second }
 
@@ -428,8 +431,12 @@ class SemanticSearchRepository @Inject constructor(
                         }
 
                         // Filtraggio di sicurezza contro rumore e B-movie affossati dal reranker:
-                        // I film che non hanno il macro-genere ad alta confidenza o TV movie scadenti crollano sotto soglia
-                        val validRanked = finalRanked.filter { (_, score) ->
+                        val validRanked = finalRanked.filter { (dto, score) ->
+                            // Se la query cercava chiaramente Sci-Fi (es. cyberpunk, synthwave, spazio, wormhole) e il film non ha 878L,
+                            // con lo 0.60x finale non deve superare la soglia e viene estromesso
+                            if (isStrictSciFiIntent && dto.genreIds?.contains(878L) != true && score < 0.35) {
+                                return@filter false
+                            }
                             score >= (thresholdFloor * 0.70)
                         }
 
