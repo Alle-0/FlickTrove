@@ -835,8 +835,9 @@ class SemanticSearchRepository @Inject constructor(
 
     private fun looksLikeNonEnglish(query: String): Boolean {
         // 1. Intercetta istantaneamente oltre 20 lingue non-ASCII (cirillico, arabo, CJK, hindi, greco, thai)
-        // e qualsiasi parola europea con accenti o dieresi (français, español, deutsch, italiano con à/è/ì/ò/ù)
-        if (query.any { it.code > 127 }) return true
+        // e qualsiasi parola europea con accenti o dieresi (français, español, deutsch, italiano con à/è/ì/ò/ù).
+        // it.isLetter() protegge da apostrofi curvi tipografici (’, code 8217) e trattini em-dash/en-dash di Gboard su query inglesi.
+        if (query.any { it.isLetter() && it.code > 127 }) return true
 
         // 2. Manciata di articoli e preposizioni ASCII essenziali per lingue latine pure
         val lower = query.lowercase(Locale.ROOT)
@@ -845,7 +846,7 @@ class SemanticSearchRepository @Inject constructor(
             "un", "una", "uno", "il", "lo", "la", "gli", "le", "dei", "degli", "delle",
             "del", "della", "dello", "con", "senza", "per", "tra", "fra", "che", "chi",
             "cosa", "dove", "come", "quando", "perche", "piu", "tutto", "tutti",
-            "storia", "film", "serie", "personaggio", "amore", "morte", "paura", "spazio", "futuro",
+            "storia", "serie", "personaggio", "amore", "morte", "paura", "spazio", "futuro",
             "el", "los", "las", "para", "por", "avec", "sans", "pour", "dans", "und", "der", "die", "das"
         )
         return tokens.any { it in nonEnglishMarkers }
