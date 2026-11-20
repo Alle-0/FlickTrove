@@ -1,6 +1,8 @@
 package com.cinetrack.ui.screens
 
 import androidx.activity.compose.BackHandler
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import androidx.compose.animation.*
 import androidx.compose.animation.core.Animatable
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -113,6 +115,7 @@ object HistoryTab : Tab {
  * Fallback Voyager Screen per eventuale apertura diretta.
  */
 class HistoryScreen : Screen {
+    override val key: ScreenKey = uniqueScreenKey
     @Composable
     override fun Content() {
         val navigator = LocalNavigator.currentOrThrow

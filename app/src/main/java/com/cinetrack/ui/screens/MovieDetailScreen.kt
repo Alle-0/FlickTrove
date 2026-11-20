@@ -62,7 +62,6 @@ data class MovieDetailScreen(
         }
 
         LaunchedEffect(movieId, mediaType) {
-            kotlinx.coroutines.delay(250)
             viewModel.initMovie(movieId, mediaType)
         }
 
@@ -107,7 +106,11 @@ data class MovieDetailScreen(
             preloadedAccentColor = preloadedAccentColor,
             settingsViewModel = settingsViewModel,
             paddingValues = PaddingValues(0.dp),
-            onBackClick = { navigator.pop() },
+            onBackClick = {
+                if (navigator.canPop) {
+                    navigator.pop()
+                }
+            },
             onMovieClick = { movie ->
                 navigator.push(MovieDetailScreen(movie.id, movie.mediaType))
             },

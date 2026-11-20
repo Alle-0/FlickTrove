@@ -130,7 +130,7 @@ class MovieDetailViewModel @Inject constructor(
             lastYear = null
             commentsDelegate.reset()
             commentsDelegate.startLikeObservation(viewModelScope)
-            // Load cached accent color instantly if available
+            // Load cached accent color if available
             viewModelScope.launch {
                 val cachedHex = repository.getCachedColor("$type:$id")
                 if (cachedHex != null && _extractedColor.value == null) {
@@ -361,17 +361,19 @@ class MovieDetailViewModel @Inject constructor(
         val startTime = System.currentTimeMillis()
         try {
             repository.getMovieDetailsFlow(id, isTv).collect { response ->
-                // Preload image & accent color while keeping skeleton displayed on first opening
+                // Preload accent color asynchronously in background without blocking metadata emission
                 val targetPath = response.backdropPath ?: response.posterPath
-                if (targetPath != null && (_metadata.value == null || _extractedColor.value == null)) {
+                if (targetPath != null && _extractedColor.value == null) {
                     val imageType = if (response.backdropPath != null) ImageType.BACKDROP else ImageType.POSTER
                     val imageUrl = buildTmdbImageUrl(targetPath, imageType, ImageQuality.HIGH)
                     if (imageUrl != null) {
-                        preloadAccentColor(imageUrl)
+                        viewModelScope.launch(Dispatchers.Default) {
+                            preloadAccentColor(imageUrl)
+                        }
                     }
                 }
 
-                // Emit metadata cleanly after initial image and color are ready
+                // Emit metadata immediately so screen content animates smoothly with the entrance
                 _metadata.value = response
 
                 // Start caching and secondary background syncs AFTER initial display

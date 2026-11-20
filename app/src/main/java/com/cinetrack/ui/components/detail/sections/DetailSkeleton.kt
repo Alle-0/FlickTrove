@@ -36,7 +36,8 @@ fun DetailSkeleton(
     preloadedPosterPath: String? = null,
     preloadedBackdropPath: String? = null,
     preloadedAccentColor: String? = null,
-    isTv: Boolean = false
+    isTv: Boolean = false,
+    backgroundColor: Color = com.cinetrack.ui.utils.ColorUtils.BaseDarkSlate
 ) {
     Box(
         modifier = Modifier
@@ -46,6 +47,7 @@ fun DetailSkeleton(
         Column(
             modifier = Modifier
                 .fillMaxSize()
+                .background(backgroundColor)
                 .verticalScroll(rememberScrollState())
         ) {
             // 1. Backdrop Skeleton matching DetailBackdrop height (520dp)
@@ -53,7 +55,7 @@ fun DetailSkeleton(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(520.dp)
-                    .background(Color.Black)
+                    .background(backgroundColor)
             ) {
                 // Neutral deep slate atmospheric background
                 Box(
@@ -63,8 +65,8 @@ fun DetailSkeleton(
                             Brush.verticalGradient(
                                 0.0f to Color(0xFF1A1C28).copy(alpha = 0.5f),
                                 0.30f to Color(0xFF141522).copy(alpha = 0.3f),
-                                0.60f to Color(0xFF10111A),
-                                1.0f to Color.Black
+                                0.60f to Color(0xFF10111A).copy(alpha = 0.6f),
+                                1.0f to backgroundColor
                             )
                         )
                 )
@@ -77,7 +79,7 @@ fun DetailSkeleton(
                         .shimmerEffect()
                 )
 
-                // Exact multi-step fading gradient matching DetailBackdrop
+                // Exact multi-step fading gradient matching DetailBackdrop (seamless blend into backgroundColor)
                 Box(
                     modifier = Modifier
                         .fillMaxSize()
@@ -85,10 +87,10 @@ fun DetailSkeleton(
                             Brush.verticalGradient(
                                 0.0f to Color.Transparent,
                                 0.30f to Color.Transparent,
-                                0.50f to Color.Black.copy(alpha = 0.30f),
-                                0.70f to Color.Black.copy(alpha = 0.70f),
-                                0.85f to Color.Black.copy(alpha = 0.90f),
-                                1.0f to Color.Black
+                                0.50f to backgroundColor.copy(alpha = 0.30f),
+                                0.70f to backgroundColor.copy(alpha = 0.70f),
+                                0.85f to backgroundColor.copy(alpha = 0.90f),
+                                1.0f to backgroundColor
                             )
                         )
                 )

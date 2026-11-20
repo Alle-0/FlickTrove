@@ -1,5 +1,13 @@
 package com.cinetrack.ui.components.detail
 
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.core.Spring
+import androidx.compose.animation.core.spring
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -36,27 +44,39 @@ fun DetailFloatingActionBar(
     onToggleRemindersMuted: () -> Unit,
     modifier: Modifier = Modifier
 ) {
-    if (!visible) return
-
-    Box(
+    AnimatedVisibility(
+        visible = visible,
+        enter = slideInVertically(
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioLowBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        ) { it } + fadeIn(tween(300)),
+        exit = slideOutVertically(
+            animationSpec = tween(250)
+        ) { it } + fadeOut(tween(200)),
         modifier = modifier
-            .fillMaxWidth()
-            .padding(bottom = bottomPadding + 32.dp),
-        contentAlignment = Alignment.Center
     ) {
-        DetailActions(
-            movie = movie,
-            movieStatus = movieStatus,
-            watchState = watchState,
-            progress = progress,
-            accentColor = accentColor,
-            hazeState = hazeState,
-            onStateChange = onStateChange,
-            onRemove = onRemove,
-            onEpisodesClick = onEpisodesClick,
-            onManageRewatches = onManageRewatches,
-            onPreviewWatch = onPreviewWatch,
-            onToggleRemindersMuted = onToggleRemindersMuted
-        )
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = bottomPadding + 32.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            DetailActions(
+                movie = movie,
+                movieStatus = movieStatus,
+                watchState = watchState,
+                progress = progress,
+                accentColor = accentColor,
+                hazeState = hazeState,
+                onStateChange = onStateChange,
+                onRemove = onRemove,
+                onEpisodesClick = onEpisodesClick,
+                onManageRewatches = onManageRewatches,
+                onPreviewWatch = onPreviewWatch,
+                onToggleRemindersMuted = onToggleRemindersMuted
+            )
+        }
     }
 }

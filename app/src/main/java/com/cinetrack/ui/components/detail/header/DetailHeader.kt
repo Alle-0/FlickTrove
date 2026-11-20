@@ -94,6 +94,7 @@ fun DetailHeader(
     onTrailerClick: ((Rect?) -> Unit)? = null,
     isOffline: Boolean = false,
     movieStatus: String? = null,
+    scrollState: androidx.compose.foundation.ScrollState? = null,
     modifier: Modifier = Modifier
 ) {
     var expandedSection by remember { mutableStateOf(DetailHeaderExpandedSection.NONE) }
@@ -240,16 +241,20 @@ fun DetailHeader(
             }
 
             movie.tagline?.let {
-                if (it.isNotEmpty()) {
+                if (it.isNotBlank()) {
                     Text(
                         text = it.uppercase(),
                         style = MaterialTheme.typography.labelSmall.copy(
-                            fontWeight = FontWeight.Black,
-                            letterSpacing = 1.2.sp
+                            fontSize = 10.5.sp,
+                            fontWeight = FontWeight.Bold,
+                            lineHeight = 15.sp,
+                            letterSpacing = 1.sp
                         ),
-                        color = Color.White.copy(alpha = 0.5f),
+                        color = Color.White.copy(alpha = 0.65f),
                         textAlign = TextAlign.Center,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp)
+                        modifier = Modifier
+                            .fillMaxWidth(0.92f)
+                            .padding(bottom = 6.dp)
                     )
                 }
             }
@@ -263,7 +268,7 @@ fun DetailHeader(
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()
-                        .padding(bottom = 16.dp),
+                        .padding(bottom = 12.dp),
                     horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
                     verticalAlignment = Alignment.CenterVertically
                 ) {
@@ -275,10 +280,11 @@ fun DetailHeader(
                                     .hazeGlass(
                                         state = hazeState,
                                         shape = CircleShape,
-                                        containerColor = accentColor.copy(alpha = 0.15f),
+                                        containerColor = accentColor.copy(alpha = 0.16f),
+                                        borderColor = ColorUtils.lightenForText(accentColor, 1.35f).copy(alpha = 0.35f),
                                         blurRadius = 16.dp
                                     )
-                                    .padding(horizontal = 6.dp, vertical = 2.dp),
+                                    .padding(horizontal = 9.dp, vertical = 3.5.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -288,7 +294,7 @@ fun DetailHeader(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = ColorUtils.lightenForText(accentColor, 1.35f)
+                                    color = ColorUtils.lightenForText(accentColor, 1.4f)
                                 )
                             }
                         } else {
@@ -298,7 +304,7 @@ fun DetailHeader(
                                     .clip(CircleShape)
                                     .background(Color(0xFF1E1A22))
                                     .border(0.5.dp, ColorUtils.lightenForText(accentColor, 1.25f).copy(alpha = 0.7f), CircleShape)
-                                    .padding(horizontal = 10.dp, vertical = 4.dp),
+                                    .padding(horizontal = 9.dp, vertical = 3.5.dp),
                                 contentAlignment = Alignment.Center
                             ) {
                                 Text(
@@ -308,7 +314,7 @@ fun DetailHeader(
                                         fontWeight = FontWeight.ExtraBold,
                                         letterSpacing = 0.5.sp
                                     ),
-                                    color = ColorUtils.lightenForText(accentColor, 1.35f)
+                                    color = ColorUtils.lightenForText(accentColor, 1.4f)
                                 )
                             }
                         }
@@ -320,24 +326,40 @@ fun DetailHeader(
                             modifier = Modifier
                                 .onGloballyPositioned { buttonCoords = it }
                                 .bounceClick { onTrailerClick(buttonCoords?.boundsInRoot()) }
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                .let { m ->
+                                    if (advancedEffectsEnabled) {
+                                        m.hazeGlass(
+                                            state = hazeState,
+                                            shape = CircleShape,
+                                            containerColor = Color.White.copy(alpha = 0.08f),
+                                            borderColor = Color.White.copy(alpha = 0.20f),
+                                            blurRadius = 16.dp
+                                        )
+                                    } else {
+                                        m
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(0.5.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                    }
+                                }
+                                .padding(horizontal = 9.dp, vertical = 3.5.dp),
                             horizontalArrangement = Arrangement.spacedBy(5.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_play),
                                 contentDescription = null,
-                                modifier = Modifier.size(12.dp),
-                                tint = ColorUtils.lightenForText(accentColor, 1.35f)
+                                modifier = Modifier.size(11.dp),
+                                tint = Color.White
                             )
                             Text(
-                                text = "Trailer",
+                                text = stringResource(R.string.detail_video_pill_trailer),
                                 style = MaterialTheme.typography.labelMedium.copy(
-                                    fontSize = 11.5.sp,
+                                    fontSize = 11.sp,
                                     fontWeight = FontWeight.ExtraBold,
                                     letterSpacing = 0.5.sp
                                 ),
-                                color = ColorUtils.lightenForText(accentColor, 1.35f)
+                                color = Color.White
                             )
                         }
                     }
@@ -346,20 +368,36 @@ fun DetailHeader(
                         Row(
                             modifier = Modifier
                                 .bounceClick { onCoverSelectClick() }
-                                .padding(horizontal = 4.dp, vertical = 2.dp),
+                                .let { m ->
+                                    if (advancedEffectsEnabled) {
+                                        m.hazeGlass(
+                                            state = hazeState,
+                                            shape = CircleShape,
+                                            containerColor = Color.White.copy(alpha = 0.08f),
+                                            borderColor = Color.White.copy(alpha = 0.20f),
+                                            blurRadius = 16.dp
+                                        )
+                                    } else {
+                                        m
+                                            .clip(CircleShape)
+                                            .background(Color.White.copy(alpha = 0.08f))
+                                            .border(0.5.dp, Color.White.copy(alpha = 0.20f), CircleShape)
+                                    }
+                                }
+                                .padding(horizontal = 8.dp, vertical = 3.5.dp),
                             horizontalArrangement = Arrangement.spacedBy(4.dp),
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_image),
                                 contentDescription = stringResource(R.string.detail_select_cover),
-                                modifier = Modifier.size(14.dp),
+                                modifier = Modifier.size(13.dp),
                                 tint = ColorUtils.lightenForText(accentColor, 1.35f)
                             )
                             Icon(
                                 imageVector = ImageVector.vectorResource(id = R.drawable.ic_sparkle),
                                 contentDescription = null,
-                                modifier = Modifier.size(14.dp),
+                                modifier = Modifier.size(13.dp),
                                 tint = ColorUtils.lightenForText(accentColor, 1.35f)
                             )
                         }

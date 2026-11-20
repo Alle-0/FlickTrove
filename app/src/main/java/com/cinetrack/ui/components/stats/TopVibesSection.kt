@@ -46,6 +46,7 @@ import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.drawText
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.rememberTextMeasurer
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
@@ -553,7 +554,9 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                     Column(
                         horizontalAlignment = Alignment.CenterHorizontally,
                         verticalArrangement = Arrangement.Center,
-                        modifier = Modifier.padding(12.dp)
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(12.dp)
                     ) {
                         val activeCode = selectedVibeCode
                         if (activeCode != null) {
@@ -589,8 +592,10 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White.copy(alpha = 0.9f)
                                 ),
+                                textAlign = TextAlign.Center,
                                 maxLines = 1,
-                                overflow = TextOverflow.Ellipsis
+                                overflow = TextOverflow.Ellipsis,
+                                modifier = Modifier.fillMaxWidth()
                             )
 
                             Spacer(modifier = Modifier.height(2.dp))
@@ -617,7 +622,9 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                 style = MaterialTheme.typography.labelMedium.copy(
                                     fontWeight = FontWeight.Bold,
                                     color = Color.White.copy(alpha = 0.85f)
-                                )
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(2.dp))
                             Text(
@@ -625,7 +632,9 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                 style = MaterialTheme.typography.titleMedium.copy(
                                     fontWeight = FontWeight.Black,
                                     color = animatedHaloColor
-                                )
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
                             )
                             Spacer(modifier = Modifier.height(4.dp))
                             Text(
@@ -633,7 +642,9 @@ fun TopVibesSection(vibes: List<VibeStat>) {
                                 style = MaterialTheme.typography.labelSmall.copy(
                                     color = Color.White.copy(alpha = 0.4f),
                                     fontSize = 10.sp
-                                )
+                                ),
+                                textAlign = TextAlign.Center,
+                                modifier = Modifier.fillMaxWidth()
                             )
                         }
                     }

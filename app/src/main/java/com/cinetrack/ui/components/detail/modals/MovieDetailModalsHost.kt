@@ -1,4 +1,4 @@
-﻿package com.cinetrack.ui.components.detail
+package com.cinetrack.ui.components.detail
 
 import android.content.Intent
 import android.net.Uri
@@ -176,7 +176,7 @@ fun MovieDetailModalsHost(
             cast = cachedSuccess.cast,
             characterImages = cachedSuccess.characterImages,
             accentColor = vividAccentColor,
-            hazeState = rootHazeState,
+            hazeState = localHazeState,
             onSave = { rating, vibes, mvp, charUrl ->
                 viewModel.onEvent(DetailEvent.SaveCheckIn(rating, vibes, mvp, charUrl))
             },
@@ -200,7 +200,7 @@ fun MovieDetailModalsHost(
                 viewModel.emitMessage(UiText.StringResource(R.string.external_link_error_no_browser))
             }
         },
-        hazeState = rootHazeState
+        hazeState = localHazeState
     )
 
     // 6. Rating & Age Certification Dialog
@@ -209,7 +209,7 @@ fun MovieDetailModalsHost(
     DetailRatingInfoDialog(
         visible = showRatingInfoDialog,
         onDismiss = onDismissRatingInfoDialog,
-        hazeState = rootHazeState,
+        hazeState = localHazeState,
         countryCode = currentRatings?.certificationCountry ?: "US",
         isTv = isTvShow,
         onViewGuideClick = null
@@ -222,7 +222,7 @@ fun MovieDetailModalsHost(
         onTranslate = { commentId, text, requireWifi ->
             viewModel.translateComment(commentId, text, requireWifi)
         },
-        hazeState = rootHazeState,
+        hazeState = localHazeState,
         accentColor = globalAccentColor
     )
 
@@ -234,7 +234,7 @@ fun MovieDetailModalsHost(
         backdrops = cachedSuccess?.details?.images?.backdrops ?: emptyList(),
         currentImageQuality = currentImageQuality,
         accentColor = globalAccentColor,
-        hazeState = rootHazeState,
+        hazeState = localHazeState,
         onSelectCover = { filePath ->
             viewModel.onEvent(DetailEvent.UpdateCustomCover(filePath))
         }
@@ -257,7 +257,7 @@ fun MovieDetailModalsHost(
                 isVisible = showTrailerModal,
                 videos = modalVideos,
                 accentColor = globalAccentColor,
-                hazeState = rootHazeState,
+                hazeState = localHazeState,
                 triggerBounds = trailerTriggerBounds,
                 onDismiss = onDismissTrailerModal
             )

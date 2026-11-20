@@ -39,6 +39,7 @@ import com.cinetrack.ui.components.common.GlobalErrorToast
 
 private val initialSystemLocale = java.util.Locale.getDefault()
 
+@OptIn(cafe.adriel.voyager.core.annotation.ExperimentalVoyagerApi::class)
 @Composable
 fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: SettingsViewModel) {
     val accentColorName by settingsViewModel.accentColor.collectAsStateWithLifecycle()
@@ -201,7 +202,9 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
             ) {
                 Box(modifier = Modifier.fillMaxSize()) {
                     Box(modifier = Modifier.fillMaxSize()) {
-                        Navigator(SplashScreen()) { navigator ->
+                        Navigator(
+                            screen = SplashScreen()
+                        ) { navigator ->
                             CompositionLocalProvider(
                                 com.cinetrack.ui.LocalSearchOverlay provides com.cinetrack.ui.SearchOverlayTrigger { offset, genreId, genreName, keywordId, keywordName, category ->
                                     searchOverlayTriggerX = offset?.x ?: -1f
@@ -248,8 +251,15 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                             val isTargetHorizontal = targetState is com.cinetrack.ui.screens.TrophyRoomScreen || targetState is com.cinetrack.ui.screens.HistoryScreen
                                             val isInitialHorizontal = initialState is com.cinetrack.ui.screens.TrophyRoomScreen || initialState is com.cinetrack.ui.screens.HistoryScreen
                                             
-                                            val enter = if (isPop || isReplace || isInitialSplash) {
-                                                androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(500))
+                                            val enter = if (isPop) {
+                                                androidx.compose.animation.scaleIn(
+                                                    initialScale = 0.94f,
+                                                    animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                ) + androidx.compose.animation.fadeIn(
+                                                    animationSpec = androidx.compose.animation.core.tween(260, easing = androidx.compose.animation.core.LinearOutSlowInEasing)
+                                                )
+                                            } else if (isReplace || isInitialSplash) {
+                                                androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(400))
                                             } else {
                                                 if (isTargetSearch) {
                                                     androidx.compose.animation.fadeIn(animationSpec = androidx.compose.animation.core.tween(300))
@@ -260,8 +270,13 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                     )
                                                 } else {
                                                     androidx.compose.animation.slideInVertically(
-                                                        initialOffsetY = { it },
-                                                        animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                        initialOffsetY = { (it * 0.28f).toInt() },
+                                                        animationSpec = androidx.compose.animation.core.tween(360, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    ) + androidx.compose.animation.fadeIn(
+                                                        animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.LinearOutSlowInEasing)
+                                                    ) + androidx.compose.animation.scaleIn(
+                                                        initialScale = 0.95f,
+                                                        animationSpec = androidx.compose.animation.core.tween(360, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                                                     )
                                                 }
                                             }
@@ -276,17 +291,27 @@ fun FlickTroveApp(deepLinkIntent: MutableState<Intent?>, settingsViewModel: Sett
                                                     )
                                                 } else {
                                                     androidx.compose.animation.slideOutVertically(
-                                                        targetOffsetY = { it },
+                                                        targetOffsetY = { (it * 0.28f).toInt() },
+                                                        animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    ) + androidx.compose.animation.fadeOut(
+                                                        animationSpec = androidx.compose.animation.core.tween(240, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    ) + androidx.compose.animation.scaleOut(
+                                                        targetScale = 0.95f,
                                                         animationSpec = androidx.compose.animation.core.tween(300, easing = androidx.compose.animation.core.FastOutSlowInEasing)
                                                     )
                                                 }
                                             } else if (isReplace || isInitialSplash) {
-                                                androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(500))
+                                                androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(400))
                                             } else {
                                                 if (isInitialSearch) {
                                                     androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
                                                 } else {
-                                                    androidx.compose.animation.fadeOut(animationSpec = androidx.compose.animation.core.tween(300))
+                                                    androidx.compose.animation.scaleOut(
+                                                        targetScale = 0.93f,
+                                                        animationSpec = androidx.compose.animation.core.tween(320, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    ) + androidx.compose.animation.fadeOut(
+                                                        animationSpec = androidx.compose.animation.core.tween(260, easing = androidx.compose.animation.core.FastOutSlowInEasing)
+                                                    )
                                                 }
                                             }
                                             

@@ -37,6 +37,7 @@ fun Modifier.bounceClick(
     shape: Shape? = null,
     onPress: (() -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
+    debounceTimeMs: Long = 350L,
     onClick: () -> Unit
 ): Modifier = bounceClickWithOffset(
     scaleDown = scaleDown,
@@ -48,6 +49,7 @@ fun Modifier.bounceClick(
     shape = shape,
     onPress = onPress?.let { action -> { _ -> action() } },
     interactionSource = interactionSource,
+    debounceTimeMs = debounceTimeMs,
     onClick = { _ -> onClick() }
 )
 
@@ -68,6 +70,7 @@ fun Modifier.bounceClickWithOffset(
     shape: Shape? = null,
     onPress: ((Offset) -> Unit)? = null,
     interactionSource: MutableInteractionSource? = null,
+    debounceTimeMs: Long = 350L,
     onClick: (Offset) -> Unit
 ): Modifier = composed {
     val haptic = LocalHapticFeedback.current
@@ -77,6 +80,7 @@ fun Modifier.bounceClickWithOffset(
     val scale = remember { Animatable(1f) }
     
     var lastOffset by remember { mutableStateOf(Offset.Zero) }
+    var lastClickTime by remember { mutableLongStateOf(0L) }
     val currentOnClick by rememberUpdatedState(onClick)
     val currentOnLongClick by rememberUpdatedState(onLongClick)
     val currentOnPress by rememberUpdatedState(onPress)
@@ -135,10 +139,14 @@ fun Modifier.bounceClickWithOffset(
             indication = null,
             enabled = enabled,
             onClick = { 
-                if (vibrationEnabled) {
-                    com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                val now = android.os.SystemClock.uptimeMillis()
+                if (now - lastClickTime >= debounceTimeMs) {
+                    lastClickTime = now
+                    if (vibrationEnabled) {
+                        com.cinetrack.util.VibrationHelper.vibrateTick(context)
+                    }
+                    currentOnClick(lastOffset)
                 }
-                currentOnClick(lastOffset) 
             },
             onLongClick = currentOnLongClick?.let { action ->
                 {

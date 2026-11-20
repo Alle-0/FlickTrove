@@ -115,7 +115,9 @@ fun MovieDetailScreenContent(
         hasCompletedFirstEnter = true
     }
 
-    androidx.activity.compose.BackHandler(enabled = true) {
+    var isBackInProgress by remember { mutableStateOf(false) }
+
+    androidx.activity.compose.BackHandler(enabled = !isBackInProgress) {
         if (movieActions.isAnyModalOpen) {
             movieActions.closeAll()
         } else if (showCheckInModal) {
@@ -133,6 +135,7 @@ fun MovieDetailScreenContent(
         } else if (showTrailerModal) {
             showTrailerModal = false
         } else {
+            isBackInProgress = true
             onBackClick()
         }
     }
@@ -285,8 +288,10 @@ fun MovieDetailScreenContent(
                 is DetailUiState.Error -> 2
             },
             transitionSpec = {
-                fadeIn(animationSpec = tween(400, easing = FastOutSlowInEasing)) togetherWith 
-                fadeOut(animationSpec = tween(400, easing = FastOutSlowInEasing))
+                (fadeIn(animationSpec = tween(220, easing = LinearOutSlowInEasing)))
+                    .togetherWith(
+                        fadeOut(animationSpec = tween(140, easing = FastOutSlowInEasing))
+                    )
             },
             label = "DetailUiStateTransition"
         ) { targetIndex ->
@@ -295,11 +300,8 @@ fun MovieDetailScreenContent(
                     DetailSkeleton(
                         hazeState = null,
                         paddingValues = paddingValues,
-                        preloadedTitle = preloadedTitle,
-                        preloadedPosterPath = preloadedPosterPath,
-                        preloadedBackdropPath = preloadedBackdropPath,
-                        preloadedAccentColor = preloadedAccentColor,
-                        isTv = mediaType == "tv"
+                        isTv = mediaType == "tv",
+                        backgroundColor = animatedBgColor
                     )
                 }
                 2 -> {
@@ -330,6 +332,57 @@ fun MovieDetailScreenContent(
                             label = "AccentColorAnimation"
                         )
 
+                        var startCascade by remember { mutableStateOf(false) }
+                        LaunchedEffect(Unit) {
+                            startCascade = true
+                        }
+
+                        val cascadeBackdropAlpha by animateFloatAsState(
+                            targetValue = if (startCascade) 1f else 0f,
+                            animationSpec = tween(durationMillis = 260, easing = FastOutSlowInEasing),
+                            label = "cascadeBackdropAlpha"
+                        )
+                        val cascadeHeaderAlpha by animateFloatAsState(
+                            targetValue = if (startCascade) 1f else 0f,
+                            animationSpec = tween(durationMillis = 280, delayMillis = 40, easing = FastOutSlowInEasing),
+                            label = "cascadeHeaderAlpha"
+                        )
+                        val cascadeHeaderOffsetY by animateFloatAsState(
+                            targetValue = if (startCascade) 0f else 18f,
+                            animationSpec = tween(durationMillis = 280, delayMillis = 40, easing = FastOutSlowInEasing),
+                            label = "cascadeHeaderOffsetY"
+                        )
+                        val cascadeMetaAlpha by animateFloatAsState(
+                            targetValue = if (startCascade) 1f else 0f,
+                            animationSpec = tween(durationMillis = 280, delayMillis = 100, easing = FastOutSlowInEasing),
+                            label = "cascadeMetaAlpha"
+                        )
+                        val cascadeMetaOffsetY by animateFloatAsState(
+                            targetValue = if (startCascade) 0f else 18f,
+                            animationSpec = tween(durationMillis = 280, delayMillis = 100, easing = FastOutSlowInEasing),
+                            label = "cascadeMetaOffsetY"
+                        )
+                        val cascadeSectionsAlpha by animateFloatAsState(
+                            targetValue = if (startCascade) 1f else 0f,
+                            animationSpec = tween(durationMillis = 300, delayMillis = 160, easing = FastOutSlowInEasing),
+                            label = "cascadeSectionsAlpha"
+                        )
+                        val cascadeSectionsOffsetY by animateFloatAsState(
+                            targetValue = if (startCascade) 0f else 22f,
+                            animationSpec = tween(durationMillis = 300, delayMillis = 160, easing = FastOutSlowInEasing),
+                            label = "cascadeSectionsOffsetY"
+                        )
+                        val cascadeFabAlpha by animateFloatAsState(
+                            targetValue = if (startCascade) 1f else 0f,
+                            animationSpec = tween(durationMillis = 320, delayMillis = 220, easing = FastOutSlowInEasing),
+                            label = "cascadeFabAlpha"
+                        )
+                        val cascadeFabOffsetY by animateFloatAsState(
+                            targetValue = if (startCascade) 0f else 28f,
+                            animationSpec = tween(durationMillis = 320, delayMillis = 220, easing = FastOutSlowInEasing),
+                            label = "cascadeFabOffsetY"
+                        )
+
                         Box(modifier = Modifier.fillMaxSize()) {
                             Column(
                                 modifier = Modifier
@@ -343,8 +396,6 @@ fun MovieDetailScreenContent(
                                         .fillMaxWidth()
                                         .layout { measurable, constraints ->
                                             val placeable = measurable.measure(constraints)
-                                            // Preserva esattamente 520.dp alla colonna di scroll affinché
-                                            // il layout e la posizione di DetailHeader restino invariati
                                             layout(placeable.width, 520.dp.roundToPx()) {
                                                 placeable.place(0, 0)
                                             }
@@ -364,10 +415,11 @@ fun MovieDetailScreenContent(
                                             backgroundColor = animatedBgColor,
                                             isOffline = isOffline,
                                             modifier = Modifier
+                                                .graphicsLayer { alpha = cascadeBackdropAlpha }
                                                 .pointerInput(Unit) {
                                                     detectTapGestures(
                                                         onLongPress = {
-                                                            showCoverSelectionSheet = true
+                                                             showCoverSelectionSheet = true
                                                         }
                                                     )
                                                 }
@@ -384,7 +436,7 @@ fun MovieDetailScreenContent(
 
                                 Column(
                                     modifier = Modifier
-                                        .offset(y = (-140).dp)
+                                        .offset(y = (-146).dp)
                                         .padding(bottom = paddingValues.calculateBottomPadding() + 60.dp)
                                  ) {
                                     val effectiveVideos = remember(state.videos, state.trailers) {
@@ -395,62 +447,83 @@ fun MovieDetailScreenContent(
                                         }
                                     }
 
-                                    DetailHeader(
-                                        movie = activeMovie,
-                                        movieDetails = state.details,
-                                        ratings = state.externalRatings,
-                                        accentColor = accentColor,
-                                        matchPercentage = state.matchPercentage,
-                                        logoPath = if (useMovieLogo) {
-                                            val currentLang = java.util.Locale.getDefault().language
-                                            val logos = state.details.images?.logos
-                                            val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
-                                                ?: logos?.firstOrNull { it.iso6391 == "en" } 
-                                                ?: logos?.firstOrNull()
-                                            bestLogo?.filePath ?: preloadedLogoPath
-                                        } else null,
-                                        hazeState = backdropHazeState,
-                                        onRatingClick = { showRatingInfoDialog = true },
-                                        hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
-                                        onCoverSelectClick = { showCoverSelectionSheet = true },
-                                        onTrailerClick = if (effectiveVideos.isNotEmpty()) {
-                                            { bounds ->
-                                                trailerTriggerBounds = bounds
-                                                showTrailerModal = true
-                                            }
-                                        } else null,
-                                        isOffline = isOffline,
-                                        movieStatus = state.details.status ?: activeMovie.status
-                                    )
+                                    Box(
+                                        modifier = Modifier.graphicsLayer {
+                                            alpha = cascadeHeaderAlpha
+                                            translationY = cascadeHeaderOffsetY.dp.toPx()
+                                        }
+                                    ) {
+                                        DetailHeader(
+                                            movie = activeMovie,
+                                            movieDetails = state.details,
+                                            ratings = state.externalRatings,
+                                            accentColor = accentColor,
+                                            matchPercentage = state.matchPercentage,
+                                            logoPath = if (useMovieLogo) {
+                                                val currentLang = java.util.Locale.getDefault().language
+                                                val logos = state.details.images?.logos
+                                                val bestLogo = logos?.firstOrNull { it.iso6391 == currentLang } 
+                                                    ?: logos?.firstOrNull { it.iso6391 == "en" } 
+                                                    ?: logos?.firstOrNull()
+                                                bestLogo?.filePath ?: preloadedLogoPath
+                                            } else null,
+                                            hazeState = backdropHazeState,
+                                            onRatingClick = { showRatingInfoDialog = true },
+                                            hasAlternativeCovers = activeMovie.customBackdropPath != null || (state.details.images?.backdrops?.size ?: 0) > 1,
+                                            onCoverSelectClick = { showCoverSelectionSheet = true },
+                                            onTrailerClick = if (effectiveVideos.isNotEmpty()) {
+                                                { bounds ->
+                                                    trailerTriggerBounds = bounds
+                                                    showTrailerModal = true
+                                                }
+                                            } else null,
+                                            isOffline = isOffline,
+                                            movieStatus = state.details.status ?: activeMovie.status,
+                                            scrollState = scrollState
+                                        )
+                                    }
 
-                                    DetailMetaRows(
-                                        genres = state.movieEntry.genres ?: emptyList(),
-                                        keywords = state.details.keywords?.getList() ?: emptyList(),
-                                        streaming = state.streamingProviders,
-                                        buyAndRent = state.buyRentProviders,
-                                        accentColor = accentColor,
-                                        isInTheaters = state.isInTheaters,
-                                        onGenreClick = { genre, offset -> onGenreClick(genre.id, genre.name, offset) },
-                                        onKeywordClick = { id, name, offset -> onKeywordClick(id, name, offset) },
-                                        onProviderClick = { provider ->
-                                            val deepLink = WatchProviderDeepLinkUtils.resolveProviderSearchUrl(
-                                                providerName = provider.providerName,
-                                                mediaTitle = state.movieEntry.displayName,
-                                                region = state.watchRegion,
-                                                fallbackUrl = state.watchProviderLink
-                                            )
-                                            deepLink?.let { link ->
-                                                try {
-                                                    val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link))
-                                                    context.startActivity(intent)
-                                                } catch (e: Exception) {
-                                                    viewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(R.string.detail_cannot_open_link))
+                                    Box(
+                                        modifier = Modifier.graphicsLayer {
+                                            alpha = cascadeMetaAlpha
+                                            translationY = cascadeMetaOffsetY.dp.toPx()
+                                        }
+                                    ) {
+                                        DetailMetaRows(
+                                            genres = state.movieEntry.genres ?: emptyList(),
+                                            keywords = state.details.keywords?.getList() ?: emptyList(),
+                                            streaming = state.streamingProviders,
+                                            buyAndRent = state.buyRentProviders,
+                                            accentColor = accentColor,
+                                            isInTheaters = state.isInTheaters,
+                                            onGenreClick = { genre, offset -> onGenreClick(genre.id, genre.name, offset) },
+                                            onKeywordClick = { id, name, offset -> onKeywordClick(id, name, offset) },
+                                            onProviderClick = { provider ->
+                                                val deepLink = WatchProviderDeepLinkUtils.resolveProviderSearchUrl(
+                                                    providerName = provider.providerName,
+                                                    mediaTitle = state.movieEntry.displayName,
+                                                    region = state.watchRegion,
+                                                    fallbackUrl = state.watchProviderLink
+                                                )
+                                                deepLink?.let { link ->
+                                                    try {
+                                                        val intent = android.content.Intent(android.content.Intent.ACTION_VIEW, android.net.Uri.parse(link))
+                                                        context.startActivity(intent)
+                                                    } catch (e: Exception) {
+                                                        viewModel.emitMessage(com.cinetrack.ui.utils.UiText.StringResource(R.string.detail_cannot_open_link))
+                                                    }
                                                 }
                                             }
-                                        }
-                                    )
+                                        )
+                                    }
 
-                                    Spacer(modifier = Modifier.height(24.dp))
+                                    Column(
+                                        modifier = Modifier.graphicsLayer {
+                                            alpha = cascadeSectionsAlpha
+                                            translationY = cascadeSectionsOffsetY.dp.toPx()
+                                        }
+                                    ) {
+                                        Spacer(modifier = Modifier.height(24.dp))
 
                                     DetailInfo(
                                         overview = activeMovie.overview ?: stringResource(R.string.detail_no_overview),
@@ -573,6 +646,7 @@ fun MovieDetailScreenContent(
                                         animatedVisibilityScope = animatedVisibilityScope
                                     )
                                     Spacer(modifier = Modifier.height(16.dp))
+                                    }
                                 }
                             }
 
@@ -603,7 +677,12 @@ fun MovieDetailScreenContent(
                                 onToggleRemindersMuted = {
                                     viewModel.onEvent(DetailEvent.ToggleRemindersMuted)
                                 },
-                                modifier = Modifier.align(Alignment.BottomCenter)
+                                modifier = Modifier
+                                    .align(Alignment.BottomCenter)
+                                    .graphicsLayer {
+                                        alpha = cascadeFabAlpha
+                                        translationY = cascadeFabOffsetY.dp.toPx()
+                                    }
                             )
                         }
                     }

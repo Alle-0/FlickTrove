@@ -35,10 +35,13 @@ import com.cinetrack.ui.components.common.CinematicBackground
 import com.cinetrack.ui.components.shared.ModalBackButton
 import com.cinetrack.ui.LocalHazeState
 import com.cinetrack.ui.components.glass.hazeGlass
+import cafe.adriel.voyager.core.screen.ScreenKey
+import cafe.adriel.voyager.core.screen.uniqueScreenKey
 import com.cinetrack.ui.theme.HazeStyles
 import com.cinetrack.ui.utils.bounceClick
 
 data class EditorialCollectionScreen(val collectionId: String) : Screen {
+    override val key: ScreenKey = uniqueScreenKey
 
     @Composable
     override fun Content() {

@@ -1,11 +1,7 @@
 package com.cinetrack.ui.components.detail
 
-import androidx.compose.animation.*
-import androidx.compose.animation.core.*
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
-import androidx.compose.foundation.clickable
-import androidx.compose.foundation.interaction.MutableInteractionSource
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
@@ -23,10 +19,8 @@ import androidx.compose.ui.res.vectorResource
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.compose.ui.zIndex
 import com.cinetrack.R
-import com.cinetrack.ui.components.glass.hazeGlass
-import com.cinetrack.ui.theme.HazeStyles
+import com.cinetrack.ui.components.shared.FlickTroveModal
 import com.cinetrack.ui.utils.bounceClick
 import com.cinetrack.ui.utils.mirrorInRtl
 import com.cinetrack.ui.utils.premiumScrollbar
@@ -42,78 +36,46 @@ fun DetailRatingInfoDialog(
     isTv: Boolean = false,
     onViewGuideClick: (() -> Unit)? = null
 ) {
-    AnimatedVisibility(
-        visible = visible,
-        enter = fadeIn(tween(200)),
-        exit = fadeOut(tween(200)),
-        modifier = Modifier.zIndex(100f)
+    FlickTroveModal(
+        isVisible = visible,
+        onDismissRequest = onDismiss,
+        hazeState = hazeState,
+        maxWidth = 420.dp
     ) {
-        val blurAlpha by transition.animateFloat(
-            transitionSpec = { tween(200) },
-            label = "blurAlpha"
-        ) { if (it == androidx.compose.animation.EnterExitState.Visible) 0.85f else 0f }
-        
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .background(Color.Black.copy(alpha = HazeStyles.ModalScrimAlpha * (blurAlpha / 0.85f)))
-                .clickable(
-                    interactionSource = remember { MutableInteractionSource() },
-                    indication = null
-                ) { onDismiss() },
-            contentAlignment = Alignment.Center
-        ) {
-            Box(
-                modifier = Modifier
-                    .widthIn(max = 400.dp)
-                    .fillMaxWidth(0.85f)
-                    .hazeGlass(
-                        state = hazeState,
-                        alpha = blurAlpha,
-                        shape = RoundedCornerShape(32.dp)
-                    )
-                    .clickable(
-                        interactionSource = remember { MutableInteractionSource() },
-                        indication = null
-                    ) {}
-            ) {
-                val dialogScrollState = rememberScrollState()
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(24.dp)
-                        .heightIn(max = 500.dp)
-                ) {
-                    // Title (Fixed)
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically,
-                        horizontalArrangement = Arrangement.Center,
-                        modifier = Modifier.fillMaxWidth().padding(bottom = 20.dp)
-                    ) {
-                        Icon(
-                            ImageVector.vectorResource(id = R.drawable.ic_documento),
-                            null,
-                            tint = Color.White,
-                            modifier = Modifier.size(28.dp)
-                        )
-                        Spacer(modifier = Modifier.width(10.dp))
-                        Text(
-                            stringResource(R.string.detail_rating_legend_title),
-                            style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
-                            color = Color.White
-                        )
-                    }
+        val dialogScrollState = rememberScrollState()
 
-                    // Scrollable Content
-                    Column(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .weight(1f, fill = false)
-                            .premiumScrollbar(dialogScrollState)
-                            .padding(end = 12.dp)
-                            .verticalFadingEdges(dialogScrollState, 16.dp, 16.dp)
-                            .verticalScroll(dialogScrollState)
-                    ) {
+        // Title (Fixed)
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(bottom = 20.dp)
+        ) {
+            Icon(
+                ImageVector.vectorResource(id = R.drawable.ic_documento),
+                null,
+                tint = Color.White,
+                modifier = Modifier.size(28.dp)
+            )
+            Spacer(modifier = Modifier.width(10.dp))
+            Text(
+                stringResource(R.string.detail_rating_legend_title),
+                style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                color = Color.White
+            )
+        }
+
+        // Scrollable Content
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .heightIn(max = 440.dp)
+                .premiumScrollbar(dialogScrollState)
+                .padding(end = 8.dp)
+                .verticalFadingEdges(dialogScrollState, 16.dp, 16.dp)
+                .verticalScroll(dialogScrollState)
+        ) {
                         when (countryCode?.uppercase()) {
                             "IT" -> {
                                 Text(
@@ -419,21 +381,19 @@ fun DetailRatingInfoDialog(
                                 )
                             }
                         }
-                        Spacer(modifier = Modifier.height(10.dp))
-                    }
+        }
+        
+        Spacer(modifier = Modifier.height(18.dp))
 
-                    Box(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .bounceClick(onClick = onDismiss)
-                            .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
-                            .padding(vertical = 12.dp),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
-                    }
-                }
-            }
+        Box(
+            modifier = Modifier
+                .fillMaxWidth()
+                .bounceClick(onClick = onDismiss)
+                .background(Color.White.copy(alpha = 0.15f), RoundedCornerShape(16.dp))
+                .padding(vertical = 12.dp),
+            contentAlignment = Alignment.Center
+        ) {
+            Text(stringResource(R.string.settings_close), color = Color.White, fontWeight = FontWeight.Bold)
         }
     }
 }

@@ -15,6 +15,8 @@ import androidx.compose.foundation.border
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.lazy.itemsIndexed
+import kotlinx.coroutines.delay
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
@@ -71,7 +73,7 @@ fun DetailMetaRows(
         FlowRow(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(bottom = 28.dp)
+                .padding(bottom = 18.dp)
                 .animateContentSize(spring(dampingRatio = Spring.DampingRatioNoBouncy, stiffness = Spring.StiffnessMediumLow)),
             horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
             verticalArrangement = Arrangement.spacedBy(8.dp)
@@ -168,6 +170,7 @@ fun DetailMetaRows(
 
         // Watch Providers (Compact stacked layout)
         if (streaming.isNotEmpty() || buyAndRent.isNotEmpty() || isInTheaters) {
+            Spacer(modifier = Modifier.height(12.dp))
             Text(
                 text = stringResource(R.string.detail_where_to_watch),
                 style = MaterialTheme.typography.labelSmall.copy(
@@ -276,7 +279,7 @@ fun GenrePill(genre: Genre, accentColor: Color, onGenreClick: (Offset) -> Unit) 
                     letterSpacing = 1.sp
                 ),
                 color = Color.White.copy(alpha = 0.95f),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp)
             )
         }
     }
@@ -301,20 +304,50 @@ fun ProviderRow(label: String, providers: List<Provider>, accentColor: Color, on
             contentPadding = PaddingValues(end = 24.dp), // To allow scroll past edge
             modifier = Modifier.fillMaxWidth()
         ) {
-            items(providers, key = { it.providerId }, contentType = { "provider" }) { provider ->
-                ProviderLogo(provider = provider, accentColor = accentColor, onClick = onProviderClick)
+            itemsIndexed(providers, key = { _, it -> it.providerId }, contentType = { _, _ -> "provider" }) { index, provider ->
+                ProviderLogo(
+                    provider = provider,
+                    accentColor = accentColor,
+                    index = index,
+                    onClick = onProviderClick
+                )
             }
         }
     }
 }
 
 @Composable
-fun ProviderLogo(provider: Provider, accentColor: Color, onClick: (Provider) -> Unit) {
-    // logoBaseUrl is no longer needed
+fun ProviderLogo(
+    provider: Provider,
+    accentColor: Color,
+    index: Int = 0,
+    onClick: (Provider) -> Unit
+) {
+    // Cascading spring wave on entrance
+    val animProgress = remember { Animatable(0f) }
+    LaunchedEffect(provider.providerId) {
+        val delayMs = (index * 40L).coerceAtMost(320L)
+        if (delayMs > 0) delay(delayMs)
+        animProgress.animateTo(
+            targetValue = 1f,
+            animationSpec = spring(
+                dampingRatio = Spring.DampingRatioMediumBouncy,
+                stiffness = Spring.StiffnessMediumLow
+            )
+        )
+    }
+
     val shape = RoundedCornerShape(8.dp)
     
     Box(
         modifier = Modifier
+            .graphicsLayer {
+                val p = animProgress.value
+                scaleX = 0.45f + (0.55f * p)
+                scaleY = 0.45f + (0.55f * p)
+                alpha = p.coerceIn(0f, 1f)
+                translationY = (1f - p) * 12.dp.toPx()
+            }
             .bounceClick { onClick(provider) }
             .size(32.dp)
             .border(
@@ -360,7 +393,7 @@ fun KeywordExpandPill(accentColor: Color, onClick: () -> Unit) {
                     letterSpacing = 1.sp
                 ),
                 color = ColorUtils.lightenForText(accentColor, 1.35f),
-                modifier = Modifier.padding(horizontal = 12.dp, vertical = 6.dp)
+                modifier = Modifier.padding(horizontal = 11.dp, vertical = 5.dp)
             )
         }
     }

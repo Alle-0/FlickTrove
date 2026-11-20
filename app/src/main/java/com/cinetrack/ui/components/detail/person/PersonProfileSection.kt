@@ -166,12 +166,14 @@ fun PersonHeroHeader(
         Box(
             modifier = Modifier.fillMaxSize().background(
                 Brush.verticalGradient(
-                    listOf(
-                        Color.Transparent,
-                        Color.Transparent,
-                        Color(0xFF0A0A0A).copy(alpha = 0.55f),
-                        Color(0xFF0A0A0A)
-                    )
+                    0.00f to Color.Transparent,
+                    0.60f to Color.Transparent,
+                    0.72f to Color(0xFF0A0A0A).copy(alpha = 0.08f),
+                    0.80f to Color(0xFF0A0A0A).copy(alpha = 0.22f),
+                    0.87f to Color(0xFF0A0A0A).copy(alpha = 0.48f),
+                    0.93f to Color(0xFF0A0A0A).copy(alpha = 0.78f),
+                    0.97f to Color(0xFF0A0A0A).copy(alpha = 0.94f),
+                    1.00f to Color(0xFF0A0A0A)
                 )
             )
         )

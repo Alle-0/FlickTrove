@@ -13,3 +13,7 @@
 # 4. Hilt / Dagger DI
 -keep class **_HiltModules* { *; }
 -keep class **_HiltComponents* { *; }
+
+# 5. Voyager Navigation
+-keepclassmembers class * implements cafe.adriel.voyager.core.screen.Screen { *; }
+-keepnames class * implements cafe.adriel.voyager.core.screen.Screen
