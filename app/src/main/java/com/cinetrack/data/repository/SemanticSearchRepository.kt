@@ -776,16 +776,31 @@ class SemanticSearchRepository @Inject constructor(
 
     private fun detectTargetDecade(query: String): IntRange? {
         val lower = query.lowercase(Locale.ROOT)
+
+        // 1. Parser matematico universale per tutte le 29 lingue basato su cifre
+        // Cattura: 1980, 1980s, 2000s, 2010s, '80, '80s, anni 80, anni '80, años 80, 80er, ecc.
+        val numericDecade = Regex(
+            """\b(?:(19[2-9]0|20[0-2]0)s?|'([2-9]0)s?|(?:anni|años|anos|années|jahre)\s+'?([2-9]0)|([2-9]0)(?:s|er))\b""",
+            RegexOption.IGNORE_CASE
+        ).find(lower)?.groupValues?.drop(1)?.firstOrNull { it.isNotEmpty() }
+            ?.toIntOrNull()
+            ?.let { if (it < 100) 1900 + it else it }
+
+        if (numericDecade != null) {
+            return numericDecade..(numericDecade + 9)
+        }
+
+        // 2. Forme verbali scritte a lettere (IT / EN)
         return when {
-            lower.contains(Regex("""\b(anni\s+'?80|80s|'80s|eighties|1980s|anni\s+ottanta)\b""")) -> 1980..1989
-            lower.contains(Regex("""\b(anni\s+'?70|70s|'70s|seventies|1970s|anni\s+settanta)\b""")) -> 1970..1979
-            lower.contains(Regex("""\b(anni\s+'?90|90s|'90s|nineties|1990s|anni\s+novanta)\b""")) -> 1990..1999
-            lower.contains(Regex("""\b(anni\s+'?60|60s|'60s|sixties|1960s|anni\s+sessanta)\b""")) -> 1960..1969
-            lower.contains(Regex("""\b(anni\s+'?50|50s|'50s|fifties|1950s|anni\s+cinquanta)\b""")) -> 1950..1959
-            lower.contains(Regex("""\b(anni\s+'?2000|2000s|duemila)\b""")) -> 2000..2009
-            lower.contains(Regex("""\b(anni\s+'?20|20s|'20s|roaring\s+twenties|anni\s+venti)\b""")) -> 1920..1929
-            lower.contains(Regex("""\b(anni\s+'?30|30s|'30s|thirties|anni\s+trenta)\b""")) -> 1930..1939
-            lower.contains(Regex("""\b(anni\s+'?40|40s|'40s|forties|anni\s+quaranta)\b""")) -> 1940..1949
+            lower.contains(Regex("""\b(anni\s+ottanta|eighties)\b""")) -> 1980..1989
+            lower.contains(Regex("""\b(anni\s+settanta|seventies)\b""")) -> 1970..1979
+            lower.contains(Regex("""\b(anni\s+novanta|nineties)\b""")) -> 1990..1999
+            lower.contains(Regex("""\b(anni\s+sessanta|sixties)\b""")) -> 1960..1969
+            lower.contains(Regex("""\b(anni\s+cinquanta|fifties)\b""")) -> 1950..1959
+            lower.contains(Regex("""\b(anni\s+quaranta|forties)\b""")) -> 1940..1949
+            lower.contains(Regex("""\b(anni\s+trenta|thirties)\b""")) -> 1930..1939
+            lower.contains(Regex("""\b(anni\s+venti|roaring\s+twenties|twenties)\b""")) -> 1920..1929
+            lower.contains(Regex("""\b(duemila|two\s+thousands)\b""")) -> 2000..2009
             else -> null
         }
     }
