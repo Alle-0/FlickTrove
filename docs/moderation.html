@@ -1,0 +1,494 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>FlickTrove — Platform Evidence & Verification Gallery</title>
+  <meta name="description"
+    content="Official platform verification, metrics, and engagement audit evidence screenshots for FlickTrove.">
+  <meta name="theme-color" content="#0B0F19">
+
+  <!-- Favicon -->
+  <link rel="icon" type="image/svg+xml" href="./favicon.svg">
+  <link rel="icon" type="image/png" href="./favicon.png">
+  <link rel="apple-touch-icon" href="./assets/icon-512.png">
+
+  <!-- Google Fonts -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Outfit:wght@600;700;800&display=swap"
+    rel="stylesheet">
+
+  <style>
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+    }
+
+    :root {
+      --bg: #0B0F19;
+      --surface-1: #111522;
+      --surface-2: #161B2B;
+      --border: rgba(255, 255, 255, 0.08);
+      --border-hover: rgba(45, 212, 191, 0.35);
+      --text: #FFFFFF;
+      --text-muted: #8E98B0;
+      --accent: #2DD4BF;
+      --accent-glow: rgba(45, 212, 191, 0.25);
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      line-height: 1.5;
+    }
+
+    /* Ambient background glow */
+    .ambient-glow {
+      position: fixed;
+      top: -160px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 800px;
+      height: 400px;
+      background: radial-gradient(circle, rgba(45, 212, 191, 0.12) 0%, rgba(11, 15, 25, 0) 70%);
+      pointer-events: none;
+      z-index: 0;
+    }
+
+    /* Header */
+    header {
+      position: relative;
+      z-index: 10;
+      border-bottom: 1px solid var(--border);
+      background: rgba(11, 15, 25, 0.85);
+      -webkit-backdrop-filter: blur(16px);
+      backdrop-filter: blur(16px);
+      padding: 16px 28px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 16px;
+    }
+
+    .brand-wrap {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      text-decoration: none;
+      color: var(--text);
+    }
+
+    .brand-logo {
+      width: 36px;
+      height: 36px;
+      border-radius: 10px;
+      object-fit: cover;
+      box-shadow: 0 4px 12px var(--accent-glow);
+    }
+
+    .brand-text h1 {
+      font-family: 'Outfit', sans-serif;
+      font-size: 19px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .badge-evidence {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      padding: 3px 9px;
+      border-radius: 6px;
+      background: rgba(45, 212, 191, 0.12);
+      color: var(--accent);
+      border: 1px solid rgba(45, 212, 191, 0.28);
+    }
+
+    .btn {
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 18px;
+      border-radius: 10px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      border: 1px solid transparent;
+      background: rgba(255, 255, 255, 0.06);
+      color: var(--text);
+      border-color: var(--border);
+    }
+
+    .btn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      border-color: rgba(255, 255, 255, 0.2);
+      transform: translateY(-1px);
+    }
+
+    /* Main Container */
+    main {
+      position: relative;
+      z-index: 1;
+      max-width: 1200px;
+      width: 100%;
+      margin: 0 auto;
+      padding: 40px 24px 80px;
+      display: flex;
+      flex-direction: column;
+      gap: 32px;
+    }
+
+    .gallery-header {
+      text-align: center;
+      max-width: 700px;
+      margin: 0 auto;
+    }
+
+    .gallery-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 32px;
+      font-weight: 800;
+      letter-spacing: -0.02em;
+      margin-bottom: 8px;
+      background: linear-gradient(135deg, #FFFFFF 60%, rgba(255, 255, 255, 0.65));
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .gallery-subtitle {
+      font-size: 15px;
+      color: var(--text-muted);
+      line-height: 1.6;
+    }
+
+    /* Screenshots Grid */
+    .screenshots-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(480px, 1fr));
+      gap: 28px;
+      margin-top: 12px;
+    }
+
+    .screenshot-card {
+      background: var(--surface-1);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+      cursor: pointer;
+      position: relative;
+    }
+
+    .screenshot-card:hover {
+      border-color: var(--border-hover);
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5), 0 0 24px rgba(45, 212, 191, 0.12);
+    }
+
+    .img-wrapper {
+      position: relative;
+      width: 100%;
+      background: #000;
+      overflow: hidden;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 280px;
+    }
+
+    .screenshot-img {
+      width: 100%;
+      height: auto;
+      max-height: 520px;
+      object-fit: contain;
+      display: block;
+      transition: transform 0.35s ease;
+    }
+
+    .screenshot-card:hover .screenshot-img {
+      transform: scale(1.02);
+    }
+
+    .zoom-overlay {
+      position: absolute;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.35);
+      opacity: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: opacity 0.2s ease;
+    }
+
+    .screenshot-card:hover .zoom-overlay {
+      opacity: 1;
+    }
+
+    .zoom-pill {
+      background: rgba(11, 15, 25, 0.85);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 13px;
+      font-weight: 600;
+      padding: 8px 16px;
+      border-radius: 20px;
+      -webkit-backdrop-filter: blur(8px);
+      backdrop-filter: blur(8px);
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.4);
+    }
+
+    .card-caption {
+      padding: 18px 20px;
+      background: var(--surface-1);
+      border-top: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .card-title {
+      font-family: 'Outfit', sans-serif;
+      font-size: 16px;
+      font-weight: 700;
+      color: #FFFFFF;
+      letter-spacing: -0.01em;
+    }
+
+    .card-desc {
+      font-size: 13px;
+      color: var(--text-muted);
+      line-height: 1.5;
+    }
+
+    /* Lightbox Modal */
+    .lightbox-modal {
+      display: none;
+      position: fixed;
+      inset: 0;
+      z-index: 9999;
+      background: rgba(0, 0, 0, 0.94);
+      -webkit-backdrop-filter: blur(14px);
+      backdrop-filter: blur(14px);
+      align-items: center;
+      justify-content: center;
+      padding: 24px;
+    }
+
+    .lightbox-modal.active {
+      display: flex;
+    }
+
+    .lightbox-container {
+      max-width: 92vw;
+      max-height: 90vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .lightbox-img {
+      max-width: 100%;
+      max-height: 82vh;
+      border-radius: 12px;
+      box-shadow: 0 16px 50px rgba(0, 0, 0, 0.85);
+      object-fit: contain;
+    }
+
+    .lightbox-caption {
+      font-size: 14px;
+      font-weight: 600;
+      color: rgba(255, 255, 255, 0.85);
+      text-align: center;
+    }
+
+    .lightbox-close {
+      position: absolute;
+      top: 24px;
+      right: 24px;
+      background: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      color: #fff;
+      font-size: 18px;
+      width: 42px;
+      height: 42px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all 0.2s ease;
+    }
+
+    .lightbox-close:hover {
+      background: rgba(255, 255, 255, 0.2);
+      transform: scale(1.08);
+    }
+
+    @media (max-width: 640px) {
+      .screenshots-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .gallery-title {
+        font-size: 26px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="ambient-glow"></div>
+
+  <!-- Header -->
+  <header>
+    <a href="./index.html" class="brand-wrap">
+      <img src="./favicon.png" alt="FlickTrove Logo" class="brand-logo" />
+      <div class="brand-text">
+        <h1>FlickTrove <span class="badge-evidence">Evidence Gallery</span></h1>
+      </div>
+    </a>
+    <a href="./index.html" class="btn">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+      </svg>
+      App Home
+    </a>
+  </header>
+
+  <!-- Main Container -->
+  <main>
+    <div class="gallery-header">
+      <h2 class="gallery-title">Verification Evidence</h2>
+      <p class="gallery-subtitle">Click on any screenshot to view in full resolution.</p>
+    </div>
+
+    <div class="screenshots-grid" id="screenshots-container">
+
+      <!-- Screenshot 1: Overview & Top Activity -->
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133039.png', 'Engagement Overview')">
+        <div class="img-wrapper">
+          <img src="./assets/evidence/Screenshot 2026-10-20 133039.png" alt="Engagement Overview"
+            class="screenshot-img" />
+          <div class="zoom-overlay">
+            <span class="zoom-pill">🔍 Click to zoom</span>
+          </div>
+        </div>
+        <figcaption class="card-caption">
+          <div class="card-title">Engagement Overview</div>
+          <div class="card-desc">7-day totals for comments, daily average, and ratings.</div>
+        </figcaption>
+      </figure>
+
+      <!-- Screenshot 2: Feed Scroll 1 -->
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133051.png', 'Recent Activity (Part 1)')">
+        <div class="img-wrapper">
+          <img src="./assets/evidence/Screenshot 2026-10-20 133051.png" alt="Recent Activity (Part 1)"
+            class="screenshot-img" />
+          <div class="zoom-overlay">
+            <span class="zoom-pill">🔍 Click to zoom</span>
+          </div>
+        </div>
+        <figcaption class="card-caption">
+          <div class="card-title">Recent Activity (Part 1)</div>
+          <div class="card-desc">Comments and community rating updates.</div>
+        </figcaption>
+      </figure>
+
+      <!-- Screenshot 3: Feed Scroll 2 -->
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133059.png', 'Recent Activity (Part 2)')">
+        <div class="img-wrapper">
+          <img src="./assets/evidence/Screenshot 2026-10-20 133059.png" alt="Recent Activity (Part 2)"
+            class="screenshot-img" />
+          <div class="zoom-overlay">
+            <span class="zoom-pill">🔍 Click to zoom</span>
+          </div>
+        </div>
+        <figcaption class="card-caption">
+          <div class="card-title">Recent Activity (Part 2)</div>
+          <div class="card-desc">Discussion comments and ratings log.</div>
+        </figcaption>
+      </figure>
+
+      <!-- Screenshot 4: Feed Scroll 3 -->
+      <figure class="screenshot-card"
+        onclick="openLightbox('./assets/evidence/Screenshot 2026-10-20 133106.png', 'Recent Activity (Part 3)')">
+        <div class="img-wrapper">
+          <img src="./assets/evidence/Screenshot 2026-10-20 133106.png" alt="Recent Activity (Part 3)"
+            class="screenshot-img" />
+          <div class="zoom-overlay">
+            <span class="zoom-pill">🔍 Click to zoom</span>
+          </div>
+        </div>
+        <figcaption class="card-caption">
+          <div class="card-title">Recent Activity (Part 3)</div>
+          <div class="card-desc">Historical activity across the 7-day window.</div>
+        </figcaption>
+      </figure>
+
+    </div>
+  </main>
+
+  <!-- Lightbox Modal for Fullscreen View -->
+  <div class="lightbox-modal" id="lightbox" onclick="closeLightbox(event)">
+    <button class="lightbox-close" onclick="closeLightbox(event)">✕</button>
+    <div class="lightbox-container">
+      <img src="" alt="Fullscreen Screenshot" class="lightbox-img" id="lightbox-img" />
+      <div class="lightbox-caption" id="lightbox-caption"></div>
+    </div>
+  </div>
+
+  <script>
+    function openLightbox(src, caption) {
+      const modal = document.getElementById('lightbox');
+      const img = document.getElementById('lightbox-img');
+      const cap = document.getElementById('lightbox-caption');
+      img.src = src;
+      cap.textContent = caption || '';
+      modal.classList.add('active');
+    }
+
+    function closeLightbox(e) {
+      if (e.target.id === 'lightbox' || e.target.classList.contains('lightbox-close')) {
+        document.getElementById('lightbox').classList.remove('active');
+      }
+    }
+
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        document.getElementById('lightbox').classList.remove('active');
+      }
+    });
+  </script>
+</body>
+
+</html>

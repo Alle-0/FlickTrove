@@ -1,0 +1,4 @@
+User-agent: *
+Allow: /
+
+Sitemap: https://alle-0.github.io/FlickTrove/sitemap.xml

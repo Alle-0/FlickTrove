@@ -1,0 +1,10 @@
+[{
+  "relation": ["delegate_permission/common.handle_all_urls"],
+  "target": {
+    "namespace": "android_app",
+    "package_name": "com.cinetrack",
+    "sha256_cert_fingerprints": [
+      "9B:9E:51:22:C3:9B:5A:1A:07:6C:63:17:72:07:4A:24:36:FB:66:82:09:D3:EC:31:CE:49:CE:61:59:9B:48:DB"
+    ]
+  }
+}]
