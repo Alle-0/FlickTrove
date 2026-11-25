@@ -109,8 +109,8 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
   </tr>
   <tr>
     <td width="50%" valign="top">
-      <h3>⏱️ Watch Diary & 52-Week Heatmap</h3>
-      100% offline-first diary tracking every viewing, rewatch, and TV episode session. Includes a filmstrip timeline with sticky month headers, personal notes, emotional <em>"Vibes"</em>, half-star ratings, and a <strong>GitHub-style 52-Week Activity Heatmap</strong>.
+      <h3>⏱️ Watch Diary, Heatmap &amp; Yearly Challenge</h3>
+      100% offline-first diary tracking every viewing, rewatch, and TV episode session. Includes a filmstrip timeline with sticky month headers, personal notes, emotional <em>"Vibes"</em>, half-star ratings, a <strong>GitHub-style 52-Week Activity Heatmap</strong>, and the <strong>Yearly Cinephile Challenge</strong> (Movies, Items, or Hours goals with an Aperture Ring card and weekly/monthly pace tracking).
     </td>
     <td width="50%" valign="top">
       <h3>💬 CommsUni & Episode Threads</h3>
@@ -290,7 +290,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.
 - [ ] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters, on Streaming, or on Physical Media (4K UHD / Blu-Ray).
-- [ ] **Yearly Cinephile Challenge:** Set annual watch goals with dynamic progress tracking and pacing indicators.
+- [x] **Yearly Cinephile Challenge:** Set annual watch goals (Movies, Items, or Hours) with an Aperture Ring progress card, dynamic weekly/monthly pace tracking, and Diary dashboard preview.
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces a new project.
 - [ ] **Calendar Integration:** Sync upcoming premiere dates and TV air dates directly to your Google Calendar.
@@ -301,13 +301,13 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
-This repository serves as the public showcase, APK distribution hub (**Releases**), and **Issue** tracker for FlickTrove. The application source code is proprietary and maintained in a private repository; reproduction, copying, modification, or redistribution of the application or its assets without explicit written permission from the author is strictly prohibited. Please consult the `TERMS_OF_SERVICE.md` file for further details.
+The source code is publicly exposed strictly for reference and sharing purposes. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
 
 ---
 
 <h2 id="support-the-project"><img src="docs/assets/readme_icons/heart.svg" width="24" height="24" alt="" align="absmiddle" /> Support the Project</h2>
 
-FlickTrove is, and will always be, completely free and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
+FlickTrove is, and will always be, completely free, source-available, and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
 
 <br>
 
