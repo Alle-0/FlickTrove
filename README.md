@@ -263,9 +263,9 @@ Design is the true crown jewel of FlickTrove.
 <h2 id="developer-note"><img src="docs/assets/readme_icons/scudo_privacy.svg" width="24" height="24" alt="" align="absmiddle" /> Developer Note</h2>
 
 > [!NOTE]
-> For security reasons, backend configuration files (such as Firebase's `google-services.json`) and private API keys (TMDB, TheTVDB, OMDb, Trakt, KLIPY) have been excluded from this repository.
+> FlickTrove was previously **source-available**, but its source code repository has now been made **private** (closed-source) and is no longer publicly accessible.
 >
-> Therefore, the project cannot be cloned and compiled "out-of-the-box" and is not intended to be a plug-and-play application.
+> Backend configuration files and private API keys have always been excluded from version control for security reasons.
 
 ---
 
@@ -290,7 +290,6 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.
 - [ ] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters, on Streaming, or on Physical Media (4K UHD / Blu-Ray).
-- [x] **Yearly Cinephile Challenge:** Set annual watch goals (Movies, Items, or Hours) with an Aperture Ring progress card, dynamic weekly/monthly pace tracking, and Diary dashboard preview.
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces a new project.
 - [ ] **Calendar Integration:** Sync upcoming premiere dates and TV air dates directly to your Google Calendar.
@@ -301,13 +300,13 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 
 Copyright © 2026 Alessandro Basile. All rights reserved.
 
-The source code is publicly exposed strictly for reference and sharing purposes. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
+The source code is proprietary and maintained in a private repository. Reproduction, copying, modification, or redistribution of the code, as well as its use for commercial or non-commercial purposes, is strictly prohibited without the explicit written permission of the author. Please consult the `TERMS_OF_SERVICE.md` file for further details.
 
 ---
 
 <h2 id="support-the-project"><img src="docs/assets/readme_icons/heart.svg" width="24" height="24" alt="" align="absmiddle" /> Support the Project</h2>
 
-FlickTrove is, and will always be, completely free, source-available, and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
+FlickTrove is completely free and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
 
 <br>
 
