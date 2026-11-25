@@ -178,27 +178,37 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/HomeFeed.webp" width="240" alt="Home Screen"/>&nbsp;&nbsp;</td>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/YourList-Watched.webp" width="240" alt="Personal Collection"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_Lupin.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Detail_PercyJackson.webp" width="240" alt="Details Screen"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
-      <td align="center"><br><b>Advanced Statistics</b></td>
-      <td align="center"><br><b>Custom Folders & Curation</b></td>
-      <td align="center"><br><b>The Trove's Pick</b></td>
+      <td align="center"><br><b>IRIS Cinema Mood Discovery</b></td>
+      <td align="center"><br><b>Diegetic Chronological Sagas</b></td>
+      <td align="center"><br><b>Diary & Cinephile Challenge</b></td>
     </tr>
     <tr>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/GeneralStats.webp" width="240" alt="Stats Screen"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/MyFolders.webp" width="240" alt="Folders Screen"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/TrovesPick.webp" width="240" alt="Trove's Pick"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/SearchMood_Ex1.webp" width="240" alt="IRIS Cinema Mood Discovery"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Collection_MCU.webp" width="240" alt="Diegetic Chronological Sagas"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/CinephileChallenge.webp" width="240" alt="Diary & Cinephile Challenge"/>&nbsp;&nbsp;</td>
     </tr>
     <tr>
       <td align="center"><br><b>Trophy Room Gamification</b></td>
-      <td align="center"><br><b>TV Series & Episodic Progress</b></td>
-      <td align="center"><br><b>Interactive Discovery Swiper</b></td>
+      <td align="center"><br><b>TV Series & Filter Pills</b></td>
+      <td align="center"><br><b>Unified Account Hub</b></td>
     </tr>
     <tr>
       <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/TrophyRoom.webp" width="240" alt="Trophy Room"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/ToWatchSeriesScreen.webp" width="240" alt="TV Series Tracking"/>&nbsp;&nbsp;</td>
-      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/Raccomandated_Swiper.webp" width="240" alt="Discovery Swiper"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/ToWatch_FilterPillow.webp" width="240" alt="TV Series Watchlist"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/AccountScreen.webp" width="240" alt="Account Hub"/>&nbsp;&nbsp;</td>
+    </tr>
+    <tr>
+      <td align="center"><br><b>Media Server Scrobbling</b></td>
+      <td align="center"><br><b>Cinematic Story Cards</b></td>
+      <td align="center"><br><b>Surprise Me & IRIS</b></td>
+    </tr>
+    <tr>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/MediaServerScrobbling.webp" width="240" alt="Media Server Scrobbling"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/StoryCard.webp" width="240" alt="Cinematic Story Cards"/>&nbsp;&nbsp;</td>
+      <td align="center">&nbsp;&nbsp;<img src="docs/assets/readme_screenshots/SurpriseMe.webp" width="240" alt="Surprise Me"/>&nbsp;&nbsp;</td>
     </tr>
   </table>
 </div>
