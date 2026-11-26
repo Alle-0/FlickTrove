@@ -94,7 +94,7 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
     </td>
     <td width="50%" valign="top">
       <h3>🎭 Diegetic Chronological Sagas</h3>
-      Experience 6 flagship sagas (<strong>MCU</strong> with 85 items, <strong>Star Wars Canon</strong> with 27 items, <strong>Middle-earth</strong>, <strong>MonsterVerse</strong>, <strong>Alien</strong>, <strong>The Conjuring</strong>) in true in-universe story order. TV series split diegetically across their canonical chronology with scoped season badges (<code>[📺 STAGIONE 1]</code>) and 800+ global aliases.
+      Experience 8 flagship sagas (<strong>MCU</strong> with 85 items, <strong>Star Wars Canon</strong> with 27 items, <strong>Middle-earth</strong>, <strong>MonsterVerse</strong>, <strong>Alien</strong>, <strong>Predator</strong>, <strong>The Conjuring</strong>, and <strong>Wizarding World</strong>) in true in-universe story order. TV series split diegetically across their canonical chronology with scoped season badges (<code>[📺 STAGIONE 1]</code>) and 800+ global aliases.
     </td>
   </tr>
   <tr>
@@ -104,13 +104,13 @@ FlickTrove is not just a tracker — it's a personal cinema companion custom-bui
     </td>
     <td width="50%" valign="top">
       <h3>🏛️ Trophy Room Gamification</h3>
-      <strong>53 unique achievements</strong> across historical film stock formats (<em>Super 8</em>, <em>16mm</em>, <em>35mm</em>, <em>70mm</em>, <em>The Final Cut</em>) plus 12 secret <em>Lost Reels</em>. 100% offline-first async evaluation, real-time floating unlock banners, and global community rarity stats.
+      <strong>54 unique achievements</strong> across historical film stock formats (<em>Super 8</em>, <em>16mm</em>, <em>35mm</em>, <em>70mm</em>, <em>The Final Cut</em>) plus 12 secret <em>Lost Reels</em>. 100% offline-first async evaluation, real-time floating unlock banners, and global community rarity stats.
     </td>
   </tr>
   <tr>
     <td width="50%" valign="top">
       <h3>⏱️ Watch Diary, Heatmap &amp; Yearly Challenge</h3>
-      100% offline-first diary tracking every viewing, rewatch, and TV episode session. Includes a filmstrip timeline with sticky month headers, personal notes, emotional <em>"Vibes"</em>, half-star ratings, a <strong>GitHub-style 52-Week Activity Heatmap</strong>, and the <strong>Yearly Cinephile Challenge</strong> (Movies, Items, or Hours goals with an Aperture Ring card and weekly/monthly pace tracking).
+      100% offline-first diary tracking every viewing, rewatch, and TV episode session. Includes a filmstrip timeline with sticky month headers, personal notes, emotional <em>"Vibes"</em>, <strong>Where Did You Watch It?</strong> venue tagging (Cinema, Streaming, Home, Other), half-star ratings, a <strong>GitHub-style 52-Week Activity Heatmap</strong>, and the <strong>Yearly Cinephile Challenge</strong> (Movies, Items, or Hours goals with an Aperture Ring card and weekly/monthly pace tracking).
     </td>
     <td width="50%" valign="top">
       <h3>💬 CommsUni & Episode Threads</h3>
@@ -299,7 +299,7 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **WeTrakr (wetrkr) API Integration:** Bidirectional synchronization, watchlist, history, ratings, and scrobbling support with the WeTrakr API ([wetrakr.com](https://wetrakr.com/)) alongside Trakt and SIMKL.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.
-- [ ] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters, on Streaming, or on Physical Media (4K UHD / Blu-Ray).
+- [x] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters (IMAX, 4DX, Dolby, etc.), on Streaming, at Home (4K UHD / Blu-ray / Media Server), or Elsewhere.
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces a new project.
 - [ ] **Calendar Integration:** Sync upcoming premiere dates and TV air dates directly to your Google Calendar.
