@@ -299,7 +299,6 @@ FlickTrove is constantly evolving. In the future, the app will expand beyond a p
 - [ ] **WeTrakr (wetrkr) API Integration:** Bidirectional synchronization, watchlist, history, ratings, and scrobbling support with the WeTrakr API ([wetrakr.com](https://wetrakr.com/)) alongside Trakt and SIMKL.
 - [ ] **Public Shareable Folders:** Make any folder public and shareable via link — let anyone browse your curated collections on the web.
 - [ ] **Web & PWA Client:** Access your FlickTrove library, watchlist, ratings, and custom collections from any desktop browser.
-- [x] **Cinema Diary & Venue Tagging:** Track whether you saw a title in Theaters (IMAX, 4DX, Dolby, etc.), on Streaming, at Home (4K UHD / Blu-ray / Media Server), or Elsewhere.
 - [ ] **Social Integration:** Follow your cinephile friends and browse their personal libraries, ratings, and trophy rooms.
 - [ ] **Follow Actors & Directors:** Real-time alert feed the moment a followed director or actor announces a new project.
 - [ ] **Calendar Integration:** Sync upcoming premiere dates and TV air dates directly to your Google Calendar.
