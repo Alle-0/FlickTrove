@@ -79,6 +79,7 @@ Experience FlickTrove on your Android device right now. Download the latest comp
 
 > [!IMPORTANT]
 > Since the app is not currently distributed via the Google Play Store, you will need to allow **"Install from unknown sources"** in your Android security settings before installing the downloaded APK file.
+> Want to help bring FlickTrove to the Play Store? Check out the [Google Play Store goal on Ko-fi](https://ko-fi.com/alle0).
 
 ---
 
@@ -316,6 +317,10 @@ The source code is proprietary and maintained in a private repository. Reproduct
 <h2 id="support-the-project"><img src="docs/assets/readme_icons/heart.svg" width="24" height="24" alt="" align="absmiddle" /> Support the Project</h2>
 
 FlickTrove is completely free and ad-free. If this app is helping you organize your cinema and TV library, consider supporting its development! Every little bit helps keep the project alive and expanding.
+
+> [!TIP]
+> **🎯 Google Play Store Goal (€25 / $25)**  
+> FlickTrove is 100% free, with zero ads and no tracking. Any support on [Ko-fi](https://ko-fi.com/alle0) helps cover the one-time $25 Google Play Console registration fee to keep the app available on the store. Any support is hugely appreciated, never expected!
 
 <br>
 
