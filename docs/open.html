@@ -542,8 +542,15 @@
   <script>
     const TMDB_IMAGE_BASE = 'https://image.tmdb.org/t/p/';
     const TMDB_API_BASE = 'https://api.themoviedb.org/3';
-    // Public read-only TMDB token (no secret needed for public data)
+    // --- TMDB metadata enrichment (OPTIONAL) ---
+    // No API credential is bundled on purpose: the links shared by the app already carry
+    // the title (`t`) and the poster path (`p`), so this fetch is only an optional
+    // enrichment for hand-crafted links.
+    // You may paste either a TMDB v4 "API Read Access Token" (JWT, sent as Bearer)
+    // or a v3 API key (sent as `api_key` query param). Left empty, the network call is
+    // skipped entirely (it would return 401) and the URL parameters are used as-is.
     const TMDB_READ_TOKEN = '';
+    const TMDB_FETCH_TIMEOUT_MS = 6000;
 
     // --- Parse query params ---
     const params = new URLSearchParams(window.location.search);
@@ -563,7 +570,7 @@
     const divider = document.getElementById('divider');
     const ambientBackdrop = document.getElementById('ambient-backdrop');
 
-    // --- Multi-language I18n (13 Languages) ---
+    // --- Multi-language I18n (13 languages + zh-TW regional variant) ---
     const rawLang = (navigator.language || navigator.userLanguage || 'en').toLowerCase();
     const langKey = rawLang.startsWith('zh-tw') || rawLang.startsWith('zh-hk') || rawLang.startsWith('zh-hant')
       ? 'zh-tw'
@@ -831,11 +838,9 @@
       const folderTitle = t || (langKey === 'it' ? 'Cartella Condivisa' : 'Shared Folder');
       titleEl.textContent = folderTitle;
       titleEl.classList.remove('skeleton');
-      titleEl.style.width = titleEl.style.height = '';
 
       metaEl.textContent = folderCode ? `${langKey === 'it' ? 'Codice Invito' : 'Invite Code'}: ${folderCode}` : i18n.open_app;
       metaEl.classList.remove('skeleton');
-      metaEl.style.width = metaEl.style.height = '';
       document.title = `${folderTitle} — FlickTrove`;
 
       if (isAndroid) {
@@ -1011,14 +1016,10 @@
       if (t) {
         titleEl.textContent = t;
         titleEl.classList.remove('skeleton');
-        titleEl.style.width = '';
-        titleEl.style.height = '';
         document.title = `${t} — FlickTrove`;
 
         metaEl.textContent = i18n.fallback_meta;
         metaEl.classList.remove('skeleton');
-        metaEl.style.width = '';
-        metaEl.style.height = '';
       }
 
       if (p) {
@@ -1032,10 +1033,13 @@
         if (!t && isNonNumericId) {
           titleEl.textContent = id.replace(/[-_]/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
           titleEl.classList.remove('skeleton');
-          titleEl.style.width = titleEl.style.height = '';
         }
         return;
       }
+
+      // No credential configured: skip the network call entirely (it would return 401)
+      // and keep whatever the URL parameters already provided.
+      if (!TMDB_READ_TOKEN) { showFallback(); return; }
 
       try {
         let endpoint = '';
@@ -1043,12 +1047,23 @@
         if (type === 'tv') endpoint = `/tv/${id}?language=${i18n.tmdb_lang}`;
         if (type === 'person') endpoint = `/person/${id}?language=${i18n.tmdb_lang}`;
         if (type === 'collection') endpoint = `/collection/${id}?language=${i18n.tmdb_lang}`;
+        if (!endpoint) { showFallback(); return; }
 
-        const res = await fetch(`${TMDB_API_BASE}${endpoint}`, {
-          headers: TMDB_READ_TOKEN
-            ? { 'Authorization': `Bearer ${TMDB_READ_TOKEN}` }
-            : {}
-        });
+        // Support both a v4 read access token (Bearer) and a v3 API key (query param).
+        const isV3Key = !TMDB_READ_TOKEN.startsWith('eyJ');
+        const separator = endpoint.includes('?') ? '&' : '?';
+        const url = `${TMDB_API_BASE}${endpoint}${isV3Key ? `${separator}api_key=${encodeURIComponent(TMDB_READ_TOKEN)}` : ''}`;
+        const headers = isV3Key ? {} : { 'Authorization': `Bearer ${TMDB_READ_TOKEN}` };
+
+        // Hard timeout so a slow or offline network degrades silently to the URL parameters.
+        const controller = new AbortController();
+        const timeoutId = setTimeout(() => controller.abort(), TMDB_FETCH_TIMEOUT_MS);
+        let res;
+        try {
+          res = await fetch(url, { headers, signal: controller.signal });
+        } finally {
+          clearTimeout(timeoutId);
+        }
 
         if (!res.ok) { showFallback(); return; }
         const data = await res.json();
@@ -1057,8 +1072,6 @@
         const title = data.title || data.name || i18n.fallback_title;
         titleEl.textContent = title;
         titleEl.classList.remove('skeleton');
-        titleEl.style.width = '';
-        titleEl.style.height = '';
 
         // Meta (year + genres or known_for or collection parts)
         let metaText = '';
@@ -1069,8 +1082,6 @@
         if (type === 'collection' && data.parts?.length) metaText = `${data.parts.length} ${i18n.collection_parts}`;
         metaEl.textContent = metaText;
         metaEl.classList.remove('skeleton');
-        metaEl.style.width = '';
-        metaEl.style.height = '';
 
         // Poster
         const posterPath = data.poster_path || data.profile_path;
@@ -1087,12 +1098,18 @@
     }
 
     function showFallback(msg) {
-      titleEl.textContent = i18n.fallback_title;
-      titleEl.classList.remove('skeleton');
-      metaEl.textContent = msg || i18n.fallback_meta;
-      metaEl.classList.remove('skeleton');
-      titleEl.style.width = metaEl.style.width = '';
-      titleEl.style.height = metaEl.style.height = '';
+      // NON-DESTRUCTIVE fallback: never overwrite a title already resolved from the URL
+      // parameters (`t`), from a shared folder, or from a previous successful fetch.
+      // The `.skeleton` class is removed exactly when a field gets resolved, so it is
+      // the source of truth for "this field still needs a value".
+      if (titleEl.classList.contains('skeleton')) {
+        titleEl.textContent = i18n.fallback_title;
+        titleEl.classList.remove('skeleton');
+      }
+      if (metaEl.classList.contains('skeleton')) {
+        metaEl.textContent = msg || i18n.fallback_meta;
+        metaEl.classList.remove('skeleton');
+      }
     }
 
     fetchTmdb();

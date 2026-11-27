@@ -290,47 +290,6 @@ body {
   gap: 1.5rem;
 }
 
-/* Kicker Badge */
-.hero-kicker-badge {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 6px 16px;
-  background: var(--surface-variant);
-  border: 1px solid var(--ghost-border);
-  border-radius: 9999px;
-  font-size: 12px;
-  font-weight: 600;
-  letter-spacing: 0.04em;
-  color: var(--text-secondary);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
-}
-
-.kicker-dot {
-  width: 7px;
-  height: 7px;
-  border-radius: 50%;
-  background: var(--primary);
-  box-shadow: 0 0 8px var(--primary);
-  animation: pulseDot 2s ease-in-out infinite;
-}
-
-@keyframes pulseDot {
-
-  0%,
-  100% {
-    opacity: 1;
-    transform: scale(1);
-  }
-
-  50% {
-    opacity: 0.4;
-    transform: scale(0.8);
-  }
-}
-
 /* Typography */
 .hero-title {
   font-family: var(--font-heading);
@@ -681,7 +640,7 @@ body {
   width: 100%;
   height: 300vh;
   /* Scroll space for the animation */
-  background-color: none;
+  background-color: transparent;
 }
 
 .sticky-container {
@@ -1014,31 +973,6 @@ body {
   margin: 0;
 }
 
-/* Clean Editorial Highlights (FlickTrove Style, No Generic Checklists) */
-.panel-highlights-clean {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
-  gap: 24px;
-  margin-top: 10px;
-  padding-top: 24px;
-  border-top: 1px solid rgba(255, 255, 255, 0.08);
-}
-
-.highlight-clean-item h4 {
-  font-family: var(--font-heading);
-  font-size: 0.95rem;
-  font-weight: 700;
-  color: #FFFFFF;
-  margin: 0 0 6px 0;
-}
-
-.highlight-clean-item p {
-  font-size: 0.85rem;
-  color: rgba(255, 255, 255, 0.55);
-  line-height: 1.45;
-  margin: 0;
-}
-
 /* Right Visual Column */
 .panel-visual {
   display: flex;
@@ -1213,35 +1147,6 @@ body {
 .cta-btn-wrapper {
   position: relative;
   z-index: 10;
-}
-
-/* Offline Floating Badge */
-.offline-floating-badge {
-  position: absolute;
-  bottom: 35px;
-  right: -20px;
-  background: rgba(15, 20, 28, 0.88);
-  -webkit-backdrop-filter: blur(16px);
-  backdrop-filter: blur(16px);
-  border: 1px solid rgba(16, 185, 129, 0.3);
-  border-radius: 9999px;
-  padding: 10px 18px;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.6);
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 0.75rem;
-  font-weight: 700;
-  letter-spacing: 0.8px;
-  color: #10B981;
-  z-index: 10;
-}
-
-.offline-dot {
-  font-size: 0.85rem;
-  color: #10B981;
-  box-shadow: 0 0 10px #10B981;
-  border-radius: 50%;
 }
 
 
@@ -2884,15 +2789,6 @@ body {
     line-height: 1.55;
   }
 
-  .panel-highlights-clean {
-    grid-template-columns: 1fr;
-    gap: 16px;
-    text-align: left;
-    width: 100%;
-    margin-top: 6px;
-    padding-top: 20px;
-  }
-
   .sync-services-panel {
     width: 100%;
     max-width: 100%;
@@ -2924,8 +2820,7 @@ body {
     transform: none !important;
   }
 
-  .swatches-floating-card,
-  .offline-floating-badge {
+  .swatches-floating-card {
     right: 0;
     bottom: -15px;
   }
